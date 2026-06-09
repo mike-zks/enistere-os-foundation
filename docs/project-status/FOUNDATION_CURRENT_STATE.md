@@ -22,7 +22,7 @@ pas une application ni une bibliothèque complète).
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
 | Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y) ; aligné **React 19** ; **consommé par le Web Core** |
-| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, consomme le UI Kit + **API publique (Health) + TanStack Query** (SSR/hydratation), 79 tests + preuve API réelle. **Aucune auth.** |
+| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** (SSR/hydratation) + **fondations BFF Auth serveur** (client authentifiable, cookies `HttpOnly`, session adapter — **aucune route ni CSRF**). **112 tests** + preuve API réelle. |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public)** dans le Web Core — preuve API réelle) |
 | Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
@@ -49,7 +49,7 @@ enistere-os-foundation/
   cores/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
-    web-nextjs/        PARTIEL (Next 16 App Router + React 19 ; UI Kit + API publique Health + TanStack Query, SSR)
+    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + fondations BFF Auth)
     cloud/ mobile-react-native/                       → CORE_SPECIFICATION.md seul
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
@@ -120,11 +120,12 @@ server state (TanStack Query), CI/CD, registry. Détail : [`IMPLEMENTATION_MATRI
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **64 tests** (`node:test` + `global-jsdom`
-+ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **79 tests** (`node:test` +
-Testing Library + jest-axe : config/URL, clients serveur/public, QueryClient/retry, query keys, transport
-Health, hooks, **hydratation**, UI, mapping d'erreurs, garde anti-réseau) + `next build` + **sonde HTTP
-locale** + **preuve API réelle** (NestJS + PostgreSQL jetable : Health/live/ready, hydratation, API
-down→contrôlé). Aucune CI : exécution **manuelle/locale**.
++ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **112 tests** (`node:test` :
+config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
+UI, mapping d'erreurs, garde anti-réseau, **+ fondations Auth** : cookie-config, cookie store, session
+adapter, factory authentifiée read-only/writable, isolation A/B, frontières d'import, sentinelles) +
+`next build` + **sonde HTTP locale** + **preuve API réelle** (NestJS + PostgreSQL jetable). Aucune CI :
+exécution **manuelle/locale**.
 
 ## 10. Preuves
 
@@ -164,11 +165,11 @@ preuve désormais retiré (bannière de migration ajoutée).
 
 ## 15. Prochaine étape
 
-Le **Web Core** est désormais **`IMPLEMENTATION_PARTIELLE`** (`@enistere/web-nextjs`) : Next 16 App
-Router + React 19, UI Kit consommé, **API publique (Health) + TanStack Query** intégrés (SSR/hydratation),
-79 tests + preuve API réelle, **aucune authentification**. **Prochaine action recommandée** :
-**Auth/BFF** (cookies `HttpOnly`, CSRF, login/refresh/logout — ADR-005/011) via un **nouveau** client
-serveur authentifié (jamais le client public) — OU compléter le UI Kit / démarrer le Mobile Core.
+Le **Web Core** (`@enistere/web-nextjs`, **`IMPLEMENTATION_PARTIELLE`**) intègre l'API publique + TanStack
+Query (SSR/hydratation) et pose désormais les **fondations serveur du BFF Auth** (client authentifiable,
+cookies `HttpOnly`, adaptateur de session, modes read-only/writable) — **sans route Auth, sans CSRF, sans
+login/refresh/logout réels** ; 112 tests + preuve API réelle. **Prochaine action recommandée** : **Web
+Auth 2** — `login`/`refresh`/`logout` via **Route Handlers BFF** (`/api/auth/*`) + **CSRF opérationnel**.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

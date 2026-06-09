@@ -34,17 +34,20 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
   en-têtes sécurité + pas de `X-Powered-By`. **Intègre l'API publique (Health)** : factory serveur par
   requête + client public navigateur (sans session, `enableRefresh:false`), **TanStack Query** (retry
-  borné), **SSR + hydratation** (page `force-dynamic`, build indépendant de l'API). **79 tests** +
-  preuve **API réelle** (PostgreSQL jetable). **Aucune authentification.** Statut :
+  borné), **SSR + hydratation** (page `force-dynamic`, build indépendant de l'API). Pose les **fondations
+  serveur du BFF Auth** : client API **authentifiable** par requête (distinct du public), **cookies
+  `HttpOnly`** (access/refresh distincts, `__Host-` prod), **`WebAuthSessionAdapter`**, modes
+  **read-only/writable** — **sans route Auth, sans CSRF, sans login/refresh/logout réels, aucun token au
+  navigateur**. **112 tests** + preuve **API réelle** (PostgreSQL jetable). Statut :
   **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack** (`extensionAlias` ; Turbopack ne résout pas `.js`).
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
   **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public)** dans
-  le Web Core (preuve API réelle). Usage **authentifié** non encore intégré.
+  le Web Core (preuve API réelle), et **session adapter authentifié** posé (fondations, non exposé).
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): integrate public API and query layer`,
-  `feat(web-nextjs): initialize minimal starter`, `feat(ui-kit): add minimal web primitives`, baseline.
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): establish server auth foundations`,
+  `feat(web-nextjs): integrate public API and query layer`, `feat(web-nextjs): initialize minimal starter`, baseline.
 - **Audit** : **0 vulnérabilité** (TanStack Query v5 ; override `postcss ^8.5.15`).
 
 ## 4. Cores techniquement implémentés
@@ -67,27 +70,31 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 ## 7. ADR clés
 
 18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), 006 (RBAC), 007 (upload),
-039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, 004, **011** (Fetch instancié public Web),
-**012** (TanStack Query intégré Web), 016. Décidés non implémentés : 005 (cookies/CSRF web), 013, 014, 015.
-**008/009/010 partiels** (UI Kit : tokens + primitives Web). ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, **004** (session : adapter serveur Web posé),
+**005** (cookies web : config + session adapter posés ; **CSRF + routes absents**), **011** (Fetch instancié
+public + session authentifiée Web), **012** (TanStack Query intégré Web), 016. Décidés non implémentés :
+013, 014, 015. **008/009/010 partiels** (UI Kit). ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Web Core Next.js 2 — intégration API publique + TanStack Query** (`@enistere/web-nextjs`) :
-`@tanstack/react-query` v5 ajouté ; factory API **serveur par requête** (`API_INTERNAL_URL`, no-store) +
-client **public** navigateur (sans session, `enableRefresh:false`, X-Request-Id) ; transport **Health**
-typé (`SchemaOf<>`, aucun DTO recopié) ; `QueryClient` (retry borné), `QueryProvider`/`AppProviders`
-(layout reste serveur), query keys, hooks ; **SSR prefetch + hydratation** (page `force-dynamic`, build
-indépendant de l'API) ; normalisation d'erreurs + requestId. **79 tests** (dont hydratation, garde
-anti-réseau) + **preuve API réelle** (NestJS + PostgreSQL jetable : Health/live/ready, API down→contrôlé,
-up→succès). **Aucune auth.** Build via **webpack**. **0 vuln**, Axios absent, React unique 19.2.7 ;
-UI Kit/API Core/packages non régressés. Commit `feat(web-nextjs): integrate public API and query layer`.
+**Web Auth 1 — fondations BFF, session serveur et cookies** (`@enistere/web-nextjs`) : architecture **BFF**
+documentée ; **client API serveur authentifiable** par requête (`createAuthenticatedServerApiClient`,
+distinct du public, `API_INTERNAL_URL`, no-store, X-Request-Id) ; **`WebAuthSessionAdapter`** (implémente
+`AuthSessionAdapter`) sur une **abstraction `ServerCookieStore`** (+ adaptateur `next/headers` async,
++ store mémoire de test) ; **config cookies** (`enistere_access`/`refresh` distincts, `HttpOnly`,
+`Secure` prod, `SameSite=Lax`, `Path=/`, **`__Host-` prod**, durées issues de l'API, validations) ; modes
+**read-only (refresh off) / writable (refresh activable)** ; **aucune session globale SSR** (isolation A/B
+testée). **Hors périmètre tenu** : aucune route Auth, **aucun CSRF actif**, aucun login/refresh/logout
+réel, **aucun token au navigateur**, aucun log de token. **112 tests** (cookies, store, adapter, factory,
+isolation, **frontières d'import statiques**, **sentinelles** non fuitées). **0 vuln**, Axios absent,
+React unique 19.2.7 ; UI Kit/API Core/packages non régressés. `server-only` (npm) non utilisé (incompatible
+node:test) → frontière par `next/headers` + tests statiques. Commit `feat(web-nextjs): establish server auth foundations`.
 
 ## 9. Prochaine étape
 
-**Action unique** : **Web Core — Auth/BFF** (cookies `HttpOnly`, CSRF, login/refresh/logout — ADR-005/011)
-via un **nouveau client serveur authentifié** (jamais le client public). Alternative : compléter le UI Kit
-ou démarrer le Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Web Auth 2** — `login`/`refresh`/`logout` via **Route Handlers BFF** (`/api/auth/*`),
+pose **réelle** des cookies (fondations Web Auth 1) + **CSRF opérationnel** (mode writable). Alternative :
+compléter le UI Kit ou démarrer le Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

@@ -15,7 +15,7 @@ La phase actuelle du repository est la **Phase 0 : stratégie et fondations**. E
 
 - `strategy/` : documents stratégiques de Phase 0.
 - `docs/` : ADR, guides, checklists, runbooks, onboarding, décisions et glossaire.
-- `cores/` : socles techniques (**API Core NestJS V1** dans `cores/api-nestjs/` ; **UI Kit** — tokens **+ primitives Web** (React 19) — dans `cores/ui-kit/` ; **Web Core Next.js** — Next 16 / React 19 + UI Kit + **API publique (Health)** + **TanStack Query** — dans `cores/web-nextjs/`).
+- `cores/` : socles techniques (**API Core NestJS V1** dans `cores/api-nestjs/` ; **UI Kit** — tokens **+ primitives Web** (React 19) — dans `cores/ui-kit/` ; **Web Core Next.js** — Next 16 / React 19 + UI Kit + **API publique (Health)** + **TanStack Query** + **fondations BFF Auth serveur** — dans `cores/web-nextjs/`).
 - `packages/` : **packages partagés** du monorepo (npm workspaces).
 - `prompts/` : prompts IA classés par usage.
 - `tools/` : futurs générateurs, scripts, validateurs et outils de release.
@@ -55,6 +55,6 @@ recommandation ou mission :
 
 Phase 0 (stratégie/fondations) + **API Core NestJS V1** (`cores/api-nestjs/`), **UI Kit** (`cores/ui-kit/`,
 tokens + primitives Web, React 19) et **Web Core Next.js** (`cores/web-nextjs/`, Next 16 / React 19 +
-UI Kit + API publique Health + TanStack Query — `IMPLEMENTATION_PARTIELLE`) ; **packages clients officiels**
-(`packages/`) validés localement, non publiés. État détaillé et vérifié : [`docs/project-status/`](docs/project-status/README.md).
+UI Kit + API publique Health + TanStack Query + **fondations BFF Auth serveur** — `IMPLEMENTATION_PARTIELLE`) ;
+**packages clients officiels** (`packages/`) validés localement, non publiés. État détaillé et vérifié : [`docs/project-status/`](docs/project-status/README.md).
 

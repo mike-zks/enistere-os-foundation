@@ -24,13 +24,16 @@ viendront dans un incrément ultérieur).
 - Normalisation d'erreurs Web, propagation **X-Request-Id**, en-têtes de **sécurité** + pas de `X-Powered-By`.
 - États `loading` / `error` / `not-found`, métadonnées, `manifest`.
 - Tests (node:test + Testing Library + jest-axe) + preuve avec **API réelle** (PostgreSQL jetable).
+- **Fondations BFF Auth serveur** : client API **authentifiable** (par requête, distinct du public),
+  **adaptateur de session** + configuration **cookies `HttpOnly`** (access/refresh distincts), modes
+  **read-only / writable**. Détail : [`docs/auth-architecture.md`](docs/auth-architecture.md).
 
 ### Hors périmètre — volontairement absent
 
-Auth / BFF / cookies `HttpOnly` / CSRF · login-refresh-logout · middleware d'auth · stockage de token ·
-endpoints **authentifiés** · routes Files / upload · **Axios** · **Zustand**/Redux/Jotai · Orval ·
-Storybook · logique métier · OAuth / MFA · i18n complet · monitoring · workflow CI · Dockerfile ·
-publication npm · **aucun type d'API recopié manuellement**.
+**Routes Auth** (`/api/auth/*`) · login/refresh/logout réels · **CSRF opérationnel** · middleware d'auth ·
+pages/formulaires de login · token exposé au navigateur · endpoints **authentifiés** · routes Files /
+upload · **Axios** · **Zustand**/Redux/Jotai · Orval · Storybook · logique métier · OAuth / MFA · i18n
+complet · monitoring · workflow CI · Dockerfile · publication npm · **aucun type d'API recopié**.
 
 ---
 
@@ -65,10 +68,12 @@ src/
     config/                  # api-url (validation), public-config, server-config, metadata, theme
     api/
       run-public-request     # timeout + normalisation ApiClientError pour `client.raw`
-      server/                # createServerApiClient (par requête, API_INTERNAL_URL, no-store)
+      server/                # createServerApiClient (public) + createAuthenticatedServerApiClient (BFF)
       public/                # createPublicApiClient + singleton navigateur (sans session)
       health/                # getHealth/getLiveness/getReadiness (types via SchemaOf<>)
       errors/                # mapApiErrorToPublicMessage
+    auth/                    # FONDATIONS BFF : cookie-config, server-cookie-store, session-contract,
+      server/                #   web-session-adapter ; server/ = SERVER-ONLY (next/headers) — exclu node:test
     query/                   # query-client (retry), query-provider, keys/health-keys
   features/
     foundation-status/       # page technique (matrice d'intégrations) — testable
@@ -101,8 +106,10 @@ Deux compilateurs cohabitent : **Next** (build de `app/` + graphe importé) et *
 - Le build utilise **webpack** (`next build --webpack`) avec `experimental.extensionAlias`
   (`.js → .ts/.tsx`). **Turbopack** ne résout pas encore ces imports `.js` ; webpack le fait. C'est la
   seule raison de ce choix de bundler (documentée ici).
-- `src/app/` est **exclu** de `tsconfig.test.json` : les fichiers App Router (CSS, layout, page async,
-  RSC/Client) sont validés par `next build` + sonde HTTP locale, pas par `node:test`.
+- `src/app/` **et** `src/core/auth/server/` sont **exclus** de `tsconfig.test.json` : les fichiers App
+  Router et les modules **SERVER-ONLY** liant `next/headers` (cookie store, entrée Auth serveur) sont
+  validés par `next build` + typecheck, pas par `node:test`. `server-only` (npm) n'est pas utilisé (il
+  lève à l'import sous `node:test`) ; la frontière est garantie par `next/headers` + tests d'import statiques.
 
 ---
 
@@ -164,21 +171,37 @@ client public (no-Authorization, `enableRefresh:false`, requestId, **aucun impor
 statiquement), `QueryClient` (politique de retry, isolation du cache), query keys, transport Health
 (succès/erreur/timeout/requestId), hooks (succès/erreur/refetch/désactivé), **hydratation** (donnée
 fraîche → pas de refetch), UI Health (états + a11y), mapping d'erreurs, et **garde anti-réseau** (toute
-requête réelle non mockée fait échouer un test). Build + sonde HTTP locale. **Preuve API réelle** :
-API NestJS + PostgreSQL jetable (Health/live/ready, hydratation SSR, API down → rendu contrôlé, API up
-→ succès) — **sans authentification**.
+requête réelle non mockée fait échouer un test). **Fondations Auth** : config cookies (Secure/env,
+préfixes, durées, rejets), cookie store mémoire, `WebAuthSessionAdapter` (lecture/écriture/clear, tokens
+vides/contrôle rejetés, aucune valeur en erreur), factory authentifiée (instance/appel, isolation A/B,
+Bearer issu du cookie, read-only refresh off vs writable refresh tenté), **frontières d'import statiques**,
+**sentinelles** non fuitées. Build + sonde HTTP locale. **Preuve API réelle** : API NestJS + PostgreSQL
+jetable (Health/live/ready, hydratation SSR, API down → rendu contrôlé, API up → succès) — **sans authentification**.
 
 ---
 
-## 11. UI Kit & React 19
+## 11. Fondations BFF Auth (serveur)
+
+Architecture **BFF** : le navigateur parlera aux Route Handlers Next `/api/auth/*` (V2), qui poseront des
+cookies `HttpOnly` et appelleront l'API via un **client serveur authentifiable** (`core/api/server/
+create-authenticated-server-api-client.ts`, par requête, distinct du client public). Présent : config
+cookies (`enistere_access`/`refresh`, `HttpOnly`, `Secure` prod, `SameSite=Lax`, `Path=/`, `__Host-` prod),
+abstraction `ServerCookieStore` (+ mémoire pour tests, adaptateur `next/headers`), `WebAuthSessionAdapter`,
+modes **read-only** (refresh off) / **writable** (refresh activable). **Absent** : routes Auth, CSRF actif,
+login/refresh/logout réels, token côté navigateur. Détail : [`docs/auth-architecture.md`](docs/auth-architecture.md)
+et [`src/core/auth/README.md`](src/core/auth/README.md).
+
+---
+
+## 12. UI Kit & React 19
 
 `@enistere/ui-kit` est aligné sur **React 19** (peer `react >=18`, couvre 18 et 19) ; ses **64 tests**
 passent sous React 19 (aucune régression). Voir le `CHANGELOG.md` racine.
 
 ---
 
-## 12. Feuille de route
+## 13. Feuille de route
 
-**Prochain incrément** : Auth/BFF (cookies `HttpOnly`, CSRF, login/refresh/logout) — via un **nouveau**
-client serveur authentifié (jamais le client public). Puis : endpoints authentifiés, gestionnaire de
-thème, CSP à nonces, i18n, CI/CD.
+**Prochain incrément** : **Web Auth 2** — `login` / `refresh` / `logout` via Route Handlers BFF
+(`/api/auth/*`), pose réelle des cookies, **CSRF opérationnel**, puis `me` / `authorization`. Puis :
+écrans authentifiés, gestionnaire de thème, CSP à nonces, i18n, CI/CD.
