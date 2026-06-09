@@ -31,7 +31,7 @@
 | Registry images | ADR-014 Validé | — | — | **DECIDE_NON_IMPLEMENTE** | choix registry + publication |
 | Conteneurisation (Docker) | — | — | — | **ABSENT** | Dockerfile/compose (post-CI) |
 | Observabilité (métriques/traces) | ADR-018/036 à rédiger | — | — | **NON_COMMENCE** | Cloud Core |
-| Git (commits/branches) | ADR-001 Validé | ⚠️ **aucun commit** | — | **A_REVOIR** | commit de référence |
+| Git (commits/branches) | ADR-001 Validé | **baseline `7dcb543` (main)** | — | **PARTIELLEMENT_IMPLEMENTE** | push `origin` (décision humaine) |
 
 ## 3. Matrice détaillée — API Core NestJS
 
@@ -63,7 +63,7 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 
 | ID | Source A | Source B | État réel | Impact | Action recommandée | Priorité |
 |---|---|---|---|---|---|---|
-| C1 | Travail substantiel présent | `git log` (aucun commit) | Tout non suivi | Perte possible, zéro traçabilité | Établir un commit de référence (ADR-001) | CRITIQUE |
+| C1 | Travail substantiel présent | `git log` | **Résolu (local)** : baseline `7dcb543` ; non poussée | Traçabilité locale OK ; pas encore de sauvegarde distante | Pousser vers `origin` (décision humaine) | RÉSOLU (local) / IMPORTANTE (push) |
 | C2 | Packages dits « officiels » | Aucun import dans les cores | Non intégrés | Faux sentiment d'intégration | Intégrer lors des cores Web/Mobile | IMPORTANTE |
 | C3 | ADR-005/008/009/010/012/013/014/015 Validés | Aucun code correspondant | Décidés, non implémentés | Lecture « fait » erronée | Implémenter au fil des cores | IMPORTANTE |
 | C4 | `strategy/` Phase 0 (« avant code ») | API Core implémenté | Phase 0 partiellement dépassée | Contexte trompeur | Lire strategy comme historique | MINEURE |
@@ -74,7 +74,7 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 
 | Élément | Classe |
 |---|---|
-| Absence totale de commits Git | CRITIQUE |
+| Baseline Git locale créée (`7dcb543`) **non poussée** vers `origin` | IMPORTANTE |
 | Packages non intégrés (à clarifier dans les futurs cores) | IMPORTANTE |
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |
 | `OPENAPI_CLIENT_PROOF.md` réfère un code retiré | MINEURE |

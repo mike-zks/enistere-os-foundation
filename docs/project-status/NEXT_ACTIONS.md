@@ -12,10 +12,10 @@ React Native — tous Validés) ; il est la **dépendance commune** des cores We
 Native (qui restent documentaires). Aucun prérequis technique manquant. Conforme à l'ordre historique
 attendu (UI Kit → Web → Mobile → Cloud), confirmé par les dépendances réelles.
 
-**Prérequis de gouvernance (URGENT, à traiter d'abord)** : ⚠️ **le dépôt n'a aucun commit Git**. Avant
-toute nouvelle implémentation, **établir un commit de référence** (ADR-001) pour rendre l'état actuel
-traçable et réversible. C'est une action humaine/gouvernance, non une implémentation ; elle conditionne
-la sécurité de toutes les missions suivantes.
+**Prérequis « baseline Git » — SATISFAIT** : la baseline locale existe (commit `7dcb543` sur `main`,
+ADR-001 exercé ; voir [`GIT_BASELINE_REPORT.md`](./GIT_BASELINE_REPORT.md)). Reste une décision
+**humaine/gouvernance** : **pousser** la baseline vers `origin` (non fait par l'agent). Non bloquant
+pour démarrer le UI Kit en local, mais recommandé pour sécuriser le travail.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 

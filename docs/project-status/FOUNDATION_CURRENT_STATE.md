@@ -24,7 +24,7 @@ Web/Mobile n'est implémenté.**
 | Cores documentaires | `cloud`, `web-nextjs`, `mobile-react-native`, `ui-kit` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **Absents** (aucun workflow ni Dockerfile dans le dépôt) |
-| **État Git** | ⚠️ **Aucun commit** — tout le dépôt est non suivi (untracked) |
+| **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
 
@@ -134,8 +134,8 @@ détaillée du API Core.
 
 ## 13. Risques
 
-1. **Aucun commit Git** — tout le travail est non suivi : risque de perte, aucune traçabilité,
-   ADR-001 (monorepo) décidé mais non exercé. **Risque le plus élevé.**
+1. ~~Aucun commit Git~~ **RÉSOLU (local)** — baseline `7dcb543` créée sur `main` (ADR-001 exercé
+   localement). Reste : **non poussée** vers `origin` (décision humaine/gouvernance).
 2. **Packages non intégrés** — créés/validés mais aucun core ne les consomme ; risque de dérive si le
    contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
 3. **Spécifications sans starter** — 4 cores documentaires peuvent être lus à tort comme implémentés.
@@ -153,9 +153,9 @@ preuve désormais retiré (bannière de migration ajoutée).
 ## 15. Prochaine étape
 
 **Action unique recommandée** : initialiser le **starter UI Kit minimal** (`cores/ui-kit/`) — débloqué
-par ADR-008/009/010, dépendance des cores Web/Mobile. **Prérequis de gouvernance urgent** : établir un
-**commit Git de référence** (ADR-001) avant toute nouvelle implémentation. Détail et ordre :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+par ADR-008/009/010, dépendance des cores Web/Mobile. Le prérequis « baseline Git » est désormais
+**satisfait** (commit `7dcb543`). Détail et ordre : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md) ; preuve de
+baseline : [`GIT_BASELINE_REPORT.md`](./GIT_BASELINE_REPORT.md).
 
 ## 16. Règles de mise à jour
 

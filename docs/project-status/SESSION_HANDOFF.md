@@ -31,7 +31,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `web-nextjs`, `mobile-react-native`, `ui-kit`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- ⚠️ **Aucun commit Git** — tout le dépôt est non suivi.
+- **Git** : baseline locale créée (commit `7dcb543` sur `main`, 322 fichiers) ; remote `origin`
+  configuré mais **non poussé**.
 
 ## 4. Cores techniquement implémentés
 
@@ -57,15 +58,15 @@ Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-Création des **packages clients officiels** `@enistere/api-contracts` + `@enistere/api-client-fetch`
-(migration de la preuve ADR-016, validés localement, preuve live 16/16), puis **ce checkpoint
-documentaire** (`docs/project-status/`).
+Packages clients officiels (`@enistere/api-contracts` + `@enistere/api-client-fetch`, validés
+localement, live 16/16) → checkpoint documentaire (`docs/project-status/`) → **baseline Git de
+référence** (commit `7dcb543` sur `main`, non poussée ; voir `GIT_BASELINE_REPORT.md`).
 
 ## 9. Prochaine étape
 
 **Action unique** : initialiser le **starter UI Kit minimal** (`cores/ui-kit/`) — débloqué par
-ADR-008/009/010, dépendance des cores Web/Mobile. **Prérequis urgent** : établir un **commit Git de
-référence** (ADR-001). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+ADR-008/009/010, dépendance des cores Web/Mobile. Le prérequis « baseline Git » est **satisfait**
+(`7dcb543`) ; reste à décider du **push** vers `origin` (humain). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

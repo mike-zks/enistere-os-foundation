@@ -12,6 +12,7 @@
 | [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md) | **Matrice** par core/package/module : dossier, spéc, ADR, starter, code, tests, revue, statut officiel + matrice détaillée API Core + contradictions + dette. |
 | [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md) | **Lecture rapide des ADR** : statut ADR vs **statut d'implémentation** (ne remplace pas les ADR). |
 | [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md) | **Prochaine action unique**, suites, actions bloquées, prérequis, critères d'entrée/sortie, interdits. |
+| [`GIT_BASELINE_REPORT.md`](./GIT_BASELINE_REPORT.md) | **Preuve de la baseline Git** (commit `7dcb543`, exclusions, validations, audit secrets, remote non poussé). |
 | `README.md` | Ce fichier : rôles, ordre de lecture, protocoles, responsabilités. |
 
 ## Ordre de lecture
