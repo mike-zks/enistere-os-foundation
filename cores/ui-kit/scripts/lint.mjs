@@ -17,7 +17,7 @@ function walk(dir) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
       files.push(...walk(full));
-    } else if (extname(full) === '.ts') {
+    } else if (extname(full) === '.ts' || extname(full) === '.tsx') {
       files.push(full);
     }
   }

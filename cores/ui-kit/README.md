@@ -1,8 +1,57 @@
 # @enistere/ui-kit
 
-> **Statut : STARTER_INITIALISE.** Socle technique des **design tokens** Enistere (ADR-008) — source de
-> vérité UI, agnostique et versionnée. **Privé / non publié** (`0.1.0`). **Aucun composant, aucun
-> framework UI** (ni React, ni React Native, ni Tailwind/Radix/shadcn/NativeWind). V1 = tokens only.
+> **Statut : IMPLEMENTATION_PARTIELLE.** Design tokens Enistere (ADR-008, source de vérité) **+
+> premières primitives Web accessibles** (React). **Privé / non publié** (`0.1.0`). **Pas de
+> bibliothèque complète**, **pas de Tailwind/Radix/shadcn/NativeWind dans le package** (ADR-009/010 :
+> ces stacks vivent dans les cores clients ; le UI Kit reste piloté par les tokens).
+
+## Installation (workspace) & usage
+
+`react` est une **peerDependency** (`>=18`) — fournie par l'application consommatrice. Les composants
+ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js, ni de React Native.
+
+```ts
+import { Button, Input, Label, Text, Spinner, VisuallyHidden } from '@enistere/ui-kit';
+import '@enistere/ui-kit/styles.css'; // tokens + styles des primitives (une seule feuille)
+```
+
+Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impose aucun JS de thème) :
+
+```html
+<html data-theme="dark"> … </html>
+```
+
+## Primitives Web (V2)
+
+Six primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
+
+- **Button** — `variant` (primary/secondary/outline/ghost/danger), `size` (sm/md/lg), `loading`,
+  `loadingText`. `type="button"` par défaut, désactivé réel en `loading` (donc pas d'`onClick`),
+  `aria-busy`, spinner décoratif (jamais annoncé deux fois).
+- **Input** — `size`, `invalid` (→ `aria-invalid`). Transmet tous les attributs natifs ; `forwardRef`.
+  Aucune logique de formulaire (label/erreur/description viendront avec un `Field` ultérieur).
+- **Label** — `<label>` natif, `htmlFor` transmis, indicateur requis **décoratif** (`aria-hidden`).
+- **Text** — `variant` (display/heading/title/body/label/caption/code), `tone`
+  (default/muted/inverse/success/warning/danger/info), `as` (élément choisi par le consommateur).
+- **Spinner** — autonome (`role="status"` + libellé) ou `decorative` (`aria-hidden`) ; respecte
+  `prefers-reduced-motion`.
+- **VisuallyHidden** — masque visuellement en restant accessible (technique sr-only, pas `display:none`).
+
+```tsx
+<Button variant="primary" size="md" loading loadingText="Envoi…">Envoyer</Button>
+<Label htmlFor="email" required>Email</Label>
+<Input id="email" type="email" invalid placeholder="jean@example.com" />
+<Text as="h1" variant="display">Titre</Text>
+<Spinner label="Chargement…" />
+```
+
+Tous : acceptent `className`, transmettent les attributs HTML pertinents, exposent `ref` (forwardRef),
+sont accessibles par défaut, et n'embarquent aucune logique métier. Détail : [`docs/components.md`](docs/components.md).
+
+### Web vs Mobile
+
+Ces composants sont **Web (React + DOM)**. Le Mobile React Native (ADR-010) partage les **tokens et
+intentions**, **pas** les composants : il aura ses propres primitives (ThemeProvider/StyleSheet).
 
 ## 1. Rôle
 
@@ -131,15 +180,19 @@ nouvelle valeur cohérente.
 
 ## 18. Limites actuelles
 
-V1 = **tokens uniquement**. Pas de composant, pas de Storybook, pas d'icônes, pas de docs visuelles.
-Breakpoints orientés Web (non directement applicables à React Native). ESLint complet aligné plus tard
-au niveau monorepo (lint léger zéro-dépendance pour l'instant). Accessibilité : contrastes pensés au
-niveau des tokens sémantiques, à vérifier par des tests dédiés en V2.
+V2 = tokens + **6 primitives Web minimales**. Pas de bibliothèque complète, pas de Storybook, pas
+d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les
+tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger
+zéro-dépendance). Accessibilité : `jest-axe` couvre Button/Input+Label/Spinner ; les **contrastes**
+réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` +
+`global-jsdom` + Testing Library (un seul runner, **0 vulnérabilité**).
 
 ## 19. Non implémenté (volontaire)
 
-Composants, ThemeProvider, adaptateurs Tailwind/Radix/shadcn/NativeWind, Storybook/Ladle, icônes,
-documentation visuelle, publication npm — réservés aux missions et ADR ultérieurs.
+Dialog, Modal, Drawer, Select, Combobox, Dropdown, Toast, Table, Pagination, Form complet, DatePicker,
+Upload, navigation ; `asChild`/polymorphisme Radix ; ThemeProvider ; adaptateurs
+Tailwind/Radix/shadcn/NativeWind ; Storybook/Ladle ; icônes ; documentation visuelle ; publication npm
+— réservés aux missions et ADR ultérieurs. Composants Web ≠ React Native.
 
 ## 20. Sécurité
 

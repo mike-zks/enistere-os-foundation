@@ -1,0 +1,394 @@
+/* ENISTERE UI KIT — styles agrégés (tokens + primitives). GÉNÉRÉ — NE PAS MODIFIER À LA MAIN.
+   Régénérer : npm run tokens:generate · Vérifier : npm run tokens:check. */
+
+/* ENISTERE UI KIT — GENERATED CSS variables. NE PAS MODIFIER À LA MAIN.
+   Régénérer : npm run tokens:generate · Vérifier : npm run tokens:check (ADR-008). */
+
+:root {
+  --enistere-spacing-0: 0px;
+  --enistere-spacing-1: 4px;
+  --enistere-spacing-2: 8px;
+  --enistere-spacing-3: 12px;
+  --enistere-spacing-4: 16px;
+  --enistere-spacing-5: 20px;
+  --enistere-spacing-6: 24px;
+  --enistere-spacing-8: 32px;
+  --enistere-spacing-10: 40px;
+  --enistere-spacing-12: 48px;
+  --enistere-spacing-16: 64px;
+  --enistere-spacing-20: 80px;
+  --enistere-spacing-24: 96px;
+  --enistere-radius-none: 0px;
+  --enistere-radius-sm: 4px;
+  --enistere-radius-md: 8px;
+  --enistere-radius-lg: 12px;
+  --enistere-radius-xl: 20px;
+  --enistere-radius-full: 9999px;
+  --enistere-font-family-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --enistere-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --enistere-font-size-xs: 12px;
+  --enistere-font-size-sm: 14px;
+  --enistere-font-size-md: 16px;
+  --enistere-font-size-lg: 18px;
+  --enistere-font-size-xl: 20px;
+  --enistere-font-size-2xl: 24px;
+  --enistere-font-size-3xl: 30px;
+  --enistere-font-size-4xl: 36px;
+  --enistere-font-weight-regular: 400;
+  --enistere-font-weight-medium: 500;
+  --enistere-font-weight-semibold: 600;
+  --enistere-font-weight-bold: 700;
+  --enistere-line-height-tight: 1.2;
+  --enistere-line-height-normal: 1.5;
+  --enistere-line-height-relaxed: 1.7;
+  --enistere-letter-spacing-tight: -0.2px;
+  --enistere-letter-spacing-normal: 0px;
+  --enistere-letter-spacing-wide: 0.4px;
+  --enistere-shadow-none: none;
+  --enistere-shadow-sm: 0px 1px 2px 0px rgba(15, 23, 42, 0.08);
+  --enistere-shadow-md: 0px 4px 8px -2px rgba(15, 23, 42, 0.12);
+  --enistere-shadow-lg: 0px 12px 24px -4px rgba(15, 23, 42, 0.16);
+  --enistere-duration-fast: 120ms;
+  --enistere-duration-normal: 200ms;
+  --enistere-duration-slow: 320ms;
+  --enistere-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --enistere-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --enistere-easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --enistere-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --enistere-breakpoint-sm: 640px;
+  --enistere-breakpoint-md: 768px;
+  --enistere-breakpoint-lg: 1024px;
+  --enistere-breakpoint-xl: 1280px;
+  --enistere-breakpoint-2xl: 1536px;
+  --enistere-z-index-base: 0;
+  --enistere-z-index-dropdown: 1000;
+  --enistere-z-index-sticky: 1100;
+  --enistere-z-index-overlay: 1200;
+  --enistere-z-index-modal: 1300;
+  --enistere-z-index-toast: 1400;
+  --enistere-z-index-tooltip: 1500;
+
+  /* semantic colors (light, default) */
+  --enistere-color-background-default: #FFFFFF;
+  --enistere-color-background-muted: #F8FAFC;
+  --enistere-color-background-elevated: #FFFFFF;
+  --enistere-color-foreground-default: #0F172A;
+  --enistere-color-foreground-muted: #64748B;
+  --enistere-color-foreground-inverse: #FFFFFF;
+  --enistere-color-border-default: #E2E8F0;
+  --enistere-color-border-strong: #CBD5E1;
+  --enistere-color-border-focus: #3B82F6;
+  --enistere-color-action-primary: #2563EB;
+  --enistere-color-action-primary-hover: #1D4ED8;
+  --enistere-color-action-primary-pressed: #1E40AF;
+  --enistere-color-action-disabled: #CBD5E1;
+  --enistere-color-status-success: #16A34A;
+  --enistere-color-status-warning: #F59E0B;
+  --enistere-color-status-danger: #DC2626;
+  --enistere-color-status-info: #2563EB;
+  --enistere-color-focus-ring: #3B82F6;
+  --enistere-color-overlay: #0F172A;
+}
+
+[data-theme="dark"] {
+  --enistere-color-background-default: #020617;
+  --enistere-color-background-muted: #0F172A;
+  --enistere-color-background-elevated: #1E293B;
+  --enistere-color-foreground-default: #F8FAFC;
+  --enistere-color-foreground-muted: #94A3B8;
+  --enistere-color-foreground-inverse: #0F172A;
+  --enistere-color-border-default: #334155;
+  --enistere-color-border-strong: #475569;
+  --enistere-color-border-focus: #60A5FA;
+  --enistere-color-action-primary: #3B82F6;
+  --enistere-color-action-primary-hover: #60A5FA;
+  --enistere-color-action-primary-pressed: #93C5FD;
+  --enistere-color-action-disabled: #334155;
+  --enistere-color-status-success: #22C55E;
+  --enistere-color-status-warning: #F59E0B;
+  --enistere-color-status-danger: #EF4444;
+  --enistere-color-status-info: #3B82F6;
+  --enistere-color-focus-ring: #60A5FA;
+  --enistere-color-overlay: #020617;
+}
+
+/* src/components/button/button.css */
+/* Button — variantes/tailles pilotées par tokens. Light/dark via variables (aucune règle dark dédiée). */
+.enistere-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-2);
+  font-family: var(--enistere-font-family-sans);
+  font-weight: var(--enistere-font-weight-semibold);
+  border: 1px solid transparent;
+  border-radius: var(--enistere-radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--enistere-duration-fast) var(--enistere-easing-standard),
+    border-color var(--enistere-duration-fast) var(--enistere-easing-standard),
+    color var(--enistere-duration-fast) var(--enistere-easing-standard);
+}
+.enistere-button__label {
+  display: inline-flex;
+  align-items: center;
+}
+.enistere-button:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 2px;
+}
+.enistere-button:disabled {
+  cursor: not-allowed;
+  background-color: var(--enistere-color-action-disabled);
+  color: var(--enistere-color-foreground-muted);
+  border-color: transparent;
+}
+
+/* Sizes — min-height = cible tactile raisonnable */
+.enistere-button--sm {
+  min-height: var(--enistere-spacing-8);
+  padding: 0 var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-button--md {
+  min-height: var(--enistere-spacing-10);
+  padding: 0 var(--enistere-spacing-4);
+  font-size: var(--enistere-font-size-md);
+}
+.enistere-button--lg {
+  min-height: var(--enistere-spacing-12);
+  padding: 0 var(--enistere-spacing-6);
+  font-size: var(--enistere-font-size-lg);
+}
+
+/* Variants */
+.enistere-button--primary {
+  background-color: var(--enistere-color-action-primary);
+  color: var(--enistere-color-foreground-inverse);
+}
+.enistere-button--primary:hover:not(:disabled) {
+  background-color: var(--enistere-color-action-primary-hover);
+}
+.enistere-button--primary:active:not(:disabled) {
+  background-color: var(--enistere-color-action-primary-pressed);
+}
+.enistere-button--secondary {
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-default);
+  border-color: var(--enistere-color-border-default);
+}
+.enistere-button--secondary:hover:not(:disabled) {
+  background-color: var(--enistere-color-background-elevated);
+}
+.enistere-button--outline {
+  background-color: transparent;
+  color: var(--enistere-color-foreground-default);
+  border-color: var(--enistere-color-border-strong);
+}
+.enistere-button--outline:hover:not(:disabled) {
+  background-color: var(--enistere-color-background-muted);
+}
+.enistere-button--ghost {
+  background-color: transparent;
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-button--ghost:hover:not(:disabled) {
+  background-color: var(--enistere-color-background-muted);
+}
+.enistere-button--danger {
+  background-color: var(--enistere-color-status-danger);
+  color: var(--enistere-color-foreground-inverse);
+}
+/* NB : pas de teinte danger hover/pressed dédiée en V2 (lacune de token documentée). */
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-button {
+    transition: none;
+  }
+}
+
+/* src/components/input/input.css */
+/* Input — états focus/disabled/invalid pilotés par tokens. Light/dark via variables. */
+.enistere-input {
+  width: 100%;
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-default);
+  background-color: var(--enistere-color-background-default);
+  border: 1px solid var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-md);
+  transition: border-color var(--enistere-duration-fast) var(--enistere-easing-standard);
+}
+.enistere-input::placeholder {
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-input:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 1px;
+  border-color: var(--enistere-color-border-focus);
+}
+.enistere-input:disabled {
+  cursor: not-allowed;
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-input--invalid {
+  border-color: var(--enistere-color-status-danger);
+}
+.enistere-input--invalid:focus-visible {
+  outline-color: var(--enistere-color-status-danger);
+}
+
+.enistere-input--sm {
+  min-height: var(--enistere-spacing-8);
+  padding: 0 var(--enistere-spacing-2);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-input--md {
+  min-height: var(--enistere-spacing-10);
+  padding: 0 var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-md);
+}
+.enistere-input--lg {
+  min-height: var(--enistere-spacing-12);
+  padding: 0 var(--enistere-spacing-4);
+  font-size: var(--enistere-font-size-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-input {
+    transition: none;
+  }
+}
+
+/* src/components/label/label.css */
+/* Label — typographie label, indicateur requis décoratif. */
+.enistere-label {
+  display: inline-block;
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-sm);
+  font-weight: var(--enistere-font-weight-medium);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-label__required {
+  color: var(--enistere-color-status-danger);
+}
+
+/* src/components/spinner/spinner.css */
+/* Spinner — animation indéterminée, réduite si prefers-reduced-motion. Couleurs via tokens. */
+.enistere-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--enistere-color-action-primary);
+}
+.enistere-spinner__indicator {
+  display: inline-block;
+  border: 2px solid var(--enistere-color-border-default);
+  border-top-color: currentColor;
+  border-radius: var(--enistere-radius-full);
+  animation: enistere-spinner-rotate var(--enistere-duration-slow) linear infinite;
+}
+.enistere-spinner--sm .enistere-spinner__indicator {
+  width: var(--enistere-spacing-4);
+  height: var(--enistere-spacing-4);
+}
+.enistere-spinner--md .enistere-spinner__indicator {
+  width: var(--enistere-spacing-5);
+  height: var(--enistere-spacing-5);
+}
+.enistere-spinner--lg .enistere-spinner__indicator {
+  width: var(--enistere-spacing-6);
+  height: var(--enistere-spacing-6);
+}
+
+@keyframes enistere-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-spinner__indicator {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}
+
+/* src/components/text/text.css */
+/* Text — variantes typographiques sémantiques + tons. Pilotés par tokens. */
+.enistere-text {
+  font-family: var(--enistere-font-family-sans);
+  margin: 0;
+}
+.enistere-text--display {
+  font-size: var(--enistere-font-size-4xl);
+  font-weight: var(--enistere-font-weight-bold);
+  line-height: var(--enistere-line-height-tight);
+  letter-spacing: var(--enistere-letter-spacing-tight);
+}
+.enistere-text--heading {
+  font-size: var(--enistere-font-size-3xl);
+  font-weight: var(--enistere-font-weight-bold);
+  line-height: var(--enistere-line-height-tight);
+}
+.enistere-text--title {
+  font-size: var(--enistere-font-size-xl);
+  font-weight: var(--enistere-font-weight-semibold);
+  line-height: var(--enistere-line-height-normal);
+}
+.enistere-text--body {
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-regular);
+  line-height: var(--enistere-line-height-normal);
+}
+.enistere-text--label {
+  font-size: var(--enistere-font-size-sm);
+  font-weight: var(--enistere-font-weight-medium);
+  line-height: var(--enistere-line-height-normal);
+}
+.enistere-text--caption {
+  font-size: var(--enistere-font-size-xs);
+  line-height: var(--enistere-line-height-normal);
+  letter-spacing: var(--enistere-letter-spacing-wide);
+}
+.enistere-text--code {
+  font-family: var(--enistere-font-family-mono);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-text--tone-default {
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-text--tone-muted {
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-text--tone-inverse {
+  color: var(--enistere-color-foreground-inverse);
+}
+.enistere-text--tone-success {
+  color: var(--enistere-color-status-success);
+}
+.enistere-text--tone-warning {
+  color: var(--enistere-color-status-warning);
+}
+.enistere-text--tone-danger {
+  color: var(--enistere-color-status-danger);
+}
+.enistere-text--tone-info {
+  color: var(--enistere-color-status-info);
+}
+
+/* src/components/visually-hidden/visually-hidden.css */
+/* VisuallyHidden — technique sr-only standard (valeurs d'accessibilité, pas des tokens de design). */
+.enistere-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+

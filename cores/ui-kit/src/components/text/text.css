@@ -1,0 +1,61 @@
+/* Text — variantes typographiques sémantiques + tons. Pilotés par tokens. */
+.enistere-text {
+  font-family: var(--enistere-font-family-sans);
+  margin: 0;
+}
+.enistere-text--display {
+  font-size: var(--enistere-font-size-4xl);
+  font-weight: var(--enistere-font-weight-bold);
+  line-height: var(--enistere-line-height-tight);
+  letter-spacing: var(--enistere-letter-spacing-tight);
+}
+.enistere-text--heading {
+  font-size: var(--enistere-font-size-3xl);
+  font-weight: var(--enistere-font-weight-bold);
+  line-height: var(--enistere-line-height-tight);
+}
+.enistere-text--title {
+  font-size: var(--enistere-font-size-xl);
+  font-weight: var(--enistere-font-weight-semibold);
+  line-height: var(--enistere-line-height-normal);
+}
+.enistere-text--body {
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-regular);
+  line-height: var(--enistere-line-height-normal);
+}
+.enistere-text--label {
+  font-size: var(--enistere-font-size-sm);
+  font-weight: var(--enistere-font-weight-medium);
+  line-height: var(--enistere-line-height-normal);
+}
+.enistere-text--caption {
+  font-size: var(--enistere-font-size-xs);
+  line-height: var(--enistere-line-height-normal);
+  letter-spacing: var(--enistere-letter-spacing-wide);
+}
+.enistere-text--code {
+  font-family: var(--enistere-font-family-mono);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-text--tone-default {
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-text--tone-muted {
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-text--tone-inverse {
+  color: var(--enistere-color-foreground-inverse);
+}
+.enistere-text--tone-success {
+  color: var(--enistere-color-status-success);
+}
+.enistere-text--tone-warning {
+  color: var(--enistere-color-status-warning);
+}
+.enistere-text--tone-danger {
+  color: var(--enistere-color-status-danger);
+}
+.enistere-text--tone-info {
+  color: var(--enistere-color-status-info);
+}

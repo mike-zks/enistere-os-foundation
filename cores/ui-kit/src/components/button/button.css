@@ -1,0 +1,93 @@
+/* Button — variantes/tailles pilotées par tokens. Light/dark via variables (aucune règle dark dédiée). */
+.enistere-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-2);
+  font-family: var(--enistere-font-family-sans);
+  font-weight: var(--enistere-font-weight-semibold);
+  border: 1px solid transparent;
+  border-radius: var(--enistere-radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--enistere-duration-fast) var(--enistere-easing-standard),
+    border-color var(--enistere-duration-fast) var(--enistere-easing-standard),
+    color var(--enistere-duration-fast) var(--enistere-easing-standard);
+}
+.enistere-button__label {
+  display: inline-flex;
+  align-items: center;
+}
+.enistere-button:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 2px;
+}
+.enistere-button:disabled {
+  cursor: not-allowed;
+  background-color: var(--enistere-color-action-disabled);
+  color: var(--enistere-color-foreground-muted);
+  border-color: transparent;
+}
+
+/* Sizes — min-height = cible tactile raisonnable */
+.enistere-button--sm {
+  min-height: var(--enistere-spacing-8);
+  padding: 0 var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-button--md {
+  min-height: var(--enistere-spacing-10);
+  padding: 0 var(--enistere-spacing-4);
+  font-size: var(--enistere-font-size-md);
+}
+.enistere-button--lg {
+  min-height: var(--enistere-spacing-12);
+  padding: 0 var(--enistere-spacing-6);
+  font-size: var(--enistere-font-size-lg);
+}
+
+/* Variants */
+.enistere-button--primary {
+  background-color: var(--enistere-color-action-primary);
+  color: var(--enistere-color-foreground-inverse);
+}
+.enistere-button--primary:hover:not(:disabled) {
+  background-color: var(--enistere-color-action-primary-hover);
+}
+.enistere-button--primary:active:not(:disabled) {
+  background-color: var(--enistere-color-action-primary-pressed);
+}
+.enistere-button--secondary {
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-default);
+  border-color: var(--enistere-color-border-default);
+}
+.enistere-button--secondary:hover:not(:disabled) {
+  background-color: var(--enistere-color-background-elevated);
+}
+.enistere-button--outline {
+  background-color: transparent;
+  color: var(--enistere-color-foreground-default);
+  border-color: var(--enistere-color-border-strong);
+}
+.enistere-button--outline:hover:not(:disabled) {
+  background-color: var(--enistere-color-background-muted);
+}
+.enistere-button--ghost {
+  background-color: transparent;
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-button--ghost:hover:not(:disabled) {
+  background-color: var(--enistere-color-background-muted);
+}
+.enistere-button--danger {
+  background-color: var(--enistere-color-status-danger);
+  color: var(--enistere-color-foreground-inverse);
+}
+/* NB : pas de teinte danger hover/pressed dédiée en V2 (lacune de token documentée). */
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-button {
+    transition: none;
+  }
+}

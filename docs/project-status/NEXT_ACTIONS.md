@@ -5,24 +5,26 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **UI Kit 2 — primitives Web minimales** (`cores/ui-kit/`) : quelques composants primitifs (ex. Box,
-> Text, Button) consommant les tokens, **sans bibliothèque complète**.
+> **Web Core Next.js minimal** (`cores/web-nextjs/`) : starter consommant `@enistere/api-client-fetch`
+> + `@enistere/ui-kit` (+ `styles.css`), avec hooks TanStack Query (ADR-012) — **un seul core**.
 
-**Justification** : le **starter UI Kit (tokens) est livré** (`@enistere/ui-kit` — tokens validés,
-générés, 25 tests, 100 % couverture). L'étape suivante naturelle est de prouver la **consommation** des
-tokens par quelques primitives Web, avant d'initialiser le Web Core Next.js. Cela reste dans le UI Kit
-(dépendance commune), sans créer de projet Next.js ni de bibliothèque exhaustive. ADR-009 (stack Web)
-encadrera l'ajout éventuel de Tailwind/Radix/shadcn — **non requis** pour des primitives basées tokens.
+**Justification** : le **UI Kit fournit désormais tokens + 6 primitives Web** (`@enistere/ui-kit`,
+64 tests, 100 %, SSR/install local validés) et les **packages clients** sont prêts. Le premier
+consommateur réel est le Web Core Next.js, qui prouve l'intégration de bout en bout (contrat → client →
+UI). C'est là qu'ADR-009 (Tailwind/Radix/shadcn) et ADR-005 (cookies/CSRF) s'appliquent.
 
-**Note gouvernance** : la baseline Git existe (`7dcb543`) ; **push vers `origin` non fait** (décision
-humaine). L'initialisation du UI Kit a ajouté un commit local `feat(ui-kit): initialize token foundation`.
+**Alternative (justifiée)** : **compléter le UI Kit** (composants formulaire/feedback supplémentaires :
+FormField, Alert, Card…) avant Next.js, si l'on veut un socle UI plus large d'abord. À arbitrer.
+
+**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
+`feat(ui-kit): add minimal web primitives`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **UI Kit 2 — primitives Web** (composants minimaux consommant les tokens) ✦ prochaine action.
-2. **Web Core Next.js minimal** — starter ; **intégration de `@enistere/api-client-fetch`** + hooks TanStack Query (ADR-012) ; cookies/CSRF (ADR-005) ; consomme le UI Kit + `@enistere/ui-kit/tokens.css`.
-3. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; consomme les tokens (ThemeProvider, ADR-010).
-4. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation, au service du API Core et des cores clients.
+1. **Web Core Next.js minimal** — starter ; **intégration `@enistere/api-client-fetch`** + hooks TanStack Query (ADR-012) ; cookies/CSRF (ADR-005) ; consomme `@enistere/ui-kit` + `styles.css` ; ADR-009 (Tailwind/Radix/shadcn) au niveau du core. ✦ prochaine action.
+2. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
+3. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
+4. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste

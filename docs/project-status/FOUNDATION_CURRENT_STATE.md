@@ -11,16 +11,17 @@
 ## 1. Statut global
 
 Le repository combine la **Phase 0 (stratégie + ADR + spécifications)** et des **implémentations
-techniques réelles** : le **API Core NestJS**, deux **packages clients officiels**, et le **starter UI
-Kit** (design tokens). Les autres cores sont **documentaires** (spécification) ou **vides** (dossier
-seul). **Aucun client Web/Mobile n'est implémenté** (le UI Kit n'expose que des tokens, pas de composant).
+techniques réelles** : le **API Core NestJS**, deux **packages clients officiels**, et le **UI Kit**
+(design tokens **+ premières primitives Web React**). Les autres cores sont **documentaires** ou
+**vides**. **Aucun client Web/Mobile applicatif n'est implémenté** (le UI Kit fournit tokens + primitives,
+pas une application ni une bibliothèque complète).
 
 | Catégorie | État |
 |---|---|
 | Stratégie (Phase 0) | 10 documents présents |
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
-| Core initialisé | **UI Kit** (`@enistere/ui-kit`) — starter design tokens (tokens validés/générés, 25 tests, 100 % couverture) |
+| Core en cours | **UI Kit** (`@enistere/ui-kit`) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y jest-axe) |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés, **non intégrés**) |
 | Cores documentaires | `cloud`, `web-nextjs`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
@@ -61,7 +62,7 @@ enistere-os-foundation/
 | Core | Dossier | Spécification | Starter/code | Statut officiel |
 |---|---|---|---|---|
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
-| `ui-kit` | oui | oui | **oui** (tokens) | **STARTER_INITIALISE** |
+| `ui-kit` | oui | oui | **oui** (tokens + primitives Web) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `web-nextjs` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `mobile-react-native` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
@@ -114,7 +115,8 @@ server state (TanStack Query), CI/CD, registry. Détail : [`IMPLEMENTATION_MATRI
 
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
-+ preuve live **16/16** (client officiel vs API réelle). Aucune CI : exécution **manuelle/locale**.
++ preuve live **16/16** (client officiel vs API réelle). UI Kit : **64 tests** (`node:test` + `global-jsdom`
++ Testing Library + jest-axe), **100 % couverture**. Aucune CI : exécution **manuelle/locale**.
 
 ## 10. Preuves
 
@@ -153,10 +155,10 @@ preuve désormais retiré (bannière de migration ajoutée).
 
 ## 15. Prochaine étape
 
-Le **starter UI Kit (tokens)** est désormais **initialisé** (`@enistere/ui-kit`). **Action unique
-recommandée** : **UI Kit 2 — primitives Web minimales** (quelques composants primitifs consommant les
-tokens, sans bibliothèque complète), avant l'initialisation du Web Core Next.js. Détail et ordre :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+Le UI Kit fournit désormais **tokens + 6 primitives Web** (`@enistere/ui-kit`). **Action unique
+recommandée** : initialiser le **Web Core Next.js minimal** (consommant `@enistere/api-client-fetch` +
+`@enistere/ui-kit` + `styles.css`, hooks TanStack Query ADR-012) — OU compléter le UI Kit (composants
+de formulaire/feedback supplémentaires) si jugé prioritaire. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

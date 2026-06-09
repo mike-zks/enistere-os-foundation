@@ -15,7 +15,7 @@
 | Cloud Core | ✓ | ✓ | ✓ (013,014,007…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | starter (après CI/registry) |
 | Web Core Next.js | ✓ | ✓ | ✓ (005,009,011,012…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | UI Kit + intégration packages |
 | Mobile Core React Native | ✓ | ✓ | ✓ (010,012,015…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | UI Kit + secure storage |
-| UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓ (tokens)** | **✓ (tokens)** | **✓ (25, 100 %)** | — | **STARTER_INITIALISE** | tokens validés/générés (déterministes) | UI Kit 2 — primitives Web |
+| UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 6 primitives Web)** | **✓ (64, 100 %, a11y)** | — | **IMPLEMENTATION_PARTIELLE** | tokens déterministes + primitives (SSR/local install OK) | Web Core Next.js / composants UI suppl. |
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
@@ -65,7 +65,7 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 |---|---|---|---|---|---|---|
 | C1 | Travail substantiel présent | `git log` | **Résolu (local)** : baseline `7dcb543` ; non poussée | Traçabilité locale OK ; pas encore de sauvegarde distante | Pousser vers `origin` (décision humaine) | RÉSOLU (local) / IMPORTANTE (push) |
 | C2 | Packages dits « officiels » | Aucun import dans les cores | Non intégrés | Faux sentiment d'intégration | Intégrer lors des cores Web/Mobile | IMPORTANTE |
-| C3 | ADR-005/009/010/012/013/014/015 Validés | Aucun code correspondant | Décidés, non implémentés (ADR-008 désormais **partiellement** : tokens UI Kit) | Lecture « fait » erronée | Implémenter au fil des cores | IMPORTANTE |
+| C3 | ADR-005/012/013/014/015 Validés | Aucun code correspondant | Décidés, non implémentés (ADR-008 **partiel** : tokens + primitives UI Kit ; ADR-009/010 **partiels** : tokens consommés, stacks Tailwind/RN non ajoutées) | Lecture « fait » erronée | Implémenter au fil des cores | IMPORTANTE |
 | C4 | `strategy/` Phase 0 (« avant code ») | API Core implémenté | Phase 0 partiellement dépassée | Contexte trompeur | Lire strategy comme historique | MINEURE |
 | C5 | `OPENAPI_CLIENT_PROOF.md` cite `proofs/openapi-client/*` | Code de preuve retiré | Pointeur seul | Liens internes partiellement périmés | Bannière de migration déjà ajoutée | MINEURE |
 | C6 | `cores/{cloud,web-nextjs,mobile-react-native}` ont une spéc | Aucun starter | Documentaires (ui-kit désormais **STARTER_INITIALISE**) | Confusion spéc↔implémentation | Statut explicite (cette matrice) | IMPORTANTE |

@@ -1,0 +1,51 @@
+/* Input — états focus/disabled/invalid pilotés par tokens. Light/dark via variables. */
+.enistere-input {
+  width: 100%;
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-default);
+  background-color: var(--enistere-color-background-default);
+  border: 1px solid var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-md);
+  transition: border-color var(--enistere-duration-fast) var(--enistere-easing-standard);
+}
+.enistere-input::placeholder {
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-input:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 1px;
+  border-color: var(--enistere-color-border-focus);
+}
+.enistere-input:disabled {
+  cursor: not-allowed;
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-input--invalid {
+  border-color: var(--enistere-color-status-danger);
+}
+.enistere-input--invalid:focus-visible {
+  outline-color: var(--enistere-color-status-danger);
+}
+
+.enistere-input--sm {
+  min-height: var(--enistere-spacing-8);
+  padding: 0 var(--enistere-spacing-2);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-input--md {
+  min-height: var(--enistere-spacing-10);
+  padding: 0 var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-md);
+}
+.enistere-input--lg {
+  min-height: var(--enistere-spacing-12);
+  padding: 0 var(--enistere-spacing-4);
+  font-size: var(--enistere-font-size-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-input {
+    transition: none;
+  }
+}

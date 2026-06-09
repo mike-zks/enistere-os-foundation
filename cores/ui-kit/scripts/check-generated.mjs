@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 import { generateAll } from '../dist/generators/index.js';
 import { validateDefaultTokens } from '../dist/validation/validate-tokens.js';
+import { buildStylesContent } from './styles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GEN = join(ROOT, 'generated');
@@ -26,6 +27,7 @@ const targets = [
   ['tokens.json', json],
   [join('typescript', 'tokens.ts'), typescript],
   [join('css', 'tokens.css'), css],
+  [join('css', 'styles.css'), buildStylesContent(css, join(ROOT, 'src', 'components'))],
 ];
 
 const tmp = mkdtempSync(join(tmpdir(), 'enistere-ui-gen-'));

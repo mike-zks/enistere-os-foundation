@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 import { generateAll } from '../dist/generators/index.js';
 import { validateDefaultTokens } from '../dist/validation/validate-tokens.js';
+import { buildStylesContent } from './styles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GEN = join(ROOT, 'generated');
@@ -26,10 +27,15 @@ mkdirSync(join(GEN, 'css'), { recursive: true });
 writeFileSync(join(GEN, 'tokens.json'), json);
 writeFileSync(join(GEN, 'typescript', 'tokens.ts'), typescript);
 writeFileSync(join(GEN, 'css', 'tokens.css'), css);
+writeFileSync(join(GEN, 'css', 'styles.css'), buildStylesContent(css, join(ROOT, 'src', 'components')));
 
 console.log(
   JSON.stringify(
-    { mode: 'generate', files: ['tokens.json', 'typescript/tokens.ts', 'css/tokens.css'], path: GEN },
+    {
+      mode: 'generate',
+      files: ['tokens.json', 'typescript/tokens.ts', 'css/tokens.css', 'css/styles.css'],
+      path: GEN,
+    },
     null,
     2,
   ),

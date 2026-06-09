@@ -17,9 +17,9 @@
 | ADR-005 | Cookies web + CSRF | Validé | **DECIDE_NON_IMPLEMENTE** | api/web | pas de core web |
 | ADR-006 | RBAC + permissions fines | Validé | **IMPLEMENTE_ET_REVU** | api/web/mobile/ui | RBAC API + `AUTH_RBAC_REVIEW` |
 | ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files + `FILES_REVIEW` |
-| ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | starter `@enistere/ui-kit` (tokens validés/générés, 25 tests) ; composants à venir |
-| ADR-009 | Stack UI Web (Tailwind/shadcn/Radix) | Validé | **DECIDE_NON_IMPLEMENTE** | ui-kit/web | spéc seule |
-| ADR-010 | Stack UI React Native | Validé | **DECIDE_NON_IMPLEMENTE** | ui-kit/mobile | spéc seule |
+| ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | `@enistere/ui-kit` : tokens + 6 primitives Web (64 tests) ; bibliothèque complète à venir |
+| ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | primitives Web pilotées par tokens (CSS `--enistere-*`) ; Tailwind/Radix/shadcn = Web Core (non ajoutés au package) |
+| ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | package `api-client-fetch` ; non intégré aux cores |
 | ADR-012 | Server state = TanStack Query | Validé | **DECIDE_NON_IMPLEMENTE** | web/mobile | hooks réservés aux cores (absents) |
 | ADR-013 | CI/CD V1 | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web/mobile | aucun workflow |
@@ -33,8 +33,8 @@
 
 À traiter au fil des cores / de l'infrastructure (aucune n'est implémentée aujourd'hui) :
 
-- **ADR-008** — tokens UI Kit : **partiellement fait** (starter `@enistere/ui-kit`) ; composants à venir.
-- **ADR-009 / 010** — stacks UI Web/RN (Tailwind/Radix/shadcn ; ThemeProvider/NativeWind) : prérequis des cores clients.
+- **ADR-008/009/010** — UI Kit : **partiellement fait** (tokens + 6 primitives Web). Restent : composants
+  supplémentaires, stacks Tailwind/Radix/shadcn (Web Core) et ThemeProvider/NativeWind (Mobile Core).
 - **ADR-005** — cookies web/CSRF : avec le Web Core.
 - **ADR-012** — TanStack Query : hooks dans les cores Web/Mobile (hors packages).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.

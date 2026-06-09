@@ -1,0 +1,39 @@
+/* Spinner — animation indéterminée, réduite si prefers-reduced-motion. Couleurs via tokens. */
+.enistere-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--enistere-color-action-primary);
+}
+.enistere-spinner__indicator {
+  display: inline-block;
+  border: 2px solid var(--enistere-color-border-default);
+  border-top-color: currentColor;
+  border-radius: var(--enistere-radius-full);
+  animation: enistere-spinner-rotate var(--enistere-duration-slow) linear infinite;
+}
+.enistere-spinner--sm .enistere-spinner__indicator {
+  width: var(--enistere-spacing-4);
+  height: var(--enistere-spacing-4);
+}
+.enistere-spinner--md .enistere-spinner__indicator {
+  width: var(--enistere-spacing-5);
+  height: var(--enistere-spacing-5);
+}
+.enistere-spinner--lg .enistere-spinner__indicator {
+  width: var(--enistere-spacing-6);
+  height: var(--enistere-spacing-6);
+}
+
+@keyframes enistere-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-spinner__indicator {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

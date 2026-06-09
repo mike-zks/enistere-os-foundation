@@ -49,3 +49,8 @@ export {
   defaultTokenModel,
 } from './validation/validate-tokens.js';
 export type { TokenModel, ValidationResult } from './validation/validate-tokens.js';
+
+// Primitives Web (V2) — React requis (peerDependency) ; styles via @enistere/ui-kit/styles.css.
+export * from './components/index.js';
+export { mergeClassNames } from './utilities/merge-class-names.js';
+export type { ClassValue } from './utilities/merge-class-names.js';

@@ -1,0 +1,11 @@
+/* Label — typographie label, indicateur requis décoratif. */
+.enistere-label {
+  display: inline-block;
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-sm);
+  font-weight: var(--enistere-font-weight-medium);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-label__required {
+  color: var(--enistere-color-status-danger);
+}
