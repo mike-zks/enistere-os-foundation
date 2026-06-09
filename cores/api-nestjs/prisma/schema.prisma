@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ADR-002 retient Prisma comme ORM V1.
+// Fondations d'authentification V1 — étape 1 : User et RefreshSession.
+// Les rôles et permissions (ADR-006) seront ajoutés dans une mission dédiée.
+// Les modèles Prisma ne doivent pas être exposés directement comme DTO publics (ADR-002 §20).
+
+/// Statut générique d'un utilisateur. Reste volontairement minimal et non métier.
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+/// Raison de révocation d'une RefreshSession (Auth 3). Interne, jamais exposée telle quelle au client.
+enum SessionRevocationReason {
+  ROTATED
+  LOGOUT
+  REUSE_DETECTED
+  SECURITY_ACTION
+  USER_DISABLED
+}
+
+/// Cycle de vie d'un fichier (ADR-007). PENDING : intention créée, contenu pas encore stocké/validé.
+enum FileStatus {
+  PENDING
+  UPLOADED
+  VALIDATED
+  REJECTED
+  QUARANTINED
+  DELETED
+}
+
+/// Visibilité d'un fichier. PRIVATE par défaut ; PUBLIC ne rend pas le bucket public ;
+/// SIGNED = accès par URL temporaire ; INTERNAL = services internes.
+enum FileVisibility {
+  PRIVATE
+  PUBLIC
+  SIGNED
+  INTERNAL
+}
+
+/// Catégorie générique de fichier (aucune catégorie métier).
+enum FileCategory {
+  IMAGE
+  DOCUMENT
+  AVATAR
+  MEDIA
+  VIDEO
+  AUDIO
+  IDENTITY_DOCUMENT
+  ATTACHMENT
+  OTHER
+}
+
+/// Utilisateur minimal et générique.
+/// L'email est stocké normalisé (trim + minuscule) par la couche applicative
+/// (UsersService.normalizeEmail) ; l'unicité est garantie au niveau base.
+/// Aucun champ de profil métier (nom, téléphone, avatar...) n'est ajouté à ce stade.
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique
+  passwordHash String
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  // Désactivation logique : permet de neutraliser un compte sans suppression
+  // physique (ADR-004 §15 révocation sur désactivation, CORE_SPEC §16).
+  deactivatedAt DateTime?
+
+  refreshSessions RefreshSession[]
+  roles           UserRole[]
+  files           StoredFile[]
+
+  @@map("users")
+}
+
+/// Fichier stocké (ADR-007). Privé par défaut. Le contenu binaire et le stockage objet
+/// réel (MinIO/S3) seront branchés en Upload 2 ; ici seules les métadonnées sont persistées.
+/// `storageKey` et `bucket` sont internes et ne doivent pas être exposés publiquement.
+model StoredFile {
+  id        String @id @default(uuid()) @db.Uuid
+  // Propriétaire applicatif. SetNull à la suppression de l'utilisateur : on préserve la
+  // métadonnée de fichier pour l'audit plutôt que de supprimer physiquement sans contrôle.
+  ownerId   String? @db.Uuid
+  owner     User?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  // Rattachement métier générique optionnel (pas de relation polymorphique en V1).
+  subjectId String?
+
+  // Métadonnée non fiable, conservée pour l'UX uniquement (jamais utilisée comme chemin).
+  originalName String
+  // Clé de stockage générée côté serveur, unique, indépendante du fournisseur. Interne.
+  storageKey String @unique
+  bucket     String
+  mimeType   String
+  extension  String
+  // Taille en octets. BigInt pour les gros médias ; sérialisée en chaîne dans les contrats.
+  size       BigInt
+  // Empreinte d'intégrité optionnelle (SHA-256). Pas de déduplication globale en V1.
+  checksum   String?
+
+  visibility FileVisibility @default(PRIVATE)
+  status     FileStatus     @default(PENDING)
+  category   FileCategory   @default(OTHER)
+
+  // Métadonnées techniques contrôlées (width, height, duration...). Jamais de payload client brut.
+  metadata Json?
+
+  uploadedAt  DateTime?
+  validatedAt DateTime?
+  rejectedAt  DateTime?
+  // Cycle de vie Upload 4. Quarantaine administrative (raison bornée, code générique).
+  quarantinedAt   DateTime?
+  quarantineReason String?
+  // Suppression confidentielle : `deletionRequestedAt` marque l'intention AVANT suppression de
+  // l'objet (ordre objet→DB) ; `storageDeletedAt` confirme la suppression effective de l'objet.
+  deletionRequestedAt DateTime?
+  storageDeletedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("stored_files")
+}
+
+/// Rôle RBAC générique (ADR-006). Regroupe des permissions. Aucun rôle métier imposé.
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  // Code stable, normalisé (minuscules), identifiant logique du rôle.
+  code        String   @unique
+  name        String
+  description String?
+  // Protège les rôles structurels du core (suppression/édition contrôlées à terme).
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+/// Permission fine (ADR-006), convention `resource.action`. Aucune permission métier.
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  // Code unique stable au format `resource.action` (minuscules).
+  code        String   @unique
+  resource    String
+  action      String
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+/// Association explicite utilisateur ↔ rôle (many-to-many).
+model UserRole {
+  userId     String   @db.Uuid
+  roleId     String   @db.Uuid
+  assignedAt DateTime @default(now())
+  assignedBy String?  @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  // Clé composite = unicité de l'association + index sur le préfixe userId.
+  @@id([userId, roleId])
+  // Index complémentaire pour les recherches « utilisateurs d'un rôle ».
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+/// Association explicite rôle ↔ permission (many-to-many).
+model RolePermission {
+  roleId       String   @db.Uuid
+  permissionId String   @db.Uuid
+  assignedAt   DateTime @default(now())
+  assignedBy   String?  @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  // Clé composite = unicité + index sur le préfixe roleId.
+  @@id([roleId, permissionId])
+  // Index complémentaire pour « rôles possédant une permission ».
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+/// Session de refresh révocable, support de la rotation future (ADR-004 §11/§15/§16).
+/// Ne stocke jamais le refresh token brut, uniquement son empreinte (hash).
+model RefreshSession {
+  id        String @id @default(uuid()) @db.Uuid
+  userId    String @db.Uuid
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Empreinte du refresh token (jamais le token brut). Unique pour la détection
+  // de réutilisation lors de la rotation.
+  tokenHash String @unique
+
+  // Identifiant de famille de tokens : permet la rotation et la détection de
+  // réutilisation d'un ancien token au sein d'une même lignée (ADR-004 §16).
+  familyId String @db.Uuid
+
+  expiresAt DateTime
+  // Révocation : logout, changement de mot de passe, compromission... (ADR-004 §15).
+  revokedAt DateTime?
+  // Raison de révocation, utile à la détection de réutilisation et à l'audit.
+  revocationReason SessionRevocationReason?
+  // Session ayant remplacé celle-ci lors d'une rotation (traçabilité de la chaîne).
+  replacedBySessionId String? @db.Uuid
+  createdAt DateTime  @default(now())
+  // Dernière utilisation / rotation, utile à l'audit et à la rotation.
+  lastUsedAt DateTime?
+
+  // Métadonnées techniques limitées et facultatives, utiles à l'audit de session
+  // (ADR-004 §18). Aucune donnée personnelle superflue.
+  userAgent String?
+  ipAddress String?
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_sessions")
+}
+
+/// Journal d'audit générique des actions sensibles (CORE_SPEC §19).
+/// Ne stocke jamais de token, hash, mot de passe ni payload complet.
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  eventType    String
+  actorId      String?  @db.Uuid
+  subjectId    String?  @db.Uuid
+  resourceType String?
+  resourceId   String?
+  // Métadonnées contrôlées (clés non sensibles uniquement : familyId, sessionId, reason...).
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([eventType])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

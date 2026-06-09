@@ -1,0 +1,40 @@
+# Système
+.DS_Store
+Thumbs.db
+
+# Editeurs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Environnement local
+.env
+.env.*
+!.env.example
+
+# Artefacts temporaires
+tmp/
+temp/
+.cache/
+
+# Dependances et builds futurs
+node_modules/
+dist/
+build/
+coverage/
+.next/
+
+# Artefacts générés / temporaires supplémentaires
+*.tsbuildinfo
+*.tgz
+*.pid
+*.tmp
+
+# État runtime de l'outillage agent (jamais versionné)
+.claude/
+

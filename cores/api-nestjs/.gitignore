@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+# Artefact OpenAPI temporaire à la racine — non committé. Le snapshot canonique versionné
+# est cores/api-nestjs/openapi/openapi.json (suivi par Git).
+/openapi.json

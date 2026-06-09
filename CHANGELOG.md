@@ -1,0 +1,142 @@
+# Changelog
+
+Tous les changements notables de ce repository seront documentés dans ce fichier.
+
+Le format suit une approche simple inspirée de Keep a Changelog, avec des sections par version ou jalon.
+
+## [Unreleased]
+
+### Ajouté
+
+- Création du **checkpoint documentaire officiel** d'Enistere OS Foundation (`docs/project-status/`) : `FOUNDATION_CURRENT_STATE.md` (photographie générale), `IMPLEMENTATION_MATRIX.md` (matrice par core/package/module + matrice détaillée API Core + contradictions + dette), `DECISIONS_REGISTER.md` (lecture rapide des ADR : statut ADR vs statut d'implémentation), `NEXT_ACTIONS.md` (prochaine action unique + ordre + critères + interdits), `SESSION_HANDOFF.md` (transfert de session compact) et `README.md` (rôles + protocoles début/fin de mission). Le README racine référence ce checkpoint (section « État du projet »).
+- Analyse **basée sur le repository réel** (vérification fichier par fichier ; le code et les tests priment sur les rapports). Constats : API Core NestJS implémenté/testé/revu (IMPLEMENTATION_AVANCEE) ; packages `@enistere/api-contracts` + `@enistere/api-client-fetch` validés localement mais **non publiés et non intégrés** ; `cloud`/`web-nextjs`/`mobile-react-native`/`ui-kit` documentaires (spécification seule) ; `ai-core`/`api-spring`/`docs-core`/`mobile-flutter`/`quality-core`/`web-angular` vides ; CI/CD et conteneurisation absentes ; 18 ADR validés (017→038 non rédigés) ; **aucun commit Git** (signalé comme risque critique). Prochaine action recommandée : starter UI Kit minimal.
+- **Aucune implémentation modifiée, aucun core créé, aucune dépendance ajoutée, aucun ADR ni spécification modifié** (mission strictement documentaire ; les incohérences sont documentées, pas corrigées).
+
+- Création des **packages clients officiels** (ADR-016) sous `packages/` via **npm workspaces** racine (`"workspaces": ["packages/*"]` ; les cores restent autonomes) : **`@enistere/api-contracts`** et **`@enistere/api-client-fetch`**. Tous deux **privés / non publiés**, **non intégrés** aux cores. **Aucun hook TanStack Query, aucun adaptateur Next.js/SecureStore concret, aucun Axios, aucun Orval, aucun workflow CI.**
+- `@enistere/api-contracts` : types OpenAPI **générés** depuis `cores/api-nestjs/openapi/openapi.json` (déterministe, `generate`/`generate:check`), **runtime-indépendant** (`sideEffects:false`, build types-only), exports `paths`/`components`/`operations` + aliases (`ApiSchemas`, `SchemaOf`, `ApiErrorResponse`, `OperationJsonRequestBody`, `OperationJsonResponse`). Aucune dépendance React/Fetch/Node au runtime.
+- `@enistere/api-client-fetch` : client Fetch typé au-dessus d'`openapi-fetch` + `@enistere/api-contracts`. Façades `auth`/`files`, factory `createEnistereApiClient` (baseUrl obligatoire, `fetch` injectable, credentials web optionnels, `timeoutMs`, `createRequestId`, `AuthSessionAdapter` **asynchrone**), `ApiClientError` (whitelist + helpers `isUnauthorized/Forbidden/NotFound/Conflict/RateLimited`), **refresh single-flight + rejeu unique** (jamais sur 403/login/refresh, aucune boucle, nettoyage de session unique), **timeout** combinable à une annulation utilisateur, **X-Request-Id**, helpers multipart **Web et React Native** (jamais de `Content-Type` forcé). Indépendant de TanStack Query/React/React Native/Angular.
+- Migration de la preuve en packages : **code exécutable du proof retiré** (`cores/api-nestjs/proofs/openapi-client/` réduit à un pointeur), **rapport conservé** (`docs/OPENAPI_CLIENT_PROOF.md`). Exclusion de `proofs/` du build de l'API (`tsconfig.build.json`).
+- Tests des packages (`node:test`) : génération/formes du contrat ; wrapper (Bearer, credentials, X-Request-Id, ApiClientError, réseau, timeout, refresh single-flight, rejeu unique, 403, 204, fuite de token), multipart Web/RN, SingleFlight, `withTimeout`, **isolation SSR de deux clients**, sentinelles `PACKAGE_*_SECRET` jamais fuitées ; fixtures de compilation Node/navigateur/React Native (strict). **Preuve LIVE 16/16** ré-exécutée **avec le package officiel** contre une API réelle PostgreSQL + MinIO. `npm pack --dry-run` sans test/secret ; `npm audit` 0 vulnérabilité ; contrat canonique inchangé.
+- Preuve technique **`openapi-typescript` + `openapi-fetch`** comme socle des clients TypeScript Enistere (ADR-016), isolée et **non publiable** (`cores/api-nestjs/proofs/openapi-client/`, `@enistere/openapi-client-proof`) : **aucun package publié, aucun client définitif, aucun hook TanStack Query, aucun Axios, aucun Orval**. Rapport permanent `cores/api-nestjs/docs/OPENAPI_CLIENT_PROOF.md` — **verdict : concluant**.
+- Génération **déterministe** des types depuis le contrat canonique `openapi/openapi.json` (`npm run generate`, sortie `src/generated/schema.ts` jamais éditée à la main) + `npm run generate:check` (RC=1 sur divergence) ; deux générations = zéro diff ; les 14 `operationId`, enveloppes, erreurs, enums, `size` BigInt en chaîne et multipart circulent jusqu'au client typé.
+- Wrapper Enistere expérimental au-dessus d'`openapi-fetch` : base URL, **Bearer** via adaptateur de session, `credentials` web optionnel, **timeout** (AbortController), corrélation **X-Request-Id**, normalisation d'erreur **`ApiClientError`** (http/réseau/timeout/réponse invalide/session expirée, **jamais de token**), **refresh coordonné single-flight + rejeu unique** (jamais sur 403, aucune boucle, nettoyage de session unique sur échec).
+- Multipart **Web et React Native** sans modifier le code généré ni forcer le `Content-Type` (helper `createReactNativeUploadFormData`, assertion unique centralisée) ; exemples de compatibilité **Next.js** (factory par requête, aucun client SSR global partagé) et **React Native** (compilation stricte **sans lib DOM**, types Fetch/FormData via `@types/node`, sans Axios).
+- Tests de la preuve (`node:test`, fetch mocké) : génération, compilation stricte, wrapper (Bearer/credentials/X-Request-Id/erreurs/réseau/timeout/refresh/single-flight/rejeu unique/403/204/fuite de token), multipart, sécurité ; et **preuve LIVE 16/16** du client (du build) contre une API réelle PostgreSQL + MinIO (login, profil, autorisations, upload, metadata, URL signée + GET HTTP réel, quarantaine/restauration, suppression 204, refresh, logout, 401/403/404/413, X-Request-Id). Script de provisionnement `scripts/proof-seed-user.ts` (préparation de comptes, sans import du code de preuve).
+- Stabilisation du **contrat OpenAPI canonique** du API Core NestJS V1 (ADR-016), **avant** toute génération de client : le document devient la **source de vérité des API publiques**. Aucun client généré ; aucun outil OpenAPI externe (`openapi-typescript`/`openapi-fetch`/Orval/oasdiff/Spectral/Redoc) ajouté. Documentation `cores/api-nestjs/openapi/README.md`.
+- Ajout des **DTO de sortie publics** (`*ResponseDto`, `PublicStoredFileDto`, `UserProfileResponseDto`…) et des décorateurs réutilisables d'enveloppe (`@ApiSuccessResponse`/`@ApiSuccessNoDataResponse`/`@ApiNoBodyResponse`) : enveloppe de succès `{ success, data, timestamp }` avec `data` **typé** (jamais un objet vide).
+- Schématisation du **schéma d'erreur commun** `ApiErrorResponseDto` (`success`, `statusCode`, `message`, `errorCode`, `details?`, `path`, `timestamp`, `requestId?`) **aligné sur le runtime** ; ajout de `requestId` au corps d'erreur de l'`AllExceptionsFilter` (corrélation `X-Request-Id` documentée et présente dans la réponse d'erreur). Seules les erreurs réellement possibles sont documentées par endpoint.
+- Stabilisation des **`operationId`** (`<domaine>_<actionCamelCase>` : `health_get`, `auth_login`, `files_upload`…), indépendants des noms de classes/méthodes (tout renommage = breaking), et des **tags** canoniques `Health`/`Auth`/`Files` sur l'ensemble des 14 opérations.
+- Documentation explicite des **formats** : `uuid`, `date-time`, **`BigInt` public en chaîne décimale** (`type: string`, `pattern: ^[0-9]+$`), champ `binary` du **multipart** `POST /files` (avec `category` en enum), enums **fermées** ; sécurité Bearer requise sur les routes privées, absente sur les routes publiques.
+- Ajout du **snapshot canonique versionné** `cores/api-nestjs/openapi/openapi.json`, régénéré depuis le code (`npm run openapi:generate`), **déterministe** (deux générations = zéro diff), et de `npm run openapi:check` (diff strict détectant toute divergence, RC=1, **sans outil externe**) ; un seul artefact temporaire racine reste ignoré.
+- Ajout d'un **test de contrat e2e** (`test/openapi-contract.e2e-spec.ts`) : `operationId` exacts/uniques/non dérivés du contrôleur, tags canoniques, enveloppes/erreurs typées, formats, multipart, fraîcheur du snapshot, alignement runtime du corps d'erreur, et **absence de fuite** (aucun modèle Prisma, secret, `passwordHash`/`tokenHash`, clé de stockage, bucket, empreinte ni URL signée réelle).
+- Création de l'ADR-016 : adoption d'un contrat OpenAPI canonique et versionné produit par le API Core, avec génération des contrats TypeScript (`openapi-typescript`) et d'un client Fetch (`openapi-fetch`), wrappers Enistere (auth/erreurs/timeout/refresh) et hooks TanStack Query maintenus séparément dans les cores. Orval en repli TypeScript ; adaptateur Angular et générateur Dart (Flutter) décidés par preuve ; `operationId` stables, DTO de sortie explicites, enveloppes/erreurs schématisées, breaking-change detection avant merge. Backlog ADR mis à jour (ADR-016 → Validé). Aucun code ni dépendance ajoutés ; aucun client généré.
+- Implémentation du logging structuré (ADR-040) : preuve de compatibilité `nestjs-pino` réalisée (`cores/api-nestjs/docs/STRUCTURED_LOGGING_COMPATIBILITY_PROOF.md`) puis adoption de la solution de repli officielle **Pino direct** (`nestjs-pino` compatible NestJS 11 mais inadapté : auto-log d'URL brute, request id propre, destination globale).
+- Logs JSON structurés sur stdout (HTTP) / stderr (CLI) via `AppLogger` (moteur Pino), avec schéma commun (timestamp ISO, level, context, service, environment, requestId, route normalisée, statusCode, durationMs, userId/sessionId).
+- Contexte de corrélation par requête (`AsyncLocalStorage`) réutilisant `X-Request-Id` (un seul identifiant), enrichi de `userId`/`sessionId` après authentification ; log HTTP unique de fin de requête (route normalisée, jamais de body/query/URL signée).
+- Redaction centralisée (clés sensibles à toute profondeur, URLs signées, nettoyage des chaînes de connexion/bearer) et sérialiseur d'erreur par liste blanche (jamais l'objet AWS/Prisma complet) ; `AuditLog` reste séparé des logs techniques.
+- Convention CLI stdout (résultat machine JSON) / stderr (logs techniques) ; configuration `LOG_LEVEL`/`LOG_PRETTY`/`LOG_HTTP_ENABLED`/`LOG_HEALTH_SUCCESS_ENABLED`/`SERVICE_NAME` (validée). Tests unitaires + e2e (incl. redaction) ; collecte/Loki/Grafana déléguées au Cloud Core.
+- Création de l'ADR-040 : adoption de Pino comme moteur de logging structuré du API Core NestJS V1, avec intégration `nestjs-pino` conditionnée à une preuve de compatibilité NestJS 11 (repli officiel : intégration Pino directe). Logs JSON sur stdout/stderr, collecte/Loki/Grafana côté Cloud Core, `AuditLog` séparé des logs techniques ; backlog ADR mis à jour. Aucun code ni dépendance ajoutés.
+- Revue d'étape globale et durcissement transverse du starter API Core NestJS V1 (rapports permanents `cores/api-nestjs/docs/API_CORE_V1_REVIEW.md`, `API_CORE_V1_IMPLEMENTATION_STATUS.md`, `API_CORE_V1_NEXT_ROADMAP.md`).
+- Durcissement HTTP : Helmet (en-têtes de sécurité), `X-Powered-By` désactivé, limites explicites des body parsers (`JSON_BODY_LIMIT`/`URL_ENCODED_BODY_LIMIT`), `trust proxy` configurable (`TRUST_PROXY_HOPS`), CORS strict (rejet de `*` avec credentials, méthodes/headers minimisés).
+- Ajout d'un identifiant de corrélation de requête `X-Request-Id` (validé-ou-généré, anti-injection de logs) exposé en réponse.
+- Ajout des sondes `GET /health/live` (liveness) et `GET /health/ready` (readiness PostgreSQL, 503 générique si indisponible).
+- Ajout des commandes `npm run test:cov` (couverture) et `npm run openapi:generate` (artefact OpenAPI contrôlé, gitignoré, sans secret ni modèle interne) en préparation d'ADR-016.
+- Revue et durcissement du bloc Files API Core NestJS V1 (rapport permanent `cores/api-nestjs/docs/FILES_REVIEW.md`) : architecture, sécurité, transitions, réconciliation, données sensibles validées (aucune fuite), architectures futures antivirus/média/streaming documentées.
+- Ajout des quotas par propriétaire (`FILES_OWNER_MAX_ACTIVE_FILES`/`FILES_OWNER_MAX_TOTAL_BYTES`, `0` = illimité) vérifiés **atomiquement** à la création via un verrou advisory transactionnel par propriétaire (aucun dépassement sous concurrence) ; erreurs `409 FILE_COUNT_QUOTA_EXCEEDED`/`FILE_STORAGE_QUOTA_EXCEEDED`, audit `FILE_QUOTA_EXCEEDED`.
+- Ajout d'un verrou de maintenance PostgreSQL (`MaintenanceLockService`, advisory lock) rendant réconciliation/cleanup/purge **mutuellement exclusifs** (seconde exécution refusée, sans Redis ni impact API).
+- Ajout de la purge physique contrôlée des métadonnées `files:purge-metadata` (lignes `DELETED`/`REJECTED` au-delà de la rétention et **sans objet présent** ; `AuditLog` jamais supprimés ; dry-run par défaut, sous verrou).
+- Ajout des tests de durcissement (quota concurrent, verrou advisory deux sessions, purge, détection ≠ antivirus) ; documentation explicite « détection de signatures ≠ antivirus ».
+- Ajout de la suppression applicative `DELETE /files/:id` (permission `files.delete` + ownership) : suppression de l'objet S3 **puis** marquage `DELETED`, **idempotente**, anti-énumération.
+- Gestion des incohérences de suppression : objet déjà absent traité comme objectif atteint (audité) ; échec DB après suppression S3 → audit critique (`FILE_DATABASE_FINALIZATION_FAILED`).
+- Ajout de la quarantaine **administrative** `POST /files/:id/quarantine` et `POST /files/:id/restore` (permissions `files.quarantine`/`files.restore`, sans ownership ; raison bornée) bloquant tout accès/URL signée.
+- Ajout du service de réconciliation **PostgreSQL ↔ S3** par comparaison directe (jamais les seuls audits) : ligne incohérente, `PENDING` abandonnés, objets orphelins, listing scopé par préfixe et borné.
+- Traitement des `PENDING` expirés (marqués `REJECTED`) et détection/suppression prudente des objets orphelins (âge minimal requis).
+- Ajout des commandes CLI contrôlées `files:reconcile` et `files:cleanup-pending` (**dry-run par défaut**, mode `--apply`, sans scheduler embarqué — déclenchement délégué au Cloud Core).
+- Ajout de la table centralisée des transitions de cycle de vie et d'updates conditionnels (anti-concurrence : suppression idempotente, la suppression l'emporte sur la quarantaine).
+- Politiques de rétention configurables (`FILES_PENDING_EXPIRATION_SECONDS`, `FILES_REJECTED_RETENTION_SECONDS`, `FILES_DELETED_METADATA_RETENTION_SECONDS`, `FILES_ORPHAN_MIN_AGE_SECONDS`, `FILES_RECONCILIATION_BATCH_SIZE`) ; pas de suppression physique des lignes en V1.
+- Ajout des permissions structurelles `files.quarantine`/`files.restore` au seed et fondations de quota (usage actif par propriétaire, sans application stricte).
+- Migration `files_lifecycle` (`quarantinedAt`, `quarantineReason`, `deletionRequestedAt`, `storageDeletedAt`) et extension `ObjectStorage.listObjects` (pagination, préfixe).
+- Ajout des tests Upload 4 (unitaires, et e2e PostgreSQL+MinIO réels : suppression/idempotence, quarantaine/restauration, réconciliation dry-run/apply, orphelins, `PENDING` expirés, concurrence).
+- Ajout de la consultation sécurisée des métadonnées fichier `GET /files/:id` (permission `files.read`, ownership, 404 anti-énumération, aucun détail interne).
+- Ajout des URLs signées de lecture courtes `POST /files/:id/download-url` (`@aws-sdk/s3-request-presigner`) : permission `files.download` **+ ownership**, durée bornée serveur (30..900 s), `Cache-Control: no-store`, URL jamais journalisée ni persistée.
+- Ajout de la permission structurelle `files.download` au seed (idempotent ; `administrator` la reçoit, `user` non sans décision explicite).
+- Vérification d'existence de l'objet avant signature et restriction aux fichiers `VALIDATED` lisibles (statuts/visibilités non téléchargeables refusés) ; objet manquant → 503 générique + audit `FILE_STORAGE_OBJECT_MISSING`.
+- `Content-Disposition: attachment` nettoyé (anti-injection CR/LF/guillemets, repli ASCII + RFC 5987) et `Content-Type` imposé depuis le MIME réel enregistré.
+- Audit de la génération d'accès (`FILE_DOWNLOAD_URL_ISSUED`/`FILE_DOWNLOAD_URL_DENIED`) sans jamais journaliser l'URL signée ni de donnée de stockage.
+- Throttling dédié de la génération d'URLs de téléchargement (`download`, distinct de l'upload).
+- Ajout des tests Upload 3 (unitaires, et e2e PostgreSQL+MinIO réels : téléchargement HTTP réel via l'URL signée, expiration, objet manquant, bucket privé, anti-énumération).
+- Intégration du stockage objet S3-compatible (`@aws-sdk/client-s3`, MinIO/AWS S3) via l'abstraction `ObjectStorage`.
+- Ajout de l'upload multipart sécurisé `POST /files` (permission `files.upload`, throttling dédié, compatible `fetch + FormData`).
+- Inspection du contenu réel par signatures binaires (JPEG/PNG/GIF/WebP/PDF) ; le MIME déclaré n'est jamais une preuve.
+- Calcul du checksum SHA-256, écriture dans un bucket privé et orchestration compensatoire DB/S3 (objet supprimé si la finalisation échoue, détection d'orphelin sinon).
+- Ajout des tests Upload 2 (unitaires, intégration MinIO et e2e PostgreSQL+MinIO jetables).
+- Ajout des fondations `FilesModule` (Upload 1) : domaine fichier générique, privé par défaut, indépendant du fournisseur de stockage.
+- Ajout du modèle Prisma `StoredFile` (taille BigInt, propriétaire `onDelete: SetNull`, `storageKey` unique) et de la migration `files_foundation`.
+- Ajout des enums `FileStatus`/`FileVisibility`/`FileCategory`, des contrats internes/publics et des DTO fichiers.
+- Ajout de l'abstraction de stockage `ObjectStorage` (sans implémentation S3 réelle), du `StorageKeyGenerator` et de la `FileValidationPolicy` déclarative.
+- Ajout des permissions structurelles `files.read`/`files.upload`/`files.delete` au seed (idempotent).
+- Ajout des tests Upload 1 (unitaires et intégration Prisma).
+- Revue et durcissement du bloc Auth/RBAC API Core NestJS V1 (rapport `cores/api-nestjs/docs/AUTH_RBAC_REVIEW.md` ; login à temps de réponse uniforme pour les comptes inactifs/suspendus ; couverture de tests renforcée).
+- Ajout des modèles RBAC Prisma `Role` et `Permission` (convention `resource.action`) et de la migration `auth5_rbac`.
+- Ajout des associations RBAC explicites `UserRole` et `RolePermission` (clés composites, index, cascades).
+- Ajout du `RolesModule` et du `PermissionsModule` (services internes : création, affectation, calcul des permissions effectives).
+- Ajout des décorateurs `@Roles()` (logique OR) et `@Permissions()` (logique AND).
+- Ajout des guards d'autorisation `RolesGuard` et `PermissionsGuard` (globaux conditionnels, deny by default, 403 générique).
+- Ajout du contrat d'autorisation utilisateur chargé côté serveur (jamais dans le JWT) et de l'endpoint `GET /auth/me/authorization`.
+- Ajout d'un seed RBAC structurel idempotent et optionnel.
+- Tests Auth 5 (unitaires, intégration, e2e) : rôles, permissions, guards, ordre, refus 403, prise en compte immédiate des changements de droits.
+- Ajout de la stratégie Passport JWT (access token) et du `JwtAuthGuard` (validation signature, expiration, claims et session `sid`).
+- Protection privée par défaut via guard global et décorateur `@Public()` (health, login, refresh, logout publics).
+- Ajout du décorateur `@CurrentUser()`, du contrat `AuthenticatedPrincipal` et de l'endpoint protégé `GET /auth/me`.
+- Vérification serveur de la session à chaque requête protégée : révocation/rotation/logout invalident immédiatement les access tokens liés.
+- Tests Auth 4 (unitaires et e2e) : protection par défaut, `/auth/me`, refus après logout/rotation/réutilisation/suspension.
+- Ajout du refresh `POST /auth/refresh` avec rotation atomique (transaction Prisma) des refresh tokens.
+- Détection de réutilisation d'un refresh token et révocation de toute la famille de sessions associée.
+- Ajout du logout `POST /auth/logout` idempotent et non révélateur (révocation de la famille courante).
+- Ajout d'un `AuditModule` persistant et des audit logs de sécurité d'authentification (refresh, réutilisation, logout, login).
+- Ajout du rate limiting dédié au refresh, distinct de celui du login.
+- Migration `auth3_rotation_and_audit` (enum `SessionRevocationReason`, champs de rotation, table `audit_logs`).
+- Tests Auth 3 (unitaires, intégration, e2e) incluant rotation, réutilisation, logout idempotent et concurrence.
+- Intégration d'Argon2id (`@node-rs/argon2`) et d'un service `PasswordHasher` centralisé pour le API Core NestJS.
+- Ajout du login `POST /auth/login` : émission d'un access token JWT court et d'un refresh token opaque révocable.
+- Création d'une `RefreshSession` sécurisée stockant uniquement l'empreinte HMAC-SHA-256 du refresh token (jamais le token brut).
+- Ajout du rate limiting du login (`@nestjs/throttler`) et d'un script de benchmark Argon2id (`npm run benchmark:argon2`).
+- Tests Auth 2 (unitaires, intégration et e2e) du login, des tokens, du hachage et des sessions.
+- Création de l'ADR-039 adoptant Argon2id comme standard de hachage des mots de passe du API Core NestJS V1 (bcrypt en exception de compatibilité/migration).
+- Centralisation du bootstrap applicatif NestJS dans un helper `configureApp` réutilisé par `main.ts` et les tests.
+- Ajout des fondations de persistance d'authentification : modèles Prisma `User` et `RefreshSession` (révocable, support de rotation) et première migration `init_auth_foundations`.
+- Création du `UsersModule` interne minimal (service, repository, contrats internes, validation ADR-003).
+- Préparation structurelle de l'`AuthModule` (import `UsersModule`, cadrage des étapes Auth 2 à Auth 5, emplacement du futur hashing).
+- Revue et ajustement du starter API Core NestJS V1 minimal.
+- Initialisation du starter API Core NestJS V1 minimal.
+- Création de la revue finale des ADR bloquants V1.
+- Création de l'ADR-014 sur la stratégie registry images.
+- Création de l'ADR-013 sur la stratégie CI/CD V1.
+- Création de l'ADR-015 sur la stratégie de stockage mobile sécurisé.
+- Création de l'ADR-007 sur la stratégie upload MinIO/S3 et contrats fichiers.
+- Création de l'ADR-006 sur RBAC et permissions fines.
+- Création de l'ADR-005 sur la sécurité cookies web et CSRF.
+- Création de l'ADR-004 sur la stratégie auth/session multi-client.
+- Création de l'ADR-003 sur la stratégie de validation API NestJS.
+- Création de l'ADR-002 sur le choix ORM API NestJS Prisma vs TypeORM.
+- Création de l'ADR-012 sur la stratégie server state web/mobile.
+- Création de l'ADR-011 sur la stratégie Client HTTP fetch vs Axios.
+- Création de l'ADR-010 sur la stack UI React Native.
+- Création de l'ADR-009 sur la stack UI Web.
+- Création de l'ADR-008 sur la stratégie des design tokens UI Kit.
+- Création de l'ADR-001 sur l'organisation Git monorepo hybride.
+- Création du backlog ADR après revue globale des 5 cores prioritaires.
+- Revue et ajustement de la spécification UI Kit.
+- Création de la spécification initiale du UI Kit.
+- Revue et ajustement de la spécification Web Core Next.js.
+- Création de la spécification initiale du Web Core Next.js.
+- Revue et ajustement de la spécification Mobile Core React Native.
+- Création de la spécification initiale du Mobile Core React Native.
+- Revue et ajustement de la spécification Cloud Core.
+- Création de la spécification initiale du Cloud Core.
+- Revue et ajustement de la spécification API Core NestJS.
+- Création de la spécification initiale du API Core NestJS.
+- Création des prompts IA minimaux de Phase 0.
+- Préparation de la génération contrôlée des `CORE_SPECIFICATION.md`.
+- Initialisation de la structure globale du repository.
+- Ajout des emplacements pour la stratégie, la documentation, les cores, les prompts, les outils, les templates et les exemples.

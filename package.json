@@ -1,0 +1,17 @@
+{
+  "name": "enistere-os-foundation",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Enistere OS Foundation — monorepo. Workspaces limités aux packages clients officiels (les cores restent autonomes).",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "generate": "npm run generate --workspace=@enistere/api-contracts",
+    "generate:check": "npm run generate:check --workspace=@enistere/api-contracts",
+    "build": "npm run build --workspace=@enistere/api-contracts && npm run build --workspace=@enistere/api-client-fetch",
+    "typecheck": "npm run typecheck --workspace=@enistere/api-contracts && npm run typecheck --workspace=@enistere/api-client-fetch",
+    "test": "npm run build --workspace=@enistere/api-contracts && npm run test --workspace=@enistere/api-contracts && npm run test --workspace=@enistere/api-client-fetch"
+  }
+}
