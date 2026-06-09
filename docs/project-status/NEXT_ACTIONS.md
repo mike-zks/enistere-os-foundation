@@ -5,26 +5,27 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Web Auth 2 — login / refresh / logout via Route Handlers BFF** (`cores/web-nextjs/`) : implémenter
-> `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout` (Route Handlers Next), pose
-> **réelle** des cookies `HttpOnly` (via les fondations Web Auth 1) + **CSRF opérationnel** (Origin/Referer
-> + token), en mode **writable**. **Un seul incrément à la fois.**
+> **Web Auth 3 — profil, autorisations et état de session** (`cores/web-nextjs/`) : exposer
+> `GET /api/auth/me` et `GET /api/auth/authorization` (Route Handlers BFF, client **authentifié** lisant
+> le cookie ; refresh **writable**), hooks **`useSession`/`useAuthorization`** (TanStack Query), et
+> **purge du cache au logout**. **Un seul incrément à la fois.**
 
-**Justification** : les **fondations serveur du BFF Auth sont posées** (Web Auth 1 : client authentifiable
-par requête, cookies `HttpOnly`, `WebAuthSessionAdapter`, modes read-only/writable) — mais **aucune route,
-aucun CSRF, aucun flux réel**. La suite logique est d'**exposer les flux** via Route Handlers + CSRF.
-Découper : (a) login + cookies + CSRF ; (b) refresh/logout ; (c) `me`/`authorization` + écrans.
+**Justification** : les **flux Auth BFF sont opérationnels** (Web Auth 2 : login/refresh/logout + CSRF +
+Origin/Referer, cookies `HttpOnly`, prouvés contre l'API réelle). La suite logique est de **lire l'identité
+authentifiée** (profil/autorisations) et d'en dériver l'état de session côté client, puis les écrans
+protégés (middleware). Découper : (a) `me`/`authorization` + hooks ; (b) purge cache au logout ;
+(c) middleware + écrans.
 
 **Alternative (justifiée)** : **compléter le UI Kit** ou démarrer le **Mobile Core React Native minimal**
 (parallélisable). À arbitrer par décision humaine.
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(web-nextjs): establish server auth foundations`.
+`feat(web-nextjs): implement secure auth BFF flows`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Web Auth 2 — login/refresh/logout (Route Handlers BFF)** — pose réelle des cookies + **CSRF opérationnel** (ADR-005), mode writable. ✦ prochaine action.
-2. **Web Auth 3 — `me`/`authorization` + écrans authentifiés** — middleware de protection, premiers appels privés.
+1. **Web Auth 3 — `me`/`authorization` + session TanStack Query** — hooks `useSession`/`useAuthorization`, purge cache au logout. ✦ prochaine action.
+2. **Web Auth 4 — écrans authentifiés + middleware** — protection de routes privées, redirections.
 3. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
@@ -39,7 +40,7 @@ deux cores. À arbitrer par décision humaine.
 | Action | Bloquée par |
 |---|---|
 | Intégrer les packages API (public) dans le Web Core | **FAIT** — `api-client-fetch` instancié (Health), preuve API réelle |
-| Usage **authentifié** des packages (Web) | **fondations posées** (Web Auth 1) ; routes Auth + CSRF = Web Auth 2 (prochaine action) |
+| Usage **authentifié** des packages (Web) | **flux login/refresh/logout + CSRF opérationnels** (Web Auth 2) ; reste `me`/`authorization` = Web Auth 3 |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |

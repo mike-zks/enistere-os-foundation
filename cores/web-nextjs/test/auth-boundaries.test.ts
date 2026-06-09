@@ -30,6 +30,13 @@ const FORBIDDEN_IN_CLIENT = [
   "server-cookie-store",
   "session-contract",
   "create-authenticated-server-api-client",
+  "auth/handlers",
+  "auth/csrf",
+  "auth/http",
+  "login-handler",
+  "refresh-handler",
+  "logout-handler",
+  "csrf-token",
 ];
 
 test("aucun module atteignable côté client n'importe un module serveur/sensible", () => {

@@ -1,23 +1,40 @@
-# Architecture Auth Web — fondations BFF (Web Auth 1)
+# Architecture Auth Web — BFF (Web Auth 1 + Web Auth 2)
 
-> **Fondations serveur uniquement.** Aucune route Auth fonctionnelle, aucun login/refresh/logout réel,
-> aucun middleware, **aucun CSRF actif**. Aucune authentification utilisateur n'est encore disponible.
-> ADR-004 (session multi-client), ADR-005 (cookies/CSRF), ADR-011 (Fetch).
+> **Flux Auth BFF disponibles** : `login` / `refresh` / `logout` (+ bootstrap `csrf`), protégés par
+> cookies `HttpOnly`, Origin/Referer et **CSRF opérationnel**. **Profil/autorisations (`me`,
+> `authorization`) NON implémentés**, **aucune page de connexion**, **aucun middleware de route privée**,
+> aucun hook TanStack Query Auth. ADR-004 (session), ADR-005 (cookies/CSRF), ADR-011 (Fetch).
+
+## 0. Flux réels (Web Auth 2)
+
+| Route | Méthode | Rôle |
+| --- | --- | --- |
+| `/api/auth/csrf` | GET | Bootstrap : pose le cookie CSRF (non HttpOnly) + renvoie le jeton. |
+| `/api/auth/login` | POST | Valide (body/Origin/CSRF) → API NestJS → pose les cookies `HttpOnly` access/refresh, renouvelle le CSRF. |
+| `/api/auth/refresh` | POST | Lit le refresh cookie → API `/auth/refresh` → **rotation** des deux cookies + CSRF. |
+| `/api/auth/logout` | POST | API `/auth/logout` (best-effort) → **supprime toujours** les cookies (Auth + CSRF). |
+
+Réponses navigateur : **jamais de token** (`{ success, data:{ authenticated|refreshed|loggedOut }, requestId }`).
 
 ## 1. BFF (Backend-for-Frontend)
 
 ```
 Navigateur
-   ↓  (same-origin, cookies HttpOnly)
-Route Handlers Next.js  /api/*        ← (V2 — non implémentés)
-   ↓  (client API serveur authentifiable, par requête)
+   ↓  (same-origin ; cookies HttpOnly Auth + cookie CSRF lisible ; en-tête X-CSRF-Token)
+Route Handlers Next.js  /api/auth/*   (login | refresh | logout | csrf)
+   ↓  (client API serveur authentifiable, PAR REQUÊTE — Bearer lu du cookie)
 API Core NestJS  /auth/*
 ```
 
-Le navigateur **ne parle jamais directement** aux endpoints Auth NestJS. Les tokens transitent via des
-cookies `HttpOnly` posés par les Route Handlers Next.js (V2). Le BFF permet : refresh token inaccessible
-au JS, cookies same-origin, contrôle CSRF centralisé (futur), API interne non exposée publiquement,
-adaptation de la réponse Auth avant retour navigateur, propagation `X-Request-Id`.
+Le navigateur **ne parle jamais directement** aux endpoints Auth NestJS. Les tokens transitent par des
+cookies `HttpOnly` posés par les Route Handlers. Le BFF assure : refresh token inaccessible au JS, cookies
+same-origin, **contrôle CSRF centralisé**, API interne non exposée, adaptation de la réponse (aucun token),
+propagation `X-Request-Id`.
+
+> **Note transport (BFF→API)** : le client serveur authentifié **bufferise le corps de requête** et
+> reconstruit l'appel `fetch(url, init)` (corps rejouable) — sans quoi, sous le `fetch` patché de Next,
+> un POST recevant une réponse non-2xx (ex. 401 login) échouait avec `expected non-null body source`
+> (remonté à tort en « réseau »).
 
 ## 2. Client public vs client authentifié
 
@@ -73,18 +90,34 @@ Cette distinction empêche un refresh automatique dans un contexte incapable de 
 tokens. Points d'entrée serveur : `core/auth/server/index.ts` (`getReadOnlyAuthApiClient` /
 `getWritableAuthApiClient`).
 
-## 8. Refresh (futur)
+## 8. Refresh (réel — Web Auth 2)
 
-Aucun refresh réel n'est déclenché en Web Auth 1. Le refresh **coordonné single-flight** est fourni par
-`@enistere/api-client-fetch` ; le `WebAuthSessionAdapter.updateTokens` posera les cookies avec les durées
-de l'API. Activé seulement en mode `writable` (Route Handlers, V2).
+`/api/auth/refresh` : lit le refresh token du cookie `HttpOnly`, appelle **une seule fois** `/auth/refresh`
+(aucune boucle, aucun rejeu auto au niveau de la route), **remplace les deux cookies** via
+`WebAuthSessionAdapter.updateTokens` (durées de l'API). En échec (invalide/expiré/révoqué) : **cookies
+supprimés** + 401 générique. Le client est en mode **writable**.
 
-## 9. CSRF (futur — cadrage uniquement)
+## 9. CSRF (opérationnel — Web Auth 2)
 
-**Aucune protection CSRF active.** En V2 : validation `Origin`/`Referer`, token CSRF (cookie + en-tête
-`X-CSRF-Token`) sur les méthodes mutatives (login/refresh/logout), rotation. Des noms de constantes
-(`CSRF_COOKIE_NAME`, `CSRF_HEADER_NAME`) sont réservés pour éviter une future duplication — **ils
-n'activent aucun mécanisme**.
+**Double-submit cookie** : cookie CSRF **non HttpOnly** (lisible par le JS) + en-tête `X-CSRF-Token`,
+comparés en **temps constant** (mêmes longueur/format). Jeton 256 bits (base64url), **sans persistance
+serveur**, **sans lien avec les tokens Auth**. Bootstrap : `GET /api/auth/csrf` pose le cookie + renvoie
+le jeton (`Cache-Control: no-store`, `Referrer-Policy: no-referrer`). **Rotation** après login/refresh ;
+**suppression** au logout (l'ancien jeton est alors refusé). **login/refresh/logout exigent le CSRF**
+(le login est protégé contre le login-CSRF). Détail : [`csrf.md`](csrf.md).
+
+## 9b. Origin / Referer
+
+Sur chaque route mutative : si `Origin` présent → doit appartenir à `WEB_ALLOWED_ORIGINS` (comparaison
+**exacte** `scheme+host+port`, aucun suffixe) ; sinon `Referer` (origine extraite) ; **fail-closed** si
+les deux sont absents. Wildcard de configuration rejeté.
+
+## 9c. Erreurs & request ID
+
+Réponses **génériques** (jamais la réponse brute de l'API, ni cause/stack/cookie/token). Mapping :
+400 invalide · 401 auth · 403 CSRF/Origin · 413 corps trop volumineux · 415 content-type · 429 rate ·
+500 BFF · 502/504 API indisponible/timeout. `X-Request-Id` : entrant validé ou généré, propagé
+navigateur → BFF → API → réponse (jamais une preuve d'autorisation). Corps de login borné.
 
 ## 10. SSR & isolation
 
@@ -101,14 +134,20 @@ vérifiées absentes des erreurs/logs/bundle.
 
 ## 12. Limites
 
-- **Pas de transaction cookie** : `updateTokens` pose access **puis** refresh ; en cas d'échec partiel,
-  le code appelant doit `clearSession()`.
+- **Pas de transaction cookie** : `updateTokens` pose access **puis** refresh ; en cas d'échec partiel, le
+  handler login exécute `clearSession()` en **compensation** (testé). Logout : suppression locale **toujours**
+  appliquée (même API indisponible).
 - Les `expiresAt` ne sont pas stockés (seul le `maxAge` l'est).
-- Les modules `core/auth/server/**` (liant `next/headers`) sont validés par **typecheck/build**, non par
-  `node:test` (ils requièrent le contexte de requête Next). `server-only` (npm) n'est pas utilisé (il lève
-  à l'import sous `node:test`) : la frontière est garantie par `next/headers` + des **tests d'import statiques**.
+- Pas de `me`/`authorization`, pas de middleware de route privée, pas de page de connexion, pas de hook
+  TanStack Query Auth (Web Auth 3).
+- **Replay de l'ancien refresh** : non rejoué via le BFF (le cookie ne porte que le token courant) ; la
+  rotation/révocation côté API est couverte par les tests de l'API NestJS.
+- Les Route Handlers (`app/api/auth/**`) + `core/auth/server/**` (liant `next/headers`) sont validés par
+  **typecheck/build + preuve API réelle**, non par `node:test` ; la logique testable vit dans
+  `core/auth/{handlers,csrf,http}` (handlers prenant `(Request, deps)`). `server-only` (npm) non utilisé
+  (lève sous `node:test`) → frontière par `next/headers` + tests d'import statiques.
 
 ## 13. Prochaine étape
 
-**Web Auth 2** — `login` / `refresh` / `logout` via **Route Handlers BFF** (`/api/auth/*`), pose réelle
-des cookies, **CSRF opérationnel**, puis `me` / `authorization`.
+**Web Auth 3** — `GET /api/auth/me`, `GET /api/auth/authorization`, hooks `useSession`/`useAuthorization`
+(TanStack Query) et purge du cache au logout.

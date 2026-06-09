@@ -18,9 +18,10 @@ export type AuthCookieKind = "access" | "refresh";
 export type SameSitePolicy = "lax" | "strict" | "none";
 export type CookiePriority = "low" | "medium" | "high";
 
-/** Attributs d'un cookie d'authentification (compatible `ServerCookieStore.set`). */
+/** Attributs d'un cookie (compatible `ServerCookieStore.set`). */
 export interface CookieAttributes {
-  readonly httpOnly: true;
+  // `true` pour les cookies Auth (access/refresh) ; `false` pour le cookie CSRF (lisible par le JS).
+  readonly httpOnly: boolean;
   readonly secure: boolean;
   readonly sameSite: SameSitePolicy;
   readonly path: string;

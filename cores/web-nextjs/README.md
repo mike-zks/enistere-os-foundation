@@ -24,15 +24,16 @@ viendront dans un incrément ultérieur).
 - Normalisation d'erreurs Web, propagation **X-Request-Id**, en-têtes de **sécurité** + pas de `X-Powered-By`.
 - États `loading` / `error` / `not-found`, métadonnées, `manifest`.
 - Tests (node:test + Testing Library + jest-axe) + preuve avec **API réelle** (PostgreSQL jetable).
-- **Fondations BFF Auth serveur** : client API **authentifiable** (par requête, distinct du public),
-  **adaptateur de session** + configuration **cookies `HttpOnly`** (access/refresh distincts), modes
-  **read-only / writable**. Détail : [`docs/auth-architecture.md`](docs/auth-architecture.md).
+- **BFF Auth** : `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`,
+  `GET /api/auth/csrf`. Cookies `HttpOnly` access/refresh (jamais renvoyés au navigateur), **CSRF
+  double-submit opérationnel**, validation **Origin/Referer**, rotation, logout idempotent. Détail :
+  [`docs/auth-architecture.md`](docs/auth-architecture.md), [`docs/csrf.md`](docs/csrf.md).
 
 ### Hors périmètre — volontairement absent
 
-**Routes Auth** (`/api/auth/*`) · login/refresh/logout réels · **CSRF opérationnel** · middleware d'auth ·
-pages/formulaires de login · token exposé au navigateur · endpoints **authentifiés** · routes Files /
-upload · **Axios** · **Zustand**/Redux/Jotai · Orval · Storybook · logique métier · OAuth / MFA · i18n
+`GET /api/auth/me` · `GET /api/auth/authorization` · **page/formulaire de connexion** · **middleware** de
+route privée · hooks TanStack Query Auth · token Auth exposé au navigateur · routes Files / upload ·
+**Axios** · **Zustand**/Redux/Jotai · Orval · Storybook · OAuth / MFA · forgot/reset password · i18n
 complet · monitoring · workflow CI · Dockerfile · publication npm · **aucun type d'API recopié**.
 
 ---
@@ -180,16 +181,18 @@ jetable (Health/live/ready, hydratation SSR, API down → rendu contrôlé, API 
 
 ---
 
-## 11. Fondations BFF Auth (serveur)
+## 11. Auth BFF
 
-Architecture **BFF** : le navigateur parlera aux Route Handlers Next `/api/auth/*` (V2), qui poseront des
-cookies `HttpOnly` et appelleront l'API via un **client serveur authentifiable** (`core/api/server/
-create-authenticated-server-api-client.ts`, par requête, distinct du client public). Présent : config
-cookies (`enistere_access`/`refresh`, `HttpOnly`, `Secure` prod, `SameSite=Lax`, `Path=/`, `__Host-` prod),
-abstraction `ServerCookieStore` (+ mémoire pour tests, adaptateur `next/headers`), `WebAuthSessionAdapter`,
-modes **read-only** (refresh off) / **writable** (refresh activable). **Absent** : routes Auth, CSRF actif,
-login/refresh/logout réels, token côté navigateur. Détail : [`docs/auth-architecture.md`](docs/auth-architecture.md)
-et [`src/core/auth/README.md`](src/core/auth/README.md).
+Flux **login / refresh / logout** (+ bootstrap **csrf**) exposés par des **Route Handlers** `/api/auth/*`.
+Le navigateur ne parle jamais directement à l'API NestJS : un **client serveur authentifiable par requête**
+(`core/api/server/create-authenticated-server-api-client.ts`, distinct du public) lit le Bearer depuis le
+cookie `HttpOnly`. **Cookies** : `enistere_access`/`refresh` **HttpOnly** (jamais renvoyés au navigateur,
+`Secure` prod, `SameSite=Lax`, `Path=/`, `__Host-` prod) ; `enistere_csrf` **non HttpOnly** (double-submit).
+**Protection** : CSRF (cookie + `X-CSRF-Token`, temps constant, rotation), **Origin/Referer** (fail-closed),
+corps borné, erreurs génériques, `X-Request-Id` propagé. **Prouvé contre l'API réelle.** **Absent** :
+`me`/`authorization`, page de connexion, middleware, hooks Auth. Détail :
+[`docs/auth-architecture.md`](docs/auth-architecture.md), [`docs/csrf.md`](docs/csrf.md),
+[`src/core/auth/README.md`](src/core/auth/README.md).
 
 ---
 
@@ -202,6 +205,6 @@ passent sous React 19 (aucune régression). Voir le `CHANGELOG.md` racine.
 
 ## 13. Feuille de route
 
-**Prochain incrément** : **Web Auth 2** — `login` / `refresh` / `logout` via Route Handlers BFF
-(`/api/auth/*`), pose réelle des cookies, **CSRF opérationnel**, puis `me` / `authorization`. Puis :
-écrans authentifiés, gestionnaire de thème, CSP à nonces, i18n, CI/CD.
+**Prochain incrément** : **Web Auth 3** — `GET /api/auth/me`, `GET /api/auth/authorization`, hooks
+`useSession`/`useAuthorization` (TanStack Query) + purge du cache au logout. Puis : écrans authentifiés,
+middleware de protection, gestionnaire de thème, CSP à nonces, i18n, CI/CD.

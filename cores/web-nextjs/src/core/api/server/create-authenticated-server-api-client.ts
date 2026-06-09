@@ -13,6 +13,37 @@ import { getServerApiUrl } from "../../config/server-config.js";
 type InjectedFetch = NonNullable<EnistereApiClientOptions["fetch"]>;
 
 /**
+ * `fetch` serveur du client authentifié (BFF → API).
+ *
+ * **Bufferise le corps de la requête** (`arrayBuffer`) et reconstruit l'appel via `(url, init)`, de
+ * sorte que le corps soit **rejouable** : sous le `fetch` patché de Next.js, un `Request` POST
+ * (corps en flux) pouvait échouer avec `expected non-null body source` (corps non rejouable lors d'un
+ * réessai/instrumentation) — l'erreur remontait alors à tort en « réseau » (502). La **réponse** est
+ * aussi re-bufferisée (lecture/`clone` fiables par `openapi-fetch`). Routes Auth = POST `force-dynamic`
+ * → aucune mise en cache en jeu.
+ */
+const serverFetch: InjectedFetch = async (request) => {
+  const method = request.method.toUpperCase();
+  const hasBody = method !== "GET" && method !== "HEAD";
+  const requestBody = hasBody ? await request.arrayBuffer() : undefined;
+
+  const upstream = await fetch(request.url, {
+    method,
+    headers: request.headers,
+    body: requestBody,
+    signal: request.signal,
+    redirect: "manual",
+  });
+
+  const responseBody = await upstream.arrayBuffer();
+  return new Response(upstream.status === 204 || upstream.status === 304 ? null : responseBody, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers: upstream.headers,
+  });
+};
+
+/**
  * Mode de session :
  * - `read-only` : contexte **sans écriture cookie** (Server Component). Le refresh est **désactivé**
  *   (un refresh nécessiterait d'écrire les nouveaux tokens, impossible ici).
@@ -35,9 +66,6 @@ export interface AuthenticatedServerApiClientOptions {
   readonly requestId?: string;
 }
 
-/** `fetch` serveur sans cache Next.js : les réponses Auth ne doivent jamais être mises en cache. */
-const noStoreFetch: InjectedFetch = (request) => fetch(request, { cache: "no-store" });
-
 /**
  * Factory du client API **serveur authentifiable**, **par requête** (BFF).
  *
@@ -59,7 +87,7 @@ export function createAuthenticatedServerApiClient(
 
   return createEnistereApiClient({
     baseUrl,
-    fetch: options.fetch ?? noStoreFetch,
+    fetch: options.fetch ?? serverFetch,
     session,
     enableRefresh: options.mode === "writable",
     createRequestId: incomingId !== undefined ? () => incomingId : defaultRequestIdFactory,
