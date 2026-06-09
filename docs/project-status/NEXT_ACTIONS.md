@@ -5,23 +5,23 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Initialiser le starter minimal du UI Kit** (`cores/ui-kit/`).
+> **UI Kit 2 — primitives Web minimales** (`cores/ui-kit/`) : quelques composants primitifs (ex. Box,
+> Text, Button) consommant les tokens, **sans bibliothèque complète**.
 
-**Justification** : le UI Kit est **débloqué** (ADR-008 design tokens, ADR-009 stack Web, ADR-010 stack
-React Native — tous Validés) ; il est la **dépendance commune** des cores Web Next.js et Mobile React
-Native (qui restent documentaires). Aucun prérequis technique manquant. Conforme à l'ordre historique
-attendu (UI Kit → Web → Mobile → Cloud), confirmé par les dépendances réelles.
+**Justification** : le **starter UI Kit (tokens) est livré** (`@enistere/ui-kit` — tokens validés,
+générés, 25 tests, 100 % couverture). L'étape suivante naturelle est de prouver la **consommation** des
+tokens par quelques primitives Web, avant d'initialiser le Web Core Next.js. Cela reste dans le UI Kit
+(dépendance commune), sans créer de projet Next.js ni de bibliothèque exhaustive. ADR-009 (stack Web)
+encadrera l'ajout éventuel de Tailwind/Radix/shadcn — **non requis** pour des primitives basées tokens.
 
-**Prérequis « baseline Git » — SATISFAIT** : la baseline locale existe (commit `7dcb543` sur `main`,
-ADR-001 exercé ; voir [`GIT_BASELINE_REPORT.md`](./GIT_BASELINE_REPORT.md)). Reste une décision
-**humaine/gouvernance** : **pousser** la baseline vers `origin` (non fait par l'agent). Non bloquant
-pour démarrer le UI Kit en local, mais recommandé pour sécuriser le travail.
+**Note gouvernance** : la baseline Git existe (`7dcb543`) ; **push vers `origin` non fait** (décision
+humaine). L'initialisation du UI Kit a ajouté un commit local `feat(ui-kit): initialize token foundation`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **UI Kit minimal** — tokens (ADR-008), stack Web (ADR-009) + RN (ADR-010), 1–2 composants de preuve, tests.
-2. **Web Core Next.js minimal** — starter ; **intégration de `@enistere/api-client-fetch`** + hooks TanStack Query (ADR-012) ; cookies/CSRF (ADR-005) ; consomme le UI Kit.
-3. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; consomme le UI Kit.
+1. **UI Kit 2 — primitives Web** (composants minimaux consommant les tokens) ✦ prochaine action.
+2. **Web Core Next.js minimal** — starter ; **intégration de `@enistere/api-client-fetch`** + hooks TanStack Query (ADR-012) ; cookies/CSRF (ADR-005) ; consomme le UI Kit + `@enistere/ui-kit/tokens.css`.
+3. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; consomme les tokens (ThemeProvider, ADR-010).
 4. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation, au service du API Core et des cores clients.
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour

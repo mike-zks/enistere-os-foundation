@@ -10,18 +10,19 @@
 
 ## 1. Statut global
 
-Le repository combine la **Phase 0 (stratégie + ADR + spécifications)** et une **première
-implémentation technique réelle** : le **API Core NestJS** et deux **packages clients officiels**.
-Les autres cores sont **documentaires** (spécification) ou **vides** (dossier seul). **Aucun client
-Web/Mobile n'est implémenté.**
+Le repository combine la **Phase 0 (stratégie + ADR + spécifications)** et des **implémentations
+techniques réelles** : le **API Core NestJS**, deux **packages clients officiels**, et le **starter UI
+Kit** (design tokens). Les autres cores sont **documentaires** (spécification) ou **vides** (dossier
+seul). **Aucun client Web/Mobile n'est implémenté** (le UI Kit n'expose que des tokens, pas de composant).
 
 | Catégorie | État |
 |---|---|
 | Stratégie (Phase 0) | 10 documents présents |
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
+| Core initialisé | **UI Kit** (`@enistere/ui-kit`) — starter design tokens (tokens validés/générés, 25 tests, 100 % couverture) |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés, **non intégrés**) |
-| Cores documentaires | `cloud`, `web-nextjs`, `mobile-react-native`, `ui-kit` (spécification seule) |
+| Cores documentaires | `cloud`, `web-nextjs`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **Absents** (aucun workflow ni Dockerfile dans le dépôt) |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
@@ -60,10 +61,10 @@ enistere-os-foundation/
 | Core | Dossier | Spécification | Starter/code | Statut officiel |
 |---|---|---|---|---|
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
+| `ui-kit` | oui | oui | **oui** (tokens) | **STARTER_INITIALISE** |
 | `cloud` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `web-nextjs` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `mobile-react-native` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
-| `ui-kit` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -152,10 +153,10 @@ preuve désormais retiré (bannière de migration ajoutée).
 
 ## 15. Prochaine étape
 
-**Action unique recommandée** : initialiser le **starter UI Kit minimal** (`cores/ui-kit/`) — débloqué
-par ADR-008/009/010, dépendance des cores Web/Mobile. Le prérequis « baseline Git » est désormais
-**satisfait** (commit `7dcb543`). Détail et ordre : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md) ; preuve de
-baseline : [`GIT_BASELINE_REPORT.md`](./GIT_BASELINE_REPORT.md).
+Le **starter UI Kit (tokens)** est désormais **initialisé** (`@enistere/ui-kit`). **Action unique
+recommandée** : **UI Kit 2 — primitives Web minimales** (quelques composants primitifs consommant les
+tokens, sans bibliothèque complète), avant l'initialisation du Web Core Next.js. Détail et ordre :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

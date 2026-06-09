@@ -5,7 +5,8 @@
   "description": "Enistere OS Foundation — monorepo. Workspaces limités aux packages clients officiels (les cores restent autonomes).",
   "license": "UNLICENSED",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "cores/ui-kit"
   ],
   "scripts": {
     "generate": "npm run generate --workspace=@enistere/api-contracts",

@@ -15,7 +15,7 @@ La phase actuelle du repository est la **Phase 0 : stratégie et fondations**. E
 
 - `strategy/` : documents stratégiques de Phase 0.
 - `docs/` : ADR, guides, checklists, runbooks, onboarding, décisions et glossaire.
-- `cores/` : socles techniques (le **API Core NestJS V1** est implémenté dans `cores/api-nestjs/`).
+- `cores/` : socles techniques (**API Core NestJS V1** implémenté dans `cores/api-nestjs/` ; **UI Kit** — starter design tokens — dans `cores/ui-kit/`).
 - `packages/` : **packages partagés** du monorepo (npm workspaces).
 - `prompts/` : prompts IA classés par usage.
 - `tools/` : futurs générateurs, scripts, validateurs et outils de release.

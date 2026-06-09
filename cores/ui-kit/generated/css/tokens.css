@@ -1,0 +1,110 @@
+/* ENISTERE UI KIT — GENERATED CSS variables. NE PAS MODIFIER À LA MAIN.
+   Régénérer : npm run tokens:generate · Vérifier : npm run tokens:check (ADR-008). */
+
+:root {
+  --enistere-spacing-0: 0px;
+  --enistere-spacing-1: 4px;
+  --enistere-spacing-2: 8px;
+  --enistere-spacing-3: 12px;
+  --enistere-spacing-4: 16px;
+  --enistere-spacing-5: 20px;
+  --enistere-spacing-6: 24px;
+  --enistere-spacing-8: 32px;
+  --enistere-spacing-10: 40px;
+  --enistere-spacing-12: 48px;
+  --enistere-spacing-16: 64px;
+  --enistere-spacing-20: 80px;
+  --enistere-spacing-24: 96px;
+  --enistere-radius-none: 0px;
+  --enistere-radius-sm: 4px;
+  --enistere-radius-md: 8px;
+  --enistere-radius-lg: 12px;
+  --enistere-radius-xl: 20px;
+  --enistere-radius-full: 9999px;
+  --enistere-font-family-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --enistere-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --enistere-font-size-xs: 12px;
+  --enistere-font-size-sm: 14px;
+  --enistere-font-size-md: 16px;
+  --enistere-font-size-lg: 18px;
+  --enistere-font-size-xl: 20px;
+  --enistere-font-size-2xl: 24px;
+  --enistere-font-size-3xl: 30px;
+  --enistere-font-size-4xl: 36px;
+  --enistere-font-weight-regular: 400;
+  --enistere-font-weight-medium: 500;
+  --enistere-font-weight-semibold: 600;
+  --enistere-font-weight-bold: 700;
+  --enistere-line-height-tight: 1.2;
+  --enistere-line-height-normal: 1.5;
+  --enistere-line-height-relaxed: 1.7;
+  --enistere-letter-spacing-tight: -0.2px;
+  --enistere-letter-spacing-normal: 0px;
+  --enistere-letter-spacing-wide: 0.4px;
+  --enistere-shadow-none: none;
+  --enistere-shadow-sm: 0px 1px 2px 0px rgba(15, 23, 42, 0.08);
+  --enistere-shadow-md: 0px 4px 8px -2px rgba(15, 23, 42, 0.12);
+  --enistere-shadow-lg: 0px 12px 24px -4px rgba(15, 23, 42, 0.16);
+  --enistere-duration-fast: 120ms;
+  --enistere-duration-normal: 200ms;
+  --enistere-duration-slow: 320ms;
+  --enistere-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --enistere-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --enistere-easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --enistere-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --enistere-breakpoint-sm: 640px;
+  --enistere-breakpoint-md: 768px;
+  --enistere-breakpoint-lg: 1024px;
+  --enistere-breakpoint-xl: 1280px;
+  --enistere-breakpoint-2xl: 1536px;
+  --enistere-z-index-base: 0;
+  --enistere-z-index-dropdown: 1000;
+  --enistere-z-index-sticky: 1100;
+  --enistere-z-index-overlay: 1200;
+  --enistere-z-index-modal: 1300;
+  --enistere-z-index-toast: 1400;
+  --enistere-z-index-tooltip: 1500;
+
+  /* semantic colors (light, default) */
+  --enistere-color-background-default: #FFFFFF;
+  --enistere-color-background-muted: #F8FAFC;
+  --enistere-color-background-elevated: #FFFFFF;
+  --enistere-color-foreground-default: #0F172A;
+  --enistere-color-foreground-muted: #64748B;
+  --enistere-color-foreground-inverse: #FFFFFF;
+  --enistere-color-border-default: #E2E8F0;
+  --enistere-color-border-strong: #CBD5E1;
+  --enistere-color-border-focus: #3B82F6;
+  --enistere-color-action-primary: #2563EB;
+  --enistere-color-action-primary-hover: #1D4ED8;
+  --enistere-color-action-primary-pressed: #1E40AF;
+  --enistere-color-action-disabled: #CBD5E1;
+  --enistere-color-status-success: #16A34A;
+  --enistere-color-status-warning: #F59E0B;
+  --enistere-color-status-danger: #DC2626;
+  --enistere-color-status-info: #2563EB;
+  --enistere-color-focus-ring: #3B82F6;
+  --enistere-color-overlay: #0F172A;
+}
+
+[data-theme="dark"] {
+  --enistere-color-background-default: #020617;
+  --enistere-color-background-muted: #0F172A;
+  --enistere-color-background-elevated: #1E293B;
+  --enistere-color-foreground-default: #F8FAFC;
+  --enistere-color-foreground-muted: #94A3B8;
+  --enistere-color-foreground-inverse: #0F172A;
+  --enistere-color-border-default: #334155;
+  --enistere-color-border-strong: #475569;
+  --enistere-color-border-focus: #60A5FA;
+  --enistere-color-action-primary: #3B82F6;
+  --enistere-color-action-primary-hover: #60A5FA;
+  --enistere-color-action-primary-pressed: #93C5FD;
+  --enistere-color-action-disabled: #334155;
+  --enistere-color-status-success: #22C55E;
+  --enistere-color-status-warning: #F59E0B;
+  --enistere-color-status-danger: #EF4444;
+  --enistere-color-status-info: #3B82F6;
+  --enistere-color-focus-ring: #60A5FA;
+  --enistere-color-overlay: #020617;
+}

@@ -26,22 +26,25 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique) — 377 tests unitaires + 101 e2e + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
+- **Starter initialisé** : **UI Kit** (`@enistere/ui-kit`, 0.1.0, privé) — design tokens (primitives,
+  sémantique, light/dark, générateurs JSON/TS/CSS déterministes, validation). **25 tests, 100 %
+  couverture. Aucun composant.** Statut : **STARTER_INITIALISE**.
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
   **localement** (tests + live 16/16), **non publiés**, **non intégrés** dans un core client.
-- **Documentaires (spéc seule, aucun starter)** : `cloud`, `web-nextjs`, `mobile-react-native`, `ui-kit`.
+- **Documentaires (spéc seule, aucun starter)** : `cloud`, `web-nextjs`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : baseline locale créée (commit `7dcb543` sur `main`, 322 fichiers) ; remote `origin`
-  configuré mais **non poussé**.
+- **Git** : baseline `7dcb543` + checkpoint `e0ab052` + `feat(ui-kit)` (cette mission) sur `main` ;
+  remote `origin` configuré mais **non poussé**.
 
 ## 4. Cores techniquement implémentés
 
-`cores/api-nestjs/` uniquement.
+`cores/api-nestjs/` (avancé) et `cores/ui-kit/` (starter tokens).
 
 ## 5. Cores documentaires
 
-`cloud`, `web-nextjs`, `mobile-react-native`, `ui-kit` (un `CORE_SPECIFICATION.md` chacun, **pas** de
-starter).
+`cloud`, `web-nextjs`, `mobile-react-native` (un `CORE_SPECIFICATION.md` chacun, **pas** de starter).
+Le `ui-kit` a sa spéc **et** un starter (tokens).
 
 ## 6. Packages
 
@@ -53,20 +56,20 @@ starter).
 
 18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), 006 (RBAC), 007 (upload),
 039 (Argon2id), 040 (logging). Partiels : 001 (monorepo, **mais aucun commit**), 003, 004, 011, 016.
-Décidés non implémentés : 005, 008, 009, 010, 012, 013, 014, 015. ADR-017→038 = backlog non rédigé.
-Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+Décidés non implémentés : 005, 009, 010, 012, 013, 014, 015. **008 (design tokens) désormais partiel**
+(starter UI Kit). ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-Packages clients officiels (`@enistere/api-contracts` + `@enistere/api-client-fetch`, validés
-localement, live 16/16) → checkpoint documentaire (`docs/project-status/`) → **baseline Git de
-référence** (commit `7dcb543` sur `main`, non poussée ; voir `GIT_BASELINE_REPORT.md`).
+Baseline Git (`7dcb543`) + checkpoint (`e0ab052`) → **initialisation du starter UI Kit**
+(`@enistere/ui-kit` : design tokens, validation, générateurs déterministes JSON/TS/CSS, 25 tests,
+100 % couverture ; commit `feat(ui-kit): initialize token foundation`).
 
 ## 9. Prochaine étape
 
-**Action unique** : initialiser le **starter UI Kit minimal** (`cores/ui-kit/`) — débloqué par
-ADR-008/009/010, dépendance des cores Web/Mobile. Le prérequis « baseline Git » est **satisfait**
-(`7dcb543`) ; reste à décider du **push** vers `origin` (humain). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **UI Kit 2 — primitives Web minimales** (composants primitifs consommant les
+tokens, sans bibliothèque complète), avant l'initialisation du Web Core Next.js. Le starter UI Kit
+(tokens) est livré. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
