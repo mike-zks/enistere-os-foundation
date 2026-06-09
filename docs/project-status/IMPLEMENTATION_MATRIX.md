@@ -13,9 +13,9 @@
 | `@enistere/api-contracts` | ✓ | n/a | ✓ (016) | ✓ | ✓ | ✓ (11) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | build + generate:check | publication (non requise V1) |
 | `@enistere/api-client-fetch` | ✓ | n/a | ✓ (011,012,016) | ✓ | ✓ | ✓ (29 + live 16/16) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | live 16/16 (client officiel) | intégration dans un core client |
 | Cloud Core | ✓ | ✓ | ✓ (013,014,007…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | starter (après CI/registry) |
-| Web Core Next.js | ✓ | ✓ | ✓ (005,009,011,012…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | UI Kit + intégration packages |
+| Web Core Next.js | ✓ | ✓ | ✓ (005,009,011,012…) | **✓** | **✓ (App Router + UI Kit, Next 16/React 19)** | **✓ (25, a11y + sonde HTTP)** | — | **STARTER_INITIALISE** | build/lint/typecheck/tests verts + serveur local (en-têtes, 404, classes `enistere-*`, CSS) | intégration paquets API + TanStack Query (V2) |
 | Mobile Core React Native | ✓ | ✓ | ✓ (010,012,015…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | UI Kit + secure storage |
-| UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 6 primitives Web)** | **✓ (64, 100 %, a11y)** | — | **IMPLEMENTATION_PARTIELLE** | tokens déterministes + primitives (SSR/local install OK) | Web Core Next.js / composants UI suppl. |
+| UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 6 primitives Web)** | **✓ (64, 100 %, a11y, React 19)** | — | **IMPLEMENTATION_PARTIELLE** | aligné **React 19** (0 régression, v0.1.1) + **réellement consommé par le Web Core** | composants UI suppl. |
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
@@ -64,11 +64,11 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 | ID | Source A | Source B | État réel | Impact | Action recommandée | Priorité |
 |---|---|---|---|---|---|---|
 | C1 | Travail substantiel présent | `git log` | **Résolu (local)** : baseline `7dcb543` ; non poussée | Traçabilité locale OK ; pas encore de sauvegarde distante | Pousser vers `origin` (décision humaine) | RÉSOLU (local) / IMPORTANTE (push) |
-| C2 | Packages dits « officiels » | Aucun import dans les cores | Non intégrés | Faux sentiment d'intégration | Intégrer lors des cores Web/Mobile | IMPORTANTE |
+| C2 | Packages dits « officiels » | Import dans les cores | **Partiel** : UI Kit **consommé** par le Web Core ; `api-contracts`/`api-client-fetch` **résolus à la compilation** (non instanciés, aucun appel réseau) | Lecture « intégré » à nuancer | Instancier les paquets API au Web Core V2 | IMPORTANTE |
 | C3 | ADR-005/012/013/014/015 Validés | Aucun code correspondant | Décidés, non implémentés (ADR-008 **partiel** : tokens + primitives UI Kit ; ADR-009/010 **partiels** : tokens consommés, stacks Tailwind/RN non ajoutées) | Lecture « fait » erronée | Implémenter au fil des cores | IMPORTANTE |
 | C4 | `strategy/` Phase 0 (« avant code ») | API Core implémenté | Phase 0 partiellement dépassée | Contexte trompeur | Lire strategy comme historique | MINEURE |
 | C5 | `OPENAPI_CLIENT_PROOF.md` cite `proofs/openapi-client/*` | Code de preuve retiré | Pointeur seul | Liens internes partiellement périmés | Bannière de migration déjà ajoutée | MINEURE |
-| C6 | `cores/{cloud,web-nextjs,mobile-react-native}` ont une spéc | Aucun starter | Documentaires (ui-kit désormais **STARTER_INITIALISE**) | Confusion spéc↔implémentation | Statut explicite (cette matrice) | IMPORTANTE |
+| C6 | `cores/{cloud,mobile-react-native}` ont une spéc | Aucun starter | Documentaires ; **ui-kit et web-nextjs désormais `STARTER_INITIALISE`** | Confusion spéc↔implémentation | Statut explicite (cette matrice) | IMPORTANTE |
 
 ## 5. Dette documentaire
 

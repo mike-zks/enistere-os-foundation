@@ -1,7 +1,7 @@
 # @enistere/ui-kit
 
 > **Statut : IMPLEMENTATION_PARTIELLE.** Design tokens Enistere (ADR-008, source de vérité) **+
-> premières primitives Web accessibles** (React). **Privé / non publié** (`0.1.0`). **Pas de
+> premières primitives Web accessibles** (React). **Privé / non publié** (`0.1.1`). **Pas de
 > bibliothèque complète**, **pas de Tailwind/Radix/shadcn/NativeWind dans le package** (ADR-009/010 :
 > ces stacks vivent dans les cores clients ; le UI Kit reste piloté par les tokens).
 
@@ -9,6 +9,11 @@
 
 `react` est une **peerDependency** (`>=18`) — fournie par l'application consommatrice. Les composants
 ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js, ni de React Native.
+
+> **Compatibilité React 19 (v0.1.1).** Le UI Kit est développé et **testé sous React 19** (les 64 tests
+> passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19 sont tous deux
+> supportés** (les primitives n'utilisent ni hook ni API spécifique de version, et sont sûres en Server
+> Component). Alignement effectué lors de l'initialisation du **Web Core Next.js** (Next 16 / React 19).
 
 ```ts
 import { Button, Input, Label, Text, Spinner, VisuallyHidden } from '@enistere/ui-kit';

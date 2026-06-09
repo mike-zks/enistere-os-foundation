@@ -18,14 +18,14 @@
 | ADR-006 | RBAC + permissions fines | Validé | **IMPLEMENTE_ET_REVU** | api/web/mobile/ui | RBAC API + `AUTH_RBAC_REVIEW` |
 | ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files + `FILES_REVIEW` |
 | ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | `@enistere/ui-kit` : tokens + 6 primitives Web (64 tests) ; bibliothèque complète à venir |
-| ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | primitives Web pilotées par tokens (CSS `--enistere-*`) ; Tailwind/Radix/shadcn = Web Core (non ajoutés au package) |
+| ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | UI Kit **consommé par le Web Core starter** (CSS `--enistere-*`, classes `enistere-*`) ; Tailwind/Radix/shadcn **non ajoutés** (différés V2) |
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
-| ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | package `api-client-fetch` ; non intégré aux cores |
-| ADR-012 | Server state = TanStack Query | Validé | **DECIDE_NON_IMPLEMENTE** | web/mobile | hooks réservés aux cores (absents) |
+| ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | package `api-client-fetch` **résolu à la compilation** dans le Web Core (non instancié) ; **Axios absent** |
+| ADR-012 | Server state = TanStack Query | Validé | **DECIDE_NON_IMPLEMENTE** | web/mobile | Web Core starter présent ; hooks **non ajoutés** (prochain incrément) |
 | ADR-013 | CI/CD V1 | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web/mobile | aucun workflow |
 | ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
-| ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; clients non intégrés |
+| ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **résolus à la compilation** dans le Web Core (non instanciés) |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
 | ADR-040 | Logging structuré (Pino) | Validé | **IMPLEMENTE_ET_REVU** | api/cloud | Pino + `STRUCTURED_LOGGING_COMPATIBILITY_PROOF` + e2e |
 
@@ -33,10 +33,19 @@
 
 À traiter au fil des cores / de l'infrastructure (aucune n'est implémentée aujourd'hui) :
 
-- **ADR-008/009/010** — UI Kit : **partiellement fait** (tokens + 6 primitives Web). Restent : composants
-  supplémentaires, stacks Tailwind/Radix/shadcn (Web Core) et ThemeProvider/NativeWind (Mobile Core).
-- **ADR-005** — cookies web/CSRF : avec le Web Core.
-- **ADR-012** — TanStack Query : hooks dans les cores Web/Mobile (hors packages).
+- **ADR-008/009/010** — UI Kit : **partiellement fait** (tokens + 6 primitives Web, React 19) ;
+  **consommé par le Web Core starter**. Restent : composants supplémentaires, stacks
+  Tailwind/Radix/shadcn (Web) et ThemeProvider/NativeWind (Mobile).
+- **ADR-005** — cookies web/CSRF : prochain incrément du Web Core (starter présent).
+- **ADR-011/012** — instanciation du client Fetch + hooks TanStack Query : prochain incrément du Web
+  Core (le starter résout les paquets à la compilation mais ne les instancie pas).
+
+> **Décisions d'implémentation du Web Core starter (hors ADR, tracées ici)** : framework **Next.js 16
+> (App Router, Turbopack) + React 19** retenu plutôt que Next 14/React 18 — Next 14.2.x portait des
+> advisories *high* sans correctif en 14.x, le correctif npm étant `next@16` ; Next 16 + React 19
+> ramène l'audit à **0 vuln**. Le **UI Kit a été aligné sur React 19** (v0.1.1, peer `react >=18`
+> inchangé). Un **override npm `postcss ^8.5.15`** neutralise l'advisory transitif (postcss < 8.5.10)
+> embarqué par Next. Runner de test = **node:test** (pas de Vitest → 0 vuln). CSP **différée** (V2).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

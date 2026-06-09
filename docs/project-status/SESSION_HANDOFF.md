@@ -26,32 +26,41 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique) — 377 tests unitaires + 101 e2e + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
-- **En cours** : **UI Kit** (`@enistere/ui-kit`, 0.1.0, privé) — design tokens **+ 6 primitives Web React**
+- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 6 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden) pilotées par tokens, accessibles. React =
-  peerDependency ; CSS via `@enistere/ui-kit/styles.css`. **64 tests, 100 % couverture** (node:test +
-  global-jsdom + Testing Library + jest-axe). Statut : **IMPLEMENTATION_PARTIELLE** (pas de bibliothèque complète).
+  peerDependency `>=18` ; **aligné et testé sous React 19** (64 tests, 100 %). CSS via
+  `@enistere/ui-kit/styles.css`. Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
+- **Starter** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
+  TypeScript strict, Server Components par défaut, UI Kit consommé (+ `styles.css`), thème clair via
+  `data-theme`, états loading/error/not-found, en-têtes sécurité + pas de `X-Powered-By`. **25 tests**
+  (node:test + Testing Library + jest-axe) + build + sonde HTTP. **Aucun appel réseau, aucune auth.**
+  Statut : **STARTER_INITIALISE**.
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
-  **localement** (tests + live 16/16), **non publiés**, **non intégrés** dans un core client.
-- **Documentaires (spéc seule, aucun starter)** : `cloud`, `web-nextjs`, `mobile-react-native`.
+  **localement** (tests + live 16/16), **non publiés** ; **résolus à la compilation** dans le Web Core,
+  **non instanciés**.
+- **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(ui-kit): add minimal web primitives`,
-  `feat(ui-kit): initialize token foundation`, checkpoint, baseline.
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): initialize minimal starter`
+  (+ alignement UI Kit React 19), `feat(ui-kit): add minimal web primitives`, baseline.
+- **Audit** : **0 vulnérabilité** (override `postcss ^8.5.15` neutralisant l'advisory transitif de Next 16).
 
 ## 4. Cores techniquement implémentés
 
-`cores/api-nestjs/` (avancé) et `cores/ui-kit/` (starter tokens).
+`cores/api-nestjs/` (avancé), `cores/ui-kit/` (starter tokens + primitives, React 19) et
+`cores/web-nextjs/` (starter Next 16 App Router, **STARTER_INITIALISE**).
 
 ## 5. Cores documentaires
 
-`cloud`, `web-nextjs`, `mobile-react-native` (un `CORE_SPECIFICATION.md` chacun, **pas** de starter).
-Le `ui-kit` a sa spéc **et** un starter (tokens).
+`cloud`, `mobile-react-native` (un `CORE_SPECIFICATION.md` chacun, **pas** de starter).
+`ui-kit` et `web-nextjs` ont leur spéc **et** un starter.
 
 ## 6. Packages
 
 `@enistere/api-contracts` (types OpenAPI, runtime-indépendant) ; `@enistere/api-client-fetch`
 (client Fetch typé + wrappers : auth, erreurs, timeout, refresh, multipart). Workspaces npm
-(`packages/*`). **Non publiés, non intégrés.**
+(`packages/*`, `cores/ui-kit`, `cores/web-nextjs`). **Non publiés** ; UI Kit **consommé** par le Web
+Core, paquets API **résolus à la compilation** (non instanciés).
 
 ## 7. ADR clés
 
@@ -62,15 +71,19 @@ Web ; stacks Tailwind/RN non ajoutées). ADR-017→038 = backlog non rédigé. D
 
 ## 8. Dernière étape terminée
 
-**UI Kit 2 — primitives Web** : 6 composants React accessibles (Button, Input, Label, Text, Spinner,
-VisuallyHidden) pilotés par tokens, CSS agrégé `styles.css`, 64 tests + a11y + install local SSR validé,
-0 vulnérabilité, packages API non régressés ; commit `feat(ui-kit): add minimal web primitives`.
+**Web Core Next.js 1 — starter minimal** (`@enistere/web-nextjs`) : Next 16 App Router + React 19,
+TypeScript strict, Server Components par défaut, UI Kit **réellement consommé** (classes `enistere-*` +
+`styles.css`), thème clair via `data-theme`, états loading/error/not-found, métadonnées, en-têtes
+sécurité + `X-Powered-By` absent, **aucun appel réseau / aucune auth**. 25 tests + build + sonde HTTP
+verts ; **0 vulnérabilité**. UI Kit **aligné React 19** (v0.1.1, 64 tests, 0 régression) ; API Core et
+paquets non régressés. Commit `feat(web-nextjs): initialize minimal starter`.
 
 ## 9. Prochaine étape
 
-**Action unique** : initialiser le **Web Core Next.js minimal** (consommant `@enistere/api-client-fetch`
-+ `@enistere/ui-kit` + `styles.css`, hooks TanStack Query ADR-012). Alternative : compléter le UI Kit
-(composants supplémentaires). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : faire progresser le **Web Core** de `STARTER_INITIALISE` à `IMPLEMENTATION_PARTIELLE`
+— **instancier `@enistere/api-client-fetch`** + hooks TanStack Query (ADR-012), puis Auth/BFF
+(cookies `HttpOnly`, CSRF — ADR-005/011). Alternative : compléter le UI Kit ou démarrer le Mobile Core.
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
@@ -104,4 +117,10 @@ npm run openapi:check
 
 # Packages (racine)
 npm install && npm run build && npm test && npm run generate:check
+
+# UI Kit (cores/ui-kit/)
+npm run test --workspace=@enistere/ui-kit
+
+# Web Core (cores/web-nextjs/) — port 3100
+npm run check --workspace=@enistere/web-nextjs   # typecheck + lint + test + build
 ```

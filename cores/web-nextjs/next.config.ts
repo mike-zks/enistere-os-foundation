@@ -1,0 +1,35 @@
+import type { NextConfig } from "next";
+
+/**
+ * En-têtes de sécurité de base appliqués à TOUTES les routes (Web 1).
+ *
+ * Volontairement minimal :
+ * - Pas de Content-Security-Policy ici : la CSP sera définie en V2 (nonces + sources réelles),
+ *   voir `docs/SECURITY.md`. Une CSP incomplète donnerait une fausse impression de protection.
+ * - `poweredByHeader: false` retire l'en-tête `X-Powered-By`.
+ */
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-DNS-Prefetch-Control", value: "off" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+  },
+];
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
+  },
+};
+
+export default nextConfig;

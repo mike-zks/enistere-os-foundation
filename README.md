@@ -15,7 +15,7 @@ La phase actuelle du repository est la **Phase 0 : stratégie et fondations**. E
 
 - `strategy/` : documents stratégiques de Phase 0.
 - `docs/` : ADR, guides, checklists, runbooks, onboarding, décisions et glossaire.
-- `cores/` : socles techniques (**API Core NestJS V1** implémenté dans `cores/api-nestjs/` ; **UI Kit** — design tokens **+ premières primitives Web** — dans `cores/ui-kit/`).
+- `cores/` : socles techniques (**API Core NestJS V1** dans `cores/api-nestjs/` ; **UI Kit** — tokens **+ primitives Web** (React 19) — dans `cores/ui-kit/` ; **Web Core Next.js** — starter minimal Next 16 / React 19 — dans `cores/web-nextjs/`).
 - `packages/` : **packages partagés** du monorepo (npm workspaces).
 - `prompts/` : prompts IA classés par usage.
 - `tools/` : futurs générateurs, scripts, validateurs et outils de release.
@@ -24,7 +24,7 @@ La phase actuelle du repository est la **Phase 0 : stratégie et fondations**. E
 
 ## Packages partagés (`packages/`)
 
-Workspaces npm (`"workspaces": ["packages/*"]` ; les cores restent autonomes). Issus de la preuve
+Workspaces npm (`"workspaces": ["packages/*", "cores/ui-kit", "cores/web-nextjs"]`). Issus de la preuve
 ADR-016 (voir `cores/api-nestjs/docs/OPENAPI_CLIENT_PROOF.md`) :
 
 - **`@enistere/api-contracts`** — types OpenAPI canoniques (générés depuis `cores/api-nestjs/openapi/openapi.json`), runtime-indépendant.
@@ -33,8 +33,8 @@ ADR-016 (voir `cores/api-nestjs/docs/OPENAPI_CLIENT_PROOF.md`) :
 Commandes (racine) : `npm install`, `npm run build`, `npm test`, `npm run generate:check`.
 
 > **Statut** : packages **créés et validés localement** (builds, tests, preuve live 16/16). **Non
-> publiés** ; **non encore intégrés** dans les cores Web/Mobile (les hooks TanStack Query — ADR-012 —
-> seront maintenus dans ces cores).
+> publiés**. Le **Web Core** (`cores/web-nextjs/`) les **résout à la compilation** (non instanciés en
+> V1) ; les hooks TanStack Query (ADR-012) y seront ajoutés à l'incrément suivant.
 
 ## État du projet (pilotage)
 
@@ -52,7 +52,8 @@ recommandation ou mission :
 
 ## Statut
 
-Phase 0 (stratégie/fondations) + **API Core NestJS V1** implémenté (`cores/api-nestjs/`) et premiers
-**packages clients officiels** (`packages/`) créés et validés localement, non publiés. État détaillé et
-vérifié : [`docs/project-status/`](docs/project-status/README.md).
+Phase 0 (stratégie/fondations) + **API Core NestJS V1** (`cores/api-nestjs/`), **UI Kit** (`cores/ui-kit/`,
+tokens + primitives Web, React 19) et **Web Core Next.js** (`cores/web-nextjs/`, starter minimal
+Next 16 / React 19 — `STARTER_INITIALISE`) ; **packages clients officiels** (`packages/`) validés
+localement, non publiés. État détaillé et vérifié : [`docs/project-status/`](docs/project-status/README.md).
 

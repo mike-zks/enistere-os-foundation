@@ -21,9 +21,10 @@ pas une application ni une bibliothèque complète).
 | Stratégie (Phase 0) | 10 documents présents |
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
-| Core en cours | **UI Kit** (`@enistere/ui-kit`) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y jest-axe) |
-| Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés, **non intégrés**) |
-| Cores documentaires | `cloud`, `web-nextjs`, `mobile-react-native` (spécification seule) |
+| Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y) ; aligné **React 19** ; **consommé par le Web Core** |
+| Web Core | **`@enistere/web-nextjs`** — **STARTER_INITIALISE** : Next 16 App Router + React 19, consomme le UI Kit (build/lint/typecheck/tests verts, serveur local vérifié) |
+| Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **résolus à la compilation** dans le Web Core, non instanciés) |
+| Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **Absents** (aucun workflow ni Dockerfile dans le dépôt) |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
@@ -47,12 +48,14 @@ enistere-os-foundation/
     checklists/ decisions/ glossary/ guides/ onboarding/ runbooks/
   cores/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
-    cloud/ web-nextjs/ mobile-react-native/ ui-kit/   → CORE_SPECIFICATION.md seul
+    ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
+    web-nextjs/        STARTER (Next 16 App Router + React 19, src/app|core|shared|features, test/)
+    cloud/ mobile-react-native/                       → CORE_SPECIFICATION.md seul
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
     api-client-fetch/  @enistere/api-client-fetch (0.1.0, privé)
-  package.json         racine privé, workspaces ["packages/*"]
+  package.json         racine privé, workspaces ["packages/*","cores/ui-kit","cores/web-nextjs"]
   prompts/ templates/  présents ; tools/ examples/ vides
   README.md CHANGELOG.md
 ```
@@ -62,9 +65,9 @@ enistere-os-foundation/
 | Core | Dossier | Spécification | Starter/code | Statut officiel |
 |---|---|---|---|---|
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
-| `ui-kit` | oui | oui | **oui** (tokens + primitives Web) | **IMPLEMENTATION_PARTIELLE** |
+| `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
-| `web-nextjs` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
+| `web-nextjs` | oui | oui | **oui** (Next 16 App Router + UI Kit) | **STARTER_INITIALISE** |
 | `mobile-react-native` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -85,12 +88,13 @@ seed RBAC, commandes CLI fichiers. Rapports : `API_CORE_V1_REVIEW`, `AUTH_RBAC_R
 
 | Package | Version | Privé | Build/Tests | Publié | Intégré dans un core |
 |---|---|---|---|---|---|
-| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **non** |
-| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **non** |
+| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **résolu (compilation) dans `web-nextjs`** |
+| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **résolu (compilation) dans `web-nextjs`** |
 
-Dépendance à sens unique : `openapi.json → api-contracts → api-client-fetch`. **Aucun** core client
-(`web-nextjs`, `mobile-react-native`, …) ne consomme ces packages aujourd'hui (vérifié par recherche
-d'import). Un package créé et testé **n'est pas** une intégration.
+Dépendance à sens unique : `openapi.json → api-contracts → api-client-fetch`. Le **UI Kit** est
+désormais **réellement consommé** par le Web Core. Les paquets **API** y sont déclarés et **résolus à
+la compilation** (preuve : `cores/web-nextjs/test/api-resolution.fixture.ts`) mais **non instanciés**
+(aucun appel réseau en V1). Une résolution de compilation **n'est pas** une intégration runtime.
 
 ## 6. Stratégie (Phase 0)
 
@@ -116,7 +120,10 @@ server state (TanStack Query), CI/CD, registry. Détail : [`IMPLEMENTATION_MATRI
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **64 tests** (`node:test` + `global-jsdom`
-+ Testing Library + jest-axe), **100 % couverture**. Aucune CI : exécution **manuelle/locale**.
++ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **25 tests** (`node:test` +
+Testing Library + jest-axe : config, thème, métadonnées, états, a11y, contraintes, résolution paquets)
++ `next build` + **sonde HTTP locale** (en-têtes, 404, classes `enistere-*`, CSS). Aucune CI : exécution
+**manuelle/locale**.
 
 ## 10. Preuves
 
@@ -139,9 +146,10 @@ détaillée du API Core.
 
 1. ~~Aucun commit Git~~ **RÉSOLU (local)** — baseline `7dcb543` créée sur `main` (ADR-001 exercé
    localement). Reste : **non poussée** vers `origin` (décision humaine/gouvernance).
-2. **Packages non intégrés** — créés/validés mais aucun core ne les consomme ; risque de dérive si le
-   contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
-3. **Spécifications sans starter** — 4 cores documentaires peuvent être lus à tort comme implémentés.
+2. **Packages partiellement intégrés** — le UI Kit est **consommé** par le Web Core ; les paquets API
+   y sont **résolus à la compilation** mais **non instanciés**. Risque de dérive si le contrat évolue
+   sans régénération (mitigé par `generate:check`, non automatisé).
+3. **Spécifications sans starter** — `cloud` et `mobile-react-native` peuvent être lus à tort comme implémentés.
 4. **Pas de CI** — non-régression et reproductibilité reposent sur l'exécution manuelle.
 5. **Strategy Phase 0 partiellement datée** — contexte historique à ne pas confondre avec l'état réel.
 
@@ -155,10 +163,12 @@ preuve désormais retiré (bannière de migration ajoutée).
 
 ## 15. Prochaine étape
 
-Le UI Kit fournit désormais **tokens + 6 primitives Web** (`@enistere/ui-kit`). **Action unique
-recommandée** : initialiser le **Web Core Next.js minimal** (consommant `@enistere/api-client-fetch` +
-`@enistere/ui-kit` + `styles.css`, hooks TanStack Query ADR-012) — OU compléter le UI Kit (composants
-de formulaire/feedback supplémentaires) si jugé prioritaire. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+Le **Web Core Next.js minimal** est désormais initialisé (`@enistere/web-nextjs`, **STARTER_INITIALISE** :
+Next 16 App Router + React 19, UI Kit consommé, build/lint/tests verts + serveur local vérifié, aucun
+appel réseau). **Prochaine action recommandée** : faire passer le Web Core de `STARTER_INITIALISE` vers
+`IMPLEMENTATION_PARTIELLE` en **instanciant les paquets API** (`@enistere/api-client-fetch`) + **hooks
+TanStack Query** (ADR-012) et l'**Auth/BFF** (cookies `HttpOnly`, CSRF — ADR-011) — OU compléter le UI Kit.
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

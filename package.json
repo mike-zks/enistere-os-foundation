@@ -6,8 +6,12 @@
   "license": "UNLICENSED",
   "workspaces": [
     "packages/*",
-    "cores/ui-kit"
+    "cores/ui-kit",
+    "cores/web-nextjs"
   ],
+  "overrides": {
+    "postcss": "^8.5.15"
+  },
   "scripts": {
     "generate": "npm run generate --workspace=@enistere/api-contracts",
     "generate:check": "npm run generate:check --workspace=@enistere/api-contracts",

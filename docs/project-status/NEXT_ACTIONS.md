@@ -5,26 +5,30 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Web Core Next.js minimal** (`cores/web-nextjs/`) : starter consommant `@enistere/api-client-fetch`
-> + `@enistere/ui-kit` (+ `styles.css`), avec hooks TanStack Query (ADR-012) — **un seul core**.
+> **Web Core Next.js — intégration (V2)** (`cores/web-nextjs/`) : faire passer le core de
+> `STARTER_INITIALISE` à `IMPLEMENTATION_PARTIELLE` en **instanciant `@enistere/api-client-fetch`** +
+> **hooks TanStack Query** (ADR-012), puis **Auth/BFF** (cookies `HttpOnly`, CSRF — ADR-005/011).
+> **Un seul incrément à la fois.**
 
-**Justification** : le **UI Kit fournit désormais tokens + 6 primitives Web** (`@enistere/ui-kit`,
-64 tests, 100 %, SSR/install local validés) et les **packages clients** sont prêts. Le premier
-consommateur réel est le Web Core Next.js, qui prouve l'intégration de bout en bout (contrat → client →
-UI). C'est là qu'ADR-009 (Tailwind/Radix/shadcn) et ADR-005 (cookies/CSRF) s'appliquent.
+**Justification** : le **Web Core minimal est désormais initialisé** (`@enistere/web-nextjs`,
+**STARTER_INITIALISE** : Next 16 App Router + React 19, UI Kit réellement consommé, 25 tests + build +
+sonde HTTP, **aucun appel réseau**). La suite logique est l'**intégration de bout en bout**
+(contrat → client → données → UI), là où s'appliquent ADR-012 (TanStack Query) et ADR-005/011
+(cookies/CSRF). Découper en incréments : (a) data fetching read-only ; (b) Auth/BFF.
 
-**Alternative (justifiée)** : **compléter le UI Kit** (composants formulaire/feedback supplémentaires :
-FormField, Alert, Card…) avant Next.js, si l'on veut un socle UI plus large d'abord. À arbitrer.
+**Alternative (justifiée)** : **compléter le UI Kit** (FormField, Alert, Card…) ou démarrer le
+**Mobile Core React Native minimal** (parallélisable). À arbitrer par décision humaine.
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(ui-kit): add minimal web primitives`.
+`feat(web-nextjs): initialize minimal starter` (inclut l'alignement **UI Kit → React 19**, v0.1.1).
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Web Core Next.js minimal** — starter ; **intégration `@enistere/api-client-fetch`** + hooks TanStack Query (ADR-012) ; cookies/CSRF (ADR-005) ; consomme `@enistere/ui-kit` + `styles.css` ; ADR-009 (Tailwind/Radix/shadcn) au niveau du core. ✦ prochaine action.
-2. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
-3. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
-4. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
+1. **Web Core Next.js — data fetching read-only** — instancier `@enistere/api-client-fetch` + hooks TanStack Query (ADR-012), un écran de lecture réel. ✦ prochaine action.
+2. **Web Core Next.js — Auth/BFF** — cookies `HttpOnly`, CSRF, login/refresh/logout, middleware (ADR-005/011).
+3. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
+4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
+5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -35,7 +39,8 @@ deux cores. À arbitrer par décision humaine.
 
 | Action | Bloquée par |
 |---|---|
-| Intégrer les packages dans Web/Mobile | starters Web/Mobile inexistants (donc UI Kit d'abord) |
+| Intégrer (instancier) les packages API dans le Web Core | **débloqué** — starter Web présent ; mission d'intégration dédiée |
+| Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |
 | Web Core Angular | spécification absente + **ADR-035 non rédigé** |
@@ -57,8 +62,8 @@ deux cores. À arbitrer par décision humaine.
 
 ## 6. Critères de sortie (fin de la prochaine action)
 
-1. Starter UI Kit exécutable (build + lint + tests verts) **et** revu.
-2. Aucune régression du API Core ni des packages.
+1. Core ciblé exécutable (build + lint + typecheck + tests verts) **et** revu.
+2. Aucune régression du API Core, du UI Kit ni des packages.
 3. `docs/project-status/` mis à jour (matrice, état, décisions si l'implémentation change, prochaines actions, handoff).
 4. `CHANGELOG.md` mis à jour.
 5. État Git propre / commit effectué.

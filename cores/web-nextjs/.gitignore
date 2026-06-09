@@ -1,0 +1,19 @@
+# dépendances
+/node_modules
+
+# build Next.js
+/.next
+/out
+
+# sortie de compilation des tests (node:test)
+/build-test
+
+# environnement local (jamais versionné)
+.env
+.env.local
+.env*.local
+
+# divers
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
