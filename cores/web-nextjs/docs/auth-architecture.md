@@ -1,20 +1,41 @@
-# Architecture Auth Web — BFF (Web Auth 1 + Web Auth 2)
+# Architecture Auth Web — BFF (Web Auth 1 → 3)
 
-> **Flux Auth BFF disponibles** : `login` / `refresh` / `logout` (+ bootstrap `csrf`), protégés par
-> cookies `HttpOnly`, Origin/Referer et **CSRF opérationnel**. **Profil/autorisations (`me`,
-> `authorization`) NON implémentés**, **aucune page de connexion**, **aucun middleware de route privée**,
-> aucun hook TanStack Query Auth. ADR-004 (session), ADR-005 (cookies/CSRF), ADR-011 (Fetch).
+> **Flux Auth BFF disponibles** : `login` / `refresh` / `logout` (+ bootstrap `csrf`) **et lecture
+> `me` / `authorization`** ; protégés par cookies `HttpOnly`, Origin/Referer (mutations) et **CSRF
+> opérationnel**. État de session côté navigateur via **TanStack Query** (`useSession`/`useAuthorization`).
+> **Aucune page de connexion, aucun middleware de route privée, aucun SSR Auth complet** (session chargée
+> côté client). ADR-004 (session), ADR-005 (cookies/CSRF), ADR-006 (RBAC), ADR-011 (Fetch), ADR-012 (server state).
 
-## 0. Flux réels (Web Auth 2)
+## 0. Flux réels
 
 | Route | Méthode | Rôle |
 | --- | --- | --- |
 | `/api/auth/csrf` | GET | Bootstrap : pose le cookie CSRF (non HttpOnly) + renvoie le jeton. |
-| `/api/auth/login` | POST | Valide (body/Origin/CSRF) → API NestJS → pose les cookies `HttpOnly` access/refresh, renouvelle le CSRF. |
+| `/api/auth/login` | POST | Valide (body/Origin/CSRF) → API NestJS → cookies `HttpOnly` access/refresh, renouvelle le CSRF. |
 | `/api/auth/refresh` | POST | Lit le refresh cookie → API `/auth/refresh` → **rotation** des deux cookies + CSRF. |
 | `/api/auth/logout` | POST | API `/auth/logout` (best-effort) → **supprime toujours** les cookies (Auth + CSRF). |
+| `/api/auth/me` | GET | Profil public. **Read-only (aucun refresh auto)**, pas de CSRF, `no-store`. 401 si session invalide. |
+| `/api/auth/authorization` | GET | Rôles/permissions. Read-only, pas de CSRF, `no-store`. 401 si session invalide. |
 
-Réponses navigateur : **jamais de token** (`{ success, data:{ authenticated|refreshed|loggedOut }, requestId }`).
+Réponses navigateur : **jamais de token** (`{ success, data, requestId }`).
+
+## 0b. Session & autorisations (navigateur, Web Auth 3)
+
+- **Source de vérité** : `GET /api/auth/me` (pas de cookie supposé, pas de localStorage). États dérivés par
+  `useSession` : `pending → loading`, succès → `authenticated`, **401 → anonymous**, **403/autre → error**.
+  Pas de flash : tant que `/me` n'a pas répondu, l'état est `loading` (jamais anonyme par défaut).
+- **`useAuthorization`** (activé **seulement** si authentifié) : `roles`/`permissions` + helpers
+  `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions` (OR/AND, **sans wildcard**, ADR-006). Les
+  helpers servent à l'**affichage conditionnel** — **l'API reste l'autorité finale** : masquer un bouton
+  n'est pas une protection. Les codes de l'API sont **canoniques** (paramètres seulement `trim()`).
+- **Changement de droits** : les permissions sont lues **en direct** côté API ; un refetch de
+  `/authorization` reflète un changement de rôle **sans nouveau JWT** (prouvé). 
+- **Cache** : `authKeys` (`session`/`authorization`), `staleTime` court, **aucune persistance**. Au
+  **logout** : `removeQueries(authKeys.all)` (session + authorization purgées) ; les queries **Health
+  restent intactes**. Sur échec réseau navigateur↔BFF du logout : **pas de purge** (on ne prétend pas la
+  session supprimée), retry possible. Aucune redirection (hors périmètre).
+- **SSR** : Option A retenue — la session est chargée **côté client** après hydratation (pas d'appel `/me`
+  au build ni de serveur appelant son propre BFF). Le SSR Auth complet sera étudié avant les routes protégées.
 
 ## 1. BFF (Backend-for-Frontend)
 
@@ -138,16 +159,21 @@ vérifiées absentes des erreurs/logs/bundle.
   handler login exécute `clearSession()` en **compensation** (testé). Logout : suppression locale **toujours**
   appliquée (même API indisponible).
 - Les `expiresAt` ne sont pas stockés (seul le `maxAge` l'est).
-- Pas de `me`/`authorization`, pas de middleware de route privée, pas de page de connexion, pas de hook
-  TanStack Query Auth (Web Auth 3).
+- **Aucune route protégée, aucun middleware, aucune page de connexion, aucune redirection auto** : Web Auth 3
+  expose **l'état** (profil/rôles/permissions) mais ne **protège** rien côté navigateur. L'API reste l'autorité.
+- **`me`/`authorization` en read-only** : `enableRefresh:false` → un access expiré ⇒ **401 → anonymous**
+  (pas de refresh silencieux sur une lecture). Le refresh reste explicite (route dédiée / relogin).
 - **Replay de l'ancien refresh** : non rejoué via le BFF (le cookie ne porte que le token courant) ; la
   rotation/révocation côté API est couverte par les tests de l'API NestJS.
 - Les Route Handlers (`app/api/auth/**`) + `core/auth/server/**` (liant `next/headers`) sont validés par
   **typecheck/build + preuve API réelle**, non par `node:test` ; la logique testable vit dans
-  `core/auth/{handlers,csrf,http}` (handlers prenant `(Request, deps)`). `server-only` (npm) non utilisé
-  (lève sous `node:test`) → frontière par `next/headers` + tests d'import statiques.
+  `core/auth/{handlers,csrf,http,client}` (handlers prenant `(Request, deps)`, client BFF navigateur
+  testé via `fetch` mocké). `server-only` (npm) non utilisé (lève sous `node:test`) → frontière par
+  `next/headers` + tests d'import statiques.
 
 ## 13. Prochaine étape
 
-**Web Auth 3** — `GET /api/auth/me`, `GET /api/auth/authorization`, hooks `useSession`/`useAuthorization`
-(TanStack Query) et purge du cache au logout.
+**Checkpoint de gouvernance Web Core** (revue de socle avant nouvelles capacités) — puis, le moment venu,
+étude du **SSR Auth** et des **routes protégées** (middleware / layout privé), hors périmètre actuel.
+Voir [`session-state.md`](session-state.md) pour les états de session et [`tanstack-query.md`](tanstack-query.md)
+pour le cache.

@@ -38,25 +38,33 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   Auth** : `login`/`refresh`/`logout`/`csrf` via **Route Handlers** `/api/auth/*` — cookies `HttpOnly`
   access/refresh (jamais renvoyés au navigateur, `__Host-` prod), **CSRF double-submit** (cookie non
   HttpOnly + `X-CSRF-Token`, temps constant, rotation), **Origin/Referer** (fail-closed), corps borné,
-  erreurs génériques, `X-Request-Id` propagé, logout idempotent. **Sans `me`/`authorization`, sans page,
-  sans middleware, sans hook Auth.** **169 tests** + preuve **API réelle Auth** (PostgreSQL jetable).
-  Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack** (`extensionAlias`). Note transport :
-  le client serveur authentifié **bufferise le corps** (sinon le `fetch` patché de Next échouait sur les
-  réponses non-2xx — `expected non-null body source`).
+  erreurs génériques, `X-Request-Id` propagé, logout idempotent. **Lit aussi le profil/les autorisations** :
+  `GET /api/auth/me` + `GET /api/auth/authorization` (Route Handlers **read-only**, `no-store`) → **client
+  BFF navigateur** (same-origin, `credentials:"include"`, **aucun token lu/exposé**) → hooks **`useSession`**
+  (`loading`/`authenticated`/**`anonymous` (401)**/**`error` (403/5xx/réseau)**) et **`useAuthorization`**
+  (activé si authentifié ; helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions`, **OR/AND, sans
+  wildcard**, ADR-006) ; **logout purge** `authKeys.all` (Health conservé). **Sans page, sans middleware,
+  sans route protégée, sans SSR Auth complet (Option A client-only).** **206 tests** + preuve **API réelle
+  Auth + session** (PostgreSQL jetable). Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
+  (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
+  `fetch` patché de Next échouait sur les réponses non-2xx — `expected non-null body source`).
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
-  **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public)** dans
-  le Web Core (preuve API réelle), et **client authentifié** (BFF Auth login/refresh/logout) — preuve API réelle.
+  **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public/Health +
+  authentifié/BFF Auth login/refresh/logout/me/authorization)** dans le Web Core ; types Auth dérivés via
+  `SchemaOf<>` (`UserProfileResponseDto`, `AuthorizationSummaryResponseDto`) — preuve API réelle.
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): implement secure auth BFF flows`,
-  `feat(web-nextjs): establish server auth foundations`, `feat(web-nextjs): integrate public API and query layer`, baseline.
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add session and authorization state`,
+  `feat(web-nextjs): implement secure auth BFF flows`, `feat(web-nextjs): establish server auth foundations`,
+  `feat(web-nextjs): integrate public API and query layer`, baseline.
 - **Audit** : **0 vulnérabilité** (TanStack Query v5 ; override `postcss ^8.5.15`).
 
 ## 4. Cores techniquement implémentés
 
 `cores/api-nestjs/` (avancé), `cores/ui-kit/` (starter tokens + primitives, React 19) et
-`cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query, **IMPLEMENTATION_PARTIELLE**).
+`cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations,
+**IMPLEMENTATION_PARTIELLE**).
 
 ## 5. Cores documentaires
 
@@ -68,39 +76,52 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 `@enistere/api-contracts` (types OpenAPI, runtime-indépendant) ; `@enistere/api-client-fetch`
 (client Fetch typé + wrappers : auth, erreurs, timeout, refresh, multipart). Workspaces npm
 (`packages/*`, `cores/ui-kit`, `cores/web-nextjs`). **Non publiés** ; UI Kit **consommé** + `api-client-fetch`
-**instancié (public/Health)** par le Web Core. Usage authentifié non encore intégré.
+**instancié (public/Health + authentifié/BFF Auth)** par le Web Core. Usage authentifié **intégré** (preuve API réelle).
 
 ## 7. ADR clés
 
-18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), 006 (RBAC), 007 (upload),
-039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, **004** (session : adapter serveur Web posé),
-**005** (cookies web + **CSRF** : flux BFF login/refresh/logout opérationnels, cookies `HttpOnly`, CSRF
-double-submit, Origin/Referer — Web ; reste : autres mutations futures), **011** (Fetch instancié public +
-**authentifié** Web), **012** (TanStack Query intégré Web), 016. Décidés non implémentés : 013, 014, 015.
-**008/009/010 partiels** (UI Kit). ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), 007 (upload), 039 (Argon2id),
+040 (logging). Partiels : 001 (monorepo), 003, **004** (session : adapter serveur Web + **état de session
+navigateur** `useSession`/`useAuthorization`, read-only sans refresh silencieux), **005** (cookies web +
+**CSRF** : flux BFF login/refresh/logout opérationnels, cookies `HttpOnly`, CSRF double-submit,
+Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appliqué **côté API** ;
+**consommé en lecture** côté Web via helpers OR/AND sans wildcard pour l'affichage conditionnel —
+**l'API reste l'autorité**), **011** (Fetch instancié public + **authentifié** Web + client BFF navigateur),
+**012** (TanStack Query intégré Web : server state Health **et** Auth, cache disjoint, purge au logout), 016
+(types Auth via `SchemaOf<>`). Décidés non implémentés : 013, 014, 015. **008/009/010 partiels** (UI Kit).
+ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Web Auth 2 — login, refresh, logout et protection CSRF du BFF** (`@enistere/web-nextjs`) : Route Handlers
-`POST /api/auth/{login,refresh,logout}` + `GET /api/auth/csrf` (thin) → handlers testables
-(`core/auth/handlers/*`, `(Request, deps)→Response`). **login** valide (corps borné/Origin/CSRF) → API →
-pose cookies `HttpOnly` access/refresh (jamais renvoyés) + renouvelle CSRF + compensation `clearSession`
-si écriture partielle. **refresh** : refresh cookie → 1 appel `/auth/refresh` → rotation des 2 cookies ;
-échec → cookies supprimés + 401. **logout** : best-effort + **suppression locale toujours** (idempotent).
-**CSRF** double-submit (cookie non HttpOnly + `X-CSRF-Token`, 256 bits, temps constant, rotation), **login
-protégé contre login-CSRF**. **Origin/Referer** exact + fail-closed (`WEB_ALLOWED_ORIGINS`). Erreurs
-génériques (jamais réponse brute), `X-Request-Id` propagé. **169 tests** (CSRF, Origin, validation, mapping,
-4 handlers, isolation, **sentinelles**) + **preuve API réelle** (NestJS + PostgreSQL : login/refresh/logout,
-cookies HttpOnly, CSRF, Origin, rotation, refresh-après-logout 401, bad-creds 401). **0 vuln**, Axios absent,
-React 19.2.7 ; non-régression complète ; API NestJS non modifiée. Correctif transport (buffer du corps de
-requête, `fetch(url, init)`) contre `expected non-null body source` sous le fetch patché de Next. Commit
-`feat(web-nextjs): implement secure auth BFF flows`.
+**Web Auth 3 — profil, autorisations et état de session avec TanStack Query** (`@enistere/web-nextjs`) :
+Route Handlers `GET /api/auth/me` + `GET /api/auth/authorization` (thin, `force-dynamic`) → handlers
+testables (`core/auth/handlers/get-profile`, `get-authorization`, `(Request, deps)→Response`) appelant le
+client serveur **read-only** (`enableRefresh:false` → **aucun refresh silencieux** sur une lecture ; 401
+propagé), `no-store`, erreurs génériques. **Client BFF navigateur** (`core/auth/client/`) : appels
+**same-origin** `/api/auth/*`, `credentials:"include"`, **aucun token lu/exposé**, valide l'enveloppe
+`{success,data}`, lève `BffAuthError` (http/network/invalid_response). **TanStack Query** : `authKeys`
+(disjoints de `healthKeys`), `sessionQueryOptions`/`authorizationQueryOptions` (`retry:false`, sans
+persistance). **`useSession`** : `loading` → `authenticated` → **`anonymous` (401, pas une erreur)** /
+**`error` (403/5xx/réseau, 403 distinct d'anonyme)** ; `toPublicAuthError` (générique, sans cause/token).
+**`useAuthorization`** : activé **uniquement** si authentifié (aucun appel `/authorization` en anonyme),
+helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions` (**OR/AND, sans wildcard**, ADR-006 ;
+affichage conditionnel — **API = autorité finale**). **`useLogout`** : CSRF → `POST /api/auth/logout` →
+`removeQueries(authKeys.all)` (**Auth purgé, Health conservé**) ; **échec réseau → pas de purge** (retry).
+UI présentationnelle (SessionStatus/AuthorizationStatus + a11y). **206 tests** + **preuve API réelle Auth +
+session** (NestJS + PostgreSQL : login → `/me` (profil, **aucun token**, `X-Request-Id`, `no-store`) →
+`/authorization` (rôles/permissions) → logout → `/me` **401** ; **read-only sans appel `/auth/refresh`** ;
+**changement de droits sans nouveau JWT** : retrait de rôle → `roles:[],permissions:[]` sur la même session,
+`/me` toujours 200 ; bundle client **sans** `API_INTERNAL_URL` ni secret). **0 vuln**, Axios/Zustand absents,
+React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Commit
+`feat(web-nextjs): add session and authorization state`.
 
 ## 9. Prochaine étape
 
-**Action unique** : **Web Auth 3** — `GET /api/auth/me`, `GET /api/auth/authorization`, hooks
-`useSession`/`useAuthorization` (TanStack Query) + purge du cache au logout. Alternative : compléter le
-UI Kit ou démarrer le Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Checkpoint de gouvernance Web Core** — revue de socle (Web Core
+`IMPLEMENTATION_PARTIELLE` : Health + TanStack Query + BFF Auth + session/autorisations, 206 tests) et
+**arbitrage d'architecture** SSR Auth complet vs Option A client-only **avant** d'implémenter routes
+protégées / middleware. Alternative : compléter le UI Kit, démarrer le Mobile Core, ou Cloud/CI-CD. Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

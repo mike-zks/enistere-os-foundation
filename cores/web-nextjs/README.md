@@ -28,11 +28,19 @@ viendront dans un incrément ultérieur).
   `GET /api/auth/csrf`. Cookies `HttpOnly` access/refresh (jamais renvoyés au navigateur), **CSRF
   double-submit opérationnel**, validation **Origin/Referer**, rotation, logout idempotent. Détail :
   [`docs/auth-architecture.md`](docs/auth-architecture.md), [`docs/csrf.md`](docs/csrf.md).
+- **Session & autorisations (Web Auth 3)** : `GET /api/auth/me`, `GET /api/auth/authorization`
+  (read-only, `no-store`), client **BFF navigateur** (same-origin, sans token), hooks **`useSession`** /
+  **`useAuthorization`** (TanStack Query), états `loading`/`authenticated`/`anonymous`/`error`
+  (**401→anonymous**, **403 distinct**), helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions`
+  (OR/AND, **sans wildcard**, ADR-006), **purge du cache Auth au logout** (Health conservé). **L'API reste
+  l'autorité finale** (affichage conditionnel ≠ protection). Détail :
+  [`docs/session-state.md`](docs/session-state.md).
 
 ### Hors périmètre — volontairement absent
 
-`GET /api/auth/me` · `GET /api/auth/authorization` · **page/formulaire de connexion** · **middleware** de
-route privée · hooks TanStack Query Auth · token Auth exposé au navigateur · routes Files / upload ·
+**page/formulaire de connexion** · **middleware** de route privée · **route/layout protégé** ·
+**redirection automatique** · **Server Action Auth** · **RBAC d'administration** (modifier rôles/permissions) ·
+**SSR Auth complet** (session chargée côté client) · token Auth exposé au navigateur · routes Files / upload ·
 **Axios** · **Zustand**/Redux/Jotai · Orval · Storybook · OAuth / MFA · forgot/reset password · i18n
 complet · monitoring · workflow CI · Dockerfile · publication npm · **aucun type d'API recopié**.
 
@@ -73,12 +81,16 @@ src/
       public/                # createPublicApiClient + singleton navigateur (sans session)
       health/                # getHealth/getLiveness/getReadiness (types via SchemaOf<>)
       errors/                # mapApiErrorToPublicMessage
-    auth/                    # FONDATIONS BFF : cookie-config, server-cookie-store, session-contract,
-      server/                #   web-session-adapter ; server/ = SERVER-ONLY (next/headers) — exclu node:test
-    query/                   # query-client (retry), query-provider, keys/health-keys
+    auth/                    # BFF : cookie-config, server-cookie-store, session-contract, web-session-adapter ;
+      server/                #   server/ = SERVER-ONLY (next/headers) — exclu node:test
+      handlers/              #   get-profile / get-authorization (handlers (Request, deps), testables)
+      client/                #   client BFF NAVIGATEUR (me/authorization/csrf/logout) + bff-error
+      session-state.ts       #   SessionState + toPublicAuthError (public, sans token)
+    query/                   # query-client (retry), query-provider, keys/{health-keys,auth-keys}
   features/
     foundation-status/       # page technique (matrice d'intégrations) — testable
     health/                  # queries (queryOptions), hooks, health-panel, health-probe-view
+    auth/                    # auth-queries, useSession, useAuthorization, useLogout, *-status-view, session-panel
 test/                        # node:test (compilés vers build-test/)
 ```
 
@@ -176,8 +188,17 @@ requête réelle non mockée fait échouer un test). **Fondations Auth** : confi
 préfixes, durées, rejets), cookie store mémoire, `WebAuthSessionAdapter` (lecture/écriture/clear, tokens
 vides/contrôle rejetés, aucune valeur en erreur), factory authentifiée (instance/appel, isolation A/B,
 Bearer issu du cookie, read-only refresh off vs writable refresh tenté), **frontières d'import statiques**,
-**sentinelles** non fuitées. Build + sonde HTTP locale. **Preuve API réelle** : API NestJS + PostgreSQL
-jetable (Health/live/ready, hydratation SSR, API down → rendu contrôlé, API up → succès) — **sans authentification**.
+**sentinelles** non fuitées. **Session & autorisations (Web Auth 3)** : handlers `me`/`authorization`
+(GET-only, read-only, erreurs génériques), client BFF navigateur (envelope `{success,data}`, **chemin
+same-origin relatif**, 401/403/réseau/réponse invalide, **aucun token**), `authKeys` (disjoints, sans
+secret), `useSession` (loading/authenticated/**401→anonymous**/**403→error**/refetch), `useAuthorization`
+(désactivé en anonyme = **aucun appel** `/authorization` ; helpers OR/AND **sans wildcard**), `useLogout`
+(CSRF posé, **purge Auth / Health conservé** ; échec réseau → **pas de purge**), UI session/authorization
+(états + a11y). Build + sonde HTTP locale. **Preuve API réelle** : API NestJS + PostgreSQL jetable —
+Health (live/ready, hydratation SSR, API down → rendu contrôlé) **et Auth** : login → `/me` (profil, **aucun
+token**, `no-store`, `X-Request-Id`) → `/authorization` (rôles/permissions) → logout → `/me` **401** ;
+**read-only** prouvé (401 **sans** appel `/auth/refresh`) ; **changement de droits sans nouveau JWT**
+(`roles:[]` après retrait, `/me` toujours 200) ; bundle client **sans** `API_INTERNAL_URL` ni secret.
 
 ---
 
@@ -190,9 +211,22 @@ cookie `HttpOnly`. **Cookies** : `enistere_access`/`refresh` **HttpOnly** (jamai
 `Secure` prod, `SameSite=Lax`, `Path=/`, `__Host-` prod) ; `enistere_csrf` **non HttpOnly** (double-submit).
 **Protection** : CSRF (cookie + `X-CSRF-Token`, temps constant, rotation), **Origin/Referer** (fail-closed),
 corps borné, erreurs génériques, `X-Request-Id` propagé. **Prouvé contre l'API réelle.** **Absent** :
-`me`/`authorization`, page de connexion, middleware, hooks Auth. Détail :
+page de connexion, middleware, route protégée. Détail :
 [`docs/auth-architecture.md`](docs/auth-architecture.md), [`docs/csrf.md`](docs/csrf.md),
 [`src/core/auth/README.md`](src/core/auth/README.md).
+
+### 11b. Session & autorisations (Web Auth 3)
+
+`GET /api/auth/me` et `GET /api/auth/authorization` (Route Handlers **read-only**, `no-store`, pas de CSRF —
+lectures) exposent profil et rôles/permissions. Le **client BFF navigateur** (`core/auth/client/`,
+same-origin, `credentials:"include"`, **aucun token lu/exposé**) alimente deux hooks TanStack Query :
+**`useSession`** (`loading`/`authenticated`/`anonymous`/`error` — **401→anonymous**, **403 reste `error`**,
+read-only ⇒ aucun refresh silencieux) et **`useAuthorization`** (activé **uniquement** si authentifié ;
+helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions`, **OR/AND, sans wildcard**, ADR-006). Le
+cache `authKeys` est **disjoint** de `healthKeys`, **non persisté** ; le **logout purge** `authKeys.all`
+(Health conservé), sauf échec réseau (pas de purge → retry). Un **changement de droits** se reflète par
+refetch de `/authorization` **sans nouveau JWT** (prouvé). Les helpers pilotent l'**affichage conditionnel**
+— **l'API reste l'autorité finale**. Détail : [`docs/session-state.md`](docs/session-state.md).
 
 ---
 
@@ -205,6 +239,6 @@ passent sous React 19 (aucune régression). Voir le `CHANGELOG.md` racine.
 
 ## 13. Feuille de route
 
-**Prochain incrément** : **Web Auth 3** — `GET /api/auth/me`, `GET /api/auth/authorization`, hooks
-`useSession`/`useAuthorization` (TanStack Query) + purge du cache au logout. Puis : écrans authentifiés,
-middleware de protection, gestionnaire de thème, CSP à nonces, i18n, CI/CD.
+**Prochain incrément** : **Checkpoint de gouvernance Web Core** (revue de socle avant nouvelles capacités).
+Puis, une fois validé : **SSR Auth** complet et **routes protégées** (middleware / layout privé), écrans
+authentifiés, gestionnaire de thème, CSP à nonces, i18n, CI/CD.

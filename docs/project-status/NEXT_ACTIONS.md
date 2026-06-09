@@ -5,27 +5,30 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Web Auth 3 — profil, autorisations et état de session** (`cores/web-nextjs/`) : exposer
-> `GET /api/auth/me` et `GET /api/auth/authorization` (Route Handlers BFF, client **authentifié** lisant
-> le cookie ; refresh **writable**), hooks **`useSession`/`useAuthorization`** (TanStack Query), et
-> **purge du cache au logout**. **Un seul incrément à la fois.**
+> **Checkpoint de gouvernance Web Core** (`cores/web-nextjs/`) : **revue de socle** avant d'ouvrir de
+> nouvelles capacités. Statuer (décision humaine) sur l'état `IMPLEMENTATION_PARTIELLE` du Web Core
+> (Health + TanStack Query + BFF Auth + session/autorisations, 206 tests, preuves API réelles), arbitrer
+> la **portée du SSR Auth** et des **routes protégées** (middleware / layout privé), et décider du
+> séquencement vis-à-vis du UI Kit, du Mobile et du Cloud/CI-CD. **Pas directement un middleware** : la
+> décision d'architecture (SSR Auth complet vs Option A actuelle) doit précéder l'implémentation.
 
-**Justification** : les **flux Auth BFF sont opérationnels** (Web Auth 2 : login/refresh/logout + CSRF +
-Origin/Referer, cookies `HttpOnly`, prouvés contre l'API réelle). La suite logique est de **lire l'identité
-authentifiée** (profil/autorisations) et d'en dériver l'état de session côté client, puis les écrans
-protégés (middleware). Découper : (a) `me`/`authorization` + hooks ; (b) purge cache au logout ;
-(c) middleware + écrans.
+**Justification** : l'**état de session/autorisations est opérationnel** (Web Auth 3 : `me`/`authorization`
+read-only, `useSession`/`useAuthorization`, **401→anonymous / 403 distinct**, helpers OR/AND sans wildcard,
+purge cache au logout, **changement de droits sans nouveau JWT** — prouvés contre l'API réelle). Avant
+d'attaquer les **routes protégées**, un choix d'architecture s'impose (SSR Auth complet — appel `/me`
+serveur, gestion du flash/redirection — vs l'**Option A client-only** actuelle). Ce checkpoint évite de
+coder un middleware sur une fondation SSR non tranchée.
 
 **Alternative (justifiée)** : **compléter le UI Kit** ou démarrer le **Mobile Core React Native minimal**
-(parallélisable). À arbitrer par décision humaine.
+(parallélisable), ou avancer **Cloud/CI-CD** pour sécuriser la non-régression. À arbitrer par décision humaine.
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(web-nextjs): implement secure auth BFF flows`.
+`feat(web-nextjs): add session and authorization state`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Web Auth 3 — `me`/`authorization` + session TanStack Query** — hooks `useSession`/`useAuthorization`, purge cache au logout. ✦ prochaine action.
-2. **Web Auth 4 — écrans authentifiés + middleware** — protection de routes privées, redirections.
+1. **Checkpoint de gouvernance Web Core** — revue de socle ; arbitrage SSR Auth / routes protégées. ✦ prochaine action.
+2. **Web Auth 4 — SSR Auth + routes protégées** — middleware / layout privé, redirections, **après** décision d'architecture du checkpoint.
 3. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
@@ -40,7 +43,8 @@ deux cores. À arbitrer par décision humaine.
 | Action | Bloquée par |
 |---|---|
 | Intégrer les packages API (public) dans le Web Core | **FAIT** — `api-client-fetch` instancié (Health), preuve API réelle |
-| Usage **authentifié** des packages (Web) | **flux login/refresh/logout + CSRF opérationnels** (Web Auth 2) ; reste `me`/`authorization` = Web Auth 3 |
+| Usage **authentifié** des packages (Web) | **FAIT** — login/refresh/logout + CSRF (Web Auth 2) **et** me/authorization + session/autorisations (Web Auth 3), preuve API réelle |
+| Routes protégées / middleware (Web) | **décision d'architecture SSR Auth** (checkpoint de gouvernance) requise d'abord |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |

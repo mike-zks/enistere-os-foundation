@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { createServerApiClient } from "../core/api/server/create-server-api-client.js";
 import { isServerApiConfigured } from "../core/config/server-config.js";
 import { createQueryClient } from "../core/query/query-client.js";
+import { SessionPanel } from "../features/auth/session-panel.js";
 import { FoundationStatus } from "../features/foundation-status/foundation-status.js";
 import { healthQueryOptions } from "../features/health/health-queries.js";
 import { HealthPanel } from "../features/health/health-panel.js";
@@ -30,6 +31,7 @@ export default async function HomePage(): Promise<ReactElement> {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <FoundationStatus>
         <HealthPanel />
+        <SessionPanel />
       </FoundationStatus>
     </HydrationBoundary>
   );

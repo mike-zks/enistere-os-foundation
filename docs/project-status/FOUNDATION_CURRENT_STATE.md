@@ -22,8 +22,8 @@ pas une application ni une bibliothèque complète).
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
 | Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y) ; aligné **React 19** ; **consommé par le Web Core** |
-| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** (SSR/hydratation) + **BFF Auth** (`login`/`refresh`/`logout`/`csrf` via Route Handlers, cookies `HttpOnly`, **CSRF** double-submit, Origin/Referer). **169 tests** + preuve API réelle Auth. Pas de `me`/page/middleware. |
-| Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public)** dans le Web Core — preuve API réelle) |
+| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** (SSR/hydratation) + **BFF Auth** (`login`/`refresh`/`logout`/`csrf` via Route Handlers, cookies `HttpOnly`, **CSRF** double-submit, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, hooks `useSession`/`useAuthorization`, purge cache au logout). **206 tests** + preuve API réelle Auth + session. Pas de page/middleware/route protégée. |
+| Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **Absents** (aucun workflow ni Dockerfile dans le dépôt) |
@@ -49,7 +49,7 @@ enistere-os-foundation/
   cores/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
-    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout+CSRF)
+    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state)
     cloud/ mobile-react-native/                       → CORE_SPECIFICATION.md seul
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
@@ -67,7 +67,7 @@ enistere-os-foundation/
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
-| `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query) | **IMPLEMENTATION_PARTIELLE** |
+| `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations) | **IMPLEMENTATION_PARTIELLE** |
 | `mobile-react-native` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -88,13 +88,15 @@ seed RBAC, commandes CLI fichiers. Rapports : `API_CORE_V1_REVIEW`, `AUTH_RBAC_R
 
 | Package | Version | Privé | Build/Tests | Publié | Intégré dans un core |
 |---|---|---|---|---|---|
-| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **consommé (types) dans `web-nextjs`** |
-| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **instancié (public/Health) dans `web-nextjs`** |
+| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **consommé (types) dans `web-nextjs`** (Health + Auth, dont `UserProfile`/`AuthorizationSummary` via `SchemaOf<>`) |
+| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **instancié (public/Health + authentifié/BFF) dans `web-nextjs`** |
 
 Dépendance à sens unique : `openapi.json → api-contracts → api-client-fetch`. Le **UI Kit** et les
 **paquets API** sont désormais **réellement intégrés** par le Web Core pour les endpoints **publics**
-(Health) : `api-client-fetch` est **instancié** (factory serveur par requête + client public
-navigateur), avec preuve **API réelle**. Reste hors périmètre : l'usage **authentifié** (BFF/cookies).
+(Health) **et authentifiés** (BFF Auth : login/refresh/logout/me/authorization) : `api-client-fetch` est
+**instancié** (factory serveur par requête + client public navigateur + façade Auth serveur), avec preuve
+**API réelle**. Côté navigateur, l'état de session est lu via le **client BFF same-origin** (`/api/auth/*`),
+sans token ni appel direct à l'API.
 
 ## 6. Stratégie (Phase 0)
 
@@ -111,22 +113,30 @@ d'implémentation : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 ## 8. Implémentations
 
 Implémenté + testé + revu : Auth, sessions, refresh, RBAC, permissions, audit, Files (S3/MinIO),
-logging structuré, contrat OpenAPI canonique. Implémenté (local, non publié, non intégré) : packages
-clients. Décidé mais non implémenté : UI (tokens/stacks), cookies/CSRF web, secure storage mobile,
-server state (TanStack Query), CI/CD, registry. Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
+logging structuré, contrat OpenAPI canonique. Implémenté côté Web Core : UI Kit consommé, API publique
+(Health) + TanStack Query (SSR/hydratation), **BFF Auth** (cookies `HttpOnly`, CSRF double-submit,
+Origin/Referer) **et état de session/autorisations** (`me`/`authorization` read-only, `useSession`/
+`useAuthorization`, purge cache au logout). Implémenté (local, non publié) : packages clients. Décidé mais
+non implémenté : secure storage mobile, **SSR Auth complet / routes protégées web**, CI/CD, registry.
+Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 
 ## 9. Tests
 
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **64 tests** (`node:test` + `global-jsdom`
-+ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **112 tests** (`node:test` :
++ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **206 tests** (`node:test` :
 config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
 UI, mapping d'erreurs, garde anti-réseau, **Auth** : cookie-config, session adapter, factory
 read-only/writable, **CSRF** (gén/validation temps constant), **Origin/Referer**, validation login, handlers
-`csrf`/`login`/`refresh`/`logout`, isolation A/B, frontières d'import, **sentinelles**) + `next build` +
-**sonde HTTP** + **preuve API réelle Auth** (NestJS + PostgreSQL jetable : login/refresh/logout, cookies
-HttpOnly, CSRF, Origin, rotation, refresh-après-logout). Aucune CI : exécution **manuelle/locale**.
+`csrf`/`login`/`refresh`/`logout`/`me`/`authorization`, isolation A/B, frontières d'import, **sentinelles** ;
+**session/autorisations** : client BFF navigateur (envelope, same-origin, 401/403/réseau, aucun token),
+`authKeys` disjoints, `useSession` (401→anonymous / 403→error), `useAuthorization` (désactivé en anonyme,
+helpers OR/AND sans wildcard), `useLogout` (purge Auth / Health conservé ; échec réseau → pas de purge), UI
+session/authorization + a11y) + `next build` + **sonde HTTP** + **preuve API réelle Auth + session** (NestJS
++ PostgreSQL jetable : login → `/me` → `/authorization` → logout → `/me` 401 ; cookies HttpOnly ; CSRF ;
+Origin ; rotation ; **read-only sans refresh** ; **changement de droits sans nouveau JWT** ; bundle client
+sans secret). Aucune CI : exécution **manuelle/locale**.
 
 ## 10. Preuves
 
@@ -149,9 +159,9 @@ détaillée du API Core.
 
 1. ~~Aucun commit Git~~ **RÉSOLU (local)** — baseline `7dcb543` créée sur `main` (ADR-001 exercé
    localement). Reste : **non poussée** vers `origin` (décision humaine/gouvernance).
-2. **Packages intégrés (public)** — UI Kit consommé + `api-client-fetch` **instancié** (endpoints
-   publics) par le Web Core ; usage **authentifié** non encore intégré. Risque de dérive si le contrat
-   évolue sans régénération (mitigé par `generate:check`, non automatisé).
+2. **Packages intégrés (public + authentifié)** — UI Kit consommé + `api-client-fetch` **instancié**
+   (endpoints publics **et** BFF Auth) par le Web Core ; types Auth dérivés via `SchemaOf<>`. Risque de
+   dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
 3. **Spécifications sans starter** — `cloud` et `mobile-react-native` peuvent être lus à tort comme implémentés.
 4. **Pas de CI** — non-régression et reproductibilité reposent sur l'exécution manuelle.
 5. **Strategy Phase 0 partiellement datée** — contexte historique à ne pas confondre avec l'état réel.
@@ -167,11 +177,12 @@ preuve désormais retiré (bannière de migration ajoutée).
 ## 15. Prochaine étape
 
 Le **Web Core** (`@enistere/web-nextjs`, **`IMPLEMENTATION_PARTIELLE`**) expose désormais les **flux BFF
-Auth** (`login`/`refresh`/`logout`/`csrf` via Route Handlers) : cookies `HttpOnly` access/refresh,
-**CSRF** double-submit, Origin/Referer, rotation, logout idempotent — **prouvés contre l'API réelle**
-(169 tests). Restent : `me`/`authorization`, page de connexion, middleware, hooks Auth. **Prochaine
-action recommandée** : **Web Auth 3** — `me`/`authorization` + session via TanStack Query.
-Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+Auth** (`login`/`refresh`/`logout`/`csrf`) **et l'état de session/autorisations** (`me`/`authorization`
+read-only, hooks `useSession`/`useAuthorization`, purge du cache Auth au logout, `403` distinct d'`anonymous`,
+helpers OR/AND sans wildcard) — **prouvés contre l'API réelle** (206 tests ; changement de droits **sans
+nouveau JWT**). Restent volontairement absents : page de connexion, middleware, route protégée, SSR Auth
+complet. **Prochaine action recommandée** : **Checkpoint de gouvernance Web Core** (revue de socle) avant
+d'attaquer le SSR Auth / les routes protégées. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 
