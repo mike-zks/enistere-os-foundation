@@ -72,11 +72,51 @@ body {
   margin: 0;
 }
 
-.foundation__scope-list {
+.foundation__scope-list,
+.foundation__connections-list {
   margin: 0;
   padding-left: 1.25rem;
   display: grid;
   gap: 0.375rem;
+}
+
+.foundation__connection {
+  list-style: none;
+}
+
+/* --- Panneau Health --- */
+.health {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.health__list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.health-probe {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--enistere-color-background-muted);
+  border-radius: 0.5rem;
+  background-color: var(--enistere-color-background-elevated);
+}
+
+.health-probe__value {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.health-probe__error {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
 }
 
 /* --- États (loading / error / not-found) --- */

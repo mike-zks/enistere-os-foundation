@@ -22,6 +22,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Résolution des imports de style nodenext (`./x.js` → `./x.ts`/`.tsx`) côté Turbopack, afin
+  // d'utiliser une convention d'import UNIQUE dans tout le code (cohérente avec `node:test`).
+  experimental: {
+    extensionAlias: { ".js": [".ts", ".tsx", ".js"] },
+  },
   async headers() {
     return [
       {

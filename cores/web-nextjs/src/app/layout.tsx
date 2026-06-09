@@ -7,8 +7,9 @@ import type { ReactElement, ReactNode } from "react";
 import "@enistere/ui-kit/styles.css";
 import "./globals.css";
 
-import { appMetadata } from "../core/config/metadata";
-import { DEFAULT_THEME } from "../core/config/theme";
+import { appMetadata } from "../core/config/metadata.js";
+import { DEFAULT_THEME } from "../core/config/theme.js";
+import { AppProviders } from "./providers/app-providers.js";
 
 export const metadata: Metadata = appMetadata;
 
@@ -17,11 +18,13 @@ export default function RootLayout({
 }: {
   readonly children: ReactNode;
 }): ReactElement {
-  // Thème clair fixé via `data-theme` (le UI Kit résout les tokens en conséquence).
-  // Pas de bascule runtime ni de gestionnaire de thème en Web 1.
+  // Layout = Server Component. Les fournisseurs client (TanStack Query) sont isolés dans
+  // `AppProviders` (Client Component). Thème clair fixé via `data-theme` (résolu par le UI Kit).
   return (
     <html lang="fr" data-theme={DEFAULT_THEME}>
-      <body>{children}</body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

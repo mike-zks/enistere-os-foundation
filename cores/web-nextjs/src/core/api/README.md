@@ -1,16 +1,24 @@
-# `core/api` — cadrage (vide en Web 1)
+# `core/api` — couche d'accès API
 
-Emplacement réservé à la **couche d'accès API** du Web Core. **Aucun code en Web 1.**
+Couche de transport du Web Core. **Intégration publique uniquement** (endpoints Health) — aucune
+authentification.
 
-En Web 1, il n'y a **aucun appel réseau**. Les paquets clients officiels du monorepo
-(`@enistere/api-contracts`, `@enistere/api-client-fetch`) sont déclarés en dépendances et
-**résolvent à la compilation** (preuve : `test/api-resolution.fixture.ts`), mais ne sont **pas
-instanciés**.
+## Implémenté
 
-Prévu (incréments ultérieurs, hors périmètre V1) :
+- `run-public-request.ts` — exécution `client.raw` (timeout + normalisation `ApiClientError`).
+- `server/create-server-api-client.ts` — factory **serveur par requête** (`API_INTERNAL_URL`, no-store).
+- `public/public-api-client.ts` — client **public** navigateur (sans session, `enableRefresh:false`).
+- `health/health-transport.ts` — `getHealth/getLiveness/getReadiness` (types via `SchemaOf<>`).
+- `errors/map-api-error.ts` — message public générique (`kind`/`status`), sans fuite.
 
-- instanciation de `createEnistereApiClient` (depuis `@enistere/api-client-fetch`) ;
-- BFF / route handlers serveur, cookies `HttpOnly`, CSRF ;
-- hooks TanStack Query (ADR-012) maintenus dans ce core.
+Les paquets `@enistere/api-contracts` et `@enistere/api-client-fetch` sont **réellement consommés**
+(transport Health). Détail : [`../../../docs/api-integration.md`](../../../docs/api-integration.md).
 
-> Ne rien ajouter ici sans mission dédiée : la frontière « pas d'API en Web 1 » est explicite.
+## Hors périmètre (incréments ultérieurs)
+
+- **Client authentifié** : il passera par un **BFF** + cookies `HttpOnly` (ADR-005/011) et **ne
+  réutilisera pas** le client public. Voir [`../auth/README.md`](../auth/README.md).
+- Endpoints **Files** / upload (ADR-007).
+- Hooks de domaines métier (au fil des features).
+
+> Ne pas ajouter d'appel authentifié ni d'endpoint privé ici sans mission dédiée.

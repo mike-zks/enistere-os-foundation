@@ -20,32 +20,32 @@
 | ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | `@enistere/ui-kit` : tokens + 6 primitives Web (64 tests) ; bibliothèque complète à venir |
 | ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | UI Kit **consommé par le Web Core starter** (CSS `--enistere-*`, classes `enistere-*`) ; Tailwind/Radix/shadcn **non ajoutés** (différés V2) |
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
-| ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | package `api-client-fetch` **résolu à la compilation** dans le Web Core (non instancié) ; **Axios absent** |
-| ADR-012 | Server state = TanStack Query | Validé | **DECIDE_NON_IMPLEMENTE** | web/mobile | Web Core starter présent ; hooks **non ajoutés** (prochain incrément) |
+| ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public/Health)** dans le Web Core (serveur + navigateur), preuve API réelle ; **Axios absent**. Reste : usage authentifié (Mobile) |
+| ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation). Reste : mutations/auth ; Mobile |
 | ADR-013 | CI/CD V1 | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web/mobile | aucun workflow |
 | ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
-| ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **résolus à la compilation** dans le Web Core (non instanciés) |
+| ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>`, client **instancié** pour Health) — aucun DTO recopié |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
 | ADR-040 | Logging structuré (Pino) | Validé | **IMPLEMENTE_ET_REVU** | api/cloud | Pino + `STRUCTURED_LOGGING_COMPATIBILITY_PROOF` + e2e |
 
-## 2. Décisions validées mais NON encore appliquées
-
-À traiter au fil des cores / de l'infrastructure (aucune n'est implémentée aujourd'hui) :
+## 2. Décisions validées — état d'application
 
 - **ADR-008/009/010** — UI Kit : **partiellement fait** (tokens + 6 primitives Web, React 19) ;
-  **consommé par le Web Core starter**. Restent : composants supplémentaires, stacks
-  Tailwind/Radix/shadcn (Web) et ThemeProvider/NativeWind (Mobile).
-- **ADR-005** — cookies web/CSRF : prochain incrément du Web Core (starter présent).
-- **ADR-011/012** — instanciation du client Fetch + hooks TanStack Query : prochain incrément du Web
-  Core (le starter résout les paquets à la compilation mais ne les instancie pas).
+  **consommé par le Web Core**. Restent : composants supplémentaires, stacks Tailwind/Radix/shadcn (Web)
+  et ThemeProvider/NativeWind (Mobile).
+- **ADR-011 / 012** — **FAIT (public, Web)** : `api-client-fetch` **instancié** (factory serveur par
+  requête + client public navigateur) et **TanStack Query** intégré (QueryClient, provider, keys, hooks
+  Health, SSR/hydratation), preuve API réelle. Reste : usage **authentifié** (Web), et le Mobile.
+- **ADR-005** — cookies web/CSRF/BFF : **prochain incrément** du Web Core (Auth).
 
-> **Décisions d'implémentation du Web Core starter (hors ADR, tracées ici)** : framework **Next.js 16
-> (App Router, Turbopack) + React 19** retenu plutôt que Next 14/React 18 — Next 14.2.x portait des
-> advisories *high* sans correctif en 14.x, le correctif npm étant `next@16` ; Next 16 + React 19
-> ramène l'audit à **0 vuln**. Le **UI Kit a été aligné sur React 19** (v0.1.1, peer `react >=18`
-> inchangé). Un **override npm `postcss ^8.5.15`** neutralise l'advisory transitif (postcss < 8.5.10)
-> embarqué par Next. Runner de test = **node:test** (pas de Vitest → 0 vuln). CSP **différée** (V2).
+> **Décisions d'implémentation du Web Core (hors ADR, tracées ici)** : **Next.js 16 + React 19** (vs
+> Next 14/React 18) — advisories *high* sans correctif en 14.x ; **0 vuln** avec Next 16 + override
+> `postcss ^8.5.15`. **UI Kit aligné React 19** (v0.1.1). Runner **node:test** (pas de Vitest). **Build
+> via webpack** (`experimental.extensionAlias` résout les imports `.js → .ts/.tsx` ; Turbopack ne le
+> fait pas — convention d'import unique `.js`). **TanStack Query v5** pour le server state ; **aucun
+> store global** (Zustand/Redux), **aucun Axios**. Page Health **`force-dynamic` + `no-store`** : build
+> indépendant de l'API. CSP **différée** (V2).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

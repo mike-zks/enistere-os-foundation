@@ -2,9 +2,12 @@
  * Configuration PUBLIQUE (sûre côté client).
  *
  * Ne lit que des variables non sensibles : `APP_ENV` et les variables `NEXT_PUBLIC_*`.
- * Aucun secret/token ne doit transiter ici. En Web 1, aucune URL d'API n'est requise
- * (aucun appel réseau) : `apiBaseUrl` reste `null` tant que `NEXT_PUBLIC_API_URL` est absente.
+ * Aucun secret/token ne doit transiter ici. `NEXT_PUBLIC_API_URL` est l'URL **publique** consommée
+ * par le client navigateur (endpoints Health, Web 2) ; elle est facultative — sans elle, l'intégration
+ * API publique est « non configurée » (les hooks restent désactivés, l'UI l'affiche).
  */
+import { normalizeApiBaseUrl } from "./api-url.js";
+
 export type AppEnv = "development" | "test" | "production";
 
 function readAppEnv(): AppEnv {
@@ -29,3 +32,17 @@ export const publicConfig: PublicConfig = {
   appEnv: readAppEnv(),
   apiBaseUrl: process.env.NEXT_PUBLIC_API_URL ?? null,
 };
+
+/** `true` si `NEXT_PUBLIC_API_URL` est définie (non vide) — l'API publique est alors configurée. */
+export function isPublicApiConfigured(): boolean {
+  const raw = process.env.NEXT_PUBLIC_API_URL;
+  return typeof raw === "string" && raw.trim() !== "";
+}
+
+/**
+ * URL d'API publique **validée et normalisée** (client navigateur). Lève `ApiUrlError` si absente
+ * ou invalide. À n'appeler que lorsque `isPublicApiConfigured()` est vrai (sinon « non configuré »).
+ */
+export function getPublicApiUrl(): string {
+  return normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL, { varName: "NEXT_PUBLIC_API_URL" });
+}

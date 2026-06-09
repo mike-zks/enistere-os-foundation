@@ -12,16 +12,9 @@ const pkg = JSON.parse(
 
 const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
 
-// Dépendances interdites en Web 1 (frontières explicites de la mission).
-const FORBIDDEN = [
-  "axios",
-  "@tanstack/react-query",
-  "@tanstack/query-core",
-  "zustand",
-  "orval",
-  "@reduxjs/toolkit",
-  "@storybook/react",
-];
+// Dépendances interdites (frontières explicites de la mission Web 2).
+// TanStack Query est désormais REQUIS (server state) ; Axios/Zustand/Orval restent proscrits.
+const FORBIDDEN = ["axios", "zustand", "redux", "@reduxjs/toolkit", "jotai", "mobx", "orval", "@storybook/react"];
 
 // Dépendances socle attendues.
 const REQUIRED = [
@@ -31,6 +24,7 @@ const REQUIRED = [
   "@enistere/ui-kit",
   "@enistere/api-contracts",
   "@enistere/api-client-fetch",
+  "@tanstack/react-query",
 ];
 
 test("aucune dépendance interdite en Web 1", () => {

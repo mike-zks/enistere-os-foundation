@@ -1,34 +1,36 @@
-# `@enistere/web-nextjs` — Web Core (starter minimal)
+# `@enistere/web-nextjs` — Web Core
 
-Socle **Web** d'Enistère : application **Next.js 16 (App Router)** en **TypeScript strict**,
-consommant le design system **`@enistere/ui-kit`**. **Starter minimal V1** — aucune logique métier,
-aucun appel réseau, aucune authentification.
+Socle **Web** d'Enistère : application **Next.js 16 (App Router)** en **TypeScript strict**, consommant
+le design system **`@enistere/ui-kit`**, l'**API publique** (endpoints Health) via les paquets clients
+officiels et **TanStack Query** pour le server state. **Aucune authentification** (BFF/cookies/CSRF
+viendront dans un incrément ultérieur).
 
-> **Statut** : `STARTER_INITIALISE` (compile, build, lint, tests verts + serveur local vérifié).
-> Source de vérité de pilotage : [`docs/project-status/`](../../docs/project-status/README.md).
+> **Statut** : `IMPLEMENTATION_PARTIELLE` (compile, build, lint, tests verts + serveur local + preuve
+> API réelle). Source de vérité de pilotage : [`docs/project-status/`](../../docs/project-status/README.md).
 
 ---
 
 ## 1. Périmètre
 
-### Inclus (V1)
+### Inclus
 
 - Next.js **App Router** + **TypeScript strict** (`strict`, `noUncheckedIndexedAccess`, …).
-- Arborescence `app` / `core` / `shared` / `features`.
-- **Server Components par défaut** (seul `app/error.tsx` est `"use client"`, contrainte Next).
-- Layout racine, page technique d'accueil, `loading` / `error` / `not-found`, `manifest`.
-- **Consommation réelle** du UI Kit (`@enistere/ui-kit` + `@enistere/ui-kit/styles.css`).
-- Thème **clair par défaut** via `data-theme` (résolu par le UI Kit ; pas de bascule runtime).
-- En-têtes de **sécurité de base** + suppression de `X-Powered-By`.
-- Configuration d'environnement minimale (public vs serveur).
-- Tests (node:test + Testing Library + jest-axe), build, lint, typecheck.
+- Arborescence `app` / `core` / `shared` / `features` ; **Server Components par défaut**.
+- **Consommation réelle** du UI Kit (`@enistere/ui-kit` + `styles.css`) ; thème clair via `data-theme`.
+- **Intégration de l'API publique** (Health) : factory serveur **par requête**, client **public**
+  navigateur (sans session), transport typé depuis `@enistere/api-contracts`/`@enistere/api-client-fetch`.
+- **TanStack Query** : `QueryClient` (retry borné), `QueryProvider`, query keys, hooks Health.
+- **SSR + préchargement + hydratation** contrôlés ; build **indépendant** d'une API disponible.
+- Normalisation d'erreurs Web, propagation **X-Request-Id**, en-têtes de **sécurité** + pas de `X-Powered-By`.
+- États `loading` / `error` / `not-found`, métadonnées, `manifest`.
+- Tests (node:test + Testing Library + jest-axe) + preuve avec **API réelle** (PostgreSQL jetable).
 
-### Hors périmètre (V1) — volontairement absent
+### Hors périmètre — volontairement absent
 
-Auth / BFF / cookies `HttpOnly` / CSRF · login-refresh-logout · middleware d'auth · TanStack Query ·
-Zustand · **Axios** · Orval · routes Files / upload multipart · Storybook · composants UI complexes ·
-logique métier · OAuth / MFA · i18n complet · monitoring · workflow CI · Dockerfile · publication npm ·
-**aucun type d'API recopié manuellement** · **aucun appel réseau réel**.
+Auth / BFF / cookies `HttpOnly` / CSRF · login-refresh-logout · middleware d'auth · stockage de token ·
+endpoints **authentifiés** · routes Files / upload · **Axios** · **Zustand**/Redux/Jotai · Orval ·
+Storybook · logique métier · OAuth / MFA · i18n complet · monitoring · workflow CI · Dockerfile ·
+publication npm · **aucun type d'API recopié manuellement**.
 
 ---
 
@@ -36,15 +38,17 @@ logique métier · OAuth / MFA · i18n complet · monitoring · workflow CI · D
 
 | Brique | Version | Note |
 | --- | --- | --- |
-| Next.js | **16.2.7** | App Router · build par **Turbopack** |
+| Next.js | **16.2.7** | App Router · build **webpack** (cf. [§5](#5-conventions-dimport)) |
 | React / React DOM | **19** | version **unique** dans tout le monorepo |
+| Server state | `@tanstack/react-query` **5** | retry borné, SSR/hydratation ; **aucun Axios** |
+| Clients API | `@enistere/api-client-fetch` + `@enistere/api-contracts` | Fetch typé, sans Axios |
 | TypeScript | 5.7+ | `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride` |
 | Tests | `node:test` + `@testing-library/react` 16 + `jest-axe` + `global-jsdom` | pas de Vitest (0 vuln) |
 | Lint | ESLint **9** (flat config) + `eslint-config-next` 16 | `next lint` retiré en Next 16 |
 
-> **Pourquoi Next 16 / React 19** : Next 14.2.x traînait 4 advisories *high* sans correctif en
-> 14.x ; le correctif npm était précisément `next@16`. Next 16 + React 19 ramène l'audit à **0
-> vulnérabilité**. Le UI Kit a été aligné sur React 19 (voir [§10](#10-ui-kit--react-19)).
+> **Pourquoi Next 16 / React 19** : Next 14.2.x traînait des advisories *high* sans correctif en 14.x ;
+> le correctif npm était `next@16`. Next 16 + React 19 (+ override `postcss`) ramène l'audit à **0
+> vulnérabilité**. Le UI Kit a été aligné sur React 19 (voir [§11](#11-ui-kit--react-19)).
 
 ---
 
@@ -52,22 +56,24 @@ logique métier · OAuth / MFA · i18n complet · monitoring · workflow CI · D
 
 ```
 src/
-  app/                      # App Router (compilé par Next uniquement)
-    layout.tsx              # layout racine : importe les CSS, pose <html data-theme>
-    page.tsx                # page d'accueil technique (Server Component)
-    loading.tsx             # UI de chargement
-    error.tsx               # frontière d'erreur ("use client" — reçoit reset)
-    not-found.tsx           # UI 404
-    manifest.ts             # manifeste web
-    globals.css             # reset + structure (référence les variables du UI Kit)
+  app/                       # App Router
+    layout.tsx               # Server Component : CSS + <html data-theme> + <AppProviders>
+    page.tsx                 # force-dynamic : prefetch Health (SSR) + HydrationBoundary
+    providers/app-providers  # Client Component : enveloppe QueryProvider (layout reste serveur)
+    loading/error/not-found/manifest
   core/
-    config/                 # public-config, server-config, metadata, theme (testables)
-    api/ auth/ query/       # cadrage uniquement (README) — vides en V1
-  shared/components/        # LoadingState / ErrorState / NotFoundState (UI Kit, testables)
+    config/                  # api-url (validation), public-config, server-config, metadata, theme
+    api/
+      run-public-request     # timeout + normalisation ApiClientError pour `client.raw`
+      server/                # createServerApiClient (par requête, API_INTERNAL_URL, no-store)
+      public/                # createPublicApiClient + singleton navigateur (sans session)
+      health/                # getHealth/getLiveness/getReadiness (types via SchemaOf<>)
+      errors/                # mapApiErrorToPublicMessage
+    query/                   # query-client (retry), query-provider, keys/health-keys
   features/
-    foundation-status/      # contenu de la page technique (testable)
-  types/global.d.ts         # déclaration ambiante des imports CSS
-test/                       # tests node:test (compilés à part vers build-test/)
+    foundation-status/       # page technique (matrice d'intégrations) — testable
+    health/                  # queries (queryOptions), hooks, health-panel, health-probe-view
+test/                        # node:test (compilés vers build-test/)
 ```
 
 ---
@@ -76,87 +82,103 @@ test/                       # tests node:test (compilés à part vers build-test
 
 | Commande | Effet |
 | --- | --- |
-| `npm run dev` | serveur de dev (port **3100**) |
-| `npm run build` | build de production (Turbopack) |
+| `npm run dev` | serveur de dev (port **3100**, webpack) |
+| `npm run build` | build de production (webpack) |
 | `npm run start` | serveur de production (port 3100) |
-| `npm run lint` | ESLint (flat config) |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run test` | compile `tsconfig.test.json` puis `node --test` |
+| `npm run lint` / `typecheck` | ESLint / `tsc --noEmit` |
+| `npm run test` / `test:coverage` | compile `tsconfig.test.json` puis `node --test` |
 | `npm run check` | typecheck + lint + test + build |
 
 ---
 
-## 5. Conventions d'import (important)
+## 5. Conventions d'import
 
-Deux compilateurs cohabitent :
+Deux compilateurs cohabitent : **Next** (build de `app/` + graphe importé) et **`tsc` nodenext**
+(compilation des tests vers `build-test/`, exécutés par `node --test`).
 
-- **Next/Turbopack** (build du dossier `app/` + tsconfig `bundler`) ;
-- **`tsc` nodenext** (compilation des tests vers `build-test/`, exécutés par `node --test`).
-
-Règles :
-
-- Les **fichiers de `test/`** importent la source via **`../src/.../x.js`** (extension `.js`
-  obligatoire en `nodenext`).
-- Les **fichiers `app/`** importent en **relatif sans extension** (`../shared/components/x`) :
-  Turbopack ne mappe pas `.js → .tsx` par défaut.
-- Les composants feuilles (`shared`, `features`) n'importent que des spécificateurs **nus**
-  (`@enistere/ui-kit`, `react`) — donc aucun conflit d'extension.
-
-`src/app/` est **exclu** de `tsconfig.test.json` : les fichiers App Router (CSS, layout) sont validés
-par `next build` + une sonde HTTP locale, pas par `node:test`.
+- **Convention unique** : tous les imports relatifs utilisent l'extension **`.js`** (style `nodenext`,
+  requis par `node:test`).
+- Le build utilise **webpack** (`next build --webpack`) avec `experimental.extensionAlias`
+  (`.js → .ts/.tsx`). **Turbopack** ne résout pas encore ces imports `.js` ; webpack le fait. C'est la
+  seule raison de ce choix de bundler (documentée ici).
+- `src/app/` est **exclu** de `tsconfig.test.json` : les fichiers App Router (CSS, layout, page async,
+  RSC/Client) sont validés par `next build` + sonde HTTP locale, pas par `node:test`.
 
 ---
 
 ## 6. Environnement
 
-Variables (voir [`.env.example`](.env.example)) — **aucune n'est requise en V1** :
+Variables (voir [`.env.example`](.env.example)) — **aucune n'est requise** pour build/lint/tests :
 
-- `APP_ENV`, `NEXT_PUBLIC_APP_NAME` : **publiques** (sûres côté client).
-- `NEXT_PUBLIC_API_URL` : URL API publique — **commentée** (aucun appel en V1).
-- `API_INTERNAL_URL` : **serveur uniquement** — jamais préfixée `NEXT_PUBLIC_`.
+- `APP_ENV`, `NEXT_PUBLIC_APP_NAME` : **publiques**.
+- `NEXT_PUBLIC_API_URL` : URL **publique** (navigateur) des endpoints Health. Facultative : sans elle,
+  l'UI affiche « non configuré » et n'émet aucune requête. **Aucun secret** (inlinée au build).
+- `API_INTERNAL_URL` : URL **interne, serveur uniquement** (préchargement SSR), jamais préfixée
+  `NEXT_PUBLIC_`. Préférée côté serveur si présente.
 
-Règle : **aucun secret/token dans une variable `NEXT_PUBLIC_*`**. `core/config/public-config.ts` ne
-lit que des valeurs publiques ; `core/config/server-config.ts` est réservé au serveur.
-
----
-
-## 7. Thème
-
-Le UI Kit résout les tokens via `data-theme` sur `<html>` : `:root` = **clair** (défaut),
-`[data-theme="dark"]` = surcharges sombres. V1 fixe `data-theme="light"` dans `layout.tsx`
-(pas de flash, pas de gestionnaire de thème, pas de persistance — prévu V2).
+Toutes les URLs sont **validées** (`http(s)`, absolues, sans credentials, slash final normalisé,
+wildcard rejeté — `core/config/api-url.ts`). Détail : [`docs/api-integration.md`](docs/api-integration.md).
 
 ---
 
-## 8. Sécurité
+## 7. Intégration API (transport)
 
-En-têtes appliqués à toutes les routes (`next.config.ts`) : `X-Content-Type-Options: nosniff`,
-`Referrer-Policy`, `X-Frame-Options: DENY`, `X-DNS-Prefetch-Control: off`, `Permissions-Policy`.
-`poweredByHeader: false` retire `X-Powered-By`. **CSP volontairement différée** (V2). Détails :
-[`docs/SECURITY.md`](docs/SECURITY.md).
+- **Factory serveur par requête** (`createServerApiClient`) : nouvelle instance à chaque appel, aucun
+  état module, `API_INTERNAL_URL`, `fetch` **`no-store`**, aucun Bearer, aucun refresh.
+- **Client public navigateur** (`createPublicApiClient` + singleton) : `NEXT_PUBLIC_API_URL`, **aucune
+  session**, `enableRefresh:false`, **X-Request-Id** (`crypto.randomUUID`).
+- Les endpoints Health (non couverts par les façades auth/files) passent par `client.raw` + un petit
+  transport (`run-public-request`) : **timeout**, normalisation en **`ApiClientError`**, extraction de
+  l'enveloppe — **sans recopier de DTO** (types via `SchemaOf<>` des contrats).
 
----
-
-## 9. Tests
-
-`node:test` (pas de second runner — voir ADR UI Kit) : configuration, thème, métadonnées,
-`FoundationStatus`, états partagés, **a11y** (`jest-axe`), **non-régression de contraintes**
-(dépendances interdites absentes), **résolution des paquets API** (compilation + `import.meta.resolve`,
-sans appel réseau). La page d'accueil rend réellement des classes `enistere-*` (preuve de
-consommation du UI Kit). Le serveur local est vérifié par sonde HTTP (statut, en-têtes, thème,
-CSS, 404). Pas d'E2E lourd en V1.
+> ⚠️ Le client **public** ne doit PAS devenir le futur client **authentifié** (qui passera par un BFF
+> + cookies `HttpOnly`). Voir [`src/core/auth/README.md`](src/core/auth/README.md). Détail :
+> [`docs/api-integration.md`](docs/api-integration.md).
 
 ---
 
-## 10. UI Kit & React 19
+## 8. TanStack Query & SSR
 
-L'intégration a aligné `@enistere/ui-kit` sur **React 19** (devDeps/types ; peer `react >=18`
-inchangé, couvre 18 et 19). Les **64 tests** du UI Kit passent sous React 19 (aucune régression).
-Voir le `CHANGELOG.md` racine.
+`QueryClient` (retry **borné** : jamais sur 4xx/429, borné sur réseau/5xx ; `refetchOnWindowFocus`
+off), `QueryProvider` (client, une instance par navigateur), `AppProviders` (le layout reste **Server
+Component**). Query keys standardisées (`healthKeys`). Hooks `useHealth/useLiveness/useReadiness`
+(désactivés si l'API publique n'est pas configurée). La page précharge `health_get` côté serveur,
+`dehydrate` + `HydrationBoundary` ; `staleTime` évite un refetch immédiat après hydratation. La page
+est **`force-dynamic` + `no-store`** : le **build ne dépend d'aucune API**. Détail :
+[`docs/tanstack-query.md`](docs/tanstack-query.md).
 
 ---
 
-## 11. Feuille de route (extraits V2)
+## 9. Erreurs & corrélation
 
-Intégration des paquets API + hooks TanStack Query · BFF Auth (cookies `HttpOnly`, CSRF) ·
-gestionnaire de thème · CSP à nonces · i18n · CI/CD.
+`mapApiErrorToPublicMessage` produit un message **public générique** depuis `kind`/`status`/`errorCode`
+(jamais de `cause`/stack/secret) ; le `requestId` est conservé comme référence technique. Cas couverts :
+réseau, timeout, réponse invalide, 429, 500, 503 (401/403 normalisés **sans** workflow d'auth).
+
+---
+
+## 10. Tests & preuve
+
+`node:test` : validation d'URL/config, factory serveur (instance par appel, no-Bearer, isolation),
+client public (no-Authorization, `enableRefresh:false`, requestId, **aucun import serveur** — vérifié
+statiquement), `QueryClient` (politique de retry, isolation du cache), query keys, transport Health
+(succès/erreur/timeout/requestId), hooks (succès/erreur/refetch/désactivé), **hydratation** (donnée
+fraîche → pas de refetch), UI Health (états + a11y), mapping d'erreurs, et **garde anti-réseau** (toute
+requête réelle non mockée fait échouer un test). Build + sonde HTTP locale. **Preuve API réelle** :
+API NestJS + PostgreSQL jetable (Health/live/ready, hydratation SSR, API down → rendu contrôlé, API up
+→ succès) — **sans authentification**.
+
+---
+
+## 11. UI Kit & React 19
+
+`@enistere/ui-kit` est aligné sur **React 19** (peer `react >=18`, couvre 18 et 19) ; ses **64 tests**
+passent sous React 19 (aucune régression). Voir le `CHANGELOG.md` racine.
+
+---
+
+## 12. Feuille de route
+
+**Prochain incrément** : Auth/BFF (cookies `HttpOnly`, CSRF, login/refresh/logout) — via un **nouveau**
+client serveur authentifié (jamais le client public). Puis : endpoints authentifiés, gestionnaire de
+thème, CSP à nonces, i18n, CI/CD.

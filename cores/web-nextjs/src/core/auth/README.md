@@ -1,13 +1,20 @@
-# `core/auth` — cadrage (vide en Web 1)
+# `core/auth` — cadrage (vide)
 
-Emplacement réservé à l'**authentification** du Web Core. **Aucun code en Web 1.**
+Emplacement réservé à l'**authentification** du Web Core. **Aucun code à ce stade.**
 
-Volontairement **absent** en Web 1 (et interdit par la mission de starter) :
+Volontairement **absent** (et hors périmètre des missions actuelles) :
 
 - BFF Auth, cookies `HttpOnly`, protection CSRF ;
-- flux login / refresh / logout, middleware d'authentification ;
-- OAuth, MFA.
+- login / refresh / logout, middleware d'authentification ;
+- OAuth, MFA ; **aucun token stocké**.
 
-**Aucun token n'est stocké** dans le Web Core en V1.
+## ⚠️ Frontière à respecter
+
+Le **client API public** (`core/api/public/`, introduit pour les endpoints Health) **ne doit pas
+devenir** le client authentifié. La future intégration Auth utilisera :
+
+- un **BFF** (Route Handlers serveur) + **cookies `HttpOnly`** (ADR-005) ;
+- un **client serveur authentifié dédié** (jamais le singleton public, qui est sans session) ;
+- une protection **CSRF** et un flux refresh côté serveur.
 
 > Ne rien ajouter ici sans mission dédiée.

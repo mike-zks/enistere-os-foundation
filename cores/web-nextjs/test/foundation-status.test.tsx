@@ -22,9 +22,24 @@ test("expose un repère <main>", () => {
   assert.ok(screen.getByRole("main"));
 });
 
-test("affiche le statut STARTER_INITIALISE", () => {
+test("affiche la matrice d'intégrations (UI Kit / API / TanStack connectés ; Auth/Files non configurés)", () => {
   render(<FoundationStatus />);
-  assert.ok(screen.getByText("STARTER_INITIALISE"));
+  // « UI Kit » et « TanStack Query » apparaissent aussi dans les faits → getAllByText.
+  assert.ok(screen.getAllByText(/UI Kit/).length >= 1);
+  assert.ok(screen.getAllByText(/TanStack Query/).length >= 1);
+  assert.ok(screen.getByText(/Client API public/));
+  // Auth et Files explicitement « non configuré ».
+  const notConfigured = screen.getAllByText(/non configuré/);
+  assert.ok(notConfigured.length >= 2, "Auth et Files doivent être marqués non configurés");
+});
+
+test("rend un emplacement enfant (panneau Health injecté par la page)", () => {
+  render(
+    <FoundationStatus>
+      <div data-testid="health-slot">slot</div>
+    </FoundationStatus>,
+  );
+  assert.ok(screen.getByTestId("health-slot"));
 });
 
 test("consomme réellement le UI Kit (classes enistere-*)", () => {

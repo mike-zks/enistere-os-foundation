@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import { useEffect } from "react";
-import { ErrorState } from "../shared/components/error-state";
+import { ErrorState } from "../shared/components/error-state.js";
 
 /**
  * Frontière d'erreur de segment (App Router) — DOIT être un Client Component (reçoit `reset`).
