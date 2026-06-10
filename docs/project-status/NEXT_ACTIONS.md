@@ -1,39 +1,45 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-06-09). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-06-10). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
 
-> **Web Core Files 1 — consultation des métadonnées & téléchargement sécurisé** (`cores/web-nextjs/`) :
-> consommer les opérations **Files** déjà présentes dans `@enistere/api-client-fetch` (liste/métadonnées +
-> téléchargement via URL présignée), **sans upload**. Réutilise les **états UI** (loading/empty/error/
-> forbidden/unavailable) et le BFF Auth. **Pas d'upload, pas d'admin RBAC, pas de composant lourd.**
+> **Revue globale Web Core — incrément V1** (`cores/web-nextjs/`) : revue **transverse de stabilisation** du
+> Web Core traité comme **un système unique** (API publique/Health → BFF Auth → session/autorisations →
+> layout protégé → login → états UI → **Files lecture/téléchargement**), **sans nouvelle fonctionnalité**.
+> Vérifier fichier par fichier + commandes réelles : frontières client/serveur, routes BFF `ƒ`, cookies
+> `HttpOnly`/`__Host-`, CSRF + Origin/Referer, **aucune fuite de token/URL signée** (greps src + bundle),
+> caches disjoints + purges, RBAC OR/AND **affichage seul** (API autorité), contrats `SchemaOf<>`, mappeurs
+> d'erreurs cohérents, non-régression complète. Produire un **rapport permanent** + verdict.
 
-**Justification** : **Web Core UI 1 est terminé** (commit `feat(web-ui): add standard interface states`) :
-primitives UI Kit `Alert`/`Card`/`FormField` (**78 tests**) + compositions d'états Web
-(loading/empty/error/**401≠403≠indisponible**/`PageHeader`, **270 tests**), intégrées (accueil/Health/
-frontières/Auth), accessibles (axe), pilotées par tokens, **sans donnée sensible**. Le Web Core dispose
-désormais d'un socle d'**états standardisés** ; la suite produit logique est une **première feature de
-données** — **Files en lecture** — qui consomme l'API Core (Files déjà implémenté), le BFF Auth et ces états,
-**sans** introduire l'upload (incrément ultérieur).
+**Justification** : **Web Core Files 1 est terminé** (commit `feat(web-nextjs): add secure file read access`) :
+lecture des métadonnées **publiques** + URL signée courte + téléchargement direct depuis le stockage objet,
+via **deux Route Handlers BFF ciblés** (`GET /api/files/:id`, `POST /api/files/:id/download-url`), client BFF
+navigateur, `fileKeys` disjoints, `useFileMetadata` (query) + `useCreateDownloadUrl` (**mutation**, URL jamais
+mise en cache), page privée `/protected/files/[id]`, états UI réutilisés. **307 tests** + **preuve API + MinIO
+réelle 21/21**. Avec Files 1, le **bloc V1 du Web Core** (Health + Auth 1→5 + UI 1 + Files 1) est complet pour
+une **revue globale de stabilisation** — symétrique de la *Revue globale Auth Web (1→5)* — **avant** d'ouvrir
+le prochain incrément produit (Files 2 / UI Kit 4 / Mobile Core). **Ne pas choisir automatiquement Files 2
+avant cette revue.**
 
-**Alternative (justifiée)** : **UI Kit 4** (primitives interactives suivantes) si une lacune structurelle est
-confirmée ; ou démarrer le **Mobile Core**. À arbitrer par décision humaine.
+**Alternative (justifiée)** : si la revue globale est jugée prématurée par décision humaine — **Files 2**
+(upload sécurisé côté Web) ou **UI Kit 4** (primitives interactives) ou démarrer le **Mobile Core**.
 
-**Réserves V1 Auth (recommandées en parallèle, non bloquantes)** : **CI minimale** (ADR-013 : ordre de build
-des paquets + non-régression) + amorce d'un **E2E navigateur** (cf. `WEB_AUTH_V1_REVIEW.md`).
+**Réserves V1 (recommandées en parallèle, non bloquantes)** : **CI minimale** (ADR-013 : ordre de build des
+paquets + non-régression) + amorce d'un **E2E navigateur** (cf. `WEB_AUTH_V1_REVIEW.md`).
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(web-ui): add standard interface states`.
+`feat(web-nextjs): add secure file read access`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Web Core Files 1 — consultation métadonnées & téléchargement sécurisé** — consomme les Files de `api-client-fetch` (lecture), réutilise les états UI + BFF Auth ; **sans upload**. ✦ prochaine action.
-2. **CI minimale (ADR-013) + amorce E2E navigateur** — réserves V1 du bloc Auth (recommandées en parallèle).
-3. **UI Kit 4** — primitives interactives suivantes (alternative à (1) si lacune structurelle confirmée).
-4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
-5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
+1. **Revue globale Web Core (incrément V1)** — revue transverse de stabilisation (Health + Auth 1→5 + UI 1 + Files 1) comme un système unique ; rapport + verdict ; **sans nouvelle fonctionnalité**. ✦ prochaine action.
+2. **CI minimale (ADR-013) + amorce E2E navigateur** — réserves V1 (recommandées en parallèle).
+3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états) — **après** la revue globale.
+4. **UI Kit 4** — primitives interactives suivantes (alternative si lacune structurelle confirmée).
+5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
+6. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -51,7 +57,9 @@ deux cores. À arbitrer par décision humaine.
 | Bloc **Auth Web (1→5)** stable V1 ? | **REVU** — verdict **`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (`WEB_AUTH_V1_REVIEW.md`) : sûr/cohérent, aucun défaut bloquant ; réserves opérationnelles (CI, E2E, streaming-redirect, multi-onglets, CSP) |
 | Auth post-V1 (register/reset/OAuth/MFA) | **hors périmètre V1** — ne pas poursuivre l'Auth |
 | États UI & composants structurels (Web/UI Kit) | **FAIT** — Web UI 1 : Alert/Card/FormField (UI Kit, 78 tests) + LoadingState/EmptyState/ErrorState/Unauthorized/Forbidden/ServiceUnavailable/PageHeader (Web, 270 tests), intégrés + axe |
-| Files Web (lecture) | **débloqué** — c'est **Web Core Files 1** (prochaine action) ; consomme Files de `api-client-fetch`, sans upload |
+| Files Web (lecture/téléchargement) | **FAIT** — Web Core Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, client BFF, `fileKeys`, `useFileMetadata`/`useCreateDownloadUrl` (URL jamais en cache), page `/protected/files/[id]`, **307 tests** + preuve API+MinIO 21/21 |
+| Revue globale Web Core (incrément V1) | **débloqué** — prochaine action ; revue transverse de stabilisation (Health+Auth+UI+Files), sans nouvelle fonctionnalité |
+| Files Web (upload) | **débloqué après revue** — c'est **Web Core Files 2** ; multipart + finalisation, **non** prioritaire avant la revue globale |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |

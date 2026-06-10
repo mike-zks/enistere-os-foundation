@@ -63,3 +63,18 @@ une **référence technique**, pas une preuve de sécurité.
 - Serveur : `no-store` (toujours frais).
 - Client : `staleTime` court (TanStack) pour éviter un refetch immédiat après hydratation.
 - **Aucun cache global utilisateur** ; aucune donnée d'authentification mise en cache (il n'y en a pas).
+
+## Files (lecture/téléchargement — Files 1)
+
+Opérations Files consommées **via le BFF** (jamais l'API directe depuis le navigateur), à partir de la
+façade `@enistere/api-client-fetch` (`client.files.getMetadata` / `client.files.createDownloadUrl`,
+operationId `files_getMetadata` / `files_createDownloadUrl`) :
+
+- `GET /api/files/:id` → métadonnées **publiques** (`PublicStoredFileDto`) — client serveur **read-only**,
+  `no-store`, validation UUID (400), 404 anti-énumération relayé.
+- `POST /api/files/:id/download-url` → **URL signée courte** (`SignedDownloadResponseDto`) — Origin/Referer +
+  **CSRF**, client serveur **writable**, `no-store`, réponse **minimale** `{ url, expiresAt }`.
+
+Permission (`files.read`/`files.download`) **et** ownership restent vérifiés par l'**API NestJS** (autorité).
+Aucun champ interne (storageKey/bucket/checksum) n'est exposé ; l'URL signée n'est ni journalisée ni
+persistée. Détail : [`files-read-download.md`](files-read-download.md).

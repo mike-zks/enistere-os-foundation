@@ -22,7 +22,7 @@ pas une application ni une bibliothèque complète).
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
 | Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 9 primitives Web React** accessibles (Button/Input/Label/Text/Spinner/VisuallyHidden + **Alert/Card/FormField**, Web UI 1) ; **78 tests, 100 % couverture**, a11y ; aligné **React 19** ; **consommé par le Web Core** |
-| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth). **270 tests** + preuves API réelles (Auth/session **26/26** + login **22/22**). **Pas de middleware, pas de Server Action Auth, pas de token en JS.** |
+| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth) + **Files lecture/téléchargement** (Web Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, validation UUID, **CSRF/Origin** sur download-url, client BFF navigateur, `fileKeys`, `useFileMetadata` + `useCreateDownloadUrl` (**URL signée jamais en cache/log**), page `/protected/files/[id]`, **404 anti-énumération** ; **aucun upload/suppression/admin**, **aucun champ interne** exposé). **307 tests** + preuves API réelles (Auth/session **26/26** + login **22/22** + **Files API+MinIO 21/21**). **Pas de middleware, pas de Server Action Auth, pas de token en JS, pas de proxy générique.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
@@ -49,7 +49,7 @@ enistere-os-foundation/
   cores/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
-    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state)
+    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
     cloud/ mobile-react-native/                       → CORE_SPECIFICATION.md seul
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
@@ -67,7 +67,7 @@ enistere-os-foundation/
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
-| `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations) | **IMPLEMENTATION_PARTIELLE** |
+| `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture) | **IMPLEMENTATION_PARTIELLE** |
 | `mobile-react-native` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -88,8 +88,8 @@ seed RBAC, commandes CLI fichiers. Rapports : `API_CORE_V1_REVIEW`, `AUTH_RBAC_R
 
 | Package | Version | Privé | Build/Tests | Publié | Intégré dans un core |
 |---|---|---|---|---|---|
-| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **consommé (types) dans `web-nextjs`** (Health + Auth, dont `UserProfile`/`AuthorizationSummary` via `SchemaOf<>`) |
-| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **instancié (public/Health + authentifié/BFF) dans `web-nextjs`** |
+| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **consommé (types) dans `web-nextjs`** (Health + Auth + **Files** : `PublicStoredFileDto`/`SignedDownloadResponseDto` via `SchemaOf<>`) |
+| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **instancié (public/Health + authentifié/BFF Auth + façade Files lecture) dans `web-nextjs`** |
 
 Dépendance à sens unique : `openapi.json → api-contracts → api-client-fetch`. Le **UI Kit** et les
 **paquets API** sont désormais **réellement intégrés** par le Web Core pour les endpoints **publics**
@@ -115,9 +115,12 @@ d'implémentation : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 Implémenté + testé + revu : Auth, sessions, refresh, RBAC, permissions, audit, Files (S3/MinIO),
 logging structuré, contrat OpenAPI canonique. Implémenté côté Web Core : UI Kit consommé, API publique
 (Health) + TanStack Query (SSR/hydratation), **BFF Auth** (cookies `HttpOnly`, CSRF double-submit,
-Origin/Referer) **et état de session/autorisations** (`me`/`authorization` read-only, `useSession`/
-`useAuthorization`, purge cache au logout). Implémenté (local, non publié) : packages clients. Décidé mais
-non implémenté : secure storage mobile, **SSR Auth complet / routes protégées web**, CI/CD, registry.
+Origin/Referer), **état de session/autorisations** (`me`/`authorization` read-only, `useSession`/
+`useAuthorization`, purge cache au logout), **états UI standardisés** (UI 1) **et Files en lecture** (Files 1 :
+BFF ciblé métadonnées + URL signée + téléchargement direct, `useFileMetadata`/`useCreateDownloadUrl`, page
+`/protected/files/[id]` — **sans upload/suppression/admin**, **404 anti-énumération**, URL signée jamais
+mise en cache/journalisée). Implémenté (local, non publié) : packages clients. Décidé mais non implémenté :
+secure storage mobile, **SSR Auth complet**, **upload/admin Files côté Web**, CI/CD, registry.
 Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 
 ## 9. Tests
@@ -126,7 +129,7 @@ API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, P
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **78 tests** (`node:test` + `global-jsdom`
 + Testing Library + jest-axe, **React 19**), **100 % couverture** (9 primitives, dont Alert/Card/FormField).
-Web Core : **270 tests** (`node:test` :
+Web Core : **307 tests** (`node:test` :
 config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
 UI, mapping d'erreurs, garde anti-réseau, **Auth** : cookie-config, session adapter, factory
 read-only/writable, **CSRF** (gén/validation temps constant), **Origin/Referer**, validation login, handlers
@@ -139,12 +142,23 @@ isolation, **aucun refresh**, **aucune écriture cookie**), `decideProtectedRend
 au 1ᵉʳ rendu, **0 appel `/me`**, aucun token), vues indisponibilité/notice ; **Web Auth 5** : `sanitizeReturnTo`
 (anti open-redirect), validation login, client BFF login (CSRF/body/statuts/**aucune fuite mot de passe**),
 `useLogin` (**purge authKeys**, **double-soumission empêchée**, aucun credential en cache), `LoginForm`
-(a11y ×4)) + `next build` + **sonde HTTP** + **preuve API réelle** (NestJS + PostgreSQL jetable) : Auth + session
+(a11y ×4) ; **Files 1** : handlers BFF (UUID **400 sans appel API**, **401/403/404/409/503 distincts**, CSRF/Origin
+sur download-url, `no-store`, `requestId`, **aucun champ interne**, read-only **sans refresh**), client BFF Files
+(same-origin, `credentials:include`, **aucun Authorization**, **URL absente des erreurs**), `useFileMetadata`
+(clé disjointe, désactivée si UUID invalide, 404/503, retry false), `useCreateDownloadUrl` (CSRF→POST, **URL
+jamais en cache**, anti-double-clic, 409), `isUuid`/`formatFileSize` (BigInt)/`formatDateTime`/`isSafeDownloadUrl`/
+`triggerDownload` (schémas dangereux refusés, ancre nettoyée), `classifyFileError`, vue métadonnées + axe) +
+`next build` + **sonde HTTP** + **preuve API réelle** (NestJS + PostgreSQL jetable) : Auth + session
 (login → `/me` → `/authorization` → logout → `/me` 401 ; **read-only sans refresh** ; **droits sans nouveau
 JWT**), **espace protégé 26/26** et **connexion 22/22** (anonyme `/protected` → **redirection `/login`** ;
 `/login` → formulaire ; login BFF → `authenticated` sans token ; authentifié `/login` → redirection hors login ;
 **`returnTo` externe → `/protected`** (aucun open redirect) ; logout → `/login` ; 401 sans énumération ; 403 CSRF ;
-bundle/HTML sans secret/mot de passe). Aucune CI : exécution **manuelle/locale**.
+bundle/HTML sans secret/mot de passe), **et Files (API NestJS + MinIO jetables) 21/21** (upload auto-VALIDATED +
+objet → propriétaire `GET /api/files/:id` **200** publics no-store sans champ interne → `download-url` **200**
+`{url,expiresAt}` → **téléchargement réel MinIO** (octets == upload, image/png) → sans permission **403** →
+**non-propriétaire avec permission → 404** → quarantaine **409** → objet supprimé **503** → logout **401** + page →
+`/login` ; **aucun** storageKey/bucket/X-Amz-Signature/credentials en métadonnées, logs ou bundle). Aucune CI :
+exécution **manuelle/locale**.
 
 ## 10. Preuves
 
@@ -204,10 +218,20 @@ streaming-redirect, multi-onglets, CSP/HSTS). Puis **Web Core UI 1** a livré le
 structurels** : primitives UI Kit `Alert`/`Card`/`FormField` (**78 tests**) + compositions Web
 (`LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/
 `PageHeader`, **270 tests**), intégrées (accueil/Health/frontières/Auth), accessibles (axe), **sans donnée
-sensible** (détail [`ui-states.md`](../../cores/web-nextjs/docs/ui-states.md)). Statuts **maintenus**
+sensible** (détail [`ui-states.md`](../../cores/web-nextjs/docs/ui-states.md)). Enfin **Web Core Files 1** a livré
+la **première feature de données** en **lecture seule** : deux **Route Handlers BFF ciblés** (`GET /api/files/:id`,
+`POST /api/files/:id/download-url`, jamais un proxy générique ; validation **UUID** → 400 sans appel API ;
+**CSRF/Origin** sur download-url ; mapping d'erreurs distinct préservant **404 anti-énumération**/409/503), un
+**client BFF navigateur** (aucun Bearer), `fileKeys` **disjoints**, `useFileMetadata` (query) + **`useCreateDownloadUrl`**
+(**mutation** : URL signée **consommée puis abandonnée**, jamais en cache/log), téléchargement par **ancre
+temporaire** (`https`-only), et une page privée `/protected/files/[id]` réutilisant les états UI — **l'API restant
+l'autorité** (permission + ownership), **aucun champ interne** exposé, **sans upload/suppression/admin**
+(**307 tests** + **preuve API + MinIO réelle 21/21** ; détail
+[`files-read-download.md`](../../cores/web-nextjs/docs/files-read-download.md)). Statuts **maintenus**
 `IMPLEMENTATION_PARTIELLE` (UI Kit + Web Core ; ni Tailwind/Radix/shadcn ni bibliothèque exhaustive).
-**Prochaine action** : **Web Core Files 1** (consultation métadonnées + téléchargement sécurisé, sans upload).
-Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Prochaine action** : **Revue globale Web Core (incrément V1)** — revue transverse de stabilisation
+(Health + Auth 1→5 + UI 1 + Files 1) comme un système unique, **sans nouvelle fonctionnalité** (ne pas choisir
+automatiquement Files 2 avant la revue). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

@@ -222,3 +222,28 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
   gap: 1rem;
 }
+
+/* --- Détail fichier (Files 1) --- */
+.file-meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) 1fr;
+  gap: 0.5rem 1rem;
+}
+.file-meta__row {
+  display: contents;
+}
+.file-meta__row dt {
+  margin: 0;
+}
+.file-meta__row dd {
+  margin: 0;
+  word-break: break-word;
+}
+.file-meta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}

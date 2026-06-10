@@ -30,10 +30,20 @@ inséré dans le layout, qui **reste un Server Component**.
 
 ## Query keys (`core/query/keys/`)
 
-`healthKeys.all / status() / live() / ready()` et `authKeys.all / session() / authorization()` :
-**stables**, **readonly**, **sérialisables**, sans URL, sans objet Fetch, sans secret, sans timestamp.
-Convention par domaine. Les deux espaces de clés sont **disjoints** (`["health", …]` vs `["auth", …]`) :
-purger l'un **n'affecte jamais** l'autre.
+`healthKeys.all / status() / live() / ready()`, `authKeys.all / session() / authorization()` et
+`fileKeys.all / detail(id)` : **stables**, **readonly**, **sérialisables**, sans URL, sans objet Fetch, sans
+secret, sans timestamp (l'`id` UUID de ressource est admis pour `fileKeys.detail`, **jamais** d'URL signée).
+Convention par domaine. Les trois espaces de clés sont **disjoints** (`["health",…]` / `["auth",…]` /
+`["files",…]`) : purger l'un **n'affecte jamais** les autres.
+
+## Server state Files (`features/files/file-queries.ts` — Files 1)
+
+- `fileMetadataQueryOptions(id)` : clé `fileKeys.detail(id)`, `queryFn` = client BFF navigateur
+  (`getFileMetadata`), **`enabled`** seulement si UUID valide (aucune requête sinon), `retry:false`,
+  `staleTime` court — **données publiques** (`PublicStoredFileDto`) uniquement.
+- **URL signée = mutation, jamais une query** (`useCreateDownloadUrl`) : `mutationFn` retourne `void`, l'URL
+  est **consommée immédiatement** (téléchargement) puis **abandonnée** — elle **n'entre jamais** dans le cache
+  de query/mutation, n'est ni journalisée ni persistée. Pas de `mutationKey` (aucun credential/URL en clé).
 
 ## Server state Auth (`features/auth/auth-queries.ts`)
 

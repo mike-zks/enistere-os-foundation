@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-09.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-10.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -54,9 +54,21 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **aucun token lu**), `useLogin` (purge `authKeys`, **anti-double-soumission**, aucun credential en cache),
   navigation **`router.replace(returnTo)` + `refresh()`** ; **`returnTo` interne assaini** (`sanitizeReturnTo`,
   anti open-redirect) ; utilisateur déjà authentifié **redirigé** hors `/login`. La redirection anonyme du
-  layout protégé pointe vers `/login?returnTo=/protected`. **Sans middleware, sans Server Action Auth, sans
-  token en JS.** **263 tests** + preuves **API réelles** Auth/session **+ protégé 26/26 + login 22/22**
-  (PostgreSQL jetable). Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
+  layout protégé pointe vers `/login?returnTo=/protected`. **Lit les fichiers en lecture seule** (Files 1) :
+  deux **Route Handlers BFF ciblés** (jamais un proxy générique) `GET /api/files/:id` (métadonnées
+  **publiques**, client serveur **read-only**, `no-store`) et `POST /api/files/:id/download-url` (URL signée
+  courte, client serveur **writable** réutilisant le refresh BFF, **Origin/Referer + CSRF**, `no-store`) — seul
+  l'**UUID** du chemin est accepté (UUID invalide → **400 sans appel API**) ; mapping d'erreurs **distinct**
+  (400/401/403/**404 anti-énumération**/**409**/429/**503**) ; client BFF navigateur (`credentials:"include"`,
+  **aucun Bearer**) ; `fileKeys` **disjoints** ; `useFileMetadata` (query, `enabled` si UUID, `retry:false`) +
+  **`useCreateDownloadUrl`** (**mutation** : l'URL signée est **consommée immédiatement** puis abandonnée —
+  **jamais** en cache/log/persistance) ; téléchargement via **ancre temporaire** (`rel="noopener noreferrer"`,
+  URL `https`-only validée) ; page privée `/protected/files/[id]` avec états UI réutilisés ; **l'API reste
+  l'autorité** (permission `files.read`/`files.download` + ownership), `useAuthorization` ne fait qu'afficher le
+  bouton ; **aucun champ interne** (storageKey/bucket/checksum/ownerId). **Sans middleware, sans Server Action
+  Auth, sans token en JS, sans upload/suppression/admin.** **307 tests** + preuves **API réelles** Auth/session
+  **+ protégé 26/26 + login 22/22 + Files (API + MinIO) 21/21** (PostgreSQL + MinIO jetables). Statut :
+  **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
   (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
   `fetch` patché de Next échouait sur les réponses non-2xx — `expected non-null body source`).
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
@@ -66,7 +78,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-ui): add standard interface states`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add secure file read access`,
+  `feat(web-ui): add standard interface states`,
   `docs(web-nextjs): review web auth v1`,
   `feat(web-nextjs): add secure login experience`,
   `feat(web-nextjs): add server-resolved protected layout`,
@@ -96,20 +109,52 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 7. ADR clés
 
-18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), 007 (upload), 039 (Argon2id),
-040 (logging). Partiels : 001 (monorepo), 003, **004** (session : adapter serveur Web + **état de session
+18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
+**consommé en lecture côté Web** — métadonnées publiques + URL signée + téléchargement direct, **sans** upload),
+039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, **004** (session : adapter serveur Web + **état de session
 navigateur** `useSession`/`useAuthorization`, read-only sans refresh silencieux), **005** (cookies web +
 **CSRF** : flux BFF login/refresh/logout opérationnels, cookies `HttpOnly`, CSRF double-submit,
 Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appliqué **côté API** ;
 **consommé en lecture** côté Web via helpers OR/AND sans wildcard pour l'affichage conditionnel —
-**l'API reste l'autorité**), **011** (Fetch instancié public + **authentifié** Web + client BFF navigateur),
-**012** (TanStack Query intégré Web : server state Health **et** Auth, cache disjoint, purge au logout), 016
+**l'API reste l'autorité**), **011** (Fetch instancié public + **authentifié** Web + client BFF navigateur + **façade Files** read-only),
+**012** (TanStack Query intégré Web : server state Health, Auth **et Files** — cache disjoint, purge au logout,
+**URL signée hors cache** via mutation), 016
 (types Auth via `SchemaOf<>`). Décidés non implémentés : 013, 014, 015. **008/009/010 partiels** (UI Kit).
 ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Web Core UI 1 — états UI & composants structurels génériques** (`@enistere/ui-kit` + `@enistere/web-nextjs`) :
+**Web Core Files 1 — métadonnées & téléchargement sécurisé (lecture seule)** (`@enistere/web-nextjs`) :
+première intégration **Files** du Web Core, **sans upload/suppression/admin**. Statut **inchangé**
+`IMPLEMENTATION_PARTIELLE`. **BFF ciblé** (jamais un proxy générique) : `GET /api/files/:id` (métadonnées
+**publiques**, client serveur **read-only** sans refresh au rendu, `no-store`) et `POST /api/files/:id/download-url`
+(URL signée courte, client serveur **writable** réutilisant le refresh BFF existant, **Origin/Referer + CSRF**,
+`no-store`). Ordre de garde : méthode (405) → **validation UUID** (400 **sans appel API**) → [POST : CSRF/Origin
+403] → API ; seul l'**UUID** du chemin est accepté (jamais URL/bucket/storageKey/TTL/headers). Mapping d'erreurs
+**distinct** (`core/files/http/files-response.ts`) préservant **404 anti-énumération** / **409** (non
+téléchargeable) / **503** (stockage indisponible). **Client BFF navigateur** (`credentials:"include"`, **aucun
+Bearer**, ne lit aucun token). **TanStack Query** : `fileKeys.all/detail(id)` **disjoints** de auth/health
+(UUID admis, **jamais** d'URL/token) ; `useFileMetadata` (query : `enabled` si UUID, `retry:false`,
+`PublicStoredFileDto`) ; **`useCreateDownloadUrl`** = **mutation** (sans `mutationKey`) dont l'URL signée est
+**consommée immédiatement** (`triggerDownload`) puis **abandonnée** — **jamais** en cache/log/persistance ;
+anti-double-clic. **Téléchargement** : URL `https`-only validée (`isSafeDownloadUrl` ; `javascript:`/`data:`
+refusés ; signature jamais reconstruite) → **ancre temporaire** `rel="noopener noreferrer"`. Formatage **pur**
+(`formatFileSize` BigInt, `formatDateTime` UTC déterministe). Page privée `/protected/files/[id]` → `FileDetails`
+(hooks inconditionnels puis branche) avec états réutilisés **`LoadingState`/`EmptyState`(404)/`ForbiddenState`(403)/
+`ServiceUnavailableState`(503)/`ErrorState`**, succès `PageHeader`+`Card`. **L'API reste l'autorité**
+(`files.read`/`files.download` + ownership → **404** anti-énumération pour un non-propriétaire) ; `useAuthorization`
+ne sert qu'à l'affichage du bouton. **Aucun champ interne** (storageKey/bucket/checksum/ownerId), `originalName`
+rendu en **texte**. **307 tests** Web (+37) + **preuve API + MinIO réelle 21/21** (PostgreSQL + MinIO jetables) :
+upload (auto-VALIDATED + objet) → propriétaire `GET` **200** (publics, no-store, aucun champ interne) →
+`download-url` **200** `{url,expiresAt}` → **téléchargement réel MinIO** (octets == upload, `Content-Type`
+image/png) → sans permission **403** → **non-propriétaire (avec permission) → 404** → quarantaine **409** → objet
+supprimé **503** → logout **401** + page → `/login` ; **aucun** `storageKey`/`bucket`/`X-Amz-Signature`/credentials
+en métadonnées, logs ou bundle. **Non-régression** : Web 307 + couverture + build ; UI Kit 78 ; api-contracts 11 ;
+api-client-fetch 29 ; **0 vuln** ; Axios/Zustand absents. **Aucun nouveau composant UI Kit, aucun middleware,
+aucun proxy.** API NestJS / `packages/` / `ui-kit` **non modifiés**. Docs : `cores/web-nextjs/docs/files-read-download.md`
+(+ `api-integration.md`/`tanstack-query.md`). Commit `feat(web-nextjs): add secure file read access`.
+
+**Étape précédente — Web Core UI 1 — états UI & composants structurels génériques** (`@enistere/ui-kit` + `@enistere/web-nextjs`) :
 standardise les états d'interface et ajoute 3 primitives structurelles. Statuts **inchangés**
 `IMPLEMENTATION_PARTIELLE`. **UI Kit** : `Alert` (variant info/success/warning/danger ; rôle status sauf
 danger→alert ; glyphe+bordure+titre, jamais couleur seule), `Card` (slots ; `CardTitle` n'impose aucun
@@ -220,13 +265,16 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Web Core Files 1 — consultation des métadonnées & téléchargement sécurisé**. Web Core UI 1
-est **terminé** (états UI standardisés + Alert/Card/FormField). La suite logique est une **première feature de
-données** : **Files en lecture** (liste/métadonnées + téléchargement via URL présignée) consommant les
-opérations Files de `@enistere/api-client-fetch` + le BFF Auth + les états UI — **sans upload** (incrément
-ultérieur), sans admin RBAC. **Recommandé en parallèle (réserves V1, non bloquant)** : CI minimale (ADR-013,
-ordre de build paquets) + amorce E2E navigateur. **Alternative** : UI Kit 4 (primitives interactives) ou
-Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Revue globale Web Core — incrément V1**. Web Core Files 1 est **terminé** (lecture des
+métadonnées + URL signée + téléchargement direct, 307 tests, preuve API+MinIO 21/21). Avec Health + Auth 1→5 +
+UI 1 + Files 1, le **bloc V1 du Web Core** est complet pour une **revue transverse de stabilisation** — traiter
+le Web Core comme **un système unique**, vérifier fichier par fichier + commandes réelles (frontières,
+routes BFF, cookies/CSRF/Origin, **aucune fuite de token ni d'URL signée**, caches disjoints, RBAC affichage
+seul, contrats `SchemaOf<>`, mappeurs d'erreurs, non-régression complète), produire un **rapport permanent**
++ verdict — **sans nouvelle fonctionnalité**. **Ne pas choisir automatiquement Files 2 avant cette revue.**
+**Recommandé en parallèle (réserves V1, non bloquant)** : CI minimale (ADR-013) + amorce E2E navigateur.
+**Alternative (décision humaine)** : Files 2 (upload), UI Kit 4 ou Mobile Core. Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

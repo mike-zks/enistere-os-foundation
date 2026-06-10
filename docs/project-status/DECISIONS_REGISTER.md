@@ -16,16 +16,16 @@
 | ADR-004 | Auth/session multi-client | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | API OK ; **session web BFF opérationnelle** (login/refresh/logout via cookies `HttpOnly`) **+ état de session navigateur** (`me`/`authorization` read-only, `useSession`/`useAuthorization` TanStack Query, **401→anonymous / 403 distinct**, purge au logout) **+ premier layout protégé résolu côté serveur** (read-only, Option C, hydratation, redirection anonyme, indisponibilité ≠ anonyme) — preuve API réelle ; secure storage mobile absent |
 | ADR-005 | Cookies web + CSRF | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web | **Flux BFF opérationnels** : login/refresh/logout via Route Handlers, cookies `HttpOnly` (access/refresh, `__Host-` prod), **CSRF double-submit** (cookie+header, temps constant, rotation), **Origin/Referer** (fail-closed) — preuve API réelle. Reste : mutations futures réutilisant systématiquement la protection |
 | ADR-006 | RBAC + permissions fines | Validé | **IMPLEMENTE_ET_REVU** | api/web/mobile/ui | RBAC API + `AUTH_RBAC_REVIEW` ; **consommé en lecture côté Web** (`useAuthorization` : helpers OR/AND **sans wildcard** pour l'affichage conditionnel — **l'API reste l'autorité finale** ; changement de droits reflété **sans nouveau JWT**, prouvé) |
-| ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files + `FILES_REVIEW` |
+| ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files API + `FILES_REVIEW` ; **consommé en LECTURE côté Web** (Web Files 1 : métadonnées **publiques** `GET /api/files/:id` + URL signée courte `POST /api/files/:id/download-url` + téléchargement **direct** depuis le stockage objet, BFF ciblé, **404 anti-énumération**, URL signée **jamais** mise en cache/journalisée, **aucun champ interne** exposé) — preuve API + MinIO réelle ; **upload/suppression/admin côté Web différés** |
 | ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | `@enistere/ui-kit` : tokens + **9 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden + **Alert/Card/FormField**, Web UI 1 — CSS pilotée par tokens, aucun hex ; 78 tests, 100 %) ; bibliothèque complète à venir |
 | ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | UI Kit **consommé par le Web Core** (CSS `--enistere-*`, classes `enistere-*`) ; primitives ajoutées en **CSS natif tokens** ; **Tailwind/Radix/shadcn TOUJOURS non ajoutés** (différés ; non requis pour les états/composants UI 1) |
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
-| ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié)** dans le Web Core (façade `auth.login/refresh/logout/getProfile/getAuthorization` via BFF) **+ client BFF navigateur** (`fetch` same-origin `/api/auth/*`, sans token), preuve API réelle ; **Axios absent**. Reste : Mobile |
-| ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`). Reste : mutations ; Mobile |
+| ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
+| ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
 | ADR-013 | CI/CD V1 | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web/mobile | aucun workflow |
 | ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
-| ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health **et** Auth : `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` ; client **instancié** pour Health + BFF Auth) — aucun DTO recopié |
+| ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
 | ADR-040 | Logging structuré (Pino) | Validé | **IMPLEMENTE_ET_REVU** | api/cloud | Pino + `STRUCTURED_LOGGING_COMPATIBILITY_PROOF` + e2e |
 
@@ -123,6 +123,34 @@
 > correction de code applicatif** nécessaire (seul correctif test-only `gcTime` mutation, déjà dans `447e3b5`).
 > Statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE`. Prochaine action : **états UI & composants
 > structurels** (pas d'Auth post-V1).
+>
+> **Web Files 1 — métadonnées & téléchargement sécurisé (consomme ADR-007/011/012/016, lecture seule)** :
+> première feature **Files** du Web Core, **sans upload/suppression/admin**. Deux **Route Handlers BFF ciblés**
+> (jamais un proxy générique) : `GET /api/files/:id` (métadonnées **publiques**, client serveur **read-only**
+> `enableRefresh:false` → 401 sur access expiré **sans refresh** au rendu, `no-store`) et `POST /api/files/:id/
+> download-url` (URL signée courte, client serveur **writable** réutilisant le **refresh BFF existant** — aucune
+> seconde stratégie Auth —, **Origin/Referer + CSRF** double-submit, `no-store`). **Ordre de garde** : méthode
+> (405) → **validation UUID** (`isUuid` → **400 sans appel API**) → [POST : CSRF/Origin → 403 sans appel API] →
+> API. **Seul l'UUID du chemin** est accepté (jamais URL/bucket/storageKey/TTL/headers fournis par le client).
+> **L'API reste l'autorité** : permissions `files.read`/`files.download` **et** ownership vérifiées côté API ;
+> un **non-propriétaire (même avec la permission) → 404** (anti-énumération) ; `useAuthorization` ne sert qu'à
+> l'**affichage conditionnel** du bouton. Mapping d'erreurs **distinct** (`files-response.ts`) préservant le
+> **404** (vs Auth qui collapse 404→500), **409** (non téléchargeable : statut/visibilité) et **503** (objet
+> stockage manquant). **Client BFF navigateur** same-origin (`credentials:"include"`, **aucun Bearer**, ne lit
+> aucun token). **TanStack Query** : `fileKeys` **disjoints** ; **l'URL signée est une mutation**
+> (`useCreateDownloadUrl` retourne `void`) **consommée immédiatement** (`triggerDownload` : URL `https`-only
+> validée → **ancre temporaire** `rel="noopener noreferrer"`) puis **abandonnée** — **jamais** en cache de
+> query/mutation, log, erreur, clé ou `localStorage`/`sessionStorage`. **Aucun champ interne** (storageKey/
+> bucket/checksum/ownerId) exposé ; `originalName` rendu en **texte** (aucun `dangerouslySetInnerHTML`). Page
+> privée `/protected/files/[id]` réutilisant les états UI (UI 1). **Aucun nouveau composant UI Kit, aucun
+> middleware, aucun proxy, aucun Server Action.** **307 tests** + **preuve API + MinIO réelle 21/21** (PostgreSQL
+> + MinIO jetables ; upload auto-VALIDATED + objet → propriétaire 200 publics no-store sans champ interne →
+> download-url 200 `{url,expiresAt}` → **téléchargement réel MinIO** (octets == upload, image/png) → sans
+> permission 403 → non-propriétaire avec permission 404 → quarantaine 409 → objet supprimé 503 → logout 401 +
+> page → `/login` ; **aucun** storageKey/bucket/X-Amz-Signature/credentials en métadonnées, logs ou bundle).
+> **ADR-007 n'est que partiellement consommé côté Web** (lecture/téléchargement uniquement). Statut Web Core
+> **maintenu** `IMPLEMENTATION_PARTIELLE`. Détail : `cores/web-nextjs/docs/files-read-download.md`. **Prochaine
+> action : Revue globale Web Core (incrément V1)** — **ne pas** choisir automatiquement Files 2 avant la revue.
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

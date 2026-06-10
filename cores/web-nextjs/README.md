@@ -61,6 +61,13 @@ interne assaini, navigation `replace`/`refresh`). **Sans middleware, sans Server
   optionnels). Intégrés : `PageHeader` + galerie sur l'accueil, `EmptyState` dans Health, `ErrorState`/
   `NotFoundState`/`LoadingState` aux frontières, `ServiceUnavailableState` (le layout protégé y délègue).
   Détail : [`docs/ui-states.md`](docs/ui-states.md).
+- **Files — métadonnées & téléchargement sécurisé (Files 1, lecture seule)** : BFF ciblé `GET /api/files/:id`
+  (métadonnées publiques, read-only) + `POST /api/files/:id/download-url` (URL signée, **CSRF + Origin/Referer**)
+  ; client BFF navigateur same-origin ; `fileKeys` + `useFileMetadata` (désactivée si UUID invalide) +
+  `useCreateDownloadUrl` (URL **jamais** en cache/log, consommée immédiatement) ; page privée
+  `/protected/files/[id]` + états UI (**404 introuvable / 403 interdit / 503 indisponible** distincts). **L'API
+  reste l'autorité** (permission `files.read`/`files.download` + ownership → non-propriétaire **404**). **Aucun
+  upload/suppression/admin.** Détail : [`docs/files-read-download.md`](docs/files-read-download.md).
 
 ### Hors périmètre — volontairement absent
 
@@ -250,7 +257,12 @@ de mot de passe**), `useLogin` (succès/erreur, **purge authKeys / Health conser
 empêchée**, aucun credential en cache), `LoginForm` (labels/autoComplete/validation/loading/erreurs/`jest-axe` ×4).
 **États UI (Web UI 1)** : `EmptyState`/`UnauthorizedState`/`ForbiddenState`/`ServiceUnavailableState`/
 `PageHeader` (rôles, distinction 401≠403≠indisponible, requestId/retry, aucune donnée sensible, `jest-axe`),
-galerie `StatesShowcase` (sans `h1`). **Total : 270 tests** (`tsc -p tsconfig.test.json` + `node --test`).
+galerie `StatesShowcase` (sans `h1`). **Files (Files 1)** : handlers BFF (UUID 400 sans appel API,
+401/403/404/409/503 distincts, CSRF/Origin pour download-url, no-store, requestId, **aucun champ interne**),
+client BFF (same-origin, aucun Authorization, URL absente des erreurs), `useFileMetadata` (désactivée si UUID
+invalide, 404/503, retry false), `useCreateDownloadUrl` (**URL jamais en cache**, anti-double-clic), helpers
+(`formatFileSize` BigInt, `triggerDownload` schémas refusés), vue métadonnées (+`jest-axe`). **Total : 307 tests**
+(`tsc -p tsconfig.test.json` + `node --test`).
 **Preuve API réelle Web Auth 4**
 (NestJS + PostgreSQL jetable, **26 assertions**) : anonyme `GET /protected` → **redirection serveur** (sans
 donnée privée) · authentifié → **200 + profil hydraté** (e-mail en SSR, **aucun token** dans HTML/RSC,
@@ -264,6 +276,12 @@ authentifié `GET /protected` → **200 + profil hydraté** (`X-Request-Id` prop
 + meta refresh ; **aucun open redirect**) · logout → `/protected` redirige vers `/login` · identifiants
 invalides → **401 générique** (aucune énumération) · CSRF invalide → **403** · HTML/bundle **sans**
 `API_INTERNAL_URL`, sans cookie Auth, **sans mot de passe**. Détail : [`docs/login-flow.md`](docs/login-flow.md).
+**Preuve API + MinIO réelle Files 1** (**21 assertions**) : upload (auto-VALIDATED + objet) → propriétaire
+`GET /api/files/:id` **200** (champs publics, no-store, **aucun champ interne**) → `download-url` **200**
+`{url,expiresAt}` → **téléchargement réel MinIO** (octets == upload, `Content-Type` image/png) → sans
+permission **403** → non-propriétaire (avec permission) **404** → quarantaine **409** → objet supprimé **503**
+→ logout **401** + page → `/login` ; **aucun** `storageKey`/`bucket`/`X-Amz-Signature`/credentials en
+métadonnées, logs ou bundle. Détail : [`docs/files-read-download.md`](docs/files-read-download.md).
 
 ---
 
@@ -305,7 +323,7 @@ le `CHANGELOG.md` racine.
 
 ## 13. Feuille de route
 
-**Prochain incrément** : **Web Core Files 1** — consultation des métadonnées + téléchargement sécurisé
-(consomme les opérations Files des paquets API ; **sans** upload). **Alternative** : UI Kit 4 (primitives
-interactives suivantes) si une lacune structurelle est confirmée. **Réserves V1 Auth** recommandées en
-parallèle : CI minimale (ADR-013) + E2E navigateur. Puis : gestionnaire de thème, CSP à nonces, i18n, CI/CD.
+**Prochain incrément** : **Revue globale Web Core (incrément V1)** — auditer l'ensemble Auth + UI + Files,
+rejouer les preuves, classer les dettes, et arbitrer la suite (compléter Files, primitives interactives UI Kit,
+ou démarrer Mobile Core). Puis (selon la revue) : Files 2 / écrans, CI/E2E, CSP à nonces, i18n, CI/CD.
+**Réserves V1** recommandées en parallèle : CI minimale (ADR-013) + E2E navigateur.
