@@ -30,6 +30,10 @@
 
 → **7 checks** à cocher dans *Require status checks to pass before merging*.
 
+**Recommandé (8ᵉ, Cloud Core 5)** : `registry-ci.yml` → job **`images`** (build des images Docker en PR, sans
+push). À exiger si tu veux garantir que les images restent constructibles avant merge — au prix d'une PR un peu
+plus lente (build Docker). Optionnel mais conseillé.
+
 ### Futurs (à exiger quand implémentés — ne pas exiger maintenant)
 
 `coverage` (publication couverture, niveau 4+) · `security-scan` (scan dépendances/secrets) · `actionlint`

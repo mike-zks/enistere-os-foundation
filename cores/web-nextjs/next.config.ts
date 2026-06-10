@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { NextConfig } from "next";
 
 /**
@@ -22,6 +23,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Image Docker (Cloud Core 5) : sortie autonome (serveur minimal + dépendances tracées, y compris les
+  // paquets de workspace `@enistere/*`). `outputFileTracingRoot` = racine du monorepo pour que le tracing
+  // inclue `packages/*` et `cores/ui-kit`. N'affecte ni le dev (`next dev`) ni les tests `node:test`.
+  output: "standalone",
+  outputFileTracingRoot: join(import.meta.dirname, "..", ".."),
   // Résolution des imports de style nodenext (`./x.js` → `./x.ts`/`.tsx`) côté Turbopack, afin
   // d'utiliser une convention d'import UNIQUE dans tout le code (cohérente avec `node:test`).
   experimental: {

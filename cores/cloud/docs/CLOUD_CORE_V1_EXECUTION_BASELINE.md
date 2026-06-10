@@ -82,8 +82,11 @@ Quatre niveaux — **niveaux 1, 2 et 3 implémentés** (voir aussi `.github/work
 - **Niveau 3 (présent — `web-e2e-ci.yml`, Cloud Core 3)** : **E2E navigateur** Web — stack réelle
   (PostgreSQL + MinIO + **API + Web**) + **Playwright/Chromium** ; parcours **Health/Auth/Files** ; données
   éphémères ; traces `retain-on-failure` (**aucun artefact poussé**). Détail : `WEB_E2E_CI_PLAN.md`.
-- **Niveau 4 (futur)** : build images, **GHCR** (ADR-014), déploiement staging, approbation production,
-  rollback. Détail : `REGISTRY_POLICY.md`.
+- **Niveau 4 (partiel — `registry-ci.yml`, Cloud Core 5)** : **registry GHCR** — build des images API/Web
+  (Dockerfiles multi-stage, non-root) + **push GHCR sur `main`** (tags immuables `sha-`/`main-`, **pas de
+  `latest`**, labels OCI, auth `GITHUB_TOKEN`). **Sans déploiement, sans secret applicatif, sans PAT.**
+  **Reste du niveau 4 (futur)** : déploiement staging, approbation production, rollback, scan/signature d'image.
+  Détail : `REGISTRY_POLICY.md`, `GHCR_REGISTRY_GUIDE.md`.
 
 ### 8 bis. Gouvernance & durcissement CI (Cloud Core 4)
 
@@ -115,11 +118,12 @@ Détail : `SECRETS_POLICY.md`. Principe : **aucun secret dans le repository ni d
 usage futur via **GitHub Environments** scoppés ; jamais de secret en `NEXT_PUBLIC_*` ; jamais de secret
 journalisé. Cette mission **n'ajoute aucun secret**.
 
-## 10. Politique registry
+## 10. Politique registry (partiellement implémentée — Cloud Core 5)
 
-Détail : `REGISTRY_POLICY.md`. Cible **GHCR** (ADR-014), tags **immuables** (sha court ; pas de `latest` comme
-référence prod unique), semver/provenance plus tard. **ADR-014 reste `NON_IMPLEMENTE`** — aucune image
-construite ni poussée dans cette mission.
+Détail : `REGISTRY_POLICY.md` + `GHCR_REGISTRY_GUIDE.md`. **Implémentée** (`registry-ci.yml` + Dockerfiles
+API/Web) : build + **push GHCR sur `main`**, tags **immuables** (`sha-`/`main-`, **pas de `latest`**), labels
+OCI, auth `GITHUB_TOKEN`, **non-root**, **aucun secret/PAT**. **ADR-014 → `PARTIELLEMENT_IMPLEMENTE`.** Reste :
+déploiement par environnement protégé, rollback, scan/signature d'image, semver/release.
 
 ## 11. Politique déploiement
 

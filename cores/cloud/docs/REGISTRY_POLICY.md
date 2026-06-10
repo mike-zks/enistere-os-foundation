@@ -1,41 +1,42 @@
-# Cloud Core — Politique registry (cadrage, ADR-014)
+# Cloud Core — Politique registry (ADR-014)
 
-> Cadre la future publication d'images applicatives. **Aucune image n'est construite ni poussée dans cette
-> mission. ADR-014 reste `NON_IMPLEMENTE`.** Aligné sur `CORE_SPECIFICATION.md` §31 et ADR-014.
+> **PARTIELLEMENT IMPLÉMENTÉE (Cloud Core 5)** — workflow **`.github/workflows/registry-ci.yml`** + Dockerfiles
+> API/Web. Build + **push GHCR sur `main` uniquement**, **sans déploiement, sans secret applicatif, sans PAT**.
+> Aligné sur `CORE_SPECIFICATION.md` §31 et ADR-014. Guide pratique : `GHCR_REGISTRY_GUIDE.md`.
 
 ## 1. Statut
 
-**ADR-014 (registry images) : `NON_IMPLEMENTE`.** La CI minimale (`.github/workflows/ci.yml`) **ne construit
-ni ne pousse aucune image** ; `permissions: contents: read` exclut tout `packages: write`. Aucun `GHCR_TOKEN`,
-aucun `docker build`, aucun login registry.
+**ADR-014 (registry images) : `PARTIELLEMENT_IMPLEMENTE`.** Implémenté : build des images API/Web, push **GHCR**
+sur `main`, tags **immuables**, labels OCI, auth via `GITHUB_TOKEN`. **Non implémenté** (volontaire) :
+déploiement, environnements, rollback, scan de vulnérabilité d'image, signature/provenance (SLSA), semver/release,
+rétention automatisée. La CI niveaux 1–3 (`ci.yml`/`api-runtime-ci.yml`/`web-e2e-ci.yml`) reste **inchangée**.
 
-## 2. Cible (future, niveau 4)
+## 2. Registry & images
 
-- **Registry standard : GitHub Container Registry (GHCR)** — `ghcr.io/<org>/<image>`, intégré à GitHub
-  Actions (auth via `GITHUB_TOKEN`/`packages: write`, scoppé au workflow déployant).
-- Alternatives possibles si besoin : registry privé self-hosted, registry cloud compatible OCI. Le choix
-  définitif sera tranché (et fera l'objet d'un **ADR** si structurant) selon sécurité, coûts, droits
-  d'accès, rétention et intégration CI/CD.
+- **GHCR** : `ghcr.io/<owner>/<repo>/api-nestjs` et `ghcr.io/<owner>/<repo>/web-nextjs` (owner/repo dérivés de
+  `github.repository`, minuscules forcés par `docker/metadata-action`). Pas de nom hardcodé.
+- **Auth** : `GITHUB_TOKEN` automatique + `permissions: packages: write` (login **conditionnel**, push `main`
+  seulement). **Aucun `GHCR_TOKEN`, aucun PAT, aucun secret custom.**
+- Alternative (privé self-hosted / cloud OCI) : différée, ADR si structurant.
 
-## 3. Règles de tags (future)
+## 3. Règles de tags
 
-- **Pas de `latest` comme référence de production unique** : `latest` ne doit jamais désigner ce qui tourne
-  en prod.
-- **Tags immuables** : référencer par **sha court** du commit (ex. `ghcr.io/.../api:sha-<7>`), jamais par un
-  tag mobile réécrit.
-- **semver plus tard** : tags `vX.Y.Z` à la mise en place du versioning/release (non décidé en V1).
-- **build provenance / attestations plus tard** (SLSA, signatures) — niveau VF.
+- **`latest` JAMAIS généré** (`flavor: latest=false`) — aucune référence mobile.
+- **Tags immuables** : **`sha-<short>`** (toujours), **`main-<short>`** (sur `main`). Build PR taggé
+  **`pr-<n>`** mais **non poussé**.
+- **semver** (`vX.Y.Z`) plus tard avec le versioning/release (non décidé).
+- **provenance / attestations / signature** (SLSA, cosign) plus tard.
 
-## 4. Sécurité (future)
+## 4. Sécurité
 
-- Images privées par défaut ; accès en lecture restreint ; jeton de pull scoppé.
-- Aucune image non versionnée en production (anti-pattern interdit, `CORE_SPECIFICATION.md` §51).
-- Scan de vulnérabilités d'image (futur) avant promotion vers `production`.
-- Rétention/nettoyage des anciennes images documentés (coûts).
+- **Aucun secret dans l'image** : Dockerfiles **ne copient aucun `.env`** ; aucune URL d'API de production
+  figée ; build args non sensibles uniquement.
+- Exécution **non-root** (`USER node`) dans les deux images.
+- Build PR **sans push** (vérifie la constructibilité sans publier) ; push **uniquement** `push main`.
+- À venir : scan de vulnérabilité d'image avant promotion, images privées/visibilité selon le repo, rétention.
 
 ## 5. Ce que cette mission NE fait PAS
 
-Pas de `Dockerfile`, pas de `docker build`, pas de `docker push`, pas de workflow registry, pas de
-`packages: write`, pas de `GHCR_TOKEN`. La publication d'images est **explicitement hors périmètre** et
-n'arrivera qu'au **niveau 4** de la politique CI progressive (`CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8),
-après la CI runtime API (niveau 2) et l'E2E Web (niveau 3).
+Pas de déploiement, staging, production, preview, rollback, monitoring, backup, `docker-compose` de prod,
+K8s/Helm/Terraform/Ansible, release GitHub, tag git automatique, publication npm. Le **niveau 4 complet**
+(déploiement par environnement protégé) reste futur (`CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8).

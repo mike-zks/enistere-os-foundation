@@ -5,37 +5,36 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **(Action HUMAINE d'abord)** **Appliquer la protection de branche `main`** dans GitHub Settings — rendre
-> **bloquants** les **7 checks** (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`,
-> `api-runtime`, `web-e2e`) selon `cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (PR obligatoire,
-> force-push/suppression interdits). **Non réalisable par un agent.**
+> **Cloud Core 6 — déploiement staging manuel** : premier déploiement **contrôlé** d'une image GHCR vers un
+> environnement **staging** (GitHub **Environment** protégé, secrets scoppés, **approbation manuelle**), à
+> partir des images déjà publiées par `registry-ci.yml`. **Pas de production**, pas d'automatisation totale,
+> rollback documenté. **Alternative** : **durcissement registry** (scan de vulnérabilité d'image + signature/
+> provenance cosign/SLSA + SHA-pinning des actions) avant tout déploiement.
 >
-> **(Prochaine mission Codex)** **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014) :
-> construire et **pousser des images** vers GHCR (tags **immuables** sha court), **sans** déployer, sans
-> environnement de prod. Suivre `cores/cloud/docs/REGISTRY_POLICY.md`.
+> **(Action HUMAINE, en parallèle)** **Appliquer la protection de branche `main`** (désormais possible — repo
+> **public**) : rendre **bloquants** les **7 checks** (+ `images` recommandé) selon
+> `cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. **Non réalisable par un agent.**
 
-**Justification** : le **Cloud Core 4 — durcissement CI & gouvernance de branche** est **terminé** (commit
-`docs(cloud): harden ci governance`) : **7 checks** `main` figés (= `name:` des jobs), checklist de protection
-de branche **actionnable** (matrice obligatoires/futurs, avertissement renommage), et **politiques tranchées**
-(artefacts = aucun upload ; couverture = exécutée non publiée ; pinning `@v4`, SHA futur ; `actionlint` futur) —
-**workflows inchangés**. Les **niveaux 1–3** de CI sont outillés ; la **seule réserve transverse restante** est
-la **protection de branche** (action **humaine**, GitHub Settings) qui rend la CI **bloquante**. Une fois
-appliquée (ou en parallèle), la suite produit est le **niveau 4** (registry GHCR **sans** déploiement) qui
-débloque la conteneurisation/publication.
+**Justification** : le **Cloud Core 5 — Registry GHCR sans déploiement** est **terminé** (commit `ci(cloud):
+add ghcr registry workflow`) : Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) + workflow
+`registry-ci.yml` (build PR sans push ; **build + push GHCR sur `main`** ; tags immuables `sha-`/`main-`, **pas
+de `latest`**, labels OCI, auth `GITHUB_TOKEN`, **aucun secret/PAT/`.env`**) — **`docker build` API+Web validé
+localement**. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`**. Les images existent désormais ; la suite logique est un
+**premier déploiement contrôlé** (staging manuel) **ou** le durcissement de la chaîne registry avant déploiement.
+**Ne pas** automatiser un déploiement production sans environnement protégé + rollback.
 
 **Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives) ; **Files 2** (upload
-Web) ; **Mobile Core** ; ou différer le registry. **Ne pas** ajouter de déploiement/staging/production sans
-décision dédiée.
+Web) ; **Mobile Core**.
 
-**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit `docs(cloud): harden
-ci governance` ; statuts **inchangés** : Cloud Core **`IMPLEMENTATION_PARTIELLE`** (niveaux 1–3), ADR-013
-**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 + protection de branche **documentée non appliquée**), ADR-014
-**`NON_IMPLEMENTE`**.
+**Note gouvernance** : `main` est poussé sur `origin` (SSH) ; **repo désormais public** (protection de branche
+applicable gratuitement). Cette mission ajoute le commit `ci(cloud): add ghcr registry workflow` ; statuts :
+Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel), ADR-014
+**`PARTIELLEMENT_IMPLEMENTE`**.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **(Humain)** Appliquer la **protection de branche `main`** (7 checks bloquants) — `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. ✦ action humaine.
-2. **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014) — build/push d'images, tags immuables, **sans** déployer. ✦ prochaine mission Codex.
+1. **Cloud Core 6 — déploiement staging manuel** (environnement protégé, approbation, rollback documenté) **ou** durcissement registry (scan/signature/SHA-pinning). ✦ prochaine mission Codex.
+2. **(Humain)** Appliquer la **protection de branche `main`** (8 checks recommandés) — `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. ✦ action humaine, en parallèle.
 3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
 4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
@@ -62,9 +61,10 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 1 — cadrage CI/CD & environnements | **FAIT** — `cores/cloud/docs/` (baseline, environnements, checklist branch protection, politique CI 4 niveaux, secrets/registry, plans) |
 | Cloud Core 2 — CI runtime API (niveau 2) | **FAIT** — `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) |
 | Cloud Core 3 — E2E navigateur (niveau 3) | **FAIT** — `.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ; Health/Auth/Files ; **7 tests verts** en simulation) |
-| Cloud Core 4 — durcissement CI & gouvernance | **FAIT** — 7 checks `main` figés + checklist actionnable + politiques artefacts/couverture/pinning/actionlint tranchées (`CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8 bis) ; workflows inchangés |
-| Protection de branche `main` | **débloqué (action humaine)** — checklist `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les **7 checks** bloquants) ; **non applicable par un agent** (GitHub Settings) ✦ |
-| Cloud Core 5 — Registry GHCR (niveau 4) | **débloqué** — prochaine mission ; build/push images GHCR **sans déploiement** (ADR-014, `REGISTRY_POLICY.md`) |
+| Cloud Core 4 — durcissement CI & gouvernance | **FAIT** — 7 checks `main` figés + checklist actionnable + politiques artefacts/couverture/pinning/actionlint tranchées ; workflows inchangés |
+| Cloud Core 5 — Registry GHCR (niveau 4 partiel) | **FAIT** — `registry-ci.yml` + Dockerfiles API/Web (multi-stage, non-root, Web standalone) ; build PR sans push, push GHCR sur `main`, tags immuables, labels OCI, `GITHUB_TOKEN` ; `docker build` validé local ; ADR-014 → partiel |
+| Protection de branche `main` | **débloqué (action humaine, repo public)** — checklist `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (7 checks + `images`) ; **non applicable par un agent** (GitHub Settings) |
+| Cloud Core 6 — déploiement staging manuel | **débloqué** — prochaine mission ; déployer une image GHCR vers staging protégé (approbation, rollback) ; ou durcissement registry |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
