@@ -8,11 +8,13 @@ progressive et documentaire**, sans imposer prématurément une implémentation.
 
 **`IMPLEMENTATION_PARTIELLE`** — au cadrage opérationnel (Cloud Core 1) s'ajoutent **deux workflows Cloud
 runtime réels** : la **CI runtime de l'API NestJS** (`api-runtime-ci.yml`, niveau 2 — migrations + unit +
-**e2e** contre PostgreSQL + MinIO jetables, OpenAPI check, build, audit) **et la CI E2E navigateur**
+**e2e** contre PostgreSQL + MinIO jetables, OpenAPI check, build, audit), **la CI E2E navigateur**
 (`web-e2e-ci.yml`, niveau 3 — stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours
-Health/Auth/Files). **Restent non implémentés** : registre/GHCR (ADR-014), déploiement, environnements protégés
-(staging/production), monitoring, backups, rollback, Dockerfile/Compose/Traefik, secrets. **Aucune
-infrastructure de déploiement** ; les workflows sont **lecture seule, sans secret GitHub**.
+Health/Auth/Files) **et la CI registry GHCR** (`registry-ci.yml`, niveau 4 partiel — build + push d'images
+API/Web sur `main`, **sans déploiement**). **Restent non implémentés** : déploiement, environnements protégés
+(staging/production), monitoring, backups, rollback, `docker-compose` de prod/Traefik, secrets applicatifs,
+scan/signature d'image. **Aucune infrastructure de déploiement** ; les workflows sont **sans secret applicatif**
+(le registry utilise le `GITHUB_TOKEN` automatique, sans déployer).
 
 ## Ce qui est cadré (Cloud Core 1)
 
@@ -38,35 +40,41 @@ infrastructure de déploiement** ; les workflows sont **lecture seule, sans secr
   seed utilisateurs + fixture VALIDATED éphémères ; parcours **Health/Auth/Files** (anonyme→/login, login,
   logout, métadonnées sans champ interne, téléchargement, introuvable, accès refusé) ; **`APP_ENV=development`**
   (cookies HTTP) ; traces `retain-on-failure`.
+- **Niveau 4 partiel — `registry-ci.yml`** (Cloud Core 5) : **registry GHCR** — build des images API/Web
+  (Dockerfiles multi-stage, **non-root**, Web en Next.js **standalone**) + **push GHCR sur `main`** (tags
+  immuables `sha-`/`main-`, **pas de `latest`**, labels OCI, auth `GITHUB_TOKEN`). **Aucun déploiement, aucun
+  secret applicatif, aucun PAT, aucun `.env` dans l'image.** Détail : [`docs/REGISTRY_POLICY.md`](docs/REGISTRY_POLICY.md),
+  guide [`docs/GHCR_REGISTRY_GUIDE.md`](docs/GHCR_REGISTRY_GUIDE.md).
 
 Valeurs de **test jetables** (jamais `secrets.*`), **logs sans secret**, données **éphémères**, **aucun
 artefact uploadé**. E2E **isolés** du niveau 1 (`tsconfig`/`eslint` exclus).
 
 ## Ce qui n'est PAS implémenté
 
-Dockerfile/Compose · Traefik/DNS/TLS · Redis/MinIO **provisionnés en prod** · GHCR/registry (ADR-014) ·
-déploiement (staging/production) · GitHub Environments réels · monitoring (Prometheus/Grafana/Loki) ·
-backups/restore · OSRM/PostGIS · rollback · couverture publiée · **upload/suppression Files côté Web** ·
-secrets. Les workflows restent **lecture seule, non déployants, sans secret GitHub**.
+`docker-compose` de prod · Traefik/DNS/TLS · Redis/MinIO **provisionnés en prod** · **déploiement**
+(staging/production) · GitHub Environments réels · monitoring (Prometheus/Grafana/Loki) · backups/restore ·
+OSRM/PostGIS · rollback · scan/signature d'image · semver/release · couverture publiée ·
+**upload/suppression Files côté Web** · secrets applicatifs. Les workflows restent **non déployants, sans
+secret applicatif** (le registry pousse des images via `GITHUB_TOKEN`, sans déployer).
 
 ## État CI/CD (ADR)
 
-- **ADR-013 (CI/CD V1)** : **`PARTIELLEMENT_IMPLEMENTE`** — CI minimale (niveau 1) **+ CI runtime API**
-  (niveau 2) **+ CI E2E navigateur** (niveau 3) ; restent protection de branche, déploiement, environnements
-  protégés, release (niveau 4).
-- **ADR-014 (registry images)** : **`NON_IMPLEMENTE`** — aucune image construite/poussée.
+- **ADR-013 (CI/CD V1)** : **`PARTIELLEMENT_IMPLEMENTE`** — CI niveaux 1–3 + **niveau 4 partiel** (registry) ;
+  restent protection de branche (action humaine), déploiement, environnements protégés, release.
+- **ADR-014 (registry images)** : **`PARTIELLEMENT_IMPLEMENTE`** (Cloud Core 5) — build + push GHCR sur `main`,
+  tags immuables, labels OCI, **sans déploiement** ; restent scan/signature, semver, déploiement.
 
 ## Gouvernance CI (Cloud Core 4)
 
-**7 checks** à rendre **bloquants** sur `main` (= `name:` des jobs) : `api-contracts`, `api-client-fetch`,
-`ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e` — application **manuelle**
-([`docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md), **non appliquée**).
+**Checks** à rendre **bloquants** sur `main` (= `name:` des jobs) : `api-contracts`, `api-client-fetch`,
+`ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e` (**7 obligatoires**) **+ `images`** (registry, 8ᵉ
+recommandé) — application **manuelle** ([`docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md)).
 Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécutée, non publiée ; **pinning** =
 `@v4` (SHA futur) ; **`actionlint`** futur. Détail : [`docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) §8 bis.
 
 ## Prochaine étape
 
-**Action humaine d'abord** : **appliquer** la protection de branche `main` (rend les 7 checks bloquants). Puis
-**prochaine mission Codex** : **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014 — build/push
-d'images **sans** déployer), ou **UI Kit 4 / Files 2 / Mobile Core** selon décision. Voir
+**Action humaine** (si pas déjà fait) : **appliquer** la protection de branche `main`. Puis **prochaine mission
+Codex** : **Cloud Core 6 — déploiement staging manuel** (premier déploiement contrôlé, environnement protégé)
+**ou** durcissement registry (scan/signature/provenance d'image), selon gouvernance. Voir
 [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).

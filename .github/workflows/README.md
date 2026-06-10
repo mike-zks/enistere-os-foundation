@@ -8,6 +8,7 @@ sans déploiement** :
 | [`ci.yml`](ci.yml) | Non-régression du monorepo (contrats, client, UI Kit, Web, audit) — **sans** base/stockage | Niveau 1 |
 | [`api-runtime-ci.yml`](api-runtime-ci.yml) | Runtime de l'**API NestJS** : PostgreSQL + MinIO **jetables**, migrations Prisma, unit + e2e, OpenAPI check, build, audit | Niveau 2 |
 | [`web-e2e-ci.yml`](web-e2e-ci.yml) | **E2E navigateur** : stack réelle (PostgreSQL + MinIO + API + Web) + Playwright/Chromium ; parcours Health, Auth, Files | Niveau 3 |
+| [`registry-ci.yml`](registry-ci.yml) | **Registry GHCR** : build images API/Web ; **push sur `main` seulement** (tags immuables, pas de `latest`) — **sans déploiement** | Niveau 4 (partiel) |
 
 ## `ci.yml` — CI minimale V1 (ADR-013)
 
@@ -132,11 +133,28 @@ gitignoré) ; **aucun upload d'artefact** ; traces/captures Playwright **uniquem
 
 ### Ce qu'il ne garantit PAS
 
-Déploiement · registre/GHCR (ADR-014) · environnements protégés · rollback · monitoring · **upload/suppression
-Files côté Web** (hors périmètre). Les tests E2E sont **isolés** du niveau 1 (exclus de `typecheck`/`lint`/
-`build` via `tsconfig.json`/`eslint.config.mjs` ; compilés par Playwright).
+Déploiement · registre/GHCR (couvert par `registry-ci.yml`) · environnements protégés · rollback · monitoring ·
+**upload/suppression Files côté Web** (hors périmètre). Les tests E2E sont **isolés** du niveau 1 (exclus de
+`typecheck`/`lint`/`build` via `tsconfig.json`/`eslint.config.mjs` ; compilés par Playwright).
 
-### Niveau CI actuel & progression (Cloud Core 1 → 3)
+## `registry-ci.yml` — Registry GHCR (niveau 4 partiel, Cloud Core 5)
+
+Construit les **images Docker** API/Web et les **pousse vers GHCR sur `main` uniquement**. **Début d'ADR-014
+(registry seulement) — AUCUN déploiement, AUCUN secret applicatif, AUCUN PAT** (auth `GITHUB_TOKEN`).
+
+- **`permissions: contents: read` + `packages: write`** ; login GHCR **conditionnel** (`push` + `main`).
+- **PR → build SANS push** (vérifie la constructibilité) ; **push `main` → build + push**.
+- **Images** : `ghcr.io/<owner>/<repo>/api-nestjs` (Dockerfile `cores/api-nestjs/`, contexte `cores/api-nestjs/`)
+  et `/web-nextjs` (Dockerfile `cores/web-nextjs/`, contexte **racine**, Next.js **standalone**). Multi-stage,
+  **non-root**, **aucun `.env` copié**.
+- **Tags immuables** (`docker/metadata-action`, `flavor: latest=false`) : `sha-<short>`, `main-<short>` (sur
+  `main`), `pr-<n>` (build PR, non poussé). **`latest` jamais généré.** Labels OCI (source/revision/created/
+  title/description).
+- Actions Docker officielles (`setup-buildx`/`login`/`metadata`/`build-push`), épinglées par **majeure** (SHA
+  futur). Détail : [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md) · guide :
+  [`GHCR_REGISTRY_GUIDE.md`](../../cores/cloud/docs/GHCR_REGISTRY_GUIDE.md).
+
+### Niveau CI actuel & progression (Cloud Core 1 → 5)
 
 Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
 [`cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
@@ -147,8 +165,9 @@ Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La p
   migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../cores/cloud/docs/API_RUNTIME_CI_PLAN.md).
 - **Niveau 3 (présent — `web-e2e-ci.yml`)** : E2E navigateur Web (Health/Auth/Files) sur stack réelle —
   [`WEB_E2E_CI_PLAN.md`](../../cores/cloud/docs/WEB_E2E_CI_PLAN.md).
-- **Niveau 4 (futur)** : build/push d'images (GHCR, ADR-014) + déploiement par environnement —
-  [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md).
+- **Niveau 4 (partiel — `registry-ci.yml`)** : **registry GHCR** (build + push images, sans déploiement) —
+  [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md). **Reste** : déploiement par environnement
+  protégé + rollback (futur).
 
 ### Checks requis pour la protection de `main` (Cloud Core 4)
 
@@ -161,6 +180,7 @@ Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). 
 | `ci.yml` | `api-contracts` · `api-client-fetch` · `ui-kit` · `web-nextjs` · `audit` |
 | `api-runtime-ci.yml` | `api-runtime` |
 | `web-e2e-ci.yml` | `web-e2e` |
+| `registry-ci.yml` | `images` *(8ᵉ, recommandé — build des images en PR ; ralentit un peu la PR)* |
 
 > **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour. Les
 > noms actuels sont **stables** ; Cloud Core 4 ne renomme **aucun** job. **Statut : protection non appliquée.**

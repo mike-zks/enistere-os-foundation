@@ -1,0 +1,15 @@
+# Contexte de build de l'image API (Cloud Core 5). Réduit le contexte et évite de copier des secrets.
+node_modules
+dist
+coverage
+test
+.env
+.env.*
+*.log
+.git
+.gitignore
+Dockerfile
+.dockerignore
+proofs
+docs
+README.md

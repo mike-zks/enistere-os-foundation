@@ -79,16 +79,19 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   checklist protection de branche, politique CI 4 niveaux, secrets/registry, plans) **+ CC2 : CI runtime API**
   `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit + e2e, openapi:check) **+ CC3 : CI E2E
   navigateur** `web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ;
-  parcours **Health/Auth/Files**). **Trois workflows CI** (niveaux 1–3), **sans secret/déploiement/registre**.
-  **Restent** : registry/GHCR (ADR-014), déploiement, environnements protégés, monitoring, rollback, couverture
-  publiée, protection de branche (action humaine), Compose/Traefik.
+  parcours **Health/Auth/Files**) **+ CC5 : registry GHCR** `registry-ci.yml` + **Dockerfiles** API/Web
+  (multi-stage, non-root, Web **standalone**) — build PR sans push, **push images GHCR sur `main`** (tags
+  immuables, labels OCI, `GITHUB_TOKEN`, **sans déploiement/secret/PAT/`.env`**). **Quatre workflows CI**
+  (niveaux 1–4 partiel). **Restent** : déploiement, environnements protégés, monitoring, rollback, scan/signature
+  d'image, couverture publiée, protection de branche (action humaine, repo public), Compose/Traefik.
 - **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo,
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
   gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
   déploiement, protection de branche, E2E navigateur.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(cloud): harden ci governance`,
+- **Git** : `main` poussé sur `origin` (SSH ; **repo public**). Commits récents : `ci(cloud): add ghcr registry workflow`,
+  `docs(cloud): harden ci governance`,
   `ci(web): add browser e2e validation workflow`,
   `ci(api): add runtime validation workflow`,
   `docs(cloud): define v1 execution baseline`,
@@ -140,13 +143,35 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 (types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
 ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
 `ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
-restent branch protection (**documentée — 7 checks — non appliquée**, humain), couverture, release, déploiement,
-environnements (niveau 4). **ADR-014** (registry) reste non implémenté. Détail :
-[`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+restent branch protection (**documentée — 7+1 checks — non appliquée**, humain), couverture, release, déploiement,
+environnements. **ADR-014 (registry)** : **`PARTIELLEMENT_IMPLEMENTE`** (CC5 — build + push GHCR sur `main`,
+Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 4 — durcissement CI & gouvernance de branche** (mission **documentaire**) : prépare la CI à être
+**Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4 partiel) : début d'**ADR-014** (registry
+**uniquement**), **sans déploiement, sans staging/production, sans rollback, sans secret applicatif, sans PAT**.
+**Dockerfiles** : `cores/api-nestjs/Dockerfile` (contexte `cores/api-nestjs/` — multi-stage : build = `npm ci`
++ `prisma generate` + `nest build` ; runtime = deps prod + `.prisma` copié + openssl + **`USER node`**) et
+`cores/web-nextjs/Dockerfile` (contexte **racine** — build des paquets + Web ; runtime = Next.js **standalone**,
+`node cores/web-nextjs/server.js`, **`USER node`**) + `.dockerignore` (API + racine ; **aucun `.env`/secret
+copié**). `next.config.ts` : ajout **`output: 'standalone'`** + `outputFileTracingRoot` (racine) — **testé**,
+niveau 1 **inchangé** (307 tests, typecheck/lint/build verts). **Workflow** `.github/workflows/registry-ci.yml`
+(job `images`, matrice api/web) : `permissions: contents:read + packages:write` ; **PR → build SANS push** ;
+**push `main` → login GHCR (`secrets.GITHUB_TOKEN`) + build + push** ; actions `docker/{setup-buildx,login,
+metadata,build-push}-action` (majeure). **Images** `ghcr.io/<owner>/<repo>/{api-nestjs,web-nextjs}` (owner/repo
+= `github.repository`, minuscules). **Tags immuables** (`metadata-action`, `flavor: latest=false`) :
+`sha-<short>`, `main-<short>`, `pr-<n>` (build seul) — **`latest` JAMAIS généré** ; **labels OCI**. **Validation
+locale** : `docker build` **API OK + Web OK** + smoke (`node --version`, exécution **non-root**, **aucun `.env`**
+dans l'image) ; non-régression niveau 1 verte (307) + `npm audit` 0 vuln. **Workflows existants (1–3)
+inchangés.** Docs : `REGISTRY_POLICY.md` (→ partiel), **`GHCR_REGISTRY_GUIDE.md`** (nouveau), `.github/workflows/
+README.md`, baseline, `cores/cloud/README.md`. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 partiel
+(niveaux 1–4 partiel) ; Cloud Core reste `IMPLEMENTATION_PARTIELLE`. `cores/*/src`/`packages`/`docs/adr`/
+`strategy` **non modifiés** (hors `next.config.ts`, config build testée). **Repo désormais public** → protection
+de branche applicable. Commit `ci(cloud): add ghcr registry workflow`. **Prochaine action : Cloud Core 6 —
+déploiement staging manuel** (ou durcissement registry).
+
+**Étape précédente — Cloud Core 4 — durcissement CI & gouvernance de branche** (mission **documentaire**) : prépare la CI à être
 **exigée** comme protection de `main`, **sans** déploiement/registry/secret, **sans** modifier les workflows
 existants ni **renommer aucun job**. **7 checks** figés à rendre bloquants sur `main` (= `name:` des jobs :
 `api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` de `ci.yml` + `api-runtime` de
@@ -429,15 +454,17 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action HUMAINE d'abord** : **appliquer la protection de branche `main`** (GitHub Settings) — rendre bloquants
-les **7 checks** (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` + `api-runtime` + `web-e2e`),
-PR obligatoire, force-push/suppression interdits (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`). **Non réalisable par
-un agent.** **Prochaine mission Codex** : **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014 :
-build/push d'images, tags immuables sha court, **sans** déployer ni environnement de prod ;
-`REGISTRY_POLICY.md`). Le **Cloud Core 4** (gouvernance CI) est **terminé** : 7 checks figés, checklist
-actionnable, politiques artefacts/couverture/pinning/actionlint tranchées, workflows inchangés. **Alternative
-(décision humaine)** : UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas ajouter de déploiement/staging/production sans
-décision dédiée.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique (mission Codex)** : **Cloud Core 6 — déploiement staging manuel** — premier déploiement
+**contrôlé** d'une image GHCR (publiée par `registry-ci.yml`) vers un **environnement staging protégé** (GitHub
+Environment, secrets scoppés, **approbation manuelle**, rollback documenté). **Pas de production, pas
+d'automatisation totale.** **Alternative** : **durcissement registry** (scan de vulnérabilité d'image,
+signature/provenance cosign/SLSA, SHA-pinning des actions) avant déploiement. **Action HUMAINE (en parallèle)** :
+**appliquer la protection de branche `main`** (désormais possible, **repo public**) — 7 checks + `images`
+recommandé (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`). Le **Cloud Core 5** (registry GHCR) est **terminé** :
+Dockerfiles API/Web + `registry-ci.yml` (build + push images sur `main`, sans déploiement) — `docker build`
+validé localement, ADR-014 → partiel. **Alternative (décision humaine)** : UI Kit 4 ; Files 2 ; Mobile Core.
+**Ne pas automatiser un déploiement production sans environnement protégé + rollback.** Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

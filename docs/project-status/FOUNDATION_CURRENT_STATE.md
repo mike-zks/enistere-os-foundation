@@ -27,7 +27,7 @@ pas une application ni une bibliothèque complète).
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
 | Cores documentaires | `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
-| CI/CD, conteneurisation | **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo ; ADR-013 **partiel**) ; **conteneurisation/registry/déploiement absents** (aucun Dockerfile, ADR-014 non implémenté) |
+| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web présents (multi-stage, non-root) ; **déploiement absent** |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
@@ -51,7 +51,7 @@ enistere-os-foundation/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
     web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
-    cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + CI E2E navigateur : api-runtime-ci.yml, web-e2e-ci.yml)
+    cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles)
     mobile-react-native/                              → CORE_SPECIFICATION.md seul
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
@@ -175,18 +175,26 @@ Node 24, `npm ci`, `permissions: contents:read`, `concurrency`) impose l'ordre d
 api-client-fetch → ui-kit → web-nextjs → audit** : `generate:check`, typecheck/lint/build/test, `pack:check`
 UI Kit, **build Web indépendant de l'API**, `npm audit` (0 vuln) et **gardes Axios/Zustand absents**
 (ADR-011/012). **Aucun secret, aucun Docker, aucune base/stockage, aucun déploiement, aucun registry.**
-**Restent** : protection de branche, couverture publiée, **E2E navigateur**, CI runtime API (PostgreSQL/MinIO),
-release/versioning, déploiement, environnements protégés. **ADR-014 (registry/GHCR) non implémenté** (aucune
-image construite/poussée). Aucun Dockerfile ni compose dans le dépôt. Détail : `.github/workflows/README.md`.
+**Restent** (au-delà de la CI minimale `ci.yml`) : protection de branche, couverture publiée, release/versioning,
+déploiement, environnements protégés. **ADR-014 (registry/GHCR) → `PARTIELLEMENT_IMPLEMENTE`** (Cloud Core 5,
+ci-dessous : build + push images). Détail : `.github/workflows/README.md`.
 Le **Cloud Core 1** (cadrage) gouverne cette CI ; le **Cloud Core 2** ajoute le **niveau 2**
 (`api-runtime-ci.yml` : API NestJS contre PostgreSQL + MinIO jetables, migrate deploy, unit + e2e,
 openapi:check, build, audit) ; le **Cloud Core 3** ajoute le **niveau 3** (`web-e2e-ci.yml` : **E2E navigateur**
 sur stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours **Health/Auth/Files** ;
 utilisateurs + fichier VALIDATED éphémères ; `APP_ENV=development` pour cookies HTTP). **Valeurs de test
 jetables**, **aucun secret GitHub**, données éphémères, traces `retain-on-failure` (**aucun artefact poussé**).
-**Politique CI à 4 niveaux** : 1–3 présents ; 4 (registry/déploiement) futur. Le **Cloud Core 4** a figé les
+Le **Cloud Core 5** ajoute le **niveau 4 partiel** (`registry-ci.yml` + **Dockerfiles** API/Web multi-stage
+non-root, Web **standalone**) : build des images + **push GHCR sur `main`** (tags immuables `sha-`/`main-`,
+**pas de `latest`**, labels OCI, auth `GITHUB_TOKEN`, **aucun secret/PAT/`.env`**) — **sans déploiement**.
+**Politique CI à 4 niveaux** : 1–3 présents, **4 partiel** (registry ; déploiement futur). Le **Cloud Core 4** a figé les
 **7 checks** à rendre bloquants sur `main` (= `name:` des jobs) et tranché les politiques artefacts/couverture/
-pinning ; la protection de branche `main` reste une **action humaine manuelle** (non appliquée).
+pinning ; la protection de branche `main` reste une **action humaine manuelle**. Enfin le **Cloud Core 5** a
+livré la **registry GHCR** (niveau 4 partiel) : `registry-ci.yml` + Dockerfiles API/Web (multi-stage, non-root,
+Web standalone) → build + **push images sur `main`** (tags immuables, labels OCI, `GITHUB_TOKEN`, **sans
+déploiement/secret/PAT**) — `docker build` API+Web **validé localement**, ADR-014 → `PARTIELLEMENT_IMPLEMENTE`.
+**Prochaine action** : **Cloud Core 6 — déploiement staging manuel** (ou durcissement registry : scan/signature) ;
+**action humaine** : appliquer la protection de branche `main` (désormais possible, repo public).
 
 ## 12. Documentation
 

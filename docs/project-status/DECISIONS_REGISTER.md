@@ -23,7 +23,7 @@
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
 | ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **Niveau 1** `ci.yml` (non-régression monorepo : ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Niveau 2** `api-runtime-ci.yml` (**runtime API NestJS** : PostgreSQL + MinIO jetables, `prisma migrate deploy`, unit + **e2e**, `openapi:check`, build, audit) **+ Niveau 3** `web-e2e-ci.yml` (**E2E navigateur** : stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours **Health/Auth/Files** ; données éphémères ; valeurs de test jetables, **aucun secret**, `APP_ENV=development`) **+ Cloud Core 1** cadrage **+ Cloud Core 4** gouvernance (7 checks `main` documentés, politiques artefacts/couverture/pinning/actionlint). **Reste** : protection de branche **appliquée** (action humaine), couverture publiée, release/versioning, déploiement, environnements protégés (niveau 4) |
-| ADR-014 | Registry images | Validé | **NON_IMPLEMENTE** | cloud/api/web | aucune image ; **non couvert par la CI** (aucun build/push GHCR) ; **cadré** par `cores/cloud/docs/REGISTRY_POLICY.md` (GHCR cible, tags immuables, niveau 4 futur) |
+| ADR-014 | Registry images | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web | **Cloud Core 5** : `.github/workflows/registry-ci.yml` + Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) — build images + **push GHCR sur `main`** (`ghcr.io/<owner>/<repo>/{api-nestjs,web-nextjs}`), tags **immuables** (`sha-`/`main-`, **pas de `latest`**), labels OCI, auth `GITHUB_TOKEN` (**pas de PAT/secret**), **aucun `.env` dans l'image**. PR = build **sans push**. **Reste** : déploiement, scan/signature/provenance, semver/release. Guide : `GHCR_REGISTRY_GUIDE.md` |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
 | ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
@@ -227,6 +227,20 @@
   ADR-013 **partiel** (niveaux 1–3 + **protection de branche documentée mais non appliquée**) ; ADR-014
   **`NON_IMPLEMENTE`**. **Action humaine en attente** : appliquer la protection de branche. Prochaine mission :
   **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4).
+- **Cloud Core 5 — Registry GHCR sans déploiement (niveau 4 partiel, 2026-06-10)** : début d'**ADR-014**
+  (registry **uniquement**). **Dockerfiles** `cores/api-nestjs/Dockerfile` (contexte `cores/api-nestjs/`,
+  multi-stage, `prisma generate` au build, **non-root**, openssl runtime) et `cores/web-nextjs/Dockerfile`
+  (contexte **racine**, Next.js **`output: 'standalone'`** + `outputFileTracingRoot` racine, **non-root**) +
+  `.dockerignore` (API + racine, **aucun `.env` copié**). **Workflow** `registry-ci.yml` : `permissions:
+  contents:read + packages:write` ; **PR → build sans push** ; **push `main` → login GHCR (`GITHUB_TOKEN`) +
+  build + push** ; matrice api/web ; `docker/{setup-buildx,login,metadata,build-push}-action` (majeure). **Tags
+  immuables** (`docker/metadata-action`, `flavor: latest=false`) : `sha-<short>`, `main-<short>`, `pr-<n>`
+  (build seul) — **`latest` jamais généré** ; **labels OCI**. **Aucun secret applicatif, aucun PAT, aucun
+  déploiement.** `next.config.ts` modifié (ajout `output:'standalone'` + tracing root — **testé**, niveau 1
+  inchangé : 307 tests). **Validé localement** : `docker build` API + Web **OK** + smoke (`node --version`,
+  **non-root**, aucun `.env`). ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 reste partiel ; Cloud Core
+  reste `IMPLEMENTATION_PARTIELLE`. Workflows existants (1–3) **inchangés**. Prochaine action : **Cloud Core 6 —
+  déploiement staging manuel** (ou durcissement registry).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés
