@@ -1,0 +1,33 @@
+import { defineConfig, devices } from "@playwright/test";
+
+/**
+ * Configuration E2E navigateur (Cloud Core 3, niveau 3).
+ *
+ * Les serveurs (API NestJS + Web Next.js) et les dépendances jetables (PostgreSQL + MinIO) sont démarrés
+ * PAR le workflow `.github/workflows/web-e2e-ci.yml` (et par la simulation locale) AVANT Playwright :
+ * cette config se contente de piloter le navigateur contre `E2E_WEB_URL` (aucun `webServer` interne, aucun
+ * secret ici). `e2e/global-setup.ts` provisionne un fichier VALIDATED éphémère via l'API.
+ */
+const WEB_URL = process.env.E2E_WEB_URL ?? "http://127.0.0.1:3100";
+
+export default defineConfig({
+  testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
+  // Sérialisé : les parcours partagent un utilisateur/fichier éphémères ; on évite les courses.
+  fullyParallel: false,
+  workers: 1,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  timeout: 30_000,
+  expect: { timeout: 10_000 },
+  // Pas de rapport HTML auto-ouvert ; pas d'upload d'artefact par défaut (cf. mission Cloud Core 3).
+  reporter: [["list"]],
+  use: {
+    baseURL: WEB_URL,
+    // Traces/captures UNIQUEMENT en cas d'échec (jamais de cookie/URL signée en succès).
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    video: "off",
+  },
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+});

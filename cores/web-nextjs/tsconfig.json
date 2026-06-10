@@ -41,6 +41,8 @@
   "exclude": [
     "node_modules",
     "build-test",
-    ".next"
+    ".next",
+    "e2e",
+    "playwright.config.ts"
   ]
 }

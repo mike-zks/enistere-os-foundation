@@ -1,8 +1,24 @@
-# Cloud Core — Plan E2E navigateur Web (niveau 3, futur)
+# Cloud Core — E2E navigateur Web (niveau 3)
 
-> **Plan, non implémenté.** Décrit le futur niveau E2E navigateur du Web Core. **Aucun outil E2E (Playwright
-> ou autre) n'est ajouté dans cette mission.** Aligné sur `CLOUD_CORE_V1_EXECUTION_BASELINE.md` §13, la revue
-> `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md` (réserve « E2E navigateur ») et ADR-013.
+> **IMPLÉMENTÉ (Cloud Core 3)** — workflow **`.github/workflows/web-e2e-ci.yml`** + suite Playwright
+> (`cores/web-nextjs/e2e/`). Ce document a servi de plan ; il décrit désormais le niveau 3 réel. Toujours
+> **sans** déploiement, registry/GHCR, secret GitHub. Aligné sur `CLOUD_CORE_V1_EXECUTION_BASELINE.md` §13, la
+> revue `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md` (réserve « E2E navigateur ») et ADR-013.
+
+## 0. Implémentation réelle (`web-e2e-ci.yml` + `cores/web-nextjs/e2e/`)
+
+- **Outil** : **Playwright** (`@playwright/test`, devDep du workspace Web) + **Chromium** headless
+  (`playwright install --with-deps chromium`). Pas de Cypress, pas de Storybook.
+- **Isolation niveau 1** : `e2e/` et `playwright.config.ts` **exclus** de `typecheck`/`lint`/`build`
+  (`tsconfig.json` `exclude` + `eslint.config.mjs` `ignores`) — Playwright compile lui-même les specs.
+- **Orchestration (workflow)** : PostgreSQL (`postgres:16`, `services:`) + MinIO (`docker run` + bucket) →
+  `npm ci` + build paquets → `e2e:install` (Chromium) → API (autonome : `npm ci`, prisma generate/
+  **migrate:deploy**/seed, build, démarrage + attente `/health/ready`) → **seed utilisateurs** éphémères
+  (`proof-seed-user.ts` → propriétaire + sans-permission via `$GITHUB_ENV`) → build + démarrage Web
+  (`next start`, `APP_ENV=development` pour cookies HTTP) → **`playwright test`**.
+- **Fixture** : `e2e/global-setup.ts` se connecte à l'API et **téléverse un fichier VALIDATED** éphémère →
+  `e2e/.state.json` (gitignoré) ; **aucun token/URL signée journalisé**.
+- **Validé localement par simulation** (mêmes services/env/étapes, Chromium réel) — voir le rapport de mission.
 
 ## 1. Objectif
 
@@ -44,7 +60,8 @@ Files         : /protected/files/[id] métadonnées ; téléchargement (URL sign
 - Sélecteurs accessibles stables (rôles ARIA déjà présents : `role=alert/status`, labels).
 - Politique d'artefacts (rétention courte, non sensibles).
 
-## 6. Hors périmètre (cette mission)
+## 6. Hors périmètre (toujours non couvert)
 
-Aucun outil E2E installé, aucun workflow E2E, aucune dépendance ajoutée. Ce plan sera implémenté au **niveau
-3**, après la CI runtime API (niveau 2).
+**Upload/suppression Files côté Web** (non implémentés côté produit), nouvelle feature Auth/UI, déploiement,
+registre/GHCR (ADR-014), environnements protégés, monitoring, rollback, **upload d'artefacts** (les traces/
+captures Playwright sont `retain-on-failure`, non poussées). Le niveau suivant est **4** (registry/déploiement).

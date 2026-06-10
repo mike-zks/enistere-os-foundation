@@ -75,19 +75,21 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public/Health +
   authentifié/BFF Auth login/refresh/logout/me/authorization)** dans le Web Core ; types Auth dérivés via
   `SchemaOf<>` (`UserProfileResponseDto`, `AuthorizationSummaryResponseDto`) — preuve API réelle.
-- **Cloud Core** : **`IMPLEMENTATION_PARTIELLE`** — `CORE_SPECIFICATION.md` + `README.md` + `docs/` (Cloud Core
-  1 : baseline d'exécution, environnements, checklist protection de branche, politique CI 4 niveaux, secrets/
-  registry, plans) **+ Cloud Core 2 : CI runtime API** `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO
-  jetables, migrations Prisma, unit + **e2e**, openapi:check, build, audit ; **sans secret/déploiement/
-  registry**). **Restent** : E2E navigateur (niveau 3), registry/GHCR (ADR-014), déploiement, environnements
-  protégés, monitoring, rollback, Compose/Traefik.
+- **Cloud Core** : **`IMPLEMENTATION_PARTIELLE`** — spec + README + `docs/` (CC1 cadrage : baseline, environnements,
+  checklist protection de branche, politique CI 4 niveaux, secrets/registry, plans) **+ CC2 : CI runtime API**
+  `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit + e2e, openapi:check) **+ CC3 : CI E2E
+  navigateur** `web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ;
+  parcours **Health/Auth/Files**). **Trois workflows CI** (niveaux 1–3), **sans secret/déploiement/registre**.
+  **Restent** : registry/GHCR (ADR-014), déploiement, environnements protégés, monitoring, rollback, couverture
+  publiée, protection de branche (action humaine), Compose/Traefik.
 - **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo,
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
   gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
   déploiement, protection de branche, E2E navigateur.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `ci(api): add runtime validation workflow`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `ci(web): add browser e2e validation workflow`,
+  `ci(api): add runtime validation workflow`,
   `docs(cloud): define v1 execution baseline`,
   `ci: add minimal monorepo validation`,
   `docs(web-nextjs): review web core v1 increment`,
@@ -135,14 +137,42 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 **URL signée hors cache** via mutation), **013** (**CI minimale** GitHub Actions — non-régression monorepo ;
 **partiel**), 016
 (types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
-ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** depuis la CI minimale
-(`.github/workflows/ci.yml`) — restent branch protection, E2E, CI runtime API, release, déploiement,
-environnements. **ADR-014** (registry) reste non implémenté. Détail :
-[`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
+`ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
+restent branch protection (humain), couverture, release, déploiement, environnements (niveau 4). **ADR-014**
+(registry) reste non implémenté. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 2 — CI runtime API NestJS (niveau 2)** (`.github/workflows/api-runtime-ci.yml`) : implémente le
+**Cloud Core 3 — CI E2E navigateur (niveau 3)** (`.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/`) :
+implémente le **niveau 3** — un workflow démarrant une **stack réelle et éphémère** (PostgreSQL `services:` +
+MinIO `docker run` + **API NestJS** + **Web Next.js**) et rejouant les **parcours navigateur** critiques avec
+**Playwright/Chromium** headless, **sans déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni
+environnement protégé**. **Outil** : `@playwright/test` (devDep du **workspace Web**) + Chromium
+(`playwright install --with-deps chromium`) — pas de Cypress/Storybook. **Isolation niveau 1** : `e2e/` +
+`playwright.config.ts` **exclus** de `typecheck`/`lint`/`build` (`tsconfig.json` `exclude` + `eslint.config.mjs`
+`ignores`) → niveau 1 **inchangé** (vérifié : 307 tests Web, typecheck/lint/build verts). **Orchestration** :
+`npm ci` + build paquets → `e2e:install` (Chromium) → API (autonome : `npm ci`, prisma generate/migrate:deploy/
+seed, build, démarrage + attente `/health/ready`) → **seed utilisateurs** éphémères (`proof-seed-user.ts` →
+propriétaire + sans-permission via `$GITHUB_ENV`) → build + démarrage Web (`next start`, **`APP_ENV=development`**
+pour cookies HTTP) → **`playwright test`**. **Fixture** : `e2e/global-setup.ts` téléverse un **fichier VALIDATED**
+éphémère via l'API → `e2e/.state.json` (gitignoré) ; **aucun token/URL signée journalisé**. **Specs**
+(`e2e/{health,auth,files}.spec.ts`) : **Health** (accueil + sans fuite de config), **Auth** (anonyme `/protected`
+→ `/login` ; identifiants invalides → **erreur générique** sans énumération, reste sur `/login` ; login valide
+→ `/protected` ; **déconnexion** → re-navigation → `/login`), **Files** (métadonnées publiques, titre = nom
+d'origine, **aucun champ interne** storageKey/bucket/checksum/ownerId, **téléchargement** : `download-url` **200**
++ requête au stockage ; id inexistant → « Fichier introuvable » ; sans permission → « Accès refusé »).
+**Valeurs de test jetables** (jamais `secrets.*`, jamais en `.env`), traces `retain-on-failure`, **aucun
+artefact poussé**. **`ci.yml`/`api-runtime-ci.yml` inchangés.** **Validation** : non-régression niveau 1
+**12/12** (avec e2e présent) + **simulation locale du workflow** (stack réelle + Chromium) → **7 tests Playwright
+verts** (anonyme→/login, invalide→erreur, login+logout, métadonnées+téléchargement, introuvable, accès refusé,
+Health). Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` (trois workflows CI niveaux 1–3 ; **pas** de registry/
+déploiement/environnements/monitoring/rollback). ADR-013 **partiel** (niveaux 1–3) ; **ADR-014 `NON_IMPLEMENTE`**.
+`cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** (hors `tsconfig`/`eslint`/
+`.gitignore`/`package.json` du Web pour isoler l'E2E). Commit `ci(web): add browser e2e validation workflow`.
+**Prochaine action : Cloud Core 4 — durcissement CI & protection de branche** (humain).
+
+**Étape précédente — Cloud Core 2 — CI runtime API NestJS (niveau 2)** (`.github/workflows/api-runtime-ci.yml`) : implémente le
 **niveau 2** de la politique CI cadrée — un workflow rejouant l'**API Core NestJS** contre ses dépendances
 runtime **jetables**, **sans déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement
 protégé**. `cores/api-nestjs/` est un projet npm **autonome** (lockfile propre, **hors workspaces racine**) →
@@ -376,16 +406,14 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Cloud Core 3 — E2E navigateur (niveau 3)**. Le **Cloud Core 2** (CI runtime API) est
-**terminé** (`.github/workflows/api-runtime-ci.yml` : PostgreSQL+MinIO jetables, migrations, unit + **e2e**,
-openapi:check, build, audit) ; Cloud Core → `IMPLEMENTATION_PARTIELLE`. Les **niveaux 1–2** sont en place ; la
-suite gouvernée est le **niveau 3** : un workflow démarrant la stack **API + PostgreSQL + MinIO + Web Next.js**
-(éphémère) et rejouant les **parcours navigateur** (Health, Auth, Files), outil **à décider** (Playwright
-candidat), captures en échec seulement, **aucun secret** — voir `cores/cloud/docs/WEB_E2E_CI_PLAN.md`. **En
-parallèle (action humaine, non-agent)** : appliquer la **protection de branche `main`**
-(`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`). **Alternative (décision humaine)** : UI Kit 4 ; Files 2 ; Mobile
-Core ; ou niveau 4 (registry/déploiement) si la mise en production devient prioritaire. **Ne pas enchaîner
-automatiquement vers Files 2.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Cloud Core 4 — durcissement CI & gouvernance de branche**. Le **Cloud Core 3** (CI E2E
+navigateur) est **terminé** (`web-e2e-ci.yml` + `cores/web-nextjs/e2e/` : Playwright/Chromium, stack réelle,
+parcours Health/Auth/Files, **7 tests verts** en simulation) ; Cloud Core → `IMPLEMENTATION_PARTIELLE` (niveaux
+1–3). La **dernière réserve transverse non outillée** est la **protection de branche `main`** — une **action
+humaine** (GitHub Settings) qui rend les checks des trois workflows **bloquants** ; l'agent peut compléter par
+la **couverture publiée** et le **pinning** (sans déploiement). **Alternative (décision humaine)** : niveau 4
+(registry GHCR + déploiement, ADR-014) ; UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas enchaîner automatiquement
+vers Files 2 ni le déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

@@ -5,37 +5,35 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 3 — E2E navigateur (niveau 3)** (`.github/workflows/` + `cores/cloud/docs/`) : implémenter le
-> **niveau 3** — un workflow démarrant la stack **API + PostgreSQL + MinIO + Web Next.js** (éphémère) et
-> rejouant les **parcours navigateur** (Health, Auth login/refresh/logout + protection des routes, Files
-> métadonnées/téléchargement, 404/403/503), outil **à décider** (Playwright candidat), **données éphémères**,
-> **captures en échec seulement**, **aucun secret**. Suivre `cores/cloud/docs/WEB_E2E_CI_PLAN.md`. **Pas de
-> déploiement, pas de registry, pas de secret.** **En parallèle (action humaine)** : appliquer la **protection
-> de branche `main`** (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) pour rendre les deux workflows bloquants.
+> **Cloud Core 4 — durcissement CI & gouvernance de branche** : **appliquer** (action **humaine**, GitHub
+> Settings) la **protection de branche `main`** (`cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) pour
+> rendre **bloquants** les checks des trois workflows (`ci.yml`, `api-runtime-ci.yml`, `web-e2e-ci.yml`) ; puis
+> côté agent, durcir la CI **sans déploiement** : publication de **couverture** (Web/UI Kit/paquets), pinning
+> léger des images/actions, éventuel scan de secrets. **Alternative immédiate** : **niveau 4** (registry GHCR +
+> déploiement, ADR-014) si la mise en production devient prioritaire.
 
-**Justification** : le **Cloud Core 2 — CI runtime API NestJS (niveau 2)** est **terminé** (commit `ci(api):
-add runtime validation workflow`) : `.github/workflows/api-runtime-ci.yml` rejoue l'API contre PostgreSQL +
-MinIO jetables (migrations, unit + **e2e**, openapi:check, build, audit) — Cloud Core →
-**`IMPLEMENTATION_PARTIELLE`**. Les **niveaux 1–2** sont en place ; la suite gouvernée est le **niveau 3** (E2E
-navigateur), seule réserve « tests » majeure du Web (cf. revue Web V1) encore non couverte. **Ne pas sauter au
-niveau 4 (registry/déploiement, ADR-014) ni enchaîner vers Files 2.**
+**Justification** : le **Cloud Core 3 — CI E2E navigateur (niveau 3)** est **terminé** (commit `ci(web): add
+browser e2e validation workflow`) : `.github/workflows/web-e2e-ci.yml` + suite Playwright (`cores/web-nextjs/e2e/`)
+rejouent les parcours **Health/Auth/Files** sur une stack réelle (API + PostgreSQL + MinIO + Web + Chromium) —
+**validé localement, 7 tests verts**. Les **niveaux 1–3** sont en place ; la **dernière réserve transverse
+non outillée** est la **protection de branche** (qui rend la CI bloquante) — une **action humaine** que l'agent
+ne peut appliquer. Le durcissement CI (couverture, pinning) la complète. **Ne pas enchaîner vers Files 2 ni
+sauter au déploiement** sans décision.
 
-**Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives) si features riches
-imminentes ; **Files 2** (upload Web) ; **Mobile Core** ; ou **niveau 4** (registry/déploiement) si la priorité
-devient la mise en production. La **protection de branche** `main` est une **action humaine manuelle** (GitHub
-Settings), non un travail d'agent.
+**Alternative (justifiée, décision humaine)** : **niveau 4** (registry/déploiement) ; **UI Kit 4** (primitives
+interactives) ; **Files 2** (upload Web) ; **Mobile Core**.
 
-**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit `ci(api): add
-runtime validation workflow` ; statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013
-**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–2), ADR-014 **`NON_IMPLEMENTE`**.
+**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit `ci(web): add
+browser e2e validation workflow` ; statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`** (niveaux 1–3), ADR-013
+**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3), ADR-014 **`NON_IMPLEMENTE`**.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 3 — E2E navigateur (niveau 3)** — stack API+PG+MinIO+Web en CI, parcours Health/Auth/Files (`WEB_E2E_CI_PLAN.md`). ✦ prochaine action. **+ humain** : appliquer la protection de branche `main`.
-2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
-3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
-4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
-5. **Cloud Core 4 — registry (ADR-014) + déploiement** — build/push GHCR, environnements protégés, rollback.
+1. **Cloud Core 4 — durcissement CI & protection de branche** — appliquer (humain) la protection de `main` ; couverture publiée, pinning. ✦ prochaine action.
+2. **Cloud Core (niveau 4) — registry (ADR-014) + déploiement** — build/push GHCR, environnements protégés, rollback.
+3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
+4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -57,9 +55,10 @@ deux cores. À arbitrer par décision humaine.
 | Revue globale Web Core (incrément V1) | **FAIT** — verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (`WEB_CORE_V1_INCREMENT_REVIEW.md`) : 307 tests ×2 + runtime réel 49/49, aucun défaut bloquant ; réserves : CI/ordre de build, E2E |
 | CI minimale (ADR-013) | **FAIT** — `.github/workflows/ci.yml` (GitHub Actions, ordre de build imposé, `npm ci` Node 24, audit, gardes deps) ; ADR-013 **partiel** (restent branch protection, E2E, runtime API, déploiement) |
 | Cloud Core 1 — cadrage CI/CD & environnements | **FAIT** — `cores/cloud/docs/` (baseline, environnements, checklist branch protection, politique CI 4 niveaux, secrets/registry, plans) |
-| Cloud Core 2 — CI runtime API (niveau 2) | **FAIT** — `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) ; Cloud Core → `IMPLEMENTATION_PARTIELLE` |
-| Cloud Core 3 — E2E navigateur (niveau 3) | **débloqué** — prochaine action ; stack API+PG+MinIO+Web en CI (`WEB_E2E_CI_PLAN.md`) |
-| Protection de branche `main` | **débloqué (action humaine)** — checklist manuelle `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les checks `ci.yml` + `api-runtime-ci.yml` bloquants) ; non applicable par un agent (GitHub Settings) |
+| Cloud Core 2 — CI runtime API (niveau 2) | **FAIT** — `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) |
+| Cloud Core 3 — E2E navigateur (niveau 3) | **FAIT** — `.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ; Health/Auth/Files ; **7 tests verts** en simulation) |
+| Cloud Core 4 — durcissement CI | **débloqué** — prochaine action ; couverture publiée, pinning (+ protection de branche, humain) |
+| Protection de branche `main` | **débloqué (action humaine)** — checklist manuelle `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les checks des **trois** workflows bloquants) ; non applicable par un agent (GitHub Settings) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |

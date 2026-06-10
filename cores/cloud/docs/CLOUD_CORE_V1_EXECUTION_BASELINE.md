@@ -28,9 +28,10 @@ l'implémentation future **sans l'anticiper** (pas de Compose, pas de Traefik, p
 
 **Inclus (cadrage, Cloud Core 1)** : environnements, checklist de protection de branche (manuelle), politique
 CI progressive (4 niveaux), politiques secrets/registry, plans CI runtime API et E2E Web, notes observabilité/
-rollback. **Implémenté ensuite (Cloud Core 2)** : la **CI runtime API** (niveau 2, `api-runtime-ci.yml`).
-**Statut Cloud Core : `IMPLEMENTATION_PARTIELLE`** depuis Cloud Core 2 — deux workflows runtime réels (niveaux
-1–2) existent, **mais** ni registry, ni déploiement, ni environnements protégés, ni monitoring, ni rollback.
+rollback. **Implémenté ensuite** : **Cloud Core 2** = CI **runtime API** (niveau 2, `api-runtime-ci.yml`) ;
+**Cloud Core 3** = CI **E2E navigateur** (niveau 3, `web-e2e-ci.yml`). **Statut Cloud Core :
+`IMPLEMENTATION_PARTIELLE`** — **trois** workflows CI réels (niveaux 1–3) existent, **mais** ni registry, ni
+déploiement, ni environnements protégés, ni monitoring, ni rollback.
 
 **Exclus** : Dockerfile, Compose, Traefik, GHCR/registry, déploiement, Helm/K8s/Terraform/Ansible, secrets
 GitHub réels, GitHub Environments réels via API, workflows deploy/registry/runtime, monitoring réel, OSRM/
@@ -42,18 +43,20 @@ PostGIS réels, backups réels.
 |---|---|
 | CI non-régression monorepo (ADR-013) | **présent** (`.github/workflows/ci.yml`, niveau 1) |
 | **CI runtime API NestJS** (PostgreSQL + MinIO) | **présent** (`.github/workflows/api-runtime-ci.yml`, niveau 2 — Cloud Core 2) |
+| **CI E2E navigateur** (stack réelle + Playwright) | **présent** (`.github/workflows/web-e2e-ci.yml`, niveau 3 — Cloud Core 3) |
 | Ordre de build imposé | **présent** (jobs `needs`) |
 | Garde `npm audit` 0 vuln | **présent** (monorepo + API) |
 | Gardes Axios/Zustand | **présent** (ADR-011/012) |
 | Build Web sans API | **présent** (force-dynamic) |
 | Migrations Prisma + e2e API rejoués en CI | **présent** (niveau 2) |
+| Parcours navigateur Health/Auth/Files rejoués en CI | **présent** (niveau 3) |
 
 ## 5. Ce qui n'existe pas encore
 
-Protection de branche `main` (action humaine, non appliquée) · GitHub Environments · **E2E navigateur Web**
-(niveau 3) · couverture publiée · build/push d'images (GHCR, ADR-014) · déploiement · staging/preview/
-production réels · monitoring/observabilité · backups/restore · Traefik/DNS/TLS · secrets manager.
-*(La CI runtime API + e2e en CI — niveau 2 — **existe** désormais : `api-runtime-ci.yml`.)*
+Protection de branche `main` (action humaine, non appliquée) · GitHub Environments · couverture publiée ·
+build/push d'images (GHCR, ADR-014) · déploiement · staging/preview/production réels · monitoring/
+observabilité · backups/restore · Traefik/DNS/TLS · secrets manager · **upload/suppression Files côté Web**.
+*(Niveaux 1–3 — non-régression monorepo, runtime API + e2e, **E2E navigateur** — **existent** désormais.)*
 
 ## 6. Environnements cibles (logiques)
 
@@ -70,14 +73,15 @@ cette mission.
 
 ## 8. Politique de CI (progressive)
 
-Quatre niveaux — **niveaux 1 et 2 implémentés** (voir aussi `.github/workflows/README.md`) :
+Quatre niveaux — **niveaux 1, 2 et 3 implémentés** (voir aussi `.github/workflows/README.md`) :
 
 - **Niveau 1 (présent — `ci.yml`)** : contrats, client API, UI Kit, Web Core, audit, gardes dépendances.
 - **Niveau 2 (présent — `api-runtime-ci.yml`, Cloud Core 2)** : CI **runtime API NestJS** — PostgreSQL +
   MinIO **jetables**, **migrations Prisma** (`migrate deploy`), tests **unitaires + e2e**, **OpenAPI check**,
   build, audit ; **sans secret, sans déploiement, sans registre**. Détail : `API_RUNTIME_CI_PLAN.md`.
-- **Niveau 3 (prochain)** : **E2E navigateur** Web (Health/Auth/Files), artefacts de test non sensibles.
-  Détail : `WEB_E2E_CI_PLAN.md`.
+- **Niveau 3 (présent — `web-e2e-ci.yml`, Cloud Core 3)** : **E2E navigateur** Web — stack réelle
+  (PostgreSQL + MinIO + **API + Web**) + **Playwright/Chromium** ; parcours **Health/Auth/Files** ; données
+  éphémères ; traces `retain-on-failure` (**aucun artefact poussé**). Détail : `WEB_E2E_CI_PLAN.md`.
 - **Niveau 4 (futur)** : build images, **GHCR** (ADR-014), déploiement staging, approbation production,
   rollback. Détail : `REGISTRY_POLICY.md`.
 
@@ -107,11 +111,13 @@ PostgreSQL + MinIO jetables, `prisma generate/validate/migrate deploy`, tests un
 projet npm **autonome** (`npm ci` propre). **Restent hors couverture** : déploiement, registre, environnements
 protégés, monitoring, rollback.
 
-## 13. Politique E2E (future)
+## 13. Politique E2E (implémentée — niveau 3)
 
-Détail : `WEB_E2E_CI_PLAN.md`. Niveau E2E navigateur futur : stack API + PostgreSQL + MinIO + Web, parcours
-Health/Auth/Files, **données éphémères**, captures uniquement en échec, **aucun secret**. Outil (Playwright ou
-alternative) **à décider** ; **non ajouté** ici.
+Détail : `WEB_E2E_CI_PLAN.md`. **Implémentée** (`.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/`) :
+**Playwright/Chromium** headless contre une stack réelle (API + PostgreSQL + MinIO + Web), parcours
+**Health/Auth/Files**, **données éphémères** (fixture VALIDATED via `global-setup.ts`), captures
+`retain-on-failure`, **aucun secret**, **aucun artefact poussé**. E2E **isolés** du niveau 1
+(`tsconfig`/`eslint` exclus).
 
 ## 14. Politique observabilité (future)
 
@@ -127,16 +133,17 @@ déploiement futur devra documenter sa procédure de rollback.
 
 ## 16. Limites V1
 
-Niveaux 1–2 présents. **Restent** : protection de branche **non appliquée** (action humaine manuelle) ; pas
-d'E2E **navigateur** (niveau 3) ; pas de couverture publiée ; pas de registry/déploiement/monitoring/backups ;
-environnements `preview`/`staging`/`production` **théoriques**. La reproductibilité hors-CI (clone local) reste
-à documenter (ordre `npm run build` racine). **Aucun statut n'est augmenté artificiellement** (Cloud Core
-`IMPLEMENTATION_PARTIELLE` : deux workflows runtime réels, mais ni registry, ni déploiement, ni environnements).
+Niveaux 1–3 présents. **Restent** : protection de branche **non appliquée** (action humaine manuelle) ; pas
+de couverture publiée ; pas de registry/déploiement/monitoring/backups ; environnements `preview`/`staging`/
+`production` **théoriques**. La reproductibilité hors-CI (clone local) reste à documenter (ordre `npm run
+build` racine). **Aucun statut n'est augmenté artificiellement** (Cloud Core `IMPLEMENTATION_PARTIELLE` : trois
+workflows CI réels — non-régression, runtime API, E2E navigateur —, mais ni registry, ni déploiement, ni
+environnements protégés, ni monitoring, ni rollback).
 
 ## 17. Étapes suivantes
 
 1. **Appliquer** la checklist de protection de branche `main` (manuel, GitHub Settings) — rendre les checks
-   de `ci.yml` **et** `api-runtime-ci.yml` bloquants.
-2. **Niveau 3** : E2E navigateur (Health/Auth/Files) — `WEB_E2E_CI_PLAN.md`.
-3. **Niveau 4** : registry GHCR (ADR-014) puis déploiement par environnement protégé + rollback.
+   des **trois** workflows (`ci.yml`, `api-runtime-ci.yml`, `web-e2e-ci.yml`) bloquants.
+2. **Niveau 4** : registry GHCR (ADR-014) puis déploiement par environnement protégé + rollback.
+3. Durcissement CI complémentaire (couverture publiée, dépendances pinnées, scan de secrets).
 4. Rédiger les ADR structurants au moment voulu (registry si structurante, OSRM/PostGIS si adoptés).

@@ -7,6 +7,7 @@ sans déploiement** :
 |---|---|---|
 | [`ci.yml`](ci.yml) | Non-régression du monorepo (contrats, client, UI Kit, Web, audit) — **sans** base/stockage | Niveau 1 |
 | [`api-runtime-ci.yml`](api-runtime-ci.yml) | Runtime de l'**API NestJS** : PostgreSQL + MinIO **jetables**, migrations Prisma, unit + e2e, OpenAPI check, build, audit | Niveau 2 |
+| [`web-e2e-ci.yml`](web-e2e-ci.yml) | **E2E navigateur** : stack réelle (PostgreSQL + MinIO + API + Web) + Playwright/Chromium ; parcours Health, Auth, Files | Niveau 3 |
 
 ## `ci.yml` — CI minimale V1 (ADR-013)
 
@@ -101,7 +102,41 @@ monitoring · E2E **navigateur** (niveau 3).
 > **Contrainte GitHub Actions documentée** : MinIO via `docker run` (pas `services:`) car un service ne peut
 > pas porter la commande `server /data`. PostgreSQL reste un service idiomatique.
 
-### Niveau CI actuel & progression (Cloud Core 1 → 2)
+## `web-e2e-ci.yml` — CI E2E navigateur (niveau 3, Cloud Core 3)
+
+Démarre une **stack réelle et éphémère** et rejoue les **parcours navigateur** critiques avec **Playwright/
+Chromium** (headless). **Lecture seule, aucun secret GitHub, aucun registre, aucun déploiement.**
+
+### Stack & orchestration
+
+PostgreSQL (`postgres:16`, `services:`) + MinIO (`docker run` + bucket) → `npm ci` (racine) + build des paquets
+→ `npm run e2e:install` (Chromium) → API NestJS (autonome : `npm ci`, prisma generate/**migrate:deploy**/seed,
+build, **démarrage** en arrière-plan, attente `/health/ready`) → **seed utilisateurs éphémères**
+(`proof-seed-user.ts` → propriétaire + sans-permission, exportés via `$GITHUB_ENV`) → build + **démarrage du
+Web** (`next start`, attente) → **Playwright**. **`APP_ENV=development`** (cookies non-Secure → Auth en HTTP
+local). Valeurs **jetables** (jamais `secrets.*`).
+
+### Parcours couverts
+
+- **Health** : accueil charge, panneau Health visible, **aucune fuite** de config/token.
+- **Auth** : anonyme `/protected` → `/login` ; identifiants invalides → **erreur générique** (sans énumération),
+  reste sur `/login` ; connexion valide → `/protected` ; **déconnexion** → re-navigation → `/login`.
+- **Files** : métadonnées publiques (titre = nom d'origine), **aucun champ interne** (storageKey/bucket/
+  checksum/ownerId), **téléchargement** (BFF `download-url` **200** + requête au stockage, **URL signée jamais
+  journalisée**) ; id inexistant → « Fichier introuvable » ; sans permission → « Accès refusé ».
+
+### Données & artefacts
+
+Données **éphémères** (utilisateur + fichier VALIDATED via `global-setup.ts`, écrits dans `e2e/.state.json`
+gitignoré) ; **aucun upload d'artefact** ; traces/captures Playwright **uniquement en échec** (`retain-on-failure`).
+
+### Ce qu'il ne garantit PAS
+
+Déploiement · registre/GHCR (ADR-014) · environnements protégés · rollback · monitoring · **upload/suppression
+Files côté Web** (hors périmètre). Les tests E2E sont **isolés** du niveau 1 (exclus de `typecheck`/`lint`/
+`build` via `tsconfig.json`/`eslint.config.mjs` ; compilés par Playwright).
+
+### Niveau CI actuel & progression (Cloud Core 1 → 3)
 
 Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
 [`cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
@@ -110,12 +145,13 @@ Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La p
   gardes Axios/Zustand.
 - **Niveau 2 (présent — `api-runtime-ci.yml`)** : CI runtime API NestJS (PostgreSQL + MinIO jetables) +
   migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../cores/cloud/docs/API_RUNTIME_CI_PLAN.md).
-- **Niveau 3 (futur)** : E2E navigateur Web — [`WEB_E2E_CI_PLAN.md`](../../cores/cloud/docs/WEB_E2E_CI_PLAN.md).
+- **Niveau 3 (présent — `web-e2e-ci.yml`)** : E2E navigateur Web (Health/Auth/Files) sur stack réelle —
+  [`WEB_E2E_CI_PLAN.md`](../../cores/cloud/docs/WEB_E2E_CI_PLAN.md).
 - **Niveau 4 (futur)** : build/push d'images (GHCR, ADR-014) + déploiement par environnement —
   [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md).
 
-**Protection de branche `main`** : à appliquer **manuellement** (rendre les checks des deux workflows
+**Protection de branche `main`** : à appliquer **manuellement** (rendre les checks des **trois** workflows
 bloquants) — [`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md).
 **Aucun déploiement, aucun secret, aucun registry** dans ces workflows. ADR-013 reste
-**`PARTIELLEMENT_IMPLEMENTE`** tant que les niveaux 3–4 et la protection de branche ne sont pas en place ;
+**`PARTIELLEMENT_IMPLEMENTE`** tant que le niveau 4 et la protection de branche ne sont pas en place ;
 ADR-014 reste **`NON_IMPLEMENTE`**.

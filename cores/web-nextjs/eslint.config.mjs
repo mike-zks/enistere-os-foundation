@@ -12,6 +12,12 @@ const eslintConfig = [
       "build-test/**",
       "node_modules/**",
       "next-env.d.ts",
+      // Tests E2E Playwright (Cloud Core 3) : compilés/exécutés par Playwright (TS natif), isolés du
+      // lint/typecheck/build niveau 1. Validés en exécutant la suite (web-e2e-ci.yml).
+      "e2e/**",
+      "playwright.config.ts",
+      "test-results/**",
+      "playwright-report/**",
     ],
   },
 ];

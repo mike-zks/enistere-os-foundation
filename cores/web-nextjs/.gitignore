@@ -8,6 +8,12 @@
 # sortie de compilation des tests (node:test)
 /build-test
 
+# E2E Playwright (Cloud Core 3) — artefacts et état éphémère, jamais versionnés
+/test-results
+/playwright-report
+/playwright/.cache
+/e2e/.state.json
+
 # environnement local (jamais versionné)
 .env
 .env.local
