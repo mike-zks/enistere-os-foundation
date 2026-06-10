@@ -34,14 +34,26 @@ script/style. Elle sera introduite en V2 avec nonces et inventaire des sources.
   test statique d'imports** (`test/auth-boundaries.test.ts`) ; le paquet `server-only` n'est **pas**
   utilisé (il lève à l'import sous `node:test`).
 
-## Implémenté (Auth — Web Auth 2 → 3)
+## Implémenté (Auth — Web Auth 2 → 5)
 
 BFF Auth (`login`/`refresh`/`logout`/`csrf`, `me`/`authorization`) · cookies `HttpOnly` access/refresh
 (`__Host-` en production) · **CSRF double-submit** (comparaison à temps constant, rotation) ·
 **Origin/Referer** fail-closed · erreurs génériques (aucune fuite token/cause/stack/réponse brute) ·
-`no-store` · état de session **sans token** au navigateur · purge du cache Auth au logout.
+`no-store` · état de session **sans token** au navigateur · purge du cache Auth au logout · **routes
+protégées** : layout `(protected)` à **résolution serveur read-only** (anonyme ⇒ redirection ; **indisponible
+⇒ état contrôlé**, jamais assimilé à anonyme, aucun contenu privé) · page `/login` (`returnTo` interne
+assaini, **anti open-redirect**).
+
+## Implémenté (Files — lecture, Files 1)
+
+BFF **ciblé** `GET /api/files/:id` + `POST /api/files/:id/download-url` (jamais un proxy générique) ·
+**validation UUID** (400 sans appel API) · **Origin/Referer + CSRF** sur `download-url` · `no-store` ·
+**404 anti-énumération** (ownership = API) · mapping d'erreurs distinct (401/403/404/409/503) · **aucun champ
+interne** exposé (storageKey/bucket/checksum/ownerId) · **URL signée jamais mise en cache/journalisée**
+(mutation consommée puis abandonnée) · téléchargement par ancre `https`-only (`rel="noopener noreferrer"`).
 
 ## Reporté en V2 (hors périmètre V1)
 
-CSP à nonces · rate limiting · en-têtes HSTS (dépend du déploiement TLS) · journalisation/observabilité
-de sécurité · SSR Auth complet / routes protégées / middleware.
+CSP à nonces · rate limiting **au niveau BFF** (l'API applique déjà des limites par route) · en-têtes HSTS
+(dépend du déploiement TLS) · COOP/CORP · journalisation/observabilité de sécurité · SSR Auth complet
+(préchargement serveur des pages publiques) · middleware UX (non autoritaire).

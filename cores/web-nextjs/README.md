@@ -323,7 +323,12 @@ le `CHANGELOG.md` racine.
 
 ## 13. Feuille de route
 
-**Prochain incrément** : **Revue globale Web Core (incrément V1)** — auditer l'ensemble Auth + UI + Files,
-rejouer les preuves, classer les dettes, et arbitrer la suite (compléter Files, primitives interactives UI Kit,
-ou démarrer Mobile Core). Puis (selon la revue) : Files 2 / écrans, CI/E2E, CSP à nonces, i18n, CI/CD.
-**Réserves V1** recommandées en parallèle : CI minimale (ADR-013) + E2E navigateur.
+La **Revue globale Web Core (incrément V1)** est **terminée** — verdict
+**`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (rapport [`docs/WEB_CORE_V1_INCREMENT_REVIEW.md`](docs/WEB_CORE_V1_INCREMENT_REVIEW.md)) :
+socle sûr et cohérent, **307 tests ×2** + **runtime réel 49/49** (PostgreSQL + MinIO), **aucun défaut bloquant**.
+
+**Prochain incrément** : **CI minimale (ADR-013)** — non-régression du monorepo + **ordre de build des paquets**
+(`api-contracts → api-client-fetch → ui-kit → web-nextjs`) + `openapi:generate:check` (principale réserve
+transverse). Puis (décision humaine) : UI Kit 4 (primitives interactives), **Files 2** (upload Web) **après** la
+CI, Mobile Core ; plus tard CSP à nonces, HSTS (déploiement), E2E navigateur, i18n. **Ne pas démarrer Files 2
+tant que la non-régression n'est pas outillée.**

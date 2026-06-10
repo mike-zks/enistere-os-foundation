@@ -227,11 +227,20 @@ la **première feature de données** en **lecture seule** : deux **Route Handler
 temporaire** (`https`-only), et une page privée `/protected/files/[id]` réutilisant les états UI — **l'API restant
 l'autorité** (permission + ownership), **aucun champ interne** exposé, **sans upload/suppression/admin**
 (**307 tests** + **preuve API + MinIO réelle 21/21** ; détail
-[`files-read-download.md`](../../cores/web-nextjs/docs/files-read-download.md)). Statuts **maintenus**
-`IMPLEMENTATION_PARTIELLE` (UI Kit + Web Core ; ni Tailwind/Radix/shadcn ni bibliothèque exhaustive).
-**Prochaine action** : **Revue globale Web Core (incrément V1)** — revue transverse de stabilisation
-(Health + Auth 1→5 + UI 1 + Files 1) comme un système unique, **sans nouvelle fonctionnalité** (ne pas choisir
-automatiquement Files 2 avant la revue). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+[`files-read-download.md`](../../cores/web-nextjs/docs/files-read-download.md)). Enfin la **Revue globale Web
+Core — incrément V1** a traité l'incrément complet (Health + Auth 1→5 + UI 1 + Files 1) comme **un système
+unique** : verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (rapport
+[`WEB_CORE_V1_INCREMENT_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md)) — socle **sûr
+et cohérent** (aucune fuite de token/URL signée/donnée privée, CSRF + Origin/Referer, **indisponible ≠
+anonyme**, 404 anti-énumération, droits dynamiques **sans nouveau JWT**, clés de cache disjointes), **307 tests
+fiables ×2** + **runtime réel 49/49** (PostgreSQL + MinIO, parcours critique rejoué ×2, incluant **URL signée
+réellement expirée → 403** et **pannes API/MinIO**), **aucun défaut bloquant** ; réserves **opérationnelles**
+(CI + ordre de build monorepo, E2E navigateur) et **mineures** (CSP/HSTS, 429, contrastes, cache Files au
+logout). **Corrections documentaires seules** (`.env.example` + `SECURITY.md`, zéro comportement). Statuts
+**maintenus** `IMPLEMENTATION_PARTIELLE` (un verdict d'incrément n'augmente pas le statut du core ; ni
+Tailwind/Radix/shadcn ni bibliothèque exhaustive). **Prochaine action** : **CI minimale (ADR-013)** — non-
+régression monorepo + ordre de build des paquets + `generate:check` (principale réserve transverse ; **ne pas
+démarrer Files 2 avant l'outillage de non-régression**). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

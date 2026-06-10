@@ -5,39 +5,34 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Revue globale Web Core — incrément V1** (`cores/web-nextjs/`) : revue **transverse de stabilisation** du
-> Web Core traité comme **un système unique** (API publique/Health → BFF Auth → session/autorisations →
-> layout protégé → login → états UI → **Files lecture/téléchargement**), **sans nouvelle fonctionnalité**.
-> Vérifier fichier par fichier + commandes réelles : frontières client/serveur, routes BFF `ƒ`, cookies
-> `HttpOnly`/`__Host-`, CSRF + Origin/Referer, **aucune fuite de token/URL signée** (greps src + bundle),
-> caches disjoints + purges, RBAC OR/AND **affichage seul** (API autorité), contrats `SchemaOf<>`, mappeurs
-> d'erreurs cohérents, non-régression complète. Produire un **rapport permanent** + verdict.
+> **CI minimale (ADR-013)** : pipeline de non-régression du monorepo imposant l'**ordre de build des
+> paquets** (`api-contracts` → `api-client-fetch` → `ui-kit` → `web-nextjs`), exécutant
+> `typecheck`/`lint`/`test` (Web + UI Kit + paquets), la couverture et **`openapi:generate:check`**.
+> **Aucune nouvelle fonctionnalité produit.** Ne touche pas au comportement applicatif.
 
-**Justification** : **Web Core Files 1 est terminé** (commit `feat(web-nextjs): add secure file read access`) :
-lecture des métadonnées **publiques** + URL signée courte + téléchargement direct depuis le stockage objet,
-via **deux Route Handlers BFF ciblés** (`GET /api/files/:id`, `POST /api/files/:id/download-url`), client BFF
-navigateur, `fileKeys` disjoints, `useFileMetadata` (query) + `useCreateDownloadUrl` (**mutation**, URL jamais
-mise en cache), page privée `/protected/files/[id]`, états UI réutilisés. **307 tests** + **preuve API + MinIO
-réelle 21/21**. Avec Files 1, le **bloc V1 du Web Core** (Health + Auth 1→5 + UI 1 + Files 1) est complet pour
-une **revue globale de stabilisation** — symétrique de la *Revue globale Auth Web (1→5)* — **avant** d'ouvrir
-le prochain incrément produit (Files 2 / UI Kit 4 / Mobile Core). **Ne pas choisir automatiquement Files 2
-avant cette revue.**
+**Justification** : la **Revue globale Web Core — incrément V1** est **terminée** (rapport
+`cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, commit `docs(web-nextjs): review web core v1
+increment`) — verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** : socle sûr et cohérent (aucune
+fuite de token/URL signée/donnée privée, CSRF + Origin/Referer, indisponible ≠ anonyme, 404 anti-énumération,
+droits dynamiques sans nouveau JWT), **307 tests ×2** + **runtime réel 49/49** (PostgreSQL + MinIO), **aucun
+défaut bloquant**. La revue identifie **l'absence de CI + l'ordre de build monorepo** (`packages/*/dist` non
+versionnés) comme la **principale réserve transverse** de toutes les revues (gouvernance, Auth V1, Web Core
+V1) — la seule **dette importante** qui menace la non-régression et la reproductibilité (clone neuf). La
+sécuriser **avant** d'augmenter la surface (Files 2 / UI Kit 4 / Mobile) est l'ordre le plus sûr.
 
-**Alternative (justifiée)** : si la revue globale est jugée prématurée par décision humaine — **Files 2**
-(upload sécurisé côté Web) ou **UI Kit 4** (primitives interactives) ou démarrer le **Mobile Core**.
+**Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives Dialog/Select/Toast) si
+des features riches sont imminentes ; **Files 2** (upload Web) ou **Mobile Core** **après** la CI. **Ne pas
+démarrer Files 2 tant que la non-régression n'est pas outillée.**
 
-**Réserves V1 (recommandées en parallèle, non bloquantes)** : **CI minimale** (ADR-013 : ordre de build des
-paquets + non-régression) + amorce d'un **E2E navigateur** (cf. `WEB_AUTH_V1_REVIEW.md`).
-
-**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(web-nextjs): add secure file read access`.
+**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission (revue) ajoute le commit
+`docs(web-nextjs): review web core v1 increment` ; statut Web Core **inchangé** `IMPLEMENTATION_PARTIELLE`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Revue globale Web Core (incrément V1)** — revue transverse de stabilisation (Health + Auth 1→5 + UI 1 + Files 1) comme un système unique ; rapport + verdict ; **sans nouvelle fonctionnalité**. ✦ prochaine action.
-2. **CI minimale (ADR-013) + amorce E2E navigateur** — réserves V1 (recommandées en parallèle).
-3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états) — **après** la revue globale.
-4. **UI Kit 4** — primitives interactives suivantes (alternative si lacune structurelle confirmée).
+1. **CI minimale (ADR-013)** — non-régression monorepo + ordre de build des paquets + `generate:check`. ✦ prochaine action.
+2. **Amorce E2E navigateur** — parcours navigateur automatisé pérenne (réserve V1, en complément de la CI).
+3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — alternative si features riches imminentes.
+4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états) — **après** la CI.
 5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 6. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
@@ -58,8 +53,9 @@ deux cores. À arbitrer par décision humaine.
 | Auth post-V1 (register/reset/OAuth/MFA) | **hors périmètre V1** — ne pas poursuivre l'Auth |
 | États UI & composants structurels (Web/UI Kit) | **FAIT** — Web UI 1 : Alert/Card/FormField (UI Kit, 78 tests) + LoadingState/EmptyState/ErrorState/Unauthorized/Forbidden/ServiceUnavailable/PageHeader (Web, 270 tests), intégrés + axe |
 | Files Web (lecture/téléchargement) | **FAIT** — Web Core Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, client BFF, `fileKeys`, `useFileMetadata`/`useCreateDownloadUrl` (URL jamais en cache), page `/protected/files/[id]`, **307 tests** + preuve API+MinIO 21/21 |
-| Revue globale Web Core (incrément V1) | **débloqué** — prochaine action ; revue transverse de stabilisation (Health+Auth+UI+Files), sans nouvelle fonctionnalité |
-| Files Web (upload) | **débloqué après revue** — c'est **Web Core Files 2** ; multipart + finalisation, **non** prioritaire avant la revue globale |
+| Revue globale Web Core (incrément V1) | **FAIT** — verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (`WEB_CORE_V1_INCREMENT_REVIEW.md`) : 307 tests ×2 + runtime réel 49/49, aucun défaut bloquant ; réserves : CI/ordre de build, E2E |
+| CI minimale (ADR-013) | **débloqué** — prochaine action ; ordre de build paquets + non-régression monorepo + `generate:check` |
+| Files Web (upload) | **débloqué après la CI** — c'est **Web Core Files 2** ; multipart + finalisation, **non** prioritaire avant l'outillage de non-régression |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |

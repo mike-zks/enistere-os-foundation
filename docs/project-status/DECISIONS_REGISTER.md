@@ -149,8 +149,27 @@
 > permission 403 → non-propriétaire avec permission 404 → quarantaine 409 → objet supprimé 503 → logout 401 +
 > page → `/login` ; **aucun** storageKey/bucket/X-Amz-Signature/credentials en métadonnées, logs ou bundle).
 > **ADR-007 n'est que partiellement consommé côté Web** (lecture/téléchargement uniquement). Statut Web Core
-> **maintenu** `IMPLEMENTATION_PARTIELLE`. Détail : `cores/web-nextjs/docs/files-read-download.md`. **Prochaine
-> action : Revue globale Web Core (incrément V1)** — **ne pas** choisir automatiquement Files 2 avant la revue.
+> **maintenu** `IMPLEMENTATION_PARTIELLE`. Détail : `cores/web-nextjs/docs/files-read-download.md`.
+>
+> **Revue globale Web Core — incrément V1 (2026-06-10)** — revue **transverse de stabilisation** de l'incrément
+> complet (Health + Auth 1→5 + UI 1 + Files 1) comme **un système unique**, **sans nouvelle fonctionnalité**
+> (rapport permanent `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`). Vérifié fichier par fichier +
+> commandes + **runtime réel** : architecture (couches, aucun import inversé, frontières client/serveur par test
+> statique — `next/headers`/server-config/handlers/http Files **interdits côté client**), BFF **ciblé** (jamais
+> proxy ; UUID 400 sans appel API ; CSRF/Origin fail-closed avant API ; `no-store`), TanStack Query (clés
+> **disjointes** ; **retry borné Health vs `retry:false` Auth/Files** — divergence **intentionnelle** documentée ;
+> **URL signée = mutation, jamais en cache/log**), contrats `SchemaOf<>` (`generate:check` ok, décisions sur
+> status/errorCode jamais message), erreurs Files distinctes (400/401/403/404/409/429/503/502/504, **404
+> préservé**). **Verdict : `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** — **aucun défaut bloquant** (pas de
+> fuite token/URL signée/donnée privée en source/logs/bundle/RSC ; pas d'open redirect ; CSRF complet ;
+> indisponible ≠ anonyme ; 404 anti-énumération ; **droits dynamiques sans nouveau JWT**). **307 tests ×2** +
+> **runtime 49/49** (PostgreSQL + MinIO ; critique rejoué ×2 ; incl. **téléchargement réel MinIO**, **URL signée
+> réellement expirée → 403**, **pannes API/MinIO**, concurrence). **Réserves** : importantes (**CI + ordre de
+> build monorepo**, E2E navigateur) ; mineures (CSP/HSTS, 429 sans `Retry-After`, contrastes non mesurés, cache
+> Files non purgé au logout). **Corrections documentaires seules** (`.env.example` +`WEB_ALLOWED_ORIGINS` ;
+> `SECURITY.md` routes protégées implémentées + posture Files) — **zéro changement de comportement**. Statut Web
+> Core **maintenu** `IMPLEMENTATION_PARTIELLE`. **Prochaine action : CI minimale (ADR-013)** — outiller la
+> non-régression avant d'augmenter la surface (Files 2 / UI Kit 4 / Mobile **après** la CI).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

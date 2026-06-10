@@ -78,7 +78,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add secure file read access`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(web-nextjs): review web core v1 increment`,
+  `feat(web-nextjs): add secure file read access`,
   `feat(web-ui): add standard interface states`,
   `docs(web-nextjs): review web auth v1`,
   `feat(web-nextjs): add secure login experience`,
@@ -124,7 +125,37 @@ ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECI
 
 ## 8. Dernière étape terminée
 
-**Web Core Files 1 — métadonnées & téléchargement sécurisé (lecture seule)** (`@enistere/web-nextjs`) :
+**Revue globale Web Core — incrément V1** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** de
+l'incrément complet (Health public + Auth 1→5 + UI 1 + Files 1) traité comme **un système unique**, **sans
+nouvelle fonctionnalité**. Vérifié fichier par fichier + commandes + runtime : architecture (couches
+`app→features→core/shared`, **aucun import inversé**, 16 client components justifiés, aucun barrel dangereux),
+14 routes (privées/BFF `ƒ` → **build indépendant de l'API**), 6 clients API à responsabilités disjointes (aucun
+Bearer/token côté navigateur), **BFF ciblé** (jamais proxy générique ; UUID 400 sans appel API ; CSRF/Origin
+fail-closed avant API ; `no-store`), configuration (URL validée, `server-config` serveur-only, origines
+exactes), **frontières client/serveur** (test statique : `next/headers`/server-config/handlers/http Files
+interdits côté client), TanStack Query (client navigateur stable / serveur par rendu, **clés disjointes**,
+**retry borné Health vs `retry:false` Auth/Files** documenté, **URL signée = mutation jamais en cache**),
+contrats `SchemaOf<>` (`generate:check` ok, aucun DTO recopié, décisions sur status/errorCode jamais message),
+a11y (un `h1`/page, jest-axe sur les vues clés), erreurs Files distinctes (**400/401/403/404/409/429/503/502/
+504**). **Scans** : aucun token/URL signée/donnée privée en source, logs, `.next/static`, RSC. **Non-régression** :
+Web **307 tests ×2** (10,1 s/9,9 s, sans hang) + couverture **≈ 87,8 %** (modules `files/` 96–100 %) + build ;
+UI Kit 78 (100 %) + pack:check ; api-contracts 11 ; api-client-fetch 29 ; **0 vuln** ; Axios/Zustand absents.
+**Preuve runtime réelle (PostgreSQL + MinIO jetables) 49/49** (parcours critique Auth+Files **rejoué ×2**) :
+public (home 200 API up **et** down) ; Auth (anonyme→/login, login, /protected 200, /me sans token, refresh
+rotation, logout→401+/login) ; Files (métadonnées 200 sans champ interne, download-url 200 {url,expiresAt},
+**téléchargement réel MinIO** octets==upload image/png, **signature altérée→403**, **URL réellement expirée
+(TTL 30 s)→403**) ; droits (sans files.read→403, non-propriétaire+permission→**404**, **révocation sans nouveau
+JWT**→403, quarantaine→409, objet absent→503) ; **pannes** (MinIO arrêté→503 ; API arrêtée→home 200 +
+/protected « indisponible » **sans contenu privé ni donnée utilisateur** + /api/files→502) ; concurrence
+(double login, double download-url 200/200, isolation deux cookie jars). **Verdict :
+`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (aucun défaut bloquant ; réserves : **CI + ordre de build**,
+E2E navigateur ; mineures : CSP/HSTS, 429, contrastes, cache Files au logout). **Corrections documentaires
+seules** (zéro comportement) : `.env.example` (+`WEB_ALLOWED_ORIGINS`), `SECURITY.md` (routes protégées
+implémentées + posture Files). Statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE`. Rapport permanent :
+`cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`. `packages/`/`api-nestjs/`/`ui-kit` **non modifiés**.
+Commit `docs(web-nextjs): review web core v1 increment`. **Prochaine action : CI minimale (ADR-013).**
+
+**Étape précédente — Web Core Files 1 — métadonnées & téléchargement sécurisé (lecture seule)** (`@enistere/web-nextjs`) :
 première intégration **Files** du Web Core, **sans upload/suppression/admin**. Statut **inchangé**
 `IMPLEMENTATION_PARTIELLE`. **BFF ciblé** (jamais un proxy générique) : `GET /api/files/:id` (métadonnées
 **publiques**, client serveur **read-only** sans refresh au rendu, `no-store`) et `POST /api/files/:id/download-url`
@@ -265,15 +296,16 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Revue globale Web Core — incrément V1**. Web Core Files 1 est **terminé** (lecture des
-métadonnées + URL signée + téléchargement direct, 307 tests, preuve API+MinIO 21/21). Avec Health + Auth 1→5 +
-UI 1 + Files 1, le **bloc V1 du Web Core** est complet pour une **revue transverse de stabilisation** — traiter
-le Web Core comme **un système unique**, vérifier fichier par fichier + commandes réelles (frontières,
-routes BFF, cookies/CSRF/Origin, **aucune fuite de token ni d'URL signée**, caches disjoints, RBAC affichage
-seul, contrats `SchemaOf<>`, mappeurs d'erreurs, non-régression complète), produire un **rapport permanent**
-+ verdict — **sans nouvelle fonctionnalité**. **Ne pas choisir automatiquement Files 2 avant cette revue.**
-**Recommandé en parallèle (réserves V1, non bloquant)** : CI minimale (ADR-013) + amorce E2E navigateur.
-**Alternative (décision humaine)** : Files 2 (upload), UI Kit 4 ou Mobile Core. Détail :
+**Action unique** : **CI minimale (ADR-013)**. La **Revue globale Web Core — incrément V1** est **terminée**
+(verdict `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS` ; rapport
+[`WEB_CORE_V1_INCREMENT_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md) ; 307 tests ×2
++ runtime réel 49/49 ; aucun défaut bloquant). Sa **principale réserve transverse** — partagée par les revues
+gouvernance et Auth V1 — est l'**absence de CI** et l'**ordre de build monorepo** (`packages/*/dist` non
+versionnés). La prochaine action outille donc la **non-régression** : pipeline imposant l'ordre
+`api-contracts → api-client-fetch → ui-kit → web-nextjs`, `typecheck`/`lint`/`test`/couverture +
+`openapi:generate:check`, **sans nouvelle fonctionnalité produit**. **Alternative (décision humaine)** : UI Kit
+4 (primitives interactives) si features riches imminentes ; **Files 2 / Mobile Core après la CI**. **Ne pas
+démarrer Files 2 tant que la non-régression n'est pas outillée.** Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
