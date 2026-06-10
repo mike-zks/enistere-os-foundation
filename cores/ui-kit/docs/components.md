@@ -1,7 +1,8 @@
 # Primitives Web du UI Kit (V2)
 
-> Documentation légère des 6 primitives. React (peerDependency `>=18`) + `import '@enistere/ui-kit/styles.css'`.
-> Toutes : `className`, attributs HTML natifs, `forwardRef`, accessibles, pilotées par les tokens, sans logique métier.
+> Documentation légère des **9 primitives** (6 initiales + Alert/Card/FormField, Web UI 1). React
+> (peerDependency `>=18`) + `import '@enistere/ui-kit/styles.css'`. Toutes : `className`, attributs HTML
+> natifs, accessibles, pilotées par les tokens, **sans logique métier ni connaissance HTTP/Auth**.
 
 ## Button
 
@@ -58,3 +59,30 @@
 - **Accessibilité** : technique sr-only (jamais `display:none`/`visibility:hidden`).
 - **Do** : libeller une icône/un spinner.
 - **Don't** : ne pas y mettre du contenu interactif essentiel masqué sans raison.
+
+## Alert
+
+- **Rôle** : message d'information générique (primitive visuelle, sans connaissance HTTP/Auth).
+- **Props** : `variant` (`info`|`success`|`warning`|`danger`), `title?` (ReactNode), `role?` (`status`|`alert`), attributs `div` natifs, `forwardRef`.
+- **Exemple** : `<Alert variant="warning" title="Attention">Vérifiez la saisie.</Alert>`
+- **Accessibilité** : rôle par défaut `status` (poli) pour info/success/warning, `alert` (assertif) pour danger ; surchargeable. La variante est conveyée par **glyphe (forme) + bordure + titre**, jamais par la couleur seule ; le glyphe est `aria-hidden`.
+- **Do** : un titre court + un message ; `role="alert"` seulement si urgent.
+- **Don't** : ne pas rendre tous les messages `alert` (verbosité lecteurs d'écran) ; ne pas y mettre de sémantique HTTP/Auth (→ états Web Core).
+
+## Card
+
+- **Rôle** : conteneur visuel générique (aucune logique dashboard/métier, aucun rôle imposé).
+- **Props** : `Card`/`CardHeader`/`CardContent`/`CardFooter` (attributs `div`, `forwardRef`), `CardTitle` (`as?` `h2..h6`|`p`, **défaut `p`** → aucun titre imposé), `CardDescription` (`p`).
+- **Exemple** : `<Card><CardHeader><CardTitle as="h2">Titre</CardTitle><CardDescription>…</CardDescription></CardHeader><CardContent>…</CardContent></Card>`
+- **Accessibilité** : une Card visuelle n'a pas de `role` ; le **consommateur choisit le niveau de titre** (`as`). Pour une carte interactive : placer un `Button`/lien natif dans le contenu (hors périmètre).
+- **Do** : composer par slots ; choisir un `as` cohérent avec la hiérarchie.
+- **Don't** : ne pas imposer un `h2` automatique ; ne pas transformer la Card en composant cliquable.
+
+## FormField
+
+- **Rôle** : association **explicite** label / champ / aide / erreur (pas un moteur de formulaire, pas d'injection magique dans les enfants).
+- **Props** : `FormField` (`div`, `forwardRef`), `FormFieldLabel` (réutilise `Label`, `required?`, `htmlFor`), `FormFieldDescription`/`FormFieldError` (`p`, le consommateur leur donne un `id`).
+- **Exemple** : voir la docstring — le consommateur câble `htmlFor`/`id`/`aria-describedby`/`aria-invalid`.
+- **Accessibilité** : composition lisible ; le label est associé via `htmlFor`/`id` ; aide & erreur référencées par `aria-describedby` ; `aria-invalid` sur le champ.
+- **Do** : composition explicite (cf. exemple) ; un `id` unique par aide/erreur.
+- **Don't** : ne pas cloner/écraser les enfants ; ne pas dupliquer une politique de mot de passe (validation API = autorité).

@@ -54,6 +54,13 @@ interne assaini, navigation `replace`/`refresh`). **Sans middleware, sans Server
   `refresh()`**. **`returnTo` strictement interne** (`sanitizeReturnTo` — anti open-redirect). La redirection
   anonyme du layout protégé pointe vers **`/login?returnTo=/protected`**. Détail :
   [`docs/login-flow.md`](docs/login-flow.md).
+- **États UI & composants structurels (Web UI 1)** : primitives **UI Kit** ajoutées (`Alert`, `Card`,
+  `FormField`) **+** compositions Web `src/shared/components/` (`LoadingState`, `EmptyState`, `ErrorState`,
+  **`UnauthorizedState` (401) ≠ `ForbiddenState` (403)**, `ServiceUnavailableState`, `PageHeader`).
+  Génériques, accessibles (tokens, light/dark, `jest-axe`), **sans donnée sensible** (`requestId`/retry
+  optionnels). Intégrés : `PageHeader` + galerie sur l'accueil, `EmptyState` dans Health, `ErrorState`/
+  `NotFoundState`/`LoadingState` aux frontières, `ServiceUnavailableState` (le layout protégé y délègue).
+  Détail : [`docs/ui-states.md`](docs/ui-states.md).
 
 ### Hors périmètre — volontairement absent
 
@@ -241,7 +248,10 @@ Auth → défaut, anti open-redirect), validation login (e-mail/mot de passe, tr
 client BFF login (CSRF, header, body, same-origin, statuts 401/403/429/503/réseau/JSON invalide, **aucune fuite
 de mot de passe**), `useLogin` (succès/erreur, **purge authKeys / Health conservé**, **double-soumission
 empêchée**, aucun credential en cache), `LoginForm` (labels/autoComplete/validation/loading/erreurs/`jest-axe` ×4).
-**Total : 263 tests** (`tsc -p tsconfig.test.json` + `node --test`). **Preuve API réelle Web Auth 4**
+**États UI (Web UI 1)** : `EmptyState`/`UnauthorizedState`/`ForbiddenState`/`ServiceUnavailableState`/
+`PageHeader` (rôles, distinction 401≠403≠indisponible, requestId/retry, aucune donnée sensible, `jest-axe`),
+galerie `StatesShowcase` (sans `h1`). **Total : 270 tests** (`tsc -p tsconfig.test.json` + `node --test`).
+**Preuve API réelle Web Auth 4**
 (NestJS + PostgreSQL jetable, **26 assertions**) : anonyme `GET /protected` → **redirection serveur** (sans
 donnée privée) · authentifié → **200 + profil hydraté** (e-mail en SSR, **aucun token** dans HTML/RSC,
 `X-Request-Id` propagé) · cookie access retiré → redirection **sans** `/auth/refresh` · logout → redirection ·
@@ -287,14 +297,15 @@ refetch de `/authorization` **sans nouveau JWT** (prouvé). Les helpers pilotent
 
 ## 12. UI Kit & React 19
 
-`@enistere/ui-kit` est aligné sur **React 19** (peer `react >=18`, couvre 18 et 19) ; ses **64 tests**
-passent sous React 19 (aucune régression). Voir le `CHANGELOG.md` racine.
+`@enistere/ui-kit` est aligné sur **React 19** (peer `react >=18`, couvre 18 et 19) ; **78 tests** (6
+primitives initiales + **Alert/Card/FormField**, Web UI 1) passent sous React 19 (aucune régression). Voir
+le `CHANGELOG.md` racine.
 
 ---
 
 ## 13. Feuille de route
 
-**Prochain incrément** : **Revue globale Auth Web (1 → 5)** — audit du parcours complet (public → login →
-privé), rejeu des preuves, vérification cookies/CSRF/navigation/cache/SSR, **classement des dettes**, décision
-de **stabilité V1** du socle Auth Web (sans nouvelle fonctionnalité). Puis : écrans authentifiés, gestionnaire
-de thème, CSP à nonces, i18n, CI/CD.
+**Prochain incrément** : **Web Core Files 1** — consultation des métadonnées + téléchargement sécurisé
+(consomme les opérations Files des paquets API ; **sans** upload). **Alternative** : UI Kit 4 (primitives
+interactives suivantes) si une lacune structurelle est confirmée. **Réserves V1 Auth** recommandées en
+parallèle : CI minimale (ADR-013) + E2E navigateur. Puis : gestionnaire de thème, CSP à nonces, i18n, CI/CD.

@@ -112,6 +112,78 @@
   --enistere-color-overlay: #020617;
 }
 
+/* src/components/alert/alert.css */
+/* Alert — variantes pilotées par tokens. Accent = bordure gauche + glyphe (forme), jamais couleur seule.
+   Fond neutre (pas de token de fond teinté par statut — lacune documentée) ; light/dark via variables. */
+.enistere-alert {
+  display: flex;
+  gap: var(--enistere-spacing-3);
+  align-items: flex-start;
+  padding: var(--enistere-spacing-3) var(--enistere-spacing-4);
+  border: 1px solid var(--enistere-color-border-default);
+  border-left-width: 4px;
+  border-radius: var(--enistere-radius-md);
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-alert__icon {
+  flex: none;
+  font-size: var(--enistere-font-size-md);
+  line-height: 1.4;
+}
+.enistere-alert__icon::before {
+  content: "";
+}
+.enistere-alert__body {
+  min-width: 0;
+}
+.enistere-alert__title {
+  margin: 0 0 var(--enistere-spacing-1);
+  font-weight: var(--enistere-font-weight-semibold);
+}
+.enistere-alert__content {
+  margin: 0;
+}
+
+.enistere-alert--info {
+  border-left-color: var(--enistere-color-status-info);
+}
+.enistere-alert--info .enistere-alert__icon {
+  color: var(--enistere-color-status-info);
+}
+.enistere-alert--info .enistere-alert__icon::before {
+  content: "\2139"; /* ℹ */
+}
+.enistere-alert--success {
+  border-left-color: var(--enistere-color-status-success);
+}
+.enistere-alert--success .enistere-alert__icon {
+  color: var(--enistere-color-status-success);
+}
+.enistere-alert--success .enistere-alert__icon::before {
+  content: "\2713"; /* ✓ */
+}
+.enistere-alert--warning {
+  border-left-color: var(--enistere-color-status-warning);
+}
+.enistere-alert--warning .enistere-alert__icon {
+  color: var(--enistere-color-status-warning);
+}
+.enistere-alert--warning .enistere-alert__icon::before {
+  content: "\26A0"; /* ⚠ */
+}
+.enistere-alert--danger {
+  border-left-color: var(--enistere-color-status-danger);
+}
+.enistere-alert--danger .enistere-alert__icon {
+  color: var(--enistere-color-status-danger);
+}
+.enistere-alert--danger .enistere-alert__icon::before {
+  content: "\2715"; /* ✕ */
+}
+
 /* src/components/button/button.css */
 /* Button — variantes/tailles pilotées par tokens. Light/dark via variables (aucune règle dark dédiée). */
 .enistere-button {
@@ -205,6 +277,64 @@
   .enistere-button {
     transition: none;
   }
+}
+
+/* src/components/card/card.css */
+/* Card — conteneur structurel piloté par tokens. Light/dark via variables (aucune règle dark dédiée). */
+.enistere-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-5);
+  border: 1px solid var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-lg);
+  background-color: var(--enistere-color-background-elevated);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+}
+.enistere-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-1);
+}
+.enistere-card__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-lg);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-card__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-card__content {
+  min-width: 0;
+}
+.enistere-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--enistere-spacing-2);
+  align-items: center;
+}
+
+/* src/components/form-field/form-field.css */
+/* FormField — composition label/champ/aide/erreur pilotée par tokens. Light/dark via variables. */
+.enistere-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-1);
+  font-family: var(--enistere-font-family-sans);
+}
+.enistere-form-field__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-form-field__error {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-status-danger);
 }
 
 /* src/components/input/input.css */

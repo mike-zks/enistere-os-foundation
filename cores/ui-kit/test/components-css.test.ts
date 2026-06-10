@@ -23,8 +23,18 @@ function collectCss(dir: string): string[] {
 const componentFiles = collectCss(COMPONENTS_DIR);
 const allComponentCss = componentFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
 
-test('les CSS de composants existent pour les 6 primitives', () => {
-  for (const name of ['button', 'input', 'label', 'text', 'spinner', 'visually-hidden']) {
+test('les CSS de composants existent pour les primitives (6 initiales + alert/card/form-field)', () => {
+  for (const name of [
+    'button',
+    'input',
+    'label',
+    'text',
+    'spinner',
+    'visually-hidden',
+    'alert',
+    'card',
+    'form-field',
+  ]) {
     assert.ok(
       componentFiles.some((f) => f.includes(`/${name}/`)),
       `CSS manquant pour ${name}`,

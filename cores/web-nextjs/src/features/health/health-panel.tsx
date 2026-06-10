@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 
 import { mapApiErrorToPublicMessage } from "../../core/api/errors/map-api-error.js";
 import { isPublicApiConfigured } from "../../core/config/public-config.js";
+import { EmptyState } from "../../shared/components/empty-state.js";
 import { HealthProbeView, type HealthProbeViewProps } from "./health-probe-view.js";
 import { useHealth, useLiveness, useReadiness } from "./use-health.js";
 
@@ -45,9 +46,11 @@ export function HealthPanel(): ReactElement {
         API — Santé
       </Text>
       {!configured ? (
-        <Text as="p" variant="body" tone="muted">
-          API publique non configurée (`NEXT_PUBLIC_API_URL` absente). Aucune requête n&apos;est émise.
-        </Text>
+        <EmptyState
+          inline
+          title="API publique non configurée"
+          description="`NEXT_PUBLIC_API_URL` absente — aucune requête n'est émise."
+        />
       ) : null}
       <div className="health__list">
         <HealthProbeView {...toProbeProps("Santé", health, configured)} />

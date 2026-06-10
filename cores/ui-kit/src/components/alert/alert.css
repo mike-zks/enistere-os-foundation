@@ -1,0 +1,70 @@
+/* Alert — variantes pilotées par tokens. Accent = bordure gauche + glyphe (forme), jamais couleur seule.
+   Fond neutre (pas de token de fond teinté par statut — lacune documentée) ; light/dark via variables. */
+.enistere-alert {
+  display: flex;
+  gap: var(--enistere-spacing-3);
+  align-items: flex-start;
+  padding: var(--enistere-spacing-3) var(--enistere-spacing-4);
+  border: 1px solid var(--enistere-color-border-default);
+  border-left-width: 4px;
+  border-radius: var(--enistere-radius-md);
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-alert__icon {
+  flex: none;
+  font-size: var(--enistere-font-size-md);
+  line-height: 1.4;
+}
+.enistere-alert__icon::before {
+  content: "";
+}
+.enistere-alert__body {
+  min-width: 0;
+}
+.enistere-alert__title {
+  margin: 0 0 var(--enistere-spacing-1);
+  font-weight: var(--enistere-font-weight-semibold);
+}
+.enistere-alert__content {
+  margin: 0;
+}
+
+.enistere-alert--info {
+  border-left-color: var(--enistere-color-status-info);
+}
+.enistere-alert--info .enistere-alert__icon {
+  color: var(--enistere-color-status-info);
+}
+.enistere-alert--info .enistere-alert__icon::before {
+  content: "\2139"; /* ℹ */
+}
+.enistere-alert--success {
+  border-left-color: var(--enistere-color-status-success);
+}
+.enistere-alert--success .enistere-alert__icon {
+  color: var(--enistere-color-status-success);
+}
+.enistere-alert--success .enistere-alert__icon::before {
+  content: "\2713"; /* ✓ */
+}
+.enistere-alert--warning {
+  border-left-color: var(--enistere-color-status-warning);
+}
+.enistere-alert--warning .enistere-alert__icon {
+  color: var(--enistere-color-status-warning);
+}
+.enistere-alert--warning .enistere-alert__icon::before {
+  content: "\26A0"; /* ⚠ */
+}
+.enistere-alert--danger {
+  border-left-color: var(--enistere-color-status-danger);
+}
+.enistere-alert--danger .enistere-alert__icon {
+  color: var(--enistere-color-status-danger);
+}
+.enistere-alert--danger .enistere-alert__icon::before {
+  content: "\2715"; /* ✕ */
+}

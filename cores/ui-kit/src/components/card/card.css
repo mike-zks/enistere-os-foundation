@@ -1,0 +1,37 @@
+/* Card — conteneur structurel piloté par tokens. Light/dark via variables (aucune règle dark dédiée). */
+.enistere-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-5);
+  border: 1px solid var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-lg);
+  background-color: var(--enistere-color-background-elevated);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+}
+.enistere-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-1);
+}
+.enistere-card__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-lg);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-card__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-card__content {
+  min-width: 0;
+}
+.enistere-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--enistere-spacing-2);
+  align-items: center;
+}

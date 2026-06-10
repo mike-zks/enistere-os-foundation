@@ -5,34 +5,33 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Web Core — cadrage & implémentation des états UI et composants structurels manquants** (`cores/web-nextjs/`) :
-> standardiser les états **`loading`/`empty`/`error`/`success`**, le **système de formulaires** et des
-> **composants réutilisables** (cf. `CORE_SPECIFICATION.md` §3/§4). Le parcours Auth (login + espace protégé)
-> fournit désormais une **surface réelle** à standardiser. **Alternative** : intégration **Files** minimale.
+> **Web Core Files 1 — consultation des métadonnées & téléchargement sécurisé** (`cores/web-nextjs/`) :
+> consommer les opérations **Files** déjà présentes dans `@enistere/api-client-fetch` (liste/métadonnées +
+> téléchargement via URL présignée), **sans upload**. Réutilise les **états UI** (loading/empty/error/
+> forbidden/unavailable) et le BFF Auth. **Pas d'upload, pas d'admin RBAC, pas de composant lourd.**
 
-**Justification** : la **Revue globale Auth Web (1 → 5)** est **terminée** (rapport permanent
-`cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md`, commit `docs(web-nextjs): review web auth v1`). **Verdict :
-`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** — socle Auth **sûr et cohérent** (aucune fuite de token, aucun open
-redirect, session cohérente, contenu privé jamais exposé, droits sans nouveau JWT), **263 tests fiables ×2** +
-**runtime 33/33**, **aucun défaut bloquant**. **Réserves opérationnelles** (non bloquantes pour la correction) :
-CI, E2E navigateur, sémantique streaming-redirect, multi-onglets, durcissement CSP/HSTS. Le bloc Auth étant
-stable (avec réserves), la suite logique est la **standardisation UI/formulaires** du Web Core (priorité
-`CORE_SPECIFICATION`), pas une extension Auth post-V1.
+**Justification** : **Web Core UI 1 est terminé** (commit `feat(web-ui): add standard interface states`) :
+primitives UI Kit `Alert`/`Card`/`FormField` (**78 tests**) + compositions d'états Web
+(loading/empty/error/**401≠403≠indisponible**/`PageHeader`, **270 tests**), intégrées (accueil/Health/
+frontières/Auth), accessibles (axe), pilotées par tokens, **sans donnée sensible**. Le Web Core dispose
+désormais d'un socle d'**états standardisés** ; la suite produit logique est une **première feature de
+données** — **Files en lecture** — qui consomme l'API Core (Files déjà implémenté), le BFF Auth et ces états,
+**sans** introduire l'upload (incrément ultérieur).
 
-**Recommandé en parallèle (réserves V1, non bloquant)** : **CI minimale** (ADR-013, ordre de build des paquets +
-non-régression) et amorce d'un **E2E navigateur** (Playwright).
+**Alternative (justifiée)** : **UI Kit 4** (primitives interactives suivantes) si une lacune structurelle est
+confirmée ; ou démarrer le **Mobile Core**. À arbitrer par décision humaine.
 
-**Alternative (justifiée)** : **intégration Files minimale**, **compléter le UI Kit**, ou démarrer le
-**Mobile Core**. À arbitrer par décision humaine.
+**Réserves V1 Auth (recommandées en parallèle, non bloquantes)** : **CI minimale** (ADR-013 : ordre de build
+des paquets + non-régression) + amorce d'un **E2E navigateur** (cf. `WEB_AUTH_V1_REVIEW.md`).
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`docs(web-nextjs): review web auth v1`.
+`feat(web-ui): add standard interface states`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Web Core — états UI & composants structurels** — `loading`/`empty`/`error`/`success`, système de formulaires, composants réutilisables (`CORE_SPECIFICATION` §3/§4). ✦ prochaine action.
+1. **Web Core Files 1 — consultation métadonnées & téléchargement sécurisé** — consomme les Files de `api-client-fetch` (lecture), réutilise les états UI + BFF Auth ; **sans upload**. ✦ prochaine action.
 2. **CI minimale (ADR-013) + amorce E2E navigateur** — réserves V1 du bloc Auth (recommandées en parallèle).
-3. **Files Web minimal** — alternative à (1) selon priorité produit.
+3. **UI Kit 4** — primitives interactives suivantes (alternative à (1) si lacune structurelle confirmée).
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
@@ -50,7 +49,9 @@ deux cores. À arbitrer par décision humaine.
 | Premier layout/route protégé (Web) | **FAIT** — Web Auth 4 : résolution serveur read-only (Option C) + hydratation, page `/protected` |
 | Page de connexion `/login` + navigation Auth (Web) | **FAIT** — Web Auth 5 : formulaire, login BFF, `returnTo` interne assaini, `replace`/`refresh`, preuve API réelle 22/22 |
 | Bloc **Auth Web (1→5)** stable V1 ? | **REVU** — verdict **`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (`WEB_AUTH_V1_REVIEW.md`) : sûr/cohérent, aucun défaut bloquant ; réserves opérationnelles (CI, E2E, streaming-redirect, multi-onglets, CSP) |
-| Auth post-V1 (register/reset/OAuth/MFA) | **hors périmètre V1** — ne pas poursuivre l'Auth ; priorité = états UI & composants structurels |
+| Auth post-V1 (register/reset/OAuth/MFA) | **hors périmètre V1** — ne pas poursuivre l'Auth |
+| États UI & composants structurels (Web/UI Kit) | **FAIT** — Web UI 1 : Alert/Card/FormField (UI Kit, 78 tests) + LoadingState/EmptyState/ErrorState/Unauthorized/Forbidden/ServiceUnavailable/PageHeader (Web, 270 tests), intégrés + axe |
+| Files Web (lecture) | **débloqué** — c'est **Web Core Files 1** (prochaine action) ; consomme Files de `api-client-fetch`, sans upload |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |

@@ -21,8 +21,8 @@ pas une application ni une bibliothèque complète).
 | Stratégie (Phase 0) | 10 documents présents |
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
-| Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y) ; aligné **React 19** ; **consommé par le Web Core** |
-| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`). **263 tests** + preuves API réelles (Auth/session **26/26** + login **22/22**). **Pas de middleware, pas de Server Action Auth, pas de token en JS.** |
+| Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 9 primitives Web React** accessibles (Button/Input/Label/Text/Spinner/VisuallyHidden + **Alert/Card/FormField**, Web UI 1) ; **78 tests, 100 % couverture**, a11y ; aligné **React 19** ; **consommé par le Web Core** |
+| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth). **270 tests** + preuves API réelles (Auth/session **26/26** + login **22/22**). **Pas de middleware, pas de Server Action Auth, pas de token en JS.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
@@ -124,8 +124,9 @@ Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
-+ preuve live **16/16** (client officiel vs API réelle). UI Kit : **64 tests** (`node:test` + `global-jsdom`
-+ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **263 tests** (`node:test` :
++ preuve live **16/16** (client officiel vs API réelle). UI Kit : **78 tests** (`node:test` + `global-jsdom`
++ Testing Library + jest-axe, **React 19**), **100 % couverture** (9 primitives, dont Alert/Card/FormField).
+Web Core : **270 tests** (`node:test` :
 config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
 UI, mapping d'erreurs, garde anti-réseau, **Auth** : cookie-config, session adapter, factory
 read-only/writable, **CSRF** (gén/validation temps constant), **Origin/Referer**, validation login, handlers
@@ -199,10 +200,14 @@ Server Action Auth, sans token en JS** (**263 tests** + preuves API réelles **2
 **`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** : socle Auth **sûr et cohérent** (aucune fuite de token, **aucun open
 redirect**, session cohérente, contenu privé jamais exposé, droits sans nouveau JWT), **263 tests fiables ×2** +
 **runtime 33/33**, **aucun défaut bloquant** ; réserves **opérationnelles** (CI, E2E navigateur,
-streaming-redirect, multi-onglets, CSP/HSTS). Statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE` (la
-stabilité du bloc Auth n'augmente pas le statut global). **Prochaine action** : **Web Core — états UI &
-composants structurels** (cf. `CORE_SPECIFICATION` §3/§4 ; CI/E2E recommandés en parallèle). Détail :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+streaming-redirect, multi-onglets, CSP/HSTS). Puis **Web Core UI 1** a livré les **états UI & composants
+structurels** : primitives UI Kit `Alert`/`Card`/`FormField` (**78 tests**) + compositions Web
+(`LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/
+`PageHeader`, **270 tests**), intégrées (accueil/Health/frontières/Auth), accessibles (axe), **sans donnée
+sensible** (détail [`ui-states.md`](../../cores/web-nextjs/docs/ui-states.md)). Statuts **maintenus**
+`IMPLEMENTATION_PARTIELLE` (UI Kit + Web Core ; ni Tailwind/Radix/shadcn ni bibliothèque exhaustive).
+**Prochaine action** : **Web Core Files 1** (consultation métadonnées + téléchargement sécurisé, sans upload).
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

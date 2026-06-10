@@ -165,3 +165,60 @@ body {
 .state__link {
   color: var(--enistere-color-foreground-default);
 }
+
+/* Variante compacte (état intégré dans une page / galerie, pas en plein écran). */
+.state--inline {
+  min-height: auto;
+  padding: 1rem 0;
+}
+
+/* Actions d'un état (boutons). Les messages basés sur Alert restent alignés à gauche. */
+.state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+.state .enistere-alert {
+  max-width: 34rem;
+  text-align: left;
+}
+
+/* --- PageHeader --- */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.page-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.page-header__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+@media (max-width: 40rem) {
+  .page-header__actions {
+    width: 100%;
+  }
+}
+
+/* Galerie technique des états (page d'accueil) : grille légère de cartes. */
+.states-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem;
+}

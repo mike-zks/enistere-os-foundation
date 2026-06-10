@@ -17,6 +17,7 @@ ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js
 
 ```ts
 import { Button, Input, Label, Text, Spinner, VisuallyHidden } from '@enistere/ui-kit';
+import { Alert, Card, CardHeader, CardTitle, CardContent, FormField, FormFieldLabel } from '@enistere/ui-kit';
 import '@enistere/ui-kit/styles.css'; // tokens + styles des primitives (une seule feuille)
 ```
 
@@ -26,9 +27,9 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
 <html data-theme="dark"> … </html>
 ```
 
-## Primitives Web (V2)
+## Primitives Web (V2 + Web UI 1)
 
-Six primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
+**Neuf** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
 
 - **Button** — `variant` (primary/secondary/outline/ghost/danger), `size` (sm/md/lg), `loading`,
   `loadingText`. `type="button"` par défaut, désactivé réel en `loading` (donc pas d'`onClick`),
@@ -41,6 +42,14 @@ Six primitives accessibles, **pilotées par les tokens** (variables `--enistere-
 - **Spinner** — autonome (`role="status"` + libellé) ou `decorative` (`aria-hidden`) ; respecte
   `prefers-reduced-motion`.
 - **VisuallyHidden** — masque visuellement en restant accessible (technique sr-only, pas `display:none`).
+- **Alert** — message générique : `variant` (info/success/warning/danger), `title?`, `role?`. Rôle par
+  défaut `status` (poli) sauf `danger` → `alert` ; variante conveyée par **glyphe + bordure + titre** (jamais
+  la couleur seule). **Sans connaissance HTTP/Auth.**
+- **Card** — conteneur structurel (`Card`/`CardHeader`/`CardTitle`/`CardDescription`/`CardContent`/`CardFooter`).
+  `CardTitle` **n'impose aucun niveau** (`as`, défaut `p`). Aucune logique métier.
+- **FormField** — association **explicite** label/champ/aide/erreur (`FormField`/`FormFieldLabel`/
+  `FormFieldDescription`/`FormFieldError`) ; **pas d'injection magique** (le consommateur câble
+  `htmlFor`/`id`/`aria-describedby`/`aria-invalid`).
 
 ```tsx
 <Button variant="primary" size="md" loading loadingText="Envoi…">Envoyer</Button>

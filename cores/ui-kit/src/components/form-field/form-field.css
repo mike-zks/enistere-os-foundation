@@ -1,0 +1,17 @@
+/* FormField — composition label/champ/aide/erreur pilotée par tokens. Light/dark via variables. */
+.enistere-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-1);
+  font-family: var(--enistere-font-family-sans);
+}
+.enistere-form-field__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-form-field__error {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-status-danger);
+}

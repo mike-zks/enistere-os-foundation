@@ -17,8 +17,8 @@
 | ADR-005 | Cookies web + CSRF | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web | **Flux BFF opérationnels** : login/refresh/logout via Route Handlers, cookies `HttpOnly` (access/refresh, `__Host-` prod), **CSRF double-submit** (cookie+header, temps constant, rotation), **Origin/Referer** (fail-closed) — preuve API réelle. Reste : mutations futures réutilisant systématiquement la protection |
 | ADR-006 | RBAC + permissions fines | Validé | **IMPLEMENTE_ET_REVU** | api/web/mobile/ui | RBAC API + `AUTH_RBAC_REVIEW` ; **consommé en lecture côté Web** (`useAuthorization` : helpers OR/AND **sans wildcard** pour l'affichage conditionnel — **l'API reste l'autorité finale** ; changement de droits reflété **sans nouveau JWT**, prouvé) |
 | ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files + `FILES_REVIEW` |
-| ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | `@enistere/ui-kit` : tokens + 6 primitives Web (64 tests) ; bibliothèque complète à venir |
-| ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | UI Kit **consommé par le Web Core starter** (CSS `--enistere-*`, classes `enistere-*`) ; Tailwind/Radix/shadcn **non ajoutés** (différés V2) |
+| ADR-008 | Design tokens UI Kit | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web/mobile | `@enistere/ui-kit` : tokens + **9 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden + **Alert/Card/FormField**, Web UI 1 — CSS pilotée par tokens, aucun hex ; 78 tests, 100 %) ; bibliothèque complète à venir |
+| ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | UI Kit **consommé par le Web Core** (CSS `--enistere-*`, classes `enistere-*`) ; primitives ajoutées en **CSS natif tokens** ; **Tailwind/Radix/shadcn TOUJOURS non ajoutés** (différés ; non requis pour les états/composants UI 1) |
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié)** dans le Web Core (façade `auth.login/refresh/logout/getProfile/getAuthorization` via BFF) **+ client BFF navigateur** (`fetch` same-origin `/api/auth/*`, sans token), preuve API réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`). Reste : mutations ; Mobile |
@@ -31,8 +31,9 @@
 
 ## 2. Décisions validées — état d'application
 
-- **ADR-008/009/010** — UI Kit : **partiellement fait** (tokens + 6 primitives Web, React 19) ;
-  **consommé par le Web Core**. Restent : composants supplémentaires, stacks Tailwind/Radix/shadcn (Web)
+- **ADR-008/009/010** — UI Kit : **partiellement fait** (tokens + **9 primitives Web**, React 19 — Web UI 1
+  ajoute Alert/Card/FormField) ; **consommé par le Web Core** (états UI standardisés). **ADR-009 reste partiel :
+  Tailwind/Radix/shadcn volontairement absents** (non requis). Restent : composants supplémentaires (Web)
   et ThemeProvider/NativeWind (Mobile).
 - **ADR-011 / 012** — **FAIT (Web)** : `api-client-fetch` **instancié** (public + **authentifié** via BFF)
   et **TanStack Query** intégré — Health **et** server state Auth (`authKeys` disjoints, `useSession`/

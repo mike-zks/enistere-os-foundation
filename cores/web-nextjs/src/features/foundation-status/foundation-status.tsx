@@ -1,6 +1,8 @@
 import { Text } from "@enistere/ui-kit";
 import type { ReactElement, ReactNode } from "react";
 
+import { PageHeader } from "../../shared/components/page-header.js";
+
 export interface FoundationFact {
   readonly label: string;
   readonly value: string;
@@ -52,16 +54,11 @@ export const FOUNDATION_OUT_OF_SCOPE: readonly string[] = [
  */
 export function FoundationStatus({ children }: { readonly children?: ReactNode }): ReactElement {
   return (
-    <main className="foundation" aria-labelledby="foundation-title">
-      <header className="foundation__header">
-        <Text as="h1" variant="display" id="foundation-title">
-          Enistère — Web Core
-        </Text>
-        <Text as="p" variant="body" tone="muted">
-          Web Core Next.js (App Router). Intégration de l&apos;API publique (Health) et de TanStack
-          Query — aucune authentification, aucune donnée privée.
-        </Text>
-      </header>
+    <main className="foundation" aria-label="Enistère — Web Core">
+      <PageHeader
+        title="Enistère — Web Core"
+        description="Page technique du Web Core Next.js (App Router) : API publique (Health), TanStack Query, BFF Auth + session, layout protégé et page de connexion. Aucune donnée privée affichée ici."
+      />
 
       <section className="foundation__facts" aria-label="Stack du socle">
         <dl className="foundation__facts-list">

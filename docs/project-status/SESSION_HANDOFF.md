@@ -26,10 +26,11 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique) — 377 tests unitaires + 101 e2e + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
-- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 6 primitives Web React**
-  (Button, Input, Label, Text, Spinner, VisuallyHidden) pilotées par tokens, accessibles. React =
-  peerDependency `>=18` ; **aligné et testé sous React 19** (64 tests, 100 %). CSS via
-  `@enistere/ui-kit/styles.css`. Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
+- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 9 primitives Web React**
+  (Button, Input, Label, Text, Spinner, VisuallyHidden + **Alert, Card, FormField** — Web UI 1) pilotées par
+  tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19** (**78 tests, 100 %**,
+  jest-axe). CSS via `@enistere/ui-kit/styles.css`. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
+  Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
   en-têtes sécurité + pas de `X-Powered-By`. **Intègre l'API publique (Health)** : factory serveur par
@@ -65,7 +66,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(web-nextjs): review web auth v1`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-ui): add standard interface states`,
+  `docs(web-nextjs): review web auth v1`,
   `feat(web-nextjs): add secure login experience`,
   `feat(web-nextjs): add server-resolved protected layout`,
   `docs(web-nextjs): review web core governance`,
@@ -107,7 +109,23 @@ ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECI
 
 ## 8. Dernière étape terminée
 
-**Revue globale Auth Web (1 → 5)** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** du socle
+**Web Core UI 1 — états UI & composants structurels génériques** (`@enistere/ui-kit` + `@enistere/web-nextjs`) :
+standardise les états d'interface et ajoute 3 primitives structurelles. Statuts **inchangés**
+`IMPLEMENTATION_PARTIELLE`. **UI Kit** : `Alert` (variant info/success/warning/danger ; rôle status sauf
+danger→alert ; glyphe+bordure+titre, jamais couleur seule), `Card` (slots ; `CardTitle` n'impose aucun
+niveau), `FormField` (composition **explicite**, aucune injection magique) — CSS **tokens-only** (aucun hex),
+`styles.css` régénéré, **78 tests** (+ jest-axe), `pack:check` OK. **Web Core** (`src/shared/components/`) :
+`LoadingState`, `EmptyState`, `ErrorState` (+`requestId`), **`UnauthorizedState`(401) ≠ `ForbiddenState`(403,
+permission non révélée)**, `ServiceUnavailableState` (≠ session anonyme), `PageHeader` (h1 par défaut) — chacun
+`inline?`, **aucune donnée sensible**. **Intégrations** : `PageHeader` + galerie `StatesShowcase` (accueil),
+`EmptyState` (Health non configuré), `ErrorState`/`NotFoundState`/`LoadingState` (frontières),
+`service-unavailable-view` **délègue** à `ServiceUnavailableState` (dé-duplication ; flux Auth inchangés).
+**270 tests** Web (+40). Non-régression : UI Kit (tokens/typecheck/build/lint/test/coverage 100 %/pack) ; Web
+check+couverture+build ; packages 11+29 ; **0 vuln** ; Axios/Zustand absents. **Aucun framework UI lourd
+(Tailwind/Radix/shadcn) ajouté.** Docs : `cores/ui-kit/docs/components.md`, `cores/web-nextjs/docs/ui-states.md`.
+Commit `feat(web-ui): add standard interface states`.
+
+**Étape précédente — Revue globale Auth Web (1 → 5)** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** du socle
 Auth traité comme **un système unique** — **sans nouvelle fonctionnalité**. Vérifié **fichier par fichier** +
 commandes : architecture (BFF + résolution serveur + login), 6 routes BFF + `/protected` + `/login` (`ƒ`),
 cookies `HttpOnly`/`__Host-`, CSRF + Origin/Referer (fail-closed), **aucune fuite de token** (greps src + bundle
@@ -202,12 +220,13 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Web Core — états UI & composants structurels** (`loading`/`empty`/`error`/`success`
-standardisés, système de formulaires, composants réutilisables — `CORE_SPECIFICATION` §3/§4). Le bloc Auth est
-**revu stable avec réserves** (`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`) ; la suite logique est la standardisation
-UI/formulaires du Web Core (pas d'Auth post-V1 : register/reset/OAuth/MFA hors périmètre). **Recommandé en
-parallèle (réserves V1, non bloquant)** : CI minimale (ADR-013, ordre de build paquets) + amorce E2E navigateur.
-**Alternative** : Files Web minimal, UI Kit, ou Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Web Core Files 1 — consultation des métadonnées & téléchargement sécurisé**. Web Core UI 1
+est **terminé** (états UI standardisés + Alert/Card/FormField). La suite logique est une **première feature de
+données** : **Files en lecture** (liste/métadonnées + téléchargement via URL présignée) consommant les
+opérations Files de `@enistere/api-client-fetch` + le BFF Auth + les états UI — **sans upload** (incrément
+ultérieur), sans admin RBAC. **Recommandé en parallèle (réserves V1, non bloquant)** : CI minimale (ADR-013,
+ordre de build paquets) + amorce E2E navigateur. **Alternative** : UI Kit 4 (primitives interactives) ou
+Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
