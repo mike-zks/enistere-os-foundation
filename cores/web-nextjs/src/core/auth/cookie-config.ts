@@ -110,7 +110,8 @@ export function buildAuthCookieOptions(env: CookieEnv, maxAgeSeconds: number): C
   return attrs;
 }
 
-// --- Cadrage CSRF (V1 : AUCUN mécanisme actif — noms réservés pour éviter une future duplication) ---
-// Voir docs/auth-architecture.md §CSRF futur. Ne crée AUCUNE protection ici.
+// --- CSRF (double-submit ACTIF, Web Auth 2) ---
+// Nom de base du cookie CSRF (non HttpOnly). La protection est implémentée dans `csrf/` (génération,
+// validation à temps constant) et `handlers/security.ts` (Origin/Referer + double-submit). L'en-tête
+// `X-CSRF-Token` est posé par le client navigateur ; il n'est pas exporté ici (aucune duplication).
 export const CSRF_COOKIE_NAME = "enistere_csrf";
-export const CSRF_HEADER_NAME = "X-CSRF-Token";

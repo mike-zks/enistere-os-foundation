@@ -2,7 +2,7 @@
   "name": "@enistere/web-nextjs",
   "version": "0.1.0",
   "private": true,
-  "description": "Web Core Next.js (App Router) — Enistere. Consomme @enistere/ui-kit ; intégration API publique (Health) + TanStack Query (server state). Aucune authentification.",
+  "description": "Web Core Next.js (App Router) — Enistere. Consomme @enistere/ui-kit ; API publique (Health) + TanStack Query (server state) ; BFF Auth (login/refresh/logout/csrf) + état de session/autorisations (me/authorization, useSession/useAuthorization). Aucune route protégée ni middleware.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

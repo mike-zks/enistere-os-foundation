@@ -5,10 +5,13 @@
 - **`app/`** — App Router : routage, layout, états (`loading`/`error`/`not-found`), métadonnées.
   Fichiers fins ; ils composent `features`/`shared`. Compilés **uniquement par Next/Turbopack**.
 - **`core/`** — fondations transverses : `config` (env public/serveur, métadonnées, thème) ;
-  `api`/`auth`/`query` en **cadrage uniquement** (vides en V1).
+  `api` (clients **public** navigateur + **serveur par requête** + **serveur authentifié** BFF) ;
+  `auth` (cookies/CSRF/Origin, handlers BFF, **client navigateur same-origin**, état de session) ;
+  `query` (`QueryClient`, provider, query keys `health`/`auth` disjointes). Tous **implémentés**.
 - **`shared/`** — composants présentationnels réutilisables (états de chargement/erreur/404), bâtis
   sur le UI Kit, sans dépendance au routeur → testables hors runtime Next.
-- **`features/`** — unités fonctionnelles. V1 : `foundation-status` (contenu de la page d'accueil).
+- **`features/`** — unités fonctionnelles : `foundation-status` (page d'accueil), `health` (sondes via
+  TanStack Query), `auth` (`useSession`/`useAuthorization`/`useLogout` + vues présentationnelles).
 
 ## Rendu
 
@@ -37,5 +40,11 @@ variables `--enistere-color-*` — aucune palette dupliquée). Thème via `data-
 ## Paquets partagés
 
 `@enistere/ui-kit` est **réellement consommé** (primitives + CSS). `@enistere/api-contracts` et
-`@enistere/api-client-fetch` sont déclarés et **résolvent à la compilation** (preuve :
-`test/api-resolution.fixture.ts`) mais ne sont **pas instanciés** en V1 (aucun appel réseau).
+`@enistere/api-client-fetch` sont **instanciés** : client **public** (Health) côté navigateur et serveur,
+et **façade Auth serveur** (BFF : login/refresh/logout, me/authorization). Les types Auth dérivent des
+contrats via `SchemaOf<>` (aucun DTO recopié). Preuve **API réelle** (PostgreSQL jetable).
+
+> **Note build (monorepo)** : la phase TypeScript de `next build` consomme les **types compilés** des
+> paquets (`packages/*/dist`, **non versionnés**). Sur un clone neuf, exécuter `npm run build` à la racine
+> (build topologique `api-contracts` → `api-client-fetch`) **avant** de builder le Web Core. Aucune CI
+> n'impose encore cet ordre (ADR-013).

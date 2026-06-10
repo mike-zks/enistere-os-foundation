@@ -34,7 +34,10 @@ export function shouldRetryQuery(failureCount: number, error: unknown): boolean 
  * - `retry` borné selon la nature de l'erreur (cf. `shouldRetryQuery`) ;
  * - `refetchOnWindowFocus` désactivé (V1, explicite).
  *
- * Aucune donnée d'authentification n'est mise en cache (la mission n'en contient aucune).
+ * Le **server state Auth** (session/autorisations) est mis en cache **séparément** via `authKeys`
+ * (cf. `features/auth/auth-queries.ts`) avec `retry: false` et **sans persistance** ; la politique de
+ * retry par défaut ci-dessous (`shouldRetryQuery`) s'applique aux queries **Health**. Aucun token
+ * n'est mis en cache (clés stables sans secret).
  */
 export function createQueryClient(): QueryClient {
   return new QueryClient({

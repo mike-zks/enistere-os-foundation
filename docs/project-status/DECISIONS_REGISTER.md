@@ -1,7 +1,7 @@
 # DECISIONS_REGISTER.md — Registre de lecture rapide des décisions (ADR)
 
 > **Ne remplace pas les ADR** (`docs/adr/`). Fournit une lecture rapide du **statut d'implémentation**
-> de chaque décision validée. Vérifié depuis le repository (2026-06-09).
+> de chaque décision validée. Vérifié depuis le repository (2026-06-10).
 >
 > Statuts d'implémentation : `DECIDE_NON_IMPLEMENTE`, `PARTIELLEMENT_IMPLEMENTE`, `IMPLEMENTE`,
 > `IMPLEMENTE_ET_REVU`, `NON_APPLICABLE_ACTUELLEMENT`.
@@ -66,6 +66,22 @@
 > l'**affichage conditionnel** uniquement ; **SSR Auth = Option A client-only** (session chargée après
 > hydratation, pas d'appel `/me` serveur ; SSR Auth complet différé). Détail de test : les `queryOptions`
 > Auth imposent `gcTime` → chaque `QueryClient` de test est `clear()` en `afterEach` (sinon timer GC ref).
+>
+> **Checkpoint de gouvernance Web Core (2026-06-10)** — revue de socle (rapport permanent
+> `cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`). Verdict : socle **cohérent et sûr**, **aucune
+> dette bloquante**, statut **maintenu** `IMPLEMENTATION_PARTIELLE`. **Orientation SSR Auth tranchée
+> (hybride)** : pages **publiques** = **Option A** (client-only, actuelle) ; layouts/pages **privés** =
+> **Option C** (résolution Auth **serveur read-only** : Server Component → cookie store read-only → client
+> serveur authentifié `read-only` → API `/auth/me` → **hydratation TanStack Query**) — **pas** de self-HTTP
+> (Option B rejetée), **pas** de middleware comme autorité (Option D rejetée). **Aucun nouvel ADR requis** :
+> couvert par **ADR-004** (session multi-client), **ADR-005** (cookies) et **ADR-012** (server state /
+> hydratation) — il s'agit d'une **convention d'implémentation locale**, à confirmer à l'implémentation
+> (Web Auth 4) et à promouvoir en ADR seulement si elle devient structurante. **Middleware/proxy** : rôle
+> limité au **filtrage UX** (présence de cookie), **jamais** preuve d'authentification/autorisation
+> (l'**API reste l'autorité finale**). **Dette IMPORTANTE non bloquante** : l'ordre de build monorepo
+> (`packages/*/dist` non versionnés) n'est imposé par aucune CI (ADR-013). Corrections de cette revue :
+> **documentaires/factuelles** uniquement (+ suppression de l'export mort `CSRF_HEADER_NAME`), zéro
+> changement de comportement (206 tests + build verts).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

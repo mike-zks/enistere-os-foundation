@@ -13,7 +13,7 @@
 | `@enistere/api-contracts` | ✓ | n/a | ✓ (016) | ✓ | ✓ | ✓ (11) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | build + generate:check | publication (non requise V1) |
 | `@enistere/api-client-fetch` | ✓ | n/a | ✓ (011,012,016) | ✓ | ✓ | ✓ (29 + live 16/16) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | live 16/16 ; **instancié (public + authentifié/BFF) dans le Web Core** | publication (non requise V1) |
 | Cloud Core | ✓ | ✓ | ✓ (013,014,007…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | starter (après CI/registry) |
-| Web Core Next.js | ✓ | ✓ | ✓ (004,005,006,009,011,012,016…) | **✓** | **✓ (App Router + UI Kit + API publique Health + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session/authorization state)** | **✓ (206, a11y + sonde HTTP + preuve API réelle Auth + session)** | — | **IMPLEMENTATION_PARTIELLE** | build/lint/typecheck/206 tests verts + preuve API réelle (login → /me → /authorization → logout → /me 401 ; read-only sans refresh ; **changement de droits sans nouveau JWT** ; bundle sans secret) | Checkpoint de gouvernance Web Core (puis SSR Auth / routes protégées) |
+| Web Core Next.js | ✓ | ✓ | ✓ (004,005,006,009,011,012,016…) | **✓** | **✓ (App Router + UI Kit + API publique Health + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session/authorization state)** | **✓ (206, a11y + sonde HTTP + preuve API réelle Auth + session)** | **✓ (revue de gouvernance 2026-06-10 — `WEB_CORE_GOVERNANCE_REVIEW.md`)** | **IMPLEMENTATION_PARTIELLE** | build/lint/typecheck/**206 tests ×2** verts + couverture ≈ 84,7 % + preuve API réelle (login → /me → /authorization → logout → /me 401 ; read-only sans refresh ; **changement de droits sans nouveau JWT** ; bundle sans secret) ; **checkpoint de gouvernance FAIT** (aucune dette bloquante, statut maintenu) | **Web Auth 4** — résolution Auth serveur (Option C) + premier layout protégé (orientation SSR Auth hybride tranchée) ; CI minimale recommandée |
 | Mobile Core React Native | ✓ | ✓ | ✓ (010,012,015…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | UI Kit + secure storage |
 | UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 6 primitives Web)** | **✓ (64, 100 %, a11y, React 19)** | — | **IMPLEMENTATION_PARTIELLE** | aligné **React 19** (0 régression, v0.1.1) + **réellement consommé par le Web Core** | composants UI suppl. |
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
@@ -69,11 +69,15 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 | C4 | `strategy/` Phase 0 (« avant code ») | API Core implémenté | Phase 0 partiellement dépassée | Contexte trompeur | Lire strategy comme historique | MINEURE |
 | C5 | `OPENAPI_CLIENT_PROOF.md` cite `proofs/openapi-client/*` | Code de preuve retiré | Pointeur seul | Liens internes partiellement périmés | Bannière de migration déjà ajoutée | MINEURE |
 | C6 | `cores/{cloud,mobile-react-native}` ont une spéc | Aucun starter | Documentaires ; **ui-kit et web-nextjs désormais `STARTER_INITIALISE`** | Confusion spéc↔implémentation | Statut explicite (cette matrice) | IMPORTANTE |
+| C7 | Docs Web « starter sans auth » (`README`/`SECURITY.md`/`ARCHITECTURE.md` ; commentaires `cookie-config`/`query-client`) | BFF Auth + session implémentés | **Résolu** (revue de gouvernance 2026-06-10) : corrections factuelles appliquées + export mort `CSRF_HEADER_NAME` supprimé | Lecture « sans auth » erronée | — | RÉSOLU |
+| C8 | `next build` (phase TS) du Web Core | `packages/*/dist` **non versionnés** (gitignore `dist/`) | **Réel** : clone neuf doit builder les paquets (`npm run build` racine) **avant** le Web Core ; aucune CI ne l'impose (ADR-013) | Build cassable sur clone neuf / futur pipeline | CI imposant l'ordre topologique (ADR-013) | IMPORTANTE (non bloquante) |
 
 ## 5. Dette documentaire
 
 | Élément | Classe |
 |---|---|
+| Ordre de build monorepo (`packages/*/dist` non versionnés ; aucune CI ne l'impose — ADR-013) | IMPORTANTE |
+| Absence d'E2E navigateur Web (flux session/logout couverts au niveau handler/transport + preuve API réelle) | IMPORTANTE |
 | Baseline Git locale créée (`7dcb543`) **non poussée** vers `origin` | IMPORTANTE |
 | Packages non intégrés (à clarifier dans les futurs cores) | IMPORTANTE |
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |

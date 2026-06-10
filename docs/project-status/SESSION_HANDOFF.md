@@ -55,7 +55,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add session and authorization state`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(web-nextjs): review web core governance`,
+  `feat(web-nextjs): add session and authorization state`,
   `feat(web-nextjs): implement secure auth BFF flows`, `feat(web-nextjs): establish server auth foundations`,
   `feat(web-nextjs): integrate public API and query layer`, baseline.
 - **Audit** : **0 vulnérabilité** (TanStack Query v5 ; override `postcss ^8.5.15`).
@@ -93,7 +94,24 @@ ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECI
 
 ## 8. Dernière étape terminée
 
-**Web Auth 3 — profil, autorisations et état de session avec TanStack Query** (`@enistere/web-nextjs`) :
+**Checkpoint de gouvernance Web Core** (revue de socle — `@enistere/web-nextjs`) : mission de
+**revue/vérification/consolidation/arbitrage**, **sans** implémentation fonctionnelle (aucun
+middleware/page login/route protégée). Vérifié **fichier par fichier** + commandes réelles : frontières
+client/serveur, 6 routes BFF `ƒ`, 3 clients API séparés, cookies `HttpOnly`/`__Host-`, CSRF + Origin/Referer,
+**aucune fuite de token** (greps + bundle `.next/static`), caches `authKeys`/`healthKeys` disjoints, RBAC
+OR/AND **sans wildcard**, types `SchemaOf<>` (`generate:check` up-to-date), **read-only ⇒ aucun refresh
+silencieux**. **Non-régression verte** : web `check` (typecheck+lint+**206 tests ×2 sans hang**+build) +
+couverture ≈ 84,7 % ; UI Kit 64 ; api-contracts 11 ; api-client-fetch 29 ; **0 vuln** ; Axios/Zustand
+absents. **Décisions** : SSR Auth = **hybride** (Option C serveur read-only pour le privé / Option A
+client-only pour le public) — **pas de nouvel ADR** (couvert par ADR-004/005/012) ; middleware = UX léger
+**non autoritaire**. **Dette IMPORTANTE non bloquante** : ordre de build monorepo (`packages/*/dist` non
+versionnés ; aucune CI — ADR-013). **Corrections documentaires/factuelles + 1 export mort** (zéro
+comportement) : `package.json`, `cookie-config.ts` (CSRF actif ; `CSRF_HEADER_NAME` supprimé),
+`query-client.ts`, `README.md`, `docs/SECURITY.md`, `docs/ARCHITECTURE.md`. **Rapport permanent** :
+`cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`. Statut **inchangé** `IMPLEMENTATION_PARTIELLE`.
+`packages/` et autres cores **non modifiés**. Commit `docs(web-nextjs): review web core governance`.
+
+**Étape précédente — Web Auth 3 — profil, autorisations et état de session avec TanStack Query** (`@enistere/web-nextjs`) :
 Route Handlers `GET /api/auth/me` + `GET /api/auth/authorization` (thin, `force-dynamic`) → handlers
 testables (`core/auth/handlers/get-profile`, `get-authorization`, `(Request, deps)→Response`) appelant le
 client serveur **read-only** (`enableRefresh:false` → **aucun refresh silencieux** sur une lecture ; 401
@@ -117,11 +135,14 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Checkpoint de gouvernance Web Core** — revue de socle (Web Core
-`IMPLEMENTATION_PARTIELLE` : Health + TanStack Query + BFF Auth + session/autorisations, 206 tests) et
-**arbitrage d'architecture** SSR Auth complet vs Option A client-only **avant** d'implémenter routes
-protégées / middleware. Alternative : compléter le UI Kit, démarrer le Mobile Core, ou Cloud/CI-CD. Détail :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Web Auth 4 — résolution Auth serveur (Option C) + premier layout protégé**. Le
+checkpoint de gouvernance est **terminé** (rapport `cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`)
+et a tranché l'orientation SSR Auth (**hybride** : Option C serveur read-only pour le privé, Option A
+client-only pour le public ; middleware = UX léger non autoritaire) — aucune dette **bloquante**.
+Implémenter la résolution serveur read-only + hydratation TanStack Query, puis un layout protégé minimal
+(**API = autorité finale**). **Recommandé en parallèle (non bloquant)** : CI minimale (ADR-013) imposant
+l'ordre de build des paquets. Alternative : compléter le UI Kit, démarrer le Mobile Core, ou Cloud/CI-CD.
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

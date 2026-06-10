@@ -1,7 +1,7 @@
 # FOUNDATION_CURRENT_STATE.md — État courant officiel d'Enistere OS Foundation
 
 > **Photographie officielle** de l'état réel du repository, vérifiée fichier par fichier.
-> **Dernière mise à jour : 2026-06-09.**
+> **Dernière mise à jour : 2026-06-10.**
 >
 > ⚠️ **Ne pas supposer qu'un core est implémenté parce que sa spécification existe.** Un
 > `CORE_SPECIFICATION.md` ≠ un starter ; un README ≠ une implémentation ; un rapport ≠ une preuve
@@ -181,8 +181,14 @@ Auth** (`login`/`refresh`/`logout`/`csrf`) **et l'état de session/autorisations
 read-only, hooks `useSession`/`useAuthorization`, purge du cache Auth au logout, `403` distinct d'`anonymous`,
 helpers OR/AND sans wildcard) — **prouvés contre l'API réelle** (206 tests ; changement de droits **sans
 nouveau JWT**). Restent volontairement absents : page de connexion, middleware, route protégée, SSR Auth
-complet. **Prochaine action recommandée** : **Checkpoint de gouvernance Web Core** (revue de socle) avant
-d'attaquer le SSR Auth / les routes protégées. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+complet. Le **Checkpoint de gouvernance Web Core** a été **réalisé** (2026-06-10 ; rapport permanent
+[`../../cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md))
+— verdict : socle **cohérent et sûr**, **aucune dette bloquante**, statut **maintenu**
+`IMPLEMENTATION_PARTIELLE` ; corrections **documentaires factuelles** appliquées (README/SECURITY/
+ARCHITECTURE + commentaires/metadata + 1 export mort) ; orientation **SSR Auth hybride** tranchée (Option C
+privé / Option A public ; middleware non autoritaire). **Prochaine action** : **Web Auth 4** (résolution
+Auth serveur + premier layout protégé), CI minimale recommandée en parallèle. Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

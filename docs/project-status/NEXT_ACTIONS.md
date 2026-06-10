@@ -5,30 +5,34 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Checkpoint de gouvernance Web Core** (`cores/web-nextjs/`) : **revue de socle** avant d'ouvrir de
-> nouvelles capacités. Statuer (décision humaine) sur l'état `IMPLEMENTATION_PARTIELLE` du Web Core
-> (Health + TanStack Query + BFF Auth + session/autorisations, 206 tests, preuves API réelles), arbitrer
-> la **portée du SSR Auth** et des **routes protégées** (middleware / layout privé), et décider du
-> séquencement vis-à-vis du UI Kit, du Mobile et du Cloud/CI-CD. **Pas directement un middleware** : la
-> décision d'architecture (SSR Auth complet vs Option A actuelle) doit précéder l'implémentation.
+> **Web Auth 4 — résolution Auth serveur + premier layout protégé** (`cores/web-nextjs/`). Implémenter,
+> selon l'**orientation hybride tranchée par le checkpoint de gouvernance** : (1) la **résolution Auth
+> serveur read-only** (Server Component → cookie store read-only → client serveur authentifié `read-only`
+> → API `/auth/me`) avec **hydratation TanStack Query** du profil (même motif que le préchargement Health),
+> puis (2) un **layout/route protégé minimal**. **L'API reste l'autorité finale.**
 
-**Justification** : l'**état de session/autorisations est opérationnel** (Web Auth 3 : `me`/`authorization`
-read-only, `useSession`/`useAuthorization`, **401→anonymous / 403 distinct**, helpers OR/AND sans wildcard,
-purge cache au logout, **changement de droits sans nouveau JWT** — prouvés contre l'API réelle). Avant
-d'attaquer les **routes protégées**, un choix d'architecture s'impose (SSR Auth complet — appel `/me`
-serveur, gestion du flash/redirection — vs l'**Option A client-only** actuelle). Ce checkpoint évite de
-coder un middleware sur une fondation SSR non tranchée.
+**Justification** : le **Checkpoint de gouvernance Web Core** est **terminé** (rapport permanent
+`cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`, commit `docs(web-nextjs): review web core
+governance`). Verdict : socle **cohérent et sûr** (aucune fuite de token, caches disjoints, RBAC ADR-006,
+contrats = source des types), **aucune dette bloquante**, non-régression verte (206 tests ×2, build,
+0 vuln). L'arbitrage SSR Auth est tranché : **Option C (serveur read-only) pour les pages privées**,
+Option A (client-only) pour les pages publiques ; **middleware = filtrage UX léger non autoritaire**
+(jamais preuve d'authentification/autorisation). Cette décision **précède** et conditionne
+l'implémentation des routes protégées — elle est désormais disponible.
+
+**Pré-recommandation (non bloquante)** : amorcer une **CI minimale** (ADR-013) imposant l'**ordre de build
+des paquets** (`packages/*/dist` non versionnés) et la non-régression, en parallèle de Web Auth 4.
 
 **Alternative (justifiée)** : **compléter le UI Kit** ou démarrer le **Mobile Core React Native minimal**
-(parallélisable), ou avancer **Cloud/CI-CD** pour sécuriser la non-régression. À arbitrer par décision humaine.
+(parallélisable), ou avancer **Cloud/CI-CD**. À arbitrer par décision humaine.
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(web-nextjs): add session and authorization state`.
+`docs(web-nextjs): review web core governance` (revue + corrections documentaires factuelles).
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Checkpoint de gouvernance Web Core** — revue de socle ; arbitrage SSR Auth / routes protégées. ✦ prochaine action.
-2. **Web Auth 4 — SSR Auth + routes protégées** — middleware / layout privé, redirections, **après** décision d'architecture du checkpoint.
+1. **Web Auth 4 — résolution Auth serveur (Option C) + premier layout protégé** — hydratation TanStack Query du profil, layout privé minimal ; **API = autorité finale**. ✦ prochaine action.
+2. **CI minimale (ADR-013)** — imposer l'ordre de build des paquets + non-régression (recommandée en parallèle de Web Auth 4).
 3. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
@@ -44,7 +48,8 @@ deux cores. À arbitrer par décision humaine.
 |---|---|
 | Intégrer les packages API (public) dans le Web Core | **FAIT** — `api-client-fetch` instancié (Health), preuve API réelle |
 | Usage **authentifié** des packages (Web) | **FAIT** — login/refresh/logout + CSRF (Web Auth 2) **et** me/authorization + session/autorisations (Web Auth 3), preuve API réelle |
-| Routes protégées / middleware (Web) | **décision d'architecture SSR Auth** (checkpoint de gouvernance) requise d'abord |
+| Routes protégées / layout privé (Web) | **débloqué** — orientation SSR Auth tranchée (checkpoint : Option C serveur read-only pour le privé). C'est désormais **Web Auth 4** (prochaine action) |
+| Middleware Auth « autoritaire » (Web) | **rejeté par le checkpoint** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |

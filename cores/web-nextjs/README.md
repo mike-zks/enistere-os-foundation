@@ -2,8 +2,10 @@
 
 Socle **Web** d'Enistère : application **Next.js 16 (App Router)** en **TypeScript strict**, consommant
 le design system **`@enistere/ui-kit`**, l'**API publique** (endpoints Health) via les paquets clients
-officiels et **TanStack Query** pour le server state. **Aucune authentification** (BFF/cookies/CSRF
-viendront dans un incrément ultérieur).
+officiels et **TanStack Query** pour le server state. **BFF Auth** (login/refresh/logout/csrf, cookies
+`HttpOnly`, CSRF double-submit, Origin/Referer) **et état de session/autorisations** (`me`/`authorization`
+en lecture, `useSession`/`useAuthorization`, purge du cache Auth au logout). **Sans page de connexion,
+sans middleware, sans route protégée, sans SSR Auth complet** (Option A client-only) — différés.
 
 > **Statut** : `IMPLEMENTATION_PARTIELLE` (compile, build, lint, tests verts + serveur local + preuve
 > API réelle). Source de vérité de pilotage : [`docs/project-status/`](../../docs/project-status/README.md).
