@@ -6,6 +6,7 @@
 // =============================================================================
 import { cookies } from "next/headers";
 
+import type { ReadOnlyServerCookieStore } from "../read-only-cookie-store.js";
 import type { ServerCookieStore } from "../server-cookie-store.js";
 
 /**
@@ -26,6 +27,19 @@ export async function createNextCookieStore(): Promise<ServerCookieStore> {
     },
     delete(name) {
       jar.delete(name);
+    },
+  };
+}
+
+/**
+ * Construit une **vue lecture seule** des cookies (Server Component). N'expose que `get` : la résolution
+ * de session ne peut pas écrire (aucun `Set-Cookie` pendant le rendu).
+ */
+export async function createReadOnlyNextCookieStore(): Promise<ReadOnlyServerCookieStore> {
+  const jar = await cookies();
+  return {
+    get(name) {
+      return jar.get(name)?.value;
     },
   };
 }

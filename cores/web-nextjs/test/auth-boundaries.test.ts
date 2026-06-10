@@ -18,6 +18,17 @@ const CLIENT_REACHABLE = [
   "features/health/health-probe-view.tsx",
   "core/query/query-provider.tsx",
   "app/providers/app-providers.tsx",
+  // Surface Auth navigateur (Web Auth 3/4) : hooks, panneau, vues présentationnelles, état, client BFF.
+  "features/auth/auth-queries.ts",
+  "features/auth/use-session.ts",
+  "features/auth/use-authorization.ts",
+  "features/auth/use-logout.ts",
+  "features/auth/session-panel.tsx",
+  "features/auth/service-unavailable-view.tsx",
+  "features/auth/protected-notice.tsx",
+  "core/auth/session-state.ts",
+  "core/auth/client/auth-bff-client.ts",
+  "core/auth/client/bff-error.ts",
 ];
 
 // Éléments serveur/sensibles qui ne doivent JAMAIS être importés par un module client.
@@ -37,6 +48,9 @@ const FORBIDDEN_IN_CLIENT = [
   "refresh-handler",
   "logout-handler",
   "csrf-token",
+  // Résolution Auth serveur (Web Auth 4) : jamais atteignable depuis un module client.
+  "resolve-server-session",
+  "protected-session",
 ];
 
 test("aucun module atteignable côté client n'importe un module serveur/sensible", () => {

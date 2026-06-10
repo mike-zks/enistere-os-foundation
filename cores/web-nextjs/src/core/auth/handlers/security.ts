@@ -2,17 +2,12 @@ import { buildCsrfCookieOptions, csrfCookieName } from "../csrf/csrf-cookie.js";
 import { generateCsrfToken, validateCsrfToken } from "../csrf/csrf-token.js";
 import { validateRequestOrigin } from "../http/allowed-origins.js";
 import { jsonError } from "../http/web-response.js";
+import { resolveRequestId as resolveRequestIdValue } from "../request-id.js";
 import type { AuthHandlerDeps } from "./types.js";
-
-const REQUEST_ID_PATTERN = /^[A-Za-z0-9._-]{1,200}$/;
 
 /** Identifiant de corrélation : réutilise un `X-Request-Id` entrant valide, sinon en génère un. */
 export function resolveRequestId(request: Request): string {
-  const incoming = request.headers.get("x-request-id");
-  if (incoming !== null && REQUEST_ID_PATTERN.test(incoming)) {
-    return incoming;
-  }
-  return crypto.randomUUID();
+  return resolveRequestIdValue(request.headers.get("x-request-id"));
 }
 
 /** Refuse toute méthode autre que POST (générique 405). */

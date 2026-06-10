@@ -13,7 +13,7 @@
 | ADR-001 | Monorepo Git hybride | Validé | **PARTIELLEMENT_IMPLEMENTE** | Tous | Structure présente ; ⚠️ **aucun commit** |
 | ADR-002 | ORM = Prisma (vs TypeORM) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | schema + 5 migrations + tests |
 | ADR-003 | Validation = class-validator/transformer | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | backend OK ; clients absents |
-| ADR-004 | Auth/session multi-client | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | API OK ; **session web BFF opérationnelle** (login/refresh/logout via cookies `HttpOnly`) **+ état de session navigateur** (`me`/`authorization` read-only, `useSession`/`useAuthorization` TanStack Query, **401→anonymous / 403 distinct**, purge au logout) — preuve API réelle ; secure storage mobile absent |
+| ADR-004 | Auth/session multi-client | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | API OK ; **session web BFF opérationnelle** (login/refresh/logout via cookies `HttpOnly`) **+ état de session navigateur** (`me`/`authorization` read-only, `useSession`/`useAuthorization` TanStack Query, **401→anonymous / 403 distinct**, purge au logout) **+ premier layout protégé résolu côté serveur** (read-only, Option C, hydratation, redirection anonyme, indisponibilité ≠ anonyme) — preuve API réelle ; secure storage mobile absent |
 | ADR-005 | Cookies web + CSRF | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web | **Flux BFF opérationnels** : login/refresh/logout via Route Handlers, cookies `HttpOnly` (access/refresh, `__Host-` prod), **CSRF double-submit** (cookie+header, temps constant, rotation), **Origin/Referer** (fail-closed) — preuve API réelle. Reste : mutations futures réutilisant systématiquement la protection |
 | ADR-006 | RBAC + permissions fines | Validé | **IMPLEMENTE_ET_REVU** | api/web/mobile/ui | RBAC API + `AUTH_RBAC_REVIEW` ; **consommé en lecture côté Web** (`useAuthorization` : helpers OR/AND **sans wildcard** pour l'affichage conditionnel — **l'API reste l'autorité finale** ; changement de droits reflété **sans nouveau JWT**, prouvé) |
 | ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files + `FILES_REVIEW` |
@@ -21,7 +21,7 @@
 | ADR-009 | Stack UI Web (Tailwind/Radix/shadcn) | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/web | UI Kit **consommé par le Web Core starter** (CSS `--enistere-*`, classes `enistere-*`) ; Tailwind/Radix/shadcn **non ajoutés** (différés V2) |
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié)** dans le Web Core (façade `auth.login/refresh/logout/getProfile/getAuthorization` via BFF) **+ client BFF navigateur** (`fetch` same-origin `/api/auth/*`, sans token), preuve API réelle ; **Axios absent**. Reste : Mobile |
-| ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé). Reste : mutations ; Mobile |
+| ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`). Reste : mutations ; Mobile |
 | ADR-013 | CI/CD V1 | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web/mobile | aucun workflow |
 | ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
@@ -82,6 +82,18 @@
 > (`packages/*/dist` non versionnés) n'est imposé par aucune CI (ADR-013). Corrections de cette revue :
 > **documentaires/factuelles** uniquement (+ suppression de l'export mort `CSRF_HEADER_NAME`), zéro
 > changement de comportement (206 tests + build verts).
+>
+> **Web Auth 4 — résolution Auth serveur + premier layout protégé (implémente ADR-004/005/012, Option C)** :
+> le premier **espace privé** résout la session **côté serveur en lecture seule** (`resolveServerSession` →
+> client serveur authentifié `read-only`, `enableRefresh:false` → **aucun refresh au rendu**, appel **direct**
+> à l'API `/auth/me`, **jamais** le BFF local), retourne un contrat **sans token** (`authenticated|anonymous|
+> unavailable` ; `403`/réseau/`5xx`/réponse invalide→unavailable, **jamais** anonyme), puis **hydrate**
+> `authKeys.session()` (`prefillSessionQuery`) → `useSession` authentifié au 1ᵉʳ rendu **sans** second `/me`.
+> **Défense par le type** : `ReadOnlyServerCookieStore` (get-only) + `guardReadOnly` (lève sur écriture). **Pas
+> de middleware**, **pas de self-fetch**, **pas de QueryClient serveur global**. Redirection anonyme interne
+> `/?auth=required` (**temporaire** jusqu'à Web Auth 5) ; sous le **streaming** App Router, `redirect()` est
+> délivré en 200 via RSC `NEXT_REDIRECT` + meta-refresh (honoré ; **aucune donnée privée** exposée — vérifié).
+> Preuve API réelle **26/26**. Détail : `cores/web-nextjs/docs/protected-routes.md`.
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

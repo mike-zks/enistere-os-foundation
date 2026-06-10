@@ -43,9 +43,14 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   BFF navigateur** (same-origin, `credentials:"include"`, **aucun token lu/exposé**) → hooks **`useSession`**
   (`loading`/`authenticated`/**`anonymous` (401)**/**`error` (403/5xx/réseau)**) et **`useAuthorization`**
   (activé si authentifié ; helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions`, **OR/AND, sans
-  wildcard**, ADR-006) ; **logout purge** `authKeys.all` (Health conservé). **Sans page, sans middleware,
-  sans route protégée, sans SSR Auth complet (Option A client-only).** **206 tests** + preuve **API réelle
-  Auth + session** (PostgreSQL jetable). Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
+  wildcard**, ADR-006) ; **logout purge** `authKeys.all` (Health conservé). **Premier layout protégé**
+  (Web Auth 4) : groupe `(protected)` + page `/protected` ; le **layout Server Component** résout la session
+  **côté serveur read-only** (`resolveServerSession` → API `/auth/me`, `enableRefresh:false`, **aucun appel
+  au BFF local**, **aucune écriture cookie** via `guardReadOnly`) → **redirige** l'anonyme (`/?auth=required`,
+  temporaire), rend **« Service indisponible »** si l'API est down (≠ anonyme), sinon **hydrate** le profil
+  (`prefillSessionQuery` → `useSession` authentifié au 1ᵉʳ rendu, **sans** second `/me`). **Sans page `/login`,
+  sans middleware, sans refresh au rendu.** **230 tests** + preuve **API réelle** Auth + session **+ protégé
+  26/26** (PostgreSQL jetable). Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
   (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
   `fetch` patché de Next échouait sur les réponses non-2xx — `expected non-null body source`).
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
@@ -55,7 +60,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(web-nextjs): review web core governance`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add server-resolved protected layout`,
+  `docs(web-nextjs): review web core governance`,
   `feat(web-nextjs): add session and authorization state`,
   `feat(web-nextjs): implement secure auth BFF flows`, `feat(web-nextjs): establish server auth foundations`,
   `feat(web-nextjs): integrate public API and query layer`, baseline.
@@ -94,7 +100,26 @@ ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECI
 
 ## 8. Dernière étape terminée
 
-**Checkpoint de gouvernance Web Core** (revue de socle — `@enistere/web-nextjs`) : mission de
+**Web Auth 4 — résolution Auth serveur + premier layout protégé** (`@enistere/web-nextjs`) : premier
+**espace privé** dont la session est **résolue côté serveur** (lecture seule) puis **hydratée**. Modules
+**testables** : `core/auth/resolve-server-session.ts` (`resolveServerSession` → client serveur authentifié
+`read-only`, `enableRefresh:false`, appel **direct** API `/auth/me`, contrat **sans token** `authenticated|
+anonymous|unavailable` ; `401`→anonymous, `403`/réseau/`5xx`/réponse invalide→unavailable ; `decideProtectedRender`),
+`core/auth/read-only-cookie-store.ts` (`ReadOnlyServerCookieStore` get-only + `guardReadOnly` qui **lève** sur
+écriture), `core/auth/request-id.ts` (`resolveRequestId` partagé), `features/auth/auth-queries.ts`
+(`prefillSessionQuery`). **Server-only** (exclu node:test) : `core/auth/server/protected-session.ts`
+(`resolveNextServerSession` via `next/headers`). **App** : `app/(protected)/layout.tsx` (Server Component,
+`force-dynamic` : redirect anonyme `/?auth=required` / `ServiceUnavailableView` / hydrate+children),
+`(protected)/protected/page.tsx` (`/protected`), `(protected)/error.tsx`. **230 tests** (+24) +
+**preuve API réelle 26/26** (anonyme→redirection serveur sans donnée privée ; authentifié→200+profil hydraté,
+aucun token HTML/RSC, X-Request-Id propagé ; cookie access retiré→redirection **sans** `/auth/refresh` ;
+logout→redirection ; **API arrêtée→« Service indisponible »** ≠ anonyme ; bundle sans secret). Note : sous le
+**streaming** App Router, `redirect()` est délivré en HTTP 200 (RSC `NEXT_REDIRECT` + meta-refresh) — honoré
+par le navigateur, **aucune donnée privée** exposée. **0 vuln**, Axios/Zustand absents, React 19.2.7. API
+NestJS / packages **non modifiés**. Détail : `cores/web-nextjs/docs/protected-routes.md`. Commit
+`feat(web-nextjs): add server-resolved protected layout`.
+
+**Étape précédente — Checkpoint de gouvernance Web Core** (revue de socle — `@enistere/web-nextjs`) : mission de
 **revue/vérification/consolidation/arbitrage**, **sans** implémentation fonctionnelle (aucun
 middleware/page login/route protégée). Vérifié **fichier par fichier** + commandes réelles : frontières
 client/serveur, 6 routes BFF `ƒ`, 3 clients API séparés, cookies `HttpOnly`/`__Host-`, CSRF + Origin/Referer,
@@ -135,14 +160,13 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Web Auth 4 — résolution Auth serveur (Option C) + premier layout protégé**. Le
-checkpoint de gouvernance est **terminé** (rapport `cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`)
-et a tranché l'orientation SSR Auth (**hybride** : Option C serveur read-only pour le privé, Option A
-client-only pour le public ; middleware = UX léger non autoritaire) — aucune dette **bloquante**.
-Implémenter la résolution serveur read-only + hydratation TanStack Query, puis un layout protégé minimal
-(**API = autorité finale**). **Recommandé en parallèle (non bloquant)** : CI minimale (ADR-013) imposant
-l'ordre de build des paquets. Alternative : compléter le UI Kit, démarrer le Mobile Core, ou Cloud/CI-CD.
-Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Web Auth 5 — page de connexion & navigation Auth contrôlée**. Web Auth 4 est
+**terminé** (layout protégé + résolution serveur + hydratation, preuve API réelle 26/26). Implémenter la
+page **`/login`** + formulaire (CSRF → `login` BFF), une **redirection interne sûre** **remplaçant** la
+cible temporaire `/?auth=required`, et le **retour vers la page demandée** (sans `returnUrl` libre / open
+redirect) — **toujours sans middleware autoritaire** ; **API = autorité finale**. **Recommandé en parallèle
+(non bloquant)** : CI minimale (ADR-013) ordre de build paquets. Alternative : UI Kit (composants formulaire),
+Mobile Core, ou Cloud/CI-CD. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

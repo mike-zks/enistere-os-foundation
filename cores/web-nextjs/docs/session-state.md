@@ -1,8 +1,9 @@
-# État de session & autorisations (navigateur) — Web Auth 3
+# État de session & autorisations (navigateur) — Web Auth 3 → 4
 
 État de session **public** côté navigateur, dérivé du **server state** TanStack Query. **Aucun token**
-n'est exposé, lu ni mis en cache. **Aucune protection de route** ici : Web Auth 3 expose *l'état*, pas un
-contrôle d'accès. **L'API NestJS reste l'autorité finale** sur les permissions.
+n'est exposé, lu ni mis en cache. Web Auth 3 expose *l'état* (client-only) ; **Web Auth 4** ajoute un
+**layout protégé** dont la session est **résolue côté serveur** puis **hydratée** (cf. §« État initial selon
+l'espace »). **L'API NestJS reste l'autorité finale** sur l'authentification et les permissions.
 
 ## Source de vérité
 
@@ -78,8 +79,28 @@ Espace de clés **disjoint** de `healthKeys`. `retry:false` (un 401 n'est pas à
 **Health intact**. En cas d'**échec réseau** navigateur↔BFF : **pas de purge** (on ne prétend pas la session
 terminée), l'erreur est exposée pour un retry. **Aucune redirection** (hors périmètre).
 
-## Hors périmètre (Web Auth 3)
+## État initial selon l'espace (Web Auth 4)
 
-Pas de middleware, pas de page `/login`, pas de formulaire de connexion, pas de route/layout protégé, pas de
-redirection automatique, pas de Server Action Auth, pas de RBAC d'administration, pas de SSR Auth complet
-(session chargée **côté client**, Option A). Voir [`auth-architecture.md`](auth-architecture.md) §13.
+| Espace | État initial de `useSession` | Mécanisme |
+| --- | --- | --- |
+| **Public** (`/`, …) | `loading` → résolu **après hydratation** (client-only, Option A) | `useSession` appelle `/api/auth/me`. |
+| **Privé** (`(protected)/…`) | **`authenticated` dès le premier rendu** (sans flash) | Le layout protégé **résout la session côté serveur** (read-only) et **préremplit** `authKeys.session()` (`prefillSessionQuery`) ; `useSession` lit la donnée **hydratée**, **sans** rappeler `/me`. |
+
+Dans l'espace privé, la **source de vérité reste `/auth/me`** : elle est simplement résolue **côté serveur**
+(lecture seule, `enableRefresh:false`) puis hydratée — pas de second appel au premier rendu. Le `refetch`
+explicite et la politique `staleTime` restent inchangés. Les **autorisations** sont toujours chargées **côté
+client** à la demande (non préchargées). Détail : [`protected-routes.md`](protected-routes.md).
+
+### Logout dans l'espace privé
+
+Après `logout` (purge `authKeys`), la page protégée ne présente plus le profil (le cache Auth est vidé) ; un
+**rafraîchissement/navigation** ultérieur déclenche la **redirection serveur** (la résolution serveur voit une
+session absente). Aucune redirection « sophistiquée » n'est ajoutée dans le hook (Web Auth 5).
+
+## Hors périmètre
+
+Pas de middleware, pas de page `/login`, pas de formulaire de connexion, pas de redirection automatique post-
+logout dans le hook, pas de Server Action Auth, pas de RBAC d'administration, pas de refresh pendant le rendu
+serveur. Web Auth 4 ajoute le **premier layout/route protégé** (résolution serveur + hydratation) ; la page de
+connexion et la navigation Auth restent pour **Web Auth 5**. Voir [`protected-routes.md`](protected-routes.md)
+et [`auth-architecture.md`](auth-architecture.md) §13.

@@ -5,35 +5,34 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Web Auth 4 — résolution Auth serveur + premier layout protégé** (`cores/web-nextjs/`). Implémenter,
-> selon l'**orientation hybride tranchée par le checkpoint de gouvernance** : (1) la **résolution Auth
-> serveur read-only** (Server Component → cookie store read-only → client serveur authentifié `read-only`
-> → API `/auth/me`) avec **hydratation TanStack Query** du profil (même motif que le préchargement Health),
-> puis (2) un **layout/route protégé minimal**. **L'API reste l'autorité finale.**
+> **Web Auth 5 — page de connexion et navigation Auth contrôlée** (`cores/web-nextjs/`). Implémenter la
+> page **`/login`** + formulaire (obtention CSRF → appel BFF `login`), une **redirection interne sûre**
+> remplaçant la cible temporaire `/?auth=required`, et le **retour vers la page initialement demandée**
+> (sans `returnUrl` libre / open redirect) — **toujours sans middleware autoritaire**. **L'API reste
+> l'autorité finale.**
 
-**Justification** : le **Checkpoint de gouvernance Web Core** est **terminé** (rapport permanent
-`cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`, commit `docs(web-nextjs): review web core
-governance`). Verdict : socle **cohérent et sûr** (aucune fuite de token, caches disjoints, RBAC ADR-006,
-contrats = source des types), **aucune dette bloquante**, non-régression verte (206 tests ×2, build,
-0 vuln). L'arbitrage SSR Auth est tranché : **Option C (serveur read-only) pour les pages privées**,
-Option A (client-only) pour les pages publiques ; **middleware = filtrage UX léger non autoritaire**
-(jamais preuve d'authentification/autorisation). Cette décision **précède** et conditionne
-l'implémentation des routes protégées — elle est désormais disponible.
+**Justification** : **Web Auth 4 est terminé** (commit `feat(web-nextjs): add server-resolved protected
+layout`). Le premier **layout protégé** résout la session **côté serveur** (read-only, Option C), redirige
+l'anonyme vers **`/?auth=required`** (destination **temporaire**, faute de page login), gère
+l'indisponibilité (≠ anonyme) et **hydrate** le profil (`useSession` authentifié au 1ᵉʳ rendu, sans second
+`/me`). **230 tests** + **preuve API réelle** (26 assertions). La cible `/?auth=required` est **explicitement
+provisoire** : Web Auth 5 doit fournir la vraie page de connexion et la navigation Auth, ce qui en fait la
+suite logique directe.
 
-**Pré-recommandation (non bloquante)** : amorcer une **CI minimale** (ADR-013) imposant l'**ordre de build
-des paquets** (`packages/*/dist` non versionnés) et la non-régression, en parallèle de Web Auth 4.
+**Pré-recommandation (non bloquante, reportée du checkpoint)** : amorcer une **CI minimale** (ADR-013)
+imposant l'**ordre de build des paquets** (`packages/*/dist` non versionnés) et la non-régression.
 
-**Alternative (justifiée)** : **compléter le UI Kit** ou démarrer le **Mobile Core React Native minimal**
-(parallélisable), ou avancer **Cloud/CI-CD**. À arbitrer par décision humaine.
+**Alternative (justifiée)** : **compléter le UI Kit** (FormField/Alert/Card pour le formulaire login) en
+amont de Web Auth 5, ou démarrer le **Mobile Core**, ou avancer **Cloud/CI-CD**. À arbitrer par décision humaine.
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`docs(web-nextjs): review web core governance` (revue + corrections documentaires factuelles).
+`feat(web-nextjs): add server-resolved protected layout`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Web Auth 4 — résolution Auth serveur (Option C) + premier layout protégé** — hydratation TanStack Query du profil, layout privé minimal ; **API = autorité finale**. ✦ prochaine action.
-2. **CI minimale (ADR-013)** — imposer l'ordre de build des paquets + non-régression (recommandée en parallèle de Web Auth 4).
-3. **UI Kit (suite)** — composants supplémentaires au besoin (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
+1. **Web Auth 5 — page de connexion & navigation Auth** — `/login`, formulaire, CSRF + `login` BFF, redirection interne **sûre** (remplace `/?auth=required`), retour vers la page demandée ; **sans middleware autoritaire**. ✦ prochaine action.
+2. **CI minimale (ADR-013)** — imposer l'ordre de build des paquets + non-régression (recommandée).
+3. **UI Kit (suite)** — composants pour le formulaire login (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
@@ -48,8 +47,9 @@ deux cores. À arbitrer par décision humaine.
 |---|---|
 | Intégrer les packages API (public) dans le Web Core | **FAIT** — `api-client-fetch` instancié (Health), preuve API réelle |
 | Usage **authentifié** des packages (Web) | **FAIT** — login/refresh/logout + CSRF (Web Auth 2) **et** me/authorization + session/autorisations (Web Auth 3), preuve API réelle |
-| Routes protégées / layout privé (Web) | **débloqué** — orientation SSR Auth tranchée (checkpoint : Option C serveur read-only pour le privé). C'est désormais **Web Auth 4** (prochaine action) |
-| Middleware Auth « autoritaire » (Web) | **rejeté par le checkpoint** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
+| Premier layout/route protégé (Web) | **FAIT** — Web Auth 4 : résolution serveur read-only (Option C) + hydratation, page `/protected`, preuve API réelle |
+| Page de connexion / navigation Auth (Web) | **débloqué** — c'est **Web Auth 5** (prochaine action) ; remplace la cible temporaire `/?auth=required` |
+| Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |

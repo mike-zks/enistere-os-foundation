@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
 import {
   fetchAuthorization,
@@ -12,6 +12,21 @@ import { authKeys } from "../../core/query/keys/auth-keys.js";
 export type SessionResult =
   | { readonly status: "authenticated"; readonly user: UserProfile }
   | { readonly status: "anonymous" };
+
+/** Forme de cache **authentifiée** (utilisée pour l'hydratation depuis la résolution serveur). */
+export function authenticatedSessionResult(user: UserProfile): SessionResult {
+  return { status: "authenticated", user };
+}
+
+/**
+ * Préremplit le cache TanStack Query de la **session** (`authKeys.session()`) avec un profil **déjà
+ * obtenu côté serveur** — **sans** déclencher d'appel `/api/auth/me`. La forme posée est **exactement**
+ * celle consommée par `sessionQueryOptions`/`useSession`, garantissant un état initial `authenticated`
+ * sans flash. La fraîcheur (`staleTime`) des options évite un refetch immédiat après hydratation.
+ */
+export function prefillSessionQuery(queryClient: QueryClient, user: UserProfile): void {
+  queryClient.setQueryData(authKeys.session(), authenticatedSessionResult(user));
+}
 
 /**
  * Charge la session. Un **401** est traité comme **anonyme** (succès de query, pas une erreur) ; toute

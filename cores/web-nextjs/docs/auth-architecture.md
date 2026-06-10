@@ -1,4 +1,4 @@
-# Architecture Auth Web — BFF (Web Auth 1 → 3)
+# Architecture Auth Web — BFF (Web Auth 1 → 4)
 
 > **Flux Auth BFF disponibles** : `login` / `refresh` / `logout` (+ bootstrap `csrf`) **et lecture
 > `me` / `authorization`** ; protégés par cookies `HttpOnly`, Origin/Referer (mutations) et **CSRF
@@ -146,6 +146,36 @@ navigateur → BFF → API → réponse (jamais une preuve d'autorisation). Corp
 nouvel adaptateur, nouveau `ServerCookieStore`), sans état mutable de module. Testé : deux sessions A/B
 isolées (aucune fuite de token, aucun adaptateur réutilisé).
 
+## 10b. Résolution Auth serveur & layout protégé (Web Auth 4)
+
+**Espaces privés** : la session est résolue **côté serveur** en **lecture seule** (Option C ; les pages
+publiques restent client-only, Option A).
+
+```
+(protected)/layout.tsx  (Server Component, force-dynamic)
+  → resolveNextServerSession()              // core/auth/server/protected-session.ts (next/headers)
+      → createReadOnlyNextCookieStore()      // cookies() — get uniquement (aucune écriture possible)
+      → resolveServerSession()               // core/auth/resolve-server-session.ts (testable, deps injectées)
+          → createAuthenticatedServerApiClient({ mode:'read-only' })   // enableRefresh:false
+          → API NestJS GET /auth/me          // appel DIRECT (jamais le BFF local /api/auth/me)
+  → decideProtectedRender()                  // politique pure
+      anonymous → redirect('/?auth=required') · unavailable → <ServiceUnavailableView/> · authenticated → hydrate+children
+```
+
+- **`ServerSessionResolution`** (sans token) : `authenticated | anonymous | unavailable`. `200`→authenticated,
+  `401`→anonymous, `403`/réseau/`5xx`/réponse invalide→unavailable (**jamais** anonymous). Défense **par le
+  type** : `ReadOnlyServerCookieStore` n'expose que `get` ; `guardReadOnly` **lève** sur toute écriture.
+- **Aucun refresh pendant le rendu** : Server Component **lecture seule** (`enableRefresh:false`) → un access
+  expiré ⇒ anonymous (pas de rotation). Une future orchestration de refresh exigerait un contexte **writable
+  distinct**, jamais introduite silencieusement.
+- **Hydratation** : le profil obtenu est posé **directement** dans `authKeys.session()` (`prefillSessionQuery`)
+  → `useSession` authentifié **dès le premier rendu**, **sans** second appel `/me`. Aucun token sérialisé.
+- **Pas de middleware**, **pas de self-fetch** vers le BFF, **pas de QueryClient serveur global**.
+- **Redirection (streaming)** : `redirect()` est délivré par Next via `NEXT_REDIRECT` (RSC) + `<meta
+  http-equiv="refresh">` (HTTP 200) ; honoré par le navigateur. La preuve vérifie le **signal** + l'**absence
+  de donnée privée** (le shell public éventuel ne contient aucune session). Détail :
+  [`protected-routes.md`](protected-routes.md).
+
 ## 11. Sécurité
 
 `HttpOnly` (tokens inaccessibles au JS) ; refresh jamais renvoyé au navigateur ni loggé ; tokens validés
@@ -159,8 +189,10 @@ vérifiées absentes des erreurs/logs/bundle.
   handler login exécute `clearSession()` en **compensation** (testé). Logout : suppression locale **toujours**
   appliquée (même API indisponible).
 - Les `expiresAt` ne sont pas stockés (seul le `maxAge` l'est).
-- **Aucune route protégée, aucun middleware, aucune page de connexion, aucune redirection auto** : Web Auth 3
-  expose **l'état** (profil/rôles/permissions) mais ne **protège** rien côté navigateur. L'API reste l'autorité.
+- **Web Auth 4** ajoute un **layout/route protégé** (résolution serveur read-only + hydratation, §10b) :
+  **toujours aucun middleware, aucune page de connexion, aucun refresh pendant le rendu**. La redirection
+  anonyme pointe vers `/?auth=required` (interne, sans `returnUrl` libre) en attendant la page login (Web Auth 5).
+  L'**API reste l'autorité finale**.
 - **`me`/`authorization` en read-only** : `enableRefresh:false` → un access expiré ⇒ **401 → anonymous**
   (pas de refresh silencieux sur une lecture). Le refresh reste explicite (route dédiée / relogin).
 - **Replay de l'ancien refresh** : non rejoué via le BFF (le cookie ne porte que le token courant) ; la
@@ -173,7 +205,8 @@ vérifiées absentes des erreurs/logs/bundle.
 
 ## 13. Prochaine étape
 
-**Checkpoint de gouvernance Web Core** (revue de socle avant nouvelles capacités) — puis, le moment venu,
-étude du **SSR Auth** et des **routes protégées** (middleware / layout privé), hors périmètre actuel.
-Voir [`session-state.md`](session-state.md) pour les états de session et [`tanstack-query.md`](tanstack-query.md)
-pour le cache.
+**Web Auth 5 — page de connexion et navigation Auth contrôlée** : page `/login`, formulaire, obtention CSRF +
+appel BFF `login`, redirection interne **sûre** (remplace `/?auth=required`), retour éventuel vers la page
+initialement demandée — **toujours sans middleware autoritaire**. Voir [`protected-routes.md`](protected-routes.md)
+(layout protégé), [`session-state.md`](session-state.md) (états/hydratation) et
+[`tanstack-query.md`](tanstack-query.md) (cache).

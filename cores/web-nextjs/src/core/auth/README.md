@@ -24,17 +24,27 @@ Authentification Web via **BFF** : flux `login` / `refresh` / `logout` (+ bootst
   (`BffAuthError`), `csrf-client`, `logout-client`.
 - **État public** (`session-state.ts`) : `SessionState` (`loading`/`anonymous`/`authenticated`/`error`),
   `PublicAuthError`, `toPublicAuthError` (générique, sans cause/stack/token). Hooks dans `features/auth`.
+- **Résolution serveur (Web Auth 4)** : `resolve-server-session.ts` (`resolveServerSession` read-only →
+  contrat **sans token** `authenticated|anonymous|unavailable` ; `decideProtectedRender`),
+  `read-only-cookie-store.ts` (`ReadOnlyServerCookieStore` get-only + `guardReadOnly` qui **lève** sur
+  écriture), `request-id.ts` (`resolveRequestId` partagé). **Server-only** (exclu node:test) :
+  `server/protected-session.ts` (`resolveNextServerSession` via `next/headers`) — consommé par le layout
+  `app/(protected)/`.
 
 Détail : [`../../../docs/auth-architecture.md`](../../../docs/auth-architecture.md),
+[`../../../docs/protected-routes.md`](../../../docs/protected-routes.md),
 [`../../../docs/csrf.md`](../../../docs/csrf.md),
 [`../../../docs/session-state.md`](../../../docs/session-state.md).
 
 ## Absent (volontairement)
 
-- **Page de connexion**, formulaire React, route/layout protégé.
-- **Middleware de protection** de routes privées, redirections Auth, Server Action Auth, RBAC d'administration.
-- **SSR Auth complet** (session chargée côté client, Option A).
+- **Page de connexion**, formulaire React (Web Auth 5).
+- **Middleware de protection** de routes privées, redirection post-logout sophistiquée, Server Action Auth,
+  RBAC d'administration, **refresh pendant le rendu serveur**, self-fetch serveur → BFF.
 - forgot/reset password, OAuth, MFA. **Aucun token Auth renvoyé au navigateur ; aucun token en JS.**
+
+> **Présent (Web Auth 4)** : **premier layout protégé** (`app/(protected)/`) résolu **côté serveur**
+> (read-only) + hydratation ; redirection anonyme `/?auth=required` (temporaire) ; erreur d'indisponibilité.
 
 ## Frontière
 
