@@ -5,38 +5,37 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 2 — CI runtime API NestJS (niveau 2)** (`.github/workflows/` + `cores/cloud/docs/`) : implémenter
-> le **niveau 2** de la politique CI cadrée — un workflow (ou job dédié) rejouant l'**API NestJS** contre
-> **PostgreSQL + MinIO** en **services GitHub Actions** : `prisma generate/validate/migrate`, tests unitaires +
-> **e2e**, `openapi:check`, `npm audit`, **logs sans secret**, données **éphémères**. Suivre
-> `cores/cloud/docs/API_RUNTIME_CI_PLAN.md`. **Pas de déploiement, pas de registry, pas de secret de prod**
-> (valeurs de test factices). **En parallèle (action humaine)** : appliquer la **protection de branche `main`**
-> (`cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`).
+> **Cloud Core 3 — E2E navigateur (niveau 3)** (`.github/workflows/` + `cores/cloud/docs/`) : implémenter le
+> **niveau 3** — un workflow démarrant la stack **API + PostgreSQL + MinIO + Web Next.js** (éphémère) et
+> rejouant les **parcours navigateur** (Health, Auth login/refresh/logout + protection des routes, Files
+> métadonnées/téléchargement, 404/403/503), outil **à décider** (Playwright candidat), **données éphémères**,
+> **captures en échec seulement**, **aucun secret**. Suivre `cores/cloud/docs/WEB_E2E_CI_PLAN.md`. **Pas de
+> déploiement, pas de registry, pas de secret.** **En parallèle (action humaine)** : appliquer la **protection
+> de branche `main`** (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) pour rendre les deux workflows bloquants.
 
-**Justification** : le **Cloud Core 1 — cadrage d'exécution** est **terminé** (commit `docs(cloud): define v1
-execution baseline`) : baseline d'exécution, environnements, **checklist protection de branche**, **politique
-CI à 4 niveaux**, politiques secrets/registry, plans runtime API & E2E — Cloud Core → **`CADRAGE_OPERATIONNEL`**.
-Le **niveau 1** (CI minimale) est en place ; la suite gouvernée est le **niveau 2** (CI runtime API), qui
-rapproche en CI les preuves aujourd'hui seulement **locales** (e2e API + MinIO) et débloque ensuite le niveau 3
-(E2E Web) puis le niveau 4 (registry/déploiement). **Ne pas sauter au niveau 4 (registry/déploiement) ni
-enchaîner vers Files 2.**
+**Justification** : le **Cloud Core 2 — CI runtime API NestJS (niveau 2)** est **terminé** (commit `ci(api):
+add runtime validation workflow`) : `.github/workflows/api-runtime-ci.yml` rejoue l'API contre PostgreSQL +
+MinIO jetables (migrations, unit + **e2e**, openapi:check, build, audit) — Cloud Core →
+**`IMPLEMENTATION_PARTIELLE`**. Les **niveaux 1–2** sont en place ; la suite gouvernée est le **niveau 3** (E2E
+navigateur), seule réserve « tests » majeure du Web (cf. revue Web V1) encore non couverte. **Ne pas sauter au
+niveau 4 (registry/déploiement, ADR-014) ni enchaîner vers Files 2.**
 
-**Alternative (justifiée, décision humaine)** : **Cloud Core 3 — E2E navigateur** (niveau 3) si l'on priorise
-la couverture Web ; **UI Kit 4** (primitives interactives) ; **Files 2** (upload Web) ; **Mobile Core**. La
-**protection de branche** `main` est une **action humaine manuelle** (GitHub Settings), non un travail d'agent.
+**Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives) si features riches
+imminentes ; **Files 2** (upload Web) ; **Mobile Core** ; ou **niveau 4** (registry/déploiement) si la priorité
+devient la mise en production. La **protection de branche** `main` est une **action humaine manuelle** (GitHub
+Settings), non un travail d'agent.
 
-**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`docs(cloud): define v1 execution baseline` ; statuts : Cloud Core **`CADRAGE_OPERATIONNEL`** (non augmenté en
-`IMPLEMENTATION_PARTIELLE`), ADR-013 **`PARTIELLEMENT_IMPLEMENTE`**, ADR-014 **`NON_IMPLEMENTE`**.
+**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit `ci(api): add
+runtime validation workflow` ; statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013
+**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–2), ADR-014 **`NON_IMPLEMENTE`**.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 2 — CI runtime API (niveau 2)** — PostgreSQL/MinIO en services CI + e2e + migrations + openapi:check (`API_RUNTIME_CI_PLAN.md`). ✦ prochaine action. **+ humain** : appliquer la protection de branche `main`.
-2. **Cloud Core 3 — E2E navigateur (niveau 3)** — parcours Health/Auth/Files en CI (`WEB_E2E_CI_PLAN.md`).
-3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
-4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
-5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
-6. **Cloud Core 4 — registry (ADR-014) + déploiement** — build/push GHCR, environnements protégés, rollback.
+1. **Cloud Core 3 — E2E navigateur (niveau 3)** — stack API+PG+MinIO+Web en CI, parcours Health/Auth/Files (`WEB_E2E_CI_PLAN.md`). ✦ prochaine action. **+ humain** : appliquer la protection de branche `main`.
+2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
+3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
+5. **Cloud Core 4 — registry (ADR-014) + déploiement** — build/push GHCR, environnements protégés, rollback.
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -57,9 +56,10 @@ deux cores. À arbitrer par décision humaine.
 | Files Web (lecture/téléchargement) | **FAIT** — Web Core Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, client BFF, `fileKeys`, `useFileMetadata`/`useCreateDownloadUrl` (URL jamais en cache), page `/protected/files/[id]`, **307 tests** + preuve API+MinIO 21/21 |
 | Revue globale Web Core (incrément V1) | **FAIT** — verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (`WEB_CORE_V1_INCREMENT_REVIEW.md`) : 307 tests ×2 + runtime réel 49/49, aucun défaut bloquant ; réserves : CI/ordre de build, E2E |
 | CI minimale (ADR-013) | **FAIT** — `.github/workflows/ci.yml` (GitHub Actions, ordre de build imposé, `npm ci` Node 24, audit, gardes deps) ; ADR-013 **partiel** (restent branch protection, E2E, runtime API, déploiement) |
-| Cloud Core 1 — cadrage CI/CD & environnements | **FAIT** — `cores/cloud/docs/` (baseline d'exécution, environnements, checklist branch protection, politique CI 4 niveaux, secrets/registry, plans runtime API & E2E) ; Cloud Core → `CADRAGE_OPERATIONNEL` |
-| Cloud Core 2 — CI runtime API (niveau 2) | **débloqué** — prochaine action ; PostgreSQL/MinIO en CI + e2e (`API_RUNTIME_CI_PLAN.md`) |
-| Protection de branche `main` | **débloqué (action humaine)** — checklist manuelle `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les 5 checks CI bloquants) ; non applicable par un agent (GitHub Settings) |
+| Cloud Core 1 — cadrage CI/CD & environnements | **FAIT** — `cores/cloud/docs/` (baseline, environnements, checklist branch protection, politique CI 4 niveaux, secrets/registry, plans) |
+| Cloud Core 2 — CI runtime API (niveau 2) | **FAIT** — `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) ; Cloud Core → `IMPLEMENTATION_PARTIELLE` |
+| Cloud Core 3 — E2E navigateur (niveau 3) | **débloqué** — prochaine action ; stack API+PG+MinIO+Web en CI (`WEB_E2E_CI_PLAN.md`) |
+| Protection de branche `main` | **débloqué (action humaine)** — checklist manuelle `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les checks `ci.yml` + `api-runtime-ci.yml` bloquants) ; non applicable par un agent (GitHub Settings) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |

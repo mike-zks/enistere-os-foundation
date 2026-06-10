@@ -1,5 +1,13 @@
 # CI — workflows GitHub Actions
 
+Deux workflows, **lecture seule** (`permissions: contents: read`), **sans secret GitHub, sans registry/GHCR,
+sans déploiement** :
+
+| Workflow | Rôle | Niveau (Cloud Core) |
+|---|---|---|
+| [`ci.yml`](ci.yml) | Non-régression du monorepo (contrats, client, UI Kit, Web, audit) — **sans** base/stockage | Niveau 1 |
+| [`api-runtime-ci.yml`](api-runtime-ci.yml) | Runtime de l'**API NestJS** : PostgreSQL + MinIO **jetables**, migrations Prisma, unit + e2e, OpenAPI check, build, audit | Niveau 2 |
+
 ## `ci.yml` — CI minimale V1 (ADR-013)
 
 Non-régression du monorepo. **Lecture seule**, sans secret, sans Docker, sans base de données ni stockage
@@ -46,26 +54,68 @@ job aval **rebuild ses dépendances** avant de se valider (`needs` garantit l'or
 
 ### Ce qu'elle ne garantit PAS encore
 
-- Tests **e2e** de l'API NestJS (PostgreSQL + MinIO) ; **E2E navigateur** du Web ;
+- **E2E navigateur** du Web ;
 - **protection de branche** / approvals / environnements protégés ;
 - artefacts/rapports de couverture publiés ;
 - **build/publication d'images** (GHCR — ADR-014, non implémenté) ; déploiement ; release ; versioning npm.
 
-### Niveau CI actuel & progression (Cloud Core 1)
+> Le **runtime de l'API NestJS** (e2e + PostgreSQL/MinIO) est couvert par `api-runtime-ci.yml` (ci-dessous).
+
+## `api-runtime-ci.yml` — CI runtime API (niveau 2, Cloud Core 2)
+
+Valide l'**API Core NestJS** contre ses dépendances runtime **minimales et jetables**. `cores/api-nestjs/`
+est un projet npm **autonome** (lockfile propre, hors workspaces racine) : `working-directory: cores/api-nestjs`
++ `npm ci`. **Lecture seule, aucun secret GitHub, aucun registre, aucun déploiement.**
+
+### Services
+
+- **PostgreSQL** (`postgres:16`) en conteneur `services:` avec healthcheck `pg_isready`.
+- **MinIO** (`minio/minio`) démarré via **`docker run`** (un conteneur `services:` **ne peut pas** recevoir la
+  commande `server /data` requise par MinIO), attente de `…/minio/health/live`, puis **bucket de test** créé
+  (`enistere-test-files`) — l'API ne crée pas le bucket automatiquement.
+
+### Variables
+
+Uniquement des **valeurs de test jetables** définies dans le workflow (jamais `secrets.*`, jamais committées
+en `.env`) : `DATABASE_URL`, `JWT_*`, `REFRESH_TOKEN_HASH_SECRET`, `ARGON2_*`, `S3_*`, rate limits élargis,
+`CORS_ORIGINS`, `LOG_LEVEL=warn`. Ces noms suivent `cores/api-nestjs/.env.example`.
+
+### Étapes (scripts réels de `cores/api-nestjs/package.json`)
+
+`npm ci` → bucket → `prisma:generate` → `prisma:validate` → **`prisma:migrate:deploy`** (migrations sur base
+jetable) → `lint` → `npm test` (unitaires) → **`test:e2e`** (PostgreSQL + MinIO réels) → **`openapi:check`**
+(snapshot canonique à jour) → `build` (nest build) → `npm audit`. *(Pas de script `typecheck` côté API ; `nest
+build` couvre la compilation.)*
+
+### Garanties
+
+Migrations Prisma valides et applicables · tests unitaires + **e2e** verts contre PostgreSQL/MinIO jetables ·
+contrat **OpenAPI** non divergent · build API · `npm audit` 0 vuln · **données éphémères**, **aucun secret**,
+**logs sans secret** (`LOG_LEVEL=warn`), **aucun artefact uploadé**.
+
+### Ce qu'il ne garantit PAS
+
+Déploiement · image/registre (GHCR, ADR-014) · environnements protégés/staging/production · rollback ·
+monitoring · E2E **navigateur** (niveau 3).
+
+> **Contrainte GitHub Actions documentée** : MinIO via `docker run` (pas `services:`) car un service ne peut
+> pas porter la commande `server /data`. PostgreSQL reste un service idiomatique.
+
+### Niveau CI actuel & progression (Cloud Core 1 → 2)
 
 Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
 [`cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
 
-- **Niveau 1 (présent — ce workflow)** : contrats, client API, UI Kit, Web Core (build sans API), audit,
+- **Niveau 1 (présent — `ci.yml`)** : contrats, client API, UI Kit, Web Core (build sans API), audit,
   gardes Axios/Zustand.
-- **Niveau 2 (futur)** : CI runtime API NestJS (PostgreSQL + MinIO en services) + e2e —
-  [`API_RUNTIME_CI_PLAN.md`](../../cores/cloud/docs/API_RUNTIME_CI_PLAN.md).
+- **Niveau 2 (présent — `api-runtime-ci.yml`)** : CI runtime API NestJS (PostgreSQL + MinIO jetables) +
+  migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../cores/cloud/docs/API_RUNTIME_CI_PLAN.md).
 - **Niveau 3 (futur)** : E2E navigateur Web — [`WEB_E2E_CI_PLAN.md`](../../cores/cloud/docs/WEB_E2E_CI_PLAN.md).
 - **Niveau 4 (futur)** : build/push d'images (GHCR, ADR-014) + déploiement par environnement —
   [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md).
 
-**Protection de branche `main`** : à appliquer **manuellement** (rendre ces 5 checks bloquants) —
-[`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md).
-**Aucun déploiement, aucun secret, aucun registry** dans ce workflow. ADR-013 reste
-**`PARTIELLEMENT_IMPLEMENTE`** tant que les niveaux 2–4 et la protection de branche ne sont pas en place ;
+**Protection de branche `main`** : à appliquer **manuellement** (rendre les checks des deux workflows
+bloquants) — [`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md).
+**Aucun déploiement, aucun secret, aucun registry** dans ces workflows. ADR-013 reste
+**`PARTIELLEMENT_IMPLEMENTE`** tant que les niveaux 3–4 et la protection de branche ne sont pas en place ;
 ADR-014 reste **`NON_IMPLEMENTE`**.

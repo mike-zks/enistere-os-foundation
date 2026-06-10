@@ -13,7 +13,7 @@
 | API Core NestJS | ✓ | ✓ | ✓ (002,003,004,006,007,016,039,040…) | ✓ | ✓ | ✓ (377 u + 101 e2e) | ✓ (3 rapports) | **IMPLEMENTATION_AVANCEE** | tests verts + live 16/16 (local) | commit Git ; CI/CD (ADR-013) |
 | `@enistere/api-contracts` | ✓ | n/a | ✓ (016) | ✓ | ✓ | ✓ (11) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | build + generate:check | publication (non requise V1) |
 | `@enistere/api-client-fetch` | ✓ | n/a | ✓ (011,012,016) | ✓ | ✓ | ✓ (29 + live 16/16) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | live 16/16 ; **instancié (public + authentifié/BFF Auth + façade Files lecture) dans le Web Core** | publication (non requise V1) |
-| Cloud Core | ✓ | ✓ | ✓ (013,014,007…) | — | **cadrage** (Cloud Core 1 : baseline d'exécution, environnements, checklist branch protection, politiques CI/secrets/registry, plans runtime API & E2E) | — | — | **CADRAGE_OPERATIONNEL** | docs `cores/cloud/docs/` + CI minimale gouvernée ; **aucune infra réelle** | **Cloud Core 2 — CI runtime API (niveau 2)** : PostgreSQL/MinIO en CI + e2e (et appliquer la protection de branche, manuel) |
+| Cloud Core | ✓ | ✓ | ✓ (013,014,007…) | — | **cadrage (Cloud Core 1) + CI runtime API (Cloud Core 2)** : `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) | **e2e API en CI** (niveau 2) | — | **IMPLEMENTATION_PARTIELLE** | workflows CI niveaux 1–2 (validés localement par simulation) ; **aucune infra de déploiement/registry** | **Cloud Core 3 — E2E navigateur (niveau 3)** : Health/Auth/Files en CI (+ protection de branche, manuel) |
 | Web Core Next.js | ✓ | ✓ | ✓ (004,005,006,007,009,011,012,016…) | **✓** | **✓ (App Router + UI Kit + API publique Health + TanStack Query + BFF Auth + me/authorization + session state + layout protégé serveur read-only Option C + hydratation + page /protected + page de connexion /login + états UI Web UI 1 + Files 1 lecture/téléchargement : BFF ciblé GET /api/files/:id + POST /api/files/:id/download-url, validation UUID, CSRF/Origin, client BFF navigateur, fileKeys, useFileMetadata + useCreateDownloadUrl URL signée hors cache, page /protected/files/[id], 404 anti-énumération)** | **✓ (307 ×2, a11y + sonde HTTP + preuve API réelle Auth/session + protégé 26/26 + login 22/22 + Files API+MinIO 21/21 + revue V1 runtime 49/49)** | **✓ (gouvernance + revue Auth V1 `WEB_AUTH_V1_REVIEW.md` + revue incrément V1 `WEB_CORE_V1_INCREMENT_REVIEW.md` → `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`)** | **IMPLEMENTATION_PARTIELLE** | build/lint/typecheck/**307 tests ×2** verts + couverture ≈ 87,8 % + preuves API réelles (Auth/session ; protégé ; login ; runtime V1 33/33 ; **Files API+MinIO 21/21** ; **revue incrément V1 49/49** incl. URL expirée + pannes) | **CI minimale (ADR-013)** — non-régression monorepo + ordre de build paquets + generate:check (réserve transverse n°1 ; puis UI Kit 4 / Files 2 / Mobile) |
 | Mobile Core React Native | ✓ | ✓ | ✓ (010,012,015…) | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | — | UI Kit + secure storage |
 | UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 9 primitives Web : Button/Input/Label/Text/Spinner/VisuallyHidden + Alert/Card/FormField)** | **✓ (78, 100 %, a11y/jest-axe, React 19)** | — | **IMPLEMENTATION_PARTIELLE** | aligné **React 19** (0 régression, v0.1.1) + **réellement consommé par le Web Core** (Web UI 1) ; pack:check OK | primitives interactives suppl. (UI Kit 4) ; **Tailwind/Radix/shadcn toujours absents** (ADR-009 partiel) |
@@ -28,7 +28,7 @@
 
 | Élément | Spéc/ADR | Implémenté | Tests | Statut | Prochaine condition |
 |---|---|---|---|---|---|
-| CI/CD | ADR-013 Validé | **CI minimale** `.github/workflows/ci.yml` (GitHub Actions, Node 24, `npm ci`, ordre `api-contracts→api-client-fetch→ui-kit→web-nextjs→audit`) | — (validée par baseline locale + simulation runner neuf) | **PARTIELLEMENT_IMPLEMENTE** | protection de branche, couverture publiée, E2E, CI runtime API, release, déploiement, environnements |
+| CI/CD | ADR-013 Validé | **CI niveaux 1–2** : `ci.yml` (non-régression monorepo) **+ `api-runtime-ci.yml`** (runtime API : PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) | — (baseline locale + **simulation** services/env/étapes) | **PARTIELLEMENT_IMPLEMENTE** | protection de branche, couverture publiée, **E2E navigateur** (niveau 3), release, déploiement, environnements (niveau 4) |
 | Registry images | ADR-014 Validé | — | — | **DECIDE_NON_IMPLEMENTE** | choix registry + publication (hors CI minimale) |
 | Conteneurisation (Docker) | — | — | — | **ABSENT** | Dockerfile/compose (post-CI) |
 | Observabilité (métriques/traces) | ADR-018/036 à rédiger | — | — | **NON_COMMENCE** | Cloud Core |
@@ -51,7 +51,7 @@
 | OpenAPI canonique + check | ✓ | ✓ | ✓ | ✓ | V1 | — |
 | Client contracts (package) | ✓ | ✓ | ✓ | ✓ | V1 | publication |
 | Client fetch (package) | ✓ | ✓ | ✓ | ✓ | V1 | intégration cores |
-| CI/CD | ✓ (ADR-013) | — | — | — | V1 (hors core) | pipeline |
+| CI/CD | ✓ (ADR-013) | **CI runtime API** (`api-runtime-ci.yml` : PG+MinIO, migrations, unit+e2e, openapi:check) | ✓ (niveau 2) | — | V1 | déploiement (niveau 4) |
 | Redis (cache distribué) | ✓ | — | — | — | V2 | multi-instance |
 | Queues/jobs (BullMQ) | ✓ | — | — | — | V2 | Redis |
 | Mail / Notifications | ✓ | — | — | — | V2/V3 | infra |

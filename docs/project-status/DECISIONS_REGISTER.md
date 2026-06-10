@@ -22,7 +22,7 @@
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
-| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **CI minimale** `.github/workflows/ci.yml` (Node 24, `npm ci`, `permissions: contents:read`, jobs ordonnés `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Cloud Core 1** : cadrage gouverné (environnements `local/ci/preview/staging/production`, **checklist protection de branche** manuelle, **politique CI 4 niveaux**, politiques secrets/registry, plans runtime API & E2E). **Reste** : protection de branche appliquée, couverture publiée, E2E, CI API runtime (PostgreSQL/MinIO), release/versioning, déploiement, environnements protégés |
+| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **Niveau 1** `.github/workflows/ci.yml` (non-régression monorepo : ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Niveau 2** `.github/workflows/api-runtime-ci.yml` (**CI runtime API NestJS** : PostgreSQL `services:` + MinIO `docker run` jetables, `prisma migrate deploy`, unit + **e2e**, `openapi:check`, build, audit ; valeurs de test jetables, **aucun secret**) **+ Cloud Core 1** cadrage (environnements, **checklist protection de branche** manuelle, **politique CI 4 niveaux**, politiques secrets/registry, plans). **Reste** : protection de branche appliquée, couverture publiée, **E2E navigateur** (niveau 3), release/versioning, déploiement, environnements protégés |
 | ADR-014 | Registry images | Validé | **NON_IMPLEMENTE** | cloud/api/web | aucune image ; **non couvert par la CI** (aucun build/push GHCR) ; **cadré** par `cores/cloud/docs/REGISTRY_POLICY.md` (GHCR cible, tags immuables, niveau 4 futur) |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
 | ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
@@ -188,6 +188,17 @@
   Cloud Core → **`CADRAGE_OPERATIONNEL`** (cadrage gouverné, **aucune** infra réelle ; ne pas confondre avec
   `IMPLEMENTATION_PARTIELLE`). Prochaine action : **Cloud Core 2 — CI runtime API (niveau 2)** + appliquer la
   protection de branche (action humaine manuelle).
+- **Cloud Core 2 — CI runtime API NestJS (niveau 2, 2026-06-10)** : implémente le niveau 2. Workflow
+  **`.github/workflows/api-runtime-ci.yml`** rejouant l'API Core NestJS (**projet npm autonome**, `npm ci`
+  propre, Node 24) contre **PostgreSQL** (`postgres:16`, `services:`) + **MinIO** (`minio/minio` via `docker
+  run` — un `services:` ne peut porter `server /data` — + bucket de test) **jetables** : `prisma:generate`/
+  `validate`/**`migrate:deploy`** → `lint` → **`npm test`** (unit) → **`test:e2e`** → **`openapi:check`** →
+  `build` → `npm audit`. **Valeurs de test jetables** (jamais `secrets.*`, jamais en `.env` versionné), **logs
+  sans secret** (`LOG_LEVEL=warn`), données éphémères, **aucun artefact uploadé**, **`ci.yml` (niveau 1)
+  inchangé**. **Validé localement par simulation** (mêmes services/env/étapes). Statut Cloud Core →
+  **`IMPLEMENTATION_PARTIELLE`** (workflow Cloud runtime réel ; **pas** de registry/déploiement/environnements/
+  monitoring/rollback). ADR-013 **reste partiel** (niveaux 1–2) ; **ADR-014 `NON_IMPLEMENTE`**. Prochaine
+  action : **Cloud Core 3 — E2E navigateur (niveau 3)** + protection de branche (manuel).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés

@@ -1,8 +1,21 @@
-# Cloud Core — Plan CI runtime API NestJS (niveau 2, futur)
+# Cloud Core — CI runtime API NestJS (niveau 2)
 
-> **Plan, non implémenté.** Décrit la prochaine CI possible pour rejouer l'API Core NestJS avec ses
-> dépendances persistantes en CI. **Aucun workflow n'est créé dans cette mission.** Aligné sur
+> **IMPLÉMENTÉ (Cloud Core 2)** — workflow **`.github/workflows/api-runtime-ci.yml`**. Ce document a servi de
+> plan ; il décrit désormais la CI runtime réelle de l'API Core NestJS contre PostgreSQL + MinIO jetables.
+> Toujours **sans** déploiement, registry/GHCR, Dockerfile applicatif ni secret. Aligné sur
 > `CLOUD_CORE_V1_EXECUTION_BASELINE.md` §12 et ADR-013.
+
+## 0. Implémentation réelle (`api-runtime-ci.yml`)
+
+- Déclencheurs `pull_request` + `push main` ; `permissions: contents: read` ; concurrence
+  `api-runtime-ci-${{ github.ref }}`. Node 24, **`npm ci`** dans `cores/api-nestjs/` (**projet autonome**,
+  lockfile propre, hors workspaces racine).
+- **PostgreSQL** en `services:` (`postgres:16`, healthcheck `pg_isready`). **MinIO** via **`docker run`**
+  (`minio/minio server /data` — un conteneur `services:` ne peut pas porter cette commande) + attente santé +
+  **bucket `enistere-test-files`** créé (l'API ne le crée pas).
+- Étapes (scripts **réels**) : `prisma:generate` → `prisma:validate` → **`prisma:migrate:deploy`** → `lint`
+  → `npm test` → **`test:e2e`** → **`openapi:check`** → `build` → `npm audit`.
+- **Validé localement** par simulation (mêmes services, env, étapes) — voir le rapport de mission.
 
 ## 1. Objectif
 
@@ -50,7 +63,8 @@ npm audit
 - Stratégie de **migration en CI** (deploy sur base neuve vs reset) tranchée.
 - Budget temps CI validé (parallélisation éventuelle unit vs e2e).
 
-## 6. Hors périmètre (cette mission)
+## 6. Hors périmètre (toujours non couvert)
 
-Aucun workflow runtime, aucun service PostgreSQL/MinIO en CI, aucune image, aucun déploiement. Ce plan sera
-implémenté au **niveau 2** une fois la protection de branche (niveau 1 gouverné) appliquée.
+Aucune image, aucun registre/GHCR (ADR-014), aucun déploiement, aucun environnement protégé, aucun rollback,
+aucun monitoring, **aucun E2E navigateur** (niveau 3). La protection de branche `main` reste une **action
+humaine manuelle** (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) à appliquer pour rendre ce workflow bloquant.

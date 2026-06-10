@@ -17,18 +17,20 @@ l'implémentation future **sans l'anticiper** (pas de Compose, pas de Traefik, p
 - **CI minimale présente** (`.github/workflows/ci.yml`, ADR-013 partiel) : GitHub Actions, Node 24, `npm ci`,
   `permissions: contents: read`, ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`,
   `npm audit` 0 vuln, gardes Axios/Zustand. **Aucun secret, Docker, base, stockage, registry ni déploiement.**
-- **API Core NestJS** : exécuté localement avec PostgreSQL + MinIO **jetables** (preuves runtime), mais
-  **aucune CI runtime** ne le rejoue (pas de services GitHub Actions).
+- **API Core NestJS** : **CI runtime présente** (`.github/workflows/api-runtime-ci.yml`, niveau 2) —
+  PostgreSQL + MinIO jetables en CI, migrations + unit + e2e + OpenAPI check + build + audit. Les preuves
+  runtime ne sont donc plus seulement locales.
 - **Web Core Next.js** : build **indépendant de l'API** ; preuves runtime rejouées localement (PostgreSQL +
   MinIO), **aucun E2E navigateur permanent**.
 - **Cloud Core** : `CORE_SPECIFICATION.md` (cible complète) ; **aucune infrastructure réelle**.
 
 ## 3. Périmètre Cloud Core V1 (cette mission)
 
-**Inclus** : cadrage des environnements, checklist de protection de branche (à appliquer manuellement dans
-GitHub Settings), politique CI progressive (4 niveaux), politiques secrets/registry, plans (non implémentés)
-CI runtime API et E2E Web, notes observabilité/rollback, mise à jour du checkpoint. **Statut Cloud Core :
-`CADRAGE_OPERATIONNEL`** (cadrage gouverné, **pas** d'implémentation).
+**Inclus (cadrage, Cloud Core 1)** : environnements, checklist de protection de branche (manuelle), politique
+CI progressive (4 niveaux), politiques secrets/registry, plans CI runtime API et E2E Web, notes observabilité/
+rollback. **Implémenté ensuite (Cloud Core 2)** : la **CI runtime API** (niveau 2, `api-runtime-ci.yml`).
+**Statut Cloud Core : `IMPLEMENTATION_PARTIELLE`** depuis Cloud Core 2 — deux workflows runtime réels (niveaux
+1–2) existent, **mais** ni registry, ni déploiement, ni environnements protégés, ni monitoring, ni rollback.
 
 **Exclus** : Dockerfile, Compose, Traefik, GHCR/registry, déploiement, Helm/K8s/Terraform/Ansible, secrets
 GitHub réels, GitHub Environments réels via API, workflows deploy/registry/runtime, monitoring réel, OSRM/
@@ -39,17 +41,19 @@ PostGIS réels, backups réels.
 | Élément | État |
 |---|---|
 | CI non-régression monorepo (ADR-013) | **présent** (`.github/workflows/ci.yml`, niveau 1) |
+| **CI runtime API NestJS** (PostgreSQL + MinIO) | **présent** (`.github/workflows/api-runtime-ci.yml`, niveau 2 — Cloud Core 2) |
 | Ordre de build imposé | **présent** (jobs `needs`) |
-| Garde `npm audit` 0 vuln | **présent** |
+| Garde `npm audit` 0 vuln | **présent** (monorepo + API) |
 | Gardes Axios/Zustand | **présent** (ADR-011/012) |
 | Build Web sans API | **présent** (force-dynamic) |
-| Preuves runtime API+MinIO (locales) | **présent** (non CI) |
+| Migrations Prisma + e2e API rejoués en CI | **présent** (niveau 2) |
 
 ## 5. Ce qui n'existe pas encore
 
-Protection de branche `main` · GitHub Environments · CI runtime API (PostgreSQL/MinIO en CI) · e2e API en CI ·
-E2E navigateur Web · couverture publiée · build/push d'images (GHCR, ADR-014) · déploiement · staging/preview/
+Protection de branche `main` (action humaine, non appliquée) · GitHub Environments · **E2E navigateur Web**
+(niveau 3) · couverture publiée · build/push d'images (GHCR, ADR-014) · déploiement · staging/preview/
 production réels · monitoring/observabilité · backups/restore · Traefik/DNS/TLS · secrets manager.
+*(La CI runtime API + e2e en CI — niveau 2 — **existe** désormais : `api-runtime-ci.yml`.)*
 
 ## 6. Environnements cibles (logiques)
 
@@ -66,12 +70,13 @@ cette mission.
 
 ## 8. Politique de CI (progressive)
 
-Quatre niveaux — **seul le niveau 1 est implémenté** (voir aussi `.github/workflows/README.md`) :
+Quatre niveaux — **niveaux 1 et 2 implémentés** (voir aussi `.github/workflows/README.md`) :
 
-- **Niveau 1 (présent)** : contrats, client API, UI Kit, Web Core, audit, gardes dépendances.
-- **Niveau 2 (prochain)** : CI **runtime API NestJS** (PostgreSQL + MinIO en services), e2e API, migrations
-  Prisma, OpenAPI generate/check. Détail : `API_RUNTIME_CI_PLAN.md`.
-- **Niveau 3 (ensuite)** : **E2E navigateur** Web (Health/Auth/Files), artefacts de test non sensibles.
+- **Niveau 1 (présent — `ci.yml`)** : contrats, client API, UI Kit, Web Core, audit, gardes dépendances.
+- **Niveau 2 (présent — `api-runtime-ci.yml`, Cloud Core 2)** : CI **runtime API NestJS** — PostgreSQL +
+  MinIO **jetables**, **migrations Prisma** (`migrate deploy`), tests **unitaires + e2e**, **OpenAPI check**,
+  build, audit ; **sans secret, sans déploiement, sans registre**. Détail : `API_RUNTIME_CI_PLAN.md`.
+- **Niveau 3 (prochain)** : **E2E navigateur** Web (Health/Auth/Files), artefacts de test non sensibles.
   Détail : `WEB_E2E_CI_PLAN.md`.
 - **Niveau 4 (futur)** : build images, **GHCR** (ADR-014), déploiement staging, approbation production,
   rollback. Détail : `REGISTRY_POLICY.md`.
@@ -94,12 +99,13 @@ construite ni poussée dans cette mission.
 protégés et **rollback** (voir §15). Tout déploiement futur passera par Traefik (exposition), GitHub
 Environments protégés et approbation production. **Non implémenté.**
 
-## 12. Politique runtime API (future)
+## 12. Politique runtime API (implémentée — niveau 2)
 
-Détail : `API_RUNTIME_CI_PLAN.md`. Prochaine CI possible pour l'API NestJS : services PostgreSQL + MinIO,
-`prisma generate/validate/migrate deploy`, tests unitaires + e2e, `openapi:check`, `npm audit`, **logs sans
-secret**. **Non implémentée** ici (prérequis : scripts API stables, variables de test, temps CI acceptable,
-cleanup).
+Détail : `API_RUNTIME_CI_PLAN.md`. **Implémentée** (`.github/workflows/api-runtime-ci.yml`) : services
+PostgreSQL + MinIO jetables, `prisma generate/validate/migrate deploy`, tests unitaires + e2e, `openapi:check`,
+`build`, `npm audit`, **logs sans secret** (`LOG_LEVEL=warn`), données éphémères. `cores/api-nestjs/` est un
+projet npm **autonome** (`npm ci` propre). **Restent hors couverture** : déploiement, registre, environnements
+protégés, monitoring, rollback.
 
 ## 13. Politique E2E (future)
 
@@ -121,15 +127,16 @@ déploiement futur devra documenter sa procédure de rollback.
 
 ## 16. Limites V1
 
-Pas de protection de branche appliquée (manuel) ; pas de CI runtime API/e2e ; pas d'E2E navigateur ; pas de
-couverture publiée ; pas de registry/déploiement/monitoring/backups ; environnements `preview`/`staging`/
-`production` **théoriques**. La reproductibilité hors-CI (clone local) reste à documenter (ordre `npm run
-build` racine). **Aucun statut n'est augmenté artificiellement.**
+Niveaux 1–2 présents. **Restent** : protection de branche **non appliquée** (action humaine manuelle) ; pas
+d'E2E **navigateur** (niveau 3) ; pas de couverture publiée ; pas de registry/déploiement/monitoring/backups ;
+environnements `preview`/`staging`/`production` **théoriques**. La reproductibilité hors-CI (clone local) reste
+à documenter (ordre `npm run build` racine). **Aucun statut n'est augmenté artificiellement** (Cloud Core
+`IMPLEMENTATION_PARTIELLE` : deux workflows runtime réels, mais ni registry, ni déploiement, ni environnements).
 
 ## 17. Étapes suivantes
 
-1. **Appliquer** la checklist de protection de branche `main` (manuel, GitHub Settings).
-2. **Niveau 2** : workflow CI runtime API (PostgreSQL + MinIO services) — `API_RUNTIME_CI_PLAN.md`.
-3. **Niveau 3** : E2E navigateur — `WEB_E2E_CI_PLAN.md`.
-4. **Niveau 4** : registry GHCR (ADR-014) puis déploiement par environnement protégé.
-5. Rédiger les ADR structurants au moment voulu (registry si structurante, OSRM/PostGIS si adoptés).
+1. **Appliquer** la checklist de protection de branche `main` (manuel, GitHub Settings) — rendre les checks
+   de `ci.yml` **et** `api-runtime-ci.yml` bloquants.
+2. **Niveau 3** : E2E navigateur (Health/Auth/Files) — `WEB_E2E_CI_PLAN.md`.
+3. **Niveau 4** : registry GHCR (ADR-014) puis déploiement par environnement protégé + rollback.
+4. Rédiger les ADR structurants au moment voulu (registry si structurante, OSRM/PostGIS si adoptés).
