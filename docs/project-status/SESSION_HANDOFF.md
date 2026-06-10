@@ -75,13 +75,17 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public/Health +
   authentifié/BFF Auth login/refresh/logout/me/authorization)** dans le Web Core ; types Auth dérivés via
   `SchemaOf<>` (`UserProfileResponseDto`, `AuthorizationSummaryResponseDto`) — preuve API réelle.
-- **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
+- **Cloud Core** : **`CADRAGE_OPERATIONNEL`** — `CORE_SPECIFICATION.md` + `README.md` + `docs/` (Cloud Core 1 :
+  baseline d'exécution, environnements, checklist protection de branche, politique CI 4 niveaux, secrets/
+  registry, plans runtime API & E2E) ; **aucune infra réelle** (ni Compose/Docker/Traefik/registry/déploiement).
+- **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo,
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
   gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
   déploiement, protection de branche, E2E navigateur.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `ci: add minimal monorepo validation`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(cloud): define v1 execution baseline`,
+  `ci: add minimal monorepo validation`,
   `docs(web-nextjs): review web core v1 increment`,
   `feat(web-nextjs): add secure file read access`,
   `feat(web-ui): add standard interface states`,
@@ -102,7 +106,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores documentaires
 
-`cloud`, `mobile-react-native` (un `CORE_SPECIFICATION.md` chacun, **pas** de starter).
+`mobile-react-native` (un `CORE_SPECIFICATION.md`, **pas** de starter). **`cloud`** : spéc + README + `docs/`
+de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle (`CADRAGE_OPERATIONNEL`).
 `ui-kit` et `web-nextjs` ont leur spéc **et** un starter.
 
 ## 6. Packages
@@ -133,7 +138,27 @@ environnements. **ADR-014** (registry) reste non implémenté. Détail :
 
 ## 8. Dernière étape terminée
 
-**CI minimale (ADR-013)** (`.github/workflows/ci.yml`) : première implémentation réelle d'ADR-013 — CI GitHub
+**Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (`cores/cloud/`) : transforme la CI
+minimale en **socle gouverné**, **sans déploiement, Docker, registry, secret ni infra réelle**. Documents
+créés (`cores/cloud/docs/`) : **`CLOUD_CORE_V1_EXECUTION_BASELINE.md`** (17 sections : objectif, état,
+environnements, politiques CI/secrets/registry/runtime/E2E/observabilité/rollback, limites, étapes) ;
+**`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`** (application **manuelle** : PR obligatoire, **5 checks CI
+bloquants**, force-push/suppression interdits, linear history à décider, CODEOWNERS plus tard) ;
+**`SECRETS_POLICY.md`** (aucun secret en Git/CI ; **noms futurs sans valeurs** ; jamais en `NEXT_PUBLIC_*` ;
+GitHub Environments futurs ; procédure d'exposition) ; **`REGISTRY_POLICY.md`** (GHCR cible, tags **immuables**
+sha court, pas de `latest` prod — **ADR-014 `NON_IMPLEMENTE`**) ; **`API_RUNTIME_CI_PLAN.md`** (niveau 2 futur :
+PostgreSQL/MinIO en services, prisma migrate, unit+e2e, openapi:check, logs sans secret) ;
+**`WEB_E2E_CI_PLAN.md`** (niveau 3 futur : Playwright à décider, parcours Health/Auth/Files, données
+éphémères). **`cores/cloud/README.md`** créé ; `.github/workflows/README.md` enrichi (politique CI 4 niveaux).
+**Environnements logiques** : `local`/`ci` (réels) + `preview`/`staging`/`production` (théoriques). **Politique
+CI à 4 niveaux** : 1=présent, 2=runtime API, 3=E2E Web, 4=registry/déploiement. **Non-régression** : baseline
+locale **14/14** (contracts 11, client 29, ui-kit 78, web 307+build, audit 0 vuln) — **aucun code/CI modifié**.
+Cloud Core → **`CADRAGE_OPERATIONNEL`** (non augmenté en `IMPLEMENTATION_PARTIELLE`) ; ADR-013 reste
+**partiel**, ADR-014 **non implémenté**. `cores/api-nestjs/src`/`web-nextjs/src`/`ui-kit/src`/`packages`/
+`docs/adr`/`strategy` **non modifiés** ; `ci.yml` **non modifié**. Commit `docs(cloud): define v1 execution
+baseline`. **Prochaine action : Cloud Core 2 — CI runtime API (niveau 2)** + protection de branche (manuel).
+
+**Étape précédente — CI minimale (ADR-013)** (`.github/workflows/ci.yml`) : première implémentation réelle d'ADR-013 — CI GitHub
 Actions de **non-régression du monorepo**, **sans déploiement, registry, Docker, secret ni publication**.
 Déclencheurs `pull_request` + `push` sur `main` ; `permissions: contents: read` ; `concurrency` (annule
 l'obsolète) ; **Node 24** + **`npm ci`** (jamais `npm install`) + `cache: npm`. **5 jobs ordonnés par `needs`**
@@ -322,15 +347,16 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements**. La **CI minimale
-(ADR-013)** est **en place** (`.github/workflows/ci.yml` ; non-régression monorepo ordonnée ; ADR-013 partiel).
-La **Revue globale Web Core V1** (verdict `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`, **aucun défaut
-bloquant**) ne requiert **aucune correction urgente**. La suite naturelle est d'**étendre la chaîne CI/CD**
-côté Cloud Core : **cadrer** (et amorcer là où c'est sûr) protection de branche `main`, environnements,
-publication de couverture, amorce **E2E navigateur** — **sans** Dockerfile/registry réel (ADR-014 différé),
-**sans** secret ni déploiement. **Alternative (décision humaine)** : durcissement CI direct (branch protection
-+ couverture + E2E) ; UI Kit 4 ; Files 2 / Mobile Core plus tard. **Ne pas enchaîner automatiquement vers
-Files 2.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Cloud Core 2 — CI runtime API NestJS (niveau 2)**. Le **Cloud Core 1** (cadrage) est
+**terminé** : CI minimale gouvernée, environnements, **politique CI à 4 niveaux**, checklist de protection de
+branche, politiques secrets/registry, plans runtime API & E2E (`cores/cloud/docs/`) ; Cloud Core →
+`CADRAGE_OPERATIONNEL`. La suite gouvernée est le **niveau 2** : un workflow (ou job dédié) rejouant l'**API
+NestJS** contre **PostgreSQL + MinIO** en **services GitHub Actions** (prisma migrate, unit + **e2e**,
+`openapi:check`, `npm audit`, **logs sans secret**, données éphémères) — voir
+`cores/cloud/docs/API_RUNTIME_CI_PLAN.md`. **En parallèle (action humaine, non-agent)** : appliquer la
+**protection de branche `main`** (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`). **Alternative (décision humaine)** :
+Cloud Core 3 (E2E navigateur) ; UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas sauter au niveau 4
+(registry/déploiement) ni enchaîner vers Files 2.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

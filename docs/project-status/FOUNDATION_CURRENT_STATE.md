@@ -24,7 +24,7 @@ pas une application ni une bibliothèque complète).
 | Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 9 primitives Web React** accessibles (Button/Input/Label/Text/Spinner/VisuallyHidden + **Alert/Card/FormField**, Web UI 1) ; **78 tests, 100 % couverture**, a11y ; aligné **React 19** ; **consommé par le Web Core** |
 | Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth) + **Files lecture/téléchargement** (Web Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, validation UUID, **CSRF/Origin** sur download-url, client BFF navigateur, `fileKeys`, `useFileMetadata` + `useCreateDownloadUrl` (**URL signée jamais en cache/log**), page `/protected/files/[id]`, **404 anti-énumération** ; **aucun upload/suppression/admin**, **aucun champ interne** exposé). **307 tests** + preuves API réelles (Auth/session **26/26** + login **22/22** + **Files API+MinIO 21/21**). **Pas de middleware, pas de Server Action Auth, pas de token en JS, pas de proxy générique.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
-| Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
+| Cores documentaires | `mobile-react-native` (spécification seule) ; **`cloud` → `CADRAGE_OPERATIONNEL`** (Cloud Core 1 : baseline d'exécution + politiques CI/CD/secrets/registry + checklist protection de branche + plans runtime API/E2E ; **aucune infra réelle**) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo ; ADR-013 **partiel**) ; **conteneurisation/registry/déploiement absents** (aucun Dockerfile, ADR-014 non implémenté) |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
@@ -50,7 +50,8 @@ enistere-os-foundation/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
     web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
-    cloud/ mobile-react-native/                       → CORE_SPECIFICATION.md seul
+    cloud/             CADRAGE_OPERATIONNEL (CORE_SPECIFICATION + README + docs/ : baseline exécution, politiques CI/CD)
+    mobile-react-native/                              → CORE_SPECIFICATION.md seul
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -66,7 +67,7 @@ enistere-os-foundation/
 |---|---|---|---|---|
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
-| `cloud` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
+| `cloud` | oui | oui | non (cadrage docs only) | **CADRAGE_OPERATIONNEL** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture) | **IMPLEMENTATION_PARTIELLE** |
 | `mobile-react-native` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -176,6 +177,10 @@ UI Kit, **build Web indépendant de l'API**, `npm audit` (0 vuln) et **gardes Ax
 **Restent** : protection de branche, couverture publiée, **E2E navigateur**, CI runtime API (PostgreSQL/MinIO),
 release/versioning, déploiement, environnements protégés. **ADR-014 (registry/GHCR) non implémenté** (aucune
 image construite/poussée). Aucun Dockerfile ni compose dans le dépôt. Détail : `.github/workflows/README.md`.
+Le **Cloud Core 1** (cadrage, `cores/cloud/docs/`) gouverne désormais cette CI : **environnements logiques**
+(`local`/`ci`/`preview`/`staging`/`production`), **checklist de protection de branche** (manuelle), **politique
+CI à 4 niveaux** (niveau 1 = présent ; 2 = runtime API ; 3 = E2E Web ; 4 = registry/déploiement), politiques
+secrets/registry et plans runtime API/E2E — **sans infra réelle**.
 
 ## 12. Documentation
 
@@ -250,8 +255,13 @@ Tailwind/Radix/shadcn ni bibliothèque exhaustive). Enfin la **CI minimale (ADR-
 (`.github/workflows/ci.yml`) : non-régression du monorepo (ordre `api-contracts → api-client-fetch → ui-kit →
 web-nextjs → audit`, `npm ci` Node 24, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes
 Axios/Zustand) — **sans secret/Docker/registry/déploiement** ; ADR-013 passe **`PARTIELLEMENT_IMPLEMENTE`**.
-**Prochaine action** : **Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (étendre ADR-013
-vers protection de branche / environnements ; ADR-014 registry plus tard). Détail :
+Enfin le **Cloud Core 1 — cadrage d'exécution CI/CD & environnements** a été **réalisé** (`cores/cloud/docs/` +
+`cores/cloud/README.md`) : baseline d'exécution (17 sections), environnements logiques, **checklist de
+protection de branche** (manuelle), **politique CI à 4 niveaux**, politiques secrets/registry, plans runtime
+API & E2E — **sans déploiement, Docker, registry, secret ni infra réelle**. Cloud Core →
+**`CADRAGE_OPERATIONNEL`** (non augmenté en `IMPLEMENTATION_PARTIELLE`) ; ADR-013 reste **partiel**, ADR-014
+**non implémenté**. **Prochaine action** : **Cloud Core 2 — CI runtime API NestJS (niveau 2)** (PostgreSQL +
+MinIO en services CI + e2e) ; en parallèle, **appliquer manuellement** la protection de branche `main`. Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

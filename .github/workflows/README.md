@@ -51,7 +51,21 @@ job aval **rebuild ses dépendances** avant de se valider (`needs` garantit l'or
 - artefacts/rapports de couverture publiés ;
 - **build/publication d'images** (GHCR — ADR-014, non implémenté) ; déploiement ; release ; versioning npm.
 
-### Prochaine évolution CI
+### Niveau CI actuel & progression (Cloud Core 1)
 
-Couverture publiée, protection de branche `main`, puis (Cloud Core) build/push d'images (ADR-014) et
-déploiement par environnement. ADR-013 reste **`PARTIELLEMENT_IMPLEMENTE`** tant que ces éléments manquent.
+Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
+[`cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
+
+- **Niveau 1 (présent — ce workflow)** : contrats, client API, UI Kit, Web Core (build sans API), audit,
+  gardes Axios/Zustand.
+- **Niveau 2 (futur)** : CI runtime API NestJS (PostgreSQL + MinIO en services) + e2e —
+  [`API_RUNTIME_CI_PLAN.md`](../../cores/cloud/docs/API_RUNTIME_CI_PLAN.md).
+- **Niveau 3 (futur)** : E2E navigateur Web — [`WEB_E2E_CI_PLAN.md`](../../cores/cloud/docs/WEB_E2E_CI_PLAN.md).
+- **Niveau 4 (futur)** : build/push d'images (GHCR, ADR-014) + déploiement par environnement —
+  [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md).
+
+**Protection de branche `main`** : à appliquer **manuellement** (rendre ces 5 checks bloquants) —
+[`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md).
+**Aucun déploiement, aucun secret, aucun registry** dans ce workflow. ADR-013 reste
+**`PARTIELLEMENT_IMPLEMENTE`** tant que les niveaux 2–4 et la protection de branche ne sont pas en place ;
+ADR-014 reste **`NON_IMPLEMENTE`**.

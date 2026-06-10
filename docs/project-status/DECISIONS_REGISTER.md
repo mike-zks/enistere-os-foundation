@@ -22,8 +22,8 @@
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
-| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **CI minimale** `.github/workflows/ci.yml` (Node 24, `npm ci`, `permissions: contents:read`, jobs ordonnés `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes Axios/Zustand). **Reste** : protection de branche, couverture publiée, E2E, CI API runtime (PostgreSQL/MinIO), release/versioning, déploiement, environnements protégés |
-| ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image ; **non couvert par la CI minimale** (aucun build/push GHCR) |
+| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **CI minimale** `.github/workflows/ci.yml` (Node 24, `npm ci`, `permissions: contents:read`, jobs ordonnés `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Cloud Core 1** : cadrage gouverné (environnements `local/ci/preview/staging/production`, **checklist protection de branche** manuelle, **politique CI 4 niveaux**, politiques secrets/registry, plans runtime API & E2E). **Reste** : protection de branche appliquée, couverture publiée, E2E, CI API runtime (PostgreSQL/MinIO), release/versioning, déploiement, environnements protégés |
+| ADR-014 | Registry images | Validé | **NON_IMPLEMENTE** | cloud/api/web | aucune image ; **non couvert par la CI** (aucun build/push GHCR) ; **cadré** par `cores/cloud/docs/REGISTRY_POLICY.md` (GHCR cible, tags immuables, niveau 4 futur) |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
 | ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
@@ -178,6 +178,16 @@
   de branche, couverture publiée, E2E navigateur, CI runtime API (PostgreSQL/MinIO), release/versioning,
   déploiement et environnements protégés. **ADR-014** (registry images / GHCR) **non implémenté** — la CI
   minimale ne construit ni ne pousse aucune image. Détail : `.github/workflows/README.md`.
+- **Cloud Core 1 — cadrage d'exécution CI/CD & environnements (2026-06-10)** : prolonge ADR-013 **sans**
+  déploiement/Docker/registry/secret. Documents (`cores/cloud/docs/`) : `CLOUD_CORE_V1_EXECUTION_BASELINE.md`
+  (17 sections), `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (application **manuelle** dans GitHub Settings, rend
+  les 5 checks CI bloquants, force-push/suppression interdits), `SECRETS_POLICY.md` (aucun secret en Git/CI ;
+  noms futurs sans valeurs ; jamais en `NEXT_PUBLIC_*` ; GitHub Environments futurs), `REGISTRY_POLICY.md`
+  (GHCR cible, tags immuables — **ADR-014 `NON_IMPLEMENTE`**), `API_RUNTIME_CI_PLAN.md` (niveau 2 futur :
+  PostgreSQL/MinIO en services, e2e, migrations, openapi:check), `WEB_E2E_CI_PLAN.md` (niveau 3 futur). Statut
+  Cloud Core → **`CADRAGE_OPERATIONNEL`** (cadrage gouverné, **aucune** infra réelle ; ne pas confondre avec
+  `IMPLEMENTATION_PARTIELLE`). Prochaine action : **Cloud Core 2 — CI runtime API (niveau 2)** + appliquer la
+  protection de branche (action humaine manuelle).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés

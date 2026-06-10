@@ -6,6 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Cadrage / Cloud Core
+
+- **Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (`cores/cloud/`) : transforme la CI minimale en **socle gouverné**, **sans déploiement, Docker, registry (GHCR), secret ni infrastructure réelle**. Cloud Core → **`CADRAGE_OPERATIONNEL`** (cadrage gouverné, **pas** `IMPLEMENTATION_PARTIELLE`). ADR-013 reste **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-014 **`NON_IMPLEMENTE`**.
+  - **Documents créés** (`cores/cloud/docs/`) : **`CLOUD_CORE_V1_EXECUTION_BASELINE.md`** (17 sections : objectif, état, environnements, politiques CI/secrets/registry/runtime/E2E/observabilité/rollback, limites V1, étapes) ; **`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`** (application **manuelle** GitHub Settings : PR obligatoire, **5 checks CI bloquants**, force-push/suppression interdits, linear history à décider, CODEOWNERS plus tard) ; **`SECRETS_POLICY.md`** (aucun secret en Git/CI ; **noms futurs sans valeurs** ; jamais en `NEXT_PUBLIC_*` ; GitHub Environments futurs ; procédure d'exposition) ; **`REGISTRY_POLICY.md`** (GHCR cible, tags **immuables** sha court, pas de `latest` prod — ADR-014 non implémenté) ; **`API_RUNTIME_CI_PLAN.md`** (niveau 2 futur : PostgreSQL/MinIO en services, prisma migrate, unit+e2e, `openapi:check`, logs sans secret) ; **`WEB_E2E_CI_PLAN.md`** (niveau 3 futur : outil à décider, parcours Health/Auth/Files, données éphémères). **`cores/cloud/README.md`** créé ; `.github/workflows/README.md` enrichi (**politique CI à 4 niveaux**).
+  - **Environnements logiques** cadrés : `local`/`ci` (réels) + `preview`/`staging`/`production` (théoriques, non implémentés). **Politique CI à 4 niveaux** : 1 = présent (CI minimale) ; 2 = runtime API ; 3 = E2E Web ; 4 = registry/déploiement.
+  - **Non-régression** : baseline locale **14/14** verte (api-contracts 11, api-client-fetch 29, ui-kit 78 +tokens/pack, web-nextjs 307 + build, **`npm audit` 0 vuln**). **Aucun code applicatif, aucun `ci.yml`, aucun script modifié.** `cores/api-nestjs/src/`/`web-nextjs/src/`/`ui-kit/src/`/`packages/`/`docs/adr/`/`strategy/` **non modifiés**. **Prochaine action : Cloud Core 2 — CI runtime API (niveau 2)** + appliquer la protection de branche `main` (action humaine). Commit `docs(cloud): define v1 execution baseline`.
+
 ### Outillage / CI
 
 - **CI minimale (ADR-013)** (`.github/workflows/ci.yml`) : première implémentation réelle d'ADR-013 — CI **GitHub Actions** de **non-régression du monorepo**, **sans déploiement, registry (GHCR), Docker, secret ni publication**. ADR-013 passe **`PARTIELLEMENT_IMPLEMENTE`** ; **ADR-014 (registry) reste non implémenté**.

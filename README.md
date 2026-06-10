@@ -61,5 +61,5 @@ UI Kit + API publique Health + TanStack Query + **BFF Auth** login/refresh/logou
 (me/authorization, `useSession`/`useAuthorization`, purge cache au logout) + **layout protégé**
 (résolution Auth serveur read-only + hydratation, page `/protected`) + **page de connexion `/login`**
 (login BFF, `returnTo` interne assaini) + **états UI standardisés** (loading/empty/error/401/403/indisponible + PageHeader) + **Files lecture/téléchargement sécurisé** (BFF ciblé, URL signée hors cache, 404 anti-énumération, sans upload) — `IMPLEMENTATION_PARTIELLE`) ;
-**packages clients officiels** (`packages/`) validés localement, non publiés. État détaillé et vérifié : [`docs/project-status/`](docs/project-status/README.md).
+**packages clients officiels** (`packages/`) validés localement, non publiés. **CI minimale** (`.github/workflows/ci.yml`, ADR-013 partiel) et **Cloud Core 1 — cadrage d'exécution CI/CD & environnements** (`cores/cloud/`, `CADRAGE_OPERATIONNEL` : politiques + checklist protection de branche + plans runtime API/E2E, **sans déploiement/Docker/registry/secret**). État détaillé et vérifié : [`docs/project-status/`](docs/project-status/README.md).
 
