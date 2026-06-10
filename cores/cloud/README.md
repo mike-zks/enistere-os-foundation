@@ -56,9 +56,17 @@ secrets. Les workflows restent **lecture seule, non déployants, sans secret Git
   protégés, release (niveau 4).
 - **ADR-014 (registry images)** : **`NON_IMPLEMENTE`** — aucune image construite/poussée.
 
+## Gouvernance CI (Cloud Core 4)
+
+**7 checks** à rendre **bloquants** sur `main` (= `name:` des jobs) : `api-contracts`, `api-client-fetch`,
+`ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e` — application **manuelle**
+([`docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md), **non appliquée**).
+Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécutée, non publiée ; **pinning** =
+`@v4` (SHA futur) ; **`actionlint`** futur. Détail : [`docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) §8 bis.
+
 ## Prochaine étape
 
-**Cloud Core 4 — durcissement CI & gouvernance de branche** (recommandé) : **appliquer** la protection de
-branche `main` (action humaine, [`docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md)),
-puis couverture publiée / scan de dépendances ; ou **niveau 4** (registry GHCR + déploiement) si la mise en
-production devient prioritaire. Voir [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).
+**Action humaine d'abord** : **appliquer** la protection de branche `main` (rend les 7 checks bloquants). Puis
+**prochaine mission Codex** : **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014 — build/push
+d'images **sans** déployer), ou **UI Kit 4 / Files 2 / Mobile Core** selon décision. Voir
+[`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).

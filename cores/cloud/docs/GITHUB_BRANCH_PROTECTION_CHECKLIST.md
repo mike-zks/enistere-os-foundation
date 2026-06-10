@@ -1,14 +1,39 @@
 # GitHub — Checklist de protection de branche `main` (application manuelle)
 
 > À appliquer **manuellement** dans **GitHub → Settings → Branches → Branch protection rules** (ou
-> **Rulesets**). **Cette mission n'applique rien via l'API GitHub.** Objectif : rendre la CI minimale
-> (`.github/workflows/ci.yml`) **bloquante** avant merge, et empêcher les écritures dangereuses sur `main`.
+> **Rulesets**). **Aucune application via l'API GitHub** (action humaine). Objectif : rendre **bloquants** avant
+> merge les checks des **trois** workflows (`ci.yml`, `api-runtime-ci.yml`, `web-e2e-ci.yml`) et empêcher les
+> écritures dangereuses sur `main`.
 
 ## Pré-requis
 
-- La CI (`ci.yml`) a tourné au moins une fois sur `main` pour que ses **checks** apparaissent dans la liste
-  des status checks sélectionnables.
+- Les **trois** workflows (`ci.yml`, `api-runtime-ci.yml`, `web-e2e-ci.yml`) ont tourné **au moins une fois**
+  (sur `main` et/ou une PR) pour que leurs **checks** apparaissent dans la liste des status checks
+  sélectionnables (GitHub ne propose que les checks déjà observés).
 - Avoir les droits **admin** sur le dépôt `mike-zks/enistere-os-foundation`.
+
+## Checks à exiger (noms exacts = noms des jobs)
+
+> Le nom du status check **est le `name:` du job** (pas le nom du workflow). Vérifié dans le repository.
+
+### Obligatoires dès maintenant (niveaux 1–3)
+
+| Workflow | Job | Check à exiger | Rôle |
+|---|---|---|---|
+| `ci.yml` (CI) | `api-contracts` | **`api-contracts`** | OpenAPI `generate:check` + build/test contrats |
+| `ci.yml` | `api-client-fetch` | **`api-client-fetch`** | build/test client Fetch |
+| `ci.yml` | `ui-kit` | **`ui-kit`** | tokens/build/lint/test/pack UI Kit |
+| `ci.yml` | `web-nextjs` | **`web-nextjs`** | typecheck/lint/test/build Web (sans API) |
+| `ci.yml` | `audit` | **`audit`** | `npm audit` 0 vuln + gardes Axios/Zustand |
+| `api-runtime-ci.yml` (API Runtime CI) | `api-runtime` | **`api-runtime`** | migrations + unit + **e2e** API (PostgreSQL+MinIO) |
+| `web-e2e-ci.yml` (Web E2E CI) | `web-e2e` | **`web-e2e`** | **E2E navigateur** (Playwright : Health/Auth/Files) |
+
+→ **7 checks** à cocher dans *Require status checks to pass before merging*.
+
+### Futurs (à exiger quand implémentés — ne pas exiger maintenant)
+
+`coverage` (publication couverture, niveau 4+) · `security-scan` (scan dépendances/secrets) · `actionlint`
+(lint des workflows) · `registry` / `deploy-staging` (niveau 4, ADR-014 — **non implémentés**).
 
 ## Règle sur `main`
 
@@ -21,8 +46,9 @@ Créer une **Branch protection rule** (pattern : `main`) et cocher :
   - [ ] *Require review from Code Owners* — **plus tard** (quand un `CODEOWNERS` existera ; voir plus bas).
 - [ ] **Require status checks to pass before merging**.
   - [ ] *Require branches to be up to date before merging* — recommandé.
-  - [ ] Sélectionner les checks **CI** : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`
-    (les 5 jobs de `ci.yml`).
+  - [ ] Sélectionner les **7 checks** (cf. tableau ci-dessus) : `api-contracts`, `api-client-fetch`, `ui-kit`,
+    `web-nextjs`, `audit` (de `ci.yml`) + `api-runtime` (de `api-runtime-ci.yml`) + `web-e2e` (de
+    `web-e2e-ci.yml`).
 - [ ] **Require conversation resolution before merging**.
 - [ ] **Do not allow bypassing the above settings** (inclure les administrateurs — recommandé en V1 solo
   uniquement si cela ne bloque pas les correctifs urgents ; sinon laisser décoché et documenter).
@@ -49,9 +75,18 @@ Créer une **Branch protection rule** (pattern : `main`) et cocher :
 ## Vérification après application
 
 - [ ] Un push direct sur `main` est **refusé** (passe par PR).
-- [ ] Une PR ne peut être mergée que si les **5 checks CI** sont verts.
+- [ ] Une PR ne peut être mergée que si les **7 checks** (5 de `ci.yml` + `api-runtime` + `web-e2e`) sont verts.
 - [ ] `git push --force origin main` est **rejeté** par GitHub.
 - [ ] La branche `main` ne peut pas être supprimée.
 
+## Attention — renommer un job casse l'exigence
+
+Le check exigé est lié au **`name:` du job**. **Renommer** un job (ou son `name:`) crée un **nouveau** check
+et **désactive** silencieusement l'exigence de l'ancien (la règle référence un check qui ne sera plus produit).
+Si un `name:` de job change, **mettre à jour cette liste** et re-sélectionner le check dans la règle. Les noms
+actuels (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit`/`api-runtime`/`web-e2e`) sont
+**stables et non ambigus** — aucun renommage n'est nécessaire (ni effectué par Cloud Core 4).
+
 > Note : la protection de branche est une garantie **GitHub** (serveur), complémentaire de la discipline
-> locale. La CI reste l'autorité de validation ; ces règles la rendent **bloquante**.
+> locale. La CI reste l'autorité de validation ; ces règles la rendent **bloquante**. **Statut actuel : non
+> appliquée** (action humaine en attente) — tant qu'elle ne l'est pas, un push direct sur `main` reste possible.

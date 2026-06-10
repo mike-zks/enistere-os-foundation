@@ -85,6 +85,30 @@ Quatre niveaux — **niveaux 1, 2 et 3 implémentés** (voir aussi `.github/work
 - **Niveau 4 (futur)** : build images, **GHCR** (ADR-014), déploiement staging, approbation production,
   rollback. Détail : `REGISTRY_POLICY.md`.
 
+### 8 bis. Gouvernance & durcissement CI (Cloud Core 4)
+
+**Checks à rendre bloquants sur `main`** (7, noms = `name:` des jobs) : `api-contracts`, `api-client-fetch`,
+`ui-kit`, `web-nextjs`, `audit` (`ci.yml`) + `api-runtime` (`api-runtime-ci.yml`) + `web-e2e` (`web-e2e-ci.yml`).
+Application **manuelle** (action humaine) — voir `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. **Statut : non
+appliquée.**
+
+- **Artefacts E2E — décision : Option A (aucun upload).** Les workflows n'uploadent **aucun** artefact ;
+  Playwright conserve traces/captures `retain-on-failure` **localement au runner** (jetées en fin de job) →
+  zéro risque de fuite (cookie, `.state.json`, URL signée). **Option B** (upload conditionnel `if: failure()`,
+  rétention courte, dossier Playwright uniquement, sans logs d'env) reste une **évolution future documentée**,
+  non activée tant que les risques ne sont pas parfaitement maîtrisés.
+- **Couverture — décision : exécuter, ne pas publier.** Couvertures locales connues : UI Kit **100 %**, Web
+  **≈ 87,8 %**, API (unit + e2e, `test:cov` disponible non exécuté en CI). **Aucun service externe**
+  (Codecov/etc.) ni gate de couverture en CI pour l'instant. Seuils et publication = **durcissement futur**
+  (niveau 4+), à introduire avec une cible chiffrée par core.
+- **Pinning des actions — décision : conserver `@v4`.** `actions/checkout@v4` et `actions/setup-node@v4` sont
+  épinglés par **majeure**. Le pinning par **SHA** (immuabilité totale) est un **durcissement futur** : il
+  exige une politique de mise à jour (Dependabot/renovate) pour ne pas figer des versions vulnérables. Non
+  basculé ici.
+- **Validation YAML — décision : documentée, non outillée en CI.** `actionlint` **non installé** localement ;
+  les 3 workflows sont validés par **parse YAML** (Python) + **simulations runtime** (Cloud Core 2/3). Ajouter
+  un job `actionlint` est un **durcissement futur** (n'ajouter aucune dépendance lourde maintenant).
+
 ## 9. Politique de secrets
 
 Détail : `SECRETS_POLICY.md`. Principe : **aucun secret dans le repository ni dans la CI minimale actuelle** ;

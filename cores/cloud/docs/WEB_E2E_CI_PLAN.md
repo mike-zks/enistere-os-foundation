@@ -65,3 +65,10 @@ Files         : /protected/files/[id] métadonnées ; téléchargement (URL sign
 **Upload/suppression Files côté Web** (non implémentés côté produit), nouvelle feature Auth/UI, déploiement,
 registre/GHCR (ADR-014), environnements protégés, monitoring, rollback, **upload d'artefacts** (les traces/
 captures Playwright sont `retain-on-failure`, non poussées). Le niveau suivant est **4** (registry/déploiement).
+
+## 7. Gouvernance (Cloud Core 4)
+
+Check à exiger sur `main` : **`web-e2e`** (= `name:` du job). **Artefacts = Option A** (aucun upload ; traces
+locales `retain-on-failure`) ; Option B (upload `if: failure()`, rétention courte, dossier Playwright seul,
+sans logs d'env/`.state.json`/cookies/URL signée) = évolution future. Cf. `CLOUD_CORE_V1_EXECUTION_BASELINE.md`
+§8 bis et `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`.

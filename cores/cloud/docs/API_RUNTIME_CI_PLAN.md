@@ -66,5 +66,10 @@ npm audit
 ## 6. Hors périmètre (toujours non couvert)
 
 Aucune image, aucun registre/GHCR (ADR-014), aucun déploiement, aucun environnement protégé, aucun rollback,
-aucun monitoring, **aucun E2E navigateur** (niveau 3). La protection de branche `main` reste une **action
-humaine manuelle** (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) à appliquer pour rendre ce workflow bloquant.
+aucun monitoring. La protection de branche `main` reste une **action humaine manuelle**
+(`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) à appliquer pour rendre ce workflow bloquant.
+
+## 7. Gouvernance (Cloud Core 4)
+
+Check à exiger sur `main` : **`api-runtime`** (= `name:` du job). Aucun upload d'artefact ; couverture non
+publiée ; actions épinglées `@v4` (SHA = futur). Cf. `CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8 bis.

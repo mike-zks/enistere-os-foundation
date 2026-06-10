@@ -150,8 +150,29 @@ Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La p
 - **Niveau 4 (futur)** : build/push d'images (GHCR, ADR-014) + déploiement par environnement —
   [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md).
 
-**Protection de branche `main`** : à appliquer **manuellement** (rendre les checks des **trois** workflows
-bloquants) — [`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md).
+### Checks requis pour la protection de `main` (Cloud Core 4)
+
+Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). **7 checks** à rendre
+**bloquants** sur `main` (application **manuelle**, action humaine —
+[`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md)) :
+
+| Workflow | Checks (= `name:` des jobs) |
+|---|---|
+| `ci.yml` | `api-contracts` · `api-client-fetch` · `ui-kit` · `web-nextjs` · `audit` |
+| `api-runtime-ci.yml` | `api-runtime` |
+| `web-e2e-ci.yml` | `web-e2e` |
+
+> **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour. Les
+> noms actuels sont **stables** ; Cloud Core 4 ne renomme **aucun** job. **Statut : protection non appliquée.**
+
+### Politiques de durcissement (Cloud Core 4)
+
+- **Artefacts** : **aucun upload** (Option A). Traces Playwright `retain-on-failure` **locales au runner**
+  (jetées) — pas de fuite cookie/`.state.json`/URL signée. Upload conditionnel (Option B) = évolution future.
+- **Couverture** : **exécutée, non publiée** (UI Kit 100 %, Web ≈ 87,8 %) ; pas de service externe ni gate.
+- **Pinning** : `@v4` (majeure) conservé ; **SHA pinning** = durcissement futur (requiert une politique de MAJ).
+- **Lint workflows** : `actionlint` **futur** (non installé) ; validation actuelle = parse YAML + simulations.
+
 **Aucun déploiement, aucun secret, aucun registry** dans ces workflows. ADR-013 reste
-**`PARTIELLEMENT_IMPLEMENTE`** tant que le niveau 4 et la protection de branche ne sont pas en place ;
+**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 ; manquent protection de branche appliquée + niveau 4) ;
 ADR-014 reste **`NON_IMPLEMENTE`**.

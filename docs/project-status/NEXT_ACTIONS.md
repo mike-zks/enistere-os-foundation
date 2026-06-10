@@ -5,32 +5,37 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 4 — durcissement CI & gouvernance de branche** : **appliquer** (action **humaine**, GitHub
-> Settings) la **protection de branche `main`** (`cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) pour
-> rendre **bloquants** les checks des trois workflows (`ci.yml`, `api-runtime-ci.yml`, `web-e2e-ci.yml`) ; puis
-> côté agent, durcir la CI **sans déploiement** : publication de **couverture** (Web/UI Kit/paquets), pinning
-> léger des images/actions, éventuel scan de secrets. **Alternative immédiate** : **niveau 4** (registry GHCR +
-> déploiement, ADR-014) si la mise en production devient prioritaire.
+> **(Action HUMAINE d'abord)** **Appliquer la protection de branche `main`** dans GitHub Settings — rendre
+> **bloquants** les **7 checks** (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`,
+> `api-runtime`, `web-e2e`) selon `cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (PR obligatoire,
+> force-push/suppression interdits). **Non réalisable par un agent.**
+>
+> **(Prochaine mission Codex)** **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014) :
+> construire et **pousser des images** vers GHCR (tags **immuables** sha court), **sans** déployer, sans
+> environnement de prod. Suivre `cores/cloud/docs/REGISTRY_POLICY.md`.
 
-**Justification** : le **Cloud Core 3 — CI E2E navigateur (niveau 3)** est **terminé** (commit `ci(web): add
-browser e2e validation workflow`) : `.github/workflows/web-e2e-ci.yml` + suite Playwright (`cores/web-nextjs/e2e/`)
-rejouent les parcours **Health/Auth/Files** sur une stack réelle (API + PostgreSQL + MinIO + Web + Chromium) —
-**validé localement, 7 tests verts**. Les **niveaux 1–3** sont en place ; la **dernière réserve transverse
-non outillée** est la **protection de branche** (qui rend la CI bloquante) — une **action humaine** que l'agent
-ne peut appliquer. Le durcissement CI (couverture, pinning) la complète. **Ne pas enchaîner vers Files 2 ni
-sauter au déploiement** sans décision.
+**Justification** : le **Cloud Core 4 — durcissement CI & gouvernance de branche** est **terminé** (commit
+`docs(cloud): harden ci governance`) : **7 checks** `main` figés (= `name:` des jobs), checklist de protection
+de branche **actionnable** (matrice obligatoires/futurs, avertissement renommage), et **politiques tranchées**
+(artefacts = aucun upload ; couverture = exécutée non publiée ; pinning `@v4`, SHA futur ; `actionlint` futur) —
+**workflows inchangés**. Les **niveaux 1–3** de CI sont outillés ; la **seule réserve transverse restante** est
+la **protection de branche** (action **humaine**, GitHub Settings) qui rend la CI **bloquante**. Une fois
+appliquée (ou en parallèle), la suite produit est le **niveau 4** (registry GHCR **sans** déploiement) qui
+débloque la conteneurisation/publication.
 
-**Alternative (justifiée, décision humaine)** : **niveau 4** (registry/déploiement) ; **UI Kit 4** (primitives
-interactives) ; **Files 2** (upload Web) ; **Mobile Core**.
+**Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives) ; **Files 2** (upload
+Web) ; **Mobile Core** ; ou différer le registry. **Ne pas** ajouter de déploiement/staging/production sans
+décision dédiée.
 
-**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit `ci(web): add
-browser e2e validation workflow` ; statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`** (niveaux 1–3), ADR-013
-**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3), ADR-014 **`NON_IMPLEMENTE`**.
+**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit `docs(cloud): harden
+ci governance` ; statuts **inchangés** : Cloud Core **`IMPLEMENTATION_PARTIELLE`** (niveaux 1–3), ADR-013
+**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 + protection de branche **documentée non appliquée**), ADR-014
+**`NON_IMPLEMENTE`**.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 4 — durcissement CI & protection de branche** — appliquer (humain) la protection de `main` ; couverture publiée, pinning. ✦ prochaine action.
-2. **Cloud Core (niveau 4) — registry (ADR-014) + déploiement** — build/push GHCR, environnements protégés, rollback.
+1. **(Humain)** Appliquer la **protection de branche `main`** (7 checks bloquants) — `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. ✦ action humaine.
+2. **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014) — build/push d'images, tags immuables, **sans** déployer. ✦ prochaine mission Codex.
 3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
 4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
@@ -57,8 +62,9 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 1 — cadrage CI/CD & environnements | **FAIT** — `cores/cloud/docs/` (baseline, environnements, checklist branch protection, politique CI 4 niveaux, secrets/registry, plans) |
 | Cloud Core 2 — CI runtime API (niveau 2) | **FAIT** — `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) |
 | Cloud Core 3 — E2E navigateur (niveau 3) | **FAIT** — `.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ; Health/Auth/Files ; **7 tests verts** en simulation) |
-| Cloud Core 4 — durcissement CI | **débloqué** — prochaine action ; couverture publiée, pinning (+ protection de branche, humain) |
-| Protection de branche `main` | **débloqué (action humaine)** — checklist manuelle `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les checks des **trois** workflows bloquants) ; non applicable par un agent (GitHub Settings) |
+| Cloud Core 4 — durcissement CI & gouvernance | **FAIT** — 7 checks `main` figés + checklist actionnable + politiques artefacts/couverture/pinning/actionlint tranchées (`CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8 bis) ; workflows inchangés |
+| Protection de branche `main` | **débloqué (action humaine)** — checklist `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (rend les **7 checks** bloquants) ; **non applicable par un agent** (GitHub Settings) ✦ |
+| Cloud Core 5 — Registry GHCR (niveau 4) | **débloqué** — prochaine mission ; build/push images GHCR **sans déploiement** (ADR-014, `REGISTRY_POLICY.md`) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |

@@ -184,8 +184,9 @@ openapi:check, build, audit) ; le **Cloud Core 3** ajoute le **niveau 3** (`web-
 sur stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours **Health/Auth/Files** ;
 utilisateurs + fichier VALIDATED éphémères ; `APP_ENV=development` pour cookies HTTP). **Valeurs de test
 jetables**, **aucun secret GitHub**, données éphémères, traces `retain-on-failure` (**aucun artefact poussé**).
-**Politique CI à 4 niveaux** : 1–3 présents ; 4 (registry/déploiement) futur. La protection de branche `main`
-reste une **action humaine manuelle**.
+**Politique CI à 4 niveaux** : 1–3 présents ; 4 (registry/déploiement) futur. Le **Cloud Core 4** a figé les
+**7 checks** à rendre bloquants sur `main` (= `name:` des jobs) et tranché les politiques artefacts/couverture/
+pinning ; la protection de branche `main` reste une **action humaine manuelle** (non appliquée).
 
 ## 12. Documentation
 
@@ -268,10 +269,14 @@ API & E2E — **sans déploiement, Docker, registry, secret ni infra réelle**. 
 (niveau 2, `api-runtime-ci.yml`), et le **Cloud Core 3** la **CI E2E navigateur** (niveau 3,
 `web-e2e-ci.yml` : stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours
 **Health/Auth/Files** ; **sans secret/déploiement/registry** ; validé localement, **7 tests Playwright verts**)
-— Cloud Core → **`IMPLEMENTATION_PARTIELLE`** (trois workflows CI niveaux 1–3) ; ADR-013 reste **partiel**
-(niveaux 1–3), ADR-014 **non implémenté**. **Prochaine action** : **Cloud Core 4 — durcissement CI &
-protection de branche** (appliquer manuellement la protection de `main` ; couverture/scan), **ou** niveau 4
-(registry GHCR + déploiement). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+— Cloud Core → **`IMPLEMENTATION_PARTIELLE`** (trois workflows CI niveaux 1–3). Enfin le **Cloud Core 4 —
+durcissement CI & gouvernance de branche** (documentaire) a **figé les 7 checks** à rendre bloquants sur `main`
+(`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` + `api-runtime` + `web-e2e`) et **tranché les
+politiques** : artefacts = aucun upload (Option A), couverture = exécutée non publiée, pinning = `@v4` (SHA
+futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. ADR-013 reste **partiel** (niveaux 1–3
++ **protection de branche documentée non appliquée**), ADR-014 **non implémenté**. **Prochaine action (humaine)** :
+**appliquer** la protection de branche `main` (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) ; **prochaine mission** :
+**Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

@@ -22,7 +22,7 @@
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
-| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **Niveau 1** `ci.yml` (non-régression monorepo : ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Niveau 2** `api-runtime-ci.yml` (**runtime API NestJS** : PostgreSQL + MinIO jetables, `prisma migrate deploy`, unit + **e2e**, `openapi:check`, build, audit) **+ Niveau 3** `web-e2e-ci.yml` (**E2E navigateur** : stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours **Health/Auth/Files** ; données éphémères ; valeurs de test jetables, **aucun secret**, `APP_ENV=development`) **+ Cloud Core 1** cadrage. **Reste** : protection de branche appliquée, couverture publiée, release/versioning, déploiement, environnements protégés (niveau 4) |
+| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **Niveau 1** `ci.yml` (non-régression monorepo : ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Niveau 2** `api-runtime-ci.yml` (**runtime API NestJS** : PostgreSQL + MinIO jetables, `prisma migrate deploy`, unit + **e2e**, `openapi:check`, build, audit) **+ Niveau 3** `web-e2e-ci.yml` (**E2E navigateur** : stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours **Health/Auth/Files** ; données éphémères ; valeurs de test jetables, **aucun secret**, `APP_ENV=development`) **+ Cloud Core 1** cadrage **+ Cloud Core 4** gouvernance (7 checks `main` documentés, politiques artefacts/couverture/pinning/actionlint). **Reste** : protection de branche **appliquée** (action humaine), couverture publiée, release/versioning, déploiement, environnements protégés (niveau 4) |
 | ADR-014 | Registry images | Validé | **NON_IMPLEMENTE** | cloud/api/web | aucune image ; **non couvert par la CI** (aucun build/push GHCR) ; **cadré** par `cores/cloud/docs/REGISTRY_POLICY.md` (GHCR cible, tags immuables, niveau 4 futur) |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
 | ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
@@ -214,6 +214,19 @@
   (trois workflows CI ; **pas** de registry/déploiement/environnements/monitoring/rollback). ADR-013 **partiel**
   (niveaux 1–3) ; **ADR-014 `NON_IMPLEMENTE`**. Prochaine action : **Cloud Core 4 — durcissement CI &
   protection de branche** (manuel) ; ou niveau 4 (registry/déploiement).
+- **Cloud Core 4 — durcissement CI & gouvernance de branche (2026-06-10)** : mission **documentaire**
+  (aucun déploiement/registry/secret, **workflows existants inchangés**, **aucun job renommé**). Définit les
+  **7 checks** à rendre bloquants sur `main` (= `name:` des jobs : `api-contracts`/`api-client-fetch`/`ui-kit`/
+  `web-nextjs`/`audit` + `api-runtime` + `web-e2e`) — `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` enrichi (matrice,
+  obligatoires-maintenant vs futurs, avertissement « renommer un job casse l'exigence »). **Décisions
+  tranchées** (`CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8 bis) : **artefacts** = aucun upload (Option A ; Option B
+  upload-on-failure documentée comme future) ; **couverture** = exécutée, **non publiée** (UI Kit 100 %, Web
+  ≈ 87,8 % ; aucun service externe/Codecov) ; **pinning** = `@v4` conservé (SHA = futur, requiert politique de
+  MAJ) ; **`actionlint`** = futur (non installé ; validation = parse YAML + simulations). **Validé** : web
+  `check` (307) + `npm audit` 0 vuln + YAML des 3 workflows parsé. Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ;
+  ADR-013 **partiel** (niveaux 1–3 + **protection de branche documentée mais non appliquée**) ; ADR-014
+  **`NON_IMPLEMENTE`**. **Action humaine en attente** : appliquer la protection de branche. Prochaine mission :
+  **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés

@@ -88,7 +88,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
   gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
   déploiement, protection de branche, E2E navigateur.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `ci(web): add browser e2e validation workflow`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(cloud): harden ci governance`,
+  `ci(web): add browser e2e validation workflow`,
   `ci(api): add runtime validation workflow`,
   `docs(cloud): define v1 execution baseline`,
   `ci: add minimal monorepo validation`,
@@ -139,12 +140,34 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 (types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
 ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
 `ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
-restent branch protection (humain), couverture, release, déploiement, environnements (niveau 4). **ADR-014**
-(registry) reste non implémenté. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+restent branch protection (**documentée — 7 checks — non appliquée**, humain), couverture, release, déploiement,
+environnements (niveau 4). **ADR-014** (registry) reste non implémenté. Détail :
+[`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 3 — CI E2E navigateur (niveau 3)** (`.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/`) :
+**Cloud Core 4 — durcissement CI & gouvernance de branche** (mission **documentaire**) : prépare la CI à être
+**exigée** comme protection de `main`, **sans** déploiement/registry/secret, **sans** modifier les workflows
+existants ni **renommer aucun job**. **7 checks** figés à rendre bloquants sur `main` (= `name:` des jobs :
+`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` de `ci.yml` + `api-runtime` de
+`api-runtime-ci.yml` + `web-e2e` de `web-e2e-ci.yml`). `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` enrichi : matrice
+des checks (obligatoires-maintenant vs futurs), avertissement « **renommer un job casse l'exigence** »,
+vérifications post-application. **Politiques tranchées** (`CLOUD_CORE_V1_EXECUTION_BASELINE.md` §8 bis) :
+**artefacts** = **aucun upload** (Option A ; traces Playwright `retain-on-failure` locales, jetées ; Option B
+upload-`if:failure()` rétention courte sans logs/`.state.json`/cookies/URL signée = future) ; **couverture** =
+**exécutée, non publiée** (UI Kit 100 %, Web ≈ 87,8 % ; aucun Codecov/gate) ; **pinning** = `@v4` conservé (SHA
+= durcissement futur avec politique de MAJ) ; **`actionlint`** = futur (non installé ; validation = parse YAML +
+simulations CC2/CC3). Docs mis à jour : `.github/workflows/README.md` (checks requis + politiques),
+`API_RUNTIME_CI_PLAN.md`/`WEB_E2E_CI_PLAN.md` (check requis), `cores/cloud/README.md`. **Validation réduite
+justifiée** (doc-only) : web `check` (**307** tests) + `npm audit` **0 vuln** + parse YAML des 3 workflows +
+`git diff --check`. **Workflows existants intacts** (`ci.yml`/`api-runtime-ci.yml`/`web-e2e-ci.yml` non
+modifiés). Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ; ADR-013 **partiel** (niveaux 1–3 + protection de
+branche **documentée non appliquée**) ; ADR-014 **`NON_IMPLEMENTE`**. `cores/*/src`/`packages`/`docs/adr`/
+`strategy` **non modifiés**. Commit `docs(cloud): harden ci governance`. **Prochaine action (humaine)** :
+appliquer la protection de branche `main` ; **prochaine mission** : **Cloud Core 5 — Registry GHCR sans
+déploiement**.
+
+**Étape précédente — Cloud Core 3 — CI E2E navigateur (niveau 3)** (`.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/`) :
 implémente le **niveau 3** — un workflow démarrant une **stack réelle et éphémère** (PostgreSQL `services:` +
 MinIO `docker run` + **API NestJS** + **Web Next.js**) et rejouant les **parcours navigateur** critiques avec
 **Playwright/Chromium** headless, **sans déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni
@@ -406,14 +429,15 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Cloud Core 4 — durcissement CI & gouvernance de branche**. Le **Cloud Core 3** (CI E2E
-navigateur) est **terminé** (`web-e2e-ci.yml` + `cores/web-nextjs/e2e/` : Playwright/Chromium, stack réelle,
-parcours Health/Auth/Files, **7 tests verts** en simulation) ; Cloud Core → `IMPLEMENTATION_PARTIELLE` (niveaux
-1–3). La **dernière réserve transverse non outillée** est la **protection de branche `main`** — une **action
-humaine** (GitHub Settings) qui rend les checks des trois workflows **bloquants** ; l'agent peut compléter par
-la **couverture publiée** et le **pinning** (sans déploiement). **Alternative (décision humaine)** : niveau 4
-(registry GHCR + déploiement, ADR-014) ; UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas enchaîner automatiquement
-vers Files 2 ni le déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action HUMAINE d'abord** : **appliquer la protection de branche `main`** (GitHub Settings) — rendre bloquants
+les **7 checks** (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` + `api-runtime` + `web-e2e`),
+PR obligatoire, force-push/suppression interdits (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`). **Non réalisable par
+un agent.** **Prochaine mission Codex** : **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4, ADR-014 :
+build/push d'images, tags immuables sha court, **sans** déployer ni environnement de prod ;
+`REGISTRY_POLICY.md`). Le **Cloud Core 4** (gouvernance CI) est **terminé** : 7 checks figés, checklist
+actionnable, politiques artefacts/couverture/pinning/actionlint tranchées, workflows inchangés. **Alternative
+(décision humaine)** : UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas ajouter de déploiement/staging/production sans
+décision dédiée.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
