@@ -94,6 +94,21 @@
 > `/?auth=required` (**temporaire** jusqu'à Web Auth 5) ; sous le **streaming** App Router, `redirect()` est
 > délivré en 200 via RSC `NEXT_REDIRECT` + meta-refresh (honoré ; **aucune donnée privée** exposée — vérifié).
 > Preuve API réelle **26/26**. Détail : `cores/web-nextjs/docs/protected-routes.md`.
+>
+> **Web Auth 5 — page de connexion & navigation (implémente ADR-004/005/011/012)** : page **publique
+> `/login`** (Server Component) qui **assainit** `returnTo` (`sanitizeReturnTo` — **anti open-redirect** :
+> chemin interne uniquement, sinon `/protected` ; refuse hôte/schéma externes, `//`/`\`/`..`, contrôle,
+> encodages, routes Auth-API), **résout la session côté serveur** (déjà authentifié ⇒ redirige, jamais de
+> formulaire). **Login uniquement via le BFF** (`performBffLogin` : CSRF → `POST /api/auth/login`, **aucun
+> token lu**). `useLogin` (`useMutation` **sans `mutationKey`** → aucun credential en clé) **purge** `authKeys`
+> au succès (Health conservé), **anti-double-soumission** (verrou `useRef` + bouton désactivé) ; navigation
+> **`router.replace(returnTo)` + `refresh()`** (la réponse login, sans profil, **ne crée pas** d'état
+> authentifié — la session est résolue côté serveur à la navigation). Formulaire **accessible** (labels/
+> `aria`/`autoComplete`, `jest-axe`), **mot de passe jamais persisté/journalisé/sérialisé**, erreurs
+> **génériques** (401 **sans énumération**). La redirection anonyme du layout protégé pointe vers
+> `/login?returnTo=/protected`. **Aucun middleware, aucune Server Action.** Preuve API réelle **22/22**
+> (dont open redirect **bloqué** : `returnTo=https://evil…` → cible réelle `/protected`). Détail :
+> `cores/web-nextjs/docs/login-flow.md`.
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

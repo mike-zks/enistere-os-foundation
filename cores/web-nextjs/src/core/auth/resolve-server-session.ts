@@ -7,16 +7,17 @@ import { createAuthenticatedServerApiClient } from "../api/server/create-authent
 import type { UserProfile } from "./client/auth-bff-client.js";
 import type { CookieEnv } from "./cookie-config.js";
 import { guardReadOnly, type ReadOnlyServerCookieStore } from "./read-only-cookie-store.js";
+import { buildLoginRedirect } from "./return-to.js";
 import type { PublicAuthError } from "./session-state.js";
 
 type InjectedFetch = NonNullable<EnistereApiClientOptions["fetch"]>;
 
 /**
- * Destination de redirection des visiteurs **anonymes** d'un espace protégé. Aucune page `/login`
- * n'existe encore (Web Auth 5) : on renvoie vers l'accueil public avec un drapeau **non sensible**.
- * Chemin **interne statique** (aucune open redirect, aucun `returnUrl` libre, aucun token).
+ * Destination de redirection des visiteurs **anonymes** d'un espace protégé : la **page de connexion**
+ * (`/login`) avec un `returnTo` **assaini** vers la route demandée (par défaut `/protected`). Chemin
+ * **interne** (aucune open redirect, aucun token). Voir `return-to.ts` (`buildLoginRedirect`).
  */
-export const PROTECTED_ANONYMOUS_REDIRECT = "/?auth=required";
+export const PROTECTED_ANONYMOUS_REDIRECT = buildLoginRedirect("/protected");
 
 /**
  * Résultat **serveur** de la résolution de session — **sans token** (jamais d'access/refresh/sessionId/

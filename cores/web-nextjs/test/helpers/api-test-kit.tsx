@@ -64,12 +64,17 @@ export function envelope<T>(data: T): { success: true; data: T; timestamp: strin
   return { success: true, data, timestamp: "2026-06-09T12:00:00.000Z" };
 }
 
-/** `QueryClient` de test (pas de retry, pas de GC). */
+/**
+ * `QueryClient` de test (pas de retry, pas de GC). `gcTime: Infinity` **aussi pour les mutations** :
+ * sans cela, une mutation réglée (ex. `useLogin`) programme un timer GC **ref** de 5 min par défaut qui
+ * maintient le process `node --test` en vie après la fin des tests (~300 s). Avec `Infinity`, aucun timer
+ * n'est programmé (cf. `isValidTimeout`), et `client.clear()` en `afterEach` suffit au nettoyage.
+ */
 export function createTestQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: Number.POSITIVE_INFINITY },
-      mutations: { retry: false },
+      mutations: { retry: false, gcTime: Number.POSITIVE_INFINITY },
     },
   });
 }

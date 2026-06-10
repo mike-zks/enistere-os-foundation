@@ -30,6 +30,10 @@ Authentification Web via **BFF** : flux `login` / `refresh` / `logout` (+ bootst
   écriture), `request-id.ts` (`resolveRequestId` partagé). **Server-only** (exclu node:test) :
   `server/protected-session.ts` (`resolveNextServerSession` via `next/headers`) — consommé par le layout
   `app/(protected)/`.
+- **Connexion (Web Auth 5)** : `return-to.ts` (`sanitizeReturnTo`/`buildLoginRedirect`, anti open-redirect),
+  `client/login-client.ts` (`performBffLogin` : CSRF → `POST /api/auth/login`, navigateur, **aucun token lu**).
+  Côté `features/auth` : `login-validation`, `login-error`, `use-login` (testables) + `login-form` ; le wiring
+  router (`app/login/login-panel.tsx`) est exclu de node:test (validé par le build).
 
 Détail : [`../../../docs/auth-architecture.md`](../../../docs/auth-architecture.md),
 [`../../../docs/protected-routes.md`](../../../docs/protected-routes.md),
@@ -38,13 +42,14 @@ Détail : [`../../../docs/auth-architecture.md`](../../../docs/auth-architecture
 
 ## Absent (volontairement)
 
-- **Page de connexion**, formulaire React (Web Auth 5).
-- **Middleware de protection** de routes privées, redirection post-logout sophistiquée, Server Action Auth,
+- **Middleware de protection** de routes privées, Server Action Auth, redirection post-logout sophistiquée,
   RBAC d'administration, **refresh pendant le rendu serveur**, self-fetch serveur → BFF.
-- forgot/reset password, OAuth, MFA. **Aucun token Auth renvoyé au navigateur ; aucun token en JS.**
+- inscription/register, forgot/reset password, OAuth, MFA, remember-me. **Aucun token Auth renvoyé au
+  navigateur ; aucun token en JS ; aucun credential en cache.**
 
-> **Présent (Web Auth 4)** : **premier layout protégé** (`app/(protected)/`) résolu **côté serveur**
-> (read-only) + hydratation ; redirection anonyme `/?auth=required` (temporaire) ; erreur d'indisponibilité.
+> **Présent (Web Auth 4 → 5)** : **layout protégé** (`app/(protected)/`) résolu **côté serveur** (read-only) +
+> hydratation ; **page de connexion `/login`** (formulaire, login BFF, `returnTo` interne assaini) ; la
+> redirection anonyme pointe vers `/login?returnTo=/protected`.
 
 ## Frontière
 

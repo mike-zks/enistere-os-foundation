@@ -48,9 +48,14 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **côté serveur read-only** (`resolveServerSession` → API `/auth/me`, `enableRefresh:false`, **aucun appel
   au BFF local**, **aucune écriture cookie** via `guardReadOnly`) → **redirige** l'anonyme (`/?auth=required`,
   temporaire), rend **« Service indisponible »** si l'API est down (≠ anonyme), sinon **hydrate** le profil
-  (`prefillSessionQuery` → `useSession` authentifié au 1ᵉʳ rendu, **sans** second `/me`). **Sans page `/login`,
-  sans middleware, sans refresh au rendu.** **230 tests** + preuve **API réelle** Auth + session **+ protégé
-  26/26** (PostgreSQL jetable). Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
+  (`prefillSessionQuery` → `useSession` authentifié au 1ᵉʳ rendu, **sans** second `/me`). **Page de connexion
+  `/login`** (Web Auth 5) : formulaire accessible, **login BFF** (`performBffLogin` : CSRF → `POST /api/auth/login`,
+  **aucun token lu**), `useLogin` (purge `authKeys`, **anti-double-soumission**, aucun credential en cache),
+  navigation **`router.replace(returnTo)` + `refresh()`** ; **`returnTo` interne assaini** (`sanitizeReturnTo`,
+  anti open-redirect) ; utilisateur déjà authentifié **redirigé** hors `/login`. La redirection anonyme du
+  layout protégé pointe vers `/login?returnTo=/protected`. **Sans middleware, sans Server Action Auth, sans
+  token en JS.** **263 tests** + preuves **API réelles** Auth/session **+ protégé 26/26 + login 22/22**
+  (PostgreSQL jetable). Statut : **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
   (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
   `fetch` patché de Next échouait sur les réponses non-2xx — `expected non-null body source`).
 - **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
@@ -60,7 +65,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add server-resolved protected layout`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add secure login experience`,
+  `feat(web-nextjs): add server-resolved protected layout`,
   `docs(web-nextjs): review web core governance`,
   `feat(web-nextjs): add session and authorization state`,
   `feat(web-nextjs): implement secure auth BFF flows`, `feat(web-nextjs): establish server auth foundations`,
@@ -100,7 +106,24 @@ ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECI
 
 ## 8. Dernière étape terminée
 
-**Web Auth 4 — résolution Auth serveur + premier layout protégé** (`@enistere/web-nextjs`) : premier
+**Web Auth 5 — page de connexion & navigation Auth contrôlée** (`@enistere/web-nextjs`) : page **publique
+`/login`** (Server Component `force-dynamic`) — **assainit** `returnTo` (`core/auth/return-to.ts` :
+`sanitizeReturnTo`/`buildLoginRedirect`, **anti open-redirect**, testable), **résout la session côté serveur**
+(déjà authentifié ⇒ **redirige** vers `returnTo`, jamais de formulaire ; anonyme ⇒ formulaire ; unavailable ⇒
+formulaire + état dégradé). **Login BFF** (`core/auth/client/login-client.ts` : CSRF → `POST /api/auth/login`,
+same-origin, **aucun token lu**). `features/auth` : `login-validation` (UX, mot de passe non modifié),
+`login-error` (génériques, **401 sans énumération**), `use-login` (`useMutation` **sans `mutationKey`**, purge
+`authKeys`, **anti-double-soumission** `useRef`), `login-form` (a11y : labels/`aria`/`autoComplete`, `jest-axe`).
+**App** : `app/login/page.tsx` + `login-panel.tsx` (wiring router, exclu node:test : `router.replace(returnTo)`
++ `refresh()`). Redirection anonyme du layout protégé → `/login?returnTo=/protected`. **263 tests** (+33) +
+**preuve API réelle 22/22** (anonyme `/protected`→redirection `/login` ; `/login`→formulaire ; login BFF→
+`authenticated` sans token ; authentifié `/protected`→200+profil hydraté, X-Request-Id propagé ; authentifié
+`/login`→redirection hors login ; **`returnTo` externe→`/protected`, aucun open redirect** ; logout→`/login` ;
+401 sans énumération ; 403 CSRF ; bundle/HTML sans secret/mot de passe). **Sans middleware, sans Server Action.**
+**0 vuln**, Axios/Zustand absents. API NestJS / packages **non modifiés**. Détail :
+`cores/web-nextjs/docs/login-flow.md`. Commit `feat(web-nextjs): add secure login experience`.
+
+**Étape précédente — Web Auth 4 — résolution Auth serveur + premier layout protégé** (`@enistere/web-nextjs`) : premier
 **espace privé** dont la session est **résolue côté serveur** (lecture seule) puis **hydratée**. Modules
 **testables** : `core/auth/resolve-server-session.ts` (`resolveServerSession` → client serveur authentifié
 `read-only`, `enableRefresh:false`, appel **direct** API `/auth/me`, contrat **sans token** `authenticated|
@@ -160,13 +183,13 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Web Auth 5 — page de connexion & navigation Auth contrôlée**. Web Auth 4 est
-**terminé** (layout protégé + résolution serveur + hydratation, preuve API réelle 26/26). Implémenter la
-page **`/login`** + formulaire (CSRF → `login` BFF), une **redirection interne sûre** **remplaçant** la
-cible temporaire `/?auth=required`, et le **retour vers la page demandée** (sans `returnUrl` libre / open
-redirect) — **toujours sans middleware autoritaire** ; **API = autorité finale**. **Recommandé en parallèle
-(non bloquant)** : CI minimale (ADR-013) ordre de build paquets. Alternative : UI Kit (composants formulaire),
-Mobile Core, ou Cloud/CI-CD. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Revue globale Auth Web (1 → 5)** — **revue de socle** (pas une fonctionnalité). Le
+parcours Auth Web est **complet** (login `/login` → layout protégé → session/autorisations ; BFF
+login/refresh/logout/csrf), **263 tests** + preuves API réelles (26/26 + 22/22). Auditer le parcours
+public→login→privé, **rejouer les preuves**, vérifier cookies/CSRF/Origin/navigation/cache/SSR/hydratation,
+**classer les dettes** (E2E navigateur, CI, CSP…), et **décider de la stabilité V1** du socle Auth Web.
+**Recommandé en parallèle (non bloquant)** : CI minimale (ADR-013). Alternative : UI Kit, Mobile Core,
+Cloud/CI-CD. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

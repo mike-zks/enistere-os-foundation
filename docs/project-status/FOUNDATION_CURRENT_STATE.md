@@ -22,7 +22,7 @@ pas une application ni une bibliothèque complète).
 | ADR | 18 ADR rédigés et **Validés** (001–016, 039, 040) ; ADR-017→038 = backlog non rédigé |
 | Core implémenté | **API Core NestJS** (avancé, testé, revu) |
 | Core en cours | **UI Kit** (`@enistere/ui-kit`, v0.1.1) — tokens **+ 6 primitives Web React** accessibles (64 tests, 100 % couverture, a11y) ; aligné **React 19** ; **consommé par le Web Core** |
-| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** (SSR/hydratation) + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF** double-submit, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **premier layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`, redirection anonyme, erreur d'indisponibilité). **230 tests** + preuve API réelle (Auth + session + **protégé 26/26**). **Pas de page `/login`, pas de middleware, pas de refresh au rendu.** |
+| Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`). **263 tests** + preuves API réelles (Auth/session **26/26** + login **22/22**). **Pas de middleware, pas de Server Action Auth, pas de token en JS.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
@@ -125,7 +125,7 @@ Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **64 tests** (`node:test` + `global-jsdom`
-+ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **230 tests** (`node:test` :
++ Testing Library + jest-axe, **React 19**), **100 % couverture**. Web Core : **263 tests** (`node:test` :
 config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
 UI, mapping d'erreurs, garde anti-réseau, **Auth** : cookie-config, session adapter, factory
 read-only/writable, **CSRF** (gén/validation temps constant), **Origin/Referer**, validation login, handlers
@@ -135,12 +135,15 @@ read-only/writable, **CSRF** (gén/validation temps constant), **Origin/Referer*
 helpers OR/AND sans wildcard), `useLogout` (purge Auth / Health conservé ; échec réseau → pas de purge), UI
 session/authorization + a11y ; **Web Auth 4** : résolveur serveur read-only (200/401/403/5xx/réseau/invalide,
 isolation, **aucun refresh**, **aucune écriture cookie**), `decideProtectedRender`, **hydratation** (authentifié
-au 1ᵉʳ rendu, **0 appel `/me`**, aucun token), vues indisponibilité/notice) + `next build` + **sonde HTTP** +
-**preuve API réelle** (NestJS + PostgreSQL jetable) : Auth + session (login → `/me` → `/authorization` → logout
-→ `/me` 401 ; **read-only sans refresh** ; **droits sans nouveau JWT**) **et espace protégé 26/26** (anonyme →
-**redirection serveur** sans donnée privée ; authentifié → **200 + profil hydraté**, aucun token HTML/RSC,
-X-Request-Id propagé ; API arrêtée → **« Service indisponible »** ≠ anonyme ; bundle sans secret). Aucune CI :
-exécution **manuelle/locale**.
+au 1ᵉʳ rendu, **0 appel `/me`**, aucun token), vues indisponibilité/notice ; **Web Auth 5** : `sanitizeReturnTo`
+(anti open-redirect), validation login, client BFF login (CSRF/body/statuts/**aucune fuite mot de passe**),
+`useLogin` (**purge authKeys**, **double-soumission empêchée**, aucun credential en cache), `LoginForm`
+(a11y ×4)) + `next build` + **sonde HTTP** + **preuve API réelle** (NestJS + PostgreSQL jetable) : Auth + session
+(login → `/me` → `/authorization` → logout → `/me` 401 ; **read-only sans refresh** ; **droits sans nouveau
+JWT**), **espace protégé 26/26** et **connexion 22/22** (anonyme `/protected` → **redirection `/login`** ;
+`/login` → formulaire ; login BFF → `authenticated` sans token ; authentifié `/login` → redirection hors login ;
+**`returnTo` externe → `/protected`** (aucun open redirect) ; logout → `/login` ; 401 sans énumération ; 403 CSRF ;
+bundle/HTML sans secret/mot de passe). Aucune CI : exécution **manuelle/locale**.
 
 ## 10. Preuves
 
@@ -183,17 +186,17 @@ preuve désormais retiré (bannière de migration ajoutée).
 Le **Web Core** (`@enistere/web-nextjs`, **`IMPLEMENTATION_PARTIELLE`**) expose désormais les **flux BFF
 Auth** (`login`/`refresh`/`logout`/`csrf`) **et l'état de session/autorisations** (`me`/`authorization`
 read-only, hooks `useSession`/`useAuthorization`, purge du cache Auth au logout, `403` distinct d'`anonymous`,
-helpers OR/AND sans wildcard) — **prouvés contre l'API réelle** (230 tests ; changement de droits **sans
-nouveau JWT**). Restent volontairement absents : **page de connexion**, **middleware**, refresh au rendu,
-SSR Auth complet au-delà du layout protégé. Le **Checkpoint de gouvernance Web Core** a été réalisé (rapport
-[`WEB_CORE_GOVERNANCE_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md)), puis
-**Web Auth 4** a livré le **premier layout protégé** : résolution Auth **serveur read-only** (Option C),
-**hydratation** du profil (`useSession` authentifié au 1ᵉʳ rendu, **sans** second `/me`), redirection
-anonyme (`/?auth=required`, temporaire), erreur d'indisponibilité (≠ anonyme), page technique `/protected`
-— **sans middleware, sans page login, sans refresh au rendu** (**230 tests** + preuve API réelle **26/26** ;
-détail [`protected-routes.md`](../../cores/web-nextjs/docs/protected-routes.md)). Statut **maintenu**
-`IMPLEMENTATION_PARTIELLE`. **Prochaine action** : **Web Auth 5** (page de connexion & navigation Auth —
-remplace `/?auth=required`). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+helpers OR/AND sans wildcard) — **prouvés contre l'API réelle**. Le **Checkpoint de gouvernance** a été réalisé
+([`WEB_CORE_GOVERNANCE_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md)), **Web Auth 4** a
+livré le **layout protégé** (résolution Auth **serveur read-only** Option C + **hydratation**, page `/protected`,
+redirection anonyme, indisponibilité), puis **Web Auth 5** la **page de connexion `/login`** : formulaire
+accessible, **login BFF** (CSRF, **aucun token**), **`returnTo` interne assaini** (anti open-redirect),
+navigation **`replace`/`refresh`**, redirection d'un utilisateur déjà authentifié — **sans middleware, sans
+Server Action Auth, sans token en JS** (**263 tests** + preuves API réelles **26/26** + **22/22** ; détails
+[`protected-routes.md`](../../cores/web-nextjs/docs/protected-routes.md),
+[`login-flow.md`](../../cores/web-nextjs/docs/login-flow.md)). Statut **maintenu** `IMPLEMENTATION_PARTIELLE`.
+**Prochaine action** : **Revue globale Auth Web (1 → 5)** (audit transversal, décision de stabilité V1). Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

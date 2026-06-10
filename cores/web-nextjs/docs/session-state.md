@@ -94,8 +94,21 @@ client** à la demande (non préchargées). Détail : [`protected-routes.md`](pr
 ### Logout dans l'espace privé
 
 Après `logout` (purge `authKeys`), la page protégée ne présente plus le profil (le cache Auth est vidé) ; un
-**rafraîchissement/navigation** ultérieur déclenche la **redirection serveur** (la résolution serveur voit une
-session absente). Aucune redirection « sophistiquée » n'est ajoutée dans le hook (Web Auth 5).
+**rafraîchissement/navigation** ultérieur déclenche la **redirection serveur** vers `/login?returnTo=/protected`
+(la résolution serveur voit une session absente).
+
+### Parcours de connexion (Web Auth 5)
+
+```
+anonymous → GET /protected → redirect /login?returnTo=/protected (serveur)
+          → /login : formulaire → login BFF (CSRF) → purge authKeys
+          → router.replace(returnTo) + router.refresh()
+          → /protected : résolution serveur → authenticated → hydratation
+```
+
+Le cache Auth est **purgé** au succès du login (pas d'`anonymous` résiduel) ; la session `authenticated` est
+ensuite **résolue côté serveur** à la navigation, puis **hydratée** — la réponse login (sans profil) **ne crée
+jamais** d'état authentifié à elle seule. Détail : [`login-flow.md`](login-flow.md).
 
 ## Hors périmètre
 

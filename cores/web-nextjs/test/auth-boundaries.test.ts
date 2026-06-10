@@ -29,6 +29,14 @@ const CLIENT_REACHABLE = [
   "core/auth/session-state.ts",
   "core/auth/client/auth-bff-client.ts",
   "core/auth/client/bff-error.ts",
+  // Surface login navigateur (Web Auth 5). NB : `login-client.ts` est exclu de cette liste car sa
+  // docstring cite `/api/auth/csrf` (faux positif du filtre par sous-chaîne) ; il est couvert par
+  // `login-client.test.ts` (same-origin, aucun appel direct API).
+  "core/auth/return-to.ts",
+  "features/auth/login-validation.ts",
+  "features/auth/login-error.ts",
+  "features/auth/use-login.ts",
+  "features/auth/login-form.tsx",
 ];
 
 // Éléments serveur/sensibles qui ne doivent JAMAIS être importés par un module client.

@@ -1,4 +1,4 @@
-# Architecture Auth Web — BFF (Web Auth 1 → 4)
+# Architecture Auth Web — BFF (Web Auth 1 → 5)
 
 > **Flux Auth BFF disponibles** : `login` / `refresh` / `logout` (+ bootstrap `csrf`) **et lecture
 > `me` / `authorization`** ; protégés par cookies `HttpOnly`, Origin/Referer (mutations) et **CSRF
@@ -176,6 +176,18 @@ publiques restent client-only, Option A).
   de donnée privée** (le shell public éventuel ne contient aucune session). Détail :
   [`protected-routes.md`](protected-routes.md).
 
+## 10c. Page de connexion & navigation (Web Auth 5)
+
+Page **publique** `/login` (Server Component, `force-dynamic`) : assainit `returnTo` (`sanitizeReturnTo`),
+résout la session **côté serveur** → **authentifié** ⇒ **redirige** vers `returnTo` (jamais de formulaire) ;
+**anonyme** ⇒ rend `<LoginForm>` ; **unavailable** ⇒ formulaire + état dégradé (BFF = autorité à la
+soumission). Login **uniquement via le BFF** : `performBffLogin` (CSRF → `POST /api/auth/login`,
+`credentials:"include"`, **aucun token lu**). `useLogin` (`useMutation`, **sans `mutationKey`** → aucun
+credential en clé) purge `authKeys` au succès puis `LoginPanel` navigue (`router.replace(returnTo)` +
+`router.refresh()`). La redirection anonyme du layout protégé pointe désormais vers
+`/login?returnTo=/protected`. **Aucun middleware, aucune Server Action, aucun token en JS, aucune URL externe
+dans `returnTo`.** Détail : [`login-flow.md`](login-flow.md), [`protected-routes.md`](protected-routes.md) §4b.
+
 ## 11. Sécurité
 
 `HttpOnly` (tokens inaccessibles au JS) ; refresh jamais renvoyé au navigateur ni loggé ; tokens validés
@@ -205,8 +217,9 @@ vérifiées absentes des erreurs/logs/bundle.
 
 ## 13. Prochaine étape
 
-**Web Auth 5 — page de connexion et navigation Auth contrôlée** : page `/login`, formulaire, obtention CSRF +
-appel BFF `login`, redirection interne **sûre** (remplace `/?auth=required`), retour éventuel vers la page
-initialement demandée — **toujours sans middleware autoritaire**. Voir [`protected-routes.md`](protected-routes.md)
-(layout protégé), [`session-state.md`](session-state.md) (états/hydratation) et
-[`tanstack-query.md`](tanstack-query.md) (cache).
+**Revue globale Auth Web (1 → 5)** : audit du **parcours complet** (public → login → privé), rejeu des
+preuves, vérification cookies / CSRF / Origin / navigation / cache / SSR / hydratation, **classement des
+dettes**, et décision sur la **stabilité V1** du socle Auth Web — **sans nouvelle fonctionnalité**. Voir
+[`login-flow.md`](login-flow.md) (connexion), [`protected-routes.md`](protected-routes.md) (layout protégé +
+`returnTo`), [`session-state.md`](session-state.md) (états/hydratation), [`tanstack-query.md`](tanstack-query.md)
+(cache).

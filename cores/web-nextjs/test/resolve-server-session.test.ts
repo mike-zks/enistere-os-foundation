@@ -135,11 +135,11 @@ test("decideProtectedRender : authenticated → render avec profil", () => {
   assert.equal(d.action === "render" ? d.user.email : null, "user@example.test");
 });
 
-test("decideProtectedRender : anonymous → redirection serveur interne (aucune open redirect, aucun token)", () => {
+test("decideProtectedRender : anonymous → redirection vers /login (interne, returnTo assaini, aucun token)", () => {
   const d = decideProtectedRender({ status: "anonymous" });
   assert.equal(d.action, "redirect");
   assert.equal(d.action === "redirect" ? d.location : null, PROTECTED_ANONYMOUS_REDIRECT);
-  assert.ok(PROTECTED_ANONYMOUS_REDIRECT.startsWith("/"));
+  assert.ok(PROTECTED_ANONYMOUS_REDIRECT.startsWith("/login?returnTo="));
   assert.ok(!PROTECTED_ANONYMOUS_REDIRECT.includes("://"));
   assert.ok(!PROTECTED_ANONYMOUS_REDIRECT.toLowerCase().includes("token"));
 });

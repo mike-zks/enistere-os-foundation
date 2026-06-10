@@ -4,9 +4,10 @@ Socle **Web** d'Enistère : application **Next.js 16 (App Router)** en **TypeScr
 le design system **`@enistere/ui-kit`**, l'**API publique** (endpoints Health) via les paquets clients
 officiels et **TanStack Query** pour le server state. **BFF Auth** (login/refresh/logout/csrf, cookies
 `HttpOnly`, CSRF double-submit, Origin/Referer), **état de session/autorisations** (`me`/`authorization`,
-`useSession`/`useAuthorization`, purge au logout) **et premier layout protégé** (résolution Auth **serveur**
-read-only + hydratation, page technique `/protected`). **Sans page de connexion, sans middleware, sans
-refresh pendant le rendu serveur** (SSR Auth **hybride** : Option C pour le privé, Option A pour le public).
+`useSession`/`useAuthorization`, purge au logout), **layout protégé** (résolution Auth **serveur** read-only +
+hydratation, page `/protected`) **et page de connexion `/login`** (formulaire accessible, login BFF, `returnTo`
+interne assaini, navigation `replace`/`refresh`). **Sans middleware, sans Server Action Auth, sans token en JS**
+(SSR Auth **hybride** : Option C pour le privé, Option A pour le public).
 
 > **Statut** : `IMPLEMENTATION_PARTIELLE` (compile, build, lint, tests verts + serveur local + preuve
 > API réelle). Source de vérité de pilotage : [`docs/project-status/`](../../docs/project-status/README.md).
@@ -45,13 +46,22 @@ refresh pendant le rendu serveur** (SSR Auth **hybride** : Option C pour le priv
   est indisponible (≠ anonyme), sinon **hydrate** le profil dans TanStack Query (`useSession` authentifié dès
   le 1ᵉʳ rendu, **sans second `/me`**). **Sans middleware, sans refresh pendant le rendu.** Détail :
   [`docs/protected-routes.md`](docs/protected-routes.md).
+- **Page de connexion & navigation Auth (Web Auth 5)** : page **publique `/login`** (Server Component) —
+  assainit `returnTo`, **redirige** un utilisateur **déjà authentifié** (jamais de formulaire) ; **formulaire**
+  accessible (`login-form`, labels/aria/autoComplete, validation UX, `jest-axe`) ; **login via le BFF**
+  (`performBffLogin` : CSRF → `POST /api/auth/login`, **aucun token lu**) ; **`useLogin`** (`useMutation` sans
+  `mutationKey`, purge `authKeys`, **anti-double-soumission**) ; navigation **`router.replace(returnTo)` +
+  `refresh()`**. **`returnTo` strictement interne** (`sanitizeReturnTo` — anti open-redirect). La redirection
+  anonyme du layout protégé pointe vers **`/login?returnTo=/protected`**. Détail :
+  [`docs/login-flow.md`](docs/login-flow.md).
 
 ### Hors périmètre — volontairement absent
 
-**page/formulaire de connexion** · **middleware** de route privée · **redirection automatique post-logout** ·
-**refresh pendant le rendu serveur** · **self-fetch** serveur → BFF · **Server Action Auth** · **RBAC
-d'administration** (modifier rôles/permissions) · **SSR Auth complet** au-delà du layout protégé · token Auth
-exposé au navigateur · routes Files / upload ·
+**middleware** de route privée · **Server Action Auth** · **inscription / register** · **forgot/reset
+password** · **OAuth / MFA** · remember-me · navigation Auth globale · **redirection automatique post-logout
+sophistiquée** · **refresh pendant le rendu serveur** · **self-fetch** serveur → BFF · **RBAC d'administration**
+(modifier rôles/permissions) · **SSR Auth complet** au-delà du layout protégé · token Auth exposé au navigateur
+(aucun credential en cache / JS) · routes Files / upload ·
 **Axios** · **Zustand**/Redux/Jotai · Orval · Storybook · OAuth / MFA · forgot/reset password · i18n
 complet · monitoring · workflow CI · Dockerfile · publication npm · **aucun type d'API recopié**.
 
@@ -84,6 +94,7 @@ src/
     page.tsx                 # force-dynamic : prefetch Health (SSR) + HydrationBoundary
     (protected)/             # groupe privé (Web Auth 4) : layout (résolution serveur + hydratation),
                              #   error.tsx (filet), protected/page.tsx → /protected (page technique)
+    login/                   # page /login (Web Auth 5, Server Component) + login-panel (wiring router, client)
     providers/app-providers  # Client Component : enveloppe QueryProvider (layout reste serveur)
     loading/error/not-found/manifest
   core/
@@ -102,13 +113,16 @@ src/
       request-id.ts          #   resolveRequestId (pur, partagé handlers/serveur)
       read-only-cookie-store #   ReadOnlyServerCookieStore + guardReadOnly (défense par le type)
       resolve-server-session #   resolveServerSession (read-only) + decideProtectedRender (testables)
+      return-to.ts           #   sanitizeReturnTo / buildLoginRedirect (anti open-redirect)
+      client/login-client    #   performBffLogin (CSRF → POST /api/auth/login, navigateur, sans token)
       session-state.ts       #   SessionState + toPublicAuthError (public, sans token)
     query/                   # query-client (retry), query-provider, keys/{health-keys,auth-keys}
   features/
     foundation-status/       # page technique (matrice d'intégrations) — testable
     health/                  # queries (queryOptions), hooks, health-panel, health-probe-view
     auth/                    # auth-queries (+ prefillSessionQuery), useSession/useAuthorization/useLogout,
-                             #   *-status-view, session-panel, service-unavailable-view, protected-notice
+                             #   *-status-view, session-panel, service-unavailable-view, protected-notice ;
+                             #   login : login-form, login-validation, login-error, use-login
 test/                        # node:test (compilés vers build-test/)
 ```
 
@@ -222,12 +236,24 @@ token**, `no-store`, `X-Request-Id`) → `/authorization` (rôles/permissions) �
 via `guardReadOnly`), `decideProtectedRender` (redirect/render/unavailable, cible interne sans token),
 `prefillSessionQuery`/**hydratation** (`useSession` authentifié au 1ᵉʳ rendu, **sans** second `/me`, aucun
 token dans le payload), `request-id` (réutilisation/UUID), vues `ServiceUnavailableView`/`ProtectedNotice`
-(a11y). **Total : 230 tests** (`tsc -p tsconfig.test.json` + `node --test`). **Preuve API réelle Web Auth 4**
+(a11y). **Connexion (Web Auth 5)** : `sanitizeReturnTo` (interne/externe/`//`/`\`/schéma/`..`/encodages/routes
+Auth → défaut, anti open-redirect), validation login (e-mail/mot de passe, trim e-mail, mot de passe inchangé),
+client BFF login (CSRF, header, body, same-origin, statuts 401/403/429/503/réseau/JSON invalide, **aucune fuite
+de mot de passe**), `useLogin` (succès/erreur, **purge authKeys / Health conservé**, **double-soumission
+empêchée**, aucun credential en cache), `LoginForm` (labels/autoComplete/validation/loading/erreurs/`jest-axe` ×4).
+**Total : 263 tests** (`tsc -p tsconfig.test.json` + `node --test`). **Preuve API réelle Web Auth 4**
 (NestJS + PostgreSQL jetable, **26 assertions**) : anonyme `GET /protected` → **redirection serveur** (sans
 donnée privée) · authentifié → **200 + profil hydraté** (e-mail en SSR, **aucun token** dans HTML/RSC,
 `X-Request-Id` propagé) · cookie access retiré → redirection **sans** `/auth/refresh` · logout → redirection ·
 **API arrêtée → « Service indisponible »** (≠ anonyme) · bundle sans secret. Détail :
-[`docs/protected-routes.md`](docs/protected-routes.md).
+[`docs/protected-routes.md`](docs/protected-routes.md). **Preuve API réelle Web Auth 5** (**22 assertions**) :
+anonyme `GET /protected` → **redirection vers `/login?returnTo=/protected`** · `GET /login` → **200 +
+formulaire** (aucun token) · CSRF + `login` BFF → `authenticated:true` (**aucun token**, cookie `HttpOnly`) ·
+authentifié `GET /protected` → **200 + profil hydraté** (`X-Request-Id` propagé) · **authentifié `GET /login`
+→ redirection hors login** · **`returnTo` externe (`https://evil…`) → cible réelle `/protected`** (NEXT_REDIRECT
++ meta refresh ; **aucun open redirect**) · logout → `/protected` redirige vers `/login` · identifiants
+invalides → **401 générique** (aucune énumération) · CSRF invalide → **403** · HTML/bundle **sans**
+`API_INTERNAL_URL`, sans cookie Auth, **sans mot de passe**. Détail : [`docs/login-flow.md`](docs/login-flow.md).
 
 ---
 
@@ -239,8 +265,8 @@ Le navigateur ne parle jamais directement à l'API NestJS : un **client serveur 
 cookie `HttpOnly`. **Cookies** : `enistere_access`/`refresh` **HttpOnly** (jamais renvoyés au navigateur,
 `Secure` prod, `SameSite=Lax`, `Path=/`, `__Host-` prod) ; `enistere_csrf` **non HttpOnly** (double-submit).
 **Protection** : CSRF (cookie + `X-CSRF-Token`, temps constant, rotation), **Origin/Referer** (fail-closed),
-corps borné, erreurs génériques, `X-Request-Id` propagé. **Prouvé contre l'API réelle.** **Absent** :
-page de connexion, middleware, route protégée. Détail :
+corps borné, erreurs génériques, `X-Request-Id` propagé. **Prouvé contre l'API réelle.** Consommé par la
+**page `/login`** (Web Auth 5) via `performBffLogin`. **Absent** : middleware, Server Action Auth. Détail :
 [`docs/auth-architecture.md`](docs/auth-architecture.md), [`docs/csrf.md`](docs/csrf.md),
 [`src/core/auth/README.md`](src/core/auth/README.md).
 
@@ -268,6 +294,7 @@ passent sous React 19 (aucune régression). Voir le `CHANGELOG.md` racine.
 
 ## 13. Feuille de route
 
-**Prochain incrément** : **Web Auth 5 — page de connexion & navigation Auth** (`/login`, formulaire, CSRF +
-`login` BFF, **redirection interne sûre** remplaçant `/?auth=required`, retour vers la page demandée) —
-**sans middleware autoritaire**. Puis : écrans authentifiés, gestionnaire de thème, CSP à nonces, i18n, CI/CD.
+**Prochain incrément** : **Revue globale Auth Web (1 → 5)** — audit du parcours complet (public → login →
+privé), rejeu des preuves, vérification cookies/CSRF/navigation/cache/SSR, **classement des dettes**, décision
+de **stabilité V1** du socle Auth Web (sans nouvelle fonctionnalité). Puis : écrans authentifiés, gestionnaire
+de thème, CSP à nonces, i18n, CI/CD.
