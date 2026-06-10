@@ -194,8 +194,14 @@ accessible, **login BFF** (CSRF, **aucun token**), **`returnTo` interne assaini*
 navigation **`replace`/`refresh`**, redirection d'un utilisateur déjà authentifié — **sans middleware, sans
 Server Action Auth, sans token en JS** (**263 tests** + preuves API réelles **26/26** + **22/22** ; détails
 [`protected-routes.md`](../../cores/web-nextjs/docs/protected-routes.md),
-[`login-flow.md`](../../cores/web-nextjs/docs/login-flow.md)). Statut **maintenu** `IMPLEMENTATION_PARTIELLE`.
-**Prochaine action** : **Revue globale Auth Web (1 → 5)** (audit transversal, décision de stabilité V1). Détail :
+[`login-flow.md`](../../cores/web-nextjs/docs/login-flow.md)). La **Revue globale Auth Web (1 → 5)** a été
+**réalisée** (rapport [`WEB_AUTH_V1_REVIEW.md`](../../cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md)) — verdict
+**`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** : socle Auth **sûr et cohérent** (aucune fuite de token, **aucun open
+redirect**, session cohérente, contenu privé jamais exposé, droits sans nouveau JWT), **263 tests fiables ×2** +
+**runtime 33/33**, **aucun défaut bloquant** ; réserves **opérationnelles** (CI, E2E navigateur,
+streaming-redirect, multi-onglets, CSP/HSTS). Statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE` (la
+stabilité du bloc Auth n'augmente pas le statut global). **Prochaine action** : **Web Core — états UI &
+composants structurels** (cf. `CORE_SPECIFICATION` §3/§4 ; CI/E2E recommandés en parallèle). Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

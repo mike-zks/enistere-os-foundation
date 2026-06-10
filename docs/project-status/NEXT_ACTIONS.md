@@ -5,33 +5,34 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Revue globale Auth Web (1 → 5)** (`cores/web-nextjs/`) : **revue de socle** (pas une fonctionnalité).
-> Auditer le **parcours complet** public → `/login` → privé ; **rejouer les preuves** ; vérifier
-> cookies / CSRF / Origin-Referer / navigation / cache TanStack / SSR / hydratation ; **classer les dettes** ;
-> décider si le **socle Auth Web peut être déclaré stable V1**. **Ne pas ajouter de nouvelle fonctionnalité.**
+> **Web Core — cadrage & implémentation des états UI et composants structurels manquants** (`cores/web-nextjs/`) :
+> standardiser les états **`loading`/`empty`/`error`/`success`**, le **système de formulaires** et des
+> **composants réutilisables** (cf. `CORE_SPECIFICATION.md` §3/§4). Le parcours Auth (login + espace protégé)
+> fournit désormais une **surface réelle** à standardiser. **Alternative** : intégration **Files** minimale.
 
-**Justification** : **Web Auth 5 est terminé** (commit `feat(web-nextjs): add secure login experience`). Le
-parcours Auth Web est désormais **complet de bout en bout** : `/login` (formulaire, login BFF, `returnTo`
-interne assaini, navigation `replace`/`refresh`), layout protégé (résolution serveur read-only + hydratation),
-session/autorisations, BFF login/refresh/logout/csrf — **263 tests** + **preuves API réelles** (Auth 26/26 +
-login 22/22 ; **aucun open redirect**, **aucune fuite de token/mot de passe**). Avant d'ouvrir de nouvelles
-capacités (écrans authentifiés, thème, Files Web…), une **revue transversale** s'impose pour arbitrer la
-**stabilité V1** du socle Auth et la dette restante (E2E navigateur, CI, CSP…).
+**Justification** : la **Revue globale Auth Web (1 → 5)** est **terminée** (rapport permanent
+`cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md`, commit `docs(web-nextjs): review web auth v1`). **Verdict :
+`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** — socle Auth **sûr et cohérent** (aucune fuite de token, aucun open
+redirect, session cohérente, contenu privé jamais exposé, droits sans nouveau JWT), **263 tests fiables ×2** +
+**runtime 33/33**, **aucun défaut bloquant**. **Réserves opérationnelles** (non bloquantes pour la correction) :
+CI, E2E navigateur, sémantique streaming-redirect, multi-onglets, durcissement CSP/HSTS. Le bloc Auth étant
+stable (avec réserves), la suite logique est la **standardisation UI/formulaires** du Web Core (priorité
+`CORE_SPECIFICATION`), pas une extension Auth post-V1.
 
-**Pré-recommandation (non bloquante, reportée)** : amorcer une **CI minimale** (ADR-013) imposant l'**ordre de
-build des paquets** (`packages/*/dist` non versionnés) et la non-régression.
+**Recommandé en parallèle (réserves V1, non bloquant)** : **CI minimale** (ADR-013, ordre de build des paquets +
+non-régression) et amorce d'un **E2E navigateur** (Playwright).
 
-**Alternative (justifiée)** : **compléter le UI Kit**, démarrer le **Mobile Core**, ou avancer **Cloud/CI-CD**.
-À arbitrer par décision humaine.
+**Alternative (justifiée)** : **intégration Files minimale**, **compléter le UI Kit**, ou démarrer le
+**Mobile Core**. À arbitrer par décision humaine.
 
 **Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
-`feat(web-nextjs): add secure login experience`.
+`docs(web-nextjs): review web auth v1`.
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Revue globale Auth Web (1 → 5)** — audit du parcours public→login→privé, rejeu des preuves, classement des dettes, décision de stabilité V1 ; **sans nouvelle fonctionnalité**. ✦ prochaine action.
-2. **CI minimale (ADR-013)** — imposer l'ordre de build des paquets + non-régression (recommandée).
-3. **UI Kit (suite)** — composants supplémentaires (FormField, Alert, Card, états UI) ; pas de bibliothèque exhaustive d'un coup.
+1. **Web Core — états UI & composants structurels** — `loading`/`empty`/`error`/`success`, système de formulaires, composants réutilisables (`CORE_SPECIFICATION` §3/§4). ✦ prochaine action.
+2. **CI minimale (ADR-013) + amorce E2E navigateur** — réserves V1 du bloc Auth (recommandées en parallèle).
+3. **Files Web minimal** — alternative à (1) selon priorité produit.
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 5. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
 
@@ -48,6 +49,8 @@ deux cores. À arbitrer par décision humaine.
 | Usage **authentifié** des packages (Web) | **FAIT** — login/refresh/logout + CSRF (Web Auth 2) **et** me/authorization + session/autorisations (Web Auth 3), preuve API réelle |
 | Premier layout/route protégé (Web) | **FAIT** — Web Auth 4 : résolution serveur read-only (Option C) + hydratation, page `/protected` |
 | Page de connexion `/login` + navigation Auth (Web) | **FAIT** — Web Auth 5 : formulaire, login BFF, `returnTo` interne assaini, `replace`/`refresh`, preuve API réelle 22/22 |
+| Bloc **Auth Web (1→5)** stable V1 ? | **REVU** — verdict **`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (`WEB_AUTH_V1_REVIEW.md`) : sûr/cohérent, aucun défaut bloquant ; réserves opérationnelles (CI, E2E, streaming-redirect, multi-onglets, CSP) |
+| Auth post-V1 (register/reset/OAuth/MFA) | **hors périmètre V1** — ne pas poursuivre l'Auth ; priorité = états UI & composants structurels |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
 | Publier les packages | décision registry/CI (ADR-013/014) non implémentée |

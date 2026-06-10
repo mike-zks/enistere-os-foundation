@@ -109,6 +109,19 @@
 > `/login?returnTo=/protected`. **Aucun middleware, aucune Server Action.** Preuve API réelle **22/22**
 > (dont open redirect **bloqué** : `returnTo=https://evil…` → cible réelle `/protected`). Détail :
 > `cores/web-nextjs/docs/login-flow.md`.
+>
+> **Revue globale Auth Web (1 → 5)** — verdict **`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (rapport permanent
+> `cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md`). Le socle Auth Web, traité comme **un système unique** :
+> **aucun défaut de sécurité bloquant** (pas de fuite de token source/HTML/RSC/bundle, **aucun open redirect**,
+> session cohérente 401→anonymous / 403·5xx·réseau distincts, CSRF complet sur les mutations + Origin/Referer
+> fail-closed, contenu privé jamais exposé avant validation, caches isolés/purgés, droits dynamiques **sans
+> nouveau JWT**, contrats OpenAPI = source de vérité). **263 tests fiables (×2, sans hang)** + **runtime 33/33**
+> (nominal + erreurs + refresh + droits). **Réserves opérationnelles** (non bloquantes) : CI (non-régression +
+> ordre de build des paquets), E2E navigateur, redirections en **streaming** (HTTP 200 + `NEXT_REDIRECT`/
+> meta-refresh), **multi-onglets** + fenêtre `staleTime`, durcissement **CSP/HSTS/observabilité**. **Aucune
+> correction de code applicatif** nécessaire (seul correctif test-only `gcTime` mutation, déjà dans `447e3b5`).
+> Statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE`. Prochaine action : **états UI & composants
+> structurels** (pas d'Auth post-V1).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
 - **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.

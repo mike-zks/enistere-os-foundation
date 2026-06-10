@@ -65,7 +65,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `feat(web-nextjs): add secure login experience`,
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(web-nextjs): review web auth v1`,
+  `feat(web-nextjs): add secure login experience`,
   `feat(web-nextjs): add server-resolved protected layout`,
   `docs(web-nextjs): review web core governance`,
   `feat(web-nextjs): add session and authorization state`,
@@ -106,7 +107,25 @@ ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECI
 
 ## 8. Dernière étape terminée
 
-**Web Auth 5 — page de connexion & navigation Auth contrôlée** (`@enistere/web-nextjs`) : page **publique
+**Revue globale Auth Web (1 → 5)** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** du socle
+Auth traité comme **un système unique** — **sans nouvelle fonctionnalité**. Vérifié **fichier par fichier** +
+commandes : architecture (BFF + résolution serveur + login), 6 routes BFF + `/protected` + `/login` (`ƒ`),
+cookies `HttpOnly`/`__Host-`, CSRF + Origin/Referer (fail-closed), **aucune fuite de token** (greps src + bundle
+`.next/static` : tous secrets absents), session (401→anonymous / 403·5xx·réseau distincts), caches disjoints +
+purge login/logout, résolution serveur read-only (aucun contenu privé avant validation), `returnTo`
+**anti-open-redirect**, RBAC OR/AND sans wildcard, contrats `SchemaOf<>` (`generate:check` ok), mappeurs d'erreurs
+cohérents, frontières d'import (test statique). **Non-régression** : web `check` (typecheck+lint+**263 tests
+×2 sans hang**+build) + couverture ≈ 86,1 % ; UI Kit 64 ; api-contracts 11 ; api-client-fetch 29 ; **0 vuln**.
+**Preuve runtime rejouée (un système unique) 33/33** (NestJS + PostgreSQL jetable) : nominal (anonyme→/login→
+login→/protected hydraté→/authorization) + **refresh** (rotation, `/me` read-only sans refresh) + **droits sans
+nouveau JWT** + erreurs (401 sans énumération, 403 CSRF, 403 Origin) + API down (« indisponible » ≠ anonyme) +
+bundle sans secret. **Verdict : `AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (aucun défaut bloquant ; réserves
+opérationnelles : CI, E2E navigateur, streaming-redirect, multi-onglets, CSP/HSTS). **Aucune correction de code
+applicatif** ; statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE`. Rapport permanent :
+`cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md`. `packages/`/`api-nestjs/` non modifiés. Commit
+`docs(web-nextjs): review web auth v1`.
+
+**Étape précédente — Web Auth 5 — page de connexion & navigation Auth contrôlée** (`@enistere/web-nextjs`) : page **publique
 `/login`** (Server Component `force-dynamic`) — **assainit** `returnTo` (`core/auth/return-to.ts` :
 `sanitizeReturnTo`/`buildLoginRedirect`, **anti open-redirect**, testable), **résout la session côté serveur**
 (déjà authentifié ⇒ **redirige** vers `returnTo`, jamais de formulaire ; anonyme ⇒ formulaire ; unavailable ⇒
@@ -183,13 +202,12 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **Revue globale Auth Web (1 → 5)** — **revue de socle** (pas une fonctionnalité). Le
-parcours Auth Web est **complet** (login `/login` → layout protégé → session/autorisations ; BFF
-login/refresh/logout/csrf), **263 tests** + preuves API réelles (26/26 + 22/22). Auditer le parcours
-public→login→privé, **rejouer les preuves**, vérifier cookies/CSRF/Origin/navigation/cache/SSR/hydratation,
-**classer les dettes** (E2E navigateur, CI, CSP…), et **décider de la stabilité V1** du socle Auth Web.
-**Recommandé en parallèle (non bloquant)** : CI minimale (ADR-013). Alternative : UI Kit, Mobile Core,
-Cloud/CI-CD. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Web Core — états UI & composants structurels** (`loading`/`empty`/`error`/`success`
+standardisés, système de formulaires, composants réutilisables — `CORE_SPECIFICATION` §3/§4). Le bloc Auth est
+**revu stable avec réserves** (`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`) ; la suite logique est la standardisation
+UI/formulaires du Web Core (pas d'Auth post-V1 : register/reset/OAuth/MFA hors périmètre). **Recommandé en
+parallèle (réserves V1, non bloquant)** : CI minimale (ADR-013, ordre de build paquets) + amorce E2E navigateur.
+**Alternative** : Files Web minimal, UI Kit, ou Mobile Core. Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
