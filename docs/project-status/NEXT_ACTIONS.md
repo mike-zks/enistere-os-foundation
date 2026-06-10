@@ -5,36 +5,38 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **CI minimale (ADR-013)** : pipeline de non-régression du monorepo imposant l'**ordre de build des
-> paquets** (`api-contracts` → `api-client-fetch` → `ui-kit` → `web-nextjs`), exécutant
-> `typecheck`/`lint`/`test` (Web + UI Kit + paquets), la couverture et **`openapi:generate:check`**.
-> **Aucune nouvelle fonctionnalité produit.** Ne touche pas au comportement applicatif.
+> **Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (`cores/cloud/`) : prolonger ADR-013
+> au-delà de la CI minimale — **cadrer** (et amorcer là où c'est sûr, sans secret ni déploiement réel) la
+> **protection de branche `main`**, la publication de **couverture/rapports**, l'amorce **E2E navigateur**, et
+> le **modèle d'environnements** (sans Dockerfile/registry réel : ADR-014 reste différé). Mission de **cadrage**,
+> pas de déploiement. Alternative immédiate plus légère : durcir la CI (branch protection + couverture + E2E).
 
-**Justification** : la **Revue globale Web Core — incrément V1** est **terminée** (rapport
-`cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, commit `docs(web-nextjs): review web core v1
-increment`) — verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** : socle sûr et cohérent (aucune
-fuite de token/URL signée/donnée privée, CSRF + Origin/Referer, indisponible ≠ anonyme, 404 anti-énumération,
-droits dynamiques sans nouveau JWT), **307 tests ×2** + **runtime réel 49/49** (PostgreSQL + MinIO), **aucun
-défaut bloquant**. La revue identifie **l'absence de CI + l'ordre de build monorepo** (`packages/*/dist` non
-versionnés) comme la **principale réserve transverse** de toutes les revues (gouvernance, Auth V1, Web Core
-V1) — la seule **dette importante** qui menace la non-régression et la reproductibilité (clone neuf). La
-sécuriser **avant** d'augmenter la surface (Files 2 / UI Kit 4 / Mobile) est l'ordre le plus sûr.
+**Justification** : la **CI minimale (ADR-013)** est **en place** (`.github/workflows/ci.yml`, commit
+`ci: add minimal monorepo validation`) — non-régression du monorepo (ordre `api-contracts → api-client-fetch →
+ui-kit → web-nextjs → audit`, `npm ci` Node 24, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes
+Axios/Zustand), **sans secret/Docker/registry/déploiement**. La **Revue globale Web Core V1** (verdict
+`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`, **aucun défaut bloquant**) ne requiert **aucune correction
+urgente** de dette Web. La suite naturelle est d'**étendre la chaîne CI/CD** (ADR-013 partiel → protection de
+branche, environnements ; puis ADR-014 registry) côté **Cloud Core**, ce qui débloque la publication des
+paquets et la conteneurisation des cores. **Ne pas enchaîner automatiquement vers Files 2.**
 
-**Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives Dialog/Select/Toast) si
-des features riches sont imminentes ; **Files 2** (upload Web) ou **Mobile Core** **après** la CI. **Ne pas
-démarrer Files 2 tant que la non-régression n'est pas outillée.**
+**Alternative (justifiée, décision humaine)** : **durcissement CI direct** (branch protection + couverture
+publiée + amorce E2E navigateur) si l'on veut rester dans le Web/CI avant le Cloud ; **UI Kit 4** si features
+riches imminentes ; **Files 2 / Mobile Core** plus tard. **Aucune** n'exige de correction Web préalable (revue
+sans défaut bloquant).
 
-**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission (revue) ajoute le commit
-`docs(web-nextjs): review web core v1 increment` ; statut Web Core **inchangé** `IMPLEMENTATION_PARTIELLE`.
+**Note gouvernance** : `main` est poussé sur `origin` (SSH). Cette mission ajoute le commit
+`ci: add minimal monorepo validation` ; statuts **inchangés** (Web Core `IMPLEMENTATION_PARTIELLE` ; ADR-013
+`PARTIELLEMENT_IMPLEMENTE` ; ADR-014 non implémenté).
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **CI minimale (ADR-013)** — non-régression monorepo + ordre de build des paquets + `generate:check`. ✦ prochaine action.
-2. **Amorce E2E navigateur** — parcours navigateur automatisé pérenne (réserve V1, en complément de la CI).
-3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — alternative si features riches imminentes.
-4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états) — **après** la CI.
+1. **Cloud Core 1 — cadrage CI/CD & environnements** — étendre ADR-013 (protection de branche, environnements, couverture, amorce E2E) ; ADR-014 registry plus tard. ✦ prochaine action.
+2. **Durcissement CI** (alternative légère à (1)) — protection de branche `main` + couverture publiée + amorce E2E navigateur.
+3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
+4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
-6. **Cloud Core minimal** — CI/CD (ADR-013) + registry (ADR-014) + conteneurisation.
+6. **Registry images (ADR-014) + conteneurisation** — build/push GHCR, Dockerfiles (avec le Cloud Core).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -54,11 +56,12 @@ deux cores. À arbitrer par décision humaine.
 | États UI & composants structurels (Web/UI Kit) | **FAIT** — Web UI 1 : Alert/Card/FormField (UI Kit, 78 tests) + LoadingState/EmptyState/ErrorState/Unauthorized/Forbidden/ServiceUnavailable/PageHeader (Web, 270 tests), intégrés + axe |
 | Files Web (lecture/téléchargement) | **FAIT** — Web Core Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, client BFF, `fileKeys`, `useFileMetadata`/`useCreateDownloadUrl` (URL jamais en cache), page `/protected/files/[id]`, **307 tests** + preuve API+MinIO 21/21 |
 | Revue globale Web Core (incrément V1) | **FAIT** — verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (`WEB_CORE_V1_INCREMENT_REVIEW.md`) : 307 tests ×2 + runtime réel 49/49, aucun défaut bloquant ; réserves : CI/ordre de build, E2E |
-| CI minimale (ADR-013) | **débloqué** — prochaine action ; ordre de build paquets + non-régression monorepo + `generate:check` |
-| Files Web (upload) | **débloqué après la CI** — c'est **Web Core Files 2** ; multipart + finalisation, **non** prioritaire avant l'outillage de non-régression |
+| CI minimale (ADR-013) | **FAIT** — `.github/workflows/ci.yml` (GitHub Actions, ordre de build imposé, `npm ci` Node 24, audit, gardes deps) ; ADR-013 **partiel** (restent branch protection, E2E, runtime API, déploiement) |
+| Cloud Core 1 — cadrage CI/CD & environnements | **débloqué** — prochaine action ; étend ADR-013 (sans déploiement réel ni registry) |
+| Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
-| Publier les packages | décision registry/CI (ADR-013/014) non implémentée |
+| Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |
 | Web Core Angular | spécification absente + **ADR-035 non rédigé** |
 | AI / Docs / Quality Cores | spécifications absentes |

@@ -26,7 +26,7 @@ pas une application ni une bibliothèque complète).
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cores documentaires | `cloud`, `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
-| CI/CD, conteneurisation | **Absents** (aucun workflow ni Dockerfile dans le dépôt) |
+| CI/CD, conteneurisation | **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo ; ADR-013 **partiel**) ; **conteneurisation/registry/déploiement absents** (aucun Dockerfile, ADR-014 non implémenté) |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
@@ -157,8 +157,8 @@ bundle/HTML sans secret/mot de passe), **et Files (API NestJS + MinIO jetables) 
 objet → propriétaire `GET /api/files/:id` **200** publics no-store sans champ interne → `download-url` **200**
 `{url,expiresAt}` → **téléchargement réel MinIO** (octets == upload, image/png) → sans permission **403** →
 **non-propriétaire avec permission → 404** → quarantaine **409** → objet supprimé **503** → logout **401** + page →
-`/login` ; **aucun** storageKey/bucket/X-Amz-Signature/credentials en métadonnées, logs ou bundle). Aucune CI :
-exécution **manuelle/locale**.
+`/login` ; **aucun** storageKey/bucket/X-Amz-Signature/credentials en métadonnées, logs ou bundle). Une **CI
+minimale** (`.github/workflows/ci.yml`) rejoue désormais la non-régression du monorepo (hors e2e/runtime).
 
 ## 10. Preuves
 
@@ -168,8 +168,14 @@ exécution **manuelle/locale**.
 
 ## 11. CI/CD
 
-**Absent.** `.github/` contient uniquement des templates PR/issue ; aucun workflow ; aucun Dockerfile
-ni compose dans le dépôt. ADR-013 (CI/CD) et ADR-014 (registry) sont **Validés mais non implémentés**.
+**CI minimale présente** (ADR-013 **partiellement implémenté**) : `.github/workflows/ci.yml` (GitHub Actions,
+Node 24, `npm ci`, `permissions: contents:read`, `concurrency`) impose l'ordre de validation **api-contracts →
+api-client-fetch → ui-kit → web-nextjs → audit** : `generate:check`, typecheck/lint/build/test, `pack:check`
+UI Kit, **build Web indépendant de l'API**, `npm audit` (0 vuln) et **gardes Axios/Zustand absents**
+(ADR-011/012). **Aucun secret, aucun Docker, aucune base/stockage, aucun déploiement, aucun registry.**
+**Restent** : protection de branche, couverture publiée, **E2E navigateur**, CI runtime API (PostgreSQL/MinIO),
+release/versioning, déploiement, environnements protégés. **ADR-014 (registry/GHCR) non implémenté** (aucune
+image construite/poussée). Aucun Dockerfile ni compose dans le dépôt. Détail : `.github/workflows/README.md`.
 
 ## 12. Documentation
 
@@ -185,7 +191,9 @@ détaillée du API Core.
    (endpoints publics **et** BFF Auth) par le Web Core ; types Auth dérivés via `SchemaOf<>`. Risque de
    dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
 3. **Spécifications sans starter** — `cloud` et `mobile-react-native` peuvent être lus à tort comme implémentés.
-4. **Pas de CI** — non-régression et reproductibilité reposent sur l'exécution manuelle.
+4. **CI minimale en place** (`.github/workflows/ci.yml`) — non-régression du monorepo automatisée (ordre de
+   build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
+   navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.
 5. **Strategy Phase 0 partiellement datée** — contexte historique à ne pas confondre avec l'état réel.
 
 ## 14. Incohérences
@@ -238,9 +246,13 @@ réellement expirée → 403** et **pannes API/MinIO**), **aucun défaut bloquan
 (CI + ordre de build monorepo, E2E navigateur) et **mineures** (CSP/HSTS, 429, contrastes, cache Files au
 logout). **Corrections documentaires seules** (`.env.example` + `SECURITY.md`, zéro comportement). Statuts
 **maintenus** `IMPLEMENTATION_PARTIELLE` (un verdict d'incrément n'augmente pas le statut du core ; ni
-Tailwind/Radix/shadcn ni bibliothèque exhaustive). **Prochaine action** : **CI minimale (ADR-013)** — non-
-régression monorepo + ordre de build des paquets + `generate:check` (principale réserve transverse ; **ne pas
-démarrer Files 2 avant l'outillage de non-régression**). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+Tailwind/Radix/shadcn ni bibliothèque exhaustive). Enfin la **CI minimale (ADR-013)** a été **mise en place**
+(`.github/workflows/ci.yml`) : non-régression du monorepo (ordre `api-contracts → api-client-fetch → ui-kit →
+web-nextjs → audit`, `npm ci` Node 24, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes
+Axios/Zustand) — **sans secret/Docker/registry/déploiement** ; ADR-013 passe **`PARTIELLEMENT_IMPLEMENTE`**.
+**Prochaine action** : **Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (étendre ADR-013
+vers protection de branche / environnements ; ADR-014 registry plus tard). Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

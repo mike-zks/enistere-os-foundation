@@ -22,8 +22,8 @@
 | ADR-010 | Stack UI React Native | Validé | **PARTIELLEMENT_IMPLEMENTE** | ui-kit/mobile | tokens prêts (RN-safe) ; composants/ThemeProvider RN non implémentés |
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
-| ADR-013 | CI/CD V1 | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web/mobile | aucun workflow |
-| ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image |
+| ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **CI minimale** `.github/workflows/ci.yml` (Node 24, `npm ci`, `permissions: contents:read`, jobs ordonnés `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `generate:check`, build/lint/test, `npm audit` 0 vuln, gardes Axios/Zustand). **Reste** : protection de branche, couverture publiée, E2E, CI API runtime (PostgreSQL/MinIO), release/versioning, déploiement, environnements protégés |
+| ADR-014 | Registry images | Validé | **DECIDE_NON_IMPLEMENTE** | cloud/api/web | aucune image ; **non couvert par la CI minimale** (aucun build/push GHCR) |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
 | ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
@@ -171,7 +171,13 @@
 > Core **maintenu** `IMPLEMENTATION_PARTIELLE`. **Prochaine action : CI minimale (ADR-013)** — outiller la
 > non-régression avant d'augmenter la surface (Files 2 / UI Kit 4 / Mobile **après** la CI).
 - **ADR-015** — secure storage mobile : avec le Mobile Core.
-- **ADR-013 / 014** — CI/CD + registry : infrastructure (hors core API).
+- **ADR-013** — CI/CD V1 : **première implémentation réelle** (CI minimale `.github/workflows/ci.yml`,
+  2026-06-10) — non-régression du monorepo (ordre de build `api-contracts → api-client-fetch → ui-kit →
+  web-nextjs → audit`, `npm ci` + Node 24, `permissions: contents:read`, **aucun secret/Docker/registry/
+  déploiement**, `npm audit` 0 vuln, gardes Axios/Zustand). **`PARTIELLEMENT_IMPLEMENTE`** : restent protection
+  de branche, couverture publiée, E2E navigateur, CI runtime API (PostgreSQL/MinIO), release/versioning,
+  déploiement et environnements protégés. **ADR-014** (registry images / GHCR) **non implémenté** — la CI
+  minimale ne construit ni ne pousse aucune image. Détail : `.github/workflows/README.md`.
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés

@@ -77,8 +77,12 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   `SchemaOf<>` (`UserProfileResponseDto`, `AuthorizationSummaryResponseDto`) — preuve API réelle.
 - **Documentaires (spéc seule, aucun starter)** : `cloud`, `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
-- **Absents** : CI/CD, conteneurisation.
-- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `docs(web-nextjs): review web core v1 increment`,
+- **CI** : **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo,
+  ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
+  gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
+  déploiement, protection de branche, E2E navigateur.
+- **Git** : `main` poussé sur `origin` (SSH). Commits récents : `ci: add minimal monorepo validation`,
+  `docs(web-nextjs): review web core v1 increment`,
   `feat(web-nextjs): add secure file read access`,
   `feat(web-ui): add standard interface states`,
   `docs(web-nextjs): review web auth v1`,
@@ -112,20 +116,42 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
 **consommé en lecture côté Web** — métadonnées publiques + URL signée + téléchargement direct, **sans** upload),
-039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, **004** (session : adapter serveur Web + **état de session
+039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, **013** (CI minimale), **004** (session : adapter serveur Web + **état de session
 navigateur** `useSession`/`useAuthorization`, read-only sans refresh silencieux), **005** (cookies web +
 **CSRF** : flux BFF login/refresh/logout opérationnels, cookies `HttpOnly`, CSRF double-submit,
 Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appliqué **côté API** ;
 **consommé en lecture** côté Web via helpers OR/AND sans wildcard pour l'affichage conditionnel —
 **l'API reste l'autorité**), **011** (Fetch instancié public + **authentifié** Web + client BFF navigateur + **façade Files** read-only),
 **012** (TanStack Query intégré Web : server state Health, Auth **et Files** — cache disjoint, purge au logout,
-**URL signée hors cache** via mutation), 016
-(types Auth via `SchemaOf<>`). Décidés non implémentés : 013, 014, 015. **008/009/010 partiels** (UI Kit).
-ADR-017→038 = backlog non rédigé. Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
+**URL signée hors cache** via mutation), **013** (**CI minimale** GitHub Actions — non-régression monorepo ;
+**partiel**), 016
+(types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
+ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** depuis la CI minimale
+(`.github/workflows/ci.yml`) — restent branch protection, E2E, CI runtime API, release, déploiement,
+environnements. **ADR-014** (registry) reste non implémenté. Détail :
+[`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Revue globale Web Core — incrément V1** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** de
+**CI minimale (ADR-013)** (`.github/workflows/ci.yml`) : première implémentation réelle d'ADR-013 — CI GitHub
+Actions de **non-régression du monorepo**, **sans déploiement, registry, Docker, secret ni publication**.
+Déclencheurs `pull_request` + `push` sur `main` ; `permissions: contents: read` ; `concurrency` (annule
+l'obsolète) ; **Node 24** + **`npm ci`** (jamais `npm install`) + `cache: npm`. **5 jobs ordonnés par `needs`**
+(échec lisible) imposant l'ordre de build : **`api-contracts`** (`generate:check` + typecheck/build/test) →
+**`api-client-fetch`** (build de la dépendance api-contracts puis typecheck/build/test) → **`ui-kit`**
+(`tokens:check`/typecheck/build/lint/test/`pack:check`) → **`web-nextjs`** (build des 3 dépendances puis
+typecheck/lint/test/**build sans API**) → **`audit`** (`npm audit` 0 vuln + **gardes Axios/Zustand absents**
+ADR-011/012 + versions clés react/react-query/next). Chaque job aval **rebuild ses dépendances** (`dist/` non
+versionnés) — **validé par simulation runner neuf** (dist effacés → chaîne reconstruite → verte). **Pas de
+`pull_request_target`, aucun secret, aucun Docker/PostgreSQL/MinIO, aucun GHCR, aucun déploiement.**
+Non-régression locale (Node 24.14, `npm ci`) **verte** : api-contracts 11, api-client-fetch 29, ui-kit 78
+(+tokens/pack), web-nextjs 307 + build, **`npm audit` 0 vuln**, Axios/Zustand absents. **Corrections** : aucune
+au code applicatif ; aucun script modifié. ADR-013 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-014 **non
+implémenté**. Docs : `.github/workflows/README.md` + checkpoint. `cores/api-nestjs/src/`/`mobile`/`cloud`/
+`docs/adr`/`strategy` **non modifiés**. Commit `ci: add minimal monorepo validation`. **Prochaine action :
+Cloud Core 1 — cadrage CI/CD & environnements.**
+
+**Étape précédente — Revue globale Web Core — incrément V1** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** de
 l'incrément complet (Health public + Auth 1→5 + UI 1 + Files 1) traité comme **un système unique**, **sans
 nouvelle fonctionnalité**. Vérifié fichier par fichier + commandes + runtime : architecture (couches
 `app→features→core/shared`, **aucun import inversé**, 16 client components justifiés, aucun barrel dangereux),
@@ -296,17 +322,15 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique** : **CI minimale (ADR-013)**. La **Revue globale Web Core — incrément V1** est **terminée**
-(verdict `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS` ; rapport
-[`WEB_CORE_V1_INCREMENT_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md) ; 307 tests ×2
-+ runtime réel 49/49 ; aucun défaut bloquant). Sa **principale réserve transverse** — partagée par les revues
-gouvernance et Auth V1 — est l'**absence de CI** et l'**ordre de build monorepo** (`packages/*/dist` non
-versionnés). La prochaine action outille donc la **non-régression** : pipeline imposant l'ordre
-`api-contracts → api-client-fetch → ui-kit → web-nextjs`, `typecheck`/`lint`/`test`/couverture +
-`openapi:generate:check`, **sans nouvelle fonctionnalité produit**. **Alternative (décision humaine)** : UI Kit
-4 (primitives interactives) si features riches imminentes ; **Files 2 / Mobile Core après la CI**. **Ne pas
-démarrer Files 2 tant que la non-régression n'est pas outillée.** Détail :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique** : **Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements**. La **CI minimale
+(ADR-013)** est **en place** (`.github/workflows/ci.yml` ; non-régression monorepo ordonnée ; ADR-013 partiel).
+La **Revue globale Web Core V1** (verdict `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`, **aucun défaut
+bloquant**) ne requiert **aucune correction urgente**. La suite naturelle est d'**étendre la chaîne CI/CD**
+côté Cloud Core : **cadrer** (et amorcer là où c'est sûr) protection de branche `main`, environnements,
+publication de couverture, amorce **E2E navigateur** — **sans** Dockerfile/registry réel (ADR-014 différé),
+**sans** secret ni déploiement. **Alternative (décision humaine)** : durcissement CI direct (branch protection
++ couverture + E2E) ; UI Kit 4 ; Files 2 / Mobile Core plus tard. **Ne pas enchaîner automatiquement vers
+Files 2.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

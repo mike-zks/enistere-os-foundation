@@ -27,8 +27,8 @@
 
 | Élément | Spéc/ADR | Implémenté | Tests | Statut | Prochaine condition |
 |---|---|---|---|---|---|
-| CI/CD | ADR-013 Validé | — | — | **DECIDE_NON_IMPLEMENTE** | pipeline (hors core API) |
-| Registry images | ADR-014 Validé | — | — | **DECIDE_NON_IMPLEMENTE** | choix registry + publication |
+| CI/CD | ADR-013 Validé | **CI minimale** `.github/workflows/ci.yml` (GitHub Actions, Node 24, `npm ci`, ordre `api-contracts→api-client-fetch→ui-kit→web-nextjs→audit`) | — (validée par baseline locale + simulation runner neuf) | **PARTIELLEMENT_IMPLEMENTE** | protection de branche, couverture publiée, E2E, CI runtime API, release, déploiement, environnements |
+| Registry images | ADR-014 Validé | — | — | **DECIDE_NON_IMPLEMENTE** | choix registry + publication (hors CI minimale) |
 | Conteneurisation (Docker) | — | — | — | **ABSENT** | Dockerfile/compose (post-CI) |
 | Observabilité (métriques/traces) | ADR-018/036 à rédiger | — | — | **NON_COMMENCE** | Cloud Core |
 | Git (commits/branches) | ADR-001 Validé | **baseline `7dcb543` (main)** | — | **PARTIELLEMENT_IMPLEMENTE** | push `origin` (décision humaine) |
@@ -70,14 +70,14 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 | C5 | `OPENAPI_CLIENT_PROOF.md` cite `proofs/openapi-client/*` | Code de preuve retiré | Pointeur seul | Liens internes partiellement périmés | Bannière de migration déjà ajoutée | MINEURE |
 | C6 | `cores/{cloud,mobile-react-native}` ont une spéc | Aucun starter | Documentaires ; **ui-kit et web-nextjs désormais `STARTER_INITIALISE`** | Confusion spéc↔implémentation | Statut explicite (cette matrice) | IMPORTANTE |
 | C7 | Docs Web « starter sans auth » (`README`/`SECURITY.md`/`ARCHITECTURE.md` ; commentaires `cookie-config`/`query-client`) | BFF Auth + session implémentés | **Résolu** (revue de gouvernance 2026-06-10) : corrections factuelles appliquées + export mort `CSRF_HEADER_NAME` supprimé | Lecture « sans auth » erronée | — | RÉSOLU |
-| C8 | `next build` (phase TS) du Web Core | `packages/*/dist` **non versionnés** (gitignore `dist/`) | **Réel** : clone neuf doit builder les paquets (`npm run build` racine) **avant** le Web Core ; aucune CI ne l'impose (ADR-013) | Build cassable sur clone neuf / futur pipeline | CI imposant l'ordre topologique (ADR-013) | IMPORTANTE (non bloquante) |
+| C8 | `next build` (phase TS) du Web Core | `packages/*/dist` **non versionnés** (gitignore `dist/`) | **Atténué** : la **CI minimale** (`.github/workflows/ci.yml`) impose l'ordre topologique (`api-contracts → api-client-fetch → ui-kit → web-nextjs`) ; chaque job aval rebuild ses dépendances (validé par simulation runner neuf, dist effacés) | Risque résiduel = clone **local** sans CI | **Atténué (CI)** ; documenter l'ordre `npm run build` racine pour le dev local | RÉSOLU (CI) / MINEURE (local) |
 
 ## 5. Dette documentaire
 
 | Élément | Classe |
 |---|---|
-| Ordre de build monorepo (`packages/*/dist` non versionnés ; aucune CI ne l'impose — ADR-013) | IMPORTANTE |
-| Absence d'E2E navigateur Web (flux session/logout couverts au niveau handler/transport + preuve API réelle) | IMPORTANTE |
+| Ordre de build monorepo (`packages/*/dist` non versionnés) — **désormais imposé par la CI minimale** (`.github/workflows/ci.yml`) ; reste à documenter pour le dev local | MINEURE (CI en place) |
+| **CI minimale présente** (ADR-013 partiel) ; restent : protection de branche, couverture publiée, **E2E navigateur**, CI runtime API, release/déploiement | IMPORTANTE |
 | Baseline Git locale créée (`7dcb543`) **non poussée** vers `origin` | IMPORTANTE |
 | Packages non intégrés (à clarifier dans les futurs cores) | IMPORTANTE |
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |

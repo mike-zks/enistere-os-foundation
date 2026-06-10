@@ -1,0 +1,135 @@
+name: CI
+
+# CI minimale (ADR-013) — non-régression du monorepo, SANS déploiement, registry, Docker,
+# secret ni publication. Impose l'ordre de build/validation des espaces de travail :
+#   api-contracts → api-client-fetch → ui-kit → web-nextjs → audit/garde-dépendances.
+# Aucune base de données ni stockage objet : le build du Web Core est indépendant de l'API.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Lecture seule : la CI ne pousse rien, ne crée ni release ni image, n'utilise aucun secret.
+permissions:
+  contents: read
+
+# Annule les exécutions précédentes obsolètes sur la même référence.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1) Contrats OpenAPI : le snapshot canonique et les types générés doivent rester synchronisés.
+  api-contracts:
+    name: api-contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: generate:check (snapshot OpenAPI ↔ types à jour)
+        run: npm run generate:check --workspace=@enistere/api-contracts
+      - run: npm run typecheck --workspace=@enistere/api-contracts
+      - run: npm run build --workspace=@enistere/api-contracts
+      - run: npm run test --workspace=@enistere/api-contracts
+
+  # 2) Client Fetch officiel : compile et reste compatible avec les contrats.
+  #    Dépend d'api-contracts (gating) ET doit builder son dist (dist non versionné).
+  api-client-fetch:
+    name: api-client-fetch
+    needs: api-contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: build de la dépendance @enistere/api-contracts (dist requis)
+        run: npm run build --workspace=@enistere/api-contracts
+      - run: npm run typecheck --workspace=@enistere/api-client-fetch
+      - run: npm run build --workspace=@enistere/api-client-fetch
+      - run: npm run test --workspace=@enistere/api-client-fetch
+
+  # 3) UI Kit : tokens, build, lint, tests, pack (aucune dépendance sur les paquets API ;
+  #    `needs` impose seulement l'ordre et un échec lisible).
+  ui-kit:
+    name: ui-kit
+    needs: api-client-fetch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: tokens:check (styles régénérés à jour)
+        run: npm run tokens:check --workspace=@enistere/ui-kit
+      - run: npm run typecheck --workspace=@enistere/ui-kit
+      - run: npm run build --workspace=@enistere/ui-kit
+      - run: npm run lint --workspace=@enistere/ui-kit
+      - run: npm run test --workspace=@enistere/ui-kit
+      - name: pack:check (contenu du tarball publiable)
+        run: npm run pack:check --workspace=@enistere/ui-kit
+
+  # 4) Web Core Next.js : build INDÉPENDANT de l'API (routes privées/BFF dynamiques).
+  #    Construit d'abord toute la chaîne de dépendances (dist non versionnés), puis valide.
+  web-nextjs:
+    name: web-nextjs
+    needs: ui-kit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: build des dépendances (api-contracts → api-client-fetch → ui-kit)
+        run: |
+          npm run build --workspace=@enistere/api-contracts
+          npm run build --workspace=@enistere/api-client-fetch
+          npm run build --workspace=@enistere/ui-kit
+      - run: npm run typecheck --workspace=@enistere/web-nextjs
+      - run: npm run lint --workspace=@enistere/web-nextjs
+      - run: npm run test --workspace=@enistere/web-nextjs
+      - name: build Web (sans API, sans base de données, sans stockage)
+        run: npm run build --workspace=@enistere/web-nextjs
+
+  # 5) Audit & gardes de dépendances (ADR-011 Fetch / ADR-012 TanStack Query).
+  audit:
+    name: audit
+    needs: web-nextjs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: npm audit (posture 0 vulnérabilité)
+        run: npm audit
+      - name: dépendances interdites absentes (Axios, Zustand)
+        run: |
+          if npm ls axios >/dev/null 2>&1; then
+            echo "::error::Axios ne doit pas être installé (ADR-011 : client HTTP = Fetch)."
+            exit 1
+          else
+            echo "axios absent (OK)"
+          fi
+          if npm ls zustand >/dev/null 2>&1; then
+            echo "::error::Zustand ne doit pas être installé (ADR-012 : server state = TanStack Query)."
+            exit 1
+          else
+            echo "zustand absent (OK)"
+          fi
+      - name: dépendances clés (informatif — cohérence des versions)
+        run: npm ls react react-dom @tanstack/react-query next || true

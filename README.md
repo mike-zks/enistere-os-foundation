@@ -17,6 +17,7 @@ La phase actuelle du repository est la **Phase 0 : stratégie et fondations**. E
 - `docs/` : ADR, guides, checklists, runbooks, onboarding, décisions et glossaire.
 - `cores/` : socles techniques (**API Core NestJS V1** dans `cores/api-nestjs/` ; **UI Kit** — tokens **+ 9 primitives Web** (React 19 : Button/Input/Label/Text/Spinner/VisuallyHidden + Alert/Card/FormField) — dans `cores/ui-kit/` ; **Web Core Next.js** — Next 16 / React 19 + UI Kit + **API publique (Health)** + **TanStack Query** + **BFF Auth** (login/refresh/logout/csrf) + **session/autorisations** (me/authorization, `useSession`/`useAuthorization`) + **layout protégé** (résolution Auth serveur read-only + hydratation, page `/protected`) + **page de connexion `/login`** + **états UI standardisés** (loading/empty/error/401/403/indisponible + PageHeader) + **Files lecture/téléchargement** (BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, URL signée hors cache, page `/protected/files/[id]`) — dans `cores/web-nextjs/`).
 - `packages/` : **packages partagés** du monorepo (npm workspaces).
+- `.github/workflows/` : **CI minimale** (ADR-013) — non-régression du monorepo (`ci.yml` : ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, Node 24, `npm ci`, `npm audit`, gardes Axios/Zustand) ; **sans** secret/Docker/registry/déploiement.
 - `prompts/` : prompts IA classés par usage.
 - `tools/` : futurs générateurs, scripts, validateurs et outils de release.
 - `templates/` : modèles documentaires réutilisables.
