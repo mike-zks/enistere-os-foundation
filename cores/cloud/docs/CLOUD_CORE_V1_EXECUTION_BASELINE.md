@@ -127,12 +127,19 @@ déploiement par environnement protégé, rollback, scan/signature d'image, semv
 
 ## 11. Politique déploiement
 
-**Staging manuel `CADRE_MANUEL_DOCUMENTE`** (Cloud Core 6) : compose + `.env` **exemples** + runbooks
+**Staging** : cadré manuellement (Cloud Core 6) puis **dry-run contrôlé exécuté (Cloud Core 7, 2026-06-11)** —
+statut **`DRY_RUN_EXECUTE` avec défaut bloquant**. Compose + `.env` **exemples** + runbooks
 (`cores/cloud/staging/`, `STAGING_DEPLOYMENT_RUNBOOK.md`, `STAGING_ROLLBACK_RUNBOOK.md`) pour déployer **à la
-main** les images GHCR immuables — **aucune exécution réelle**, aucun secret, aucune automatisation. **Aucun
-déploiement réel ni production.** Cible (future) : staging exécuté → scripté → CI/CD avec environnements GitHub
-protégés + approbation + **rollback** (§15), exposition via Traefik. **Migrations découplées de l'image**
-(runtime sans CLI Prisma) ; **rollback d'image** simple, **rollback DB non garanti** (migrations additives).
+main** les images GHCR immuables — **aucune exécution réelle**, aucun secret, aucune automatisation, aucun
+`latest`. Le **dry-run** (`STAGING_DRY_RUN_REPORT.md`) a validé `compose config`/`pull`, postgres+minio, le
+boot de l'**image Web** (HTTP 200), mais a révélé un **défaut bloquant** : l'**image API ne démarre pas**
+(query engine Prisma OpenSSL **1.1.x** vs runtime **bookworm 3.0.x** → crash-loop). Il a aussi **corrigé** le
+runbook : l'image **embarque** le CLI Prisma + le schema-engine (le « CLI absent » était faux) → **stratégie
+migrations à rouvrir**. **Décision MinIO/URL signée** tranchée (Option A : `S3_ENDPOINT` = adresse publique du
+serveur, jamais `minio:9000`). **Exécution staging réelle = BLOQUÉE** tant que l'image API n'est pas corrigée.
+Cible (future) : image corrigée → staging exécuté → scripté → CI/CD avec environnements GitHub protégés +
+approbation + **rollback** (§15). **Rollback d'image** simple mais conditionné à une image **qui boote** ;
+**rollback DB non garanti** (migrations additives).
 
 ## 12. Politique runtime API (implémentée — niveau 2)
 
@@ -173,8 +180,12 @@ environnements protégés, ni monitoring, ni rollback).
 
 ## 17. Étapes suivantes
 
-1. **Appliquer** la checklist de protection de branche `main` (manuel, GitHub Settings) — rendre les checks
-   des **trois** workflows (`ci.yml`, `api-runtime-ci.yml`, `web-e2e-ci.yml`) bloquants.
-2. **Niveau 4** : registry GHCR (ADR-014) puis déploiement par environnement protégé + rollback.
-3. Durcissement CI complémentaire (couverture publiée, dépendances pinnées, scan de secrets).
+1. **Cloud Core 8 — corriger l'image runtime API NestJS (moteur de requête Prisma)** : la générer/embarquer
+   pour la plateforme runtime (Debian bookworm / OpenSSL **3.0.x**) afin que l'image **démarre**, puis
+   **re-jouer le dry-run** (`STAGING_DRY_RUN_REPORT.md`). **Verrou n°1** : aucune exécution staging réelle
+   possible avant. Trancher au passage la **stratégie migrations** (depuis l'image vs depuis les sources).
+2. **Niveau 4 (suite)** : déploiement staging réel par environnement protégé + rollback (après image corrigée).
+3. Durcissement CI complémentaire (couverture publiée, dépendances pinnées, **scan de secrets**, et — leçon
+   CC7 — **smoke-run de l'image en CI** : exécuter brièvement l'image et vérifier `/health/ready`, pour ne plus
+   laisser passer un défaut runtime invisible aux tests « depuis les sources »).
 4. Rédiger les ADR structurants au moment voulu (registry si structurante, OSRM/PostGIS si adoptés).

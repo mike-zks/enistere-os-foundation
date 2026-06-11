@@ -1,7 +1,7 @@
 # FOUNDATION_CURRENT_STATE.md — État courant officiel d'Enistere OS Foundation
 
 > **Photographie officielle** de l'état réel du repository, vérifiée fichier par fichier.
-> **Dernière mise à jour : 2026-06-10.**
+> **Dernière mise à jour : 2026-06-11.**
 >
 > ⚠️ **Ne pas supposer qu'un core est implémenté parce que sa spécification existe.** Un
 > `CORE_SPECIFICATION.md` ≠ un starter ; un README ≠ une implémentation ; un rapport ≠ une preuve
@@ -27,7 +27,7 @@ pas une application ni une bibliothèque complète).
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
 | Cores documentaires | `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
-| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging manuel cadré** (CC6 : compose/`.env` exemples + runbooks, `CADRE_MANUEL_DOCUMENTE`) ; **déploiement réel absent** |
+| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging manuel cadré** (CC6) puis **dry-run contrôlé exécuté** (CC7, `DRY_RUN_EXECUTE`) ayant **révélé un défaut bloquant : l'image API ne démarre pas** (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) ; **image Web OK** ; **déploiement réel absent/BLOQUÉ** |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
@@ -193,11 +193,18 @@ pinning ; la protection de branche `main` reste une **action humaine manuelle**.
 livré la **registry GHCR** (niveau 4 partiel) : `registry-ci.yml` + Dockerfiles API/Web (multi-stage, non-root,
 Web standalone) → build + **push images sur `main`** (tags immuables, labels OCI, `GITHUB_TOKEN`, **sans
 déploiement/secret/PAT**) — `docker build` API+Web **validé localement**, ADR-014 → `PARTIELLEMENT_IMPLEMENTE`.
-Enfin le **Cloud Core 6 — déploiement staging manuel** a livré le **cadrage** staging (`cores/cloud/staging/` :
+Puis le **Cloud Core 6 — déploiement staging manuel** a livré le **cadrage** staging (`cores/cloud/staging/` :
 compose+`.env` exemples validés `docker compose config` + runbooks **déploiement/rollback**) — `CADRE_MANUEL_DOCUMENTE`,
-**aucune exécution réelle/secret/automatisation/`latest`** ; **CC5B validé** (images GHCR publiques). **Prochaine
-action** : **Cloud Core 7 — exécution réelle staging sur serveur** (secrets hors dépôt) **ou** dry-run GitHub
-**ou** durcissement registry (scan/signature) ; **action humaine** : confirmer la protection de branche `main`.
+**aucune exécution réelle/secret/automatisation/`latest`** ; **CC5B validé** (images GHCR publiques). Enfin le
+**Cloud Core 7 — préparation serveur staging & dry-run contrôlé** a **exécuté un dry-run local réel** (images
+GHCR immuables `sha-7b07e5e` + `.env.staging` **réel hors dépôt**, secrets jetables supprimés) :
+`compose config`/`pull` OK, `postgres`+`minio`+bucket, **image Web boote (HTTP 200)** — **mais l'image API
+crash-loop** (query engine Prisma **OpenSSL 1.1.x** dans `.prisma/client` vs runtime **Debian bookworm 3.0.x**),
+défaut **invisible à la CI** (runtime de l'image jamais exécuté). Déploiement staging → **`DRY_RUN_EXECUTE`**
+(**défaut bloquant** → exécution réelle BLOQUÉE) ; décision **MinIO/URL signée** tranchée (Option A) ; runbook
+migrations corrigé (l'image **embarque** le CLI Prisma). Détail : `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`.
+**Prochaine action** : **Cloud Core 8 — corriger l'image runtime API (moteur Prisma)** puis re-dry-run ;
+**action humaine** : confirmer la protection de branche `main`.
 
 ## 12. Documentation
 
@@ -217,6 +224,12 @@ détaillée du API Core.
    build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
    navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.
 5. **Strategy Phase 0 partiellement datée** — contexte historique à ne pas confondre avec l'état réel.
+6. **Image runtime API non démarrable (BLOQUANT, dry-run CC7)** — le query engine Prisma de `.prisma/client`
+   est compilé pour **OpenSSL 1.1.x** alors que la base runtime est **Debian bookworm / OpenSSL 3.0.x** →
+   crash-loop, `/health/ready` jamais vert. **Défaut non détecté par la CI** (`api-runtime-ci` exécute depuis
+   les **sources** ; `registry-ci` ne fait que **construire** l'image). **Exécution staging réelle BLOQUÉE**
+   jusqu'à correction (**Cloud Core 8**). Atténuation future : **smoke-run de l'image en CI**. Détail :
+   `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`.
 
 ## 14. Incohérences
 

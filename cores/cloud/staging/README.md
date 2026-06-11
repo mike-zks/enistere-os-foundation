@@ -34,3 +34,23 @@ docker compose --env-file .env.staging -f docker-compose.staging.example.yml up 
 ```
 
 Détail complet, ordre exact, health checks, bucket MinIO, rollback : **runbooks** (`../docs/`).
+
+## Dry-run contrôlé (Cloud Core 7, 2026-06-11)
+
+Un **dry-run local réel** a été exécuté à partir des **images GHCR immuables** (`sha-7b07e5e`) avec un
+`.env.staging` **réel généré hors dépôt** (secrets jetables, supprimé après). Résultats (détail :
+[`../docs/STAGING_DRY_RUN_REPORT.md`](../docs/STAGING_DRY_RUN_REPORT.md)) :
+
+- ✅ `docker compose config` valide (tag immuable, **aucun `latest`**) ; ✅ images **tirées en anonyme**
+  (registry public) ; ✅ `postgres healthy` + `minio Up` + bucket créé ; ✅ **image Web démarre** (HTTP 200).
+- ❌ **Défaut BLOQUANT** : l'**image API ne démarre pas** (crash-loop) — le **query engine** Prisma de
+  `.prisma/client` est compilé pour **OpenSSL 1.1.x** alors que la base runtime est **Debian bookworm /
+  OpenSSL 3.0.x**. CI aveugle (runtime de l'image jamais exécuté). → **exécution staging réelle BLOQUÉE**.
+- ⚠️ Le runbook disait « image sans CLI Prisma » : **faux** (CLI + schema-engine présents) → stratégie
+  migrations à rouvrir.
+- 🔑 **Secrets hors dépôt** : emplacement recommandé serveur `/opt/enistere/staging/.env.staging`
+  (`chmod 600`, **jamais** committé). Décision **MinIO/URL signée** tranchée (Option A) : `S3_ENDPOINT` =
+  adresse **publique** du serveur (jamais `minio:9000`).
+
+**Prochaine action : Cloud Core 8 — corriger l'image runtime API (moteur Prisma)** puis re-dry-run.
+Statut déploiement staging : **`DRY_RUN_EXECUTE`** (défaut bloquant) — **ni** opérationnel, **ni** automatisé.
