@@ -15,13 +15,15 @@
 > **public**) : rendre **bloquants** les **7 checks** (+ `images` recommandé) selon
 > `cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. **Non réalisable par un agent.**
 
-**Justification** : le **Cloud Core 5 — Registry GHCR sans déploiement** est **terminé** (commit `ci(cloud):
-add ghcr registry workflow`) : Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) + workflow
+**Justification** : le **Cloud Core 5 — Registry GHCR sans déploiement** est **terminé et mergé** (PR #1 →
+`b41a953` sur `main`) : Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) + workflow
 `registry-ci.yml` (build PR sans push ; **build + push GHCR sur `main`** ; tags immuables `sha-`/`main-`, **pas
 de `latest`**, labels OCI, auth `GITHUB_TOKEN`, **aucun secret/PAT/`.env`**) — **`docker build` API+Web validé
-localement**. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`**. Les images existent désormais ; la suite logique est un
-**premier déploiement contrôlé** (staging manuel) **ou** le durcissement de la chaîne registry avant déploiement.
-**Ne pas** automatiser un déploiement production sans environnement protégé + rollback.
+localement**. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`**. **À confirmer côté GitHub (humain, `gh` indisponible)** :
+Registry CI **verte sur `main`** + **images GHCR présentes** (`api-nestjs`/`web-nextjs`, tags `sha-`/`main-`,
+pas de `latest`) + visibilité du package. **Cloud Core 6 est conditionné** à cette confirmation. **Ne pas**
+automatiser un déploiement production sans environnement protégé + rollback. **Flux PR obligatoire** (push direct
+`main` refusé par la protection).
 
 **Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives) ; **Files 2** (upload
 Web) ; **Mobile Core**.
@@ -62,8 +64,8 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 2 — CI runtime API (niveau 2) | **FAIT** — `.github/workflows/api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check, build, audit) |
 | Cloud Core 3 — E2E navigateur (niveau 3) | **FAIT** — `.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ; Health/Auth/Files ; **7 tests verts** en simulation) |
 | Cloud Core 4 — durcissement CI & gouvernance | **FAIT** — 7 checks `main` figés + checklist actionnable + politiques artefacts/couverture/pinning/actionlint tranchées ; workflows inchangés |
-| Cloud Core 5 — Registry GHCR (niveau 4 partiel) | **FAIT** — `registry-ci.yml` + Dockerfiles API/Web (multi-stage, non-root, Web standalone) ; build PR sans push, push GHCR sur `main`, tags immuables, labels OCI, `GITHUB_TOKEN` ; `docker build` validé local ; ADR-014 → partiel |
-| Protection de branche `main` | **débloqué (action humaine, repo public)** — checklist `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (7 checks + `images`) ; **non applicable par un agent** (GitHub Settings) |
+| Cloud Core 5 — Registry GHCR (niveau 4 partiel) | **FAIT + MERGÉ** (PR #1 → `b41a953`) — `registry-ci.yml` + Dockerfiles API/Web ; `docker build` validé local ; ADR-014 → partiel. **À confirmer (humain)** : Registry CI verte sur `main` + images GHCR |
+| Protection de branche `main` | **APPLIQUÉE** (repo public) — la PR est désormais **exigée** (push direct `main` refusé). Vérifier que les 7 checks (+ `images`) sont bien requis |
 | Cloud Core 6 — déploiement staging manuel | **débloqué** — prochaine mission ; déployer une image GHCR vers staging protégé (approbation, rollback) ; ou durcissement registry |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
