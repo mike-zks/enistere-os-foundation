@@ -587,17 +587,21 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique (mission Codex)** : **Cloud Core 10 — préparation serveur staging sécurisé** — identifier/
-provisionner un **serveur staging réel** (Hetzner/VM) avec **HTTPS + DNS/domaine + pare-feu** + SSH, secrets
-**hors dépôt** ; puis y appliquer les runbooks avec l'image GHCR API **corrigée** (`sha-d1e6242`+) et **valider
-en réel** ce que l'exécution **locale CC9** n'a pas pu : **téléchargement d'URL signée** (presign **de l'API**,
-endpoint **Option A public**) + **parcours Auth/Files réels** (utilisateur staging seedé). Le **Cloud Core 9**
-(exécution staging contrôlée) est **terminé** en **local Type D** : stack réelle (images corrigées) `healthy`,
-health 200, endpoint Option A joignable ; **URL signée + Auth/Files non validés** (pas d'utilisateur ; pas de
-serveur réel). **Actions HUMAINES** : confirmer la protection de branche `main` (7 checks + `images`) et **rendre
-`api-smoke` requis**. **Alternative (décision humaine)** : durcissement registry (scan/signature/SBOM) ; UI Kit 4 ;
-Files 2 ; Mobile Core. **Ne pas créer de production ni d'automatisation de déploiement sans environnement protégé
-+ rollback.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Décision roadmap (revue stratégique 2026-06-11 — [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md))** :
+**Cloud Core mis en PAUSE contrôlée** après CC1–9 (CI + GHCR + staging local) ; **Cloud Core 10** (serveur réel)
+**reporté** jusqu'à disponibilité d'un serveur + HTTPS/DNS/pare-feu (dépendance **externe**, hors socle). **Retour
+aux priorités V1 de la roadmap** (§7.2/§30) : **Mobile Core React Native** est la **priorité #2 V1 jamais
+démarrée** (zéro code), ses dépendances (API + packages + tokens UI Kit RN-safe) sont **satisfaites**.
+
+**Action unique (mission Codex suivante)** : **Mobile Core React Native 1 — starter foundation** — initialiser le
+starter Expo/React Native (navigation auth/privé, **secure storage** ADR-015, `api-client-fetch`, **TanStack
+Query**, tokens UI Kit via **ThemeProvider** ADR-010, états loading/error/empty), **sans logique métier**, **un
+seul core**. Le **Cloud Core 9** (exécution staging **locale** Type D) est **terminé** : stack réelle (images
+corrigées) `healthy`, health 200, endpoint Option A joignable ; URL signée + Auth/Files **non validés en réel**
+(repris en **CC10 sur serveur**). **Actions HUMAINES** : confirmer la protection de branche `main` (7 checks +
+`images`) et **rendre `api-smoke` requis**. **Alternative (décision humaine)** : UI Kit 4 (primitives
+interactives) ; reprise **Cloud Core 10** si un serveur réel devient disponible. **Ne pas créer de production ni
+d'automatisation de déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
