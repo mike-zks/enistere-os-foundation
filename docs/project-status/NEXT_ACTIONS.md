@@ -5,41 +5,37 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 6 — déploiement staging manuel** : premier déploiement **contrôlé** d'une image GHCR vers un
-> environnement **staging** (GitHub **Environment** protégé, secrets scoppés, **approbation manuelle**), à
-> partir des images déjà publiées par `registry-ci.yml`. **Pas de production**, pas d'automatisation totale,
-> rollback documenté. **Alternative** : **durcissement registry** (scan de vulnérabilité d'image + signature/
-> provenance cosign/SLSA + SHA-pinning des actions) avant tout déploiement.
+> **Cloud Core 7 — exécution réelle staging sur serveur** : appliquer les runbooks `STAGING_DEPLOYMENT_RUNBOOK.md`
+> + `STAGING_ROLLBACK_RUNBOOK.md` sur un **serveur staging identifié** (Docker Compose, images GHCR `sha-*`,
+> secrets **hors dépôt**), vérifier health checks + parcours réels. **Conditionné** à : serveur staging
+> disponible + secrets staging prêts (hors dépôt). **Sinon** : **Cloud Core 7 — staging dry-run GitHub**
+> (vérifier l'existence des images/tags sans déployer) **ou** durcissement registry (scan/signature/provenance).
 >
-> **(Action HUMAINE, en parallèle)** **Appliquer la protection de branche `main`** (désormais possible — repo
-> **public**) : rendre **bloquants** les **7 checks** (+ `images` recommandé) selon
-> `cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. **Non réalisable par un agent.**
+> **(Action HUMAINE, si pas déjà fait)** confirmer la **protection de branche `main`** (7 checks + `images`).
 
-**Justification** : le **Cloud Core 5 — Registry GHCR sans déploiement** est **terminé et mergé** (PR #1 →
-`b41a953` sur `main`) : Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) + workflow
-`registry-ci.yml` (build PR sans push ; **build + push GHCR sur `main`** ; tags immuables `sha-`/`main-`, **pas
-de `latest`**, labels OCI, auth `GITHUB_TOKEN`, **aucun secret/PAT/`.env`**) — **`docker build` API+Web validé
-localement**. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`**. **Cloud Core 5B VALIDÉ (observation réelle)** : Registry
-CI **verte sur `main`** (push `b41a953` + `bfd33dc`, build+push GHCR réussis) ; **images GHCR publiques**
-`api-nestjs`/`web-nextjs` présentes (tags `main-b41a953`/`main-bfd33dc`/`sha-bfd33dc`, **aucun `latest`**) ;
-checks requis verts sur PR #1/#2. **Cloud Core 6 est débloqué.** **Ne pas** automatiser un déploiement production
-sans environnement protégé + rollback. **Flux PR obligatoire** (push direct `main` refusé par la protection).
+**Justification** : le **Cloud Core 6 — déploiement staging manuel** est **terminé** (cadrage `CADRE_MANUEL_DOCUMENTE`) :
+`cores/cloud/staging/` (compose **exemple** api+web+postgres+minio validé `docker compose config`, `.env.staging.example`
+placeholders, README) + runbooks **déploiement** & **rollback** — **aucune exécution réelle, aucun secret, aucune
+automatisation, aucun `latest`** (images par tag **immuable**). **Cloud Core 5B était VALIDÉ** (Registry CI verte
+sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs`, tags `main-`/`sha-`, aucun `latest`). La suite
+logique est l'**exécution réelle** du staging (sur un serveur, secrets hors dépôt) **ou** un **dry-run** si le
+serveur/secrets ne sont pas prêts. **Ne pas** créer de production ni d'automatisation de déploiement sans
+environnement protégé + rollback. **Flux PR obligatoire** (push direct `main` refusé par la protection).
 
-**Alternative (justifiée, décision humaine)** : **UI Kit 4** (primitives interactives) ; **Files 2** (upload
-Web) ; **Mobile Core**.
+**Alternative (justifiée, décision humaine)** : **durcissement registry** (scan/signature/SBOM) ; **UI Kit 4** ;
+**Files 2** (upload Web) ; **Mobile Core**.
 
-**Note gouvernance** : `main` est poussé sur `origin` (SSH) ; **repo désormais public** (protection de branche
-applicable gratuitement). Cette mission ajoute le commit `ci(cloud): add ghcr registry workflow` ; statuts :
-Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel), ADR-014
-**`PARTIELLEMENT_IMPLEMENTE`**.
+**Note gouvernance** : `main` protégé (**repo public**, flux PR). Cette mission ajoute le commit
+`docs(cloud): add manual staging deployment baseline` ; statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**,
+ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel), ADR-014 **`PARTIELLEMENT_IMPLEMENTE`**, déploiement
+staging **`CADRE_MANUEL_DOCUMENTE`** (non automatisé).
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 6 — déploiement staging manuel** (environnement protégé, approbation, rollback documenté) **ou** durcissement registry (scan/signature/SHA-pinning). ✦ prochaine mission Codex.
-2. **(Humain)** Appliquer la **protection de branche `main`** (8 checks recommandés) — `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`. ✦ action humaine, en parallèle.
-3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
-4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
-5. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
+1. **Cloud Core 7 — exécution réelle staging** (serveur + secrets hors dépôt) **ou** staging dry-run GitHub **ou** durcissement registry (scan/signature/SBOM). ✦ prochaine mission Codex.
+2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
+3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -66,7 +62,8 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 4 — durcissement CI & gouvernance | **FAIT** — 7 checks `main` figés + checklist actionnable + politiques artefacts/couverture/pinning/actionlint tranchées ; workflows inchangés |
 | Cloud Core 5 — Registry GHCR (niveau 4 partiel) | **FAIT + MERGÉ + VALIDÉ** (PR #1 `b41a953`, vérif PR #2 `bfd33dc`) — `registry-ci.yml` + Dockerfiles API/Web ; **Registry CI verte sur `main`**, **images GHCR publiques** `api-nestjs`/`web-nextjs` (tags `main-`/`sha-`, **pas de `latest`**) ; ADR-014 → partiel |
 | Protection de branche `main` | **APPLIQUÉE** (repo public) — la PR est désormais **exigée** (push direct `main` refusé). Vérifier que les 7 checks (+ `images`) sont bien requis |
-| Cloud Core 6 — déploiement staging manuel | **débloqué** — prochaine mission ; déployer une image GHCR vers staging protégé (approbation, rollback) ; ou durcissement registry |
+| Cloud Core 6 — déploiement staging manuel | **FAIT** — `cores/cloud/staging/` (compose+`.env` exemples validés `docker compose config`) + runbooks déploiement/rollback ; `CADRE_MANUEL_DOCUMENTE`, **aucune exécution réelle/secret/automatisation** |
+| Cloud Core 7 — exécution réelle staging | **débloqué** — prochaine mission ; appliquer les runbooks sur un serveur (secrets hors dépôt) ; sinon dry-run GitHub ou durcissement registry |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |

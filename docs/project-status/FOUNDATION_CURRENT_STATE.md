@@ -27,7 +27,7 @@ pas une application ni une bibliothèque complète).
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
 | Cores documentaires | `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
-| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web présents (multi-stage, non-root) ; **déploiement absent** |
+| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging manuel cadré** (CC6 : compose/`.env` exemples + runbooks, `CADRE_MANUEL_DOCUMENTE`) ; **déploiement réel absent** |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
@@ -193,8 +193,11 @@ pinning ; la protection de branche `main` reste une **action humaine manuelle**.
 livré la **registry GHCR** (niveau 4 partiel) : `registry-ci.yml` + Dockerfiles API/Web (multi-stage, non-root,
 Web standalone) → build + **push images sur `main`** (tags immuables, labels OCI, `GITHUB_TOKEN`, **sans
 déploiement/secret/PAT**) — `docker build` API+Web **validé localement**, ADR-014 → `PARTIELLEMENT_IMPLEMENTE`.
-**Prochaine action** : **Cloud Core 6 — déploiement staging manuel** (ou durcissement registry : scan/signature) ;
-**action humaine** : appliquer la protection de branche `main` (désormais possible, repo public).
+Enfin le **Cloud Core 6 — déploiement staging manuel** a livré le **cadrage** staging (`cores/cloud/staging/` :
+compose+`.env` exemples validés `docker compose config` + runbooks **déploiement/rollback**) — `CADRE_MANUEL_DOCUMENTE`,
+**aucune exécution réelle/secret/automatisation/`latest`** ; **CC5B validé** (images GHCR publiques). **Prochaine
+action** : **Cloud Core 7 — exécution réelle staging sur serveur** (secrets hors dépôt) **ou** dry-run GitHub
+**ou** durcissement registry (scan/signature) ; **action humaine** : confirmer la protection de branche `main`.
 
 ## 12. Documentation
 

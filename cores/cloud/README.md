@@ -49,13 +49,25 @@ scan/signature d'image. **Aucune infrastructure de déploiement** ; les workflow
 Valeurs de **test jetables** (jamais `secrets.*`), **logs sans secret**, données **éphémères**, **aucun
 artefact uploadé**. E2E **isolés** du niveau 1 (`tsconfig`/`eslint` exclus).
 
+## Staging manuel (Cloud Core 6) — `CADRE_MANUEL_DOCUMENTE`
+
+**Cadrage** d'un déploiement **staging manuel** à partir des images GHCR immuables — **aucun déploiement réel,
+aucun secret, aucune production, aucune automatisation**. Livrables : `staging/docker-compose.staging.example.yml`
+(api+web+postgres+minio, réseau interne, healthchecks, **migrations hors démarrage**), `staging/.env.staging.example`
+(placeholders), `staging/README.md`, et les runbooks [`docs/STAGING_DEPLOYMENT_RUNBOOK.md`](docs/STAGING_DEPLOYMENT_RUNBOOK.md)
++ [`docs/STAGING_ROLLBACK_RUNBOOK.md`](docs/STAGING_ROLLBACK_RUNBOOK.md). Points clés : tag **immuable** `sha-`,
+secrets **hors dépôt** (`openssl rand -base64 48`), **migrations Prisma découplées** de l'image (CLI absent de la
+runtime → étape source séparée), **PostgreSQL non exposé**, **MinIO API joignable navigateur** (URL signées),
+**rollback d'image** simple mais **rollback DB non garanti** (migrations additives). `docker compose config`
+**validé**, **aucun secret API** fuité dans le conteneur Web.
+
 ## Ce qui n'est PAS implémenté
 
-`docker-compose` de prod · Traefik/DNS/TLS · Redis/MinIO **provisionnés en prod** · **déploiement**
-(staging/production) · GitHub Environments réels · monitoring (Prometheus/Grafana/Loki) · backups/restore ·
-OSRM/PostGIS · rollback · scan/signature d'image · semver/release · couverture publiée ·
-**upload/suppression Files côté Web** · secrets applicatifs. Les workflows restent **non déployants, sans
-secret applicatif** (le registry pousse des images via `GITHUB_TOKEN`, sans déployer).
+`docker-compose` de **production** · Traefik/DNS/TLS réels · **déploiement réel** (staging exécuté / production) ·
+GitHub Environments réels · workflow deploy automatique · monitoring (Prometheus/Grafana/Loki) · backups/restore
+automatisés · OSRM/PostGIS · rollback automatique · scan/signature d'image · semver/release · couverture publiée ·
+**upload/suppression Files côté Web** · secrets applicatifs. Les workflows restent **non déployants, sans secret
+applicatif** (le registry pousse des images via `GITHUB_TOKEN`, sans déployer).
 
 ## État CI/CD (ADR)
 
@@ -74,7 +86,8 @@ Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécut�
 
 ## Prochaine étape
 
-**Action humaine** (si pas déjà fait) : **appliquer** la protection de branche `main`. Puis **prochaine mission
-Codex** : **Cloud Core 6 — déploiement staging manuel** (premier déploiement contrôlé, environnement protégé)
-**ou** durcissement registry (scan/signature/provenance d'image), selon gouvernance. Voir
+**Prochaine mission Codex** : **Cloud Core 7 — exécution réelle staging sur serveur** (appliquer les runbooks sur
+un serveur staging identifié, secrets hors dépôt) **si** le serveur + secrets sont prêts ; **sinon** **Cloud
+Core 7 — staging dry-run GitHub** (vérifier l'existence des images/tags, sans déployer) **ou** durcissement
+registry (scan/signature/provenance). Voir
 [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).

@@ -20,6 +20,10 @@
 - Les preuves runtime (API + MinIO) utilisent des **valeurs jetables locales**, hors Git, détruites après
   exécution — **jamais** committées.
 - Aucun **GitHub Environment** ni **GitHub Secret** n'est défini par cette mission.
+- **Staging manuel (Cloud Core 6)** : les secrets sont fournis **sur le serveur staging** via un fichier
+  `.env.staging` **non versionné** (copié depuis `cores/cloud/staging/.env.staging.example`, placeholders
+  `CHANGE_ME`). Générer : `openssl rand -base64 48`. **Jamais committé, jamais journalisé.** Les secrets API ne
+  sont injectés **que** dans le conteneur API (le compose ne les passe pas au conteneur Web).
 
 ## 3. Usage futur — GitHub Environments
 

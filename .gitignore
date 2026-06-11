@@ -15,7 +15,8 @@ logs/
 # Environnement local
 .env
 .env.*
-!.env.example
+# Les TEMPLATES `.env*.example` (sans secret) sont versionnés ; les `.env*` réels restent ignorés.
+!.env*.example
 
 # Artefacts temporaires
 tmp/

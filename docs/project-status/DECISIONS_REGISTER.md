@@ -240,7 +240,23 @@
   inchangé : 307 tests). **Validé localement** : `docker build` API + Web **OK** + smoke (`node --version`,
   **non-root**, aucun `.env`). ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 reste partiel ; Cloud Core
   reste `IMPLEMENTATION_PARTIELLE`. Workflows existants (1–3) **inchangés**. Prochaine action : **Cloud Core 6 —
-  déploiement staging manuel** (ou durcissement registry).
+  déploiement staging manuel** (ou durcissement registry). **CC5B VALIDÉ** (observation réelle, repo public) :
+  Registry CI verte sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs` (tags `main-`/`sha-`, **aucun
+  `latest`**), checks requis verts (PR #1/#2).
+- **Cloud Core 6 — déploiement staging manuel (2026-06-11)** : **cadrage** d'un déploiement staging manuel à
+  partir des images GHCR immuables — **aucune exécution réelle, aucun secret, aucune production, aucun `latest`,
+  aucune automatisation/workflow deploy**. Livrables : `cores/cloud/staging/docker-compose.staging.example.yml`
+  (api+web+postgres+minio, réseau interne, healthchecks, **migrations hors démarrage**, PostgreSQL non exposé,
+  MinIO API exposé pour URL signées), `cores/cloud/staging/.env.staging.example` (placeholders ; secrets API
+  **non passés** au conteneur Web), `cores/cloud/staging/README.md`, runbooks **`STAGING_DEPLOYMENT_RUNBOOK.md`**
+  & **`STAGING_ROLLBACK_RUNBOOK.md`**. **Migrations Prisma découplées de l'image** (runtime sans CLI → `migrate
+  deploy` depuis les sources). **Rollback image** simple par tag immuable ; **rollback DB non garanti**
+  (migrations additives). **Contrainte URL signée** = hôte `S3_ENDPOINT` joignable navigateur ; **`NEXT_PUBLIC_*`
+  figé au build** documenté. **Validé** : `docker compose config` OK (4 services) + **aucun secret API fuité dans
+  le conteneur Web**. Statuts **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ;
+  **déploiement staging = `CADRE_MANUEL_DOCUMENTE`** (pas `IMPLEMENTE_AUTOMATISE`). `cores/*/src`/`packages`/
+  `docs/adr`/`strategy` + Dockerfiles/workflows **non modifiés**. Prochaine action : **Cloud Core 7 — exécution
+  réelle staging** (ou dry-run / durcissement registry).
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés
