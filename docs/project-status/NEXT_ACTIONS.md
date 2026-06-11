@@ -5,34 +5,40 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 7 — exécution réelle staging sur serveur** : appliquer les runbooks `STAGING_DEPLOYMENT_RUNBOOK.md`
-> + `STAGING_ROLLBACK_RUNBOOK.md` sur un **serveur staging identifié** (Docker Compose, images GHCR `sha-*`,
-> secrets **hors dépôt**), vérifier health checks + parcours réels. **Conditionné** à : serveur staging
-> disponible + secrets staging prêts (hors dépôt). **Sinon** : **Cloud Core 7 — staging dry-run GitHub**
-> (vérifier l'existence des images/tags sans déployer) **ou** durcissement registry (scan/signature/provenance).
+> **Cloud Core 8 — corriger l'image runtime API NestJS (moteur de requête Prisma)** : faire en sorte que
+> l'image **démarre** sur sa base runtime (Debian bookworm / OpenSSL **3.0.x**) — générer/embarquer le
+> `libquery_engine-debian-openssl-3.0.x` dans `.prisma/client` (binaryTargets / base de build cohérente) —
+> puis **re-jouer le dry-run** (`STAGING_DRY_RUN_REPORT.md`) et **trancher la stratégie migrations** (depuis
+> l'image — CLI + schema-engine présents — vs depuis les sources). **Verrou n°1** : **aucune exécution staging
+> réelle possible** tant que l'image API crash-loop.
 >
 > **(Action HUMAINE, si pas déjà fait)** confirmer la **protection de branche `main`** (7 checks + `images`).
 
-**Justification** : le **Cloud Core 6 — déploiement staging manuel** est **terminé** (cadrage `CADRE_MANUEL_DOCUMENTE`) :
-`cores/cloud/staging/` (compose **exemple** api+web+postgres+minio validé `docker compose config`, `.env.staging.example`
-placeholders, README) + runbooks **déploiement** & **rollback** — **aucune exécution réelle, aucun secret, aucune
-automatisation, aucun `latest`** (images par tag **immuable**). **Cloud Core 5B était VALIDÉ** (Registry CI verte
-sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs`, tags `main-`/`sha-`, aucun `latest`). La suite
-logique est l'**exécution réelle** du staging (sur un serveur, secrets hors dépôt) **ou** un **dry-run** si le
-serveur/secrets ne sont pas prêts. **Ne pas** créer de production ni d'automatisation de déploiement sans
-environnement protégé + rollback. **Flux PR obligatoire** (push direct `main` refusé par la protection).
+**Justification** : le **Cloud Core 7 — préparation serveur staging & dry-run contrôlé** a **exécuté un dry-run
+local réel** (2026-06-11) à partir des **images GHCR immuables** (`sha-7b07e5e`) + `.env.staging` **réel hors
+dépôt** (secrets jetables, supprimé après). Résultats (`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`) :
+✅ `docker compose config` valide (tag immuable, aucun `latest`), images **tirées en anonyme**, `postgres
+healthy` + `minio` + bucket, **image Web boote** (HTTP 200) ; ❌ **défaut BLOQUANT** : l'**image API ne démarre
+pas** (query engine Prisma **OpenSSL 1.1.x** dans `.prisma/client` vs runtime **bookworm 3.0.x** → crash-loop,
+`/health/ready` jamais vert), **invisible à la CI** (`api-runtime-ci` tourne depuis les **sources** ;
+`registry-ci` ne fait que **construire** l'image). Corrections induites : runbook (l'image **embarque** le CLI
+Prisma → « CLI absent » faux) ; **décision MinIO/URL signée** tranchée (Option A). La suite logique et
+**unique** est donc de **corriger l'image** avant toute exécution réelle. **Ne pas** créer de production ni
+d'automatisation de déploiement. **Flux PR obligatoire** (push direct `main` refusé par la protection).
 
 **Alternative (justifiée, décision humaine)** : **durcissement registry** (scan/signature/SBOM) ; **UI Kit 4** ;
 **Files 2** (upload Web) ; **Mobile Core**.
 
-**Note gouvernance** : `main` protégé (**repo public**, flux PR). **CC6 mergé** (PR #4 → `b001ce8`) ; **CC6B**
-(cette mission) valide l'intégration et ajoute le commit `docs(cloud): finalize staging integration` (checkpoint).
-Statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel),
-ADR-014 **`PARTIELLEMENT_IMPLEMENTE`**, déploiement staging **`CADRE_MANUEL_DOCUMENTE`** (non automatisé).
+**Note gouvernance** : `main` protégé (**repo public**, flux PR). **CC6 mergé** (PR #4 → `b001ce8`) ; **CC6B
+mergé** (PR #5 → `7b07e5e`) ; **CC7** (cette mission) exécute le **dry-run** et ajoute le commit
+`docs(cloud): prepare staging dry run` (rapport + runbooks + checkpoint) via PR. Statuts **inchangés** : Cloud
+Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel),
+ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging **`DRY_RUN_EXECUTE`** (dry-run exécuté, **défaut
+bloquant image API** → exécution réelle BLOQUÉE ; **non** opérationnel/automatisé). **Aucun statut augmenté.**
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 7 — exécution réelle staging** (serveur + secrets hors dépôt) **ou** staging dry-run GitHub **ou** durcissement registry (scan/signature/SBOM). ✦ prochaine mission Codex.
+1. **Cloud Core 8 — corriger l'image runtime API NestJS (moteur Prisma)** puis re-dry-run + stratégie migrations. ✦ prochaine mission Codex. *(Puis : exécution réelle staging sur serveur, secrets hors dépôt ; ou durcissement registry scan/signature/SBOM + smoke-run image en CI.)*
 2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
 3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
@@ -63,7 +69,9 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 5 — Registry GHCR (niveau 4 partiel) | **FAIT + MERGÉ + VALIDÉ** (PR #1 `b41a953`, vérif PR #2 `bfd33dc`) — `registry-ci.yml` + Dockerfiles API/Web ; **Registry CI verte sur `main`**, **images GHCR publiques** `api-nestjs`/`web-nextjs` (tags `main-`/`sha-`, **pas de `latest`**) ; ADR-014 → partiel |
 | Protection de branche `main` | **APPLIQUÉE** (repo public) — la PR est désormais **exigée** (push direct `main` refusé). Vérifier que les 7 checks (+ `images`) sont bien requis |
 | Cloud Core 6 — déploiement staging manuel | **FAIT + MERGÉ** (PR #4 → `b001ce8`) — `cores/cloud/staging/` + runbooks ; `CADRE_MANUEL_DOCUMENTE` ; checks requis **verts** (PR + `main`), images GHCR `main-b001ce8` publiées (pas de `latest`) |
-| Cloud Core 7 — exécution réelle staging | **débloqué** — prochaine mission ; appliquer les runbooks sur un serveur (secrets hors dépôt) ; **sinon dry-run staging / préparation serveur / durcissement registry** |
+| Cloud Core 7 — préparation serveur staging & dry-run contrôlé | **FAIT** — **dry-run local réel** (images GHCR `sha-7b07e5e`, `.env` hors dépôt) : `compose config`/`pull` OK, **image Web boote**, **MAIS image API crash-loop** (Prisma engine OpenSSL 1.1.x vs runtime bookworm 3.0.x) → staging `DRY_RUN_EXECUTE` (**défaut bloquant**) ; décision MinIO Option A ; runbook migrations corrigé. Détail `STAGING_DRY_RUN_REPORT.md` |
+| Cloud Core 8 — corriger l'image runtime API (Prisma engine) | **débloqué** — prochaine mission ; image API doit **démarrer** (query engine debian-openssl-3.0.x) puis re-dry-run + stratégie migrations ; **puis** exécution réelle staging |
+| Exécution réelle staging sur serveur | **BLOQUÉE** par le défaut image API (CC8) ; ensuite : serveur + secrets hors dépôt + `S3_ENDPOINT` public (Option A) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |

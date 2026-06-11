@@ -52,22 +52,35 @@ docker run --rm --network container:$(docker compose -f docker-compose.staging.e
 # Bucket PRIVÉ par défaut (aucune policy publique). Les téléchargements passent par des URL SIGNÉES.
 ```
 
-## 5. Migrations Prisma (étape SÉPARÉE — l'image runtime n'a pas le CLI Prisma)
+## 5. Migrations Prisma (étape SÉPARÉE, avant de démarrer l'API)
 
-La runtime image API est **minimale/non-root** et **n'embarque pas** `prisma` (CLI) : les migrations ne se
-lancent **pas** depuis le conteneur applicatif. Appliquer les migrations **avant** de démarrer l'API, depuis
-**les sources au commit déployé** :
+> ⚠️ **Correction (dry-run CC7, 2026-06-11)** : contrairement à ce qui était écrit ici, l'image runtime
+> **embarque** le CLI Prisma (`node_modules/.bin/prisma` 6.19.3) **et** le `schema-engine` de la bonne
+> plateforme. Le rationale « CLI absent » était **faux**. Voir
+> [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md) §4. **Stratégie migrations à trancher en Cloud
+> Core 8** : *migrate depuis l'image* (CLI présent) **ou** *migrate depuis les sources*.
+
+Appliquer les migrations **avant** de démarrer l'API. Deux voies (à arbitrer en CC8) :
 
 ```bash
-# Sur le serveur, au commit correspondant au tag d'image (même sha) :
+# Voie A — depuis les SOURCES au commit déployé (même sha que le tag d'image) :
 git fetch && git checkout <sha-déployé>
 cd cores/api-nestjs && npm ci
 DATABASE_URL="postgresql://<user>:<pwd>@<host>:5432/enistere_staging?schema=public" \
   npx prisma migrate deploy        # JAMAIS `db push` ; applique les migrations versionnées
+
+# Voie B — depuis l'IMAGE (CLI + schema-engine présents ; À CONFIRMER sur serveur avec egress réseau) :
+# docker compose --env-file .env.staging -f docker-compose.staging.example.yml \
+#   run --rm api npx prisma migrate deploy
 ```
 
 > Si une **sauvegarde** existe (DB non vide), faire un **backup** avant `migrate deploy` (cf. rollback).
 > Ne **pas** exécuter les migrations automatiquement au démarrage du conteneur applicatif.
+
+> ⛔ **Pré-requis BLOQUANT avant tout staging réel (dry-run CC7)** : l'image API publiée **ne démarre pas**
+> en l'état — le **query engine** Prisma présent dans `.prisma/client` est compilé pour **OpenSSL 1.1.x**
+> alors que la base runtime est **Debian bookworm / OpenSSL 3.0.x** → crash-loop, `/health/ready` jamais vert.
+> **Corriger l'image (Cloud Core 8)** avant d'exécuter ce runbook. Détail : `STAGING_DRY_RUN_REPORT.md` §3.
 
 ## 6. Démarrer l'applicatif
 
@@ -95,9 +108,15 @@ et un fichier de test (ex. `proof-seed-user.ts`), à **supprimer** ensuite. Ne j
 
 ## Notes / limites
 
-- **URL signée Files** : son hôte = `S3_ENDPOINT` → doit être **joignable par le navigateur** (pas
-  `http://minio:9000`). En mono-serveur : adresse publique du serveur + `MINIO_HOST_PORT` ; à terme : domaine
-  MinIO derrière reverse proxy + éventuel `S3_PUBLIC_ENDPOINT` (non supporté en V1 — endpoint unique).
+- **URL signée Files — décision V1 tranchée (CC7, Option A)** : son hôte = `S3_ENDPOINT` → doit être
+  **joignable par le navigateur** (jamais `http://minio:9000`). **Mono-serveur** : exposer l'API MinIO (9000)
+  sur l'**adresse publique du serveur** + `MINIO_HOST_PORT` et fixer `S3_ENDPOINT` à cette adresse ; le
+  conteneur API atteint la même adresse (port publié, ou `extra_hosts: host.docker.internal:host-gateway`) ; la
+  **console 9001 n'est PAS exposée publiquement**. **Cible (Option B)** : domaine MinIO derrière reverse proxy
+  + TLS ; `S3_PUBLIC_ENDPOINT` (séparation interne/public) = **évolution d'API future** (non supportée en V1 —
+  endpoint unique). Détail : [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md) §5.
+- **Dry-run d'abord** : valider les prérequis via un dry-run contrôlé (`docker compose config`/`pull`/`create`,
+  boot des images, health) **avant** toute exécution réelle — voir [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md).
 - **`NEXT_PUBLIC_API_URL`** est **figé au build** de l'image Web : pour Health navigateur par environnement,
   builder l'image par env, sinon laisser vide (Health en SSR via `API_INTERNAL_URL`).
 - **Pas de production, pas d'automatisation** : ce runbook est manuel et réversible. Le déploiement automatisé

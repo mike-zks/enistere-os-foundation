@@ -61,6 +61,23 @@ runtime → étape source séparée), **PostgreSQL non exposé**, **MinIO API jo
 **rollback d'image** simple mais **rollback DB non garanti** (migrations additives). `docker compose config`
 **validé**, **aucun secret API** fuité dans le conteneur Web.
 
+## Staging dry-run contrôlé (Cloud Core 7) — `DRY_RUN_EXECUTE` (défaut bloquant)
+
+**Dry-run local réel** (2026-06-11) à partir des **images GHCR immuables** (`sha-7b07e5e`) + `.env.staging`
+**réel hors dépôt** (secrets jetables, supprimé après) — **aucun déploiement réel, aucun secret committé,
+aucun `latest`**. Détail : [`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md).
+
+- ✅ `docker compose config` valide (tag immuable, **aucun `latest`**) ; ✅ images **tirées en anonyme** ;
+  ✅ `postgres healthy` + `minio Up` + bucket ; ✅ **image Web boote** (HTTP 200, Next 16.2.7).
+- ❌ **Défaut BLOQUANT** : l'**image API ne démarre pas** (crash-loop) — **query engine Prisma OpenSSL 1.1.x**
+  dans `.prisma/client` vs **runtime Debian bookworm / OpenSSL 3.0.x** → `/health/ready` jamais vert. **Non vu
+  par la CI** (`api-runtime-ci` tourne depuis les sources ; `registry-ci` ne fait que **construire** l'image).
+- ⚠️ Runbook **corrigé** : l'image **embarque** le CLI Prisma (+ schema-engine 3.0.x) → « CLI absent » était
+  faux → **stratégie migrations rouverte** (depuis l'image vs sources).
+- 🔑 **MinIO/URL signée** tranché (Option A) : `S3_ENDPOINT` = adresse **publique** du serveur (jamais
+  `minio:9000`) ; secrets serveur en `/opt/enistere/staging/.env.staging` (hors dépôt).
+- **Exécution staging réelle = BLOQUÉE** jusqu'à correction de l'image.
+
 ## Ce qui n'est PAS implémenté
 
 `docker-compose` de **production** · Traefik/DNS/TLS réels · **déploiement réel** (staging exécuté / production) ·
@@ -86,8 +103,8 @@ Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécut�
 
 ## Prochaine étape
 
-**Prochaine mission Codex** : **Cloud Core 7 — exécution réelle staging sur serveur** (appliquer les runbooks sur
-un serveur staging identifié, secrets hors dépôt) **si** le serveur + secrets sont prêts ; **sinon** **Cloud
-Core 7 — staging dry-run GitHub** (vérifier l'existence des images/tags, sans déployer) **ou** durcissement
-registry (scan/signature/provenance). Voir
-[`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).
+**Prochaine mission Codex** : **Cloud Core 8 — corriger l'image runtime API NestJS (moteur de requête Prisma)**
+pour qu'elle **démarre** (générer/embarquer le query engine pour Debian bookworm / OpenSSL 3.0.x), puis
+**re-jouer le dry-run** et trancher la **stratégie migrations** (depuis l'image vs sources). **Verrou n°1** :
+aucune exécution staging réelle possible avant (cf. [`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md)).
+Voir [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).
