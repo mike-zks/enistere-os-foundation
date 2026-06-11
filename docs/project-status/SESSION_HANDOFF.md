@@ -84,12 +84,15 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   immuables, labels OCI, `GITHUB_TOKEN`, **sans déploiement/secret/PAT/`.env`**) — **VALIDÉ** (Registry CI verte
   sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs` tags `main-`/`sha-`, aucun `latest`) **+ CC6 :
   staging manuel** `cores/cloud/staging/` (compose+`.env` **exemples** + runbooks déploiement/rollback) **+ CC7 :
-  dry-run staging contrôlé** (`STAGING_DRY_RUN_REPORT.md`) — **dry-run local réel** (images GHCR `sha-7b07e5e` +
-  `.env` hors dépôt) ayant validé `compose config`/`pull`/postgres/minio/bucket + **boot image Web (HTTP 200)**,
-  mais **révélé que l'image API ne démarre pas** (query engine Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) →
-  **déploiement staging = `DRY_RUN_EXECUTE` (défaut bloquant)**. **Quatre workflows CI** (niveaux 1–4 partiel)
-  **+ cadrage + dry-run staging**. **Restent** : **corriger l'image API (CC8)**, **exécution réelle** staging,
-  environnements protégés, monitoring, rollback **automatisé**, scan/signature/**smoke-run image** en CI.
+  dry-run staging contrôlé** (`STAGING_DRY_RUN_REPORT.md`) — **dry-run local réel** ayant révélé que l'image API
+  ne démarrait pas (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) **+ CC8 : image API CORRIGÉE**
+  (`binaryTargets debian-openssl-3.0.x` au schéma + `openssl` au stage build → moteur 3.0.x) **re-validée**
+  (migrations **depuis l'image** offline, API/Web **`healthy`**, `/health/live`+`/health/ready`+`/`=200) **+ angle
+  mort CI fermé** (job **`api-smoke`** dans `registry-ci.yml` → gate du push GHCR) → **déploiement staging =
+  `DRY_RUN_API_IMAGE_FIXED`** ; **migrations Option A** (depuis l'image). **Quatre workflows CI** (niveaux 1–4
+  partiel) **+ cadrage + dry-run + fix image staging**. **Restent** : **exécution réelle** staging sur serveur
+  (CC9 ; image GHCR API reconstruite au merge CC8), environnements protégés, monitoring, rollback **automatisé**,
+  scan/signature d'image, `api-smoke` à rendre **requis**.
 - **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
@@ -98,10 +101,12 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   navigateur Playwright) ; niveau 4 partiel `registry-ci.yml` (**build + push images GHCR**). **Protection de
   branche `main` ACTIVE** (flux PR). **Conteneurisation** : Dockerfiles API/Web (non-root) + **compose staging
   exemple** (CC6). **Absents** : **déploiement réel** (staging exécuté/production), environnements protégés,
-  monitoring, scan/signature d'image, couverture publiée. **Dry-run CC7** : image **Web** boote, image **API**
-  crash-loop (moteur Prisma OpenSSL 1.1.x vs bookworm 3.0.x) → **exécution staging réelle BLOQUÉE**.
+  monitoring, scan/signature d'image, couverture publiée. **CC8** : un **5ᵉ workflow-job `api-smoke`** (dans
+  `registry-ci.yml`) **exécute l'image API** et vérifie le moteur Prisma → **gate le push GHCR** (ferme l'angle
+  mort « image jamais exécutée »). Image **Web** + image **API (corrigée, moteur 3.0.x)** bootent toutes deux.
 - **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents
-  (via PR) : `docs(cloud): finalize staging integration (#5)` (`7b07e5e` — CC6B finalisé),
+  (via PR) : `docs(cloud): prepare staging dry run (#6)` (`5118283` — CC7 dry-run),
+  `docs(cloud): finalize staging integration (#5)` (`7b07e5e` — CC6B finalisé),
   `Merge PR #4 … cloud-core-6-staging` (`b001ce8` — CC6 staging intégré),
   `Merge PR #3 … cloud-core-5b-confirm` (`ac4e805` — CC5B validé),
   `Merge PR #2 … cloud-core-5b-verify` (`bfd33dc`),
@@ -164,7 +169,31 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 7 — préparation serveur staging & dry-run contrôlé** (`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`) :
+**Cloud Core 8 — correction de l'image runtime API NestJS** : **corrige** le défaut bloquant CC7 (image API en
+crash-loop) et **ferme l'angle mort CI** (image buildée mais jamais exécutée). **Cause** : le query engine
+Prisma de `node_modules/.prisma/client` était compilé pour **OpenSSL 1.1.x** (détection `native` ambiguë au
+stage build, sans openssl) alors que la base runtime est **Debian 12 bookworm / OpenSSL 3.0.x** → moteur
+introuvable → crash-loop. **Correctif** : `cores/api-nestjs/prisma/schema.prisma` generator
+`binaryTargets = ["native", "debian-openssl-3.0.x"]` (force l'émission du moteur 3.0.x, copié depuis
+`@prisma/engines` **sans réseau**) **+** `cores/api-nestjs/Dockerfile` installe `openssl`/`ca-certificates`
+**aussi au stage build**. **Re-validation réelle** (image publiée + moteur 3.0.x monté = sortie du fix ;
+`STAGING_DRY_RUN_REPORT.md` §8) : **migrations depuis l'image** (`prisma migrate deploy`, **offline**, 5
+appliquées), API **`Up (healthy)`** `/health/live` & `/health/ready` **200**, Web **200**, **stack staging
+complète healthy**, logs « Nest application successfully started » **sans** erreur moteur. **CI** :
+`.github/workflows/registry-ci.yml` nouveau job **`api-smoke`** (build → **lance l'image** → vérifie le
+chargement du moteur Prisma **sans DB** : erreur de connexion = OK / « engine could not be located » = FAIL ;
++ non-root + openssl + moteur présent) → **`images` `needs: api-smoke`** ⇒ **push GHCR conditionné au smoke**.
+**Stratégie migrations** tranchée = **Option A (depuis l'image)** (CLI Prisma 6.19.3 + `schema-engine-debian-
+openssl-3.0.x` embarqués). **Validation locale réduite justifiée** : `docker build`/`npm ci` **bloqués** (egress
+sandbox npm) → fix prouvé par (a) `prisma validate` OK, (b) dry-run réel ci-dessus, (c) `api-smoke` qui validera
+en CI ; **aucune** modif de logique métier ; `cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy`
+**non modifiés** ; **aucun secret/`latest`/déploiement**. ⚠️ L'**image GHCR corrigée** est **reconstruite/publiée
+par la registry CI au merge** (tags ≤ `sha-7b07e5e` restent cassés). Statuts **inchangés** (Cloud Core
+`IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement staging = `DRY_RUN_API_IMAGE_FIXED`**. Commit
+`fix(api): make docker runtime prisma engine compatible` (via PR). **Prochaine action : Cloud Core 9 — exécution
+staging réelle contrôlée sur serveur.**
+
+**Étape précédente — Cloud Core 7 — préparation serveur staging & dry-run contrôlé** (`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`) :
 **dry-run local réel** exécuté à partir des **images GHCR immuables** (`sha-7b07e5e`, commit `main` `7b07e5e`) avec
 un `.env.staging` **réel généré hors dépôt** (`/tmp`, `chmod 600`, secrets jetables `openssl rand -base64`,
 **shred** après) — **aucun déploiement réel, aucun secret committé, aucun `latest`, aucun workflow deploy**. Type
@@ -529,15 +558,16 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique (mission Codex)** : **Cloud Core 8 — corriger l'image runtime API NestJS (moteur de requête
-Prisma)** — faire en sorte que l'image **démarre** sur Debian bookworm / OpenSSL **3.0.x** (générer/embarquer
-`libquery_engine-debian-openssl-3.0.x` dans `.prisma/client` ; binaryTargets / base de build cohérente), puis
-**re-jouer le dry-run** (`STAGING_DRY_RUN_REPORT.md`) et **trancher la stratégie migrations** (depuis l'image —
-CLI + schema-engine présents — vs depuis les sources). **Verrou n°1** : **aucune exécution staging réelle**
-possible tant que l'image API crash-loop. Le **Cloud Core 7** (dry-run contrôlé) est **terminé** et a révélé ce
-défaut (`DRY_RUN_EXECUTE`). **Action HUMAINE (si pas déjà fait)** : confirmer la protection de branche `main`
-(7 checks + `images`). **Alternative (décision humaine)** : durcissement registry (scan/signature + **smoke-run
-image en CI**) ; UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas créer de production ni d'automatisation de
+**Action unique (mission Codex)** : **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** — appliquer
+les runbooks (`STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md`) sur un **serveur staging
+identifié**, avec l'**image GHCR API reconstruite après le merge CC8** (Docker Compose, tags immuables, secrets
+**hors dépôt**, `S3_ENDPOINT` **public** Option A), migrations **depuis l'image** (Option A), vérifier health +
+**parcours réels** (dont **téléchargement navigateur** via URL signée). **Conditionné** à serveur + secrets +
+endpoint MinIO public ; **sinon** **préparation serveur staging** (ou endpoint public MinIO). Le **Cloud Core 8**
+(correction image API) est **terminé** : défaut moteur Prisma **corrigé & re-validé** (stack staging `healthy`),
+**`api-smoke`** ferme l'angle mort CI. **Actions HUMAINES** : confirmer la protection de branche `main`
+(7 checks + `images`) et **rendre `api-smoke` requis**. **Alternative (décision humaine)** : durcissement registry
+(scan/signature/SBOM) ; UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas créer de production ni d'automatisation de
 déploiement sans environnement protégé + rollback.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer

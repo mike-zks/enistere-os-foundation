@@ -127,17 +127,20 @@ déploiement par environnement protégé, rollback, scan/signature d'image, semv
 
 ## 11. Politique déploiement
 
-**Staging** : cadré manuellement (Cloud Core 6) puis **dry-run contrôlé exécuté (Cloud Core 7, 2026-06-11)** —
-statut **`DRY_RUN_EXECUTE` avec défaut bloquant**. Compose + `.env` **exemples** + runbooks
-(`cores/cloud/staging/`, `STAGING_DEPLOYMENT_RUNBOOK.md`, `STAGING_ROLLBACK_RUNBOOK.md`) pour déployer **à la
-main** les images GHCR immuables — **aucune exécution réelle**, aucun secret, aucune automatisation, aucun
-`latest`. Le **dry-run** (`STAGING_DRY_RUN_REPORT.md`) a validé `compose config`/`pull`, postgres+minio, le
-boot de l'**image Web** (HTTP 200), mais a révélé un **défaut bloquant** : l'**image API ne démarre pas**
-(query engine Prisma OpenSSL **1.1.x** vs runtime **bookworm 3.0.x** → crash-loop). Il a aussi **corrigé** le
-runbook : l'image **embarque** le CLI Prisma + le schema-engine (le « CLI absent » était faux) → **stratégie
-migrations à rouvrir**. **Décision MinIO/URL signée** tranchée (Option A : `S3_ENDPOINT` = adresse publique du
-serveur, jamais `minio:9000`). **Exécution staging réelle = BLOQUÉE** tant que l'image API n'est pas corrigée.
-Cible (future) : image corrigée → staging exécuté → scripté → CI/CD avec environnements GitHub protégés +
+**Staging** : cadré manuellement (Cloud Core 6), **dry-run contrôlé exécuté (Cloud Core 7)** puis **image API
+corrigée & re-validée (Cloud Core 8, 2026-06-11)** — statut **`DRY_RUN_API_IMAGE_FIXED`**. Compose + `.env`
+**exemples** + runbooks (`cores/cloud/staging/`, `STAGING_DEPLOYMENT_RUNBOOK.md`, `STAGING_ROLLBACK_RUNBOOK.md`)
+pour déployer **à la main** les images GHCR immuables — **aucune exécution réelle**, aucun secret, aucune
+automatisation, aucun `latest`. CC7 (`STAGING_DRY_RUN_REPORT.md`) avait révélé un **défaut bloquant** : l'image
+API ne démarrait pas (query engine Prisma OpenSSL **1.1.x** vs runtime **bookworm 3.0.x** → crash-loop).
+**CC8 a corrigé** : `binaryTargets=["native","debian-openssl-3.0.x"]` (schéma) + `openssl` au stage build →
+moteur **3.0.x** dans `.prisma/client`. **Re-validé** (image + moteur 3.0.x) : migrations **depuis l'image**
+(offline), API **`healthy`** `/health/live` & `/health/ready` **200**, Web **200**, stack complète **healthy**.
+**Angle mort CI fermé** : `registry-ci.yml` job **`api-smoke`** (lance l'image, vérifie le chargement du moteur)
+gate le push. **Stratégie migrations** tranchée = **Option A (depuis l'image)**. **Décision MinIO/URL signée**
+(Option A : `S3_ENDPOINT` = adresse publique du serveur, jamais `minio:9000`). ⚠️ L'**image GHCR corrigée** sera
+**reconstruite/publiée par la registry CI au merge CC8** (tags antérieurs cassés). Cible : staging exécuté réel
+(serveur + secrets hors dépôt + endpoint MinIO public) → scripté → CI/CD avec environnements GitHub protégés +
 approbation + **rollback** (§15). **Rollback d'image** simple mais conditionné à une image **qui boote** ;
 **rollback DB non garanti** (migrations additives).
 
@@ -180,12 +183,11 @@ environnements protégés, ni monitoring, ni rollback).
 
 ## 17. Étapes suivantes
 
-1. **Cloud Core 8 — corriger l'image runtime API NestJS (moteur de requête Prisma)** : la générer/embarquer
-   pour la plateforme runtime (Debian bookworm / OpenSSL **3.0.x**) afin que l'image **démarre**, puis
-   **re-jouer le dry-run** (`STAGING_DRY_RUN_REPORT.md`). **Verrou n°1** : aucune exécution staging réelle
-   possible avant. Trancher au passage la **stratégie migrations** (depuis l'image vs depuis les sources).
-2. **Niveau 4 (suite)** : déploiement staging réel par environnement protégé + rollback (après image corrigée).
-3. Durcissement CI complémentaire (couverture publiée, dépendances pinnées, **scan de secrets**, et — leçon
-   CC7 — **smoke-run de l'image en CI** : exécuter brièvement l'image et vérifier `/health/ready`, pour ne plus
-   laisser passer un défaut runtime invisible aux tests « depuis les sources »).
+1. ✅ **FAIT (Cloud Core 8)** — image runtime API corrigée (moteur Prisma `debian-openssl-3.0.x`), re-validée
+   (stack staging `healthy`), et **angle mort CI fermé** (`api-smoke` dans `registry-ci.yml`, gate du push).
+2. **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** : appliquer les runbooks sur un **serveur
+   staging identifié** (image GHCR API **reconstruite après le merge CC8**, secrets hors dépôt, `S3_ENDPOINT`
+   **public** Option A), vérifier health + parcours réels (dont **téléchargement navigateur** via URL signée).
+3. Durcissement CI complémentaire (couverture publiée, dépendances pinnées, **scan de secrets** ; rendre le
+   check **`api-smoke`** *required* sur `main` — action humaine).
 4. Rédiger les ADR structurants au moment voulu (registry si structurante, OSRM/PostGIS si adoptés).

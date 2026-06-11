@@ -11,10 +11,11 @@
   migration **non rétrocompatible** ne s'annule pas sans plan dédié. **Règle** : concevoir les migrations
   **backward-compatible** (additives), pour qu'une ancienne image fonctionne sur le schéma courant.
 
-> ⚠️ **Pré-requis (dry-run CC7)** : un rollback ne vaut que vers une image **qui démarre**. L'image API
-> actuelle **ne boote pas** (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x — cf.
-> [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md) §3). Tant que **Cloud Core 8** n'a pas corrigé
-> l'image, il n'existe **aucun** tag API déployable vers lequel revenir.
+> ✅ **Pré-requis (Cloud Core 8)** : un rollback ne vaut que vers une image **qui démarre**. Le défaut de boot
+> (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) est **corrigé** (cf.
+> [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md) §8). **Ne revenir que vers des tags API reconstruits
+> APRÈS le merge CC8** (republiés par la registry CI, gate `api-smoke`) : les tags antérieurs (`sha-7b07e5e` et
+> avant) **ne démarrent pas** et ne sont **pas** des cibles de rollback valides.
 
 ## Rollback d'image (cas nominal)
 

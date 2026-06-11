@@ -116,3 +116,58 @@ corrigée, **exécution staging réelle = BLOQUÉE**.
   *pas* automatisé, *pas* production-ready.
 - **À exercer plus tard** (server avec egress) : `migrate deploy`, boot API corrigé, téléchargement navigateur
   via `S3_ENDPOINT` public, parcours réels.
+
+---
+
+# Cloud Core 8 — correction du moteur Prisma & re-validation (2026-06-11)
+
+## 8.1 Correction appliquée
+
+- **`cores/api-nestjs/prisma/schema.prisma`** — generator : `binaryTargets = ["native", "debian-openssl-3.0.x"]`.
+  Force `prisma generate` à émettre le moteur **`debian-openssl-3.0.x`** dans `node_modules/.prisma/client`
+  (copié depuis `@prisma/engines`, **sans réseau**), quel que soit le résultat de la détection « native ».
+- **`cores/api-nestjs/Dockerfile`** — installation d'**`openssl`/`ca-certificates` AUSSI au stage build**
+  (avant `npm ci`) : sans openssl, `prisma generate` détectait mal la libssl et repliait `native` sur
+  `debian-openssl-1.1.x`. Build et runtime sont tous deux `node:24-slim` (bookworm → 3.0.x) → moteur aligné.
+- **`.github/workflows/registry-ci.yml`** — nouveau job **`api-smoke`** (ferme l'angle mort) : build l'image
+  API, la **lance**, vérifie (sans DB) que le **moteur de requête Prisma se charge** (erreur de connexion = OK ;
+  « engine could not be located » = **FAIL**) + non-root + openssl + moteur présent. Le job `images`
+  (**push GHCR**) est désormais `needs: api-smoke` → **publication conditionnée au smoke vert**.
+
+## 8.2 Re-validation (dry-run réel, hors dépôt, secrets jetables)
+
+Le `docker build`/`npm ci` **local** est **bloqué** (egress sandbox vers le registre npm). Pour prouver l'effet
+du correctif **sans** rebuild, le moteur **`libquery_engine-debian-openssl-3.0.x.so.node`** (déjà présent dans
+`@prisma/engines` de l'image publiée — c'est **exactement** ce que le fix `binaryTargets` dépose dans
+`.prisma/client` au build) a été **extrait de l'image** puis **monté** dans `.prisma/client` du conteneur API,
+sur le **même compose staging** (`sha-7b07e5e`) :
+
+| Vérification | Avant (CC7) | Après (engine 3.0.x = sortie du fix) |
+|---|---|---|
+| `.prisma/client` | `libquery_engine-debian-openssl-**1.1.x**` | + `libquery_engine-debian-openssl-**3.0.x**` |
+| **Migrations** (depuis l'**image**, offline) | non testé | ✅ **5 migrations appliquées** (`prisma migrate deploy`, CLI + schema-engine 3.0.x **dans l'image**) |
+| **API conteneur** | `Restarting` (crash-loop) | ✅ **`Up (healthy)`** — logs « Nest application successfully started » |
+| `GET /health/live` | HTTP 000 | ✅ **HTTP 200** |
+| `GET /health/ready` | HTTP 000 | ✅ **HTTP 200** |
+| **Web** `GET /` | non atteint | ✅ **HTTP 200** (`Up (healthy)`) |
+| Log « query engine could not be located » | présent | ✅ **absent** |
+
+**Conclusion** : avec le moteur 3.0.x dans `.prisma/client` (= sortie du fix), l'**image publiée démarre** et
+la **stack staging complète** (api+web+postgres+minio) passe **healthy**. Le correctif **résout** le défaut
+bloquant CC7.
+
+## 8.3 Stratégie migrations (tranchée)
+
+**Option A — migrations depuis l'IMAGE** est **viable et retenue pour staging V1** : l'image embarque le **CLI
+Prisma** (`node_modules/.bin/prisma` 6.19.3) **et** le **`schema-engine-debian-openssl-3.0.x`** → `docker
+compose run --rm api npx prisma migrate deploy` applique les migrations **sans accès réseau** (validé ici : 5
+migrations appliquées). Étape **manuelle, séparée du démarrage** (jamais au boot du conteneur). Option B
+(depuis les sources) reste un repli ; image de migration dédiée = **non nécessaire** en V1.
+
+## 8.4 Limites / honnêteté
+
+- L'**image GHCR corrigée n'est pas encore reconstruite/publiée** (rebuild local impossible — egress npm). Elle
+  sera **rebâtie et poussée par la registry CI** (gate `api-smoke`) **au merge** de Cloud Core 8. La preuve
+  ci-dessus utilise l'image actuelle + le moteur 3.0.x **réel** (sortie du fix), ce qui est représentatif.
+- `S3_ENDPOINT` interne (`minio:9000`) en dry-run : **téléchargement navigateur non exercé** (cf. §5, Option A).
+- Aucun déploiement réel, aucune production, aucun secret committé, aucun `latest`.

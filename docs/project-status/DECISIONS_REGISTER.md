@@ -1,7 +1,7 @@
 # DECISIONS_REGISTER.md — Registre de lecture rapide des décisions (ADR)
 
 > **Ne remplace pas les ADR** (`docs/adr/`). Fournit une lecture rapide du **statut d'implémentation**
-> de chaque décision validée. Vérifié depuis le repository (2026-06-10).
+> de chaque décision validée. Vérifié depuis le repository (2026-06-11).
 >
 > Statuts d'implémentation : `DECIDE_NON_IMPLEMENTE`, `PARTIELLEMENT_IMPLEMENTE`, `IMPLEMENTE`,
 > `IMPLEMENTE_ET_REVU`, `NON_APPLICABLE_ACTUELLEMENT`.
@@ -23,7 +23,7 @@
 | ADR-011 | Client HTTP = Fetch (vs Axios) | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile/api | `api-client-fetch` **instancié (public + authentifié + Files lecture)** dans le Web Core (façades `auth.login/refresh/logout/getProfile/getAuthorization` **et** `files.getMetadata/createDownloadUrl` via BFF) **+ clients BFF navigateur** (`fetch` same-origin `/api/auth/*` et `/api/files/*`, sans token), preuve API + MinIO réelle ; **Axios absent**. Reste : Mobile |
 | ADR-012 | Server state = TanStack Query | Validé | **PARTIELLEMENT_IMPLEMENTE** | web/mobile | **intégré dans le Web Core** (QueryClient retry borné, provider, keys, hooks Health, SSR/hydratation) **+ server state Auth** (`authKeys` disjoints, `useSession`/`useAuthorization`, `retry:false`, **sans persistance**, **purge au logout** — Health conservé) **+ hydratation serveur du profil** (layout protégé : `prefillSessionQuery`, aucun second `/me`) **+ server state Files** (`fileKeys` **disjoints**, `useFileMetadata` query `retry:false`/`enabled` si UUID ; **URL signée = mutation** `useCreateDownloadUrl` retournant `void` → **jamais** en cache de query/mutation, log ou persistance). Reste : autres mutations ; Mobile |
 | ADR-013 | CI/CD V1 | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web/mobile | **Niveau 1** `ci.yml` (non-régression monorepo : ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln, gardes Axios/Zustand) **+ Niveau 2** `api-runtime-ci.yml` (**runtime API NestJS** : PostgreSQL + MinIO jetables, `prisma migrate deploy`, unit + **e2e**, `openapi:check`, build, audit) **+ Niveau 3** `web-e2e-ci.yml` (**E2E navigateur** : stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours **Health/Auth/Files** ; données éphémères ; valeurs de test jetables, **aucun secret**, `APP_ENV=development`) **+ Cloud Core 1** cadrage **+ Cloud Core 4** gouvernance (7 checks `main` documentés, politiques artefacts/couverture/pinning/actionlint). **Reste** : protection de branche **appliquée** (action humaine), couverture publiée, release/versioning, déploiement, environnements protégés (niveau 4) |
-| ADR-014 | Registry images | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web | **Cloud Core 5** : `.github/workflows/registry-ci.yml` + Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) — build images + **push GHCR sur `main`** (`ghcr.io/<owner>/<repo>/{api-nestjs,web-nextjs}`), tags **immuables** (`sha-`/`main-`, **pas de `latest`**), labels OCI, auth `GITHUB_TOKEN` (**pas de PAT/secret**), **aucun `.env` dans l'image**. PR = build **sans push**. ⚠️ **Dry-run CC7** : l'**image API publiée ne démarre pas** (query engine Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) — défaut **non vu** par la CI (image jamais exécutée) → **à corriger (CC8)** + **smoke-run image en CI**. L'**image Web boote** (HTTP 200). **Reste** : déploiement, scan/signature/provenance, semver/release, **smoke-run runtime**. Guide : `GHCR_REGISTRY_GUIDE.md` ; dry-run : `STAGING_DRY_RUN_REPORT.md` |
+| ADR-014 | Registry images | Validé | **PARTIELLEMENT_IMPLEMENTE** | cloud/api/web | **Cloud Core 5** : `.github/workflows/registry-ci.yml` + Dockerfiles API/Web (multi-stage, **non-root**, Web **standalone**) — build images + **push GHCR sur `main`** (`ghcr.io/<owner>/<repo>/{api-nestjs,web-nextjs}`), tags **immuables** (`sha-`/`main-`, **pas de `latest`**), labels OCI, auth `GITHUB_TOKEN` (**pas de PAT/secret**), **aucun `.env` dans l'image**. PR = build **sans push**. **CC8** : défaut runtime image API (query engine Prisma OpenSSL 1.1.x vs bookworm 3.0.x) **CORRIGÉ** (`binaryTargets` + `openssl` au build) ; **angle mort fermé** par le job **`api-smoke`** (lance l'image, vérifie le moteur Prisma) qui **gate le push GHCR**. **Reste** : déploiement, scan/signature/provenance, semver/release ; rendre `api-smoke` requis ; rebuild GHCR image (CI au merge). Guide : `GHCR_REGISTRY_GUIDE.md` ; dry-run/fix : `STAGING_DRY_RUN_REPORT.md` §8 |
 | ADR-015 | Stockage mobile sécurisé | Validé | **DECIDE_NON_IMPLEMENTE** | mobile/api | pas de core mobile |
 | ADR-016 | OpenAPI + clients typés | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | contrat + packages ; **consommés** par le Web Core (types via `SchemaOf<>` — Health, Auth `UserProfileResponseDto`/`AuthorizationSummaryResponseDto` **et Files** `PublicStoredFileDto`/`SignedDownloadResponseDto` ; client **instancié** pour Health + BFF Auth + façade Files) — **aucun DTO recopié** |
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
@@ -274,6 +274,24 @@
   ADR-013/014 partiels) ; **déploiement staging = `DRY_RUN_EXECUTE`** (dry-run exécuté, **défaut bloquant** →
   exécution réelle BLOQUÉE ; pas opérationnel/automatisé). Prochaine action : **Cloud Core 8 — corriger l'image
   runtime API (moteur Prisma)** puis re-dry-run + stratégie migrations.
+- **Cloud Core 8 — correction de l'image runtime API NestJS (2026-06-11)** : **corrige** le défaut bloquant CC7
+  (image API en crash-loop) et **ferme l'angle mort CI** (image buildée mais jamais exécutée). **Cause** : le
+  query engine Prisma de `node_modules/.prisma/client` était compilé pour **OpenSSL 1.1.x** (détection `native`
+  ambiguë au stage build sans openssl) alors que la base runtime est **Debian bookworm / OpenSSL 3.0.x**.
+  **Correctif** : `prisma/schema.prisma` generator `binaryTargets = ["native", "debian-openssl-3.0.x"]` (force
+  l'émission du moteur 3.0.x, copié depuis `@prisma/engines`, **sans réseau**) **+** `Dockerfile` installe
+  `openssl`/`ca-certificates` **aussi au stage build**. **Re-validation réelle** (image publiée + moteur 3.0.x
+  monté = sortie du fix ; `STAGING_DRY_RUN_REPORT.md` §8) : **migrations depuis l'image** (offline, 5 appliquées),
+  API **`Up (healthy)`** `/health/live` & `/health/ready` **200**, Web **200**, **stack staging complète
+  healthy**, logs sans erreur moteur. **CI** : `registry-ci.yml` job **`api-smoke`** (build → **lance l'image** →
+  vérifie le chargement du moteur Prisma sans DB ; non-root + openssl + moteur présent) → **`images` `needs:
+  api-smoke`** ⇒ **push GHCR conditionné au smoke**. **Stratégie migrations** tranchée = **Option A (depuis
+  l'image)** (CLI + schema-engine 3.0.x embarqués). **Aucune** modification de la logique métier ;
+  `cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** ; **aucun secret/`latest`/
+  déploiement**. ⚠️ Le `docker build` **local** est bloqué (egress npm) → l'**image GHCR corrigée** est
+  **reconstruite/publiée par la registry CI au merge** (tags ≤ `sha-7b07e5e` restent cassés). Statuts
+  **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement staging =
+  `DRY_RUN_API_IMAGE_FIXED`**. Prochaine action : **Cloud Core 9 — exécution staging réelle sur serveur**.
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés

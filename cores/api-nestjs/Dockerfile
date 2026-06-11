@@ -6,10 +6,16 @@
 # --- Stage build : dépendances complètes + génération Prisma + nest build ---
 FROM node:24-slim AS build
 WORKDIR /app
+# openssl/ca-certificates AUSSI au build : sans openssl, `prisma generate` détecte mal la libssl et
+# repliait `native` sur `debian-openssl-1.1.x` (incompatible avec le runtime bookworm 3.0.x). Cloud Core 8.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 # Lockfile d'abord (cache de couche). `npm ci` installe TOUTES les deps (dont devDeps : nest CLI, ts, prisma).
 COPY package.json package-lock.json ./
 RUN npm ci
-# Client Prisma généré (le schéma ne change pas au runtime).
+# Client Prisma généré (le schéma ne change pas au runtime). `binaryTargets` du schéma force le moteur
+# `debian-openssl-3.0.x` (copié depuis @prisma/engines, sans réseau) → présent dans node_modules/.prisma/client.
 COPY prisma ./prisma
 RUN npx prisma generate
 # Sources + config de build, puis compilation (nest build → dist/).
