@@ -3,11 +3,13 @@
 > Comment les images sont **construites** et **publiées** sur GitHub Container Registry (GHCR), comment les
 > retrouver et les utiliser. **L'image ne déploie rien** : elle est seulement construite et stockée.
 
-> ⚠️ **Validité des images API (Cloud Core 8)** : les images `api-nestjs` **antérieures au correctif CC8**
-> (tags ≤ `sha-7b07e5e`) **ne démarrent pas** (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x —
-> cf. `STAGING_DRY_RUN_REPORT.md` §3/§8). **N'utiliser qu'une image API reconstruite APRÈS le merge CC8.**
-> Désormais, la registry CI **exécute** l'image API (job **`api-smoke`**) et ne **pousse** que si le moteur
-> Prisma se charge — un défaut runtime de ce type ne peut plus être publié silencieusement.
+> ✅ **Validité des images API (Cloud Core 8 / 8B)** : l'image API corrigée est **publiée** depuis le merge CC8
+> (**`main` = `d1e6242`**) — tags **`sha-d1e6242`** / **`main-d1e6242`** (et ultérieurs). Elle **démarre**
+> (moteur Prisma `debian-openssl-3.0.x` ; vérifié : `/health/live` & `/health/ready` = 200, OpenSSL 3.0.20,
+> non-root). ⚠️ Les images **antérieures** (tags ≤ `sha-7b07e5e`) **ne démarrent pas** (moteur OpenSSL 1.1.x —
+> cf. `STAGING_DRY_RUN_REPORT.md` §3/§8) : **ne pas les utiliser**. Désormais la registry CI **exécute**
+> l'image API (job **`api-smoke`**) et ne **pousse** que si le moteur Prisma se charge — un défaut runtime de
+> ce type ne peut plus être publié silencieusement.
 
 ## Images produites
 
