@@ -5,11 +5,17 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Mobile Core React Native 1 — starter foundation** : initialiser le **starter Expo/React Native** (navigation
-> **auth/privé**, **secure storage** ADR-015, intégration `api-client-fetch`, **TanStack Query** (ADR-012),
-> **tokens UI Kit** via **ThemeProvider** ADR-010, états **loading/error/empty**) — **sans logique métier**, **un
-> seul core**. C'est la **priorité #2 V1** de la roadmap (`strategy/04_ROADMAP_GLOBAL.md` §7.2/§30), **jamais
-> démarrée** (zéro code), aux **dépendances satisfaites** (API + packages + tokens RN-safe).
+> ✅ **Mobile Core React Native 1 — starter foundation : RÉALISÉ** (`mobile-react-native` →
+> **`STARTER_FOUNDATION_INITIEE`**). Starter **Expo SDK 55** / Expo Router : navigation **publique+authentifiée**
+> + gate + not-found ; **shell auth sans backend** ; **secure storage** SecureStore (ADR-015 : access token en
+> mémoire, refresh token persistant) ; **transport `fetch`** générique (ADR-011) en **seam** vers
+> `@enistere/api-client-fetch` (ADR-016) ; **TanStack Query** (ADR-012) ; **ThemeProvider + tokens** (ADR-008/010) ;
+> **états standards**. Vérifs : **typecheck + lint + expo-doctor 19/19 verts**. **Aucune logique métier.**
+>
+> **Prochaine action UNIQUE : Mobile Core React Native 2 — auth/session hardening** : refresh token **réel**,
+> **intégration `@enistere/api-client-fetch`** (workspace + Metro monorepo), persistance/expiration de session,
+> **tests** (auth flow, token storage, navigation). **Un seul core**, **sans logique métier**. Différés au-delà :
+> **Zustand** (état local), **React Hook Form + Zod**, **upload `fetch + FormData`**, **notifications**, **logger**.
 >
 > **(Décision roadmap)** **Cloud Core en PAUSE contrôlée** (cf. [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md)) ;
 > **Cloud Core 10** (serveur staging réel + HTTPS/DNS/pare-feu) **reporté** jusqu'à disponibilité d'un **serveur
@@ -43,8 +49,9 @@ sans serveur réel/HTTPS/exposition ; URL signée + Auth/Files **non validés** 
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Mobile Core React Native 1 — starter foundation** (priorité **#2 V1** roadmap, jamais démarrée) — starter Expo/RN ; navigation auth/privé ; intégration `api-client-fetch` ; TanStack Query ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010) ; états loading/error/empty. ✦ **prochaine mission Codex** (décision revue d'alignement). *(Sans logique métier ; un seul core.)*
-2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+1. ✅ **Mobile Core React Native 1 — starter foundation** (priorité **#2 V1** roadmap) — **RÉALISÉ** : starter Expo SDK 55 + Expo Router ; navigation auth/privé ; transport `fetch` (seam `api-client-fetch`) ; TanStack Query ; secure storage (ADR-015) ; ThemeProvider+tokens (ADR-010) ; états standards ; typecheck/lint/doctor verts. *(Sans logique métier ; un seul core.)*
+2. **Mobile Core React Native 2 — auth/session hardening** ✦ **prochaine mission** — refresh réel + intégration `@enistere/api-client-fetch` + persistance/expiration session + tests. *(Sans logique métier ; un seul core.)*
+3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
 3. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
 4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
@@ -78,10 +85,11 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 8 — corriger l'image runtime API (Prisma engine) | **FAIT + MERGÉ** (PR #7 → `d1e6242`) — `binaryTargets debian-openssl-3.0.x` + `openssl` au stage build → moteur 3.0.x ; **`api-smoke`** gate le push. **CC8B post-merge VÉRIFIÉ** : `api-smoke` + push GHCR **success**, **images corrigées publiées** (`sha-d1e6242` API/Web, no `latest`), image API **démarre** (dry-run post-merge `healthy`, 200/200/200) |
 | Cloud Core 9 — exécution staging contrôlée | **FAIT (local Type D)** — stack réelle (images GHCR corrigées `sha-d1e6242`), migrations depuis l'image, **API/Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login`=200, endpoint MinIO Option A **joignable** ; ⚠️ **non validé** : URL signée bout-en-bout + Auth/Files (pas d'utilisateur ; seed bloqué) ; **pas de serveur réel/HTTPS** → `EXECUTION_LOCALE_CONTROLEE` |
 | Cloud Core 10 — préparation serveur staging sécurisé | **REPORTÉ (Cloud en pause contrôlée)** — dépend d'un **serveur réel** + HTTPS/DNS/pare-feu + SSH (ressource externe) ; reprise pour valider **en réel** URL signée (presign API, Option A) + Auth/Files |
-| **Mobile Core React Native 1 — starter foundation** | **PROCHAINE MISSION** — priorité #2 V1 (roadmap §7.2/§30), jamais démarrée ; dépendances satisfaites (API + packages + tokens RN-safe) ; starter Expo/RN (auth/privé, secure storage ADR-015, api-client-fetch, TanStack Query, ThemeProvider ADR-010) |
+| **Mobile Core React Native 1 — starter foundation** | **FAIT** — `mobile-react-native` → **`STARTER_FOUNDATION_INITIEE`** : starter Expo SDK 55 + Expo Router (navigation publique/authentifiée, shell auth sans backend, secure storage SecureStore ADR-015, transport `fetch` ADR-011 en seam vers `api-client-fetch` ADR-016, TanStack Query ADR-012, ThemeProvider+tokens ADR-008/010, états standards) ; typecheck + lint + expo-doctor 19/19 verts ; aucune logique métier |
+| **Mobile Core React Native 2 — auth/session hardening** | **PROCHAINE MISSION** — refresh token réel + intégration `@enistere/api-client-fetch` (workspace + Metro monorepo) + persistance/expiration session + tests (auth/token storage/navigation) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
-| Intégrer les packages dans le Mobile | **débloqué via Mobile Core RN 1** (starter à initialiser — prochaine mission) |
+| Intégrer les packages dans le Mobile | **planifié en Mobile Core RN 2** — le starter RN 1 expose un **seam** (transport `fetch` générique) ; l'intégration de `@enistere/api-client-fetch` requiert workspace racine + Metro monorepo (hors périmètre RN 1) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |
 | Web Core Angular | spécification absente + **ADR-035 non rédigé** |

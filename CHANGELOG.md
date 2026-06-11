@@ -6,6 +6,22 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 1 — starter foundation (socle générique)
+
+- **Mobile Core React Native 1 — starter foundation** (`cores/mobile-react-native/`) : initialise le **socle mobile générique** Expo / React Native. `mobile-react-native` passe de `SPECIFICATION_DOCUMENTAIRE` à **`STARTER_FOUNDATION_INITIEE`**. **Aucune logique métier**, **un seul core** ; Cloud Core **reste** `PAUSE_CONTROLEE`, staging `EXECUTION_LOCALE_CONTROLEE` ; **aucun autre core démarré**, **aucun fichier Cloud Core relancé**.
+  - **Stack** : **Expo SDK 55** (New Architecture par défaut), **Expo Router** (file-based), **React 19.2 / React Native 0.83**, **TypeScript strict**, **TanStack Query 5**, **Expo SecureStore**. Layout **plat** (cohérent `web-nextjs`/`api-nestjs`) ; core **autonome** (hors workspaces racine, comme `api-nestjs`).
+  - **Navigation** (spec §16) : stacks `(public)` + `(app)` (protégée), `app/index.tsx` **gate** de redirection selon l'état auth, **garde** de route `(app)/_layout.tsx`, écran `+not-found`, écrans placeholder public/authentifié — **génériques** (pas de seller/buyer/admin/delivery, pas de Kivvoo/RFashion/Bailo).
+  - **Shell auth** (ADR-004) : états `loading`/`authenticated`/`unauthenticated` ; `signIn`/`signOut`/`restoreSession` **placeholder, aucun appel backend métier**.
+  - **Secure storage** (ADR-015) : interface `SecureStorage` + impl `ExpoSecureStorage` (SecureStore) ; **access token en mémoire**, **refresh token persistant** ; nettoyage au logout (tokens **+ cache TanStack Query**) ; clés génériques (`accessToken`/`refreshToken`/`session`).
+  - **API client** (ADR-011) : transport `fetch` générique (base URL configurable, injection `Authorization`, erreurs typées `ApiError`/`NetworkError`/`TimeoutError`, timeout `AbortController`), **aucun endpoint métier** — présenté comme **seam** vers le client officiel `@enistere/api-client-fetch` (ADR-016 ; intégration workspace+Metro **reportée en RN 2**, hors périmètre racine de cette mission). **Pas d'Axios.**
+  - **Server state** (ADR-012) : `QueryClient` + `QueryProvider`, défauts mobiles, **aucune query métier**.
+  - **Thème / UI** (ADR-008/010) : `ThemeProvider` (light/dark) + **bridge tokens placeholder** mirant la forme `@enistere/ui-kit` (source de vérité) ; primitives maison `Screen`/`Text`/`Button` (pilotées par tokens, états pressed/disabled/loading, cible tactile a11y). **Pas de NativeWind, pas de librairie UI complète.**
+  - **États standards** (spec §26) : `LoadingState`/`ErrorState`/`EmptyState`/`OfflineState`/`UnauthorizedState`.
+  - **Sécurité** : **aucun secret** (`EXPO_PUBLIC_*` public uniquement, `.env.example` documenté) ; tokens hors logs.
+  - **Vérifications** (locales) : `npm install` ✅ (SDK 55) ; **`tsc --noEmit`** ✅ ; **`expo lint`** (eslint-config-expo 55) ✅ ; **`expo-doctor` 19/19** ✅.
+  - **Écarts assumés** (cf. `cores/mobile-react-native/ARCHITECTURE.md`) : layout **plat** au lieu du `starter/` du `CORE_SPECIFICATION.md` §8 (aligné convention repo + mission §5) ; **transport seam** local au lieu de `@enistere/api-client-fetch` (périmètre mission + ADR-016 §7) ; **bridge tokens placeholder** au lieu d'import UI Kit (core autonome ; autorisé par la mission). **Différés** (V1 partielle) : Zustand, React Hook Form/Zod, upload, notifications, logger, permissions natives.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` (décisions/écarts) ajoutés au core ; checkpoint `docs/project-status/` synchronisé (état, matrice, next actions, handoff). **Prochaine mission recommandée (unique) : Mobile Core React Native 2 — auth/session hardening.** Commit `feat(mobile): scaffold react native starter foundation` (via PR).
+
 ### Revue stratégique d'alignement roadmap (post Cloud Core 9)
 
 - **Revue stratégique** (`docs/project-status/ROADMAP_ALIGNMENT_REVIEW.md`) — **aucune fonctionnalité, aucun code modifié.** Bilan d'alignement après la séquence **Cloud Core 1→9**.
