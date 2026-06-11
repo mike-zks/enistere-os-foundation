@@ -215,10 +215,12 @@ exposition publique** (aucun serveur distant/SSH/DNS/HTTPS) : `compose config` v
 depuis l'image** (offline), **API & Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login` = **200**,
 **endpoint MinIO Option A joignable** par l'hôte ; ⚠️ **non validé** : **URL signée** bout-en-bout (presign API
 non exercé ; `mc` → 403) et **Auth/Files** applicatifs (**aucun utilisateur staging** — seed bloqué). Statut
-staging → **`EXECUTION_LOCALE_CONTROLEE`** (détail : `cores/cloud/docs/STAGING_EXECUTION_REPORT.md`).
-**Prochaine action** : **Cloud Core 10 — préparation serveur staging sécurisé** (serveur réel + HTTPS/DNS/pare-feu,
-puis validation URL signée + Auth/Files en réel) ; **actions humaines** : protection de branche `main` + rendre
-`api-smoke` requis.
+staging → **`EXECUTION_LOCALE_CONTROLEE`** (détail : `cores/cloud/docs/STAGING_EXECUTION_REPORT.md`). Enfin, une
+**revue stratégique d'alignement** (`docs/project-status/ROADMAP_ALIGNMENT_REVIEW.md`) a constaté que la séquence
+**Cloud Core 1→9** (CI = V2, registry/staging = V3/VF) a **dépassé l'ordre roadmap** alors que **Mobile Core RN —
+priorité #2 V1 — n'a jamais été démarré** → **décision : Cloud Core en PAUSE contrôlée** (CC10 serveur réel
+**reporté** — dépendance externe), **retour aux priorités V1**. **Prochaine action** : **Mobile Core React Native
+1 — starter foundation** ; **actions humaines** : protection de branche `main` + rendre `api-smoke` requis.
 
 ## 12. Documentation
 

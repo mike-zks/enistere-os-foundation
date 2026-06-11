@@ -6,6 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Revue stratégique d'alignement roadmap (post Cloud Core 9)
+
+- **Revue stratégique** (`docs/project-status/ROADMAP_ALIGNMENT_REVIEW.md`) — **aucune fonctionnalité, aucun code modifié.** Bilan d'alignement après la séquence **Cloud Core 1→9**.
+  - **Constat** : Cloud Core a livré une **vraie valeur** (CI non-régression, **images GHCR bootables** après le fix CC8, `api-smoke` gate du push, runbooks, **staging local exécuté**) **mais a dépassé l'ordre roadmap** (`strategy/04_ROADMAP_GLOBAL.md` : CI/CD = **V2**, registry/staging = **V3/VF**) **alors que Mobile Core React Native — priorité #2 V1 — n'a jamais été démarré** (zéro code), ses dépendances (API + packages + tokens UI Kit RN-safe) étant **satisfaites**. Le pas suivant Cloud (**CC10 serveur réel**) dépend d'une **ressource externe** (serveur + HTTPS/DNS/pare-feu) → **point d'arrêt raisonnable**.
+  - **Décision (une seule)** : **Cloud Core en PAUSE contrôlée** (CC10 reporté) ; **retour aux priorités V1** → **prochaine action unique : Mobile Core React Native 1 — starter foundation** (starter Expo/RN, navigation auth/privé, secure storage ADR-015, `api-client-fetch`, TanStack Query, ThemeProvider ADR-010 ; sans logique métier).
+  - **Livrables** : `ROADMAP_ALIGNMENT_REVIEW.md` (objectif originel, matrice par core, bilan Cloud, dérives, décision, handoff) + checkpoint synchronisé (handoff, next actions, état, matrice, décisions). Statuts **inchangés** (aucun gonflé). Commit `docs(project): review roadmap alignment after cloud core` (via PR).
+
 ### Exécution staging contrôlée — locale Type D (Cloud Core 9)
 
 - **Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution réelle des conteneurs** (API + Web + PostgreSQL + MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en environnement **Type D : local, sans exposition publique**. **Aucun serveur distant/SSH/DNS/HTTPS identifié** → mission **requalifiée honnêtement** en exécution **locale** (consigne §6). `.env.staging` **réel hors dépôt** (secrets `openssl` jetables, `chmod 600`, **shred** après). **Aucune production, aucun workflow deploy, aucun secret committé, aucun `latest`, aucune modif code/Dockerfile/workflow.** Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ; **déploiement staging → `EXECUTION_LOCALE_CONTROLEE`** ; ADR-013/014 **partiels**. **Aucun statut augmenté.**

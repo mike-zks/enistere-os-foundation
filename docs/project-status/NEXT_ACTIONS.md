@@ -5,27 +5,25 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 10 — préparation serveur staging sécurisé** : identifier/provisionner un **serveur staging réel**
-> (Hetzner/VM) avec **HTTPS + DNS/domaine + pare-feu** + SSH, secrets **hors dépôt** ; puis y appliquer les
-> runbooks avec l'image GHCR API **corrigée** (`sha-d1e6242`+) et **valider de bout en bout** ce que l'exécution
-> **locale** (CC9) n'a pas pu : **téléchargement d'URL signée** (presign **de l'API**, endpoint **Option A
-> public**) + **parcours Auth/Files réels** (utilisateur staging seedé). **Verrou** : aucun serveur réel
-> identifié à ce jour (CC9 = exécution **locale Type D**).
+> **Mobile Core React Native 1 — starter foundation** : initialiser le **starter Expo/React Native** (navigation
+> **auth/privé**, **secure storage** ADR-015, intégration `api-client-fetch`, **TanStack Query** (ADR-012),
+> **tokens UI Kit** via **ThemeProvider** ADR-010, états **loading/error/empty**) — **sans logique métier**, **un
+> seul core**. C'est la **priorité #2 V1** de la roadmap (`strategy/04_ROADMAP_GLOBAL.md` §7.2/§30), **jamais
+> démarrée** (zéro code), aux **dépendances satisfaites** (API + packages + tokens RN-safe).
 >
-> **(Actions HUMAINES)** confirmer la **protection de branche `main`** (7 checks + `images`) et **ajouter
-> `api-smoke`** aux checks requis.
+> **(Décision roadmap)** **Cloud Core en PAUSE contrôlée** (cf. [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md)) ;
+> **Cloud Core 10** (serveur staging réel + HTTPS/DNS/pare-feu) **reporté** jusqu'à disponibilité d'un **serveur
+> réel** (dépendance **externe**, hors socle). **(Actions HUMAINES)** confirmer la **protection de branche `main`**
+> (7 checks + `images`) et **ajouter `api-smoke`** aux checks requis.
 
-**Justification** : le **Cloud Core 9 — exécution staging contrôlée** a **exécuté réellement la stack**
-(API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en environnement **Type D :
-local, sans exposition publique** (aucun serveur distant/SSH/DNS/HTTPS identifié). Résultats
-(`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : `compose config` valide (no `latest`), **migrations depuis
-l'image** (offline, 5), **API & Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login` = **200**,
-**endpoint MinIO Option A joignable** par l'hôte (navigateur). ⚠️ **Non validé** : **URL signée** de bout en bout
-(presign `mc` → **403** ; presign **API non exercé**) et **Auth/Files** applicatifs (**aucun utilisateur staging**
-— seed bloqué : devDeps/egress) ; **aucun serveur réel / HTTPS / exposition**. Statut staging →
-**`EXECUTION_LOCALE_CONTROLEE`** (ni « réelle sur serveur » ni production-ready). La suite **unique** est donc de
-**préparer un serveur staging sécurisé** pour valider le reste **en réel**. **Ne pas** créer de production ni
-d'automatisation de déploiement. **Flux PR obligatoire** (push direct `main` refusé).
+**Justification** : la **revue stratégique d'alignement** (2026-06-11, `ROADMAP_ALIGNMENT_REVIEW.md`) constate que
+la séquence **Cloud Core 1→9** a livré une **vraie valeur** (CI non-régression, **images GHCR bootables** après
+le fix CC8, `api-smoke`, runbooks, **staging local exécuté**) mais a **dépassé l'ordre roadmap** : la CI/CD est
+**V2** et le registry/staging **V3/VF**, tandis que **Mobile Core RN (V1 #2)** n'a **jamais** été démarré. Le
+prochain pas Cloud (**CC10 serveur réel**) dépend de **ressources externes indisponibles** et relève de l'**ops
+par déploiement**, pas du **socle réutilisable** → **point d'arrêt raisonnable**. La suite **unique** la plus
+alignée est donc de **revenir aux priorités V1** et d'**initialiser Mobile Core RN**. **Ne pas** créer de
+production ni d'automatisation de déploiement. **Flux PR obligatoire** (push direct `main` refusé).
 
 **Alternative (justifiée, décision humaine)** : **durcissement registry** (scan/signature/SBOM) ; **UI Kit 4** ;
 **Files 2** (upload Web) ; **Mobile Core**.
@@ -38,14 +36,17 @@ et ajoute le commit `docs(cloud): record controlled staging execution` (rapport 
 Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`**, ADR-014
 **`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging **`EXECUTION_LOCALE_CONTROLEE`** (stack exécutée en **local**,
 sans serveur réel/HTTPS/exposition ; URL signée + Auth/Files **non validés** ⇒ **non** opérationnel/production).
+**CC9 mergé (PR #9 → `5589198`).** **Revue stratégique d'alignement** (cette mission, `ROADMAP_ALIGNMENT_REVIEW.md`)
+→ **décision : Cloud Core en PAUSE contrôlée**, **retour priorités V1 → Mobile Core RN 1** ; commit
+`docs(project): review roadmap alignment after cloud core` via PR. **Aucun statut augmenté.**
 **Aucun statut augmenté.**
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 10 — préparation serveur staging sécurisé** (serveur réel + HTTPS/DNS/pare-feu) puis validation **en réel** de l'URL signée (presign API, Option A) + Auth/Files. ✦ prochaine mission Codex. *(CC9 a exécuté la stack en **local Type D** ; reste à valider sur un serveur réel.)*
-2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
-3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
-4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
+1. **Mobile Core React Native 1 — starter foundation** (priorité **#2 V1** roadmap, jamais démarrée) — starter Expo/RN ; navigation auth/privé ; intégration `api-client-fetch` ; TanStack Query ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010) ; états loading/error/empty. ✦ **prochaine mission Codex** (décision revue d'alignement). *(Sans logique métier ; un seul core.)*
+2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+3. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -76,10 +77,11 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 7 — préparation serveur staging & dry-run contrôlé | **FAIT** — **dry-run local réel** (images GHCR `sha-7b07e5e`, `.env` hors dépôt) : `compose config`/`pull` OK, **image Web boote**, **MAIS image API crash-loop** (Prisma engine OpenSSL 1.1.x vs runtime bookworm 3.0.x) → staging `DRY_RUN_EXECUTE` (**défaut bloquant**) ; décision MinIO Option A ; runbook migrations corrigé. Détail `STAGING_DRY_RUN_REPORT.md` |
 | Cloud Core 8 — corriger l'image runtime API (Prisma engine) | **FAIT + MERGÉ** (PR #7 → `d1e6242`) — `binaryTargets debian-openssl-3.0.x` + `openssl` au stage build → moteur 3.0.x ; **`api-smoke`** gate le push. **CC8B post-merge VÉRIFIÉ** : `api-smoke` + push GHCR **success**, **images corrigées publiées** (`sha-d1e6242` API/Web, no `latest`), image API **démarre** (dry-run post-merge `healthy`, 200/200/200) |
 | Cloud Core 9 — exécution staging contrôlée | **FAIT (local Type D)** — stack réelle (images GHCR corrigées `sha-d1e6242`), migrations depuis l'image, **API/Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login`=200, endpoint MinIO Option A **joignable** ; ⚠️ **non validé** : URL signée bout-en-bout + Auth/Files (pas d'utilisateur ; seed bloqué) ; **pas de serveur réel/HTTPS** → `EXECUTION_LOCALE_CONTROLEE` |
-| Cloud Core 10 — préparation serveur staging sécurisé | **débloqué** — prochaine mission ; serveur réel + HTTPS/DNS/pare-feu + SSH ; puis valider **en réel** URL signée (presign API, Option A) + Auth/Files (utilisateur seedé) |
+| Cloud Core 10 — préparation serveur staging sécurisé | **REPORTÉ (Cloud en pause contrôlée)** — dépend d'un **serveur réel** + HTTPS/DNS/pare-feu + SSH (ressource externe) ; reprise pour valider **en réel** URL signée (presign API, Option A) + Auth/Files |
+| **Mobile Core React Native 1 — starter foundation** | **PROCHAINE MISSION** — priorité #2 V1 (roadmap §7.2/§30), jamais démarrée ; dépendances satisfaites (API + packages + tokens RN-safe) ; starter Expo/RN (auth/privé, secure storage ADR-015, api-client-fetch, TanStack Query, ThemeProvider ADR-010) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
-| Intégrer les packages dans le Mobile | starter Mobile inexistant |
+| Intégrer les packages dans le Mobile | **débloqué via Mobile Core RN 1** (starter à initialiser — prochaine mission) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |
 | Web Core Angular | spécification absente + **ADR-035 non rédigé** |

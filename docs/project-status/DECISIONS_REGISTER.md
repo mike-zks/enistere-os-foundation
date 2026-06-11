@@ -306,8 +306,18 @@
   **arrêt** après validation (`down -v`, volumes/secrets jetables supprimés). **Aucune** modification de
   `cores/*/src`/`packages`/`docs/adr`/`strategy`/Dockerfiles/workflows ; **aucun secret/`latest`/déploiement
   réel**. Statuts **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement
-  staging = `EXECUTION_LOCALE_CONTROLEE`** (ni « réelle sur serveur » ni production-ready). Prochaine action :
-  **Cloud Core 10 — préparation serveur staging sécurisé**.
+  staging = `EXECUTION_LOCALE_CONTROLEE`** (ni « réelle sur serveur » ni production-ready). Mergé via **PR #9**
+  (`5589198`). Prochaine action : **revue d'alignement**.
+- **Revue stratégique d'alignement roadmap (2026-06-11, `ROADMAP_ALIGNMENT_REVIEW.md`)** : **aucun code modifié**.
+  Constat : la séquence **Cloud Core 1→9** a livré une **vraie valeur** (CI non-régression, **images GHCR
+  bootables** après le fix CC8, `api-smoke`, runbooks, staging local exécuté) **mais a dépassé l'ordre roadmap**
+  (`04_ROADMAP_GLOBAL.md` : CI/CD = **V2**, registry/staging = **V3/VF**) **alors que Mobile Core RN — priorité
+  #2 V1 — n'a jamais été démarré** (zéro code), ses dépendances (API + packages + tokens UI Kit RN-safe) étant
+  **satisfaites**. Le pas suivant Cloud (**CC10 serveur réel**) dépend d'une **ressource externe** (serveur +
+  HTTPS/DNS/pare-feu) et relève de l'**ops**, pas du socle → **point d'arrêt raisonnable**. **DÉCISION (une
+  seule)** : **Cloud Core en PAUSE contrôlée** ; **retour aux priorités V1** → **prochaine action unique : Mobile
+  Core React Native 1 — starter foundation**. Statuts **inchangés** (aucun gonflé). Commit `docs(project): review
+  roadmap alignment after cloud core`.
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés
