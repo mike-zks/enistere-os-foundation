@@ -54,33 +54,32 @@ docker run --rm --network container:$(docker compose -f docker-compose.staging.e
 
 ## 5. Migrations Prisma (étape SÉPARÉE, avant de démarrer l'API)
 
-> ⚠️ **Correction (dry-run CC7, 2026-06-11)** : contrairement à ce qui était écrit ici, l'image runtime
-> **embarque** le CLI Prisma (`node_modules/.bin/prisma` 6.19.3) **et** le `schema-engine` de la bonne
-> plateforme. Le rationale « CLI absent » était **faux**. Voir
-> [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md) §4. **Stratégie migrations à trancher en Cloud
-> Core 8** : *migrate depuis l'image* (CLI présent) **ou** *migrate depuis les sources*.
+> ✅ **Stratégie tranchée (Cloud Core 8) — migrations DEPUIS L'IMAGE (Option A)** : l'image runtime **embarque**
+> le CLI Prisma (`node_modules/.bin/prisma` 6.19.3) **et** le `schema-engine-debian-openssl-3.0.x`. `migrate
+> deploy` s'exécute donc **depuis l'image, sans accès réseau** (validé : 5 migrations appliquées en dry-run, cf.
+> [`STAGING_DRY_RUN_REPORT.md`](STAGING_DRY_RUN_REPORT.md) §8.3). Étape **manuelle, séparée du démarrage**.
 
-Appliquer les migrations **avant** de démarrer l'API. Deux voies (à arbitrer en CC8) :
+Appliquer les migrations **avant** de démarrer l'API :
 
 ```bash
-# Voie A — depuis les SOURCES au commit déployé (même sha que le tag d'image) :
-git fetch && git checkout <sha-déployé>
-cd cores/api-nestjs && npm ci
-DATABASE_URL="postgresql://<user>:<pwd>@<host>:5432/enistere_staging?schema=public" \
-  npx prisma migrate deploy        # JAMAIS `db push` ; applique les migrations versionnées
+# Voie A (RETENUE V1) — depuis l'IMAGE (offline ; postgres déjà démarré et healthy) :
+docker compose --env-file .env.staging -f docker-compose.staging.example.yml \
+  run --rm api npx prisma migrate deploy     # JAMAIS `db push` ; migrations versionnées
 
-# Voie B — depuis l'IMAGE (CLI + schema-engine présents ; À CONFIRMER sur serveur avec egress réseau) :
-# docker compose --env-file .env.staging -f docker-compose.staging.example.yml \
-#   run --rm api npx prisma migrate deploy
+# Voie B (repli) — depuis les SOURCES au commit déployé (même sha que le tag d'image) :
+# git fetch && git checkout <sha-déployé> && cd cores/api-nestjs && npm ci
+# DATABASE_URL="postgresql://<user>:<pwd>@<host>:5432/enistere_staging?schema=public" npx prisma migrate deploy
 ```
 
 > Si une **sauvegarde** existe (DB non vide), faire un **backup** avant `migrate deploy` (cf. rollback).
 > Ne **pas** exécuter les migrations automatiquement au démarrage du conteneur applicatif.
 
-> ⛔ **Pré-requis BLOQUANT avant tout staging réel (dry-run CC7)** : l'image API publiée **ne démarre pas**
-> en l'état — le **query engine** Prisma présent dans `.prisma/client` est compilé pour **OpenSSL 1.1.x**
-> alors que la base runtime est **Debian bookworm / OpenSSL 3.0.x** → crash-loop, `/health/ready` jamais vert.
-> **Corriger l'image (Cloud Core 8)** avant d'exécuter ce runbook. Détail : `STAGING_DRY_RUN_REPORT.md` §3.
+> ✅ **Défaut image API CORRIGÉ (Cloud Core 8)** : le query engine Prisma était compilé pour **OpenSSL 1.1.x**
+> alors que la base runtime est **Debian bookworm / OpenSSL 3.0.x** (crash-loop). Correctif : `binaryTargets`
+> (schéma) + `openssl` au stage build → moteur **`debian-openssl-3.0.x`** dans `.prisma/client`. **Validé**
+> (image + moteur 3.0.x : `/health/live` & `/health/ready` = 200, stack complète `healthy`). ⚠️ **Utiliser une
+> image GHCR reconstruite APRÈS le merge CC8** (republée par la registry CI, gate `api-smoke`) — les tags
+> antérieurs (`sha-7b07e5e` et avant) restent cassés. Détail : `STAGING_DRY_RUN_REPORT.md` §8.
 
 ## 6. Démarrer l'applicatif
 

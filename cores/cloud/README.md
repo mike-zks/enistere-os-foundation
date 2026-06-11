@@ -61,22 +61,25 @@ runtime → étape source séparée), **PostgreSQL non exposé**, **MinIO API jo
 **rollback d'image** simple mais **rollback DB non garanti** (migrations additives). `docker compose config`
 **validé**, **aucun secret API** fuité dans le conteneur Web.
 
-## Staging dry-run contrôlé (Cloud Core 7) — `DRY_RUN_EXECUTE` (défaut bloquant)
+## Staging dry-run (CC7) + correction image API (CC8) — `DRY_RUN_API_IMAGE_FIXED`
 
-**Dry-run local réel** (2026-06-11) à partir des **images GHCR immuables** (`sha-7b07e5e`) + `.env.staging`
-**réel hors dépôt** (secrets jetables, supprimé après) — **aucun déploiement réel, aucun secret committé,
-aucun `latest`**. Détail : [`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md).
+**Dry-run local réel** (2026-06-11) à partir des **images GHCR immuables** + `.env.staging` **réel hors dépôt**
+(secrets jetables, supprimé après) — **aucun déploiement réel, aucun secret committé, aucun `latest`**. Détail :
+[`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md).
 
-- ✅ `docker compose config` valide (tag immuable, **aucun `latest`**) ; ✅ images **tirées en anonyme** ;
-  ✅ `postgres healthy` + `minio Up` + bucket ; ✅ **image Web boote** (HTTP 200, Next 16.2.7).
-- ❌ **Défaut BLOQUANT** : l'**image API ne démarre pas** (crash-loop) — **query engine Prisma OpenSSL 1.1.x**
-  dans `.prisma/client` vs **runtime Debian bookworm / OpenSSL 3.0.x** → `/health/ready` jamais vert. **Non vu
-  par la CI** (`api-runtime-ci` tourne depuis les sources ; `registry-ci` ne fait que **construire** l'image).
-- ⚠️ Runbook **corrigé** : l'image **embarque** le CLI Prisma (+ schema-engine 3.0.x) → « CLI absent » était
-  faux → **stratégie migrations rouverte** (depuis l'image vs sources).
-- 🔑 **MinIO/URL signée** tranché (Option A) : `S3_ENDPOINT` = adresse **publique** du serveur (jamais
-  `minio:9000`) ; secrets serveur en `/opt/enistere/staging/.env.staging` (hors dépôt).
-- **Exécution staging réelle = BLOQUÉE** jusqu'à correction de l'image.
+- **CC7** : ✅ `compose config` valide ; ✅ images tirées en anonyme ; ✅ `postgres`/`minio`/bucket ; ✅ **image
+  Web boote** (HTTP 200) ; ❌ **défaut bloquant** : l'**image API ne démarrait pas** (query engine Prisma
+  **OpenSSL 1.1.x** vs runtime **bookworm 3.0.x** → crash-loop), **invisible à la CI** (`api-runtime-ci` tourne
+  depuis les sources ; `registry-ci` ne faisait que **construire** l'image).
+- **CC8 — corrigé** : `binaryTargets=["native","debian-openssl-3.0.x"]` (schéma) + `openssl` au stage build
+  (Dockerfile) → moteur **3.0.x** dans `.prisma/client`. **Re-validé** (image + moteur 3.0.x) : migrations
+  **depuis l'image** (offline, 5 appliquées), API **`healthy`** `/health/live` & `/health/ready` **200**, Web
+  **200**, stack complète **healthy**. **Angle mort CI fermé** : job **`api-smoke`** dans `registry-ci.yml`
+  (lance l'image, vérifie le chargement du moteur Prisma) → **gate du push GHCR**.
+- 🗂️ **Stratégie migrations** tranchée = **Option A (depuis l'image)** (CLI + schema-engine 3.0.x embarqués).
+- 🔑 **MinIO/URL signée** (Option A) : `S3_ENDPOINT` = adresse **publique** du serveur (jamais `minio:9000`).
+- ⚠️ L'**image GHCR corrigée** est **reconstruite/publiée par la registry CI au merge CC8** (tags antérieurs,
+  `sha-7b07e5e` et avant, restent cassés). **Exécution staging réelle** = prochaine étape (serveur réel).
 
 ## Ce qui n'est PAS implémenté
 
@@ -90,8 +93,9 @@ applicatif** (le registry pousse des images via `GITHUB_TOKEN`, sans déployer).
 
 - **ADR-013 (CI/CD V1)** : **`PARTIELLEMENT_IMPLEMENTE`** — CI niveaux 1–3 + **niveau 4 partiel** (registry) ;
   restent protection de branche (action humaine), déploiement, environnements protégés, release.
-- **ADR-014 (registry images)** : **`PARTIELLEMENT_IMPLEMENTE`** (Cloud Core 5) — build + push GHCR sur `main`,
-  tags immuables, labels OCI, **sans déploiement** ; restent scan/signature, semver, déploiement.
+- **ADR-014 (registry images)** : **`PARTIELLEMENT_IMPLEMENTE`** (CC5 + **CC8**) — build + **smoke-run image
+  API** (`api-smoke`, gate du push) + push GHCR sur `main`, tags immuables, labels OCI, **sans déploiement** ;
+  restent scan/signature, semver, déploiement.
 
 ## Gouvernance CI (Cloud Core 4)
 
@@ -103,8 +107,9 @@ Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécut�
 
 ## Prochaine étape
 
-**Prochaine mission Codex** : **Cloud Core 8 — corriger l'image runtime API NestJS (moteur de requête Prisma)**
-pour qu'elle **démarre** (générer/embarquer le query engine pour Debian bookworm / OpenSSL 3.0.x), puis
-**re-jouer le dry-run** et trancher la **stratégie migrations** (depuis l'image vs sources). **Verrou n°1** :
-aucune exécution staging réelle possible avant (cf. [`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md)).
-Voir [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).
+**Prochaine mission Codex** : **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** : appliquer les
+runbooks sur un **serveur staging identifié** avec l'**image GHCR API reconstruite après le merge CC8** (secrets
+hors dépôt, `S3_ENDPOINT` **public** Option A), vérifier health + parcours réels (dont **téléchargement
+navigateur** via URL signée). Le défaut image API (CC7) est **corrigé et re-validé** (CC8 ; cf.
+[`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md) §8). Voir
+[`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).

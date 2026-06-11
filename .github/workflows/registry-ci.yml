@@ -23,8 +23,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Cloud Core 8 — ferme l'angle mort CI : l'image API était buildée mais JAMAIS exécutée, ce qui a laissé
+  # passer un défaut runtime (moteur Prisma incompatible OpenSSL → crash-loop, cf. STAGING_DRY_RUN_REPORT.md).
+  # Ce job construit l'image API, la LANCE, et vérifie que le moteur de requête Prisma se charge au runtime
+  # (sans base de données : une erreur de CONNEXION prouve que le moteur a chargé ; une erreur « moteur
+  # introuvable » fait ÉCHOUER le job). Le push (job `images`) est conditionné à la réussite de ce smoke.
+  api-smoke:
+    name: api-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build API image (load local, no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./cores/api-nestjs
+          file: ./cores/api-nestjs/Dockerfile
+          push: false
+          load: true
+          tags: enistere-api-smoke:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke — runtime non-root, openssl, moteur Prisma présent
+        run: |
+          docker run --rm enistere-api-smoke:ci id
+          docker run --rm --entrypoint sh enistere-api-smoke:ci -lc \
+            'openssl version && echo "engines in .prisma/client:" && ls node_modules/.prisma/client/ | grep -E "\.so\.node$"'
+
+      - name: Smoke — le moteur de requête Prisma se charge au runtime (DB-less)
+        run: |
+          # DATABASE_URL bidon (port 1) : on attend une erreur de CONNEXION (moteur chargé = OK),
+          # PAS une erreur « query engine could not be located » (moteur absent/incompatible = FAIL).
+          docker run --rm -e DATABASE_URL='postgresql://smoke:smoke@127.0.0.1:1/smoke?schema=public' \
+            enistere-api-smoke:ci node -e '
+              const { PrismaClient } = require("@prisma/client");
+              const p = new PrismaClient();
+              p.$connect()
+                .then(() => { console.log("SMOKE_OK: engine loaded + connected"); process.exit(0); })
+                .catch((e) => {
+                  const m = String((e && e.message) || e);
+                  if (/query engine|could not be located|libquery|Unable to (require|load)/i.test(m)) {
+                    console.error("SMOKE_FAIL: prisma query engine not loadable at runtime");
+                    console.error(m.split("\n").slice(0, 4).join("\n"));
+                    process.exit(1);
+                  }
+                  console.log("SMOKE_OK: engine loaded (DB unreachable as expected): " + m.split("\n")[0]);
+                  process.exit(0);
+                });
+            '
+
   images:
     name: images
+    # Cloud Core 8 : ne publier les images que si le smoke-run de l'image API a réussi.
+    needs: api-smoke
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

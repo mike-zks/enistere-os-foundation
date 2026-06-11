@@ -27,7 +27,7 @@ pas une application ni une bibliothèque complète).
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
 | Cores documentaires | `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
-| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging manuel cadré** (CC6) puis **dry-run contrôlé exécuté** (CC7, `DRY_RUN_EXECUTE`) ayant **révélé un défaut bloquant : l'image API ne démarre pas** (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) ; **image Web OK** ; **déploiement réel absent/BLOQUÉ** |
+| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée & re-validée** (CC8 : moteur Prisma 3.0.x, stack staging `healthy`, **`api-smoke` CI gate** le push), `DRY_RUN_API_IMAGE_FIXED` ; **déploiement réel non encore exécuté sur serveur** |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
@@ -200,11 +200,17 @@ compose+`.env` exemples validés `docker compose config` + runbooks **déploieme
 GHCR immuables `sha-7b07e5e` + `.env.staging` **réel hors dépôt**, secrets jetables supprimés) :
 `compose config`/`pull` OK, `postgres`+`minio`+bucket, **image Web boote (HTTP 200)** — **mais l'image API
 crash-loop** (query engine Prisma **OpenSSL 1.1.x** dans `.prisma/client` vs runtime **Debian bookworm 3.0.x**),
-défaut **invisible à la CI** (runtime de l'image jamais exécuté). Déploiement staging → **`DRY_RUN_EXECUTE`**
-(**défaut bloquant** → exécution réelle BLOQUÉE) ; décision **MinIO/URL signée** tranchée (Option A) ; runbook
-migrations corrigé (l'image **embarque** le CLI Prisma). Détail : `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`.
-**Prochaine action** : **Cloud Core 8 — corriger l'image runtime API (moteur Prisma)** puis re-dry-run ;
-**action humaine** : confirmer la protection de branche `main`.
+défaut **invisible à la CI** (runtime de l'image jamais exécuté). Enfin le **Cloud Core 8 — correction de l'image
+runtime API** a **corrigé et re-validé** ce défaut : `binaryTargets=["native","debian-openssl-3.0.x"]` (schéma)
++ `openssl` au stage build (Dockerfile) → moteur **3.0.x** dans `.prisma/client` ; **re-validation réelle**
+(image + moteur 3.0.x) : **migrations depuis l'image** (offline, 5 appliquées), API **`healthy`** `/health/live`
+& `/health/ready` **200**, Web **200**, **stack staging complète healthy** ; **angle mort CI fermé** par le job
+**`api-smoke`** (`registry-ci.yml` : lance l'image, vérifie le chargement du moteur Prisma → **gate du push**).
+Déploiement staging → **`DRY_RUN_API_IMAGE_FIXED`** ; **stratégie migrations** tranchée = **Option A (depuis
+l'image)** ; décision **MinIO/URL signée** = Option A. Détail : `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md` §8.
+⚠️ L'**image GHCR corrigée** sera **reconstruite/publiée par la registry CI au merge CC8** (tags antérieurs
+cassés). **Prochaine action** : **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** ; **actions
+humaines** : protection de branche `main` + rendre `api-smoke` requis.
 
 ## 12. Documentation
 
@@ -224,12 +230,12 @@ détaillée du API Core.
    build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
    navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.
 5. **Strategy Phase 0 partiellement datée** — contexte historique à ne pas confondre avec l'état réel.
-6. **Image runtime API non démarrable (BLOQUANT, dry-run CC7)** — le query engine Prisma de `.prisma/client`
-   est compilé pour **OpenSSL 1.1.x** alors que la base runtime est **Debian bookworm / OpenSSL 3.0.x** →
-   crash-loop, `/health/ready` jamais vert. **Défaut non détecté par la CI** (`api-runtime-ci` exécute depuis
-   les **sources** ; `registry-ci` ne fait que **construire** l'image). **Exécution staging réelle BLOQUÉE**
-   jusqu'à correction (**Cloud Core 8**). Atténuation future : **smoke-run de l'image en CI**. Détail :
-   `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`.
+6. **Image runtime API — défaut Prisma engine CORRIGÉ (Cloud Core 8)** : le query engine de `.prisma/client`
+   était compilé pour **OpenSSL 1.1.x** vs runtime **bookworm 3.0.x** (crash-loop). Corrigé via `binaryTargets`
+   (schéma) + `openssl` au stage build → moteur **3.0.x** ; re-validé (stack staging `healthy`). **Angle mort CI
+   fermé** (`api-smoke` gate le push). ⚠️ Risque **résiduel** : l'**image GHCR corrigée** n'est republiée
+   qu'**au merge CC8** (rebuild local impossible — egress npm) ; les tags ≤ `sha-7b07e5e` restent cassés. À
+   faire (humain) : rendre **`api-smoke` requis** sur `main`. Détail : `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md` §8.
 
 ## 14. Incohérences
 

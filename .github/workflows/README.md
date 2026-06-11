@@ -137,13 +137,18 @@ Déploiement · registre/GHCR (couvert par `registry-ci.yml`) · environnements 
 **upload/suppression Files côté Web** (hors périmètre). Les tests E2E sont **isolés** du niveau 1 (exclus de
 `typecheck`/`lint`/`build` via `tsconfig.json`/`eslint.config.mjs` ; compilés par Playwright).
 
-## `registry-ci.yml` — Registry GHCR (niveau 4 partiel, Cloud Core 5)
+## `registry-ci.yml` — Registry GHCR (niveau 4 partiel, Cloud Core 5 + **smoke-run CC8**)
 
 Construit les **images Docker** API/Web et les **pousse vers GHCR sur `main` uniquement**. **Début d'ADR-014
 (registry seulement) — AUCUN déploiement, AUCUN secret applicatif, AUCUN PAT** (auth `GITHUB_TOKEN`).
 
+- **Job `api-smoke` (Cloud Core 8 — ferme l'angle mort « image jamais exécutée »)** : build l'image API, la
+  **lance**, et vérifie **sans base** que le **moteur de requête Prisma se charge** au runtime (une erreur de
+  connexion = moteur chargé = OK ; « query engine could not be located » = **FAIL**) + non-root + openssl +
+  moteur présent. Le job **`images` est `needs: api-smoke`** → **le push GHCR n'a lieu que si le smoke est vert**.
+  *(Recommandé : rendre `api-smoke` un check requis sur `main` — action humaine.)*
 - **`permissions: contents: read` + `packages: write`** ; login GHCR **conditionnel** (`push` + `main`).
-- **PR → build SANS push** (vérifie la constructibilité) ; **push `main` → build + push**.
+- **PR → build SANS push** (vérifie la constructibilité) ; **push `main` → build + push** (gate `api-smoke`).
 - **Images** : `ghcr.io/<owner>/<repo>/api-nestjs` (Dockerfile `cores/api-nestjs/`, contexte `cores/api-nestjs/`)
   et `/web-nextjs` (Dockerfile `cores/web-nextjs/`, contexte **racine**, Next.js **standalone**). Multi-stage,
   **non-root**, **aucun `.env` copié**.
