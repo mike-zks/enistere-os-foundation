@@ -127,9 +127,12 @@ déploiement par environnement protégé, rollback, scan/signature d'image, semv
 
 ## 11. Politique déploiement
 
-**Aucun déploiement** en V1. Cible (V4, future) : manuel documenté → scripté → CI/CD avec environnements
-protégés et **rollback** (voir §15). Tout déploiement futur passera par Traefik (exposition), GitHub
-Environments protégés et approbation production. **Non implémenté.**
+**Staging manuel `CADRE_MANUEL_DOCUMENTE`** (Cloud Core 6) : compose + `.env` **exemples** + runbooks
+(`cores/cloud/staging/`, `STAGING_DEPLOYMENT_RUNBOOK.md`, `STAGING_ROLLBACK_RUNBOOK.md`) pour déployer **à la
+main** les images GHCR immuables — **aucune exécution réelle**, aucun secret, aucune automatisation. **Aucun
+déploiement réel ni production.** Cible (future) : staging exécuté → scripté → CI/CD avec environnements GitHub
+protégés + approbation + **rollback** (§15), exposition via Traefik. **Migrations découplées de l'image**
+(runtime sans CLI Prisma) ; **rollback d'image** simple, **rollback DB non garanti** (migrations additives).
 
 ## 12. Politique runtime API (implémentée — niveau 2)
 

@@ -81,18 +81,22 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   navigateur** `web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ;
   parcours **Health/Auth/Files**) **+ CC5 : registry GHCR** `registry-ci.yml` + **Dockerfiles** API/Web
   (multi-stage, non-root, Web **standalone**) — build PR sans push, **push images GHCR sur `main`** (tags
-  immuables, labels OCI, `GITHUB_TOKEN`, **sans déploiement/secret/PAT/`.env`**). **Quatre workflows CI**
-  (niveaux 1–4 partiel). **Restent** : déploiement, environnements protégés, monitoring, rollback, scan/signature
-  d'image, couverture publiée, protection de branche (action humaine, repo public), Compose/Traefik.
+  immuables, labels OCI, `GITHUB_TOKEN`, **sans déploiement/secret/PAT/`.env`**) — **VALIDÉ** (Registry CI verte
+  sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs` tags `main-`/`sha-`, aucun `latest`) **+ CC6 :
+  staging manuel** `cores/cloud/staging/` (compose+`.env` **exemples** + runbooks déploiement/rollback ;
+  `CADRE_MANUEL_DOCUMENTE`, **aucune exécution réelle/secret/automatisation**). **Quatre workflows CI** (niveaux
+  1–4 partiel) **+ cadrage staging**. **Restent** : **exécution réelle** staging/déploiement, environnements
+  protégés, monitoring, rollback **automatisé**, scan/signature d'image, couverture publiée, Compose de prod/Traefik.
 - **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo,
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
   gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
   déploiement, protection de branche, E2E navigateur.
-- **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents :
+- **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents
+  (via PR) : `docs(cloud): add manual staging deployment baseline` (CC6),
+  `docs(cloud): confirm ghcr registry publication` (CC5B),
   `Merge pull request #2 … cloud-core-5b-verify` (`bfd33dc`),
-  `docs(cloud): verify ghcr registry integration` (`50b7acb`),
   `ci(cloud): add ghcr registry workflow (#1)` (`b41a953`),
   `docs(cloud): harden ci governance`,
   `ci(web): add browser e2e validation workflow`,
@@ -152,7 +156,27 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4 partiel) : début d'**ADR-014** (registry
+**Cloud Core 6 — déploiement staging manuel** (cadrage `CADRE_MANUEL_DOCUMENTE`) : **aucun déploiement réel,
+aucun secret, aucune production, aucun `latest`, aucune automatisation/workflow deploy**. Livrables :
+`cores/cloud/staging/docker-compose.staging.example.yml` (**api+web+postgres+minio**, réseau interne,
+healthchecks node/pg_isready, **migrations hors démarrage**, PostgreSQL **non exposé**, MinIO API exposé pour
+les **URL signées**), `cores/cloud/staging/.env.staging.example` (**placeholders `CHANGE_ME`**, secrets API
+injectés **uniquement** dans le conteneur API — **pas** dans le Web), `cores/cloud/staging/README.md`, et les
+runbooks **`STAGING_DEPLOYMENT_RUNBOOK.md`** (tag immuable `sha-*`, secrets hors dépôt `openssl rand -base64 48`,
+bucket MinIO privé, **migrations Prisma découplées de l'image** — runtime sans CLI → `npx prisma migrate deploy`
+depuis les sources au commit déployé —, health checks, données de test éphémères, contrainte **URL signée =
+hôte `S3_ENDPOINT` joignable navigateur**, **`NEXT_PUBLIC_*` figé au build**) + **`STAGING_ROLLBACK_RUNBOOK.md`**
+(**rollback d'image** simple par tag immuable ; **rollback DB NON garanti** → migrations **additives** ;
+backup/restore `pg_dump`/`psql`). **Validation** : `docker compose config` **OK** (4 services), **aucun secret
+API fuité dans le conteneur Web** (vérifié), `git diff --check` clean. **Cookies/TLS** documenté
+(`APP_ENV=production` en HTTPS, `staging` en HTTP). Docs Cloud mises à jour (README, baseline §11,
+SECRETS_POLICY §2). **`cores/*/src`/`packages`/`docs/adr`/`strategy` non modifiés** ; **aucun Dockerfile/workflow
+modifié**. Statuts **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; déploiement
+staging = **`CADRE_MANUEL_DOCUMENTE`** (pas `IMPLEMENTE_AUTOMATISE`). Commit `docs(cloud): add manual staging
+deployment baseline`. **Prochaine action : Cloud Core 7 — exécution réelle staging** (ou dry-run / durcissement
+registry).
+
+**Étape précédente — Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4 partiel) : début d'**ADR-014** (registry
 **uniquement**), **sans déploiement, sans staging/production, sans rollback, sans secret applicatif, sans PAT**.
 **Dockerfiles** : `cores/api-nestjs/Dockerfile` (contexte `cores/api-nestjs/` — multi-stage : build = `npm ci`
 + `prisma generate` + `nest build` ; runtime = deps prod + `.prisma` copié + openssl + **`USER node`**) et
@@ -468,16 +492,16 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique (mission Codex)** : **Cloud Core 6 — déploiement staging manuel** — premier déploiement
-**contrôlé** d'une image GHCR (publiée par `registry-ci.yml`) vers un **environnement staging protégé** (GitHub
-Environment, secrets scoppés, **approbation manuelle**, rollback documenté). **Pas de production, pas
-d'automatisation totale.** **Alternative** : **durcissement registry** (scan de vulnérabilité d'image,
-signature/provenance cosign/SLSA, SHA-pinning des actions) avant déploiement. **Action HUMAINE (en parallèle)** :
-**appliquer la protection de branche `main`** (désormais possible, **repo public**) — 7 checks + `images`
-recommandé (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`). Le **Cloud Core 5** (registry GHCR) est **terminé** :
-Dockerfiles API/Web + `registry-ci.yml` (build + push images sur `main`, sans déploiement) — `docker build`
-validé localement, ADR-014 → partiel. **Alternative (décision humaine)** : UI Kit 4 ; Files 2 ; Mobile Core.
-**Ne pas automatiser un déploiement production sans environnement protégé + rollback.** Détail :
+**Action unique (mission Codex)** : **Cloud Core 7 — exécution réelle staging sur serveur** — appliquer les
+runbooks (`STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md`) sur un **serveur staging identifié**
+(Docker Compose, images GHCR `sha-*`, secrets **hors dépôt**), vérifier health checks + parcours réels.
+**Conditionné** à serveur + secrets prêts ; **sinon** **staging dry-run GitHub** (vérifier images/tags sans
+déployer) **ou** durcissement registry (scan/signature/provenance). Le **Cloud Core 6** (staging manuel) est
+**terminé** : `cores/cloud/staging/` (compose+`.env` exemples validés) + runbooks — `CADRE_MANUEL_DOCUMENTE`,
+**aucune exécution réelle/secret/automatisation**. **Action HUMAINE (si pas déjà fait)** : confirmer la
+protection de branche `main` (7 checks + `images`). **Alternative (décision humaine)** : UI Kit 4 ; Files 2 ;
+Mobile Core. **Ne pas créer de production ni d'automatisation de déploiement sans environnement protégé +
+rollback.** Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer

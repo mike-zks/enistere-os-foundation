@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Staging manuel (Cloud Core 6)
+
+- **Cloud Core 6 — déploiement staging manuel** (`cores/cloud/staging/` + runbooks) : **cadrage** d'un déploiement staging **manuel** à partir des images GHCR immuables — **aucune exécution réelle, aucun secret, aucune production, aucun `latest`, aucune automatisation / workflow deploy**. Statut déploiement staging : **`CADRE_MANUEL_DOCUMENTE`** (pas `IMPLEMENTE_AUTOMATISE`). Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 **partiels** (inchangés).
+  - **Compose exemple** `cores/cloud/staging/docker-compose.staging.example.yml` : **api + web + postgres + minio** (réseau interne, healthchecks node/`pg_isready`, **PostgreSQL non exposé**, **MinIO API exposé** pour les URL signées, **migrations hors démarrage**). **Secrets API injectés uniquement dans le conteneur API** (jamais dans le Web) — vérifié. Images par **tag immuable** `${GHCR_*_IMAGE}` (sha-*), **jamais `latest`**.
+  - **`.env.staging.example`** : **placeholders `CHANGE_ME`** uniquement (aucune valeur réelle) ; génération `openssl rand -base64 48` ; `.env.staging` **jamais versionné**. **`cores/cloud/staging/README.md`**.
+  - **Runbooks** : **`docs/STAGING_DEPLOYMENT_RUNBOOK.md`** (tag immuable, secrets hors dépôt, bucket MinIO privé, **migrations Prisma découplées de l'image** — runtime sans CLI → `npx prisma migrate deploy` depuis les sources au commit déployé —, health checks, données de test éphémères, contrainte **URL signée = hôte `S3_ENDPOINT` joignable navigateur**, **`NEXT_PUBLIC_*` figé au build**, cookies `APP_ENV` HTTP/HTTPS) ; **`docs/STAGING_ROLLBACK_RUNBOOK.md`** (**rollback d'image** simple par tag immuable ; **rollback DB NON garanti** → migrations **additives** ; backup/restore `pg_dump`/`psql`).
+  - **Validation** : `docker compose config` **OK** (4 services parsés) ; **aucun secret API fuité dans le conteneur Web** ; `git diff --check` clean. **`cores/*/src`/`packages`/`docs/adr`/`strategy` + Dockerfiles + workflows existants NON modifiés.** Docs Cloud mises à jour (README, baseline §11, `SECRETS_POLICY.md`). Rappel **CC5B validé** : Registry CI verte sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs` (tags `main-`/`sha-`, aucun `latest`). **Prochaine action : Cloud Core 7 — exécution réelle staging** (ou dry-run / durcissement registry). Commit `docs(cloud): add manual staging deployment baseline`.
+
 ### Registry GHCR (Cloud Core 5)
 
 - **Cloud Core 5 — Registry GHCR sans déploiement** (`.github/workflows/registry-ci.yml` + Dockerfiles API/Web) : début d'**ADR-014** (registry **uniquement**) — build des images Docker et **push GHCR sur `main`**, **sans déploiement, staging, production, rollback, secret applicatif ni PAT**. Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ; ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 partiel (niveaux 1–4 partiel).
