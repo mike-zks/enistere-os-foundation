@@ -291,7 +291,23 @@
   déploiement**. ⚠️ Le `docker build` **local** est bloqué (egress npm) → l'**image GHCR corrigée** est
   **reconstruite/publiée par la registry CI au merge** (tags ≤ `sha-7b07e5e` restent cassés). Statuts
   **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement staging =
-  `DRY_RUN_API_IMAGE_FIXED`**. Prochaine action : **Cloud Core 9 — exécution staging réelle sur serveur**.
+  `DRY_RUN_API_IMAGE_FIXED`**. Mergé via **PR #7** (`d1e6242`) ; post-merge **CC8B/8C** : images corrigées
+  publiées (`sha-d1e6242`) et vérifiées. Prochaine action : **Cloud Core 9**.
+- **Cloud Core 9 — exécution staging contrôlée (2026-06-11)** : **exécution réelle des conteneurs**
+  (API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en environnement **Type D :
+  local, sans exposition publique** (PAS de serveur distant/SSH/DNS/HTTPS — requalifié honnêtement, cf.
+  consigne §6). `.env.staging` **réel hors dépôt** (secrets jetables, shred). Résultats
+  (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : `compose config` valide (**no `latest`**), **migrations
+  depuis l'image** (Option A, offline, 5 appliquées), **API & Web `Up (healthy)`**, `/health/live`+`/health/ready`
+  +`/`+`/login` = **200**, **endpoint MinIO Option A joignable** par l'hôte (navigateur). ⚠️ **Non validé** :
+  **URL signée** de bout en bout (presign `mc` → **403** ; presign **de l'API non exercé**) et **Auth/Files**
+  applicatifs (**aucun utilisateur staging** — seed RBAC nécessite devDeps/egress, indisponibles). **Sécurité** :
+  staging **technique interne local, NON sécurisé production** (pas d'HTTPS/DNS/pare-feu). **Décision §20** :
+  **arrêt** après validation (`down -v`, volumes/secrets jetables supprimés). **Aucune** modification de
+  `cores/*/src`/`packages`/`docs/adr`/`strategy`/Dockerfiles/workflows ; **aucun secret/`latest`/déploiement
+  réel**. Statuts **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement
+  staging = `EXECUTION_LOCALE_CONTROLEE`** (ni « réelle sur serveur » ni production-ready). Prochaine action :
+  **Cloud Core 10 — préparation serveur staging sécurisé**.
 - **ADR-016 (reste)** — **publication** des packages et **intégration** dans les cores.
 
 ## 3. ADR au backlog, NON rédigés

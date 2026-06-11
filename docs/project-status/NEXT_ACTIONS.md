@@ -5,42 +5,44 @@
 
 ## 1. Prochaine action UNIQUE
 
-> **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** : appliquer les runbooks
-> (`STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md`) sur un **serveur staging identifié**, avec
-> l'**image GHCR API reconstruite après le merge CC8** (Docker Compose, tags immuables, secrets **hors dépôt**,
-> `S3_ENDPOINT` **public** Option A), migrations **depuis l'image** (Option A), vérifier health + **parcours
-> réels** (dont **téléchargement navigateur** via URL signée). **Conditionné** à : serveur + secrets prêts +
-> endpoint MinIO public. **Sinon** : **Cloud Core 9 — préparation serveur staging** (ou endpoint public MinIO).
+> **Cloud Core 10 — préparation serveur staging sécurisé** : identifier/provisionner un **serveur staging réel**
+> (Hetzner/VM) avec **HTTPS + DNS/domaine + pare-feu** + SSH, secrets **hors dépôt** ; puis y appliquer les
+> runbooks avec l'image GHCR API **corrigée** (`sha-d1e6242`+) et **valider de bout en bout** ce que l'exécution
+> **locale** (CC9) n'a pas pu : **téléchargement d'URL signée** (presign **de l'API**, endpoint **Option A
+> public**) + **parcours Auth/Files réels** (utilisateur staging seedé). **Verrou** : aucun serveur réel
+> identifié à ce jour (CC9 = exécution **locale Type D**).
 >
 > **(Actions HUMAINES)** confirmer la **protection de branche `main`** (7 checks + `images`) et **ajouter
 > `api-smoke`** aux checks requis.
 
-**Justification** : le **Cloud Core 8 — correction de l'image runtime API** a **corrigé et re-validé** le défaut
-bloquant découvert en CC7. Correctif : `binaryTargets=["native","debian-openssl-3.0.x"]` (schéma) + `openssl` au
-stage build (Dockerfile) → moteur **3.0.x** dans `.prisma/client`. **Re-validation réelle**
-(`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md` §8, image + moteur 3.0.x) : **migrations depuis l'image** (offline,
-5 appliquées), API **`healthy`** `/health/live` & `/health/ready` **200**, Web **200**, **stack staging complète
-healthy**. **Angle mort CI fermé** : job **`api-smoke`** dans `registry-ci.yml` (lance l'image, vérifie le
-chargement du moteur Prisma) **gate le push GHCR**. **Stratégie migrations** tranchée = **Option A (depuis
-l'image)**. ⚠️ L'**image GHCR corrigée** sera **reconstruite/publiée par la registry CI au merge CC8** (tags
-antérieurs cassés). La suite logique et **unique** est l'**exécution réelle** sur un serveur. **Ne pas** créer de
-production ni d'automatisation de déploiement. **Flux PR obligatoire** (push direct `main` refusé).
+**Justification** : le **Cloud Core 9 — exécution staging contrôlée** a **exécuté réellement la stack**
+(API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en environnement **Type D :
+local, sans exposition publique** (aucun serveur distant/SSH/DNS/HTTPS identifié). Résultats
+(`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : `compose config` valide (no `latest`), **migrations depuis
+l'image** (offline, 5), **API & Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login` = **200**,
+**endpoint MinIO Option A joignable** par l'hôte (navigateur). ⚠️ **Non validé** : **URL signée** de bout en bout
+(presign `mc` → **403** ; presign **API non exercé**) et **Auth/Files** applicatifs (**aucun utilisateur staging**
+— seed bloqué : devDeps/egress) ; **aucun serveur réel / HTTPS / exposition**. Statut staging →
+**`EXECUTION_LOCALE_CONTROLEE`** (ni « réelle sur serveur » ni production-ready). La suite **unique** est donc de
+**préparer un serveur staging sécurisé** pour valider le reste **en réel**. **Ne pas** créer de production ni
+d'automatisation de déploiement. **Flux PR obligatoire** (push direct `main` refusé).
 
 **Alternative (justifiée, décision humaine)** : **durcissement registry** (scan/signature/SBOM) ; **UI Kit 4** ;
 **Files 2** (upload Web) ; **Mobile Core**.
 
 **Note gouvernance** : `main` protégé (**repo public**, flux PR). **CC6** mergé (PR #4 → `b001ce8`) ; **CC6B**
 mergé (PR #5 → `7b07e5e`) ; **CC7** mergé (PR #6 → `5118283`) ; **CC8** mergé (PR #7 → `d1e6242` — image API
-corrigée + `api-smoke`) ; **CC8B** (cette mission) **valide le post-merge** : registry CI sur `main` `api-smoke`
-+ push GHCR **success**, **images corrigées publiées** (`sha-d1e6242` API/Web, **aucun `latest`**), image API
-`sha-d1e6242` **démarre** (dry-run post-merge `healthy`). Statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**,
-ADR-013 **`PARTIELLEMENT_IMPLEMENTE`**, ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging
-**`DRY_RUN_API_IMAGE_FIXED`** (défaut image API **corrigé, re-validé & publié** ; staging réel **pas encore
-exécuté** sur serveur ⇒ **non** opérationnel/automatisé). **Aucun statut augmenté.**
+corrigée + `api-smoke`) ; **CC8B/8C** post-merge validé (images corrigées publiées `sha-d1e6242`) ; **CC9**
+(cette mission) **exécute la stack en local Type D** (images corrigées, health verts, endpoint Option A joignable)
+et ajoute le commit `docs(cloud): record controlled staging execution` (rapport + checkpoint) via PR. Statuts :
+Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`**, ADR-014
+**`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging **`EXECUTION_LOCALE_CONTROLEE`** (stack exécutée en **local**,
+sans serveur réel/HTTPS/exposition ; URL signée + Auth/Files **non validés** ⇒ **non** opérationnel/production).
+**Aucun statut augmenté.**
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** (image GHCR API reconstruite post-CC8, secrets hors dépôt, `S3_ENDPOINT` public). ✦ prochaine mission Codex. *(Sinon : préparation serveur / endpoint public MinIO ; ou durcissement registry scan/signature/SBOM.)*
+1. **Cloud Core 10 — préparation serveur staging sécurisé** (serveur réel + HTTPS/DNS/pare-feu) puis validation **en réel** de l'URL signée (presign API, Option A) + Auth/Files. ✦ prochaine mission Codex. *(CC9 a exécuté la stack en **local Type D** ; reste à valider sur un serveur réel.)*
 2. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — si features riches imminentes.
 3. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 4. **Mobile Core React Native minimal** — starter Expo/RN ; intégration `api-client-fetch` ; secure storage (ADR-015) ; tokens via ThemeProvider (ADR-010).
@@ -73,7 +75,8 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 6 — déploiement staging manuel | **FAIT + MERGÉ** (PR #4 → `b001ce8`) — `cores/cloud/staging/` + runbooks ; `CADRE_MANUEL_DOCUMENTE` ; checks requis **verts** (PR + `main`), images GHCR `main-b001ce8` publiées (pas de `latest`) |
 | Cloud Core 7 — préparation serveur staging & dry-run contrôlé | **FAIT** — **dry-run local réel** (images GHCR `sha-7b07e5e`, `.env` hors dépôt) : `compose config`/`pull` OK, **image Web boote**, **MAIS image API crash-loop** (Prisma engine OpenSSL 1.1.x vs runtime bookworm 3.0.x) → staging `DRY_RUN_EXECUTE` (**défaut bloquant**) ; décision MinIO Option A ; runbook migrations corrigé. Détail `STAGING_DRY_RUN_REPORT.md` |
 | Cloud Core 8 — corriger l'image runtime API (Prisma engine) | **FAIT + MERGÉ** (PR #7 → `d1e6242`) — `binaryTargets debian-openssl-3.0.x` + `openssl` au stage build → moteur 3.0.x ; **`api-smoke`** gate le push. **CC8B post-merge VÉRIFIÉ** : `api-smoke` + push GHCR **success**, **images corrigées publiées** (`sha-d1e6242` API/Web, no `latest`), image API **démarre** (dry-run post-merge `healthy`, 200/200/200) |
-| Cloud Core 9 — exécution réelle staging sur serveur | **débloqué** — prochaine mission ; serveur identifié + secrets hors dépôt + `S3_ENDPOINT` **public** (Option A) + image GHCR API **reconstruite post-CC8** ; migrations **depuis l'image** (Option A) |
+| Cloud Core 9 — exécution staging contrôlée | **FAIT (local Type D)** — stack réelle (images GHCR corrigées `sha-d1e6242`), migrations depuis l'image, **API/Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login`=200, endpoint MinIO Option A **joignable** ; ⚠️ **non validé** : URL signée bout-en-bout + Auth/Files (pas d'utilisateur ; seed bloqué) ; **pas de serveur réel/HTTPS** → `EXECUTION_LOCALE_CONTROLEE` |
+| Cloud Core 10 — préparation serveur staging sécurisé | **débloqué** — prochaine mission ; serveur réel + HTTPS/DNS/pare-feu + SSH ; puis valider **en réel** URL signée (presign API, Option A) + Auth/Files (utilisateur seedé) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |
