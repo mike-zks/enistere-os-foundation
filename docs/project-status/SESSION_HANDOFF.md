@@ -105,7 +105,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   `registry-ci.yml`) **exécute l'image API** et vérifie le moteur Prisma → **gate le push GHCR** (ferme l'angle
   mort « image jamais exécutée »). Image **Web** + image **API (corrigée, moteur 3.0.x)** bootent toutes deux.
 - **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents
-  (via PR) : `docs(cloud): prepare staging dry run (#6)` (`5118283` — CC7 dry-run),
+  (via PR) : `fix(api): make docker runtime prisma engine compatible (#7)` (`d1e6242` — CC8 image API corrigée + `api-smoke`),
+  `docs(cloud): prepare staging dry run (#6)` (`5118283` — CC7 dry-run),
   `docs(cloud): finalize staging integration (#5)` (`7b07e5e` — CC6B finalisé),
   `Merge PR #4 … cloud-core-6-staging` (`b001ce8` — CC6 staging intégré),
   `Merge PR #3 … cloud-core-5b-confirm` (`ac4e805` — CC5B validé),
@@ -187,11 +188,14 @@ chargement du moteur Prisma **sans DB** : erreur de connexion = OK / « engine c
 openssl-3.0.x` embarqués). **Validation locale réduite justifiée** : `docker build`/`npm ci` **bloqués** (egress
 sandbox npm) → fix prouvé par (a) `prisma validate` OK, (b) dry-run réel ci-dessus, (c) `api-smoke` qui validera
 en CI ; **aucune** modif de logique métier ; `cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy`
-**non modifiés** ; **aucun secret/`latest`/déploiement**. ⚠️ L'**image GHCR corrigée** est **reconstruite/publiée
-par la registry CI au merge** (tags ≤ `sha-7b07e5e` restent cassés). Statuts **inchangés** (Cloud Core
+**non modifiés** ; **aucun secret/`latest`/déploiement**. Statuts **inchangés** (Cloud Core
 `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement staging = `DRY_RUN_API_IMAGE_FIXED`**. Commit
-`fix(api): make docker runtime prisma engine compatible` (via PR). **Prochaine action : Cloud Core 9 — exécution
-staging réelle contrôlée sur serveur.**
+`fix(api): make docker runtime prisma engine compatible` **mergé via PR #7** (`d1e6242`). **CC8B (post-merge)
+validé — observation réelle** : registry CI sur `main` **`api-smoke` = success** + **`images` push success** →
+**images corrigées publiées** (`sha-d1e6242`/`main-d1e6242` API **et** Web, **aucun `latest`**) ; l'image API
+`sha-d1e6242` **démarre par elle-même** (moteur `debian-openssl-3.0.x`, OpenSSL 3.0.20, non-root ; **dry-run
+post-merge** : API/Web `healthy`, `/health/live`+`/health/ready`+`/`=200). Tags ≤ `sha-7b07e5e` restent cassés
+(ne pas utiliser). **Prochaine action : Cloud Core 9 — exécution staging réelle contrôlée sur serveur.**
 
 **Étape précédente — Cloud Core 7 — préparation serveur staging & dry-run contrôlé** (`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`) :
 **dry-run local réel** exécuté à partir des **images GHCR immuables** (`sha-7b07e5e`, commit `main` `7b07e5e`) avec

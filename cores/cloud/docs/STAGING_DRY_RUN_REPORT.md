@@ -171,3 +171,17 @@ migrations appliquées). Étape **manuelle, séparée du démarrage** (jamais au
   ci-dessus utilise l'image actuelle + le moteur 3.0.x **réel** (sortie du fix), ce qui est représentatif.
 - `S3_ENDPOINT` interne (`minio:9000`) en dry-run : **téléchargement navigateur non exercé** (cf. §5, Option A).
 - Aucun déploiement réel, aucune production, aucun secret committé, aucun `latest`.
+
+## 8.5 Confirmation post-merge (Cloud Core 8B, 2026-06-11)
+
+CC8 **mergé** (PR #7 → `main` = **`d1e6242`**). **Observation réelle** (registry CI sur `main`, run `push`) :
+job **`api-smoke` = `success`** + jobs **`images` (api-nestjs / web-nextjs) = `success`** avec étape **« Build
+and push »** → **images corrigées publiées sur GHCR**. Vérifié en anonyme : tags **`sha-d1e6242`** &
+**`main-d1e6242`** présents pour `api-nestjs` **et** `web-nextjs`, **`latest` absent**.
+
+**Smoke-run depuis GHCR** (`api-nestjs:sha-d1e6242`, **sans overlay**) : `.prisma/client` contient bien
+**`libquery_engine-debian-openssl-3.0.x.so.node`** (plus de moteur 1.1.x seul) ; Node v24.16.0, **OpenSSL
+3.0.20**, **non-root** `uid=1000(node)`. **Dry-run post-merge complet** (compose, images `sha-d1e6242`, **sans**
+overlay) : migrations **depuis l'image** (offline), **API `Up (healthy)`**, **Web `Up (healthy)`**,
+`/health/live` & `/health/ready` & `/` = **200**, logs « Nest application successfully started » **sans** erreur
+moteur. ✅ **L'image GHCR corrigée démarre par elle-même** — le défaut CC7 est clos côté artefact publié.

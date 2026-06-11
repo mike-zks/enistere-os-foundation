@@ -30,12 +30,13 @@ production ni d'automatisation de déploiement. **Flux PR obligatoire** (push di
 **Files 2** (upload Web) ; **Mobile Core**.
 
 **Note gouvernance** : `main` protégé (**repo public**, flux PR). **CC6** mergé (PR #4 → `b001ce8`) ; **CC6B**
-mergé (PR #5 → `7b07e5e`) ; **CC7** mergé (PR #6 → `5118283`) ; **CC8** (cette mission) corrige l'image API +
-ajoute `api-smoke` et ajoute le commit `fix(api): make docker runtime prisma engine compatible` (code + CI +
-docs + checkpoint) via PR. Statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`**,
-ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging **`DRY_RUN_API_IMAGE_FIXED`** (défaut image API
-**corrigé & re-validé** ; staging réel **pas encore exécuté** sur serveur ⇒ **non** opérationnel/automatisé).
-**Aucun statut augmenté.**
+mergé (PR #5 → `7b07e5e`) ; **CC7** mergé (PR #6 → `5118283`) ; **CC8** mergé (PR #7 → `d1e6242` — image API
+corrigée + `api-smoke`) ; **CC8B** (cette mission) **valide le post-merge** : registry CI sur `main` `api-smoke`
++ push GHCR **success**, **images corrigées publiées** (`sha-d1e6242` API/Web, **aucun `latest`**), image API
+`sha-d1e6242` **démarre** (dry-run post-merge `healthy`). Statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**,
+ADR-013 **`PARTIELLEMENT_IMPLEMENTE`**, ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging
+**`DRY_RUN_API_IMAGE_FIXED`** (défaut image API **corrigé, re-validé & publié** ; staging réel **pas encore
+exécuté** sur serveur ⇒ **non** opérationnel/automatisé). **Aucun statut augmenté.**
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
@@ -71,7 +72,7 @@ deux cores. À arbitrer par décision humaine.
 | Protection de branche `main` | **APPLIQUÉE** (repo public) — la PR est désormais **exigée** (push direct `main` refusé). Vérifier que les 7 checks (+ `images`) sont bien requis |
 | Cloud Core 6 — déploiement staging manuel | **FAIT + MERGÉ** (PR #4 → `b001ce8`) — `cores/cloud/staging/` + runbooks ; `CADRE_MANUEL_DOCUMENTE` ; checks requis **verts** (PR + `main`), images GHCR `main-b001ce8` publiées (pas de `latest`) |
 | Cloud Core 7 — préparation serveur staging & dry-run contrôlé | **FAIT** — **dry-run local réel** (images GHCR `sha-7b07e5e`, `.env` hors dépôt) : `compose config`/`pull` OK, **image Web boote**, **MAIS image API crash-loop** (Prisma engine OpenSSL 1.1.x vs runtime bookworm 3.0.x) → staging `DRY_RUN_EXECUTE` (**défaut bloquant**) ; décision MinIO Option A ; runbook migrations corrigé. Détail `STAGING_DRY_RUN_REPORT.md` |
-| Cloud Core 8 — corriger l'image runtime API (Prisma engine) | **FAIT** — `binaryTargets debian-openssl-3.0.x` (schéma) + `openssl` au stage build (Dockerfile) → moteur 3.0.x ; **re-validé** (migrations depuis l'image, API/Web `healthy`, `/health/live`+`/health/ready`+`/`=200) ; **`api-smoke` ajouté** (gate push). Image GHCR corrigée **republiée par la CI au merge** |
+| Cloud Core 8 — corriger l'image runtime API (Prisma engine) | **FAIT + MERGÉ** (PR #7 → `d1e6242`) — `binaryTargets debian-openssl-3.0.x` + `openssl` au stage build → moteur 3.0.x ; **`api-smoke`** gate le push. **CC8B post-merge VÉRIFIÉ** : `api-smoke` + push GHCR **success**, **images corrigées publiées** (`sha-d1e6242` API/Web, no `latest`), image API **démarre** (dry-run post-merge `healthy`, 200/200/200) |
 | Cloud Core 9 — exécution réelle staging sur serveur | **débloqué** — prochaine mission ; serveur identifié + secrets hors dépôt + `S3_ENDPOINT` **public** (Option A) + image GHCR API **reconstruite post-CC8** ; migrations **depuis l'image** (Option A) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
