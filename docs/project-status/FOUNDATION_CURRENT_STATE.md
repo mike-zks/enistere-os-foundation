@@ -27,7 +27,7 @@ pas une application ni une bibliothèque complète).
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
 | Cores documentaires | `mobile-react-native` (spécification seule) |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
-| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée & re-validée** (CC8 : moteur Prisma 3.0.x, stack staging `healthy`, **`api-smoke` CI gate** le push), `DRY_RUN_API_IMAGE_FIXED` ; **déploiement réel non encore exécuté sur serveur** |
+| CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée** (CC8, `api-smoke` gate le push) + **exécution staging contrôlée LOCALE** (CC9 : images corrigées `sha-d1e6242`, stack `healthy`, endpoint Option A joignable), `EXECUTION_LOCALE_CONTROLEE` ; **déploiement sur serveur réel / HTTPS / URL signée bout-en-bout non encore réalisés** |
 | **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
 
 ## 2. Principes de vérité
@@ -208,9 +208,17 @@ runtime API** a **corrigé et re-validé** ce défaut : `binaryTargets=["native"
 **`api-smoke`** (`registry-ci.yml` : lance l'image, vérifie le chargement du moteur Prisma → **gate du push**).
 Déploiement staging → **`DRY_RUN_API_IMAGE_FIXED`** ; **stratégie migrations** tranchée = **Option A (depuis
 l'image)** ; décision **MinIO/URL signée** = Option A. Détail : `cores/cloud/docs/STAGING_DRY_RUN_REPORT.md` §8.
-⚠️ L'**image GHCR corrigée** sera **reconstruite/publiée par la registry CI au merge CC8** (tags antérieurs
-cassés). **Prochaine action** : **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** ; **actions
-humaines** : protection de branche `main` + rendre `api-smoke` requis.
+⚠️ L'**image GHCR corrigée** est **publiée par la registry CI au merge CC8** (`sha-d1e6242`, vérifiée CC8B/8C ;
+tags antérieurs cassés). Enfin le **Cloud Core 9 — exécution staging contrôlée** a **exécuté réellement la stack**
+(API+Web+PostgreSQL+MinIO) avec les **images corrigées** `sha-d1e6242`, en environnement **Type D : local, sans
+exposition publique** (aucun serveur distant/SSH/DNS/HTTPS) : `compose config` valide (no `latest`), **migrations
+depuis l'image** (offline), **API & Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login` = **200**,
+**endpoint MinIO Option A joignable** par l'hôte ; ⚠️ **non validé** : **URL signée** bout-en-bout (presign API
+non exercé ; `mc` → 403) et **Auth/Files** applicatifs (**aucun utilisateur staging** — seed bloqué). Statut
+staging → **`EXECUTION_LOCALE_CONTROLEE`** (détail : `cores/cloud/docs/STAGING_EXECUTION_REPORT.md`).
+**Prochaine action** : **Cloud Core 10 — préparation serveur staging sécurisé** (serveur réel + HTTPS/DNS/pare-feu,
+puis validation URL signée + Auth/Files en réel) ; **actions humaines** : protection de branche `main` + rendre
+`api-smoke` requis.
 
 ## 12. Documentation
 

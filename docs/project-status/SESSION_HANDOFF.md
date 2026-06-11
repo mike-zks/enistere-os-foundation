@@ -89,10 +89,13 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (`binaryTargets debian-openssl-3.0.x` au schéma + `openssl` au stage build → moteur 3.0.x) **re-validée**
   (migrations **depuis l'image** offline, API/Web **`healthy`**, `/health/live`+`/health/ready`+`/`=200) **+ angle
   mort CI fermé** (job **`api-smoke`** dans `registry-ci.yml` → gate du push GHCR) → **déploiement staging =
-  `DRY_RUN_API_IMAGE_FIXED`** ; **migrations Option A** (depuis l'image). **Quatre workflows CI** (niveaux 1–4
-  partiel) **+ cadrage + dry-run + fix image staging**. **Restent** : **exécution réelle** staging sur serveur
-  (CC9 ; image GHCR API reconstruite au merge CC8), environnements protégés, monitoring, rollback **automatisé**,
-  scan/signature d'image, `api-smoke` à rendre **requis**.
+  `DRY_RUN_API_IMAGE_FIXED`** ; **migrations Option A** (depuis l'image) **+ CC9 : exécution staging contrôlée
+  LOCALE** (`STAGING_EXECUTION_REPORT.md`) — stack réelle (images corrigées `sha-d1e6242`) en **Type D local** :
+  health 200, endpoint MinIO **Option A joignable** ; ⚠️ **URL signée bout-en-bout + Auth/Files non validés**
+  (pas d'utilisateur ; pas de serveur réel/HTTPS) → **`EXECUTION_LOCALE_CONTROLEE`**. **Quatre workflows CI**
+  (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
+  staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
+  monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
 - **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
@@ -170,7 +173,29 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 8 — correction de l'image runtime API NestJS** : **corrige** le défaut bloquant CC7 (image API en
+**Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
+réelle des conteneurs** (API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en
+environnement **Type D : local, sans exposition publique**. **Aucun serveur distant/Hetzner/VM/SSH/DNS/HTTPS
+identifié** → mission **requalifiée honnêtement** en exécution **locale** (consigne §6 : ne pas prétendre à un
+staging réel sans serveur). `.env.staging` **réel hors dépôt** (`/tmp`, `chmod 600`, secrets `openssl` jetables,
+**shred** après ; sur serveur réel : `/opt/enistere/staging/`). **Résultats** : `compose config` **valide**
+(**0 `latest`**) ; images corrigées **tirées** ; **postgres `healthy`** + **minio `Up`** + bucket privé ;
+**migrations DEPUIS l'image** (Option A, **offline**, 5 appliquées) ; **API `Up (healthy)`** + **Web `Up
+(healthy)`** ; `/health/live`+`/health/ready`+`/`+`/login` = **200** ; `/protected` anonyme = **200 sans
+`Location`** (**redirection App-Router streaming** RSC `NEXT_REDIRECT`/meta-refresh — honorée par le navigateur,
+**documentée**, aucune donnée privée) ; **endpoint MinIO Option A** (`S3_ENDPOINT=http://<host>:9000`)
+**joignable** par le conteneur ET l'hôte (navigateur). ⚠️ **Non validé** : **URL signée bout-en-bout** (l'URL
+pré-signée par `mc` → **403** côté hôte ; **presign de l'API non exercé**) et **Auth/Files** applicatifs
+(**aucun utilisateur staging** : seed RBAC nécessite `ts-node`/devDeps + egress npm, **indisponibles**).
+**Sécurité** : staging **technique interne local, NON sécurisé production** (pas d'HTTPS/DNS/pare-feu ; MinIO
+console locale seulement ; PostgreSQL non publié). **Décision §20** : **arrêt** après validation (`down -v`,
+volumes + secrets **jetables** supprimés). **Rollback** documenté (vers tags **post-CC8** seulement). **Aucune**
+modif `cores/*/src`/`packages`/`docs/adr`/`strategy`/Dockerfiles/workflows ; **aucun secret/`latest`/déploiement
+réel**. Statut **`EXECUTION_LOCALE_CONTROLEE`**. Commit `docs(cloud): record controlled staging execution` (via
+PR). **Prochaine action : Cloud Core 10 — préparation serveur staging sécurisé** (serveur réel + HTTPS/DNS/
+pare-feu, puis validation URL signée Option A + Auth/Files **en réel**).
+
+**Étape précédente — Cloud Core 8 — correction de l'image runtime API NestJS** : **corrige** le défaut bloquant CC7 (image API en
 crash-loop) et **ferme l'angle mort CI** (image buildée mais jamais exécutée). **Cause** : le query engine
 Prisma de `node_modules/.prisma/client` était compilé pour **OpenSSL 1.1.x** (détection `native` ambiguë au
 stage build, sans openssl) alors que la base runtime est **Debian 12 bookworm / OpenSSL 3.0.x** → moteur
@@ -562,17 +587,17 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 
 ## 9. Prochaine étape
 
-**Action unique (mission Codex)** : **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** — appliquer
-les runbooks (`STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md`) sur un **serveur staging
-identifié**, avec l'**image GHCR API reconstruite après le merge CC8** (Docker Compose, tags immuables, secrets
-**hors dépôt**, `S3_ENDPOINT` **public** Option A), migrations **depuis l'image** (Option A), vérifier health +
-**parcours réels** (dont **téléchargement navigateur** via URL signée). **Conditionné** à serveur + secrets +
-endpoint MinIO public ; **sinon** **préparation serveur staging** (ou endpoint public MinIO). Le **Cloud Core 8**
-(correction image API) est **terminé** : défaut moteur Prisma **corrigé & re-validé** (stack staging `healthy`),
-**`api-smoke`** ferme l'angle mort CI. **Actions HUMAINES** : confirmer la protection de branche `main`
-(7 checks + `images`) et **rendre `api-smoke` requis**. **Alternative (décision humaine)** : durcissement registry
-(scan/signature/SBOM) ; UI Kit 4 ; Files 2 ; Mobile Core. **Ne pas créer de production ni d'automatisation de
-déploiement sans environnement protégé + rollback.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique (mission Codex)** : **Cloud Core 10 — préparation serveur staging sécurisé** — identifier/
+provisionner un **serveur staging réel** (Hetzner/VM) avec **HTTPS + DNS/domaine + pare-feu** + SSH, secrets
+**hors dépôt** ; puis y appliquer les runbooks avec l'image GHCR API **corrigée** (`sha-d1e6242`+) et **valider
+en réel** ce que l'exécution **locale CC9** n'a pas pu : **téléchargement d'URL signée** (presign **de l'API**,
+endpoint **Option A public**) + **parcours Auth/Files réels** (utilisateur staging seedé). Le **Cloud Core 9**
+(exécution staging contrôlée) est **terminé** en **local Type D** : stack réelle (images corrigées) `healthy`,
+health 200, endpoint Option A joignable ; **URL signée + Auth/Files non validés** (pas d'utilisateur ; pas de
+serveur réel). **Actions HUMAINES** : confirmer la protection de branche `main` (7 checks + `images`) et **rendre
+`api-smoke` requis**. **Alternative (décision humaine)** : durcissement registry (scan/signature/SBOM) ; UI Kit 4 ;
+Files 2 ; Mobile Core. **Ne pas créer de production ni d'automatisation de déploiement sans environnement protégé
++ rollback.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
