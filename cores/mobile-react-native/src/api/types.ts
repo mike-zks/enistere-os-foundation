@@ -11,6 +11,13 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
  */
 export type TokenProvider = () => Promise<string | null> | string | null;
 
+/**
+ * Invoked on a `401`. Should refresh the session and resolve to the new access
+ * token, or `null` when the session can't be recovered (the client then surfaces
+ * the `401` and the auth layer purges the session).
+ */
+export type UnauthorizedHandler = () => Promise<string | null>;
+
 /** Per-request options shared by all verb helpers. */
 export interface RequestOptions {
   /** Additional headers merged over the defaults. */

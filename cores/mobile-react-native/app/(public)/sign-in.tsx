@@ -10,7 +10,7 @@ import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
 export default function SignInScreen(): React.JSX.Element {
-  const { signIn, error } = useAuth();
+  const { signIn, status, error } = useAuth();
   const theme = useTheme();
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,8 +30,13 @@ export default function SignInScreen(): React.JSX.Element {
         <Text variant="body" tone="muted" style={{ textAlign: 'center' }}>
           Public placeholder screen. This is a generic foundation — no business logic.
         </Text>
+        {status === 'expired' ? (
+          <Text variant="body" tone="danger" style={{ textAlign: 'center' }}>
+            Your session expired. Please sign in again.
+          </Text>
+        ) : null}
         <Button title="Sign in (placeholder)" loading={submitting} onPress={() => void onSignIn()} />
-        {error ? (
+        {error && status !== 'expired' ? (
           <Text variant="caption" tone="danger">
             {error}
           </Text>

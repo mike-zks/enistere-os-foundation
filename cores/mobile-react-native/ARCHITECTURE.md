@@ -107,12 +107,54 @@ Aucun secret embarqué ; `EXPO_PUBLIC_*` public uniquement ; tokens hors logs ;
 SecureStore pour les secrets ; HTTPS attendu en production ; aucun appel direct
 OSRM depuis le mobile (spec §35 — non concerné ici, pas de maps).
 
-## 9. Écarts résumés (à valider en revue)
+## 9. Auth/session hardening (RN 2)
+
+RN 2 transforme le shell auth de RN 1 en une fondation durcie, **testable**.
+
+- **`AuthEngine` framework-agnostique** (`src/auth/auth-engine.ts`, aucun import
+  React/RN) : machine d'état possédant le cycle de vie de session. React s'y
+  abonne via `subscribe`/`getSnapshot` (`useSyncExternalStore` dans
+  `AuthProvider`). Bénéfice : la logique auth est **unit-testée en isolation**
+  (`node --test`) — convention partagée avec `ui-kit`/`api-client-fetch`.
+- **États** (session model) : `loading` · `authenticated` · `unauthenticated` ·
+  `refreshing` · `expired`. Aucun champ métier.
+- **Tokens (ADR-015)** : access token **en mémoire** (jamais persisté, jamais
+  dans le snapshot React → hors arbre de composants/logs) ; **`SessionStore`**
+  persiste l'enveloppe `{ refreshToken, expiresAt, user }` en SecureStore, avec
+  **validation** du format restauré (fail-soft → `null`).
+- **Restauration** : au démarrage, `restoreSession` lit l'enveloppe puis
+  **refresh** pour re-minter un access token en mémoire ; succès → `authenticated`,
+  échec → `expired` (storage purgé).
+- **Refresh coalescé** : `refreshSession` partage une seule promesse in-flight →
+  pas de double refresh / token stampede.
+- **Expiration** : proactive (`getAccessToken()` renvoie `null` si l'access
+  token est expiré, via une horloge injectable) **et** réactive (voir API).
+- **API client (ADR-011)** : sur `401`, le client appelle le handler
+  (`refreshSession`), et **rejoue la requête une fois** avec le nouveau token ;
+  si le refresh échoue (handler → `null`), le `401` est surfacé et la couche
+  auth purge la session (`expired`). Une seule reprise (pas de boucle).
+- **Gardes de navigation** : `loading`/`refreshing` → loading state (pas de
+  redirection) ; `authenticated` → app ; `unauthenticated`/`expired` → public
+  (l'écran de connexion affiche un avis « session expirée »).
+- **Seam `@enistere/api-client-fetch`** : l'`AuthApi` (`src/auth/auth-api.ts`)
+  est l'interface d'intégration. RN 2 livre `PlaceholderAuthApi` (sans backend) ;
+  l'adaptateur réel POSTera `/auth/login`/`/auth/refresh` (API Core) — voir §4,
+  intégration reportée (périmètre racine workspace/Metro).
+- **Tests** (`test/`, `node --test`, 21 cas) : auth-engine (restore valide/
+  absente/expirée, signIn ok/ko, signOut purge, refresh ok/ko, coalescing,
+  expiry), session-store (round-trip, absent, corrompu, invalide, clear),
+  api-client (injection token, non-2xx, 401→refresh→retry, 401 sans reprise,
+  timeout, network). Compilés via `tsconfig.test.json` (CommonJS, sous-ensemble
+  agnostique uniquement — les fichiers RN/Expo ne sont pas compilés pour Node).
+
+## 10. Écarts résumés (à valider en revue)
 
 1. **Layout plat** au lieu de `starter/` (§1) — aligné repo + mission §5.
 2. **API client** : transport seam local au lieu de `@enistere/api-client-fetch`
    (§4) — périmètre mission + ADR-016 §7.
 3. **Bridge tokens placeholder** au lieu d'import `@enistere/ui-kit` (§3) —
    autorisé par la mission ; core autonome.
-4. **Modules différés** : Zustand, RHF/Zod, upload, notifications, logger,
-   permissions (hors périmètre mission).
+4. **Tests** : `node --test` sur le **cœur agnostique** uniquement (auth-engine/
+   stores/api-client) ; tests de composants/intégration RN (jest-expo) **différés**.
+5. **Modules différés** : Zustand, RHF/Zod, upload, notifications, logger,
+   permissions (hors périmètre mission ; RHF/Zod = RN 3).

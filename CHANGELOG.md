@@ -6,6 +6,22 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 2 — auth / session hardening
+
+- **Mobile Core React Native 2 — auth/session hardening** (`cores/mobile-react-native/`) : durcit le shell auth de RN 1 sans logique métier. `mobile-react-native` passe de `STARTER_FOUNDATION_INITIEE` à **`AUTH_SESSION_HARDENED`**. **Aucun fichier `cores/cloud/**` modifié** ; Cloud reste `PAUSE_CONTROLEE`, staging `EXECUTION_LOCALE_CONTROLEE` ; **aucun autre core démarré**.
+  - **AuthEngine framework-agnostique** (`src/auth/auth-engine.ts`, aucun import React/RN) : machine d'état possédant `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`. React s'y abonne via `useSyncExternalStore` dans `AuthProvider`. La logique auth devient **unit-testable en isolation**.
+  - **Modèle de session** (spec §4.1) : états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; snapshot React **sans tokens** (tokens hors arbre de composants/logs). Aucun champ métier.
+  - **Secure storage durci** (ADR-015) : `SessionStore` persiste l'enveloppe `{ refreshToken, expiresAt, user }` en SecureStore avec **validation** du format restauré (fail-soft → `null`) ; **access token en mémoire** uniquement ; purge complète au logout ; `InMemorySecureStorage` (fallback + fixture de test).
+  - **Refresh flow** (ADR-004) : restauration au démarrage → refresh pour re-minter l'access token ; **refresh coalescé** (une seule promesse in-flight, anti double-refresh) ; échec de refresh → `expired` + purge.
+  - **Expiration** : proactive (`getAccessToken()` renvoie `null` si expiré, horloge injectable) **et** réactive (401).
+  - **API client durci** (ADR-011) : sur `401` → `refreshSession` → **un seul retry** avec le nouveau token ; si le refresh échoue → `401` surfacé + session purgée. Pas de boucle.
+  - **Gardes de navigation** : `loading`/`refreshing` → loading state ; `authenticated` → app ; `unauthenticated`/`expired` → public (avis « session expirée »). Aucune route métier.
+  - **Seam `@enistere/api-client-fetch`** (ADR-016) : interface `AuthApi` prête pour l'adaptateur réel ; RN 2 livre `PlaceholderAuthApi` (sans backend). **Intégration du package différée** (workspace racine + Metro monorepo hors périmètre — cf. ARCHITECTURE §4).
+  - **Tests** : **21 tests** `node --test` (compilés via `tsconfig.test.json`, cœur agnostique uniquement) — auth-engine, session-store, api-client. Couvre restore valide/absente/expirée, signIn ok/ko, signOut purge, refresh ok/ko, coalescing, 401→refresh→retry/purge, timeout, network.
+  - **Dépendances** : devDeps `@types/node` (compil tests Node) ; `react-dom@19.2.0` épinglé (résout un conflit de peer SDK 55 : `react-dom@19.2.7` transitif exigeait `react ^19.2.7`).
+  - **Vérifications** (locales) : `npm install` ✅ ; **`tsc --noEmit`** ✅ ; **`expo lint`** ✅ (0) ; **`npm test` 21/21** ✅ ; **`expo-doctor` 19/19** ✅.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` (§9 hardening) mis à jour ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 3 — forms, validation and offline-ready primitives.** Commit `feat(mobile): harden auth and session` (via PR).
+
 ### Mobile Core React Native 1 — starter foundation (socle générique)
 
 - **Mobile Core React Native 1 — starter foundation** (`cores/mobile-react-native/`) : initialise le **socle mobile générique** Expo / React Native. `mobile-react-native` passe de `SPECIFICATION_DOCUMENTAIRE` à **`STARTER_FOUNDATION_INITIEE`**. **Aucune logique métier**, **un seul core** ; Cloud Core **reste** `PAUSE_CONTROLEE`, staging `EXECUTION_LOCALE_CONTROLEE` ; **aucun autre core démarré**, **aucun fichier Cloud Core relancé**.

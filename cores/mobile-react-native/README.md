@@ -1,6 +1,6 @@
-# Mobile Core React Native — Starter Foundation
+# Mobile Core React Native — Auth / Session Hardening
 
-> Statut : **`STARTER_FOUNDATION_INITIEE`** (V1, socle minimal)
+> Statut : **`AUTH_SESSION_HARDENED`** (V1 — RN 2 ; socle RN 1 durci)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -12,14 +12,16 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 
 | Brique | Module | Notes |
 |---|---|---|
-| Navigation | `app/` (Expo Router) + `src/navigation` | stacks **publique** `(public)` et **authentifiée** `(app)`, gate de redirection, écran *not-found* |
-| Shell d'auth | `src/auth` | états `loading`/`authenticated`/`unauthenticated`, `signIn`/`signOut`/`restoreSession` **placeholder, sans backend** |
-| Secure storage | `src/storage` | abstraction `SecureStorage` (interface) + impl `ExpoSecureStorage` (SecureStore) ; **refresh token only** |
-| API client | `src/api` | transport `fetch` générique (base URL, injection token, erreurs typées, timeout) ; **aucun endpoint métier** |
+| Navigation | `app/` (Expo Router) + `src/navigation` | stacks **publique** `(public)` et **authentifiée** `(app)`, gate de redirection, **gardes durcies** (`expired`/`refreshing`), écran *not-found* |
+| Auth engine | `src/auth/auth-engine.ts` | **machine d'état framework-agnostique** (no React/RN) : `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`, **expiration**, **refresh coalescé** |
+| Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` **placeholder, sans backend** |
+| Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
+| API client | `src/api` | transport `fetch` générique ; injection token, **`401` → refresh → 1 retry**, erreurs typées, timeout ; **aucun endpoint métier** |
 | Server state | `src/query` | `QueryClient` + `QueryProvider` (TanStack Query) |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, api-client) — **21 tests** |
 
 ## Stack
 
@@ -44,17 +46,18 @@ cores/mobile-react-native/
 │   │   └── home.tsx          # écran placeholder authentifié
 │   └── +not-found.tsx        # fallback
 ├── src/
-│   ├── api/                  # transport fetch générique (client, errors, types, config)
-│   ├── auth/                 # shell auth (session, provider, hook)
+│   ├── api/                  # transport fetch (client, errors, types) + 401→refresh→retry
+│   ├── auth/                 # auth-engine (agnostique), auth-api (seam), AuthProvider, hook
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
-│   ├── navigation/           # constantes de routes + redirection auth
+│   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
 │   ├── query/                # QueryClient + provider
 │   ├── states/               # états UI standards
-│   ├── storage/              # secure storage (interface + impl) + token store
+│   ├── storage/              # SecureStorage (interface) + Expo/InMemory impl + SessionStore
 │   ├── theme/                # ThemeProvider + tokens (bridge UI Kit)
 │   ├── types/                # types génériques partagés
 │   └── ui/                   # primitives UI maison
-├── app.json · tsconfig.json · babel.config.js · eslint.config.js · .env.example
+├── test/                     # node --test (auth-engine, session-store, api-client)
+├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
 
@@ -80,6 +83,7 @@ cores/mobile-react-native/
 npm install          # installe les dépendances (core autonome, hors workspaces)
 npm run typecheck    # tsc --noEmit (strict)
 npm run lint         # expo lint (eslint-config-expo)
+npm test             # tsc -p tsconfig.test.json && node --test (cœur agnostique)
 npm run doctor       # npx expo-doctor
 npm start            # démarre le serveur de dev Expo
 ```
@@ -113,11 +117,12 @@ bottom sheets, crash reporting). Voir la roadmap du spec (§53) et
 ## Vérification
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`).
-- `lint` : ✅ (`expo lint` / eslint-config-expo).
-- `doctor` : voir le rapport de session ; checks de versions alignés sur SDK 55.
+- `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
+- `test` : ✅ **21/21** (`node --test` : auth-engine, session-store, api-client).
+- `doctor` : ✅ **expo-doctor 19/19**.
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 2 — auth/session hardening** (refresh réel,
-intégration `@enistere/api-client-fetch`, persistance/expiration de session,
-tests). Une seule mission à la fois.
+**Mobile Core React Native 3 — forms, validation and offline-ready primitives**
+(React Hook Form + Zod, primitives form compatibles UI Kit, état offline/queue
+préparatoire). Une seule mission à la fois.

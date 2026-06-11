@@ -5,14 +5,14 @@
 import { Redirect } from 'expo-router';
 
 import { useAuth } from '@/auth';
-import { ROUTES } from '@/navigation';
+import { ROUTES, isAuthBusy } from '@/navigation';
 import { LoadingState } from '@/states';
 import { Screen } from '@/ui';
 
 export default function Index(): React.JSX.Element {
   const { status } = useAuth();
 
-  if (status === 'loading') {
+  if (isAuthBusy(status)) {
     return (
       <Screen>
         <LoadingState message="Restoring session…" />
@@ -20,5 +20,6 @@ export default function Index(): React.JSX.Element {
     );
   }
 
+  // authenticated → app; unauthenticated/expired → public sign-in.
   return <Redirect href={status === 'authenticated' ? ROUTES.home : ROUTES.signIn} />;
 }

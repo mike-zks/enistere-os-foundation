@@ -1,0 +1,34 @@
+{
+  "//": "Isolated config to compile the FRAMEWORK-AGNOSTIC auth/session/api modules + tests to CommonJS for `node --test`. RN/Expo/React files are intentionally NOT included (they can't run under plain Node).",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "strict": true,
+    "noImplicitOverride": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "build-test",
+    "rootDir": ".",
+    "noEmitOnError": true
+  },
+  "include": [
+    "src/types/**/*.ts",
+    "src/config/**/*.ts",
+    "src/api/errors.ts",
+    "src/api/types.ts",
+    "src/api/client.ts",
+    "src/storage/secure-storage.ts",
+    "src/storage/keys.ts",
+    "src/storage/session-store.ts",
+    "src/storage/memory-secure-storage.ts",
+    "src/auth/session.ts",
+    "src/auth/auth-api.ts",
+    "src/auth/auth-engine.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": ["node_modules", "build-test"]
+}

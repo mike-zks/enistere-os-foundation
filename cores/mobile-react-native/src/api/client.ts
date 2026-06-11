@@ -4,6 +4,9 @@
  * Responsibilities (all generic — NO business endpoints):
  * - prefix paths with a configurable base URL;
  * - inject `Authorization: Bearer <token>` when a token provider yields one;
+ * - on `401 Unauthorized`, trigger a single refresh via the registered handler
+ *   and retry the request once with the new token (purge handled by the auth
+ *   layer when the refresh fails);
  * - enforce a timeout via `AbortController`;
  * - map failures to typed errors ({@link ApiError}/{@link NetworkError}/{@link TimeoutError}).
  *
@@ -12,7 +15,13 @@
  * Multipart upload helpers are intentionally out of scope for this foundation.
  */
 import { ApiError, NetworkError, TimeoutError } from './errors';
-import { ApiClientConfig, HttpMethod, RequestOptions, TokenProvider } from './types';
+import {
+  ApiClientConfig,
+  HttpMethod,
+  RequestOptions,
+  TokenProvider,
+  UnauthorizedHandler,
+} from './types';
 
 interface RequestInternals extends RequestOptions {
   readonly method: HttpMethod;
@@ -23,6 +32,7 @@ export class ApiClient {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
   private getAccessToken?: TokenProvider;
+  private onUnauthorized?: UnauthorizedHandler;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
@@ -36,6 +46,15 @@ export class ApiClient {
    */
   setTokenProvider(provider: TokenProvider | undefined): void {
     this.getAccessToken = provider;
+  }
+
+  /**
+   * Register a handler invoked on a `401`. It should refresh the session and
+   * resolve to the new access token (or `null` if the session can't be
+   * recovered). The auth layer purges the session when it returns `null`.
+   */
+  setUnauthorizedHandler(handler: UnauthorizedHandler | undefined): void {
+    this.onUnauthorized = handler;
   }
 
   get<T>(path: string, options?: RequestOptions): Promise<T> {
@@ -58,7 +77,16 @@ export class ApiClient {
     return this.request<T>(path, { ...options, method: 'DELETE' });
   }
 
-  private async request<T>(path: string, init: RequestInternals): Promise<T> {
+  private request<T>(path: string, init: RequestInternals): Promise<T> {
+    // Allow one refresh+retry for authenticated requests only.
+    return this.send<T>(path, init, !init.skipAuth);
+  }
+
+  private async send<T>(
+    path: string,
+    init: RequestInternals,
+    allowRefresh: boolean,
+  ): Promise<T> {
     const url = this.buildUrl(path, init.query);
     const headers = await this.buildHeaders(init);
     const timeoutMs = init.timeoutMs ?? this.timeoutMs;
@@ -80,6 +108,15 @@ export class ApiClient {
       throw new NetworkError(url, error);
     }
     cleanup();
+
+    // 401 → refresh once, then retry with the new token. `buildHeaders` re-reads
+    // the token provider, so the retry automatically uses the refreshed token.
+    if (response.status === 401 && allowRefresh && this.onUnauthorized) {
+      const newToken = await this.onUnauthorized();
+      if (newToken) {
+        return this.send<T>(path, init, false);
+      }
+    }
 
     const payload = await parseBody(response);
     if (!response.ok) {

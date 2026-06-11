@@ -5,17 +5,17 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Mobile Core React Native 1 — starter foundation : RÉALISÉ** (`mobile-react-native` →
-> **`STARTER_FOUNDATION_INITIEE`**). Starter **Expo SDK 55** / Expo Router : navigation **publique+authentifiée**
-> + gate + not-found ; **shell auth sans backend** ; **secure storage** SecureStore (ADR-015 : access token en
-> mémoire, refresh token persistant) ; **transport `fetch`** générique (ADR-011) en **seam** vers
-> `@enistere/api-client-fetch` (ADR-016) ; **TanStack Query** (ADR-012) ; **ThemeProvider + tokens** (ADR-008/010) ;
-> **états standards**. Vérifs : **typecheck + lint + expo-doctor 19/19 verts**. **Aucune logique métier.**
+> ✅ **Mobile Core React Native 1 (starter, PR #11 mergé) + Mobile Core React Native 2 — auth/session hardening :
+> RÉALISÉS** (`mobile-react-native` → **`AUTH_SESSION_HARDENED`**). RN 2 : **AuthEngine** framework-agnostique
+> (restore/signIn/signOut/refresh/clear, **refresh coalescé**, **expiration**) ; **SessionStore** SecureStore +
+> validation (access token en mémoire ADR-015) ; **API client `401` → refresh → 1 retry** (ADR-011) ; gardes
+> `expired`/`refreshing` ; seam `@enistere/api-client-fetch` (ADR-016) ; **21 tests `node --test`**. Vérifs :
+> **typecheck + lint + test 21/21 + expo-doctor 19/19 verts**. **Aucune logique métier.**
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 2 — auth/session hardening** : refresh token **réel**,
-> **intégration `@enistere/api-client-fetch`** (workspace + Metro monorepo), persistance/expiration de session,
-> **tests** (auth flow, token storage, navigation). **Un seul core**, **sans logique métier**. Différés au-delà :
-> **Zustand** (état local), **React Hook Form + Zod**, **upload `fetch + FormData`**, **notifications**, **logger**.
+> **Prochaine action UNIQUE : Mobile Core React Native 3 — forms, validation and offline-ready primitives** :
+> **React Hook Form + Zod**, primitives form compatibles UI Kit, état **offline/queue** préparatoire. **Un seul
+> core**, **sans logique métier**. Différés au-delà : **intégration `@enistere/api-client-fetch` réelle** (workspace
+> + Metro), **Zustand** (état local), **upload `fetch + FormData`**, **notifications**, **logger**.
 >
 > **(Décision roadmap)** **Cloud Core en PAUSE contrôlée** (cf. [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md)) ;
 > **Cloud Core 10** (serveur staging réel + HTTPS/DNS/pare-feu) **reporté** jusqu'à disponibilité d'un **serveur
@@ -49,11 +49,12 @@ sans serveur réel/HTTPS/exposition ; URL signée + Auth/Files **non validés** 
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
-1. ✅ **Mobile Core React Native 1 — starter foundation** (priorité **#2 V1** roadmap) — **RÉALISÉ** : starter Expo SDK 55 + Expo Router ; navigation auth/privé ; transport `fetch` (seam `api-client-fetch`) ; TanStack Query ; secure storage (ADR-015) ; ThemeProvider+tokens (ADR-010) ; états standards ; typecheck/lint/doctor verts. *(Sans logique métier ; un seul core.)*
-2. **Mobile Core React Native 2 — auth/session hardening** ✦ **prochaine mission** — refresh réel + intégration `@enistere/api-client-fetch` + persistance/expiration session + tests. *(Sans logique métier ; un seul core.)*
-3. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-3. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-4. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+1. ✅ **Mobile Core React Native 1 — starter foundation** (priorité **#2 V1** roadmap) — **RÉALISÉ** (PR #11 mergé). *(Sans logique métier ; un seul core.)*
+2. ✅ **Mobile Core React Native 2 — auth/session hardening** — **RÉALISÉ** : AuthEngine agnostique (refresh coalescé + expiration), SessionStore SecureStore + validation, API client 401→refresh→retry, gardes expired/refreshing, **21 tests `node --test`** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
+3. **Mobile Core React Native 3 — forms, validation & offline-ready primitives** ✦ **prochaine mission** — RHF + Zod ; primitives form UI-Kit-compatibles ; offline/queue préparatoire. *(Sans logique métier ; un seul core.)*
+4. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+5. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+6. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -86,10 +87,11 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 9 — exécution staging contrôlée | **FAIT (local Type D)** — stack réelle (images GHCR corrigées `sha-d1e6242`), migrations depuis l'image, **API/Web `healthy`**, `/health/live`+`/health/ready`+`/`+`/login`=200, endpoint MinIO Option A **joignable** ; ⚠️ **non validé** : URL signée bout-en-bout + Auth/Files (pas d'utilisateur ; seed bloqué) ; **pas de serveur réel/HTTPS** → `EXECUTION_LOCALE_CONTROLEE` |
 | Cloud Core 10 — préparation serveur staging sécurisé | **REPORTÉ (Cloud en pause contrôlée)** — dépend d'un **serveur réel** + HTTPS/DNS/pare-feu + SSH (ressource externe) ; reprise pour valider **en réel** URL signée (presign API, Option A) + Auth/Files |
 | **Mobile Core React Native 1 — starter foundation** | **FAIT** — `mobile-react-native` → **`STARTER_FOUNDATION_INITIEE`** : starter Expo SDK 55 + Expo Router (navigation publique/authentifiée, shell auth sans backend, secure storage SecureStore ADR-015, transport `fetch` ADR-011 en seam vers `api-client-fetch` ADR-016, TanStack Query ADR-012, ThemeProvider+tokens ADR-008/010, états standards) ; typecheck + lint + expo-doctor 19/19 verts ; aucune logique métier |
-| **Mobile Core React Native 2 — auth/session hardening** | **PROCHAINE MISSION** — refresh token réel + intégration `@enistere/api-client-fetch` (workspace + Metro monorepo) + persistance/expiration session + tests (auth/token storage/navigation) |
+| **Mobile Core React Native 2 — auth/session hardening** | **FAIT** — `mobile-react-native` → **`AUTH_SESSION_HARDENED`** : AuthEngine agnostique (restore/signIn/signOut/refresh/clear, refresh coalescé, expiration) ; SessionStore SecureStore + validation (access token mémoire) ; API client 401→refresh→retry ; gardes expired/refreshing ; seam `@enistere/api-client-fetch` ; **21 tests `node --test`** ; typecheck/lint/test/doctor verts |
+| **Mobile Core React Native 3 — forms, validation & offline-ready primitives** | **PROCHAINE MISSION** — React Hook Form + Zod ; primitives form UI-Kit-compatibles ; état offline/queue préparatoire (sans logique métier) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
-| Intégrer les packages dans le Mobile | **planifié en Mobile Core RN 2** — le starter RN 1 expose un **seam** (transport `fetch` générique) ; l'intégration de `@enistere/api-client-fetch` requiert workspace racine + Metro monorepo (hors périmètre RN 1) |
+| Intégrer les packages dans le Mobile | **différé (RN 3+)** — RN 2 conserve le **seam** propre (interface `AuthApi` + transport `fetch`) ; l'intégration de `@enistere/api-client-fetch` requiert workspace racine + Metro monorepo (hors périmètre RN 1/RN 2) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |
 | Web Core Angular | spécification absente + **ADR-035 non rédigé** |

@@ -8,21 +8,23 @@
 import { Redirect, Stack } from 'expo-router';
 
 import { useAuth } from '@/auth';
-import { ROUTES } from '@/navigation';
+import { ROUTES, isAuthBusy } from '@/navigation';
 import { LoadingState } from '@/states';
 import { Screen } from '@/ui';
 
 export default function AppLayout(): React.JSX.Element {
   const { status } = useAuth();
 
-  if (status === 'loading') {
+  // Restoring or refreshing → keep the user on a loading screen, don't bounce.
+  if (isAuthBusy(status)) {
     return (
       <Screen>
-        <LoadingState />
+        <LoadingState message={status === 'refreshing' ? 'Refreshing session…' : undefined} />
       </Screen>
     );
   }
 
+  // unauthenticated / expired → back to the public stack (expired shows a notice there).
   if (status !== 'authenticated') {
     return <Redirect href={ROUTES.signIn} />;
   }
