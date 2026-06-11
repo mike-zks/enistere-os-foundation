@@ -91,7 +91,9 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
   déploiement, protection de branche, E2E navigateur.
 - **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents :
-  `ci(cloud): add ghcr registry workflow (#1)` (`b41a953`, mergé via PR),
+  `Merge pull request #2 … cloud-core-5b-verify` (`bfd33dc`),
+  `docs(cloud): verify ghcr registry integration` (`50b7acb`),
+  `ci(cloud): add ghcr registry workflow (#1)` (`b41a953`),
   `docs(cloud): harden ci governance`,
   `ci(web): add browser e2e validation workflow`,
   `ci(api): add runtime validation workflow`,
@@ -170,13 +172,18 @@ README.md`, baseline, `cores/cloud/README.md`. ADR-014 → **`PARTIELLEMENT_IMPL
 (niveaux 1–4 partiel) ; Cloud Core reste `IMPLEMENTATION_PARTIELLE`. `cores/*/src`/`packages`/`docs/adr`/
 `strategy` **non modifiés** (hors `next.config.ts`, config build testée). **Repo désormais public** + **protection
 de branche `main` ACTIVE** (la PR a été exigée). Commit `ci(cloud): add ghcr registry workflow` (`cf7873c`)
-**mergé via PR #1** (`docs(cloud)`/squash → `b41a953` sur `main`). **Cloud Core 5B** : merge confirmé côté git
-(tous les artefacts registry présents dans `main`) ; **non vérifiables sans `gh`** (non installé) → **à confirmer
-côté GitHub par un humain** : exécution **Registry CI verte sur `main`** + **images GHCR** `api-nestjs`/`web-nextjs`
-(tags `sha-`/`main-`, **pas de `latest`**, labels OCI) + **visibilité du package** (privé par défaut, à passer
-public si pull anonyme voulu). **Prochaine action : Cloud Core 6 — déploiement staging manuel** (ou durcissement
-registry) — **conditionnée** à cette confirmation humaine. **Flux PR obligatoire désormais** (push direct `main`
-refusé).
+**mergé via PR #1** (squash → `b41a953`), puis **Cloud Core 5B** (vérification) **mergé via PR #2** (merge commit
+→ `b41a953..bfd33dc` sur `main`). **Cloud Core 5B : VALIDÉ — observation réelle effectuée** (repo **public** →
+API GitHub Actions lisible + `docker manifest inspect` anonyme ; `gh` non installé mais non nécessaire) :
+**Registry CI verte sur `main`** (push `b41a953` **et** `bfd33dc`, conclusion `success` → build API + build Web +
+**push GHCR** réussis) ; **tous les checks requis verts** sur PR #1 et PR #2 ; **images GHCR publiques**
+`ghcr.io/mike-zks/enistere-os-foundation/{api-nestjs,web-nextjs}` présentes avec tags **`main-b41a953`**,
+**`main-bfd33dc`**, **`sha-bfd33dc`** ; **aucun tag `latest`** (`manifest unknown` confirmé). **Aucun déploiement/
+secret/PAT/`GHCR_TOKEN`/staging ajouté** (workflow `GITHUB_TOKEN` seul). *(Observation : les workflows e2e/audit
+ont eu des échecs **transitoires** sur d'anciens commits — endpoint `npm audit` indisponible / flakiness e2e —
+mais tous les runs `main` récents sont verts ; flakiness à surveiller, cf. risques.)* **Prochaine action :
+Cloud Core 6 — déploiement staging manuel** (ou durcissement registry) — **débloquée**. **Flux PR obligatoire**
+(push direct `main` refusé).
 
 **Étape précédente — Cloud Core 4 — durcissement CI & gouvernance de branche** (mission **documentaire**) : prépare la CI à être
 **exigée** comme protection de `main`, **sans** déploiement/registry/secret, **sans** modifier les workflows
