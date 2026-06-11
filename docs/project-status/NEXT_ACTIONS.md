@@ -25,10 +25,10 @@ environnement protégé + rollback. **Flux PR obligatoire** (push direct `main` 
 **Alternative (justifiée, décision humaine)** : **durcissement registry** (scan/signature/SBOM) ; **UI Kit 4** ;
 **Files 2** (upload Web) ; **Mobile Core**.
 
-**Note gouvernance** : `main` protégé (**repo public**, flux PR). Cette mission ajoute le commit
-`docs(cloud): add manual staging deployment baseline` ; statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**,
-ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel), ADR-014 **`PARTIELLEMENT_IMPLEMENTE`**, déploiement
-staging **`CADRE_MANUEL_DOCUMENTE`** (non automatisé).
+**Note gouvernance** : `main` protégé (**repo public**, flux PR). **CC6 mergé** (PR #4 → `b001ce8`) ; **CC6B**
+(cette mission) valide l'intégration et ajoute le commit `docs(cloud): finalize staging integration` (checkpoint).
+Statuts : Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–4 partiel),
+ADR-014 **`PARTIELLEMENT_IMPLEMENTE`**, déploiement staging **`CADRE_MANUEL_DOCUMENTE`** (non automatisé).
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 
@@ -62,8 +62,8 @@ deux cores. À arbitrer par décision humaine.
 | Cloud Core 4 — durcissement CI & gouvernance | **FAIT** — 7 checks `main` figés + checklist actionnable + politiques artefacts/couverture/pinning/actionlint tranchées ; workflows inchangés |
 | Cloud Core 5 — Registry GHCR (niveau 4 partiel) | **FAIT + MERGÉ + VALIDÉ** (PR #1 `b41a953`, vérif PR #2 `bfd33dc`) — `registry-ci.yml` + Dockerfiles API/Web ; **Registry CI verte sur `main`**, **images GHCR publiques** `api-nestjs`/`web-nextjs` (tags `main-`/`sha-`, **pas de `latest`**) ; ADR-014 → partiel |
 | Protection de branche `main` | **APPLIQUÉE** (repo public) — la PR est désormais **exigée** (push direct `main` refusé). Vérifier que les 7 checks (+ `images`) sont bien requis |
-| Cloud Core 6 — déploiement staging manuel | **FAIT** — `cores/cloud/staging/` (compose+`.env` exemples validés `docker compose config`) + runbooks déploiement/rollback ; `CADRE_MANUEL_DOCUMENTE`, **aucune exécution réelle/secret/automatisation** |
-| Cloud Core 7 — exécution réelle staging | **débloqué** — prochaine mission ; appliquer les runbooks sur un serveur (secrets hors dépôt) ; sinon dry-run GitHub ou durcissement registry |
+| Cloud Core 6 — déploiement staging manuel | **FAIT + MERGÉ** (PR #4 → `b001ce8`) — `cores/cloud/staging/` + runbooks ; `CADRE_MANUEL_DOCUMENTE` ; checks requis **verts** (PR + `main`), images GHCR `main-b001ce8` publiées (pas de `latest`) |
+| Cloud Core 7 — exécution réelle staging | **débloqué** — prochaine mission ; appliquer les runbooks sur un serveur (secrets hors dépôt) ; **sinon dry-run staging / préparation serveur / durcissement registry** |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | starter Mobile inexistant |

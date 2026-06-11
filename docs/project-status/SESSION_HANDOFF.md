@@ -89,14 +89,17 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   protégés, monitoring, rollback **automatisé**, scan/signature d'image, couverture publiée, Compose de prod/Traefik.
 - **Documentaire (spéc seule, aucun starter)** : `mobile-react-native`.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
-- **CI** : **CI minimale présente** (`.github/workflows/ci.yml` — GitHub Actions, non-régression monorepo,
-  ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit` 0 vuln,
-  gardes Axios/Zustand ; ADR-013 **partiel**). **Absents** : conteneurisation, registry/GHCR (ADR-014),
-  déploiement, protection de branche, E2E navigateur.
+- **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
+  ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
+  Axios/Zustand) ; niveau 2 `api-runtime-ci.yml` (runtime API + e2e) ; niveau 3 `web-e2e-ci.yml` (E2E
+  navigateur Playwright) ; niveau 4 partiel `registry-ci.yml` (**build + push images GHCR**). **Protection de
+  branche `main` ACTIVE** (flux PR). **Conteneurisation** : Dockerfiles API/Web (non-root) + **compose staging
+  exemple** (CC6). **Absents** : **déploiement réel** (staging exécuté/production), environnements protégés,
+  monitoring, scan/signature d'image, couverture publiée.
 - **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents
-  (via PR) : `docs(cloud): add manual staging deployment baseline` (CC6),
-  `docs(cloud): confirm ghcr registry publication` (CC5B),
-  `Merge pull request #2 … cloud-core-5b-verify` (`bfd33dc`),
+  (via PR) : `Merge PR #4 … cloud-core-6-staging` (`b001ce8` — CC6 staging intégré),
+  `Merge PR #3 … cloud-core-5b-confirm` (`ac4e805` — CC5B validé),
+  `Merge PR #2 … cloud-core-5b-verify` (`bfd33dc`),
   `ci(cloud): add ghcr registry workflow (#1)` (`b41a953`),
   `docs(cloud): harden ci governance`,
   `ci(web): add browser e2e validation workflow`,
@@ -173,8 +176,11 @@ API fuité dans le conteneur Web** (vérifié), `git diff --check` clean. **Cook
 SECRETS_POLICY §2). **`cores/*/src`/`packages`/`docs/adr`/`strategy` non modifiés** ; **aucun Dockerfile/workflow
 modifié**. Statuts **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; déploiement
 staging = **`CADRE_MANUEL_DOCUMENTE`** (pas `IMPLEMENTE_AUTOMATISE`). Commit `docs(cloud): add manual staging
-deployment baseline`. **Prochaine action : Cloud Core 7 — exécution réelle staging** (ou dry-run / durcissement
-registry).
+deployment baseline` **mergé via PR #4** (`b001ce8` sur `main`) — **CC6B validé** : tous les checks requis
+**verts** (CI/api-runtime/web-e2e/registry sur la PR **et** sur `main`), artefacts staging **intégrés à `main`**,
+`docker compose config` OK, **aucun `.env` réel / secret**, et **images GHCR `main-b001ce8`/`sha-b001ce8`
+publiées** (registry rejoué au merge, **aucun `latest`**). **Prochaine action : Cloud Core 7 — exécution réelle
+staging** (si serveur+secrets prêts) ; **sinon dry-run / préparation serveur / durcissement registry**.
 
 **Étape précédente — Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4 partiel) : début d'**ADR-014** (registry
 **uniquement**), **sans déploiement, sans staging/production, sans rollback, sans secret applicatif, sans PAT**.
