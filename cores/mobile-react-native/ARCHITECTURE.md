@@ -107,12 +107,111 @@ Aucun secret embarqué ; `EXPO_PUBLIC_*` public uniquement ; tokens hors logs ;
 SecureStore pour les secrets ; HTTPS attendu en production ; aucun appel direct
 OSRM depuis le mobile (spec §35 — non concerné ici, pas de maps).
 
-## 9. Écarts résumés (à valider en revue)
+## 9. Auth/session hardening (RN 2)
+
+RN 2 transforme le shell auth de RN 1 en une fondation durcie, **testable**.
+
+- **`AuthEngine` framework-agnostique** (`src/auth/auth-engine.ts`, aucun import
+  React/RN) : machine d'état possédant le cycle de vie de session. React s'y
+  abonne via `subscribe`/`getSnapshot` (`useSyncExternalStore` dans
+  `AuthProvider`). Bénéfice : la logique auth est **unit-testée en isolation**
+  (`node --test`) — convention partagée avec `ui-kit`/`api-client-fetch`.
+- **États** (session model) : `loading` · `authenticated` · `unauthenticated` ·
+  `refreshing` · `expired`. Aucun champ métier.
+- **Tokens (ADR-015)** : access token **en mémoire** (jamais persisté, jamais
+  dans le snapshot React → hors arbre de composants/logs) ; **`SessionStore`**
+  persiste l'enveloppe `{ refreshToken, expiresAt, user }` en SecureStore, avec
+  **validation** du format restauré (fail-soft → `null`).
+- **Restauration** : au démarrage, `restoreSession` lit l'enveloppe puis
+  **refresh** pour re-minter un access token en mémoire ; succès → `authenticated`,
+  échec → `expired` (storage purgé).
+- **Refresh coalescé** : `refreshSession` partage une seule promesse in-flight →
+  pas de double refresh / token stampede.
+- **Expiration** : proactive (`getAccessToken()` renvoie `null` si l'access
+  token est expiré, via une horloge injectable) **et** réactive (voir API).
+- **API client (ADR-011)** : sur `401`, le client appelle le handler
+  (`refreshSession`), et **rejoue la requête une fois** avec le nouveau token ;
+  si le refresh échoue (handler → `null`), le `401` est surfacé et la couche
+  auth purge la session (`expired`). Une seule reprise (pas de boucle).
+- **Gardes de navigation** : `loading`/`refreshing` → loading state (pas de
+  redirection) ; `authenticated` → app ; `unauthenticated`/`expired` → public
+  (l'écran de connexion affiche un avis « session expirée »).
+- **Seam `@enistere/api-client-fetch`** : l'`AuthApi` (`src/auth/auth-api.ts`)
+  est l'interface d'intégration. RN 2 livre `PlaceholderAuthApi` (sans backend) ;
+  l'adaptateur réel POSTera `/auth/login`/`/auth/refresh` (API Core) — voir §4,
+  intégration reportée (périmètre racine workspace/Metro).
+- **Tests** (`test/`, `node --test`, 21 cas) : auth-engine (restore valide/
+  absente/expirée, signIn ok/ko, signOut purge, refresh ok/ko, coalescing,
+  expiry), session-store (round-trip, absent, corrompu, invalide, clear),
+  api-client (injection token, non-2xx, 401→refresh→retry, 401 sans reprise,
+  timeout, network). Compilés via `tsconfig.test.json` (CommonJS, sous-ensemble
+  agnostique uniquement — les fichiers RN/Expo ne sont pas compilés pour Node).
+
+## 10. Formulaires & validation (RN 3)
+
+RN 3 ajoute des **primitives de formulaire génériques** et une couche de
+**validation UX**, **sans aucun formulaire métier**.
+
+- **Validation = UX uniquement (ADR-003 §18)** : `src/forms/validation.ts`
+  enveloppe **Zod** (`validateWith`, plus des fabriques génériques
+  `requiredText`/`emailField`/`minLengthText`/…). **La validation backend reste
+  obligatoire** — l'API Core NestJS est l'autorité (ADR-003 §7/§18). On **ne
+  recopie aucun DTO API** et on **ne crée aucun schéma métier**
+  (Kivvoo/RFashion/Bailo/…).
+- **Mapping d'erreurs agnostique** : `src/forms/form-errors.ts` normalise les
+  erreurs en `FieldErrorMap` (clé = nom de champ). `zodErrorToFieldErrors`
+  aplatit un `ZodError` par chemin (premier message par champ) ;
+  `fieldErrorMessage` lit **structurellement** une erreur React Hook Form
+  (`{ message }`) **sans importer** `react-hook-form` → le module reste
+  testable sous `node --test` (l'import `zod` est **type-only**).
+- **Primitives React (token-driven, ADR-008/010)** : `FormField` (layout
+  label + contrôle + erreur/hint, wiring `nativeID`), `FormLabel`, `FormError`
+  (danger-toned, **live region** « polite » → erreurs **accessibles**, spec
+  §45), `TextInputField` (input thémé lié à RHF via `Controller`, bordure
+  reflétant focus/validité). `resolver.ts` expose `createZodResolver` /
+  `zodResolver` comme **point d'intégration unique** RHF↔Zod.
+- **Choix de version** : **Zod 3.x** (et `@hookform/resolvers` 3.x) sont retenus
+  car le build de test (`tsconfig.test.json`) utilise la résolution **node
+  classique**, qui n'honore pas la carte `exports`-only de Zod 4 ; Zod 3 expose
+  `main`/`types` à la racine et se résout proprement pour `node --test`.
+
+## 11. Offline-ready primitives (RN 3)
+
+RN 3 pose les **briques préparatoires** offline, **sans activer** de stratégie
+offline complète (ADR-015 §19, spec §37).
+
+- **État réseau abstrait** (`src/offline/network-state.ts`) :
+  `NetworkStatus = online | offline | unknown` + helpers purs (`isOnline`,
+  `shouldQueueMutations` — **conservateur** : on file dès que ce n'est pas
+  positivement `online`). **Aucune détection** de connectivité ici : **pas de
+  NetInfo / `expo-network` / `navigator.onLine` / polling**. C'est le **seam**
+  qu'une source réelle alimentera plus tard.
+- **Enveloppe de mutation** (`src/offline/mutation.ts`) : `OfflineMutation`
+  **neutre** (`id`/`type` opaque/`payload`/`createdAt` — horloge **injectée**,
+  jamais `Date.now()` ici) + garde `isOfflineMutation`. **Aucune donnée
+  sensible** ne doit y figurer (ADR-015 §19).
+- **Queue mémoire FIFO** (`src/offline/queue.ts`) : `enqueue`/`dequeue`/`peek`/
+  `clear`/`remove` + `size`/`isEmpty`/`toArray` (snapshot défensif), `maxSize`
+  optionnel. **En mémoire uniquement** — **pas** de persistance
+  (MMKV/AsyncStorage/SQLite), perdue au reload **par design**. Elle **ne rejoue
+  rien automatiquement** et n'a **aucun** câblage réseau/timer : le drainage
+  (quand `online`) est la responsabilité de l'appelant. La persistance et la
+  sync relèvent d'un **ADR futur** (ADR-029).
+- **Tout est framework-agnostique** (aucun import React/RN) → **unit-testé**
+  sous `node --test`, comme l'AuthEngine.
+
+## 12. Écarts résumés (à valider en revue)
 
 1. **Layout plat** au lieu de `starter/` (§1) — aligné repo + mission §5.
 2. **API client** : transport seam local au lieu de `@enistere/api-client-fetch`
-   (§4) — périmètre mission + ADR-016 §7.
+   (§4) — périmètre mission + ADR-016 §7 (intégration réelle = **RN 4**).
 3. **Bridge tokens placeholder** au lieu d'import `@enistere/ui-kit` (§3) —
    autorisé par la mission ; core autonome.
-4. **Modules différés** : Zustand, RHF/Zod, upload, notifications, logger,
-   permissions (hors périmètre mission).
+4. **Tests** : `node --test` sur le **cœur agnostique** (auth-engine, stores,
+   api-client, **validation, form-errors, offline-queue, network-state**) ;
+   tests de composants/intégration RN (jest-expo) **différés** (mission §4).
+5. **Modules différés** : Zustand, upload, notifications, logger, permissions,
+   **intégration réelle de `@enistere/api-client-fetch`** (hors périmètre
+   mission). **RHF/Zod = livrés en RN 3.**
+6. **Offline préparatoire seulement** : briques (état réseau + queue mémoire)
+   **sans** persistance/rejeu/détection/sync (§11) — ADR-029 futur.

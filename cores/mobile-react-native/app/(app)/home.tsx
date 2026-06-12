@@ -10,8 +10,11 @@ import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
 export default function HomeScreen(): React.JSX.Element {
-  const { session, signOut } = useAuth();
+  const { session, status, signOut, refreshSession } = useAuth();
   const theme = useTheme();
+
+  const expiresLabel =
+    session?.expiresAt != null ? new Date(session.expiresAt).toLocaleTimeString() : '—';
 
   return (
     <>
@@ -23,8 +26,14 @@ export default function HomeScreen(): React.JSX.Element {
             Authenticated placeholder screen. This is a generic foundation — no business logic.
           </Text>
           <Text variant="caption" tone="muted">
-            session user: {session?.user?.displayName ?? '—'}
+            session user: {session?.user?.displayName ?? '—'} · expires: {expiresLabel}
           </Text>
+          <Button
+            title="Refresh session"
+            variant="secondary"
+            loading={status === 'refreshing'}
+            onPress={() => void refreshSession()}
+          />
           <Button title="Sign out" variant="secondary" onPress={() => void signOut()} />
         </View>
       </Screen>

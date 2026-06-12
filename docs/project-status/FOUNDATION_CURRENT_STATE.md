@@ -1,7 +1,7 @@
 # FOUNDATION_CURRENT_STATE.md — État courant officiel d'Enistere OS Foundation
 
 > **Photographie officielle** de l'état réel du repository, vérifiée fichier par fichier.
-> **Dernière mise à jour : 2026-06-11.**
+> **Dernière mise à jour : 2026-06-12.**
 >
 > ⚠️ **Ne pas supposer qu'un core est implémenté parce que sa spécification existe.** Un
 > `CORE_SPECIFICATION.md` ≠ un starter ; un README ≠ une implémentation ; un rapport ≠ une preuve
@@ -25,7 +25,7 @@ pas une application ni une bibliothèque complète).
 | Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth) + **Files lecture/téléchargement** (Web Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, validation UUID, **CSRF/Origin** sur download-url, client BFF navigateur, `fileKeys`, `useFileMetadata` + `useCreateDownloadUrl` (**URL signée jamais en cache/log**), page `/protected/files/[id]`, **404 anti-énumération** ; **aucun upload/suppression/admin**, **aucun champ interne** exposé). **307 tests** + preuves API réelles (Auth/session **26/26** + login **22/22** + **Files API+MinIO 21/21**). **Pas de middleware, pas de Server Action Auth, pas de token en JS, pas de proxy générique.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
-| Core mobile (socle) | **`mobile-react-native`** — **STARTER_FOUNDATION_INITIEE** : starter **Expo SDK 55** / Expo Router (navigation publique+authentifiée, shell auth **sans backend**, secure storage SecureStore ADR-015, transport `fetch` ADR-011, TanStack Query ADR-012, `ThemeProvider`+tokens ADR-008/010, états standards) ; **typecheck + lint + expo-doctor 19/19 verts** ; **aucune logique métier** |
+| Core mobile (socle) | **`mobile-react-native`** — **FORMS_OFFLINE_PRIMITIVES_READY** : socle **Expo SDK 55** / Expo Router (RN 1) + auth/session durci (RN 2 : **AuthEngine** agnostique, `SessionStore` SecureStore, **`401`→refresh→retry**, gardes `expired`/`refreshing`, seam `@enistere/api-client-fetch`) **+ RN 3 — formulaires/validation/offline** : primitives form `FormField`/`FormLabel`/`FormError`/`TextInputField` (**RHF + Zod**, token-driven, erreurs **accessibles**), validation **UX** (`validateWith` + mapping Zod/RHF, ADR-003 §18 — **backend autoritatif**), **offline préparatoire** (état réseau abstrait + **queue mémoire** FIFO, **sans persistance/rejeu/NetInfo/donnée sensible**, ADR-015 §19) ; **44 tests `node --test`** ; **typecheck + lint + test 44/44 + expo-doctor 19/19 verts** ; **aucune logique métier** |
 | Cores documentaires | _(aucun ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée** (CC8, `api-smoke` gate le push) + **exécution staging contrôlée LOCALE** (CC9 : images corrigées `sha-d1e6242`, stack `healthy`, endpoint Option A joignable), `EXECUTION_LOCALE_CONTROLEE` ; **déploiement sur serveur réel / HTTPS / URL signée bout-en-bout non encore réalisés** |
@@ -53,7 +53,7 @@ enistere-os-foundation/
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
     web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
     cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles)
-    mobile-react-native/  STARTER_FOUNDATION_INITIEE (Expo SDK 55 + Expo Router : app/ + src/{api,auth,config,navigation,query,states,storage,theme,types,ui} ; autonome hors workspaces)
+    mobile-react-native/  FORMS_OFFLINE_PRIMITIVES_READY (Expo SDK 55 + Expo Router : app/ + src/{api,auth,config,forms,navigation,offline,query,states,storage,theme,types,ui} + test/ node --test ; AuthEngine + SessionStore + 401-refresh ; forms RHF+Zod + offline queue mémoire ; autonome hors workspaces)
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -71,7 +71,7 @@ enistere-os-foundation/
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs ; pas d'infra déploiement) | **IMPLEMENTATION_PARTIELLE** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture) | **IMPLEMENTATION_PARTIELLE** |
-| `mobile-react-native` | oui | oui | **oui** (starter Expo SDK 55 + Expo Router : navigation auth/privé, shell auth sans backend, secure storage SecureStore, transport `fetch`, TanStack Query, `ThemeProvider`, états standards) | **STARTER_FOUNDATION_INITIEE** |
+| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router : navigation auth/privé durcie, AuthEngine + refresh coalescé + expiration, SessionStore SecureStore, API client 401→refresh→retry, ThemeProvider, états, **forms RHF+Zod + validation UX + offline queue mémoire** ; 44 tests) | **FORMS_OFFLINE_PRIMITIVES_READY** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -220,10 +220,13 @@ staging → **`EXECUTION_LOCALE_CONTROLEE`** (détail : `cores/cloud/docs/STAGIN
 **revue stratégique d'alignement** (`docs/project-status/ROADMAP_ALIGNMENT_REVIEW.md`) a constaté que la séquence
 **Cloud Core 1→9** (CI = V2, registry/staging = V3/VF) a **dépassé l'ordre roadmap** alors que **Mobile Core RN —
 priorité #2 V1 — n'a jamais été démarré** → **décision : Cloud Core en PAUSE contrôlée** (CC10 serveur réel
-**reporté** — dépendance externe), **retour aux priorités V1**. **Mobile Core React Native 1 — starter foundation
-RÉALISÉ** (`mobile-react-native` → **STARTER_FOUNDATION_INITIEE** ; Expo SDK 55, typecheck/lint/doctor verts). Cloud
-Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE**. **Prochaine action** : **Mobile Core React
-Native 2 — auth/session hardening** ; **actions humaines** : protection de branche `main` + rendre `api-smoke` requis.
+**reporté** — dépendance externe), **retour aux priorités V1**. **Mobile Core RN 1 (starter, #11 mergé)**, **RN 2 — auth/session hardening** puis **RN 3 — forms, validation &
+offline-ready primitives RÉALISÉ** (`mobile-react-native` → **FORMS_OFFLINE_PRIMITIVES_READY** ; primitives form
+**RHF + Zod** token-driven + validation **UX** (backend autoritatif, ADR-003 §18) + **offline préparatoire** (queue
+mémoire, **sans** persistance/rejeu/NetInfo/donnée sensible, ADR-015 §19), **44 tests `node --test`**, typecheck/
+lint/test 44/44/doctor 19/19 verts). Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE**.
+**Prochaine action** : **Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`** (workspace
+racine + Metro monorepo) ; **actions humaines** : protection de branche `main` + rendre `api-smoke` requis.
 
 ## 12. Documentation
 
@@ -238,7 +241,7 @@ détaillée du API Core.
 2. **Packages intégrés (public + authentifié)** — UI Kit consommé + `api-client-fetch` **instancié**
    (endpoints publics **et** BFF Auth) par le Web Core ; types Auth dérivés via `SchemaOf<>`. Risque de
    dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
-3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose désormais d'un **starter** (STARTER_FOUNDATION_INITIEE) ≠ implémentation complète (V1 partielle : Zustand/forms/upload/notifications différés).
+3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose d'un socle durci (FORMS_OFFLINE_PRIMITIVES_READY : auth/session + forms/validation + offline préparatoire) ≠ implémentation complète (V1 partielle : Zustand, upload, notifications, **intégration réelle `api-client-fetch`**, offline sync réelle — différés).
 4. **CI minimale en place** (`.github/workflows/ci.yml`) — non-régression du monorepo automatisée (ordre de
    build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
    navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.

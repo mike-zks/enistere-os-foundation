@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-11.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-12.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -96,13 +96,21 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Starter (socle générique)** : `mobile-react-native` → **`STARTER_FOUNDATION_INITIEE`** — starter **Expo SDK 55**
-  / Expo Router (navigation publique+authentifiée + gate + not-found ; **shell auth sans backend** ; **secure
-  storage** SecureStore ADR-015 = access token en mémoire + refresh token persistant ; **transport `fetch`**
-  générique ADR-011 en **seam** vers `@enistere/api-client-fetch` ADR-016 ; **TanStack Query** ADR-012 ;
-  **ThemeProvider + tokens** ADR-008/010 ; **états standards**). Layout **plat** + **autonome** (hors workspaces).
-  Vérifs : **typecheck + lint + expo-doctor 19/19 verts**. **Aucune logique métier.** Différés (V1 partielle) :
-  Zustand, RHF/Zod, upload, notifications, logger.
+- **Socle durci** : `mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`** — **Expo SDK 55** / Expo Router.
+  RN 1 (starter, PR #11) + **RN 2 auth/session hardening** (**AuthEngine** agnostique abonné par `AuthProvider`
+  via `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
+  **SessionStore** SecureStore + **validation** — access token **en mémoire** ADR-015, refresh persistant ;
+  **API client `401`→refresh→1 retry** ADR-011 ; seam `@enistere/api-client-fetch` ADR-016 `AuthApi`/
+  `PlaceholderAuthApi` ; gardes `expired`/`refreshing` ; **TanStack Query** ADR-012 ; **ThemeProvider** ADR-008/010
+  ; états standards) + **RN 3 forms/validation/offline** : primitives form **RHF + Zod** (`FormField`/`FormLabel`/
+  `FormError`/`TextInputField`, token-driven, erreurs **accessibles** en live region) ; **validation UX**
+  (`validateWith` + mapping Zod/RHF `zodErrorToFieldErrors`, **ADR-003 §18 — backend autoritatif**, aucun DTO/
+  schéma métier) ; **offline préparatoire** (`src/offline` : état réseau abstrait + **queue mémoire** FIFO,
+  **sans** persistance/rejeu/NetInfo/donnée sensible, **ADR-015 §19**). Layout **plat** + **autonome** (hors
+  workspaces). **44 tests `node --test`** (auth-engine/session-store/api-client/validation/form-errors/
+  offline-queue/network-state). Vérifs : **typecheck + lint + test 44/44 + expo-doctor 19/19 verts**. **Aucune
+  logique métier.** Différés : **intégration `api-client-fetch` réelle (RN 4, prochaine mission)**, Zustand,
+  upload, notifications, logger, offline sync réelle (ADR-029).
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -147,9 +155,9 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 ## 5. Cores documentaires
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
-au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et désormais
-`mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` → `STARTER_FOUNDATION_INITIEE`,
-Expo SDK 55).
+au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
+`mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` → `AUTH_SESSION_HARDENED`,
+Expo SDK 55 ; auth/session durci, 21 tests).
 
 ## 6. Packages
 
@@ -180,7 +188,23 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
+**Mobile Core React Native 3 — forms, validation & offline-ready primitives** (`cores/mobile-react-native/`,
+faisant suite à RN 1 starter PR #11 et RN 2 auth/session hardening) : ajoute des **formulaires génériques** et la
+**validation UX** (**React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` token-driven,
+erreurs **accessibles** ; helpers agnostiques `validateWith` + `zodErrorToFieldErrors` — **client = UX uniquement,
+backend autoritatif** ADR-003 §18, **aucun DTO/schéma métier**) et des **primitives offline préparatoires**
+(`src/offline` : état réseau **abstrait** + **queue mémoire** FIFO `enqueue`/`dequeue`/`peek`/`clear` ; **sans**
+persistance, **sans** rejeu auto, **sans** NetInfo/MMKV/AsyncStorage/SQLite, **sans** donnée sensible — ADR-015 §19,
+spec §37). `mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`**. **44 tests `node --test`** (21 RN 2 + 23
+nouveaux) ; **typecheck + lint + test 44/44 + expo-doctor 19/19 verts**. **Dette doc corrigée** : ADR-015
+`DECIDE_NON_IMPLEMENTE` → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-010/011/012 reflètent l'avancement mobile réel ;
+ADR-003 note la validation cliente mobile. **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/
+`packages` modifié** ; **aucun autre core démarré** ; Cloud reste **`PAUSE_CONTROLEE`**, staging
+**`EXECUTION_LOCALE_CONTROLEE`**. Commit `feat(mobile): add forms validation and offline-ready primitives`.
+**Prochaine action : Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`** (workspace
+racine + Metro monorepo).
+
+**Étape précédente — Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
 réelle des conteneurs** (API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en
 environnement **Type D : local, sans exposition publique**. **Aucun serveur distant/Hetzner/VM/SSH/DNS/HTTPS
 identifié** → mission **requalifiée honnêtement** en exécution **locale** (consigne §6 : ne pas prétendre à un
@@ -599,18 +623,19 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 **reporté** jusqu'à disponibilité d'un serveur + HTTPS/DNS/pare-feu (dépendance **externe**, hors socle). **Retour
 aux priorités V1 de la roadmap** (§7.2/§30) : **Mobile Core React Native** était la priorité #2 V1.
 
-**✅ Mobile Core React Native 1 — starter foundation : RÉALISÉ** (cette mission). `mobile-react-native` →
-**`STARTER_FOUNDATION_INITIEE`** : starter **Expo SDK 55** / Expo Router (navigation publique+authentifiée + gate
-+ not-found ; **shell auth sans backend** ; **secure storage** SecureStore ADR-015 — access token en mémoire,
-refresh token persistant ; **transport `fetch`** générique ADR-011 en **seam** vers `@enistere/api-client-fetch`
-ADR-016 ; **TanStack Query** ADR-012 ; **ThemeProvider + tokens** ADR-008/010 ; **états standards**). Layout plat,
-autonome (hors workspaces). **typecheck + lint + expo-doctor 19/19 verts** ; **aucune logique métier**. Cloud Core
-reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; aucun autre core démarré.
+**✅ Mobile Core RN 1 (starter, PR #11 mergé) + Mobile Core RN 2 — auth/session hardening : RÉALISÉS.**
+`mobile-react-native` → **`AUTH_SESSION_HARDENED`**. RN 2 : **AuthEngine** framework-agnostique (restore/signIn/
+signOut/refresh/clear, **refresh coalescé**, **expiration** proactive+réactive) abonné par `AuthProvider`
+(`useSyncExternalStore`) ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; **SessionStore**
+SecureStore + **validation** (access token **en mémoire** ADR-015) ; **API client `401` → refresh → 1 retry**
+ADR-011 ; gardes `expired`/`refreshing` ; seam `@enistere/api-client-fetch` ADR-016 (`AuthApi`/`PlaceholderAuthApi`).
+**21 tests `node --test`**. **typecheck + lint + test 21/21 + expo-doctor 19/19 verts** ; **aucune logique métier**.
+Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; aucun autre core démarré.
 
-**Action unique (mission Codex suivante)** : **Mobile Core React Native 2 — auth/session hardening** — refresh
-token **réel**, **intégration `@enistere/api-client-fetch`** (workspace racine + Metro monorepo), persistance/
-expiration de session, **tests** (auth flow, token storage, navigation), **sans logique métier**, **un seul
-core**. (Différés au-delà : Zustand, RHF/Zod, upload, notifications, logger.) Le **Cloud Core 9** (exécution
+**Action unique (mission Codex suivante)** : **Mobile Core React Native 3 — forms, validation and offline-ready
+primitives** — **React Hook Form + Zod**, primitives form compatibles UI Kit, état **offline/queue** préparatoire,
+**sans logique métier**, **un seul core**. (Différés au-delà : intégration `@enistere/api-client-fetch` réelle
+(workspace + Metro), Zustand, upload, notifications, logger.) Le **Cloud Core 9** (exécution
 staging **locale** Type D) est **terminé** : stack réelle (images
 corrigées) `healthy`, health 200, endpoint Option A joignable ; URL signée + Auth/Files **non validés en réel**
 (repris en **CC10 sur serveur**). **Actions HUMAINES** : confirmer la protection de branche `main` (7 checks +

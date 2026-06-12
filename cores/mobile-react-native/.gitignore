@@ -7,6 +7,9 @@ dist/
 web-build/
 expo-env.d.ts.bak
 
+# Test build output (tsc -p tsconfig.test.json)
+build-test/
+
 # Native
 *.orig.*
 *.jks

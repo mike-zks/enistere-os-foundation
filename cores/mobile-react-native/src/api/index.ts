@@ -32,6 +32,7 @@ export type {
   HttpMethod,
   RequestOptions,
   TokenProvider,
+  UnauthorizedHandler,
 } from './types';
 
 export const apiClient = new ApiClient({

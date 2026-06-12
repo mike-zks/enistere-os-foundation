@@ -3,6 +3,13 @@
 > **Revue stratégique** (2026-06-11, `main` = `5589198`). **Aucune fonctionnalité ajoutée, aucun code modifié.**
 > Objet : vérifier si l'effort réel reste aligné sur l'objectif originel et la roadmap globale après la longue
 > séquence **Cloud Core 1 → 9** (+ finalisations B/C), et décider **une** prochaine priorité.
+>
+> ⚠️ **Document HISTORIQUE (instantané post-Cloud Core 9).** Sa **décision** — « revenir aux priorités V1 →
+> Mobile Core RN » — a depuis été **exécutée** : **RN 1** (starter, PR #11), **RN 2** (auth/session hardening) et
+> **RN 3** (forms/validation/offline) sont **réalisés** (`mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`**).
+> Ne pas lire cette revue comme l'**état courant** : l'état réel à jour est dans
+> [`FOUNDATION_CURRENT_STATE.md`](./FOUNDATION_CURRENT_STATE.md) / [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md)
+> / [`SESSION_HANDOFF.md`](./SESSION_HANDOFF.md).
 
 ## 1. Objectif originel (rappel sourcé)
 
