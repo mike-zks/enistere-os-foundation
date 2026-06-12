@@ -360,3 +360,46 @@ logout** pour purger le cache TanStack Query de manière déterministe.
 - **Tests** (`node --test`) : `ui-state` (transitions immutables, `getFlag` défaut,
   `reset`) et `invalidation` (**ordre déterministe** `cancel`→`clear` de
   `purgeServerState` via un `QueryClient` stub ; `invalidateScope`/`removeScope`).
+- **Réserve RN 6 — reset du store au logout (clarifié RN 7)** : le store UI **n'est
+  PAS** réinitialisé au logout, **par choix**. Il ne contient **aucune donnée
+  sensible** (le type n'autorise qu'un enum + des booléens) → **aucun risque de
+  fuite** inter-session. `useUiStore.reset()` est **exposé** pour qu'une app vide
+  l'état UI éphémère si elle le souhaite ; câbler `signOut → useUiStore.reset()`
+  vivrait dans `AuthProvider` (`src/auth`, **hors périmètre RN 7**) → **non câblé
+  ici, aucun changement de comportement**.
+
+## 16. Upload sécurisé multipart (RN 7)
+
+RN 7 prépare les **primitives d'upload** au-dessus du client officiel et de la
+couche server-state, **sans endpoint métier, sans écran, sans logique applicative**.
+
+- **Descripteur de fichier RN (`src/upload/file.ts`, agnostique)** : `MobileFile`
+  = `{ uri, name, type }` — défini ici (pas importé) pour rester **pur/testable** ;
+  **structurellement assignable** au `ReactNativeFileDescriptor` du package, donc
+  passable tel quel à `apiClient.files.upload`. Helpers purs : `isMobileFile`
+  (garde), **`describeFileForLog`** (descripteur **sûr** `{name,type}` — **jamais**
+  l'`uri`, qui peut être un chemin device), `isAllowedFileType` (**pré-check UX**
+  exact / `image/*` / `*/*` ; **le backend reste l'autorité** — ADR-007).
+- **Mutation d'upload (`src/upload/use-upload.ts`)** : `useUploadMutation` enveloppe
+  **`useAuthedMutation`** appelant **`apiClient.files.upload(file, category,
+  { subjectId, retryOnAuthRefresh: false })`** → POST `multipart/form-data` vers
+  **API Core `POST /files`** (ADR-007 ; endpoint **fondation**, pas métier ; boundary
+  posé par la runtime, jamais de `Content-Type` forcé — ADR-016 §26).
+- **Refresh sur 401** : `retryOnAuthRefresh: false` → le refresh interne du client
+  reste **off** (`enableRefresh:false`) ; **`authedRequest` (AuthEngine) possède
+  l'unique retry**, qui **rejoue** l'upload → le `FormData` est **reconstruit depuis
+  `file`** (jamais de rejeu d'un flux consommé). Les **mutations ne retentent pas**
+  par défaut (le retry 401 est interne à `authedRequest`, pas un retry TanStack).
+- **Sécurité (ADR-007/015)** : c'est une **mutation** → **aucune clé de cache**,
+  résultat **transient** (jamais en cache durable). **Aucun fichier/URL signée/token/
+  header `Authorization`** dans une query key, le cache, les logs ou le store local.
+  L'upload renvoie **uniquement les métadonnées publiques** (`PublicStoredFileDto` —
+  pas d'URL signée, pas de champ interne). Validation **taille/MIME/permissions =
+  backend** (les helpers clients sont **UX** uniquement). Erreurs normalisées par
+  **`toQueryError`** (étendu pour **413** « trop volumineux » / **415** « type non
+  supporté »).
+- **Tests** (`node --test`) : `upload-file` (`isMobileFile`, `describeFileForLog`
+  **sans fuite d'`uri`**, `isAllowedFileType`) + `query-errors` 413/415. Le hook
+  (React/TanStack/ESM) est **typecheck** seulement, hors build Node.
+- **Différés** : écran/picker d'upload, progression, multi-upload, suppression/
+  quarantaine/restauration (présents dans le package, **non câblés**).

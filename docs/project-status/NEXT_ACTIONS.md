@@ -5,21 +5,27 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Mobile Core React Native 1→6 : RÉALISÉS** (`mobile-react-native` → **`LOCAL_STATE_READY`**). RN 4/4B/5 :
+> ✅ **Mobile Core React Native 1→7 : RÉALISÉS** (`mobile-react-native` → **`UPLOAD_READY`**). RN 4/4B/5 :
 > client officiel **`@enistere/api-client-fetch`** intégré + **pont 401** `authedRequest` + **couche server-state**
 > TanStack Query générique (`createQueryKeys`, `useAuthedQuery`/`useAuthedMutation` via `authedRequest`,
 > `toQueryError` sans donnée sensible, `invalidateScope`/`purgeServerState`). **RN 6 — état local UI + purge logout** :
 > **Zustand** `useUiStore` générique (primitives UI **non sensibles** : `themePreference` + `flags` booléens)
 > **séparé** du server-state (anti-pattern spec §57), **in-memory sans persistance** ; **purge logout déterministe
 > câblée** dans `AuthProvider` (`await cancelQueries`→`clear` dès `unauthenticated`/`expired` = signOut + expiry,
-> **AuthEngine inchangé**). **67 tests `node --test`**. Vérifs : **typecheck + lint + test 67/67 verts** ; expo-doctor
-> checks locaux verts (checks réseau Expo flappent). **Aucune logique métier.** *(Garde CI `npm ls zustand` au root
-> inchangée — mobile autonome, hors scope.)*
+> **AuthEngine inchangé**). **RN 7 — upload sécurisé (multipart)** : descripteur RN `MobileFile {uri,name,type}`
+> (structurellement assignable au `ReactNativeFileDescriptor` du package) + helpers **purs** (`isMobileFile`,
+> `describeFileForLog` **sans `uri`**, `isAllowedFileType` pré-check UX) + `useUploadMutation` via `useAuthedMutation`
+> → `apiClient.files.upload(file, category, {subjectId, retryOnAuthRefresh:false})` (refresh 401 possédé par
+> l'AuthEngine, `FormData` reconstruit au retry) ; **mutation → aucune clé de cache** ; **aucun fichier/URL
+> signée/token/Authorization** en query key/cache/log/store ; `toQueryError` étendu **413/415** ; **backend
+> autoritaire** (ADR-007). **71 tests `node --test`**. Vérifs : **typecheck + lint + test 71/71 verts** ; expo-doctor
+> checks locaux verts (checks réseau Expo flappent ; **RN 7 n'ajoute aucune dépendance**). **Aucune logique métier.**
+> *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 7 — upload sécurisé (multipart)** : câbler les helpers
-> multipart **déjà présents** dans `@enistere/api-client-fetch` (`buildUploadFormData`, RN `{uri,name,type}`) en
-> hooks `useAuthedMutation`, **sans endpoint métier** (ADR-007/016). **Un seul core**, **sans logique métier**.
-> Différés au-delà : **notifications**, **logger**, **offline sync réelle** (ADR-029).
+> **Prochaine action UNIQUE : Mobile Core React Native 8 — logger/observabilité client (avec redaction)** : couche
+> de log générique **sans donnée sensible** (tokens/URL signées/PII redactés), corrélation `requestId` (ADR-040),
+> **sans endpoint métier**. **Un seul core**, **sans logique métier**. Différés au-delà : **notifications**,
+> **offline sync réelle** (ADR-029).
 >
 > **(Décision roadmap)** **Cloud Core en PAUSE contrôlée** (cf. [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md)) ;
 > **Cloud Core 10** (serveur staging réel + HTTPS/DNS/pare-feu) **reporté** jusqu'à disponibilité d'un **serveur
@@ -59,10 +65,11 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 4. ✅ **Mobile Core React Native 4 — intégration réelle `@enistere/api-client-fetch`** — **RÉALISÉ** : client officiel `@enistere/api-client-fetch` + `@enistere/api-contracts` consommés (liés `file:` + Metro, **core autonome — root non touché**), `MobileAuthSessionAdapter` + `EnistereAuthApi`, **AuthEngine préservé** (`enableRefresh:false`), **47 tests** + bundle `expo export` ios. *(Sans logique métier ; un seul core.)*
 5. ✅ **Mobile Core React Native 5 — server-state data layer** — **RÉALISÉ** : couche TanStack Query générique (query-keys stables, `useAuthedQuery`/`useAuthedMutation` via `authedRequest`, `toQueryError` sans donnée sensible, `invalidateScope`/`purgeServerState`), 401 jamais retenté, mutations sans retry, pas de persistance ; **59 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
 6. ✅ **Mobile Core React Native 6 — état local (Zustand) + câblage purge au logout** — **RÉALISÉ** : `useUiStore` générique (primitives UI non sensibles, séparé du server-state), purge logout déterministe câblée dans `AuthProvider` (`await cancelQueries`→`clear` dès `unauthenticated`/`expired`), AuthEngine inchangé ; **67 tests** ; typecheck/lint/test verts. *(Sans logique métier ; un seul core.)*
-7. **Mobile Core React Native 7 — upload sécurisé (multipart)** ✦ **prochaine mission** — câbler les helpers multipart du package (`buildUploadFormData`, RN `{uri,name,type}`) en hooks `useAuthedMutation`, sans endpoint métier.
-8. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-9. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-10. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+7. ✅ **Mobile Core React Native 7 — upload sécurisé (multipart)** — **RÉALISÉ** : descripteur RN `MobileFile {uri,name,type}` (assignable au `ReactNativeFileDescriptor` du package) + helpers purs (`isMobileFile`, `describeFileForLog` sans `uri`, `isAllowedFileType`), `useUploadMutation` via `useAuthedMutation` → `apiClient.files.upload(…, {retryOnAuthRefresh:false})` (refresh 401 = AuthEngine, `FormData` reconstruit au retry), mutation sans clé de cache, `toQueryError` étendu 413/415, **backend autoritaire** (ADR-007), aucun endpoint métier/écran ; **71 tests** ; typecheck/lint/test verts. *(Sans logique métier ; un seul core.)*
+8. **Mobile Core React Native 8 — logger/observabilité client (avec redaction)** ✦ **prochaine mission** — couche de log générique sans donnée sensible (tokens/URL signées/PII redactés), corrélation `requestId` (ADR-040), sans endpoint métier.
+9. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+10. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+11. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -100,7 +107,8 @@ deux cores. À arbitrer par décision humaine.
 | **Mobile Core React Native 4 — intégration réelle `@enistere/api-client-fetch`** | **FAIT** — `mobile-react-native` → **`API_CLIENT_INTEGRATED`** : client officiel `@enistere/api-client-fetch` + `@enistere/api-contracts` consommés (liés `file:` + `metro.config.js`, **core autonome — root package.json NON touché**, choix validé avec l'utilisateur) ; `MobileAuthSessionAdapter` (injection Bearer, aucun token stocké) + `EnistereAuthApi` (`/auth/login`+`/auth/refresh` typés) ; **AuthEngine préservé** (`enableRefresh:false`) ; `ApiClientError` ; **47 tests `node --test`** + **bundle `expo export` ios** ; typecheck/lint/test/doctor verts ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29 |
 | **Mobile Core React Native 5 — server-state data layer** | **FAIT** — `mobile-react-native` → **`SERVER_STATE_READY`** : couche TanStack Query générique (`createQueryKeys`, `useAuthedQuery`/`useAuthedMutation` via `authedRequest`, `toQueryError` sans donnée sensible, `invalidateScope`/`purgeServerState`) ; 401 jamais retenté, mutations sans retry, pas de persistance, aucun endpoint métier ; **59 tests `node --test`** ; typecheck/lint/test/doctor verts |
 | **Mobile Core React Native 6 — état local (Zustand) + purge au logout** | **FAIT** — `mobile-react-native` → **`LOCAL_STATE_READY`** : `useUiStore` Zustand générique (primitives UI non sensibles : `themePreference` + `flags` booléens, **séparé** du server-state, **sans persistance**) ; **purge logout déterministe câblée** dans `AuthProvider` (`await cancelQueries`→`clear` dès `unauthenticated`/`expired`, AuthEngine inchangé) ; **67 tests `node --test`** ; typecheck/lint/test verts |
-| **Mobile Core React Native 7 — upload sécurisé (multipart)** | **PROCHAINE MISSION** — câbler les helpers multipart du package (`buildUploadFormData`, RN `{uri,name,type}`) en hooks `useAuthedMutation`, sans endpoint métier (ADR-007/016) |
+| **Mobile Core React Native 7 — upload sécurisé (multipart)** | **FAIT** — `mobile-react-native` → **`UPLOAD_READY`** : descripteur RN `MobileFile {uri,name,type}` (**structurellement assignable** au `ReactNativeFileDescriptor` du package) + helpers **purs** (`isMobileFile`, `describeFileForLog` **sans `uri`** — pas de chemin device en log, `isAllowedFileType` pré-check UX exact/`*`/`*/*`) ; `useUploadMutation` via `useAuthedMutation` → `apiClient.files.upload(file, category, {subjectId, retryOnAuthRefresh:false})` (**refresh 401 possédé par l'AuthEngine**, `FormData` reconstruit au retry) ; **mutation → aucune clé de cache**, **aucun fichier/URL signée/token/Authorization** en query key/cache/log/store ; `toQueryError` étendu **413/415** ; **backend autoritaire** (ADR-007), aucun endpoint métier/écran ; **71 tests `node --test`** ; typecheck/lint/test verts |
+| **Mobile Core React Native 8 — logger/observabilité client (avec redaction)** | **PROCHAINE MISSION** — couche de log générique **sans donnée sensible** (tokens/URL signées/PII redactés), corrélation `requestId` (ADR-040), sans endpoint métier |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |

@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`LOCAL_STATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`UPLOAD_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -115,11 +115,17 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   logout** : **Zustand** `useUiStore` générique (primitives UI **non sensibles** : `themePreference` + `flags`
   booléens) **séparé** du server-state (anti-pattern spec §57), **in-memory sans persistance** ; **purge logout
   déterministe câblée** dans `AuthProvider` (`await cancelQueries`→`clear` dès `unauthenticated`/`expired`, AuthEngine
-  inchangé). Layout **plat** + **autonome**. **67 tests `node --test`** (… + query-keys + query-errors + **ui-state +
-  invalidation**). Vérifs : **typecheck + lint + test 67/67 verts** (expo-doctor checks locaux verts ; checks réseau
-  Expo flappent) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.**
-  Différés : **upload** (helpers multipart présents non câblés = RN 7), notifications, logger, offline sync réelle
-  (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  inchangé). **+ RN 7 — primitives d'upload sécurisé multipart** (ADR-007) : descripteur RN `MobileFile {uri,name,type}`
+  (**structurellement assignable** au `ReactNativeFileDescriptor` du package) + helpers **purs** (`isMobileFile`,
+  `describeFileForLog` **sans `uri`**, `isAllowedFileType` pré-check UX) + **`useUploadMutation`** via `useAuthedMutation`
+  → `apiClient.files.upload(file, category, {subjectId, retryOnAuthRefresh:false})` (**refresh 401 possédé par
+  l'AuthEngine**, `FormData` reconstruit au retry) ; **mutation → aucune clé de cache**, **aucun fichier/URL signée/
+  token/Authorization** en cache/log/store ; `toQueryError` étendu **413/415** ; **backend autoritaire**, aucun
+  endpoint métier/écran. Layout **plat** + **autonome**. **71 tests `node --test`** (… + query-keys + query-errors +
+  **ui-state + invalidation + upload-file**). Vérifs : **typecheck + lint + test 71/71 verts** (expo-doctor checks
+  locaux verts ; checks réseau Expo flappent ; **RN 7 n'ajoute aucune dépendance**) ; packages liés `api-contracts`
+  11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **notifications**,
+  **logger** (= RN 8), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -166,8 +172,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`LOCAL_STATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout**, 67 tests + bundle Metro).
+`UPLOAD_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart**, 71 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -198,7 +204,31 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 6 — état local UI + purge logout déterministe** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 7 — primitives d'upload sécurisé multipart** (`cores/mobile-react-native/`, périmètre
+`src/query` + `src/upload` + tests + docs) : ajoute des **primitives d'upload génériques** au-dessus du client
+officiel et des couches auth/server-state — **sans endpoint métier, sans écran, sans picker, sans logique applicative**.
+`mobile-react-native` → **`UPLOAD_READY`**. **Aucune dépendance ajoutée.** **Descripteur RN** (`src/upload/file.ts`,
+**agnostique/pur**) : `MobileFile {uri,name,type}` défini localement, **structurellement assignable** au
+`ReactNativeFileDescriptor` du package → passable tel quel à `apiClient.files.upload`. Helpers **purs** : `isMobileFile`
+(garde de forme), **`describeFileForLog`** (descripteur sûr `{name,type}` — **jamais l'`uri`**, chemin device potentiel),
+`isAllowedFileType` (**pré-check UX** exact/`image/*`/`*/*` ; **backend autoritaire**, ADR-007). **Mutation**
+(`src/upload/use-upload.ts`) : `useUploadMutation` via **`useAuthedMutation`** → `apiClient.files.upload(file, category,
+{subjectId, retryOnAuthRefresh:false})` → POST `multipart/form-data` vers **`POST /files`** (endpoint **fondation**, pas
+métier). **Refresh 401 possédé par l'AuthEngine** (`authedRequest` ; le client ne refresh pas, `enableRefresh:false`) ;
+le **`FormData` est reconstruit depuis `file`** au retry (jamais de flux consommé). **Sécurité** (ADR-007/015) : c'est
+une **mutation** → **aucune clé de cache**, résultat **transient** ; **aucun fichier/URL signée/token/Authorization** en
+query key, cache durable, log ou store local ; l'upload renvoie **uniquement les métadonnées publiques**
+(`PublicStoredFileDto`). `toQueryError` **étendu** : **413** « too large » / **415** « not supported ». **Réserve RN 6
+clarifiée** : le store UI **n'est PAS** réinitialisé au logout (aucune donnée sensible → pas de fuite) ; `useUiStore.reset()`
+reste **exposé** ; câbler `signOut → reset()` vivrait dans `AuthProvider` (`src/auth`, **hors périmètre RN 7**) → **non
+câblé, aucun changement de comportement**. **+4 tests `node --test`** (`upload-file` : `isMobileFile`, `describeFileForLog`
+**sans fuite d'`uri`**, `isAllowedFileType` ; `query-errors` 413/415) → **71 tests** ; le hook (React/TanStack/ESM) est
+**typecheck** seulement. Vérifs : **typecheck + lint + test 71/71 verts** (expo-doctor : checks locaux verts ; checks
+réseau Expo/RN-Directory flappent — **RN 7 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
+`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add secure multipart upload
+primitives`. **Prochaine action : Mobile Core React Native 8 — logger/observabilité client (avec redaction).**
+
+**Étape précédente — Mobile Core React Native 6 — état local UI + purge logout déterministe** (`cores/mobile-react-native/`, périmètre
 `src/auth` + `src/query` + `src/store` + tests + docs) : ajoute un **état local UI générique** (séparé du
 server-state) et **câble le logout** pour purger le cache TanStack Query de façon déterministe. **Zustand approuvé**
 (strategy 06 « Local state: Approved » ; spec §23) ajouté à `cores/mobile-react-native` (`^5`, **0 dépendance**).
