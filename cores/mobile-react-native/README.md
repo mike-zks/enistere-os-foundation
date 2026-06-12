@@ -1,6 +1,6 @@
-# Mobile Core React Native — Client Logger & Observability Primitives
+# Mobile Core React Native — Generic Governed Native Permissions
 
-> Statut : **`OBSERVABILITY_READY`** (V1 — RN 8 ; socle RN 1 → upload RN 7)
+> Statut : **`PERMISSIONS_READY`** (V1 — RN 9 ; socle RN 1 → logger RN 8)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -21,12 +21,13 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **État local UI (RN 6)** | `src/store` | **Zustand** (`useUiStore`) générique, **séparé** du server-state : `themePreference` (enum) + `flags` (booléens) + `reset()`. **Uniquement des primitives UI non sensibles** (le type interdit token/profil/payload serveur) ; **in-memory, sans persistance**. Logique de transition **pure** (`ui-state`). |
 | **Upload sécurisé (RN 7)** | `src/upload` | `MobileFile` `{uri,name,type}` + helpers purs (`isMobileFile`, `describeFileForLog` → **`{type,extension}`**, sans `uri` ni nom brut, RN 8, `isAllowedFileType` UX) ; **`useUploadMutation`** (via `useAuthedMutation` → `apiClient.files.upload`, pont 401 `authedRequest`, `FormData` reconstruit au retry). **Mutation** → pas de clé de cache ; **aucun fichier/URL signée/token en cache/log/store** ; validation **backend autoritaire** (ADR-007). **Aucun écran, aucun endpoint métier.** |
 | **Logger / observabilité (RN 8)** | `src/logger` | Logger générique typé (`createLogger` : `debug`/`info`/`warn`/`error`, **niveaux**, **sink pluggable**, **horloge injectée**, corrélation `child`/`withRequestId`) ; **redaction centrale** (`redactValue`/`redactString` : tokens, `Authorization`, cookies, JWT, **URL signées**, **chemins device**, **PII/email**) appliquée **avant** tout sink ; `safeErrorFields(QueryError)`. **Aucune persistance, aucun transport réseau, aucun service externe, aucun log de body** (ADR-040). |
+| **Permissions natives (RN 9)** | `src/permissions` | Modèle pur `PermissionKind`/`PermissionStatus` + helpers (`normalizePermissionStatus`, `canRequestPermission`, `isPermissionGranted`…) ; `PermissionAdapter` (seam Expo) + **`createPermissionService`** (live `getStatus`/`request`/`ensure`/`openSettings`, **logs sûrs** via logger RN 8, `PermissionAdapterError` contrôlé) ; **adaptateur placeholder** (no native dep) ; hook **`usePermission`** (status/loading/error, **no UI**). **Statut jamais persisté** (ni SecureStore/Zustand/Query) ; **API Core = autorité** (07_SECURITY §6). Prépare picker/upload/notifications, **ne les livre pas**. |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, **logger-redaction, logger**) — **89 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, **permission-status, permission-engine**) — **106 tests** |
 
 ## Stack
 
@@ -60,6 +61,7 @@ cores/mobile-react-native/
 │   ├── logger/               # logger/observabilité (agnostiques) : redaction centrale + createLogger + error-fields (RN 8)
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
 │   ├── offline/              # primitives offline-ready : network-state, mutation, queue mémoire (agnostiques)
+│   ├── permissions/          # permissions runtime (agnostiques) : status + adapter + engine + placeholder + usePermission (RN 9)
 │   ├── query/                # server-state : QueryClient/provider + query-keys + query-errors (agnostiques) + useAuthedQuery/Mutation + invalidation
 │   ├── states/               # états UI standards
 │   ├── store/                # état local UI (Zustand) : ui-state (pur, agnostique) + ui-store (useUiStore)
@@ -68,7 +70,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger)
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -91,6 +93,7 @@ cores/mobile-react-native/
 | **ADR-015** Secure storage | access token **en mémoire** (injecté en Bearer via l'adaptateur), refresh token en **SecureStore** ; **purge au logout** (storage + cache server-state) ; **aucun token/donnée sensible dans Zustand** (store = primitives UI non sensibles) |
 | **ADR-016** Client typé OpenAPI | **INTÉGRÉ** : `@enistere/api-client-fetch` + `@enistere/api-contracts` consommés réellement (liés `file:`, Metro) ; refresh possédé par l'AuthEngine (`enableRefresh:false`) — voir ARCHITECTURE §12 |
 | **ADR-040** Logging structuré | **logger client (RN 8)** : `createLogger` (niveaux, sink pluggable, corrélation `requestId`) + **redaction centrale** (tokens/`Authorization`/cookies/JWT/URL signées/chemins device/PII) appliquée **avant** tout sink ; **JSON structuré**, **sans transport réseau/persistance/backend d'observabilité** ni log de body — voir ARCHITECTURE §17 |
+| **07_SECURITY §6** Autorisation | **permissions runtime (RN 9)** : une permission device est une **capacité locale**, **pas** une barrière de sécurité — l'**API Core reste l'autorité** ; statut **jamais persisté** (ni SecureStore/Zustand/Query) ; logs **sûrs** via le logger RN 8 (`{kind,status}` uniquement) — voir ARCHITECTURE §18 |
 
 ## Commandes
 
@@ -129,14 +132,17 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
 ## Hors périmètre de cette mission (différé)
 
 Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
-de mission : **notifications push**, **permissions natives**. **Le logger (RN 8)
-livre les primitives** (`createLogger`, redaction centrale, `safeErrorFields`)
-mais **PAS** de backend d'observabilité, de transport réseau, de persistance de
-logs ni de recâblage des `console.*` existants (hors périmètre) ; la
-collecte/observabilité relève d'un ADR/Cloud Core futur (ADR-018/036). **L'upload
-(RN 7) livre les primitives** (`MobileFile`, `useUploadMutation`) mais **PAS**
-d'écran/picker, de progression, de multi-upload ni de suppression/quarantaine/
-restauration (présents dans le package, non câblés).
+de mission : **notifications push réelles**. **Les permissions (RN 9) livrent
+l'abstraction** (modèle, adapter, service, placeholder, `usePermission`) mais
+**PAS** d'adaptateurs Expo réels (caméra/médias/notifications/localisation),
+d'écran ni de demande de permission contextualisée. **Le logger (RN 8) livre les
+primitives** (`createLogger`, redaction centrale, `safeErrorFields`) mais **PAS**
+de backend d'observabilité, de transport réseau, de persistance de logs ni de
+recâblage des `console.*` existants ; la collecte/observabilité relève d'un
+ADR/Cloud Core futur (ADR-018/036). **L'upload (RN 7) livre les primitives**
+(`MobileFile`, `useUploadMutation`) mais **PAS** d'écran/picker, de progression,
+de multi-upload ni de suppression/quarantaine/restauration (présents dans le
+package, non câblés).
 Et tout V2/V3 (maps, tracking, carousels, bottom sheets, crash reporting).
 **Le store local Zustand n'est PAS persisté** (in-memory ; persistance de
 préférences non sensibles = option future, ADR-015 §16).
@@ -150,15 +156,15 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **89/89** (`node --test` : … query-errors (413/415), ui-state, invalidation, upload-file, **logger-redaction + logger** — RN 8).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 8 n'ajoute aucune dépendance)*.
+- `test` : ✅ **106/106** (`node --test` : … upload-file, logger-redaction, logger, **permission-status + permission-engine** — RN 9).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 9 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 9 — permissions natives génériques (gouvernées)** :
-une abstraction générique de demande/état de permission runtime (caméra,
-médias, notifications…) **mappée purement** et **testable**, **sans** projet ni
-logique métier, qui débloque le picker d'upload (RN 7) et les notifications. Une
-seule mission à la fois. *(Notifications push et offline sync réelle — ADR-029 —
-restent différées.)*
+**Mobile Core React Native 10 — notifications client (cadrage + primitives
+génériques, sans push réel)** : modèle/permission de notification déjà préparés
+(RN 9) → ajouter une abstraction générique de gestion des notifications locales
+(types, état, handlers) **mappée purement** et **testable**, **sans** service push
+réel (Expo/FCM/APNs), **sans** projet ni logique métier. Une seule mission à la
+fois. *(Adaptateurs Expo réels et offline sync — ADR-029 — restent différés.)*

@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`OBSERVABILITY_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`PERMISSIONS_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -127,11 +127,17 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **URL signées**/**chemins device** `file://`-`content://`/**PII**) appliquée **avant** tout sink → un token ne fuit
   pas même via un sink custom ; `safeErrorFields(QueryError)` (corrélation `requestId`, sans payload) ; **correctif
   `describeFileForLog`** (plus de nom brut → `{type,extension}`) ; `Error` sans stack ; **aucune persistance/transport
-  réseau/service externe/log de body**. Layout **plat** + **autonome**. **89 tests `node --test`** (… + upload-file +
-  **logger-redaction + logger**). Vérifs : **typecheck + lint + test 89/89 + expo-doctor 19/19 verts** (**RN 8 n'ajoute
-  aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.**
-  Différés : **écran/picker d'upload**, **notifications push**, **permissions natives** (= RN 9), **backend
-  d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  réseau/service externe/log de body**. **+ RN 9 — permissions natives génériques gouvernées** (07_SECURITY §6 /
+  ADR-015) : modèle pur `PermissionKind`/`PermissionStatus` + `normalizePermissionStatus` (chaînes/objets Expo/
+  booléens, **conservateur**) + helpers ; `PermissionAdapter` (seam Expo) + `createPermissionService` (live
+  `getStatus`/`request`/`ensure`/`openSettings`, **logs sûrs** `{kind,status}` via logger RN 8, **`PermissionAdapterError`**
+  contrôlé sans cause sensible) ; **adaptateur placeholder** (no native dep) ; hook `usePermission` (**no UI**) ;
+  **statut jamais persisté** ; **API Core = autorité**. Layout **plat** + **autonome**. **106 tests `node --test`**
+  (… + logger + **permission-status + permission-engine**). Vérifs : **typecheck + lint + test 106/106 + expo-doctor
+  19/19 verts** (**RN 9 n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29.
+  **Aucune logique métier.** Différés : **écran/picker d'upload**, **notifications push réelles** (= RN 10),
+  **adaptateurs Expo de permissions réels**, **backend d'observabilité** (ADR-018/036), **offline sync réelle**
+  (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -178,8 +184,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`OBSERVABILITY_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction**, 89 tests + bundle Metro).
+`PERMISSIONS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime**, 106 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -210,7 +216,36 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 8 — logger / observabilité client (avec redaction)** (`cores/mobile-react-native/`,
+**Mobile Core React Native 9 — permissions natives génériques gouvernées** (`cores/mobile-react-native/`, périmètre
+`src/permissions` + `test/**` + docs) : ajoute une **abstraction générique, testable et gouvernée** des permissions
+runtime mobiles, **sans logique métier, sans écran/picker, sans notification push réelle, sans upload réel**.
+`mobile-react-native` → **`PERMISSIONS_READY`**. **Aucune dépendance ajoutée.** **Modèle pur**
+(`src/permissions/status.ts`, agnostique) : `PermissionKind` (`camera`/`mediaLibrary`/`notifications`/
+`locationForeground`) + **`PermissionStatus`** (`unknown`/`granted`/`denied`/`blocked`/`limited`/`unavailable`) ;
+`normalizePermissionStatus` replie chaînes (`granted`/`undetermined`/`never_ask_again`/`restricted`…), booléens et
+objets Expo `{status,granted,canAskAgain}` (`canAskAgain:false`⇒`blocked`) en **un seul** enum, **conservateur**
+(inconnu → `unknown`, jamais `granted`) ; helpers purs `canRequestPermission`/`isPermissionGranted` (strict)/
+`isPermissionUsable` (granted+limited)/`shouldOpenSettings`/`isPermissionStatus`. **Adaptateur** (`adapter.ts`) :
+`PermissionAdapter` seam Expo (`getStatus`/`request`/`openSettings?`). **Service** (`engine.ts`, agnostique) :
+`createPermissionService({adapter, logger?})` → `getStatus` (**live, jamais caché**), `request`, **`ensure`** (prompt
+uniquement si grantable et pas déjà accordé), `openSettings` ; **statut jamais persisté** (ni SecureStore/Zustand/
+Query, ADR-015) ; **logs via le logger RN 8** avec **champs sûrs uniquement** (`{kind,status}` enums), redaction RN 8
+**non contournée** ; échec adaptateur → **warn `{kind}` + `PermissionAdapterError`** contrôlé (seulement `kind`/
+`operation`, **aucune cause sensible**), jamais de faux `granted`. **Placeholder** (`placeholder-adapter.ts`) :
+`createPlaceholderPermissionAdapter` — **simulation mémoire, AUCUNE dépendance native** ; `openSettings` no-op
+documenté. **Hook** (`use-permission.ts`, typecheck-only) : `usePermission(kind, adapter, options?)` → `{status,
+loading, error}` + `request`/`refresh`/`openSettings`, **no UI**, statut live en state composant (jamais persisté),
+garde de démontage. **Sécurité** (07_SECURITY §6) : une permission device est une **capacité locale**, **pas** une
+barrière de sécurité → **API Core = autorité**. **+17 tests `node --test`** (`permission-status` : normalisation
+chaînes/objets/booléens, idempotence, conservatisme, helpers ; `permission-engine` : lecture, request **accordé/
+refusé**, `ensure`, `blocked`/`unavailable` sans prompt, **erreur adaptateur → `PermissionAdapterError` sans cause
+brute**, `openSettings` supporté/non, **aucune donnée sensible loggée**) → **106 tests** ; le hook (React) est
+**typecheck** seulement. Vérifs : **typecheck + lint + test 106/106 + expo-doctor 19/19 verts** (**RN 9 n'ajoute aucune
+dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+core. Commit `feat(mobile): add generic governed runtime permissions`. **Prochaine action : Mobile Core React Native 10
+— notifications client (cadrage + primitives génériques, sans push réel).**
+
+**Étape précédente — Mobile Core React Native 8 — logger / observabilité client (avec redaction)** (`cores/mobile-react-native/`,
 périmètre `src/logger` + `src/upload/file.ts` (correctif `describeFileForLog`) + `test/**` + docs) : ajoute une
 **couche de logging/observabilité générique** avec **redaction stricte**, **sans endpoint métier, sans backend
 d'observabilité, sans transport réseau ni persistance**. `mobile-react-native` → **`OBSERVABILITY_READY`**. **Aucune
