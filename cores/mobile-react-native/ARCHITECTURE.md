@@ -200,7 +200,7 @@ offline complète (ADR-015 §19, spec §37).
 - **Tout est framework-agnostique** (aucun import React/RN) → **unit-testé**
   sous `node --test`, comme l'AuthEngine.
 
-## 12. Intégration réelle du client officiel (RN 4)
+## 12. Intégration réelle du client officiel (RN 4 / RN 4B)
 
 RN 4 **remplace** le transport « seam » local par le **client officiel**
 `@enistere/api-client-fetch` (+ `@enistere/api-contracts`), ADR-016. Plus aucun
@@ -220,15 +220,28 @@ transport HTTP écrit à la main : le contrat est la source de vérité.
   typé expose `auth`/`files`/`raw` ; on n'utilise **aucun** endpoint métier (et
   **pas** `files.upload` — hors périmètre).
 - **Adaptateur de session (`src/auth/session-adapter.ts`)** : `AuthSessionAdapter`
-  pont **lecture seule** pour l'**injection Bearer**. `getAccessToken()` renvoie
-  l'access token **en mémoire** de l'AuthEngine (lié à chaud par `AuthProvider`
-  via `bind`/`unbind`). Le client **ne stocke jamais** de token (ADR-015/016 §27).
-- **Refresh : l'AuthEngine reste le seul propriétaire (coalescé)**. On crée donc
-  le client avec **`enableRefresh: false`** (pas de refresh concurrent côté
-  client) ; les hooks `getRefreshToken`/`updateTokens`/`clearSession` de
-  l'adaptateur sont des **no-op documentés** (jamais appelés dans cette config).
-  L'AuthEngine est **inchangé** : restore/signIn/signOut/refresh coalescé/
-  expiration proactive + 401→refresh→retry **préservés**.
+  pont **lecture seule**. `getAccessToken()` renvoie l'access token **en mémoire**
+  de l'AuthEngine (**injection Bearer**) ; `refreshSession()` expose le refresh
+  **coalescé** de l'AuthEngine au pont 401 (ci-dessous). Lié à chaud par
+  `AuthProvider` via `bind({ getAccessToken, refreshSession })`/`unbind`. Le
+  client **ne stocke jamais** de token (ADR-015/016 §27).
+- **Refresh : l'AuthEngine reste le SEUL propriétaire (coalescé)**. Le client est
+  créé avec **`enableRefresh: false`** → **une seule stratégie de refresh**, pas
+  de refresh concurrent côté client ; les hooks `getRefreshToken`/`updateTokens`/
+  `clearSession` de l'adaptateur sont des **no-op documentés** (jamais appelés).
+- **Pont 401 (RN 4B — `src/api/with-auth-retry.ts`)** : restaure le comportement
+  RN 1–3 **par-dessus** le client officiel. `authedRequest(fn)` =
+  `withAuthRetry(engine.refreshSession, fn)` :
+  **`401` → `AuthEngine.refreshSession()` (coalescé) → 1 seul retry → purge si
+  échec**. Sur 401 (détecté par `isUnauthorizedError` = `error.isUnauthorized`,
+  structurel, sans import ESM), le pont demande le refresh **coalescé** de
+  l'AuthEngine (les appels concurrents partagent l'unique refresh in-flight),
+  puis **rejoue la requête une fois** (la requête relit le Bearer rafraîchi via
+  l'adaptateur) ; si le refresh renvoie `null` (session **purgée** → `expired`),
+  le 401 est **surfacé** (pas de boucle, pas de 2ᵉ refresh). **Tout appel
+  authentifié doit passer par `authedRequest`.** Le module est **pur/agnostique**
+  → **testé** sous `node --test`. L'AuthEngine reste **inchangé** (restore/signIn/
+  signOut/refresh coalescé/expiration proactive).
 - **AuthApi réel (`src/auth/enistere-auth-api.ts`)** : `EnistereAuthApi implements
   AuthApi` POSTe `/auth/login` + `/auth/refresh` via **`client.raw`** (typé par le
   contrat) et **mappe** la réponse en `AuthSessionData` (`toAuthSessionData`,
@@ -239,11 +252,13 @@ transport HTTP écrit à la main : le contrat est la source de vérité.
 - **Erreurs typées** : le core ré-exporte **`ApiClientError`**
   (`kind`/`status`/`errorCode`/`requestId`) ; le `QueryClient` ne retente jamais
   un `401` (`error.isUnauthorized`).
-- **Tests** : la logique réseau du client (401→refresh→retry, coalescing,
-  timeout, multipart) est **testée dans le package** (`api-client-fetch` : 29
-  cas). Le core teste le **mapping pur** `toAuthSessionData` (`node --test`) ;
-  l'`EnistereAuthApi` et le câblage sont **typecheckés** contre le contrat réel
-  (les fichiers important l'ESM ne sont pas compilés pour Node).
+- **Tests** : le **transport** du client (timeout, multipart, son propre
+  refresh) est testé **dans le package** (`api-client-fetch` : 29 cas). Le core
+  teste (`node --test`, agnostique) le **mapping pur** `toAuthSessionData` **et le
+  pont 401** (`with-auth-retry` : 401→refresh→retry, refresh-null→surface+purge,
+  retry-toujours-401→pas de boucle, non-401→pas de refresh) — équivalent au test
+  RN 1–3. `EnistereAuthApi` + le câblage sont **typecheckés** contre le contrat
+  réel (les fichiers important l'ESM ne sont pas compilés pour Node).
 
 ## 13. Écarts résumés (à valider en revue)
 
