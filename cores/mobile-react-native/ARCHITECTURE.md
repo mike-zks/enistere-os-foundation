@@ -459,3 +459,63 @@ ADR-015 / 07_SECURITY §9.4/§13.
   profondeur) + `logger` (niveaux, horloge injectée, redaction au niveau du
   logger, `child`/`withRequestId`, `safeErrorFields`). Tout le module est
   **pur/agnostique** → entièrement testé sous Node (rien en typecheck-only).
+
+## 18. Permissions natives génériques gouvernées (RN 9)
+
+RN 9 ajoute une **abstraction générique, testable et gouvernée** des permissions
+runtime mobiles, **sans logique métier, sans écran/picker, sans notification push
+réelle, sans upload réel**. Elle **prépare** picker/upload/notifications mais ne
+les livre pas.
+
+- **Modèle pur (`src/permissions/status.ts`, agnostique)** : `PermissionKind`
+  (`camera` · `mediaLibrary` · `notifications` · `locationForeground`) +
+  **`PermissionStatus` normalisé** (`unknown`/`granted`/`denied`/`blocked`/
+  `limited`/`unavailable`). **`normalizePermissionStatus(value)`** replie les
+  formes hétérogènes (chaîne `granted`/`undetermined`/`never_ask_again`/
+  `restricted`…, booléen, objet Expo `{status, granted, canAskAgain}` →
+  `canAskAgain:false` ⇒ `blocked`) en **un seul** enum ; **conservateur** :
+  toute valeur inconnue → `unknown` (**jamais** `granted`). Helpers **purs** :
+  `canRequestPermission` (unknown/denied), `isPermissionGranted` (strict),
+  `isPermissionUsable` (granted/limited), `shouldOpenSettings` (blocked),
+  `isPermissionStatus`.
+- **Adaptateur (`src/permissions/adapter.ts`, agnostique)** : `PermissionAdapter`
+  = **seam** vers une implémentation plateforme (`expo-camera`/`expo-media-library`/
+  `expo-notifications`/`expo-location`…) — `getStatus(kind)`, `request(kind)`,
+  `openSettings?()`. La fondation livre **le contrat** + un placeholder ; un
+  projet dérivé branche l'adaptateur réel (qui **devrait** normaliser via
+  `normalizePermissionStatus`).
+- **Service framework-agnostique (`src/permissions/engine.ts`)** :
+  `createPermissionService({ adapter, logger? })` → `getStatus` (live, **jamais
+  caché**), `request` (prompt), **`ensure`** (get → prompt **uniquement** si
+  `canRequestPermission` et pas déjà `granted`), `openSettings`. **Statut jamais
+  persisté** (pas de SecureStore/Zustand/TanStack Query — mission/ADR-015).
+  **Logs via le logger RN 8** (injecté, optionnel) avec **champs sûrs uniquement**
+  (`{ kind, status }`, des enums) — **jamais** de payload adaptateur brut, et la
+  redaction RN 8 n'est **pas** contournée. Sur échec adaptateur : **warn `{ kind }`
+  + `throw` d'un `PermissionAdapterError` contrôlé** (porte seulement `kind`/
+  `operation`, **aucune cause sensible**) ; on ne **swallow jamais** vers un faux
+  `granted`.
+- **Adaptateur placeholder (`src/permissions/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderPermissionAdapter({ initial?, onRequest? })` — **simulation
+  mémoire, AUCUNE dépendance native ajoutée** (objectif mission 5). `request`
+  transitionne via `onRequest` (défaut : accorde sauf `blocked`/`unavailable`) ;
+  `openSettings` = no-op documenté. La map mémoire est une **simulation**, jamais
+  un stockage de permission.
+- **Hook React (`src/permissions/use-permission.ts`, typecheck-only)** :
+  `usePermission(kind, adapter, options?)` → `{ status, loading, error }` +
+  `request`/`refresh`/`openSettings`. **Aucune UI.** Statut lu **live**, gardé en
+  state composant (jamais persisté) ; garde de démontage. React/ESM → hors build
+  Node (la logique qu'il pilote EST testée).
+- **Sécurité / gouvernance** : une permission device est une **capacité locale**,
+  **pas** une barrière de sécurité — l'**API Core reste l'autorité** (07_SECURITY
+  §6). Aucun stockage de permission ; aucun log de donnée sensible ; redaction
+  RN 8 préservée.
+- **Tests** (`node --test`) : `permission-status` (normalisation chaînes/objets/
+  booléens, idempotence, conservatisme, helpers) + `permission-engine` (lecture,
+  request **accordé/refusé**, `ensure` sans re-prompt, `blocked`/`unavailable`
+  sans prompt, **erreur adaptateur → `PermissionAdapterError` sans cause brute**,
+  `openSettings` supporté/non, **aucune donnée sensible loggée** — seuls
+  `{ kind, status }`). Le hook (React) est **typecheck** seulement.
+- **Différés** : adaptateurs Expo réels (caméra/médias/notifications/localisation),
+  picker/upload (RN 7 = primitives), **notifications push réelles**, demande de
+  permission au bon moment dans un écran.
