@@ -403,3 +403,58 @@ couche server-state, **sans endpoint métier, sans écran, sans logique applicat
   (React/TanStack/ESM) est **typecheck** seulement, hors build Node.
 - **Différés** : écran/picker d'upload, progression, multi-upload, suppression/
   quarantaine/restauration (présents dans le package, **non câblés**).
+
+## 17. Logger / observabilité client (RN 8)
+
+RN 8 ajoute une **couche de logging/observabilité générique** avec **redaction
+stricte**, **sans endpoint métier, sans backend d'observabilité, sans transport
+réseau ni persistance**. Cohérent avec ADR-040 (schéma, redaction centralisée,
+niveaux, corrélation `requestId`) adapté au client mobile et au durcissement
+ADR-015 / 07_SECURITY §9.4/§13.
+
+- **Redaction centrale (`src/logger/redaction.ts`, agnostique)** : l'**unique**
+  endroit qui décide ce qui est sensible (ADR-040 §17 : « liste centralisée,
+  jamais dispersée par module »). `redactValue(value)` masque récursivement
+  (gardes **profondeur** + **cycle**, jamais de mutation) les **clés sensibles**
+  (`isSensitiveKey`, comparées normalisées → `access_token`/`Access-Token`/
+  `accessToken` matchent, `author`/`monkey` non) : `authorization`, `cookie`,
+  `set-cookie`, `password`, `otp`, `token`/`accessToken`/`refreshToken`/`jwt`,
+  `secret`/`clientSecret`/`apiKey`/`accessKey`/`secretKey`, `signedUrl`/
+  `signature`/`credential`, `email`/`phone`, données bancaires. `redactString(s)`
+  masque dans le **texte libre** : **chemins device** (`file://`/`content://`/
+  `ph://` → schéma conservé, chemin masqué), **`Bearer`/`Basic`**, **JWT** (3
+  segments base64url), **params d'URL signée** (`X-Amz-Signature`/`Credential`,
+  `token`, `sig`, `key`… → valeur masquée, nom conservé), **emails**. `Error` →
+  `{ name, message }` **redacté**, **sans `stack`** (peut contenir un chemin
+  device). Marqueur `[Redacted]` (jamais d'omission silencieuse).
+- **Logger (`src/logger/logger.ts`, agnostique)** : `createLogger(options)` →
+  façade `debug`/`info`/`warn`/`error`. **Toute** sortie (message **et** champs)
+  passe par la redaction **avant** d'atteindre le sink → un token ne peut pas
+  fuir, **même via un sink custom**. **Filtrage par niveau** (`isLevelEnabled` ;
+  défaut `info`, `debug` en dev). **Sink pluggable** (`LogSink`) — défaut
+  `consoleSink` (`console` = sink **plateforme**, **pas** un transport réseau).
+  **Horloge injectée** (jamais `Date.now()` dans le chemin testé). **Corrélation**
+  : `child(context, fields?)` (contexte imbriqué + champs de base) et
+  `withRequestId(id)` (stampe le `requestId`, ADR-040 §14). **Aucun log
+  automatique de body request/response** (ADR-040 §18) — l'appelant choisit les
+  champs sûrs.
+- **Pont erreurs (`src/logger/error-fields.ts`, agnostique)** : `safeErrorFields(
+  queryError)` projette une `QueryError` (RN 5, **import type-only**) vers des
+  champs sûrs `{ kind, status, errorCode, requestId }` — **garde la corrélation**,
+  **drop le message et tout payload**.
+- **`describeFileForLog` corrigé (RN 7 → RN 8, `src/upload/file.ts`)** : ne
+  renvoie **plus le nom brut** du fichier (un nom peut porter de la PII, ex.
+  `john_passport.jpg`, ADR-040 §18/§22). `SafeFileDescriptor` = `{ type,
+  extension }` — MIME + **extension assainie** (`[a-z0-9]{1,12}` minuscule, sinon
+  `null`) ; **jamais** l'`uri` ni le `name`. *(Seule modification autorisée de
+  `src/upload/file.ts` ; le test `upload-file` est adapté.)*
+- **Non fourni (mission / ADR-040 §24)** : **aucune** persistance de logs,
+  **aucun** transport réseau, **aucun** service externe (Sentry/Datadog/Loki),
+  **aucun** log de payload automatique. La collecte/observabilité relève d'un
+  ADR/Cloud Core futur (ADR-018/036). Le `console.warn` de `src/storage` n'est
+  **pas** recâblé (hors périmètre RN 8) → aucun changement de comportement.
+- **Tests** (`node --test`) : `logger-redaction` (clés sensibles, variantes de
+  casse, cycles, `Error` sans stack, Bearer/Basic/JWT/device-uri/URL signée/email,
+  profondeur) + `logger` (niveaux, horloge injectée, redaction au niveau du
+  logger, `child`/`withRequestId`, `safeErrorFields`). Tout le module est
+  **pur/agnostique** → entièrement testé sous Node (rien en typecheck-only).
