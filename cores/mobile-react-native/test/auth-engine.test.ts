@@ -58,7 +58,7 @@ test('restoreSession with a failing refresh → expired + storage cleared', asyn
 
 test('signIn success → authenticated + refresh token persisted', async () => {
   const { engine, sessionStore } = setup();
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   assert.equal(engine.getSnapshot().status, 'authenticated');
   assert.notEqual(engine.getAccessToken(), null);
   assert.notEqual(await sessionStore.load(), null);
@@ -68,7 +68,7 @@ test('signIn failure → unauthenticated + error', async () => {
   const api = new MockAuthApi();
   api.failLogin = true;
   const { engine } = setup({ api });
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   assert.equal(engine.getSnapshot().status, 'unauthenticated');
   assert.equal(engine.getSnapshot().error, 'Sign-in failed.');
   assert.equal(engine.getAccessToken(), null);
@@ -76,7 +76,7 @@ test('signIn failure → unauthenticated + error', async () => {
 
 test('signOut purges storage and memory', async () => {
   const { engine, sessionStore } = setup();
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   await engine.signOut();
   assert.equal(engine.getSnapshot().status, 'unauthenticated');
   assert.equal(engine.getAccessToken(), null);
@@ -85,7 +85,7 @@ test('signOut purges storage and memory', async () => {
 
 test('refreshSession success returns a new access token', async () => {
   const { engine } = setup();
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   const token = await engine.refreshSession();
   assert.equal(typeof token, 'string');
   assert.equal(engine.getSnapshot().status, 'authenticated');
@@ -94,7 +94,7 @@ test('refreshSession success returns a new access token', async () => {
 test('concurrent refreshSession calls are coalesced (refresh runs once)', async () => {
   const api = new MockAuthApi();
   const { engine } = setup({ api });
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   api.useGate();
   const p1 = engine.refreshSession();
   const p2 = engine.refreshSession();
@@ -107,7 +107,7 @@ test('concurrent refreshSession calls are coalesced (refresh runs once)', async 
 test('refreshSession failure → expired + storage cleared + null token', async () => {
   const api = new MockAuthApi();
   const { engine, sessionStore } = setup({ api });
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   api.failRefresh = true;
   const token = await engine.refreshSession();
   assert.equal(token, null);
@@ -120,7 +120,7 @@ test('getAccessToken returns null once the access token has expired', async () =
   const now = (): number => nowValue;
   const api = new MockAuthApi(now, 5_000); // expiresAt = now + 5000
   const { engine } = setup({ api, now });
-  await engine.signIn({ username: 'demo' });
+  await engine.signIn({ email: 'demo@example.com' });
   assert.notEqual(engine.getAccessToken(), null); // valid at t=1000
   nowValue = 7_000; // past expiry (6000)
   assert.equal(engine.getAccessToken(), null);

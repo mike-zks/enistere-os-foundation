@@ -49,9 +49,9 @@ export interface SessionSnapshot {
   readonly expiresAt: number | null;
 }
 
-/** Generic credentials accepted by the placeholder `signIn`. */
+/** Generic credentials accepted by `signIn` (email/password — API Core `LoginDto`). */
 export interface SignInInput {
-  readonly username: string;
+  readonly email: string;
   readonly password?: string;
 }
 

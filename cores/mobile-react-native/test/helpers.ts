@@ -43,7 +43,7 @@ export class MockAuthApi implements AuthApi {
     if (this.failLogin) {
       throw new Error('login failed');
     }
-    return this.mint(input.username);
+    return this.mint(input.email);
   }
 
   async refresh(_refreshToken: string): Promise<AuthSessionData> {

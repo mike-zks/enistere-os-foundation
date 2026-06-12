@@ -3,12 +3,11 @@
  * refresh. Framework-agnostic (no React/RN import).
  *
  * Governance: this is the integration point for the official client
- * `@enistere/api-client-fetch` (ADR-016). A real adapter will implement
- * `AuthApi` by POSTing to API Core (`/auth/login`, `/auth/refresh`) and reading
- * the profile (`/me`). Wiring that package requires root-workspace + Metro
- * monorepo changes that are OUT of this mission's perimeter, so RN 2 ships the
- * placeholder below behind this interface — swapping in the real adapter does
- * not touch the engine or the UI.
+ * `@enistere/api-client-fetch` (ADR-016). RN 4 ships the REAL implementation
+ * `EnistereAuthApi` (POSTs to API Core `/auth/login` / `/auth/refresh` via the
+ * typed client) as the default; the {@link PlaceholderAuthApi} below remains a
+ * no-backend fallback for local development. Swapping implementations does not
+ * touch the engine or the UI.
  */
 import { AuthUser, SignInInput } from './session';
 
@@ -53,7 +52,7 @@ export class PlaceholderAuthApi implements AuthApi {
   constructor(private readonly now: () => number = () => Date.now()) {}
 
   async login(input: SignInInput): Promise<AuthSessionData> {
-    return this.mint(input.username);
+    return this.mint(input.email);
   }
 
   async refresh(refreshToken: string): Promise<AuthSessionData> {
