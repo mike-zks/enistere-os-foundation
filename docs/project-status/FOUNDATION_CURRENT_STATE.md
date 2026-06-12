@@ -29,7 +29,7 @@ pas une application ni une bibliothèque complète).
 | Cores documentaires | _(aucun ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée** (CC8, `api-smoke` gate le push) + **exécution staging contrôlée LOCALE** (CC9 : images corrigées `sha-d1e6242`, stack `healthy`, endpoint Option A joignable), `EXECUTION_LOCALE_CONTROLEE` ; **déploiement sur serveur réel / HTTPS / URL signée bout-en-bout non encore réalisés** |
-| **État Git** | **Baseline locale créée** — commit `7dcb543` sur `main` (322 fichiers) ; remote `origin` configuré, **non poussé** |
+| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` au merge RN 3 `574cdcf` ; flux PR actif |
 
 ## 2. Principes de vérité
 
@@ -236,8 +236,8 @@ détaillée du API Core.
 
 ## 13. Risques
 
-1. ~~Aucun commit Git~~ **RÉSOLU (local)** — baseline `7dcb543` créée sur `main` (ADR-001 exercé
-   localement). Reste : **non poussée** vers `origin` (décision humaine/gouvernance).
+1. ~~Aucun commit Git~~ **RÉSOLU** — historique Git actif ; `main` et `origin/main` sont alignés au merge RN 3
+   `574cdcf`. Reste : maintenir le flux PR et les checks requis.
 2. **Packages intégrés (public + authentifié)** — UI Kit consommé + `api-client-fetch` **instancié**
    (endpoints publics **et** BFF Auth) par le Web Core ; types Auth dérivés via `SchemaOf<>`. Risque de
    dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).

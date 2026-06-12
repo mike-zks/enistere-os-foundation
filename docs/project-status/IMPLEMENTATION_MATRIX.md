@@ -1,6 +1,6 @@
 # IMPLEMENTATION_MATRIX.md — Matrice d'implémentation officielle
 
-> Vérifiée depuis le repository (2026-06-11). Légende des statuts officiels : `ABSENT`,
+> Vérifiée depuis le repository (2026-06-12). Légende des statuts officiels : `ABSENT`,
 > `DOSSIER_SEULEMENT`, `SPECIFICATION_DOCUMENTAIRE`, `ADR_EN_COURS`, `PREUVE_TECHNIQUE`,
 > `STARTER_INITIALISE`, `CADRAGE_OPERATIONNEL` (cadrage gouverné — docs de politique/exécution, **sans** infra
 > réelle ni starter), `IMPLEMENTATION_PARTIELLE`, `IMPLEMENTATION_AVANCEE`, `VALIDE_V1`, `SUSPENDU`,
@@ -33,7 +33,7 @@
 | Conteneurisation (Docker) | ADR-014 | **Dockerfiles API/Web** (multi-stage, non-root ; Web standalone) + `.dockerignore` ; **compose staging exemple** (CC6) ; **fix moteur Prisma 3.0.x** (CC8 : `binaryTargets` + `openssl` au build) | ✓ build/config ; ✅ **CC8 re-validé : image API `healthy`** (moteur 3.0.x), image Web `healthy` | **PARTIELLEMENT_IMPLEMENTE** | compose de prod, Traefik ; rebuild GHCR image API (CI au merge) |
 | Déploiement staging | ADR-013 | runbooks + compose/`.env` exemples (CC6) + dry-run (CC7) + image API corrigée (CC8) + **exécution LOCALE** (CC9 : stack `healthy` images corrigées, migrations depuis l'image, endpoint Option A joignable) | ✅ **stack exécutée en local** (health 200) ; ⚠️ **URL signée bout-en-bout + Auth/Files non validés** (pas d'utilisateur ; pas de serveur réel/HTTPS) | **EXECUTION_LOCALE_CONTROLEE** | **CC10 — préparation serveur staging sécurisé** (serveur réel + HTTPS/DNS/pare-feu) puis validation URL signée + Auth/Files en réel |
 | Observabilité (métriques/traces) | ADR-018/036 à rédiger | — | — | **NON_COMMENCE** | Cloud Core |
-| Git (commits/branches) | ADR-001 Validé | **baseline `7dcb543` (main)** | — | **PARTIELLEMENT_IMPLEMENTE** | push `origin` (décision humaine) |
+| Git (commits/branches) | ADR-001 Validé | **historique Git actif** ; `main` aligné sur `origin/main` (dernier merge RN 3 `574cdcf`) | — | **PARTIELLEMENT_IMPLEMENTE** | maintenir le flux PR et les checks requis |
 
 ## 3. Matrice détaillée — API Core NestJS
 
@@ -65,7 +65,7 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 
 | ID | Source A | Source B | État réel | Impact | Action recommandée | Priorité |
 |---|---|---|---|---|---|---|
-| C1 | Travail substantiel présent | `git log` | **Résolu (local)** : baseline `7dcb543` ; non poussée | Traçabilité locale OK ; pas encore de sauvegarde distante | Pousser vers `origin` (décision humaine) | RÉSOLU (local) / IMPORTANTE (push) |
+| C1 | Travail substantiel présent | `git log` / remote | **Résolu** : historique Git actif ; `main` et `origin/main` alignés (`574cdcf`, merge RN 3) | Traçabilité locale et distante OK | Maintenir le flux PR ; aucun push direct `main` | RÉSOLU |
 | C2 | Packages dits « officiels » | Import dans les cores | **Intégré (public + authentifié + Files lecture)** : UI Kit **consommé** + `api-contracts`/`api-client-fetch` **instanciés** par le Web Core pour Health, le BFF Auth (login/refresh/logout/me/authorization) **et la façade Files** (métadonnées + URL signée, types `PublicStoredFileDto`/`SignedDownloadResponseDto` via `SchemaOf<>`), preuve API + MinIO réelle. Reste : publication (non requise V1) | Lecture « intégré » vraie pour public, authentifié **et Files** | — (publication différée) | RÉSOLU |
 | C3 | ADR-005/012/013/014/015 Validés | Code correspondant partiel | ADR-008 **partiel** (tokens + primitives UI Kit) ; ADR-009 **partiel** (web : Tailwind/Radix absents) ; **ADR-010 appliqué côté mobile** (ThemeProvider + composants maison, pas de NativeWind) ; **ADR-011/012 appliqués** (web + mobile : fetch + TanStack Query) ; **ADR-015 implémenté** (mobile secure storage : access token mémoire, refresh token SecureStore) ; **ADR-003 mobile** (RN 3 : Zod UX via RHF, backend autoritatif) ; ADR-005/013/014 décidés, partiels | Lecture « fait » erronée | Implémenter au fil des cores | IMPORTANTE |
 | C4 | `strategy/` Phase 0 (« avant code ») | API Core implémenté | Phase 0 partiellement dépassée | Contexte trompeur | Lire strategy comme historique | MINEURE |
@@ -80,7 +80,7 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 |---|---|
 | Ordre de build monorepo (`packages/*/dist` non versionnés) — **désormais imposé par la CI minimale** (`.github/workflows/ci.yml`) ; reste à documenter pour le dev local | MINEURE (CI en place) |
 | **CI minimale présente** (ADR-013 partiel) ; restent : protection de branche, couverture publiée, **E2E navigateur**, CI runtime API, release/déploiement | IMPORTANTE |
-| Baseline Git locale créée (`7dcb543`) **non poussée** vers `origin` | IMPORTANTE |
+| Historique Git actif et `main` aligné sur `origin/main` ; rester vigilant sur le flux PR et les checks requis | SUIVI |
 | Packages non intégrés (à clarifier dans les futurs cores) | IMPORTANTE |
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |
 | `OPENAPI_CLIENT_PROOF.md` réfère un code retiré | MINEURE |
