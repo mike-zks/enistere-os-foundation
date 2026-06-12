@@ -13,7 +13,8 @@
  *   permissions). Client checks below are UX hints ONLY — never a security
  *   boundary; the backend re-validates everything.
  * - NEVER log/store the raw descriptor: `uri` may be a device path
- *   (`file://`/`content://`). Use {@link describeFileForLog} (name + type only).
+ *   (`file://`/`content://`) and `name` may carry PII (e.g. `john_passport.jpg`).
+ *   Use {@link describeFileForLog} (MIME type + safe extension only).
  * - The file is a MUTATION INPUT — never a query key, cached value, or secret.
  */
 
@@ -40,15 +41,34 @@ export function isMobileFile(value: unknown): value is MobileFile {
   );
 }
 
-/** A SAFE descriptor for logs/UI — name + type ONLY, never the `uri`/payload. */
+/**
+ * A SAFE descriptor for logs/telemetry — MIME `type` + a derived, non-sensitive
+ * `extension` ONLY. Never the device `uri` NOR the raw `name` (a filename can
+ * carry PII, ADR-040 §18/§22).
+ */
 export interface SafeFileDescriptor {
-  readonly name: string;
   readonly type: string;
+  /** Lowercased file extension if it looks safe (`[a-z0-9]{1,12}`), else `null`. */
+  readonly extension: string | null;
 }
 
-/** Strips the `uri` (potential device path) — use this for any log/telemetry. */
+/**
+ * Reduces a {@link MobileFile} to safe-to-log metadata. Drops the `uri`
+ * (potential device path) AND the raw `name` (potential PII), keeping only the
+ * MIME type and a sanitised extension. Use this for any log/telemetry.
+ */
 export function describeFileForLog(file: MobileFile): SafeFileDescriptor {
-  return { name: file.name, type: file.type };
+  return { type: file.type, extension: safeExtension(file.name) };
+}
+
+/** Extracts a lowercased extension only when it is plainly non-sensitive. */
+function safeExtension(name: string): string | null {
+  const dot = name.lastIndexOf('.');
+  if (dot < 0 || dot === name.length - 1) {
+    return null;
+  }
+  const ext = name.slice(dot + 1).toLowerCase();
+  return /^[a-z0-9]{1,12}$/.test(ext) ? ext : null;
 }
 
 /**

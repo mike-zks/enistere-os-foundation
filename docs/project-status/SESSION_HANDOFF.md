@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`UPLOAD_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`OBSERVABILITY_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -121,11 +121,17 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   → `apiClient.files.upload(file, category, {subjectId, retryOnAuthRefresh:false})` (**refresh 401 possédé par
   l'AuthEngine**, `FormData` reconstruit au retry) ; **mutation → aucune clé de cache**, **aucun fichier/URL signée/
   token/Authorization** en cache/log/store ; `toQueryError` étendu **413/415** ; **backend autoritaire**, aucun
-  endpoint métier/écran. Layout **plat** + **autonome**. **71 tests `node --test`** (… + query-keys + query-errors +
-  **ui-state + invalidation + upload-file**). Vérifs : **typecheck + lint + test 71/71 verts** (expo-doctor checks
-  locaux verts ; checks réseau Expo flappent ; **RN 7 n'ajoute aucune dépendance**) ; packages liés `api-contracts`
-  11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **notifications**,
-  **logger** (= RN 8), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  endpoint métier/écran. **+ RN 8 — logger/observabilité (avec redaction)** (ADR-040) : logger générique typé
+  `createLogger` (`debug`/`info`/`warn`/`error`, **niveaux**, **sink pluggable**, **horloge injectée**, corrélation
+  `child`/`withRequestId`) + **redaction centrale** (`redactValue`/`redactString` : tokens/`Authorization`/cookies/JWT/
+  **URL signées**/**chemins device** `file://`-`content://`/**PII**) appliquée **avant** tout sink → un token ne fuit
+  pas même via un sink custom ; `safeErrorFields(QueryError)` (corrélation `requestId`, sans payload) ; **correctif
+  `describeFileForLog`** (plus de nom brut → `{type,extension}`) ; `Error` sans stack ; **aucune persistance/transport
+  réseau/service externe/log de body**. Layout **plat** + **autonome**. **89 tests `node --test`** (… + upload-file +
+  **logger-redaction + logger**). Vérifs : **typecheck + lint + test 89/89 + expo-doctor 19/19 verts** (**RN 8 n'ajoute
+  aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.**
+  Différés : **écran/picker d'upload**, **notifications push**, **permissions natives** (= RN 9), **backend
+  d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -172,8 +178,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`UPLOAD_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart**, 71 tests + bundle Metro).
+`OBSERVABILITY_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction**, 89 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -186,7 +192,7 @@ au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `we
 
 18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
 **consommé en lecture côté Web** — métadonnées publiques + URL signée + téléchargement direct, **sans** upload),
-039 (Argon2id), 040 (logging). Partiels : 001 (monorepo), 003, **013** (CI minimale), **004** (session : adapter serveur Web + **état de session
+039 (Argon2id), 040 (logging API). Partiels : **040** (logging **mobile** : logger client générique RN 8 + **redaction centrale** — tokens/URL signées/chemins device/PII — sans transport/persistance), 001 (monorepo), 003, **013** (CI minimale), **004** (session : adapter serveur Web + **état de session
 navigateur** `useSession`/`useAuthorization`, read-only sans refresh silencieux), **005** (cookies web +
 **CSRF** : flux BFF login/refresh/logout opérationnels, cookies `HttpOnly`, CSRF double-submit,
 Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appliqué **côté API** ;
@@ -204,7 +210,36 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 7 — primitives d'upload sécurisé multipart** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 8 — logger / observabilité client (avec redaction)** (`cores/mobile-react-native/`,
+périmètre `src/logger` + `src/upload/file.ts` (correctif `describeFileForLog`) + `test/**` + docs) : ajoute une
+**couche de logging/observabilité générique** avec **redaction stricte**, **sans endpoint métier, sans backend
+d'observabilité, sans transport réseau ni persistance**. `mobile-react-native` → **`OBSERVABILITY_READY`**. **Aucune
+dépendance ajoutée.** **Redaction centrale** (`src/logger/redaction.ts`, **agnostique**) : l'**unique** endroit qui
+décide de la sensibilité (ADR-040 §17). `redactValue` masque récursivement (gardes **profondeur** + **cycle**, sans
+mutation) les **clés sensibles** (`isSensitiveKey`, normalisées → `access_token`/`Access-Token`/`accessToken` matchent,
+`author`/`monkey` non) ; `redactString` masque dans le **texte libre** : **chemins device** (`file://`/`content://`/
+`ph://`, schéma conservé), **`Bearer`/`Basic`**, **JWT**, **params d'URL signée** (`X-Amz-Signature`/`Credential`,
+`token`, `sig`…), **emails**. `Error` → `{name, message}` redacté **sans stack**. Marqueur `[Redacted]`. **Logger**
+(`src/logger/logger.ts`, agnostique) : `createLogger` → `debug`/`info`/`warn`/`error` ; **toute** sortie (message **et**
+champs) redactée **avant** le sink → un token ne fuit pas **même via un sink custom** ; **niveaux** (`isLevelEnabled`,
+défaut `info`), **sink pluggable** (défaut `consoleSink` — `console` = sink plateforme, **pas** un transport réseau),
+**horloge injectée** (jamais `Date.now()` dans le chemin testé), **corrélation** `child(context, fields?)` /
+`withRequestId(id)` (ADR-040 §14) ; **aucun log automatique de body** (§18). **Pont erreurs** (`error-fields.ts`) :
+`safeErrorFields(QueryError)` → `{kind,status,errorCode,requestId}` (corrélation conservée, **message/payload droppés** ;
+import **type-only** → `src/query` **non modifié**). **Correctif `describeFileForLog`** (`src/upload/file.ts`) : ne
+renvoie **plus le nom brut** (PII potentielle, §18/§22) → `SafeFileDescriptor = {type, extension}` (MIME + extension
+assainie `[a-z0-9]{1,12}`, sinon `null`), **jamais** l'`uri` ni le `name` (seule modification autorisée de `file.ts` ;
+test `upload-file` adapté). **Non fourni (mission / §24)** : aucune persistance, transport réseau, service externe
+(Sentry/Datadog/Loki) ni log de body ; le `console.warn` de `src/storage` **non** recâblé (hors périmètre) → **aucun
+changement de comportement**. **+18 tests `node --test`** (`logger-redaction` : clés/casse, cycles, `Error` sans stack,
+Bearer/Basic/JWT/device-uri/URL signée/email, profondeur ; `logger` : niveaux, horloge injectée, redaction au logger,
+`child`/`withRequestId`, `safeErrorFields`) → **89 tests** ; module **entièrement** agnostique (rien en typecheck-only).
+Vérifs : **typecheck + lint + test 89/89 + expo-doctor 19/19 verts** (**RN 8 n'ajoute aucune dépendance**). **Aucun
+fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
+`feat(mobile): add client logger with central redaction`. **Prochaine action : Mobile Core React Native 9 —
+permissions natives génériques (gouvernées).**
+
+**Étape précédente — Mobile Core React Native 7 — primitives d'upload sécurisé multipart** (`cores/mobile-react-native/`, périmètre
 `src/query` + `src/upload` + tests + docs) : ajoute des **primitives d'upload génériques** au-dessus du client
 officiel et des couches auth/server-state — **sans endpoint métier, sans écran, sans picker, sans logique applicative**.
 `mobile-react-native` → **`UPLOAD_READY`**. **Aucune dépendance ajoutée.** **Descripteur RN** (`src/upload/file.ts`,

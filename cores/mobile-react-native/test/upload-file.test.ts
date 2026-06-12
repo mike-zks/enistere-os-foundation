@@ -17,10 +17,19 @@ test('isMobileFile guards the {uri,name,type} shape', () => {
   assert.equal(isMobileFile('nope'), false);
 });
 
-test('describeFileForLog drops the uri (no device path / payload leak)', () => {
+test('describeFileForLog drops the uri AND the raw name (no device path / PII leak)', () => {
   const safe = describeFileForLog(file);
-  assert.deepEqual(safe, { name: 'photo.jpg', type: 'image/jpeg' });
+  assert.deepEqual(safe, { type: 'image/jpeg', extension: 'jpg' });
   assert.equal('uri' in safe, false);
+  assert.equal('name' in safe, false);
+  // A PII-bearing filename never survives — only the safe extension does.
+  const pii = describeFileForLog({ ...file, name: 'john_doe_passport_2026.PNG' });
+  assert.deepEqual(pii, { type: 'image/jpeg', extension: 'png' });
+  // No / weird extension → null (still never the raw name).
+  assert.deepEqual(describeFileForLog({ ...file, name: 'noext' }), {
+    type: 'image/jpeg',
+    extension: null,
+  });
 });
 
 test('isAllowedFileType: exact, wildcard subtype, */*, and empty = allow all', () => {
