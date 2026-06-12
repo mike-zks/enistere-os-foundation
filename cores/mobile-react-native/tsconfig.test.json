@@ -18,6 +18,7 @@
   "include": [
     "src/types/**/*.ts",
     "src/config/**/*.ts",
+    "src/api/with-auth-retry.ts",
     "src/storage/secure-storage.ts",
     "src/storage/keys.ts",
     "src/storage/session-store.ts",

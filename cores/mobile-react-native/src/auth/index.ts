@@ -12,7 +12,7 @@ export { PlaceholderAuthApi, AuthApiError } from './auth-api';
 export type { AuthApi, AuthSessionData } from './auth-api';
 export { EnistereAuthApi } from './enistere-auth-api';
 export { MobileAuthSessionAdapter, mobileAuthSession } from './session-adapter';
-export type { AccessTokenProvider } from './session-adapter';
+export type { AuthEngineBinding } from './session-adapter';
 export { toAuthSessionData } from './token-mapping';
 export type { ApiTokenPayload } from './token-mapping';
 export { initialAuthState } from './session';

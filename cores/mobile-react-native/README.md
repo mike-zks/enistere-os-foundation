@@ -16,14 +16,14 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | Auth engine | `src/auth/auth-engine.ts` | **machine d'état framework-agnostique** (no React/RN) : `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`, **expiration**, **refresh coalescé** |
 | Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` ; **`EnistereAuthApi`** (réel) + `MobileAuthSessionAdapter` ; `PlaceholderAuthApi` (repli sans backend) |
 | Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
-| **API client (officiel)** | `src/api` | **`@enistere/api-client-fetch`** (+ `@enistere/api-contracts`) typé — `createEnistereApiClient` (base URL/timeout, **injection Bearer** via adaptateur de session, erreurs `ApiClientError`). Refresh **possédé par l'AuthEngine** (`enableRefresh:false`). **Aucun endpoint métier.** |
+| **API client (officiel)** | `src/api` | **`@enistere/api-client-fetch`** (+ `@enistere/api-contracts`) typé — `createEnistereApiClient` (base URL/timeout, **injection Bearer** via adaptateur de session, erreurs `ApiClientError`). Refresh **possédé par l'AuthEngine** (`enableRefresh:false`) ; **pont 401** `authedRequest`/`withAuthRetry` : `401`→`refreshSession` coalescé→1 retry→purge (RN 4B). **Aucun endpoint métier.** |
 | Server state | `src/query` | `QueryClient` + `QueryProvider` (TanStack Query) |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, **token-mapping**) — **41 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, **with-auth-retry**) — **47 tests** |
 
 ## Stack
 
@@ -50,7 +50,7 @@ cores/mobile-react-native/
 │   │   └── home.tsx          # écran placeholder authentifié
 │   └── +not-found.tsx        # fallback
 ├── src/
-│   ├── api/                  # client OFFICIEL @enistere/api-client-fetch (index.ts)
+│   ├── api/                  # client OFFICIEL @enistere/api-client-fetch (index.ts) + with-auth-retry (pont 401, agnostique)
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
@@ -62,7 +62,7 @@ cores/mobile-react-native/
 │   ├── theme/                # ThemeProvider + tokens (bridge UI Kit)
 │   ├── types/                # types génériques partagés
 │   └── ui/                   # primitives UI maison
-├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping)
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -132,7 +132,7 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **41/41** (`node --test` : auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping).
+- `test` : ✅ **47/47** (`node --test` : auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, **with-auth-retry** — pont 401 RN 4B).
 - `doctor` : ✅ **expo-doctor 19/19**.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — le bundle Hermes embarque le client (`createEnistereApiClient`, `/auth/login`, `/auth/refresh`, …) → **intégration prouvée au niveau bundler**.
 - packages liés validés : `@enistere/api-contracts` **11/11**, `@enistere/api-client-fetch` **29/29** (inchangés).

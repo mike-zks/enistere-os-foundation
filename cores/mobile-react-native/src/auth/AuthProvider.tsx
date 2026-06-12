@@ -40,9 +40,13 @@ export function AuthProvider({ engine, children }: AuthProviderProps): React.JSX
   const state = useSyncExternalStore(authEngine.subscribe, authEngine.getSnapshot);
 
   useEffect(() => {
-    // Bridge the official client's Bearer injection to the engine's in-memory
-    // access token (read lazily on each request; never stored by the client).
-    mobileAuthSession.bind(authEngine.getAccessToken);
+    // Bridge the official client to the engine: Bearer injection reads the
+    // in-memory access token; the 401 bridge (authedRequest) uses the engine's
+    // COALESCED refresh. The client never stores a token, never refreshes itself.
+    mobileAuthSession.bind({
+      getAccessToken: authEngine.getAccessToken,
+      refreshSession: authEngine.refreshSession,
+    });
     void authEngine.restoreSession();
     return () => {
       mobileAuthSession.unbind();

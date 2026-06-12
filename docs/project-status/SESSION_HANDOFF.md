@@ -108,8 +108,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   mémoire, le client ne stocke aucun token, §27) + `EnistereAuthApi` (POST `/auth/login`+`/auth/refresh` via
   `client.raw` typé → mapping pur) ; **AuthEngine préservé** (refresh coalescé + expiration + 401→retry,
   `enableRefresh:false`) ; erreurs `ApiClientError` ; `PlaceholderAuthApi` en repli. Layout **plat** + **autonome**.
-  **41 tests `node --test`** (auth-engine/session-store/validation/form-errors/offline-queue/network-state/
-  token-mapping). Vérifs : **typecheck + lint + test 41/41 + expo-doctor 19/19 + `expo export` ios (bundle Hermes
+  **47 tests `node --test`** (auth-engine/session-store/validation/form-errors/offline-queue/network-state/
+  token-mapping). Vérifs : **typecheck + lint + test 47/47 + expo-doctor 19/19 + `expo export` ios (bundle Hermes
   embarquant le client) verts** ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
   métier.** Différés : hooks **server-state** (RN 5), Zustand, upload (helpers multipart présents non câblés),
   notifications, logger, offline sync réelle (ADR-029).
@@ -160,7 +160,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
 `API_CLIENT_INTEGRATED`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré**, 41 tests + bundle Metro).
+`@enistere/api-client-fetch` intégré**, 47 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -191,7 +191,19 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 4 — intégration réelle du client officiel** (`cores/mobile-react-native/`, faisant suite
+**Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`cores/mobile-react-native/`) : corrige une
+régression RN 4 (le client en `enableRefresh:false` + adaptateur no-op → plus de `401`→refresh→retry). Ajoute un **pont
+401 explicite** `src/api/with-auth-retry.ts` (pur/agnostique) : `authedRequest(fn)` = `withAuthRetry(engine.refreshSession,
+fn)` → sur `401` (détecté par `error.isUnauthorized`, sans import ESM) → **`AuthEngine.refreshSession()` COALESCÉ** → **1
+seul retry** (relit le Bearer rafraîchi) → si `null` (session **purgée** → `expired`) le 401 est **surfacé** (pas de boucle).
+**Une seule stratégie de refresh** (`enableRefresh:false` conservé ; l'AuthEngine reste le propriétaire) ; `MobileAuthSessionAdapter`
+étendu (`bind({ getAccessToken, refreshSession })`). Access token **toujours en mémoire**. **Test restauré** (`with-auth-retry.test.ts`,
+6 cas) équivalent à l'ancien `401→refresh→retry` → **47 tests**. Statut **inchangé `API_CLIENT_INTEGRATED`**. Vérifs :
+**typecheck + lint + test 47/47 + expo-doctor 19/19 verts**. **Aucun fichier API/Web/UI Kit/Cloud/`packages` modifié** ; root
+non touché. Docs : `ARCHITECTURE.md` §12 (pont 401) + `README.md`. Commit `fix(mobile): restore 401 refresh retry with official
+client`. **Prochaine action : Mobile Core React Native 5 — server-state data layer.**
+
+**Étape précédente — Mobile Core React Native 4 — intégration réelle du client officiel** (`cores/mobile-react-native/`, faisant suite
 à RN 1→3) : **remplace** le transport « seam » local par **`@enistere/api-client-fetch` + `@enistere/api-contracts`**
 (ADR-016). **Consommation = core autonome + packages liés `file:`** (écart **validé avec l'utilisateur** : ne PAS
 ajouter l'app Expo SDK 55 au lockfile racine partagé qui pilote le `npm ci` de toute la CI monorepo — risque
@@ -202,10 +214,10 @@ conditions) + `openapi-fetch` déclaré directement (pas de React dupliqué) ; *
 (POST `/auth/login`+`/auth/refresh` via `client.raw` typé → mapping pur `toAuthSessionData`, `expiresIn` s→ms) ;
 `PlaceholderAuthApi` en repli ; `SignInInput` `username`→**`email`**. **AuthEngine INCHANGÉ** (refresh coalescé +
 expiration proactive + 401→refresh→retry préservés ; le refresh reste possédé par l'AuthEngine). `mobile-react-native`
-→ **`API_CLIENT_INTEGRATED`**. **41 tests `node --test`** (retrait des 6 tests de l'ancien transport ; ajout
+→ **`API_CLIENT_INTEGRATED`**. **47 tests `node --test`** (retrait des 6 tests de l'ancien transport ; ajout
 token-mapping ; logique réseau du client testée **dans son package** = 29). **+ `babel-preset-expo@~55.0.8`** ajouté
 (référencé par `babel.config.js` mais jamais déclaré — lacune RN 1–3 ; rend le core **bundle-able**). Vérifs :
-**typecheck (types réels) + lint (0) + test 41/41 + expo-doctor 19/19 + `expo export -p ios` (bundle Hermes 2,7 Mo
+**typecheck (types réels) + lint (0) + test 47/47 + expo-doctor 19/19 + `expo export -p ios` (bundle Hermes 2,7 Mo
 **embarquant** `createEnistereApiClient`/`/auth/login`/`/auth/refresh`) verts** ; packages liés `api-contracts` 11/11
 + `api-client-fetch` 29/29 (inchangés). **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/`packages`
 modifié** ; **aucun autre core démarré** ; Cloud reste **`PAUSE_CONTROLEE`**, staging **`EXECUTION_LOCALE_CONTROLEE`**.

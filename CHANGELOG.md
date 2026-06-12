@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 4B — restore 401 refresh retry with the official client
+
+- **Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`cores/mobile-react-native/`) : corrige une régression de comportement introduite en RN 4 (le client officiel créé avec `enableRefresh:false` + adaptateur no-op → **plus aucun** `401`→refresh→retry sur les requêtes authentifiées). Statut **inchangé** : **`API_CLIENT_INTEGRATED`**. **Aucun fichier API/Web/UI Kit/Cloud/packages modifié** ; root `package.json` non touché ; aucun endpoint métier.
+  - **Pont 401 explicite** (`src/api/with-auth-retry.ts`, **pur/agnostique**) : `withAuthRetry(refresh, request)` — sur `401` (détecté par `isUnauthorizedError` = `error.isUnauthorized`, structurel, **sans import ESM**) → **`AuthEngine.refreshSession()` coalescé** → **1 seul retry** (la requête relit le Bearer rafraîchi) → si le refresh renvoie `null` (session **purgée** → `expired`) le `401` est **surfacé** (pas de boucle, pas de 2ᵉ refresh). `authedRequest(fn)` = version liée à l'AuthEngine (via l'adaptateur).
+  - **Une seule stratégie de refresh** : le client reste en **`enableRefresh:false`** (pas de refresh concurrent côté client) ; **l'AuthEngine reste le seul propriétaire** du refresh coalescé. `MobileAuthSessionAdapter` étendu : `bind({ getAccessToken, refreshSession })` expose le refresh coalescé de l'AuthEngine au pont 401 (en plus de l'injection Bearer). Access token **toujours en mémoire** uniquement.
+  - **Test restauré** (`test/with-auth-retry.test.ts`, **6 cas** `node --test`) équivalent à l'ancien `401 → refresh → retry` : succès sans 401, 401→refresh→retry, refresh `null`→surface+purge, retry encore 401→pas de boucle, non-401→pas de refresh, détection 401. **47 tests** au total (41 + 6).
+  - **Vérifications** (locales) : **`tsc --noEmit`** ✅ ; **`expo lint`** ✅ (0) ; **`npm test` 47/47** ✅ ; **`expo-doctor` 19/19** ✅ *(2 checks réseau Expo API / RN Directory ont flappé transitoirement avant de repasser au vert — non liés à ce correctif)*.
+  - **Docs** : `ARCHITECTURE.md` §12 (pont 401) + `README.md` mis à jour. Commit `fix(mobile): restore 401 refresh retry with official client`.
+
 ### Mobile Core React Native 4 — official API client integration
 
 - **Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`** (`cores/mobile-react-native/`) : remplace le transport « seam » local par le **client typé officiel** (`@enistere/api-client-fetch` + `@enistere/api-contracts`, ADR-016), **sans logique métier**. `mobile-react-native` passe de `FORMS_OFFLINE_PRIMITIVES_READY` à **`API_CLIENT_INTEGRATED`**. **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/`packages` modifié** ; **root `package.json` NON modifié** ; **aucun autre core démarré**.

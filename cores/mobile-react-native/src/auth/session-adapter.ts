@@ -1,43 +1,57 @@
 /**
  * MobileAuthSessionAdapter — bridges the official `@enistere/api-client-fetch`
- * client to the mobile auth layer for **Bearer injection** (ADR-015/016 §27).
+ * client to the mobile auth layer (ADR-015/016 §27).
  *
- * The official client never stores tokens: it asks this adapter for the access
- * token on each request. We back `getAccessToken` with the AuthEngine's
- * in-memory token (lazily bound by `AuthProvider`), so authenticated requests
- * carry `Authorization: Bearer <token>` without the client ever holding a token.
- * A token never enters logs, errors, or the React snapshot.
+ * Two responsibilities, both backed by the AuthEngine (lazily bound by
+ * `AuthProvider` via {@link bind}/{@link unbind}):
+ * - **Bearer injection** — `getAccessToken()` returns the engine's in-memory
+ *   access token, so authenticated requests carry `Authorization: Bearer <token>`
+ *   without the client ever holding a token.
+ * - **Reactive refresh handle** — `refreshSession()` exposes the engine's
+ *   COALESCED refresh to the 401 bridge (`withAuthRetry`). The official client's
+ *   own refresh stays disabled (`enableRefresh: false`), so there is a single
+ *   refresh strategy, owned by the AuthEngine. No second concurrent strategy.
  *
- * Refresh is **owned by the AuthEngine** (coalesced — ADR-004/011), so the
- * client is created with `enableRefresh: false`. The refresh/clear hooks below
- * are therefore never called by the client in this configuration; they are
- * implemented as documented no-ops so the class remains a correct
- * `AuthSessionAdapter` (and so `enableRefresh` could be flipped later).
- *
- * The `AuthSessionAdapter` import is TYPE-ONLY (erased at runtime), so this file
- * carries no runtime dependency on the ESM package.
+ * The `getRefreshToken`/`updateTokens`/`clearSession` hooks of the
+ * `AuthSessionAdapter` contract are never invoked in this configuration (the
+ * client does not refresh); they are documented no-ops. The `AuthSessionAdapter`
+ * import is TYPE-ONLY → no runtime dependency on the ESM package. No token ever
+ * enters logs, errors, or the React snapshot.
  */
 import type { AuthSessionAdapter } from '@enistere/api-client-fetch';
 
-/** Resolves the current in-memory access token (or `null`). */
-export type AccessTokenProvider = () => string | null;
+/** The engine capabilities the adapter bridges. */
+export interface AuthEngineBinding {
+  /** The current in-memory access token (or `null` if absent/expired). */
+  readonly getAccessToken: () => string | null;
+  /** The engine's coalesced refresh; resolves to a new token or `null`. */
+  readonly refreshSession: () => Promise<string | null>;
+}
 
 export class MobileAuthSessionAdapter implements AuthSessionAdapter {
-  private accessTokenProvider: AccessTokenProvider | null = null;
+  private binding: AuthEngineBinding | null = null;
 
-  /** Wires the engine's access-token getter (called by `AuthProvider` on mount). */
-  bind(provider: AccessTokenProvider): void {
-    this.accessTokenProvider = provider;
+  /** Wires the engine (called by `AuthProvider` on mount). */
+  bind(binding: AuthEngineBinding): void {
+    this.binding = binding;
   }
 
-  /** Unwires the provider (`AuthProvider` cleanup). */
+  /** Unwires the engine (`AuthProvider` cleanup). */
   unbind(): void {
-    this.accessTokenProvider = null;
+    this.binding = null;
   }
 
   async getAccessToken(): Promise<string | null> {
-    return this.accessTokenProvider?.() ?? null;
+    return this.binding?.getAccessToken() ?? null;
   }
+
+  /**
+   * The engine's coalesced refresh, for the 401 bridge ({@link withAuthRetry}).
+   * Resolves to `null` when unbound or when the session can't be recovered.
+   */
+  readonly refreshSession = (): Promise<string | null> => {
+    return this.binding ? this.binding.refreshSession() : Promise.resolve(null);
+  };
 
   async getRefreshToken(): Promise<string | null> {
     // Refresh is owned by the AuthEngine (enableRefresh:false) → unused here.
