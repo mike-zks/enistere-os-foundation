@@ -45,6 +45,11 @@ test('5xx → temporarily unavailable', () => {
   assert.match(toQueryError(apiError({ kind: 'http', status: 503 })).message, /unavailable/i);
 });
 
+test('413 / 415 map to upload-friendly messages', () => {
+  assert.match(toQueryError(apiError({ kind: 'http', status: 413 })).message, /too large/i);
+  assert.match(toQueryError(apiError({ kind: 'http', status: 415 })).message, /not supported/i);
+});
+
 test('NEVER echoes the raw error message (no sensitive data leak)', () => {
   const e = toQueryError(
     apiError({ kind: 'http', status: 400, message: 'Bearer secret-token-abc123 leaked' }),

@@ -79,6 +79,10 @@ function safeMessage(kind: QueryErrorKind, status: number | null): string {
       return 'Not found.';
     case 409:
       return 'This action conflicts with the current state.';
+    case 413:
+      return 'That file is too large.';
+    case 415:
+      return 'That file type is not supported.';
     case 429:
       return 'Too many requests. Please try again later.';
     default:
