@@ -27,11 +27,13 @@ export function removeScope(queryClient: QueryClient, queryKey: QueryKey): void 
 }
 
 /**
- * Purges ALL server state — call this on LOGOUT / session expiry. Cancels
- * in-flight fetches, then clears the entire query+mutation cache so the next
- * user starts clean (ADR-015 §18). The auth layer owns the trigger.
+ * Purges ALL server state — call this on LOGOUT / session expiry. DETERMINISTIC
+ * (RN 6): it **awaits** `cancelQueries` (so in-flight fetches are settled/aborted
+ * and cannot repopulate the cache) **then** `clear`s the entire query+mutation
+ * cache, so the next user starts clean (ADR-015 §18). The auth layer owns the
+ * trigger (wired in `AuthProvider` on session end).
  */
-export function purgeServerState(queryClient: QueryClient): void {
-  void queryClient.cancelQueries();
+export async function purgeServerState(queryClient: QueryClient): Promise<void> {
+  await queryClient.cancelQueries();
   queryClient.clear();
 }

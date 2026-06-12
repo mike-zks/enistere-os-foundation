@@ -328,3 +328,35 @@ RN 5 ajoute une **couche server-state générique** au-dessus de **TanStack Quer
   `query-errors` (mapping 401/403/404/session-expired/network/timeout/5xx,
   **non-fuite du message brut**, valeurs non-`ApiClientError`) sous `node --test`.
   Les hooks/invalidation (React/TanStack) sont **typecheckés**, hors build Node.
+
+## 15. État local UI (Zustand) + purge logout déterministe (RN 6)
+
+RN 6 ajoute un **état local UI générique** (séparé du server-state) et **câble le
+logout** pour purger le cache TanStack Query de manière déterministe.
+
+- **Zustand — choix gouverné** : `Zustand | Mobile RN | Local state | **Approved**`
+  (strategy 06 ; spec §23/§30). Léger, sans provider, pour l'**état local simple**.
+  **Strictement séparé** du server-state (ADR-012 ; anti-pattern spec §57 :
+  jamais d'état serveur dans Zustand).
+- **Store (`src/store/`)** : modèle **pur** `ui-state.ts` (agnostique) + binding
+  Zustand `ui-store.ts` (`useUiStore`). État = **uniquement des primitives UI non
+  sensibles** : `themePreference` (`'system'|'light'|'dark'`) + `flags`
+  (`Record<string, boolean>`). **Sécurité structurelle** : le type n'autorise
+  qu'un enum + des booléens → **aucun token, profil, URL signée ou payload serveur**
+  ne PEUT y être stocké (ADR-015). **In-memory uniquement** : **pas de persistance**
+  (mission ; ADR-015 §16) — l'état est éphémère (reset au redémarrage), `reset()`
+  le vide aussi au logout. La logique de transition est **pure** → testée
+  (`node --test`) ; le binding Zustand est **typecheck** seulement.
+- **Purge logout déterministe** : `purgeServerState(queryClient)` est désormais
+  **`async`** — **`await cancelQueries()` PUIS `clear()`** (les fetchs en vol sont
+  réglés/annulés AVANT le vidage, donc ne repeuplent pas le cache).
+- **Câblage `signOut → purge`** : `AuthProvider` (couche React) ajoute un effet qui
+  **purge dès que la session se termine** — `unauthenticated` (logout `signOut`)
+  **ou** `expired` (échec de refresh / `clearSession` interne). Un seul mécanisme
+  couvre **tous** les chemins de fin de session ; aucune donnée du précédent
+  utilisateur ne survit (ADR-015 §18). **AuthEngine reste INCHANGÉ** (la purge vit
+  dans `AuthProvider`, pas dans la machine d'état agnostique) ; pas de cycle
+  d'import (`AuthProvider → query → api → auth/session-adapter`, feuille).
+- **Tests** (`node --test`) : `ui-state` (transitions immutables, `getFlag` défaut,
+  `reset`) et `invalidation` (**ordre déterministe** `cancel`→`clear` de
+  `purgeServerState` via un `QueryClient` stub ; `invalidateScope`/`removeScope`).
