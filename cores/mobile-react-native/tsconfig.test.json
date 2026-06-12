@@ -1,5 +1,5 @@
 {
-  "//": "Isolated config to compile the FRAMEWORK-AGNOSTIC auth/session/api modules + tests to CommonJS for `node --test`. RN/Expo/React files are intentionally NOT included (they can't run under plain Node).",
+  "//": "Isolated config to compile the FRAMEWORK-AGNOSTIC auth/session/api/forms/offline modules + tests to CommonJS for `node --test`. RN/Expo/React files (incl. forms components) are intentionally NOT included (they can't run under plain Node). zod is resolved here via classic node resolution, hence zod 3.x (root main/types).",
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
@@ -28,6 +28,11 @@
     "src/auth/session.ts",
     "src/auth/auth-api.ts",
     "src/auth/auth-engine.ts",
+    "src/forms/form-errors.ts",
+    "src/forms/validation.ts",
+    "src/offline/network-state.ts",
+    "src/offline/mutation.ts",
+    "src/offline/queue.ts",
     "test/**/*.ts"
   ],
   "exclude": ["node_modules", "build-test"]

@@ -1,6 +1,6 @@
-# Mobile Core React Native — Auth / Session Hardening
+# Mobile Core React Native — Forms, Validation & Offline-Ready Primitives
 
-> Statut : **`AUTH_SESSION_HARDENED`** (V1 — RN 2 ; socle RN 1 durci)
+> Statut : **`FORMS_OFFLINE_PRIMITIVES_READY`** (V1 — RN 3 ; socle RN 1 + auth/session RN 2 durcis)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -20,14 +20,17 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | Server state | `src/query` | `QueryClient` + `QueryProvider` (TanStack Query) |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
+| **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
+| **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, api-client) — **21 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, api-client, **validation, form-errors, offline-queue, network-state**) — **44 tests** |
 
 ## Stack
 
 - **Expo SDK 55** (New Architecture par défaut), **Expo Router** (routing fichier).
 - **React 19.2 / React Native 0.83**.
 - **TanStack Query 5** pour l'état serveur.
+- **React Hook Form 7 + Zod 3** (`@hookform/resolvers`) pour les formulaires et la validation UX.
 - **Expo SecureStore** pour les secrets.
 - **TypeScript strict**.
 
@@ -49,14 +52,16 @@ cores/mobile-react-native/
 │   ├── api/                  # transport fetch (client, errors, types) + 401→refresh→retry
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam), AuthProvider, hook
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
+│   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
+│   ├── offline/              # primitives offline-ready : network-state, mutation, queue mémoire (agnostiques)
 │   ├── query/                # QueryClient + provider
 │   ├── states/               # états UI standards
 │   ├── storage/              # SecureStorage (interface) + Expo/InMemory impl + SessionStore
 │   ├── theme/                # ThemeProvider + tokens (bridge UI Kit)
 │   ├── types/                # types génériques partagés
 │   └── ui/                   # primitives UI maison
-├── test/                     # node --test (auth-engine, session-store, api-client)
+├── test/                     # node --test (auth-engine, session-store, api-client, validation, form-errors, offline-queue, network-state)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -69,6 +74,7 @@ cores/mobile-react-native/
 
 | ADR | Application dans ce socle |
 |---|---|
+| **ADR-003** Validation | **Zod côté client = UX uniquement** ; la validation **backend reste obligatoire** (API Core = autorité) ; aucun DTO API recopié, aucun schéma métier |
 | **ADR-004** Auth/session | access token court + refresh token ; logout invalide la session |
 | **ADR-008** Design tokens | tokens UI Kit = source de vérité ; bridge placeholder en attendant la surface mobile |
 | **ADR-010** Stack UI RN | tokens + **ThemeProvider** + composants maison (pas de NativeWind ni lib UI) |
@@ -108,21 +114,25 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
 ## Hors périmètre de cette mission (différé)
 
 Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
-de mission : **Zustand** (état local), **React Hook Form + Zod** (formulaires),
-**upload `fetch + FormData`**, **notifications push**, **logger/observabilité**,
-**permissions natives**, et tout V2/V3 (maps, tracking, offline, carousels,
-bottom sheets, crash reporting). Voir la roadmap du spec (§53) et
+de mission : **Zustand** (état local), **upload `fetch + FormData`**,
+**notifications push**, **logger/observabilité**, **permissions natives**,
+**intégration réelle de `@enistere/api-client-fetch`** (le seam reste en place),
+et tout V2/V3 (maps, tracking, carousels, bottom sheets, crash reporting).
+**L'offline est seulement préparatoire** : `src/offline` fournit les briques
+(état réseau abstrait + queue mémoire), **sans** persistance, **sans** rejeu
+automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
+(ADR-029 futur). Voir la roadmap du spec (§37/§53) et
 `docs/project-status/NEXT_ACTIONS.md`.
 
 ## Vérification
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`).
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **21/21** (`node --test` : auth-engine, session-store, api-client).
+- `test` : ✅ **44/44** (`node --test` : auth-engine, session-store, api-client, validation, form-errors, offline-queue, network-state).
 - `doctor` : ✅ **expo-doctor 19/19**.
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 3 — forms, validation and offline-ready primitives**
-(React Hook Form + Zod, primitives form compatibles UI Kit, état offline/queue
-préparatoire). Une seule mission à la fois.
+**Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`**
+(remplacer le transport seam par le client typé officiel via workspace racine +
+config Metro monorepo, sans endpoint métier). Une seule mission à la fois.

@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-11.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-12.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -96,16 +96,21 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`AUTH_SESSION_HARDENED`** — **Expo SDK 55** / Expo Router. RN 1
-  (starter, PR #11) + **RN 2 auth/session hardening** : **AuthEngine** framework-agnostique (restore/signIn/signOut/
-  refresh/clear, **refresh coalescé**, **expiration** proactive+réactive) abonné par `AuthProvider`
-  (`useSyncExternalStore`) ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; **SessionStore**
-  SecureStore + **validation** (access token **en mémoire** ADR-015, refresh token persistant) ; **API client
-  `401` → refresh → 1 retry** ADR-011 ; seam `@enistere/api-client-fetch` ADR-016 (`AuthApi` + `PlaceholderAuthApi`) ;
-  gardes `expired`/`refreshing` ; **TanStack Query** ADR-012 ; **ThemeProvider** ADR-008/010 ; **états standards**.
-  Layout **plat** + **autonome** (hors workspaces). **21 tests `node --test`** (auth-engine/session-store/api-client).
-  Vérifs : **typecheck + lint + test 21/21 + expo-doctor 19/19 verts**. **Aucune logique métier.** Différés :
-  RHF/Zod (RN 3), intégration `api-client-fetch` réelle, Zustand, upload, notifications, logger.
+- **Socle durci** : `mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`** — **Expo SDK 55** / Expo Router.
+  RN 1 (starter, PR #11) + **RN 2 auth/session hardening** (**AuthEngine** agnostique abonné par `AuthProvider`
+  via `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
+  **SessionStore** SecureStore + **validation** — access token **en mémoire** ADR-015, refresh persistant ;
+  **API client `401`→refresh→1 retry** ADR-011 ; seam `@enistere/api-client-fetch` ADR-016 `AuthApi`/
+  `PlaceholderAuthApi` ; gardes `expired`/`refreshing` ; **TanStack Query** ADR-012 ; **ThemeProvider** ADR-008/010
+  ; états standards) + **RN 3 forms/validation/offline** : primitives form **RHF + Zod** (`FormField`/`FormLabel`/
+  `FormError`/`TextInputField`, token-driven, erreurs **accessibles** en live region) ; **validation UX**
+  (`validateWith` + mapping Zod/RHF `zodErrorToFieldErrors`, **ADR-003 §18 — backend autoritatif**, aucun DTO/
+  schéma métier) ; **offline préparatoire** (`src/offline` : état réseau abstrait + **queue mémoire** FIFO,
+  **sans** persistance/rejeu/NetInfo/donnée sensible, **ADR-015 §19**). Layout **plat** + **autonome** (hors
+  workspaces). **44 tests `node --test`** (auth-engine/session-store/api-client/validation/form-errors/
+  offline-queue/network-state). Vérifs : **typecheck + lint + test 44/44 + expo-doctor 19/19 verts**. **Aucune
+  logique métier.** Différés : **intégration `api-client-fetch` réelle (RN 4, prochaine mission)**, Zustand,
+  upload, notifications, logger, offline sync réelle (ADR-029).
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -183,7 +188,23 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
+**Mobile Core React Native 3 — forms, validation & offline-ready primitives** (`cores/mobile-react-native/`,
+faisant suite à RN 1 starter PR #11 et RN 2 auth/session hardening) : ajoute des **formulaires génériques** et la
+**validation UX** (**React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` token-driven,
+erreurs **accessibles** ; helpers agnostiques `validateWith` + `zodErrorToFieldErrors` — **client = UX uniquement,
+backend autoritatif** ADR-003 §18, **aucun DTO/schéma métier**) et des **primitives offline préparatoires**
+(`src/offline` : état réseau **abstrait** + **queue mémoire** FIFO `enqueue`/`dequeue`/`peek`/`clear` ; **sans**
+persistance, **sans** rejeu auto, **sans** NetInfo/MMKV/AsyncStorage/SQLite, **sans** donnée sensible — ADR-015 §19,
+spec §37). `mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`**. **44 tests `node --test`** (21 RN 2 + 23
+nouveaux) ; **typecheck + lint + test 44/44 + expo-doctor 19/19 verts**. **Dette doc corrigée** : ADR-015
+`DECIDE_NON_IMPLEMENTE` → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-010/011/012 reflètent l'avancement mobile réel ;
+ADR-003 note la validation cliente mobile. **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/
+`packages` modifié** ; **aucun autre core démarré** ; Cloud reste **`PAUSE_CONTROLEE`**, staging
+**`EXECUTION_LOCALE_CONTROLEE`**. Commit `feat(mobile): add forms validation and offline-ready primitives`.
+**Prochaine action : Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`** (workspace
+racine + Metro monorepo).
+
+**Étape précédente — Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
 réelle des conteneurs** (API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en
 environnement **Type D : local, sans exposition publique**. **Aucun serveur distant/Hetzner/VM/SSH/DNS/HTTPS
 identifié** → mission **requalifiée honnêtement** en exécution **locale** (consigne §6 : ne pas prétendre à un
