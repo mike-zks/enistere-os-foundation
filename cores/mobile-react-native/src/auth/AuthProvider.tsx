@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
 
 import { apiClient } from '../api';
+import { purgeServerState, queryClient } from '../query';
 import { sessionStore } from '../storage';
 import { AuthContext, type AuthContextValue } from './auth-context';
 import { AuthEngine } from './auth-engine';
@@ -52,6 +53,16 @@ export function AuthProvider({ engine, children }: AuthProviderProps): React.JSX
       mobileAuthSession.unbind();
     };
   }, [authEngine]);
+
+  // Purge ALL server state whenever the session ends — logout (`signOut`) OR
+  // expiry/internal `clearSession` (both resolve to `unauthenticated`/`expired`).
+  // No previous user's cached data survives (ADR-015 §18). `purgeServerState` is
+  // deterministic (awaits `cancelQueries` then `clear`). AuthEngine is unchanged.
+  useEffect(() => {
+    if (state.status === 'unauthenticated' || state.status === 'expired') {
+      void purgeServerState(queryClient);
+    }
+  }, [state.status]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

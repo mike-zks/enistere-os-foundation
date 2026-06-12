@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 6 — état local UI (Zustand) + purge logout déterministe
+
+- **Mobile Core React Native 6** (`cores/mobile-react-native/`) : ajoute un **état local UI générique** (séparé du server-state) et **câble le logout** pour purger le cache TanStack Query de façon **déterministe**. `mobile-react-native` passe de `SERVER_STATE_READY` à **`LOCAL_STATE_READY`**. **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; périmètre `src/auth` + `src/query` + `src/store` + `test/**` + docs.
+  - **Zustand (approuvé)** : `Zustand | Mobile RN | Local state | Approved` (strategy 06 ; spec §23/§30). Ajouté à `cores/mobile-react-native` (`^5`, **0 dépendance**), **séparé** du server-state TanStack Query (anti-pattern spec §57 : jamais d'état serveur dans Zustand).
+  - **Store (`src/store/`)** : `ui-state.ts` (**pur/agnostique** : modèle + transitions immutables) + `ui-store.ts` (`useUiStore` Zustand). État = **uniquement primitives UI non sensibles** — `themePreference` (`'system'|'light'|'dark'`) + `flags` (`Record<string,boolean>`) + `reset()`. **Sécurité structurelle** : le type n'autorise qu'un enum + des booléens → **aucun token/profil/URL signée/payload serveur** ne PEUT y être stocké (ADR-015). **In-memory, sans persistance** (mission ; ADR-015 §16).
+  - **Purge déterministe** : `purgeServerState(queryClient)` devient **`async`** → **`await cancelQueries()` PUIS `clear()`** (les fetchs en vol sont réglés/annulés avant le vidage, ne repeuplent pas le cache).
+  - **Câblage `signOut → purge`** : `AuthProvider` purge **dès que la session se termine** (`unauthenticated` via `signOut`, **ou** `expired`/`clearSession` interne) — un seul mécanisme couvre **tous** les chemins de fin de session ; aucune donnée du précédent utilisateur ne survit (ADR-015 §18). **AuthEngine reste INCHANGÉ** (la purge vit dans la couche React).
+  - **Tests** : **+8** `node --test` — `ui-state` (transitions immutables, `getFlag` défaut, `reset`) ; `invalidation` (**ordre déterministe** `cancel`→`clear` de `purgeServerState` via un `QueryClient` stub ; `invalidateScope`/`removeScope`) → **67 tests** au total. Le binding Zustand + l'effet `AuthProvider` (React) sont **typecheckés**, hors build Node.
+  - **Vérifications** (locales) : **`tsc --noEmit`** ✅ ; **`expo lint`** ✅ (0) ; **`npm test` 67/67** ✅ ; **`expo-doctor`** : checks locaux verts (le check réseau **RN Directory / Expo API** flappe transitoirement dans cet environnement — 19/19 obtenu plus tôt dans la session ; zustand = paquet pur-JS 0-dépendance, non en cause).
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §15 ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 7 — upload sécurisé (multipart)** (câbler les helpers multipart du package). Commit `feat(mobile): add local ui state and deterministic logout purge`.
+
 ### Mobile Core React Native 5 — server-state data layer
 
 - **Mobile Core React Native 5 — couche server-state** (`cores/mobile-react-native/`) : couche **générique** au-dessus de **TanStack Query** (ADR-012) et du client officiel, **sans endpoint ni schéma métier**. `mobile-react-native` passe de `API_CLIENT_INTEGRATED` à **`SERVER_STATE_READY`**. **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; périmètre limité à `src/query/**` + `test/**` + docs.

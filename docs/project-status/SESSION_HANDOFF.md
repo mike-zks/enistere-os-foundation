@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`SERVER_STATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`LOCAL_STATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -111,12 +111,15 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   repli. **+ RN 5 — couche server-state** : TanStack Query **générique** (ADR-012) — `createQueryKeys` (clés stables
   typées), **`useAuthedQuery`/`useAuthedMutation`** (appels authentifiés **via `authedRequest`**), `toQueryError`
   (normalisation UI **sans donnée sensible**), `invalidateScope`/`purgeServerState` (purge au logout) ; **401 jamais
-  retenté, mutations sans retry, pas de persistance, aucun endpoint métier**. Layout **plat** + **autonome**.
-  **59 tests `node --test`** (… + with-auth-retry + **query-keys + query-errors**). Vérifs : **typecheck + lint +
-  test 59/59 + expo-doctor 19/19 + `expo export` ios verts** ; packages liés `api-contracts` 11/11 +
-  `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **Zustand** (état local) + **câblage
-  `signOut → purgeServerState`** (= RN 6), upload (helpers multipart présents non câblés), notifications, logger,
-  offline sync réelle (ADR-029).
+  retenté, mutations sans retry, pas de persistance, aucun endpoint métier**. **+ RN 6 — état local UI + purge
+  logout** : **Zustand** `useUiStore` générique (primitives UI **non sensibles** : `themePreference` + `flags`
+  booléens) **séparé** du server-state (anti-pattern spec §57), **in-memory sans persistance** ; **purge logout
+  déterministe câblée** dans `AuthProvider` (`await cancelQueries`→`clear` dès `unauthenticated`/`expired`, AuthEngine
+  inchangé). Layout **plat** + **autonome**. **67 tests `node --test`** (… + query-keys + query-errors + **ui-state +
+  invalidation**). Vérifs : **typecheck + lint + test 67/67 verts** (expo-doctor checks locaux verts ; checks réseau
+  Expo flappent) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.**
+  Différés : **upload** (helpers multipart présents non câblés = RN 7), notifications, logger, offline sync réelle
+  (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -163,8 +166,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`SERVER_STATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + couche server-state TanStack Query générique**, 59 tests + bundle Metro).
+`LOCAL_STATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout**, 67 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -195,7 +198,27 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 5 — couche server-state** (`cores/mobile-react-native/`, périmètre `src/query/**` + tests +
+**Mobile Core React Native 6 — état local UI + purge logout déterministe** (`cores/mobile-react-native/`, périmètre
+`src/auth` + `src/query` + `src/store` + tests + docs) : ajoute un **état local UI générique** (séparé du
+server-state) et **câble le logout** pour purger le cache TanStack Query de façon déterministe. **Zustand approuvé**
+(strategy 06 « Local state: Approved » ; spec §23) ajouté à `cores/mobile-react-native` (`^5`, **0 dépendance**).
+**Store** `src/store/` : `ui-state.ts` (**pur/agnostique** : modèle + transitions immutables) + `ui-store.ts`
+(`useUiStore`). État = **uniquement primitives UI non sensibles** : `themePreference` (`'system'|'light'|'dark'`) +
+`flags` (`Record<string,boolean>`) + `reset()`. **Sécurité structurelle** : le type n'autorise qu'un enum + des
+booléens → **aucun token/profil/URL signée/payload serveur** ne PEUT y être stocké (ADR-015 ; anti-pattern spec §57).
+**In-memory, sans persistance**. **Purge déterministe** : `purgeServerState` devient `async` → **`await cancelQueries()`
+PUIS `clear()`**. **Câblage** : `AuthProvider` purge **dès que la session se termine** (`unauthenticated` via `signOut`
+**ou** `expired`/`clearSession` interne) — un seul mécanisme couvre tous les chemins ; **AuthEngine INCHANGÉ** (la
+purge vit dans la couche React). `mobile-react-native` → **`LOCAL_STATE_READY`**. **+8 tests `node --test`** (ui-state ;
+invalidation : ordre déterministe `cancel`→`clear`) → **67 tests** ; binding Zustand + effet `AuthProvider`
+**typecheckés**, hors build Node. Vérifs : **typecheck + lint + test 67/67 verts** (expo-doctor : checks locaux verts ;
+checks réseau Expo/RN-Directory flappent dans cet env — 19/19 obtenu plus tôt ; zustand 0-dep non en cause). **La garde
+CI `npm ls zustand` (root) reste verte** : le mobile est autonome (hors workspaces racine), son Zustand n'est pas dans
+le scope `npm ls` du root (intent ADR-012 « pas de Zustand dans le Web » préservé). **Aucun fichier `cores/api-nestjs`/
+`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add local ui state and
+deterministic logout purge`. **Prochaine action : Mobile Core React Native 7 — upload sécurisé (multipart).**
+
+**Étape précédente — Mobile Core React Native 5 — couche server-state** (`cores/mobile-react-native/`, périmètre `src/query/**` + tests +
 docs) : ajoute une couche **server-state générique** au-dessus de **TanStack Query** (ADR-012) et du client officiel,
 **sans endpoint ni schéma métier**. **Query keys** (`createQueryKeys(scope)`, agnostique) : fabrique namespacée,
 typée, **stable** (`normalizeParams` : clés triées, `undefined` retiré → cache hit) ; aucun secret dans une clé.
