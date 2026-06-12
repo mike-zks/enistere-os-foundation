@@ -377,9 +377,10 @@ couche server-state, **sans endpoint métier, sans écran, sans logique applicat
   = `{ uri, name, type }` — défini ici (pas importé) pour rester **pur/testable** ;
   **structurellement assignable** au `ReactNativeFileDescriptor` du package, donc
   passable tel quel à `apiClient.files.upload`. Helpers purs : `isMobileFile`
-  (garde), **`describeFileForLog`** (descripteur **sûr** `{name,type}` — **jamais**
-  l'`uri`, qui peut être un chemin device), `isAllowedFileType` (**pré-check UX**
-  exact / `image/*` / `*/*` ; **le backend reste l'autorité** — ADR-007).
+  (garde), **`describeFileForLog`** (descripteur **sûr** `{type,extension}` —
+  **jamais** l'`uri` ni le nom brut, qui peuvent porter un chemin device ou de la
+  PII), `isAllowedFileType` (**pré-check UX** exact / `image/*` / `*/*` ; **le
+  backend reste l'autorité** — ADR-007).
 - **Mutation d'upload (`src/upload/use-upload.ts`)** : `useUploadMutation` enveloppe
   **`useAuthedMutation`** appelant **`apiClient.files.upload(file, category,
   { subjectId, retryOnAuthRefresh: false })`** → POST `multipart/form-data` vers
