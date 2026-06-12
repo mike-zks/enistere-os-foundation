@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core — déflaker le test e2e de refresh concurrent (sans changement de comportement)
+
+- **Fix(api) : `auth-refresh.e2e-spec.ts › handles two concurrent refreshes`** rendu **déterministe** (`cores/api-nestjs/`), **sans aucune modification de la logique d'auth/sécurité** (changement **test-only**, 1 fichier). Aucun autre fichier modifié.
+  - **Cause** : deux `/auth/refresh` simultanés avec le **même token** sont, au moment du 2ᵉ refresh, **indistinguables** d'une réutilisation côté serveur (état identique : ancien token tourné `ROTATED`, nouveau token actif). Selon l'entrelacement, le perdant lit l'ancien token **encore actif** → **conflit de rotation** (la session gagnante subsiste, **1 active**) ; ou **déjà tourné** → la réutilisation quasi-simultanée déclenche la **révocation fail-closed de la famille** (**0 active**). Les deux issues sont **sûres** ; le test exigeait `1` → **flaky**.
+  - **Décision (validée avec l'utilisateur)** : **ne pas affaiblir la détection de réutilisation**. Une fenêtre de grâce temporelle (« reuse leeway ») a été **étudiée puis écartée** : les deux scénarios (double-submit concurrent vs réutilisation séquentielle immédiate) étant **serveur-indistinguables**, elle aurait **affaibli** la détection de réutilisation et **cassé** le test (correct) `… and detects reuse`.
+  - **Correctif** : le test concurrent assouplit son assertion `active === 1` → **`0 ≤ active ≤ 1`** (jamais deux), sans dépendre du timing. `statuses === [200, 401]` reste exigé (déterministe). La **détection de réutilisation séquentielle reste stricte** (révocation de famille + audit `AUTH_REFRESH_REUSE_DETECTED`) — test `… and detects reuse` **inchangé et vert**. Cas concurrent rare en pratique : les bons clients **coalescent** les refresh (cf. `AuthEngine` mobile RN 2).
+  - **Vérifications** (locales, PostgreSQL + MinIO jetables) : **`npm run lint`** ✅ ; **`npm test` (unit) 377** ✅ (inchangé) ; **`npm run test:e2e` 12 suites / 101 tests** ✅ ; suite `auth-refresh` rejouée **6×** **déterministe** (concurrent assoupli + reuse strict). Commit `fix(api): make concurrent refresh e2e deterministic`.
+
 ### Mobile Core React Native 4B — restore 401 refresh retry with the official client
 
 - **Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`cores/mobile-react-native/`) : corrige une régression de comportement introduite en RN 4 (le client officiel créé avec `enableRefresh:false` + adaptateur no-op → **plus aucun** `401`→refresh→retry sur les requêtes authentifiées). Statut **inchangé** : **`API_CLIENT_INTEGRATED`**. **Aucun fichier API/Web/UI Kit/Cloud/packages modifié** ; root `package.json` non touché ; aucun endpoint métier.
