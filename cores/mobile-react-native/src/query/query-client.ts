@@ -6,7 +6,7 @@
  */
 import { QueryClient } from '@tanstack/react-query';
 
-import { ApiError } from '../api';
+import { ApiClientError } from '../api';
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -16,7 +16,7 @@ export function createQueryClient(): QueryClient {
         gcTime: 5 * 60_000,
         retry: (failureCount, error) => {
           // Never retry auth failures; they need a re-auth, not another attempt.
-          if (error instanceof ApiError && error.isUnauthorized) {
+          if (error instanceof ApiClientError && error.isUnauthorized) {
             return false;
           }
           return failureCount < 2;

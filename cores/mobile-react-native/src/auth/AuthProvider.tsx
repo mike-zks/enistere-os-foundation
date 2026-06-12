@@ -2,29 +2,32 @@
  * AuthProvider — thin React binding over {@link AuthEngine}.
  *
  * The provider owns no auth logic: it subscribes to the engine's state via
- * `useSyncExternalStore`, runs `restoreSession` on mount, and wires the API
- * client's token provider + 401 handler to the engine. This keeps the auth/
- * session logic framework-agnostic and unit-testable (see `test/`).
+ * `useSyncExternalStore`, runs `restoreSession` on mount, and bridges the
+ * official client's Bearer injection to the engine's in-memory access token (via
+ * {@link mobileAuthSession}). This keeps the auth/session logic framework-
+ * agnostic and unit-testable (see `test/`).
  *
- * Governance: access token stays in the engine's memory (ADR-015); the client
- * reads it lazily and triggers a coalesced refresh on 401 (ADR-011/004).
+ * Governance: the default engine uses the REAL {@link EnistereAuthApi} (official
+ * `@enistere/api-client-fetch`, ADR-016); the access token stays in the engine's
+ * memory (ADR-015), the client reads it lazily, and the engine owns the coalesced
+ * refresh on 401/expiry (ADR-004/011).
  */
 import { useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
 
 import { apiClient } from '../api';
 import { sessionStore } from '../storage';
 import { AuthContext, type AuthContextValue } from './auth-context';
-import { PlaceholderAuthApi } from './auth-api';
 import { AuthEngine } from './auth-engine';
+import { EnistereAuthApi } from './enistere-auth-api';
+import { mobileAuthSession } from './session-adapter';
 
 /**
- * Default app-wide engine. Uses the SecureStore-backed session store and the
- * PLACEHOLDER auth API (no backend) — swap the API for the real
- * `@enistere/api-client-fetch` adapter in a later mission.
+ * Default app-wide engine: SecureStore-backed session store + the REAL auth API
+ * over the official typed client. Inject a custom engine in tests.
  */
 const defaultEngine = new AuthEngine({
   sessionStore,
-  authApi: new PlaceholderAuthApi(),
+  authApi: new EnistereAuthApi(apiClient),
 });
 
 export interface AuthProviderProps extends PropsWithChildren {
@@ -37,14 +40,12 @@ export function AuthProvider({ engine, children }: AuthProviderProps): React.JSX
   const state = useSyncExternalStore(authEngine.subscribe, authEngine.getSnapshot);
 
   useEffect(() => {
-    // The client reads the in-memory access token and asks the engine to
-    // refresh on 401 (engine coalesces concurrent refreshes).
-    apiClient.setTokenProvider(authEngine.getAccessToken);
-    apiClient.setUnauthorizedHandler(authEngine.refreshSession);
+    // Bridge the official client's Bearer injection to the engine's in-memory
+    // access token (read lazily on each request; never stored by the client).
+    mobileAuthSession.bind(authEngine.getAccessToken);
     void authEngine.restoreSession();
     return () => {
-      apiClient.setTokenProvider(undefined);
-      apiClient.setUnauthorizedHandler(undefined);
+      mobileAuthSession.unbind();
     };
   }, [authEngine]);
 

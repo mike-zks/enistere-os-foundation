@@ -200,18 +200,73 @@ offline complète (ADR-015 §19, spec §37).
 - **Tout est framework-agnostique** (aucun import React/RN) → **unit-testé**
   sous `node --test`, comme l'AuthEngine.
 
-## 12. Écarts résumés (à valider en revue)
+## 12. Intégration réelle du client officiel (RN 4)
+
+RN 4 **remplace** le transport « seam » local par le **client officiel**
+`@enistere/api-client-fetch` (+ `@enistere/api-contracts`), ADR-016. Plus aucun
+transport HTTP écrit à la main : le contrat est la source de vérité.
+
+- **Consommation = core autonome + packages liés (`file:`)** (écart assumé, voir
+  §13) : le core garde **son propre lockfile** et **n'entre PAS** dans les
+  `workspaces` racine. Les deux packages sont liés via des dépendances
+  **`file:../../packages/*`** ; **`metro.config.js`** ajoute leurs dossiers aux
+  `watchFolders` et active `unstable_enablePackageExports` (la carte `exports`
+  des packages est **`import`-only**). `openapi-fetch` (seule dépendance runtime
+  d'`api-client-fetch`) est déclaré **directement** dans le core → résolution
+  100 % depuis `node_modules` du core (pas de React/RN dupliqué via la racine).
+- **Client (`src/api/index.ts`)** : `createEnistereApiClient({ baseUrl, timeoutMs,
+  session, enableRefresh: false })`. `baseUrl`/`timeoutMs` viennent de la config
+  `EXPO_PUBLIC_*` ; `session` est le {@link MobileAuthSessionAdapter}. Le client
+  typé expose `auth`/`files`/`raw` ; on n'utilise **aucun** endpoint métier (et
+  **pas** `files.upload` — hors périmètre).
+- **Adaptateur de session (`src/auth/session-adapter.ts`)** : `AuthSessionAdapter`
+  pont **lecture seule** pour l'**injection Bearer**. `getAccessToken()` renvoie
+  l'access token **en mémoire** de l'AuthEngine (lié à chaud par `AuthProvider`
+  via `bind`/`unbind`). Le client **ne stocke jamais** de token (ADR-015/016 §27).
+- **Refresh : l'AuthEngine reste le seul propriétaire (coalescé)**. On crée donc
+  le client avec **`enableRefresh: false`** (pas de refresh concurrent côté
+  client) ; les hooks `getRefreshToken`/`updateTokens`/`clearSession` de
+  l'adaptateur sont des **no-op documentés** (jamais appelés dans cette config).
+  L'AuthEngine est **inchangé** : restore/signIn/signOut/refresh coalescé/
+  expiration proactive + 401→refresh→retry **préservés**.
+- **AuthApi réel (`src/auth/enistere-auth-api.ts`)** : `EnistereAuthApi implements
+  AuthApi` POSTe `/auth/login` + `/auth/refresh` via **`client.raw`** (typé par le
+  contrat) et **mappe** la réponse en `AuthSessionData` (`toAuthSessionData`,
+  pur/agnostique — `accessTokenExpiresIn` **secondes** → epoch ms). C'est la
+  **valeur par défaut** de `AuthProvider` ; `PlaceholderAuthApi` reste un repli
+  sans backend. Les échecs lèvent un `AuthApiError` **générique** (aucun token /
+  statut / corps fuité).
+- **Erreurs typées** : le core ré-exporte **`ApiClientError`**
+  (`kind`/`status`/`errorCode`/`requestId`) ; le `QueryClient` ne retente jamais
+  un `401` (`error.isUnauthorized`).
+- **Tests** : la logique réseau du client (401→refresh→retry, coalescing,
+  timeout, multipart) est **testée dans le package** (`api-client-fetch` : 29
+  cas). Le core teste le **mapping pur** `toAuthSessionData` (`node --test`) ;
+  l'`EnistereAuthApi` et le câblage sont **typecheckés** contre le contrat réel
+  (les fichiers important l'ESM ne sont pas compilés pour Node).
+
+## 13. Écarts résumés (à valider en revue)
 
 1. **Layout plat** au lieu de `starter/` (§1) — aligné repo + mission §5.
-2. **API client** : transport seam local au lieu de `@enistere/api-client-fetch`
-   (§4) — périmètre mission + ADR-016 §7 (intégration réelle = **RN 4**).
+2. **Core autonome + packages `file:`** au lieu d'**ajout aux workspaces racine**
+   (§12) — choix **validé avec l'utilisateur** : ajouter une app Expo SDK 55 au
+   lockfile racine partagé (qui pilote le `npm ci` de toute la CI monorepo)
+   risquait de casser web/ui-kit/CI (arbre Expo, hoisting React, scoping de
+   l'override `expo-font`), pour **zéro bénéfice** sur l'intégration. Le `file:`
+   + Metro atteint le **même résultat** sans toucher la racine.
 3. **Bridge tokens placeholder** au lieu d'import `@enistere/ui-kit` (§3) —
-   autorisé par la mission ; core autonome.
+   autorisé ; core autonome (les **tokens** restent un bridge ; le **client API**
+   est désormais le package réel).
 4. **Tests** : `node --test` sur le **cœur agnostique** (auth-engine, stores,
-   api-client, **validation, form-errors, offline-queue, network-state**) ;
-   tests de composants/intégration RN (jest-expo) **différés** (mission §4).
-5. **Modules différés** : Zustand, upload, notifications, logger, permissions,
-   **intégration réelle de `@enistere/api-client-fetch`** (hors périmètre
-   mission). **RHF/Zod = livrés en RN 3.**
+   validation, form-errors, offline-queue, network-state, **token-mapping**) ;
+   composants/intégration RN (jest-expo) et logique réseau du client (testée
+   **dans son package**) **hors** de ce build.
+5. **Modules différés** : Zustand, upload (helpers multipart **présents** dans le
+   package, non câblés), notifications, logger, permissions, hooks **TanStack
+   Query** au-dessus du client (server-state).
 6. **Offline préparatoire seulement** : briques (état réseau + queue mémoire)
    **sans** persistance/rejeu/détection/sync (§11) — ADR-029 futur.
+7. **`babel-preset-expo` ajouté** : `babel.config.js` le référençait sans le
+   déclarer (lacune RN 1–3, jamais exercée car aucun bundle Metro) → ajouté
+   (`~55.0.8`) pour rendre le core **réellement *bundle-able*** et vérifier
+   l'intégration via `expo export`.

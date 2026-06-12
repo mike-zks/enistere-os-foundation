@@ -1,6 +1,6 @@
-# Mobile Core React Native — Forms, Validation & Offline-Ready Primitives
+# Mobile Core React Native — Official API Client Integration
 
-> Statut : **`FORMS_OFFLINE_PRIMITIVES_READY`** (V1 — RN 3 ; socle RN 1 + auth/session RN 2 durcis)
+> Statut : **`API_CLIENT_INTEGRATED`** (V1 — RN 4 ; socle RN 1 + auth/session RN 2 + forms/offline RN 3)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -14,21 +14,22 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 |---|---|---|
 | Navigation | `app/` (Expo Router) + `src/navigation` | stacks **publique** `(public)` et **authentifiée** `(app)`, gate de redirection, **gardes durcies** (`expired`/`refreshing`), écran *not-found* |
 | Auth engine | `src/auth/auth-engine.ts` | **machine d'état framework-agnostique** (no React/RN) : `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`, **expiration**, **refresh coalescé** |
-| Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` **placeholder, sans backend** |
+| Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` ; **`EnistereAuthApi`** (réel) + `MobileAuthSessionAdapter` ; `PlaceholderAuthApi` (repli sans backend) |
 | Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
-| API client | `src/api` | transport `fetch` générique ; injection token, **`401` → refresh → 1 retry**, erreurs typées, timeout ; **aucun endpoint métier** |
+| **API client (officiel)** | `src/api` | **`@enistere/api-client-fetch`** (+ `@enistere/api-contracts`) typé — `createEnistereApiClient` (base URL/timeout, **injection Bearer** via adaptateur de session, erreurs `ApiClientError`). Refresh **possédé par l'AuthEngine** (`enableRefresh:false`). **Aucun endpoint métier.** |
 | Server state | `src/query` | `QueryClient` + `QueryProvider` (TanStack Query) |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, api-client, **validation, form-errors, offline-queue, network-state**) — **44 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, **token-mapping**) — **41 tests** |
 
 ## Stack
 
 - **Expo SDK 55** (New Architecture par défaut), **Expo Router** (routing fichier).
 - **React 19.2 / React Native 0.83**.
+- **`@enistere/api-client-fetch` + `@enistere/api-contracts`** (client typé officiel ADR-016, sur `openapi-fetch`) — liés via `file:`, résolus par Metro.
 - **TanStack Query 5** pour l'état serveur.
 - **React Hook Form 7 + Zod 3** (`@hookform/resolvers`) pour les formulaires et la validation UX.
 - **Expo SecureStore** pour les secrets.
@@ -49,8 +50,8 @@ cores/mobile-react-native/
 │   │   └── home.tsx          # écran placeholder authentifié
 │   └── +not-found.tsx        # fallback
 ├── src/
-│   ├── api/                  # transport fetch (client, errors, types) + 401→refresh→retry
-│   ├── auth/                 # auth-engine (agnostique), auth-api (seam), AuthProvider, hook
+│   ├── api/                  # client OFFICIEL @enistere/api-client-fetch (index.ts)
+│   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
@@ -61,8 +62,8 @@ cores/mobile-react-native/
 │   ├── theme/                # ThemeProvider + tokens (bridge UI Kit)
 │   ├── types/                # types génériques partagés
 │   └── ui/                   # primitives UI maison
-├── test/                     # node --test (auth-engine, session-store, api-client, validation, form-errors, offline-queue, network-state)
-├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · eslint.config.js · .env.example
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping)
+├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
 
@@ -78,18 +79,20 @@ cores/mobile-react-native/
 | **ADR-004** Auth/session | access token court + refresh token ; logout invalide la session |
 | **ADR-008** Design tokens | tokens UI Kit = source de vérité ; bridge placeholder en attendant la surface mobile |
 | **ADR-010** Stack UI RN | tokens + **ThemeProvider** + composants maison (pas de NativeWind ni lib UI) |
-| **ADR-011** Client HTTP | `fetch` (pas d'Axios) ; tokens fournis par la couche auth, jamais stockés dans le client |
-| **ADR-012** Server state | TanStack Query pour l'état serveur ; cache vidé au logout |
-| **ADR-015** Secure storage | access token **en mémoire**, refresh token en **SecureStore** ; nettoyage au logout |
-| **ADR-016** Client typé OpenAPI | `@enistere/api-client-fetch` est le client officiel cible ; ce transport est un **seam** temporaire (voir ARCHITECTURE) |
+| **ADR-011** Client HTTP | **`fetch` via le client officiel** (`openapi-fetch`, pas d'Axios) ; tokens fournis par la couche auth (adaptateur de session), **jamais** stockés dans le client |
+| **ADR-012** Server state | TanStack Query pour l'état serveur ; cache vidé au logout ; `401` jamais retenté |
+| **ADR-015** Secure storage | access token **en mémoire** (injecté en Bearer via l'adaptateur), refresh token en **SecureStore** ; nettoyage au logout |
+| **ADR-016** Client typé OpenAPI | **INTÉGRÉ** : `@enistere/api-client-fetch` + `@enistere/api-contracts` consommés réellement (liés `file:`, Metro) ; refresh possédé par l'AuthEngine (`enableRefresh:false`) — voir ARCHITECTURE §12 |
 
 ## Commandes
 
 ```bash
-npm install          # installe les dépendances (core autonome, hors workspaces)
-npm run typecheck    # tsc --noEmit (strict)
+# Prérequis : les packages liés (file:) doivent être bâtis (dist) une fois, p.ex.
+# depuis la racine du monorepo : npm run build  (api-contracts + api-client-fetch)
+npm install          # installe les dépendances (core autonome, hors workspaces ; @enistere/* liés en file:)
+npm run typecheck    # tsc --noEmit (strict) — contre les types réels du contrat
 npm run lint         # expo lint (eslint-config-expo)
-npm test             # tsc -p tsconfig.test.json && node --test (cœur agnostique)
+npm test             # nettoie build-test, tsc -p tsconfig.test.json && node --test (cœur agnostique)
 npm run doctor       # npx expo-doctor
 npm start            # démarre le serveur de dev Expo
 ```
@@ -114,11 +117,12 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
 ## Hors périmètre de cette mission (différé)
 
 Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
-de mission : **Zustand** (état local), **upload `fetch + FormData`**,
-**notifications push**, **logger/observabilité**, **permissions natives**,
-**intégration réelle de `@enistere/api-client-fetch`** (le seam reste en place),
-et tout V2/V3 (maps, tracking, carousels, bottom sheets, crash reporting).
-**L'offline est seulement préparatoire** : `src/offline` fournit les briques
+de mission : **Zustand** (état local), **upload** (les helpers multipart
+`buildUploadFormData` / RN `{uri,name,type}` existent **dans le package** mais ne
+sont **pas câblés**), **notifications push**, **logger/observabilité**,
+**permissions natives**, et les **hooks TanStack Query** au-dessus du client
+(server-state). Et tout V2/V3 (maps, tracking, carousels, bottom sheets, crash
+reporting). **L'offline reste préparatoire** : `src/offline` fournit les briques
 (état réseau abstrait + queue mémoire), **sans** persistance, **sans** rejeu
 automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 (ADR-029 futur). Voir la roadmap du spec (§37/§53) et
@@ -126,13 +130,15 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 ## Vérification
 
-- `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`).
+- `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **44/44** (`node --test` : auth-engine, session-store, api-client, validation, form-errors, offline-queue, network-state).
+- `test` : ✅ **41/41** (`node --test` : auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping).
 - `doctor` : ✅ **expo-doctor 19/19**.
+- **bundle Metro** : ✅ `expo export -p ios` réussit — le bundle Hermes embarque le client (`createEnistereApiClient`, `/auth/login`, `/auth/refresh`, …) → **intégration prouvée au niveau bundler**.
+- packages liés validés : `@enistere/api-contracts` **11/11**, `@enistere/api-client-fetch` **29/29** (inchangés).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`**
-(remplacer le transport seam par le client typé officiel via workspace racine +
-config Metro monorepo, sans endpoint métier). Une seule mission à la fois.
+**Mobile Core React Native 5 — server-state data layer (hooks TanStack Query
+au-dessus du client officiel)** : patterns génériques de queries/mutations, clés
+de cache, invalidation, sans endpoint métier (ADR-012). Une seule mission à la fois.

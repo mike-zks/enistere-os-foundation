@@ -96,21 +96,23 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`** — **Expo SDK 55** / Expo Router.
-  RN 1 (starter, PR #11) + **RN 2 auth/session hardening** (**AuthEngine** agnostique abonné par `AuthProvider`
-  via `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
-  **SessionStore** SecureStore + **validation** — access token **en mémoire** ADR-015, refresh persistant ;
-  **API client `401`→refresh→1 retry** ADR-011 ; seam `@enistere/api-client-fetch` ADR-016 `AuthApi`/
-  `PlaceholderAuthApi` ; gardes `expired`/`refreshing` ; **TanStack Query** ADR-012 ; **ThemeProvider** ADR-008/010
-  ; états standards) + **RN 3 forms/validation/offline** : primitives form **RHF + Zod** (`FormField`/`FormLabel`/
-  `FormError`/`TextInputField`, token-driven, erreurs **accessibles** en live region) ; **validation UX**
-  (`validateWith` + mapping Zod/RHF `zodErrorToFieldErrors`, **ADR-003 §18 — backend autoritatif**, aucun DTO/
-  schéma métier) ; **offline préparatoire** (`src/offline` : état réseau abstrait + **queue mémoire** FIFO,
-  **sans** persistance/rejeu/NetInfo/donnée sensible, **ADR-015 §19**). Layout **plat** + **autonome** (hors
-  workspaces). **44 tests `node --test`** (auth-engine/session-store/api-client/validation/form-errors/
-  offline-queue/network-state). Vérifs : **typecheck + lint + test 44/44 + expo-doctor 19/19 verts**. **Aucune
-  logique métier.** Différés : **intégration `api-client-fetch` réelle (RN 4, prochaine mission)**, Zustand,
-  upload, notifications, logger, offline sync réelle (ADR-029).
+- **Socle durci** : `mobile-react-native` → **`API_CLIENT_INTEGRATED`** — **Expo SDK 55** / Expo Router. RN 1
+  (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
+  `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
+  **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
+  retry) + **RN 3 forms/validation/offline** (primitives **RHF + Zod**, erreurs accessibles ; validation **UX**
+  ADR-003 §18 backend autoritatif ; **offline préparatoire** queue mémoire, **sans** persistance/rejeu/NetInfo/
+  donnée sensible ADR-015 §19) + **RN 4 — client officiel INTÉGRÉ** : **`@enistere/api-client-fetch` +
+  `@enistere/api-contracts` consommés** (ADR-016 ; liés **`file:`** + **`metro.config.js`**, **core autonome — root
+  package.json NON touché**, choix validé) ; `MobileAuthSessionAdapter` (**injection Bearer** de l'access token en
+  mémoire, le client ne stocke aucun token, §27) + `EnistereAuthApi` (POST `/auth/login`+`/auth/refresh` via
+  `client.raw` typé → mapping pur) ; **AuthEngine préservé** (refresh coalescé + expiration + 401→retry,
+  `enableRefresh:false`) ; erreurs `ApiClientError` ; `PlaceholderAuthApi` en repli. Layout **plat** + **autonome**.
+  **41 tests `node --test`** (auth-engine/session-store/validation/form-errors/offline-queue/network-state/
+  token-mapping). Vérifs : **typecheck + lint + test 41/41 + expo-doctor 19/19 + `expo export` ios (bundle Hermes
+  embarquant le client) verts** ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
+  métier.** Différés : hooks **server-state** (RN 5), Zustand, upload (helpers multipart présents non câblés),
+  notifications, logger, offline sync réelle (ADR-029).
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -157,8 +159,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`FORMS_OFFLINE_PRIMITIVES_READY`, Expo SDK 55 ; auth/session durci + forms/validation + offline préparatoire,
-44 tests).
+`API_CLIENT_INTEGRATED`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré**, 41 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -189,7 +191,28 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 3 — forms, validation & offline-ready primitives** (`cores/mobile-react-native/`,
+**Mobile Core React Native 4 — intégration réelle du client officiel** (`cores/mobile-react-native/`, faisant suite
+à RN 1→3) : **remplace** le transport « seam » local par **`@enistere/api-client-fetch` + `@enistere/api-contracts`**
+(ADR-016). **Consommation = core autonome + packages liés `file:`** (écart **validé avec l'utilisateur** : ne PAS
+ajouter l'app Expo SDK 55 au lockfile racine partagé qui pilote le `npm ci` de toute la CI monorepo — risque
+web/ui-kit/CI pour zéro bénéfice) : `file:../../packages/*` + **`metro.config.js`** (watchFolders + `import`
+conditions) + `openapi-fetch` déclaré directement (pas de React dupliqué) ; **root `package.json` NON modifié**.
+`src/api` = `createEnistereApiClient({ baseUrl, timeoutMs, session, enableRefresh:false })` ; **`MobileAuthSessionAdapter`**
+(injection Bearer de l'access token **en mémoire**, le client ne stocke aucun token — §27) ; **`EnistereAuthApi`**
+(POST `/auth/login`+`/auth/refresh` via `client.raw` typé → mapping pur `toAuthSessionData`, `expiresIn` s→ms) ;
+`PlaceholderAuthApi` en repli ; `SignInInput` `username`→**`email`**. **AuthEngine INCHANGÉ** (refresh coalescé +
+expiration proactive + 401→refresh→retry préservés ; le refresh reste possédé par l'AuthEngine). `mobile-react-native`
+→ **`API_CLIENT_INTEGRATED`**. **41 tests `node --test`** (retrait des 6 tests de l'ancien transport ; ajout
+token-mapping ; logique réseau du client testée **dans son package** = 29). **+ `babel-preset-expo@~55.0.8`** ajouté
+(référencé par `babel.config.js` mais jamais déclaré — lacune RN 1–3 ; rend le core **bundle-able**). Vérifs :
+**typecheck (types réels) + lint (0) + test 41/41 + expo-doctor 19/19 + `expo export -p ios` (bundle Hermes 2,7 Mo
+**embarquant** `createEnistereApiClient`/`/auth/login`/`/auth/refresh`) verts** ; packages liés `api-contracts` 11/11
++ `api-client-fetch` 29/29 (inchangés). **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/`packages`
+modifié** ; **aucun autre core démarré** ; Cloud reste **`PAUSE_CONTROLEE`**, staging **`EXECUTION_LOCALE_CONTROLEE`**.
+Commit `feat(mobile): integrate official api-client-fetch`. **Prochaine action : Mobile Core React Native 5 —
+server-state data layer (hooks TanStack Query au-dessus du client officiel)**.
+
+**Étape précédente — Mobile Core React Native 3 — forms, validation & offline-ready primitives** (`cores/mobile-react-native/`,
 faisant suite à RN 1 starter PR #11 et RN 2 auth/session hardening) : ajoute des **formulaires génériques** et la
 **validation UX** (**React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` token-driven,
 erreurs **accessibles** ; helpers agnostiques `validateWith` + `zodErrorToFieldErrors` — **client = UX uniquement,

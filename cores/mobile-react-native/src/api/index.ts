@@ -1,41 +1,32 @@
 /**
- * API module public surface — GENERIC TRANSPORT SEAM (no business endpoints).
+ * API module — the OFFICIAL typed client (ADR-011 / ADR-016).
  *
- * Governance:
- * - ADR-011: `fetch` is the official HTTP base (no Axios); tokens are supplied
- *   by the auth/session layer, never stored in the client.
- * - ADR-016: the OFFICIAL typed client is `@enistere/api-client-fetch`
- *   (+ `@enistere/api-contracts`) — already RN-safe and consumed by web-nextjs.
- *   Integrating it into the mobile core requires workspace + Metro monorepo
- *   wiring that touches the repo root, which is OUTSIDE this starter-foundation
- *   mission's authorized perimeter (and ADR-016 §7 defers client generation to a
- *   dedicated mission). Until then, this minimal generic transport is the SEAM:
- *   call sites use `apiClient.get/post/...`; when the official client lands, the
- *   token provider + base URL config carry over unchanged. We intentionally do
- *   NOT reimplement the package's refresh coordination / multipart / typed
- *   endpoints here (ADR-016 §39: never hand-write a contract interface).
+ * RN 4 replaces the local transport "seam" with `@enistere/api-client-fetch`
+ * (+ `@enistere/api-contracts`), the official Fetch client used across the
+ * foundation (already RN-safe and consumed by web-nextjs). It is created once
+ * with the app's base URL + timeout and a {@link MobileAuthSessionAdapter} that
+ * injects the in-memory access token (ADR-015). No business endpoints.
  *
- * `apiClient` is a configured singleton (base URL + timeout from app config).
- * The access-token provider is wired by the auth layer at runtime via
- * `apiClient.setTokenProvider(...)` to avoid a circular dependency.
+ * Refresh ownership: the AuthEngine owns the coalesced refresh + state machine
+ * (ADR-004/011), so the client is created with `enableRefresh: false` and the
+ * engine performs `/auth/refresh` via {@link EnistereAuthApi}. See ARCHITECTURE.
  *
- * Neutral example endpoints a consumer might call (NOT implemented here, given
- * as placeholders only): `GET /health`, `GET /me`.
+ * Multipart/upload helpers (`buildUploadFormData`, RN `{uri,name,type}`) exist in
+ * the package but are intentionally NOT wired here (no upload in this mission).
  */
+import { ApiClientError, createEnistereApiClient } from '@enistere/api-client-fetch';
+
+import { mobileAuthSession } from '../auth/session-adapter';
 import { appConfig } from '../config';
-import { ApiClient } from './client';
 
-export { ApiClient } from './client';
-export { ApiError, NetworkError, TimeoutError } from './errors';
-export type {
-  ApiClientConfig,
-  HttpMethod,
-  RequestOptions,
-  TokenProvider,
-  UnauthorizedHandler,
-} from './types';
-
-export const apiClient = new ApiClient({
+/** App-wide official client. Authenticated requests get the in-memory Bearer token. */
+export const apiClient = createEnistereApiClient({
   baseUrl: appConfig.apiBaseUrl,
   timeoutMs: appConfig.apiTimeoutMs,
+  session: mobileAuthSession,
+  enableRefresh: false,
 });
+
+/** Typed transport error surfaced by the official client (kind/status/errorCode). */
+export { ApiClientError };
+export type { EnistereApiClient } from '@enistere/api-client-fetch';

@@ -1,5 +1,6 @@
 /**
- * Public placeholder screen. Demonstrates the placeholder sign-in (no backend).
+ * Public placeholder screen. Demonstrates a generic sign-in via the official
+ * client (real `/auth/login`); without a reachable API it surfaces an error.
  * Strictly generic — NO business onboarding/registration workflow (spec §17).
  */
 import { useState } from 'react';
@@ -17,7 +18,7 @@ export default function SignInScreen(): React.JSX.Element {
   const onSignIn = async (): Promise<void> => {
     setSubmitting(true);
     try {
-      await signIn({ username: 'demo' });
+      await signIn({ email: 'demo@example.com', password: 'demo' });
     } finally {
       setSubmitting(false);
     }
@@ -35,7 +36,7 @@ export default function SignInScreen(): React.JSX.Element {
             Your session expired. Please sign in again.
           </Text>
         ) : null}
-        <Button title="Sign in (placeholder)" loading={submitting} onPress={() => void onSignIn()} />
+        <Button title="Sign in" loading={submitting} onPress={() => void onSignIn()} />
         {error && status !== 'expired' ? (
           <Text variant="caption" tone="danger">
             {error}

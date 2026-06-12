@@ -4,7 +4,7 @@ import type { AuthState, SignInInput } from './session';
 
 /** Auth context: current state + the session actions (RN 2 hardening). */
 export interface AuthContextValue extends AuthState {
-  /** Placeholder sign-in — establishes a session WITHOUT calling a backend. */
+  /** Sign in (email/password) via the official client (`EnistereAuthApi`). */
   signIn(input: SignInInput): Promise<void>;
   /** Clears the session and all persisted secrets. */
   signOut(): Promise<void>;
