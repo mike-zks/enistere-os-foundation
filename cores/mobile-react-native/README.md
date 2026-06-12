@@ -1,6 +1,6 @@
-# Mobile Core React Native — Official API Client Integration
+# Mobile Core React Native — Server-State Data Layer
 
-> Statut : **`API_CLIENT_INTEGRATED`** (V1 — RN 4 ; socle RN 1 + auth/session RN 2 + forms/offline RN 3)
+> Statut : **`SERVER_STATE_READY`** (V1 — RN 5 ; socle RN 1 + auth/session RN 2 + forms/offline RN 3 + client officiel RN 4/4B)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -17,7 +17,7 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` ; **`EnistereAuthApi`** (réel) + `MobileAuthSessionAdapter` ; `PlaceholderAuthApi` (repli sans backend) |
 | Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
 | **API client (officiel)** | `src/api` | **`@enistere/api-client-fetch`** (+ `@enistere/api-contracts`) typé — `createEnistereApiClient` (base URL/timeout, **injection Bearer** via adaptateur de session, erreurs `ApiClientError`). Refresh **possédé par l'AuthEngine** (`enableRefresh:false`) ; **pont 401** `authedRequest`/`withAuthRetry` : `401`→`refreshSession` coalescé→1 retry→purge (RN 4B). **Aucun endpoint métier.** |
-| Server state | `src/query` | `QueryClient` + `QueryProvider` (TanStack Query) |
+| Server state (data layer) | `src/query` | `QueryClient` + `QueryProvider` (TanStack Query) **+ couche générique RN 5** : `createQueryKeys` (clés typées stables), **`useAuthedQuery`/`useAuthedMutation`** (appels authentifiés **via `authedRequest`** — pont 401), `toQueryError` (normalisation UI **sans donnée sensible**), `invalidateScope`/`purgeServerState` (purge au logout). **401 jamais retenté ; mutations sans retry ; pas de persistance ; aucun endpoint métier.** |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
@@ -56,13 +56,13 @@ cores/mobile-react-native/
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
 │   ├── offline/              # primitives offline-ready : network-state, mutation, queue mémoire (agnostiques)
-│   ├── query/                # QueryClient + provider
+│   ├── query/                # server-state : QueryClient/provider + query-keys + query-errors (agnostiques) + useAuthedQuery/Mutation + invalidation
 │   ├── states/               # états UI standards
 │   ├── storage/              # SecureStorage (interface) + Expo/InMemory impl + SessionStore
 │   ├── theme/                # ThemeProvider + tokens (bridge UI Kit)
 │   ├── types/                # types génériques partagés
 │   └── ui/                   # primitives UI maison
-├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry)
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -80,7 +80,7 @@ cores/mobile-react-native/
 | **ADR-008** Design tokens | tokens UI Kit = source de vérité ; bridge placeholder en attendant la surface mobile |
 | **ADR-010** Stack UI RN | tokens + **ThemeProvider** + composants maison (pas de NativeWind ni lib UI) |
 | **ADR-011** Client HTTP | **`fetch` via le client officiel** (`openapi-fetch`, pas d'Axios) ; tokens fournis par la couche auth (adaptateur de session), **jamais** stockés dans le client |
-| **ADR-012** Server state | TanStack Query pour l'état serveur ; cache vidé au logout ; `401` jamais retenté |
+| **ADR-012** Server state | TanStack Query (couche server-state générique RN 5 : query-keys, `useAuthedQuery`/`useAuthedMutation`, normalisation d'erreurs, invalidation) ; **cache vidé au logout** (`purgeServerState`) ; **`401` jamais retenté** ; mutations sans retry ; pas de persistance |
 | **ADR-015** Secure storage | access token **en mémoire** (injecté en Bearer via l'adaptateur), refresh token en **SecureStore** ; nettoyage au logout |
 | **ADR-016** Client typé OpenAPI | **INTÉGRÉ** : `@enistere/api-client-fetch` + `@enistere/api-contracts` consommés réellement (liés `file:`, Metro) ; refresh possédé par l'AuthEngine (`enableRefresh:false`) — voir ARCHITECTURE §12 |
 
@@ -132,13 +132,13 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **47/47** (`node --test` : auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, **with-auth-retry** — pont 401 RN 4B).
+- `test` : ✅ **59/59** (`node --test` : auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, **query-keys, query-errors** — server-state RN 5).
 - `doctor` : ✅ **expo-doctor 19/19**.
-- **bundle Metro** : ✅ `expo export -p ios` réussit — le bundle Hermes embarque le client (`createEnistereApiClient`, `/auth/login`, `/auth/refresh`, …) → **intégration prouvée au niveau bundler**.
-- packages liés validés : `@enistere/api-contracts` **11/11**, `@enistere/api-client-fetch` **29/29** (inchangés).
+- **bundle Metro** : ✅ `expo export -p ios` réussit — le bundle Hermes embarque le client (`createEnistereApiClient`, `/auth/login`, `/auth/refresh`, …) → **intégration prouvée au niveau bundler** (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 5 — server-state data layer (hooks TanStack Query
-au-dessus du client officiel)** : patterns génériques de queries/mutations, clés
-de cache, invalidation, sans endpoint métier (ADR-012). Une seule mission à la fois.
+**Mobile Core React Native 6 — état local (Zustand) + câblage purge au logout**
+(store local générique pour l'état UI, **séparé** du server-state — aucune donnée
+serveur dans Zustand ; et câbler `signOut → purgeServerState(queryClient)` dans
+`AuthProvider`). Une seule mission à la fois.

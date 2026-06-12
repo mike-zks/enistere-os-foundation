@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`API_CLIENT_INTEGRATED`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`SERVER_STATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -107,12 +107,16 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   package.json NON touché**, choix validé) ; `MobileAuthSessionAdapter` (**injection Bearer** de l'access token en
   mémoire, le client ne stocke aucun token, §27) + `EnistereAuthApi` (POST `/auth/login`+`/auth/refresh` via
   `client.raw` typé → mapping pur) ; **AuthEngine préservé** (refresh coalescé + expiration + 401→retry,
-  `enableRefresh:false`) ; erreurs `ApiClientError` ; `PlaceholderAuthApi` en repli. Layout **plat** + **autonome**.
-  **47 tests `node --test`** (auth-engine/session-store/validation/form-errors/offline-queue/network-state/
-  token-mapping). Vérifs : **typecheck + lint + test 47/47 + expo-doctor 19/19 + `expo export` ios (bundle Hermes
-  embarquant le client) verts** ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
-  métier.** Différés : hooks **server-state** (RN 5), Zustand, upload (helpers multipart présents non câblés),
-  notifications, logger, offline sync réelle (ADR-029).
+  `enableRefresh:false`) ; pont 401 `authedRequest` (RN 4B) ; erreurs `ApiClientError` ; `PlaceholderAuthApi` en
+  repli. **+ RN 5 — couche server-state** : TanStack Query **générique** (ADR-012) — `createQueryKeys` (clés stables
+  typées), **`useAuthedQuery`/`useAuthedMutation`** (appels authentifiés **via `authedRequest`**), `toQueryError`
+  (normalisation UI **sans donnée sensible**), `invalidateScope`/`purgeServerState` (purge au logout) ; **401 jamais
+  retenté, mutations sans retry, pas de persistance, aucun endpoint métier**. Layout **plat** + **autonome**.
+  **59 tests `node --test`** (… + with-auth-retry + **query-keys + query-errors**). Vérifs : **typecheck + lint +
+  test 59/59 + expo-doctor 19/19 + `expo export` ios verts** ; packages liés `api-contracts` 11/11 +
+  `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **Zustand** (état local) + **câblage
+  `signOut → purgeServerState`** (= RN 6), upload (helpers multipart présents non câblés), notifications, logger,
+  offline sync réelle (ADR-029).
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -159,8 +163,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`API_CLIENT_INTEGRATED`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré**, 47 tests + bundle Metro).
+`SERVER_STATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + couche server-state TanStack Query générique**, 59 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -191,7 +195,26 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`cores/mobile-react-native/`) : corrige une
+**Mobile Core React Native 5 — couche server-state** (`cores/mobile-react-native/`, périmètre `src/query/**` + tests +
+docs) : ajoute une couche **server-state générique** au-dessus de **TanStack Query** (ADR-012) et du client officiel,
+**sans endpoint ni schéma métier**. **Query keys** (`createQueryKeys(scope)`, agnostique) : fabrique namespacée,
+typée, **stable** (`normalizeParams` : clés triées, `undefined` retiré → cache hit) ; aucun secret dans une clé.
+**Appels authentifiés OBLIGATOIRES via `authedRequest`** : `useAuthedQuery`/`useAuthedMutation` enveloppent le
+`queryFn`/`mutationFn` dans `authedRequest` (pont 401 RN 4B) → `401 → AuthEngine.refreshSession() coalescé → 1 retry →
+purge` ; lectures publiques = `useQuery` simple. **Retry** : `QueryClient` ne retente **jamais** un 401 (surface
+l'`ApiClientError`) ; **mutations sans retry** ; refresh sur 401 = **exclusivement AuthEngine** (aucune 2ᵉ stratégie).
+**Erreurs UI** : `toQueryError` → `{kind,status,errorCode,requestId,isUnauthorized/Forbidden/NotFound,message}` ;
+`ApiClientError` lu **structurellement** (sans import ESM) ; **`message` générique figé** par kind/status (n'écho jamais
+le message brut/token/URL signée — ADR-016 §28). **Invalidation/purge** : `invalidateScope`/`removeScope` +
+**`purgeServerState(queryClient)`** (= `cancelQueries` + `clear`) au logout (ADR-015 §18) ; le **déclencheur** est dans
+`src/auth` (hors périmètre) → câblage `signOut → purgeServerState` documenté (= RN 6). **Pas de persistance de cache**.
+`mobile-react-native` → **`SERVER_STATE_READY`**. **+12 tests `node --test`** (query-keys, query-errors : non-fuite du
+message brut) → **59 tests** ; hooks/invalidation **typecheckés**, hors build Node. Vérifs : **typecheck + lint +
+test 59/59 + expo-doctor 19/19 verts**. **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/
+root modifié** ; aucun autre core. Commit `feat(mobile): add server-state data layer`. **Prochaine action : Mobile
+Core React Native 6 — état local (Zustand) + câblage `signOut → purgeServerState`.**
+
+**Étape précédente — Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`cores/mobile-react-native/`) : corrige une
 régression RN 4 (le client en `enableRefresh:false` + adaptateur no-op → plus de `401`→refresh→retry). Ajoute un **pont
 401 explicite** `src/api/with-auth-retry.ts` (pur/agnostique) : `authedRequest(fn)` = `withAuthRetry(engine.refreshSession,
 fn)` → sur `401` (détecté par `error.isUnauthorized`, sans import ESM) → **`AuthEngine.refreshSession()` COALESCÉ** → **1
