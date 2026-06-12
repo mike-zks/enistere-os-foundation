@@ -1,6 +1,6 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-06-10). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-06-12). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
@@ -25,14 +25,15 @@
 > réel** (dépendance **externe**, hors socle). **(Actions HUMAINES)** confirmer la **protection de branche `main`**
 > (7 checks + `images`) et **ajouter `api-smoke`** aux checks requis.
 
-**Justification** : la **revue stratégique d'alignement** (2026-06-11, `ROADMAP_ALIGNMENT_REVIEW.md`) constate que
-la séquence **Cloud Core 1→9** a livré une **vraie valeur** (CI non-régression, **images GHCR bootables** après
-le fix CC8, `api-smoke`, runbooks, **staging local exécuté**) mais a **dépassé l'ordre roadmap** : la CI/CD est
-**V2** et le registry/staging **V3/VF**, tandis que **Mobile Core RN (V1 #2)** n'a **jamais** été démarré. Le
-prochain pas Cloud (**CC10 serveur réel**) dépend de **ressources externes indisponibles** et relève de l'**ops
-par déploiement**, pas du **socle réutilisable** → **point d'arrêt raisonnable**. La suite **unique** la plus
-alignée est donc de **revenir aux priorités V1** et d'**initialiser Mobile Core RN**. **Ne pas** créer de
-production ni d'automatisation de déploiement. **Flux PR obligatoire** (push direct `main` refusé).
+**Justification** : la **revue stratégique d'alignement** (2026-06-11, `ROADMAP_ALIGNMENT_REVIEW.md`) a acté une
+pause Cloud après **Cloud Core 1→9** : la séquence a livré une **vraie valeur** (CI non-régression, **images GHCR
+bootables** après le fix CC8, `api-smoke`, runbooks, **staging local exécuté**) mais le prochain pas Cloud
+(**CC10 serveur réel**) dépend de **ressources externes indisponibles** et relève de l'**ops par déploiement**,
+pas du **socle réutilisable**. Cette décision de retour aux priorités V1 a depuis été **exécutée** : Mobile RN 1,
+RN 2 et RN 3 sont réalisés. La suite la plus cohérente est donc d'achever l'intégration mobile transverse déjà
+préparée : **remplacer le transport seam par le client officiel `@enistere/api-client-fetch`**, sans endpoint
+métier. **Ne pas** créer de production ni d'automatisation de déploiement. **Flux PR obligatoire** (push direct
+`main` refusé).
 
 **Alternative (justifiée, décision humaine)** : **durcissement registry** (scan/signature/SBOM) ; **UI Kit 4** ;
 **Files 2** (upload Web) ; **Mobile Core**.
@@ -46,9 +47,8 @@ Cloud Core **`IMPLEMENTATION_PARTIELLE`**, ADR-013 **`PARTIELLEMENT_IMPLEMENTE`*
 **`PARTIELLEMENT_IMPLEMENTE`** ; déploiement staging **`EXECUTION_LOCALE_CONTROLEE`** (stack exécutée en **local**,
 sans serveur réel/HTTPS/exposition ; URL signée + Auth/Files **non validés** ⇒ **non** opérationnel/production).
 **CC9 mergé (PR #9 → `5589198`).** **Revue stratégique d'alignement** (cette mission, `ROADMAP_ALIGNMENT_REVIEW.md`)
-→ **décision : Cloud Core en PAUSE contrôlée**, **retour priorités V1 → Mobile Core RN 1** ; commit
-`docs(project): review roadmap alignment after cloud core` via PR. **Aucun statut augmenté.**
-**Aucun statut augmenté.**
+→ **décision : Cloud Core en PAUSE contrôlée**, **retour priorités V1 → Mobile Core RN** ; décision exécutée via
+RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au merge RN 3 (`574cdcf`).
 
 ## 2. Actions immédiatement suivantes (ordre recommandé)
 

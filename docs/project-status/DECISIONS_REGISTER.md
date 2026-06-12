@@ -1,7 +1,7 @@
 # DECISIONS_REGISTER.md — Registre de lecture rapide des décisions (ADR)
 
 > **Ne remplace pas les ADR** (`docs/adr/`). Fournit une lecture rapide du **statut d'implémentation**
-> de chaque décision validée. Vérifié depuis le repository (2026-06-11).
+> de chaque décision validée. Vérifié depuis le repository (2026-06-12).
 >
 > Statuts d'implémentation : `DECIDE_NON_IMPLEMENTE`, `PARTIELLEMENT_IMPLEMENTE`, `IMPLEMENTE`,
 > `IMPLEMENTE_ET_REVU`, `NON_APPLICABLE_ACTUELLEMENT`.
@@ -10,10 +10,10 @@
 
 | ADR | Décision (résumé) | Statut ADR | Statut implémentation | Core | Preuve |
 |---|---|---|---|---|---|
-| ADR-001 | Monorepo Git hybride | Validé | **PARTIELLEMENT_IMPLEMENTE** | Tous | Structure présente ; ⚠️ **aucun commit** |
+| ADR-001 | Monorepo Git hybride | Validé | **PARTIELLEMENT_IMPLEMENTE** | Tous | Structure présente ; historique Git actif ; `main` aligné sur `origin/main` (dernier merge RN 3 `574cdcf`) |
 | ADR-002 | ORM = Prisma (vs TypeORM) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | schema + 5 migrations + tests |
 | ADR-003 | Validation = class-validator/transformer | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | backend OK (class-validator) ; **validation UX cliente mobile livrée** (Mobile RN 3 : **Zod** via RHF — `validateWith` + mapping erreurs, **UX uniquement, backend autoritatif**, aucun DTO recopié, aucun schéma métier) ; client Web Zod à venir |
-| ADR-004 | Auth/session multi-client | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | API OK ; **session web BFF opérationnelle** (login/refresh/logout via cookies `HttpOnly`) **+ état de session navigateur** (`me`/`authorization` read-only, `useSession`/`useAuthorization` TanStack Query, **401→anonymous / 403 distinct**, purge au logout) **+ premier layout protégé résolu côté serveur** (read-only, Option C, hydratation, redirection anonyme, indisponibilité ≠ anonyme) — preuve API réelle ; secure storage mobile absent |
+| ADR-004 | Auth/session multi-client | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web/mobile | API OK ; **session web BFF opérationnelle** (login/refresh/logout via cookies `HttpOnly`) **+ état de session navigateur** (`me`/`authorization` read-only, `useSession`/`useAuthorization` TanStack Query, **401→anonymous / 403 distinct**, purge au logout) **+ premier layout protégé résolu côté serveur** (read-only, Option C, hydratation, redirection anonyme, indisponibilité ≠ anonyme) — preuve API réelle ; **mobile RN 2** : AuthEngine agnostique, access token mémoire, refresh token SecureStore via `SessionStore`, refresh coalescé, expiration, purge logout |
 | ADR-005 | Cookies web + CSRF | Validé | **PARTIELLEMENT_IMPLEMENTE** | api/web | **Flux BFF opérationnels** : login/refresh/logout via Route Handlers, cookies `HttpOnly` (access/refresh, `__Host-` prod), **CSRF double-submit** (cookie+header, temps constant, rotation), **Origin/Referer** (fail-closed) — preuve API réelle. Reste : mutations futures réutilisant systématiquement la protection |
 | ADR-006 | RBAC + permissions fines | Validé | **IMPLEMENTE_ET_REVU** | api/web/mobile/ui | RBAC API + `AUTH_RBAC_REVIEW` ; **consommé en lecture côté Web** (`useAuthorization` : helpers OR/AND **sans wildcard** pour l'affichage conditionnel — **l'API reste l'autorité finale** ; changement de droits reflété **sans nouveau JWT**, prouvé) |
 | ADR-007 | Upload MinIO/S3 + contrats fichiers | Validé | **IMPLEMENTE_ET_REVU** | api/cloud/web/mobile/ui | Files API + `FILES_REVIEW` ; **consommé en LECTURE côté Web** (Web Files 1 : métadonnées **publiques** `GET /api/files/:id` + URL signée courte `POST /api/files/:id/download-url` + téléchargement **direct** depuis le stockage objet, BFF ciblé, **404 anti-énumération**, URL signée **jamais** mise en cache/journalisée, **aucun champ interne** exposé) — preuve API + MinIO réelle ; **upload/suppression/admin côté Web différés** |

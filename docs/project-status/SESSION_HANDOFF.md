@@ -156,8 +156,9 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
-`mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` → `AUTH_SESSION_HARDENED`,
-Expo SDK 55 ; auth/session durci, 21 tests).
+`mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
+`FORMS_OFFLINE_PRIMITIVES_READY`, Expo SDK 55 ; auth/session durci + forms/validation + offline préparatoire,
+44 tests).
 
 ## 6. Packages
 
