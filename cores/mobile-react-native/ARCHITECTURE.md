@@ -273,15 +273,58 @@ transport HTTP écrit à la main : le contrat est la source de vérité.
    autorisé ; core autonome (les **tokens** restent un bridge ; le **client API**
    est désormais le package réel).
 4. **Tests** : `node --test` sur le **cœur agnostique** (auth-engine, stores,
-   validation, form-errors, offline-queue, network-state, **token-mapping**) ;
-   composants/intégration RN (jest-expo) et logique réseau du client (testée
-   **dans son package**) **hors** de ce build.
+   validation, form-errors, offline-queue, network-state, token-mapping,
+   **with-auth-retry**, **query-keys, query-errors**) ; composants/hooks RN
+   (jest-expo) et logique réseau du client (testée **dans son package**)
+   **hors** de ce build.
 5. **Modules différés** : Zustand, upload (helpers multipart **présents** dans le
-   package, non câblés), notifications, logger, permissions, hooks **TanStack
-   Query** au-dessus du client (server-state).
+   package, non câblés), notifications, logger, permissions natives. *(Server-state
+   = livré en RN 5, §14.)*
 6. **Offline préparatoire seulement** : briques (état réseau + queue mémoire)
    **sans** persistance/rejeu/détection/sync (§11) — ADR-029 futur.
 7. **`babel-preset-expo` ajouté** : `babel.config.js` le référençait sans le
    déclarer (lacune RN 1–3, jamais exercée car aucun bundle Metro) → ajouté
    (`~55.0.8`) pour rendre le core **réellement *bundle-able*** et vérifier
    l'intégration via `expo export`.
+
+## 14. Couche server-state (RN 5)
+
+RN 5 ajoute une **couche server-state générique** au-dessus de **TanStack Query**
+(ADR-012) et du client officiel, **sans endpoint métier ni schéma métier**.
+
+- **Query keys (`src/query/query-keys.ts`, agnostique)** : `createQueryKeys(scope)`
+  → fabrique **namespacée, typée, stable** (`all`/`lists`/`list(params?)`/
+  `details`/`detail(id)`/`of(...)`). `normalizeParams` rend la clé **stable**
+  (clés triées, `undefined` retiré) → mêmes params logiques = **même clé** = cache
+  hit. **Aucun secret dans une clé** (ADR-015).
+- **Appels authentifiés = `useAuthedQuery` / `useAuthedMutation` (obligatoire)** :
+  ces hooks enveloppent le `queryFn`/`mutationFn` du consommateur dans
+  **`authedRequest`** (pont 401 RN 4B) → `401 → AuthEngine.refreshSession()
+  coalescé → 1 retry → purge`. Le développeur **ne peut pas oublier** le chemin
+  d'auth/refresh. Les lectures **publiques** utilisent `useQuery` simple.
+- **Retry** : le `QueryClient` **ne retente jamais un `401`** (il surface
+  l'`ApiClientError` brut pour cette décision) et borne les autres retries ; les
+  **mutations ne retentent pas** par défaut (`retry: false`). Le **refresh sur
+  401 reste exclusivement l'AuthEngine** via `authedRequest` — **aucune seconde
+  stratégie**.
+- **Erreurs UI (`src/query/query-errors.ts`, agnostique)** : `toQueryError(error)`
+  normalise `ApiClientError` (lu **structurellement**, sans import ESM) en
+  `{ kind, status, errorCode, requestId, isUnauthorized/Forbidden/NotFound,
+  message }`. Le `message` est **générique et figé** par kind/status — il **n'écho
+  jamais** le message brut, les `details`, un token, un header `Authorization` ni
+  une URL signée (ADR-015/016 §28 : la logique UI branche sur `status`/`errorCode`,
+  pas sur le message). Normalisé **à l'affichage** (pas dans le `queryFn`) pour que
+  la politique de retry continue de voir l'`ApiClientError`.
+- **Invalidation / purge (`src/query/invalidation.ts`)** : `invalidateScope` /
+  `removeScope` (par clé de scope — une clé partielle matche tout son sous-arbre) ;
+  **`purgeServerState(queryClient)`** (= `cancelQueries` + `clear`) à appeler **au
+  logout** pour qu'**aucune donnée authentifiée** de l'utilisateur précédent ne
+  survive (ADR-015 §18). **Le déclencheur appartient à la couche auth**
+  (`src/auth`, hors périmètre RN 5) : l'intégration `signOut → purgeServerState`
+  est à câbler dans `AuthProvider` (point d'extension documenté).
+- **Pas de persistance de cache** (pas d'offline), **aucun token/URL signée/donnée
+  sensible** en cache ou en log.
+- **Tests** : `query-keys` (namespacing, stabilité, non-collision) et
+  `query-errors` (mapping 401/403/404/session-expired/network/timeout/5xx,
+  **non-fuite du message brut**, valeurs non-`ApiClientError`) sous `node --test`.
+  Les hooks/invalidation (React/TanStack) sont **typecheckés**, hors build Node.

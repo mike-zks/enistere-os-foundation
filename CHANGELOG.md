@@ -6,6 +6,19 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 5 — server-state data layer
+
+- **Mobile Core React Native 5 — couche server-state** (`cores/mobile-react-native/`) : couche **générique** au-dessus de **TanStack Query** (ADR-012) et du client officiel, **sans endpoint ni schéma métier**. `mobile-react-native` passe de `API_CLIENT_INTEGRATED` à **`SERVER_STATE_READY`**. **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; périmètre limité à `src/query/**` + `test/**` + docs.
+  - **Query keys** (`src/query/query-keys.ts`, **agnostique**) : `createQueryKeys(scope)` → fabrique **namespacée, typée, stable** (`all`/`lists`/`list(params?)`/`details`/`detail(id)`/`of(...)`). `normalizeParams` (clés triées, `undefined` retiré) garantit la **stabilité** (mêmes params = même clé = cache hit). **Aucun secret dans une clé** (ADR-015).
+  - **Appels authentifiés obligatoires via `authedRequest`** : `useAuthedQuery`/`useAuthedMutation` enveloppent le `queryFn`/`mutationFn` dans **`authedRequest`** (pont 401 RN 4B) → `401 → AuthEngine.refreshSession() coalescé → 1 retry → purge`. Les lectures **publiques** utilisent `useQuery` simple.
+  - **Retry** : le `QueryClient` **ne retente jamais un `401`** (surface l'`ApiClientError` brut) ; **mutations sans retry** par défaut ; le refresh sur 401 reste **exclusivement l'AuthEngine** (aucune 2ᵉ stratégie).
+  - **Normalisation d'erreurs UI** (`src/query/query-errors.ts`, **agnostique**) : `toQueryError(error)` → `{ kind, status, errorCode, requestId, isUnauthorized/Forbidden/NotFound, message }` ; `ApiClientError` lu **structurellement** (sans import ESM) ; **`message` générique et figé** par kind/status — **n'écho jamais** le message brut/`details`/token/header/URL signée (ADR-016 §28 : brancher sur `status`/`errorCode`).
+  - **Invalidation / purge** (`src/query/invalidation.ts`) : `invalidateScope`/`removeScope` (par clé de scope) ; **`purgeServerState(queryClient)`** (`cancelQueries` + `clear`) à appeler **au logout** (ADR-015 §18). Le **déclencheur** appartient à `src/auth` (hors périmètre) : intégration `signOut → purgeServerState` documentée comme point d'extension.
+  - **Pas de persistance de cache** ; **aucun token/URL signée/donnée sensible** en cache/log.
+  - **Tests** : **+12** `node --test` (query-keys : namespacing/stabilité/non-collision ; query-errors : 401/403/404/session-expired/network/timeout/5xx, **non-fuite du message brut**, valeurs non-`ApiClientError`) → **59 tests** au total. Hooks/invalidation (React/TanStack) **typecheckés**, hors build Node.
+  - **Vérifications** (locales) : **`tsc --noEmit`** ✅ ; **`expo lint`** ✅ (0) ; **`npm test` 59/59** ✅ ; **`expo-doctor` 19/19** ✅.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §14 (règles 401/retry/cache/invalidation/données sensibles) ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 6 — état local (Zustand) + câblage `signOut → purgeServerState`.** Commit `feat(mobile): add server-state data layer`.
+
 ### API Core — déflaker le test e2e de refresh concurrent (sans changement de comportement)
 
 - **Fix(api) : `auth-refresh.e2e-spec.ts › handles two concurrent refreshes`** rendu **déterministe** (`cores/api-nestjs/`), **sans aucune modification de la logique d'auth/sécurité** (changement **test-only**, 1 fichier). Aucun autre fichier modifié.
