@@ -576,3 +576,54 @@ réel, sans backend, sans token device, sans logique métier, sans UI**.
 - **Différés** : adaptateur Expo réel (`expo-notifications`), **push distant
   (Expo Push/FCM/APNs) + token device**, handler de réponse/tap (routing),
   catégories/actions, badges, écran/réglages de notifications.
+
+## 20. i18n / localisation — primitives génériques (RN 11)
+
+RN 11 ajoute des **primitives i18n/localisation génériques**, testables et **sans
+contenu métier, sans dépendance native, sans appel réseau, sans persistance de
+locale, sans UI**. Les **projets dérivés apportent leurs catalogues métier**.
+
+- **Modèle de locale (`src/i18n/locale.ts`, agnostique)** : `LocaleCode` (BCP-47),
+  `LocaleDirection` (`ltr`/`rtl`), `DEFAULT_LOCALE` (`en`). **`normalizeLocale`**
+  canonicalise casse/séparateurs (`_`→`-`) via **`Intl.getCanonicalLocales`**
+  (built-in, **aucune dépendance**) → `EN_us`→`en-US`, `zh_hant_tw`→`zh-Hant-TW` ;
+  invalide → **fallback** (jamais de throw). `getLanguageSubtag`, **`getLocaleDirection`**
+  (RTL : ar/he/fa/ur…), **`resolveLocale`** (exact → langue seule → fallback →
+  premier dispo).
+- **Catalogue typé (`src/i18n/catalog.ts`, agnostique)** : `MessageCatalog` =
+  map plate `clé→template`. **`interpolate`** remplace `{name}` (placeholder
+  inconnu **laissé tel quel**, prévisible ; pas de ReDoS). **`createTranslator`**
+  → `t`/`has`/`plural` : **clé absente → fallback catalogue → `onMissing` → la clé
+  elle-même** (**jamais de throw**). **`plural`** sélectionne `${clé}.${catégorie}`
+  via **`Intl.PluralRules`** (CLDR : `one`/`other`/… ; `{count}` injecté), repli
+  `.other` puis la clé.
+- **Formatters `Intl` (`src/i18n/format.ts`, agnostique)** : **`formatNumber`**/
+  **`formatDate`**/**`formatCurrency`** — wrappers fins sur `Intl.NumberFormat`/
+  `Intl.DateTimeFormat`, **ne lèvent jamais** (locale/options/devise invalides →
+  repli sûr). **Pas de devise métier par défaut** : `formatCurrency(value,
+  currency, locale?, options?)` exige le code ISO-4217. Valeurs passées en
+  argument (pas de `Date.now()`).
+- **Adaptateur (`src/i18n/adapter.ts`)** : `LocaleAdapter` = seam vers la source
+  de locale device/app (`expo-localization`…) — `getLocale()` (sync), `subscribe?`.
+- **Placeholder (`src/i18n/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderLocaleAdapter(initial?)` — **mémoire, AUCUNE dépendance
+  native, aucune persistance** ; `setLocale` normalise + notifie ; `subscribe`.
+- **Service (`src/i18n/engine.ts`, agnostique)** : `createLocalization({adapter,
+  catalogs, fallbackLocale?})` — **résout** la locale active (adapter → meilleure
+  dispo → fallback ; clés de catalogues **normalisées**), borne un `Translator` et
+  **pré-lie** les formatters à la locale. Expose `locale`/`direction`/`t`/`plural`/
+  `formatDate`/`formatNumber`/`formatCurrency`. Snapshot à la création (un hôte
+  re-crée le service sur `subscribe`).
+- **Sécurité / gouvernance** : aucune donnée sensible (locales/templates ne sont
+  pas des secrets) ; **aucune dépendance** (tout via `Intl` built-in) ; aucun
+  réseau ; aucune persistance ; **catalogues métier = projets dérivés**.
+- **Tests** (`node --test`) : `i18n-locale` (normalisation/fallback/direction/
+  résolution) + `i18n-catalog` (interpolation, `t` clé inconnue **sans throw**,
+  fallback, **pluralisation** en/fr) + `i18n-format` (number/currency/date
+  déterministes UTC, **no-throw** locale/devise invalides) + `i18n-engine`
+  (résolution, fallback, match langue, formatters liés, `subscribe`). Module
+  **entièrement agnostique** (aucun hook → rien en typecheck-only).
+- **Différés** : adaptateur `expo-localization` réel, **persistance du choix de
+  locale**, hook React + provider, RTL appliqué à l'UI, `Intl.RelativeTimeFormat`/
+  `ListFormat`, chargement paresseux des catalogues, extraction/outillage de
+  traduction.

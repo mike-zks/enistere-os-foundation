@@ -5,7 +5,7 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Mobile Core React Native 1→10 : RÉALISÉS** (`mobile-react-native` → **`NOTIFICATIONS_READY`**). RN 4/4B/5 :
+> ✅ **Mobile Core React Native 1→11 : RÉALISÉS** (`mobile-react-native` → **`I18N_READY`**). RN 4/4B/5 :
 > client officiel **`@enistere/api-client-fetch`** intégré + **pont 401** `authedRequest` + **couche server-state**
 > TanStack Query générique (`createQueryKeys`, `useAuthedQuery`/`useAuthedMutation` via `authedRequest`,
 > `toQueryError` sans donnée sensible, `invalidateScope`/`purgeServerState`). **RN 6 — état local UI + purge logout** :
@@ -33,15 +33,20 @@
 > (seam Expo) + `createNotificationService` (**gate** sur la permission `notifications` RN 9 — **jamais de schedule
 > sans permission usable**, `schedule`/`cancel`/`cancelAll`/`getDelivered`, **logs sûrs**, `NotificationError` contrôlé) ;
 > **adaptateur placeholder** (no native dep). **LOCAL uniquement** : aucun push réel, aucun token device/FCM/APNs, aucun
-> stockage, aucune UI. **122 tests `node --test`**. Vérifs : **typecheck + lint + test 122/122 + expo-doctor 19/19 verts**
-> (**RN 10 n'ajoute aucune dépendance**). **Aucune logique métier.**
+> stockage, aucune UI. **RN 11 — i18n / localisation primitives génériques** : modèle de locale (`normalizeLocale` via
+> `Intl`, `getLocaleDirection` ltr/rtl, `resolveLocale`) + **catalogue typé** (`createTranslator` : `t`/`has`/`plural`,
+> interpolation `{name}`, pluralisation `Intl.PluralRules`, clé inconnue **sans throw**) + **formatters `Intl`**
+> (`formatDate`/`formatNumber`/`formatCurrency` — devise requise, **ne lèvent jamais**) ; `LocaleAdapter` + placeholder
+> (no native dep) + `createLocalization`. **Aucune dépendance** (tout via `Intl`), **aucun réseau/persistance/UI** ;
+> **catalogues métier = projets dérivés**. **144 tests `node --test`**. Vérifs : **typecheck + lint + test 144/144 +
+> expo-doctor 19/19 verts** (**RN 11 n'ajoute aucune dépendance**). **Aucune logique métier.**
 > *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 11 — i18n / localisation primitives génériques** : couche de
-> localisation générique (détection de locale **abstraite**, catalogue de messages typé + interpolation/pluralisation,
-> formatage via `Intl`), **mappée purement** et **testable**, **sans contenu métier** ni **dépendance native**.
-> **Un seul core**, **sans logique métier**. Différés au-delà : **adaptateurs Expo réels** (permissions/notifications),
-> **push distant**, **offline sync réelle** (ADR-029).
+> **Prochaine action UNIQUE : Mobile Core React Native 12 — deep-linking / routing primitives génériques** : au-dessus
+> de notifications (RN 10) et navigation, résolution de liens (parsing URL/deep-link → route interne **validée** +
+> params, **anti-open-redirect**, schémas autorisés), **mappée purement** et **testable**, **sans dépendance native** ni
+> logique métier. **Un seul core**, **sans logique métier**. Différés au-delà : **adaptateurs Expo réels**, **push
+> distant**, **offline sync réelle** (ADR-029).
 >
 > **(Décision roadmap)** **Cloud Core en PAUSE contrôlée** (cf. [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md)) ;
 > **Cloud Core 10** (serveur staging réel + HTTPS/DNS/pare-feu) **reporté** jusqu'à disponibilité d'un **serveur
@@ -85,10 +90,11 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 8. ✅ **Mobile Core React Native 8 — logger/observabilité client (avec redaction)** — **RÉALISÉ** : `createLogger` (niveaux, sink pluggable, horloge injectée, corrélation `child`/`withRequestId`) + **redaction centrale** (`redactValue`/`redactString` : tokens/`Authorization`/cookies/JWT/URL signées/chemins device/PII) appliquée **avant** tout sink ; `safeErrorFields(QueryError)` ; correctif `describeFileForLog` (`{type,extension}`, plus de nom brut) ; **aucune persistance/transport/service externe/log de body** (ADR-040) ; **89 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
 9. ✅ **Mobile Core React Native 9 — permissions natives génériques (gouvernées)** — **RÉALISÉ** : modèle pur `PermissionKind`/`PermissionStatus` + helpers (`normalizePermissionStatus`/`canRequestPermission`/`isPermissionGranted`…), `PermissionAdapter` (seam Expo) + `createPermissionService` (live `getStatus`/`request`/`ensure`/`openSettings`, logs sûrs via logger RN 8, `PermissionAdapterError` contrôlé), **adaptateur placeholder** (no native dep), hook `usePermission` (no UI) ; **statut jamais persisté** ; **API Core = autorité** (07_SECURITY §6) ; **106 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
 10. ✅ **Mobile Core React Native 10 — notifications client (primitives locales génériques, sans push réel)** — **RÉALISÉ** : `NotificationMessage` borné/sûr (`sanitizeNotificationMessage`, `describeNotificationForLog` sans contenu), modèle (delivery-state/trigger), `NotificationAdapter` (seam Expo) + `createNotificationService` (gate sur permission `notifications` RN 9 — jamais de schedule sans permission usable, `schedule`/`cancel`/`cancelAll`/`getDelivered`, logs sûrs, `NotificationError` contrôlé), **adaptateur placeholder** (no native dep) ; **LOCAL only** (aucun push/token device/stockage/UI) ; **122 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
-11. **Mobile Core React Native 11 — i18n / localisation primitives génériques** ✦ **prochaine mission** — détection de locale abstraite + catalogue de messages typé (interpolation/pluralisation) + formatage `Intl`, mappé purement et testable, sans contenu métier ni dépendance native.
-12. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-13. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-14. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+11. ✅ **Mobile Core React Native 11 — i18n / localisation primitives génériques** — **RÉALISÉ** : modèle de locale (`normalizeLocale` via `Intl`, `getLocaleDirection`, `resolveLocale`) + catalogue typé (`createTranslator` : `t`/`has`/`plural`, interpolation, pluralisation `Intl.PluralRules`, clé inconnue sans throw) + formatters `Intl` (`formatDate`/`formatNumber`/`formatCurrency`, devise requise, ne lèvent jamais) + `LocaleAdapter` + placeholder (no native dep) + `createLocalization` ; **aucune dépendance** (Intl built-in), aucun réseau/persistance/UI, catalogues métier = projets dérivés ; **144 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
+12. **Mobile Core React Native 12 — deep-linking / routing primitives génériques** ✦ **prochaine mission** — parsing URL/deep-link → route interne **validée** + params, **anti-open-redirect**, schémas autorisés ; mappé purement et testable, sans dépendance native.
+13. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+14. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+15. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -130,7 +136,8 @@ deux cores. À arbitrer par décision humaine.
 | **Mobile Core React Native 8 — logger/observabilité client (avec redaction)** | **FAIT** — `mobile-react-native` → **`OBSERVABILITY_READY`** : `createLogger` (`debug`/`info`/`warn`/`error`, **niveaux**, **sink pluggable**, **horloge injectée**, corrélation `child`/`withRequestId`) + **redaction centrale** (`redactValue`/`redactString` : tokens/`Authorization`/cookies/JWT/**URL signées**/**chemins device**/**PII**) appliquée **avant** tout sink ; `safeErrorFields(QueryError)` (corrélation `requestId`, sans payload) ; **correctif `describeFileForLog`** (`{type,extension}`, plus de nom brut/PII) ; **aucune persistance/transport réseau/service externe/log de body** (ADR-040) ; **89 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** verts |
 | **Mobile Core React Native 9 — permissions natives génériques (gouvernées)** | **FAIT** — `mobile-react-native` → **`PERMISSIONS_READY`** : modèle pur `PermissionKind`/`PermissionStatus` + **`normalizePermissionStatus`** (chaînes/objets Expo/booléens, conservateur) + helpers (`canRequestPermission`/`isPermissionGranted`/`isPermissionUsable`/`shouldOpenSettings`) ; `PermissionAdapter` (seam Expo) + **`createPermissionService`** (live `getStatus`/`request`/`ensure`/`openSettings`, **logs sûrs** `{kind,status}` via logger RN 8, **`PermissionAdapterError`** contrôlé sans cause sensible) ; **adaptateur placeholder** (no native dep) ; hook **`usePermission`** (status/loading/error, **no UI**) ; **statut jamais persisté** (ni SecureStore/Zustand/Query) ; **API Core = autorité** (07_SECURITY §6) ; **106 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** verts |
 | **Mobile Core React Native 10 — notifications client (primitives locales, sans push réel)** | **FAIT** — `mobile-react-native` → **`NOTIFICATIONS_READY`** : `NotificationMessage` **borné/sûr** (`sanitizeNotificationMessage`, `describeNotificationForLog` **sans contenu**) + modèle (delivery-state/`normalizeTrigger`) ; `NotificationAdapter` (seam Expo) + **`createNotificationService`** (**gate** sur la permission `notifications` RN 9 — **jamais de schedule sans permission usable**, `schedule`/`cancel`/`cancelAll`/`getDelivered`, **logs sûrs** `{id,status,state,count}`, **`NotificationError`** contrôlé) ; **adaptateur placeholder** (no native dep, ids déterministes) ; **LOCAL only** (aucun push/token device/FCM/APNs, aucun stockage, aucune UI) ; **122 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** verts |
-| **Mobile Core React Native 11 — i18n / localisation primitives génériques** | **PROCHAINE MISSION** — détection de locale **abstraite** + catalogue de messages typé (interpolation/pluralisation) + formatage `Intl`, **mappé purement** et **testable**, **sans contenu métier** ni **dépendance native** |
+| **Mobile Core React Native 11 — i18n / localisation primitives génériques** | **FAIT** — `mobile-react-native` → **`I18N_READY`** : modèle de locale (`normalizeLocale` via **`Intl.getCanonicalLocales`**, `getLocaleDirection` ltr/rtl, `resolveLocale`) + **catalogue typé** (`createTranslator` : `t`/`has`/`plural`, interpolation `{name}`, pluralisation **`Intl.PluralRules`**, clé inconnue **sans throw**) + **formatters `Intl`** (`formatDate`/`formatNumber`/`formatCurrency` — devise requise, **ne lèvent jamais**) ; `LocaleAdapter` (seam Expo) + **placeholder** (no native dep, no persistence) + **`createLocalization`** ; **aucune dépendance** (Intl built-in), aucun réseau/persistance/UI, **catalogues métier = projets dérivés** ; **144 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** verts |
+| **Mobile Core React Native 12 — deep-linking / routing primitives génériques** | **PROCHAINE MISSION** — parsing URL/deep-link → route interne **validée** + params, **anti-open-redirect**, schémas autorisés ; **mappé purement** et **testable**, **sans dépendance native** ni logique métier (gère le tap de notification RN 10) |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
