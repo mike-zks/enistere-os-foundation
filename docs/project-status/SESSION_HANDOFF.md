@@ -345,6 +345,21 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
+**Mobile Core React Native 25 — telemetry context composition opt-in** (`cores/mobile-react-native/`, périmètre
+`src/telemetry` + `test/telemetry-*` + docs) : ajoute une couche **opt-in** qui compose explicitement le
+consentement RN 21, le contexte environnement safe RN 22 et les services analytics RN 13 / crash RN 19.
+`mobile-react-native` → **`TELEMETRY_COORDINATOR_READY`**. `TelemetryContext` est borné par l'allow-list RN 22,
+`getTelemetryConsentDecision`/`isTelemetryCategoryAllowed` restent default-deny, et
+`createTelemetryCoordinator({ consent, environment, analytics?, crash?, logger? })` expose `track`,
+`captureError`, `captureMessage`. Consentement `unknown`/`denied` ou service absent = no-op contrôlé ;
+`granted` enrichit avec le contexte safe puis appelle explicitement le service concerné. Les erreurs adapter ne
+cassent pas le flux. Logs sûrs `{operation,category,allowed}` uniquement. **Aucun SDK réel, réseau,
+persistance, identify/user-id, émission automatique, branchement analytics/crash global ni usage du retry RN 24** ;
+RN 25 ne décide pas ADR-038/ADR-019/ADR-018. **+9 cas `node --test`** (`telemetry-context-gate`,
+`telemetry-service`) → **355 cas `test(...)`**. Vérifs : **typecheck + lint + test + expo-doctor 19/19 +
+git diff --check verts**. Commit attendu : `feat(mobile): add telemetry coordinator primitives`.
+**Prochaine action : Mobile Core React Native 26 — intégration explicite d'un adaptateur natif sûr**.
+
 **Mobile Core React Native 24 — retry / backoff primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/retry` + `test/retry-*` + docs) : ajoute des primitives **pures et déterministes** sans réseau réel, sans dépendance
 et sans `Date.now()` dans le chemin testé. `mobile-react-native` → **`RETRY_READY`**. **Aucun chemin existant modifié** :
@@ -355,8 +370,7 @@ déterministe via `rng`, `isRetryableError`/`getRetryDecision` classifient netwo
 401/403/session-expired même via `shouldRetry`, propage l'erreur finale originale et logge seulement `{attempt,delayMs}`.
 **+16 tests `node --test`** (`retry-policy-backoff`, `retry-retryable-error`, `retry-with-retry`) → **346 tests**.
 Vérifs : **typecheck + lint + test 346/346 + expo-doctor 19/19 + git diff --check verts**. Commit attendu :
-`feat(mobile): add retry backoff primitives`. **Prochaine action : Mobile Core React Native 25 — consommation opt-in des
-primitives transverses.**
+`feat(mobile): add retry backoff primitives`. **Historique : la prochaine action RN25 a depuis été réalisée.**
 
 **Étape précédente — Mobile Core React Native 23 — presse-papiers (clipboard) sécurisé primitives génériques** :
 `mobile-react-native` → **`CLIPBOARD_READY`**, `src/clipboard`, **330 tests**, aucun `expo-clipboard` réel, aucun log de

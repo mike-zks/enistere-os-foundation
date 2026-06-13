@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 25 — telemetry context composition opt-in
+
+- **Mobile Core React Native 25** (`cores/mobile-react-native/`) : ajoute `src/telemetry` — des primitives de composition télémétrie **opt-in** qui combinent explicitement le consentement RN 21, le contexte environnement sûr RN 22 et les services analytics RN 13 / crash RN 19. `mobile-react-native` passe de `RETRY_READY` à **`TELEMETRY_COORDINATOR_READY`**. **Aucun SDK réel, aucun réseau, aucune persistance, aucun identify/user-id, aucune émission automatique et aucun usage du retry RN 24**.
+  - **Contexte** : `TelemetryContext` borné construit via l'allow-list RN 22 (`buildTelemetryContext` / `createTelemetryContext`) ; identifiants device, PII, token et valeurs hors modèle sont droppés ; `describeTelemetryContextForLog` expose seulement `{fieldCount}` + enums grossiers.
+  - **Gate** : `getTelemetryConsentDecision` / `isTelemetryCategoryAllowed` délèguent au `ConsentService` RN 21 ; règle **default-deny** conservée (`unknown`/`denied`/échec store bloquent, seul `granted` autorise).
+  - **Coordinateur** : `createTelemetryCoordinator({ consent, environment, analytics?, crash?, logger? })` expose `track`, `captureError`, `captureMessage`. Chaque méthode vérifie le consentement de catégorie, enrichit avec le contexte safe puis appelle explicitement le service RN 13/RN 19 si fourni ; consentement absent/refusé ou service absent = no-op contrôlé ; erreurs adapter capturées, jamais de throw brut.
+  - **Logs** : uniquement `{operation,category,allowed}` ; jamais event name, payload, body, URL, token, error message, stack ni contexte détaillé.
+  - **Tests** : **+9** cas `node --test` — `telemetry-context-gate` et `telemetry-service` → **355 cas `test(...)`**.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (355 cas `test(...)`), `expo-doctor 19/19`, `git diff --check`.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §34 ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 26 — intégrer un adaptateur natif sûr explicite, sans SDK télémétrie réel ni logique métier.** Commit `feat(mobile): add telemetry coordinator primitives`.
+
 ### Mobile Core React Native 24 — retry / backoff primitives génériques
 
 - **Mobile Core React Native 24** (`cores/mobile-react-native/`) : ajoute `src/retry` — des **primitives génériques de retry/backoff**, **pures et déterministes**, sans réseau réel, sans dépendance, sans `Date.now()` dans le chemin testé. `mobile-react-native` passe de `CLIPBOARD_READY` à **`RETRY_READY`**. **Aucun chemin existant modifié** : AuthEngine, `withAuthRetry`/`authedRequest`, QueryClient et mutations existantes restent inchangés.

@@ -1347,3 +1347,54 @@ l'échec final**.
 - **Différés** : branchement réel dans une future couche d'appels réseau/offline
   (opt-in, jamais sur le 401), `Retry-After` (429/503) honoré, circuit-breaker,
   hook `useRetry` optionnel.
+
+## 34. Coordinateur télémétrie opt-in — composition consent/context (RN 25)
+
+RN 25 ajoute `src/telemetry` : une **couche de composition explicite** entre le
+consentement RN 21, le contexte environnement sûr RN 22 et les services analytics
+RN 13 / crash RN 19. Elle **n'émet rien automatiquement** : un appelant doit
+invoquer `track`, `captureError` ou `captureMessage`. Elle ne possède aucun SDK,
+aucun réseau, aucune persistance et aucune identité utilisateur ; RN 24 retry est
+délibérément hors circuit.
+
+- **Contexte (`src/telemetry/context.ts`, agnostique)** :
+  `TelemetryContext` reprend uniquement les champs allow-listés de
+  `AppEnvironmentSnapshot` (`os`, `osVersionMajor`, `appVersion`, `buildNumber`,
+  `buildChannel`, `locale`, `environment`) après passage par
+  `sanitizeAppEnvironmentSnapshot`. Les champs identifiants ou PII (`deviceId`,
+  IDFA/Android ID, installation id, push token, serial, IP, email, token) sont
+  donc absents par construction. `describeTelemetryContextForLog` expose seulement
+  `{fieldCount}` + enums grossiers, jamais les versions complètes ni valeurs
+  utilisateur.
+- **Gate (`src/telemetry/gate.ts`, agnostique)** :
+  `getTelemetryConsentDecision(consent, category)` et
+  `isTelemetryCategoryAllowed(consent, category)` délèguent au `ConsentService`
+  RN 21. La règle reste **default-deny** : `unknown`, `denied`, absence ou store
+  défaillant bloquent ; seul `granted` autorise.
+- **Coordinateur (`src/telemetry/telemetry-service.ts`, agnostique)** :
+  `createTelemetryCoordinator({ consent, environment, analytics?, crash?,
+  logger? })` expose :
+  `track(event)` → consentement `analytics` puis `analytics.track` enrichi avec
+  le contexte safe ; `captureError(error, options?)` et `captureMessage(message,
+  options?)` → consentement `crash` puis service crash enrichi. Si le consentement
+  bloque ou si le service optionnel est absent, le résultat est un no-op contrôlé
+  (`emitted:false`). Les erreurs des services restent capturées : le coordinateur
+  ne propage pas de throw brut.
+- **Logs et sécurité (ADR-040 / ADR-038 / ADR-019)** : le coordinateur logge
+  uniquement `{operation,category,allowed}`. Il ne logge jamais event name,
+  properties, error message, stack, body, URL, token ou contexte détaillé. Il
+  n'ajoute pas `identify`, user-id, device-id ni hook de démarrage.
+- **Gouvernance** : RN 25 **ne décide pas ADR-038** (choix analytics produit,
+  consentement UX, coûts), **ne décide pas ADR-019** (Sentry/Crashlytics/Bugsnag)
+  et **ne décide pas ADR-018** (observabilité/transport). Les services RN 13/RN 19
+  restent les seuls responsables de l'assainissement de leurs modèles avant
+  l'adapter ; RN 25 compose ces modèles sans brancher de SDK réel.
+- **Tests** (`node --test`) : `telemetry-context-gate` (contexte safe,
+  identifiants droppés, descriptor de log grossier, default-deny) +
+  `telemetry-service` (consentement `unknown`/`denied` bloque analytics et crash,
+  `granted` autorise, contexte env ajouté avec champs safe, erreurs adapter
+  capturées, logs sans payload/event/error message brut). Module entièrement
+  agnostique (pas de React/RN).
+- **Différés** : UI de consentement, choix d'un SDK analytics/crash réel,
+  transport observabilité, adaptateurs natifs d'environnement, hooks React,
+  émission au lifecycle, batching/flush, corrélation cross-service.
