@@ -5,7 +5,7 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Mobile Core React Native 1→14 : RÉALISÉS** (`mobile-react-native` → **`A11Y_READY`**). RN 4/4B/5 :
+> ✅ **Mobile Core React Native 1→15 : RÉALISÉS** (`mobile-react-native` → **`APP_LIFECYCLE_READY`**). RN 4/4B/5 :
 > client officiel **`@enistere/api-client-fetch`** intégré + **pont 401** `authedRequest` + **couche server-state**
 > TanStack Query générique (`createQueryKeys`, `useAuthedQuery`/`useAuthedMutation` via `authedRequest`,
 > `toQueryError` sans donnée sensible, `invalidateScope`/`purgeServerState`). **RN 6 — état local UI + purge logout** :
@@ -52,16 +52,21 @@
 > borné) + **`A11yState`** normalisé (`disabled`/`focused`/`pressed`/`invalid` + RN state ; `mergeA11yState`,
 > `isInteractiveRole`) + **annonce** lecteur d'écran (`sanitizeAnnouncement`, `describeAnnouncementForLog` **sans texte**)
 > + `A11yAdapter` (announce/focus?/isScreenReaderEnabled?, `A11yAdapterError` contrôlé) + placeholder + `createA11yService`
-> (best-effort **non-intrusif**, **logs sûrs** `{length,assertive}`). **Aucun `AccessibilityInfo` réel**, **aucun provider
-> global**, **aucun stockage/UI**, **aucune dépendance**. **196 tests `node --test`**. Vérifs : **typecheck + lint + test
-> 196/196 + expo-doctor 19/19 + git diff --check verts** (**RN 14 n'ajoute aucune dépendance**). **Aucune logique métier.**
+> (best-effort **non-intrusif**, **logs sûrs** `{length,assertive}`). **Aucun `AccessibilityInfo` réel/provider global/
+> stockage/UI/dépendance**. **RN 15 — app lifecycle primitives génériques** : modèle d'état `AppLifecycleState`
+> (`active`/`background`/`inactive`/`unknown`) + helpers purs (`normalizeAppLifecycleState`, `isForeground`/`isBackground`,
+> `isValidTransition`, `nextAppLifecycleState`) ; `AppLifecycleAdapter` (seam RN `AppState`) + placeholder +
+> `createAppLifecycleService` (`getState`/`subscribe`/`transition`/`dispose`, transitions **validées**, **logs sûrs**
+> `{from,to}` — que des enums, erreurs adapter contrôlées, listener isolé). **Aucun `AppState` réel/provider global/
+> stockage/dépendance**. **212 tests `node --test`**. Vérifs : **typecheck + lint + test 212/212 + expo-doctor 19/19 +
+> git diff --check verts** (**RN 15 n'ajoute aucune dépendance**). **Aucune logique métier.**
 > *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 15 — app lifecycle / état d'application primitives génériques** :
-> modèle d'état app normalisé (`active`/`background`/`inactive`) + `AppStateAdapter` (seam RN `AppState`) + placeholder +
-> service (`subscribe`, transitions), **mappé purement** et **testable**, **sans dépendance native** ni UI — utile pour le
-> flush analytics (RN 13), le refresh session au premier plan et la planif notifications. **Un seul core**, **sans logique
-> métier**. Différés au-delà : **adaptateurs natifs réels**, **SDK analytics réel**, **offline sync réelle** (ADR-029).
+> **Prochaine action UNIQUE : Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** :
+> `NetworkAdapter` (seam RN NetInfo) + modèle de connectivité normalisé (online/offline/unknown + type) + service
+> (`subscribe`/`getStatus`) + placeholder, **alimentant** la décision offline de RN 3 (`shouldQueueMutations`/`NetworkStatus`)
+> **sans** NetInfo réel, **mappé purement** et **testable**. **Un seul core**, **sans logique métier**. Différés au-delà :
+> **adaptateurs natifs réels**, **offline sync réelle** (ADR-029).
 >
 > **(Décision roadmap)** **Cloud Core en PAUSE contrôlée** (cf. [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md)) ;
 > **Cloud Core 10** (serveur staging réel + HTTPS/DNS/pare-feu) **reporté** jusqu'à disponibilité d'un **serveur
@@ -109,10 +114,11 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 12. ✅ **Mobile Core React Native 12 — deep-linking / routing primitives génériques** — **RÉALISÉ** : parseur pur (`parseDeepLink`/`decodeSafe`/`normalizeUrl`, custom + https, sans `URL` global) + `resolveLink` (`internal`/`externalBlocked`/`invalid`) — allowlist stricte schemes/hosts, **anti-open-redirect** (`//`/`scheme://`/`..`), **params sensibles supprimés**, bornes ; `isInternalRoute` ; `resolveNotificationLink` (clé configurable) ; **aucun log/stockage/dépendance** ; routes concrètes = projets dérivés ; **159 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
 13. ✅ **Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)** — **RÉALISÉ** : `AnalyticsEvent` borné + **redaction dédiée basée RN 8** (`sanitizeAnalyticsEvent` : `isSensitiveProperty` réutilise `isSensitiveKey` + scrub valeurs via `redactString`, bornes, sans throw) ; `AnalyticsAdapter` (track/flush?, **pas de `identify`**) + `createAnalyticsService` (track best-effort non-intrusif, logs sûrs `{eventName,propertyCount}`, erreurs adapter contrôlées) + placeholder mémoire ; **aucun SDK réel/réseau/persistance/user-id** ; **175 tests** ; typecheck/lint/test/doctor verts. *(Sans logique métier ; un seul core.)*
 14. ✅ **Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** — **RÉALISÉ** : props RN-compatibles (`buildA11yProps`/`normalizeA11yText`) + `A11yState` normalisé (`disabled`/`focused`/`pressed`/`invalid` + RN state ; `mergeA11yState`/`isInteractiveRole`) + annonce (`sanitizeAnnouncement`/`describeAnnouncementForLog` sans texte) + `A11yAdapter` (announce/focus?/isScreenReaderEnabled?, `A11yAdapterError` contrôlé) + placeholder + `createA11yService` (best-effort non-intrusif, logs sûrs `{length,assertive}`) ; **aucun `AccessibilityInfo` réel/provider global/stockage/UI/dépendance** ; **196 tests** ; typecheck/lint/test/doctor + `git diff --check` verts. *(Sans logique métier ; un seul core.)*
-15. **Mobile Core React Native 15 — app lifecycle / état d'application primitives génériques** ✦ **prochaine mission** — modèle d'état app (`active`/`background`/`inactive`) + `AppStateAdapter` (seam RN `AppState`) + placeholder + service (`subscribe`, transitions), mappé purement et testable, sans dépendance native ni UI.
-16. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-17. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-18. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+15. ✅ **Mobile Core React Native 15 — app lifecycle primitives génériques** — **RÉALISÉ** : modèle d'état `AppLifecycleState` (`active`/`background`/`inactive`/`unknown`) + helpers purs (`normalizeAppLifecycleState`/`isForeground`/`isBackground`/`isValidTransition`/`nextAppLifecycleState`) ; `AppLifecycleAdapter` (seam RN `AppState`) + placeholder + `createAppLifecycleService` (`getState`/`subscribe`/`transition`/`dispose`, transitions validées, logs sûrs `{from,to}`, erreurs adapter contrôlées, listener isolé) ; **aucun `AppState` réel/provider global/stockage/dépendance** ; **212 tests** ; typecheck/lint/test/doctor + `git diff --check` verts. *(Sans logique métier ; un seul core.)*
+16. **Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** ✦ **prochaine mission** — `NetworkAdapter` (seam RN NetInfo) + modèle connectivité normalisé (online/offline/unknown + type) + service (`subscribe`/`getStatus`) + placeholder, alimentant la décision offline RN 3, sans NetInfo réel.
+17. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+18. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+19. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -158,7 +164,8 @@ deux cores. À arbitrer par décision humaine.
 | **Mobile Core React Native 12 — deep-linking / routing primitives génériques** | **FAIT** — `mobile-react-native` → **`LINKING_READY`** : parseur pur (`parseDeepLink`/`decodeSafe`/`normalizeUrl`, custom schemes + `https`, **sans `URL` global**) + **`resolveLink`** (`internal`/`externalBlocked`/`invalid`) — **allowlist stricte** schemes/hosts, **anti-open-redirect** (`//`/`scheme://`/`..`), **params sensibles supprimés**, bornes ; `isInternalRoute` ; **`resolveNotificationLink`** (clé configurable, tap notification RN 10) ; **aucun log** (ni query sensible), **aucun stockage** de lien/URL, **aucune dépendance** ; routes concrètes = projets dérivés ; **159 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** verts |
 | **Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)** | **FAIT** — `mobile-react-native` → **`ANALYTICS_READY`** : `AnalyticsEvent` borné + **redaction dédiée basée RN 8** (`sanitizeAnalyticsEvent` : `isSensitiveProperty` **réutilise `isSensitiveKey`** + scrub valeurs via **`redactString`**, bornes count/longueur, **sans throw**) ; `AnalyticsAdapter` (track/flush?, **pas de `identify`**) + **`createAnalyticsService`** (track **best-effort non-intrusif** — ne casse jamais le flux app, **logs sûrs** `{eventName,propertyCount}` via logger RN 8, erreurs adapter **contrôlées** sans cause sensible) ; **adaptateur placeholder** mémoire (tests) ; **aucun SDK réel/réseau/persistance/user-id réel/token** ; **175 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** verts |
 | **Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** | **FAIT** — `mobile-react-native` → **`A11Y_READY`** : props RN-compatibles (**`buildA11yProps`**/`normalizeA11yText` borné) + **`A11yState`** normalisé (ADR-010 §16 : `disabled`/`focused`/`pressed`/`invalid` + RN state ; `mergeA11yState`/`isInteractiveRole`) + **annonce** lecteur d'écran (`sanitizeAnnouncement`, `describeAnnouncementForLog` **sans texte**) + `A11yAdapter` (announce/focus?/isScreenReaderEnabled?, **`A11yAdapterError`** contrôlé) + **placeholder** mémoire + **`createA11yService`** (best-effort **non-intrusif**, **logs sûrs** `{length,assertive}` — jamais le texte) ; **aucun `AccessibilityInfo` réel/provider global/stockage/UI/dépendance** ; **196 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** + `git diff --check` verts |
-| **Mobile Core React Native 15 — app lifecycle / état d'application primitives génériques** | **PROCHAINE MISSION** — modèle d'état app normalisé (`active`/`background`/`inactive`) + `AppStateAdapter` (seam RN `AppState`) + placeholder + service (`subscribe`, transitions), **mappé purement** et **testable**, **sans dépendance native** ni UI |
+| **Mobile Core React Native 15 — app lifecycle primitives génériques** | **FAIT** — `mobile-react-native` → **`APP_LIFECYCLE_READY`** : modèle **`AppLifecycleState`** (`active`/`background`/`inactive`/`unknown`) + helpers purs (`normalizeAppLifecycleState` tolérant, `isForeground`/`isBackground`, **`isValidTransition`** matrice, `nextAppLifecycleState`) ; `AppLifecycleAdapter` (seam RN `AppState`) + **`AppLifecycleAdapterError`** contrôlé + **placeholder** mémoire + **`createAppLifecycleService`** (`getState`/`subscribe`/`transition`/`dispose`, transitions **validées**, **best-effort non-intrusif** — erreurs adapter contrôlées + listener **isolé**, **logs sûrs** `{from,to}`/`{operation}` enums seulement) ; **aucun `AppState` réel/provider global/stockage/dépendance** ; **212 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** + `git diff --check` verts |
+| **Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** | **PROCHAINE MISSION** — `NetworkAdapter` (seam RN NetInfo) + modèle de connectivité normalisé (online/offline/unknown + type) + service (`subscribe`/`getStatus`) + placeholder, **alimentant** la décision offline RN 3 (`shouldQueueMutations`/`NetworkStatus`) **sans** NetInfo réel ; **mappé purement** et **testable** |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
