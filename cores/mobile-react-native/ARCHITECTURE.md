@@ -735,3 +735,64 @@ relève d'un **ADR/validation** côté projet dérivé.
   ADR/validation**, transport réseau + batching, **consentement utilisateur**
   (opt-in/opt-out), `identify`/user-id (sous revue privacy), crash reporting,
   session/écran auto, sampling.
+
+## 23. Accessibilité (a11y) — primitives génériques (RN 14)
+
+RN 14 ajoute une **couche d'accessibilité générique** (ADR-010 §16, spec §45),
+**pure et testable**, **sans dépendance native** (`AccessibilityInfo` réel),
+**sans écran/composant UI, sans provider global obligatoire, sans stockage**.
+Les **projets dérivés** appliquent les props à leurs composants et branchent un
+adaptateur réel.
+
+- **État a11y (`src/a11y/state.ts`, agnostique)** : `A11yRole` (sous-ensemble RN
+  curé) ; **`A11yState`** normalisé = **quartet ADR-010 §16** (`disabled`/
+  `focused`/`pressed`/`invalid`) **+** sous-ensemble RN `accessibilityState`
+  (`selected`/`checked` tri-état/`busy`/`expanded`). Helpers : `isInteractiveRole`,
+  **`mergeA11yState`** (override défini gagne, `undefined` ignoré), **`describeA11yStateForLog`**
+  (booléens/enum **uniquement** — pas de contenu). L'état ne porte **aucune
+  donnée utilisateur** → sûr en log.
+- **Props (`src/a11y/props.ts`, agnostique)** : constructeurs **purs** de props
+  **RN-compatibles** (`accessible`/`accessibilityRole`/`accessibilityLabel`/
+  `accessibilityHint`/`accessibilityState`). `normalizeA11yText` (trim + collapse
+  espaces + **borne**, vide → `undefined`) ; **`buildAccessibilityState`** mappe
+  l'`A11yState` vers le **sous-ensemble RN natif** (drop `focused`/`pressed`/
+  `invalid` — pas de champ RN natif ; le consommateur les utilise pour style/hint)
+  ; **`buildA11yProps`** compose l'objet complet borné. **Ne rend rien, n'importe
+  pas React/RN, ne logge pas** (les labels sont du contenu utilisateur).
+- **Annonce (`src/a11y/announcement.ts`, agnostique)** : `A11yAnnouncement`
+  `{message, assertive}` **borné** (`MAX_ANNOUNCEMENT_LENGTH`). `sanitizeAnnouncement`
+  (trim/collapse/borne ; `assertive` seulement si `=== true` ; jamais de throw).
+  Le **message** est du contenu à **prononcer** (non redacté, il doit atteindre
+  l'adapter) mais **jamais loggé** : **`describeAnnouncementForLog`** → `{length,
+  assertive}` **sans le texte** (07_SECURITY / ADR-010 §16).
+- **Adaptateur (`src/a11y/adapter.ts`, agnostique)** : `A11yAdapter` = seam RN
+  (`announce`, `focus?`, `isScreenReaderEnabled?`) — `A11yFocusTarget` = cible
+  **logique** `{id}` (l'adapter réel mappe vers un node handle). **`A11yAdapterError`**
+  contrôlé (porte seulement `operation`, **aucune cause sensible**).
+- **Placeholder (`src/a11y/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderA11yAdapter({screenReaderEnabled?})` — **mémoire**
+  (`getAnnouncements`/`getFocusTargets`/`clear`), **aucune dépendance native**.
+- **Service (`src/a11y/engine.ts`, agnostique)** : `createA11yService({adapter,
+  logger?})` → `announce`/`focus`/`isScreenReaderEnabled`. **Best-effort / non
+  intrusif** : un helper a11y **ne casse jamais** le flux app — adapter en échec
+  **capturé** + `warn` **sûr** (`{operation}`, aucune cause sensible) ;
+  `isScreenReaderEnabled` **défaut `false`** en cas d'erreur. **Logs RN 8 sûrs**
+  : `announce` logge **uniquement** `{length, assertive}` (debug) — **jamais le
+  texte brut** ; redaction RN 8 non contournée.
+- **Sécurité / gouvernance (07_SECURITY / ADR-010 §16)** : **aucun contenu/label/
+  message utilisateur en log** ; **aucun stockage** de données a11y ; **aucune
+  dépendance** ; **aucun provider global obligatoire** ; messages a11y **sans info
+  sensible** (responsabilité du consommateur, scrub non imposé sur le message
+  prononcé). Aligné avec les **erreurs accessibles des forms (RN 3)** et le **UI
+  Kit** (ADR-008/010).
+- **Tests** (`node --test`) : `a11y-props-state` (normalisation texte, rôle
+  interactif, **merge d'états**, `buildAccessibilityState` sous-ensemble RN,
+  `buildA11yProps`, `describeA11yStateForLog` sans contenu) + `a11y-announcement`
+  (sanitize borné, **`describeAnnouncementForLog` sans texte brut**) + `a11y-engine`
+  (announce/focus/isScreenReaderEnabled, **erreurs adapter contrôlées — pas de
+  throw**, **logger ne reçoit jamais le texte brut**, `A11yAdapterError`). Module
+  **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur `AccessibilityInfo` réel (RN) + hook/`useA11y`
+  optionnel, application des props dans des composants concrets (projets dérivés
+  / UI Kit), gestion fine de l'ordre de focus liée au rendu, audit a11y
+  automatisé, contraste/tailles tactiles (relèvent des **tokens UI Kit**, ADR-008).
