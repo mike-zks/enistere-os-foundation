@@ -73,6 +73,17 @@ test('sensitive query params are dropped from the route', () => {
   }
 });
 
+test('sensitive query params are dropped across common naming variants', () => {
+  const result = resolveLink(
+    'myapp://home?access-token=a&X-Amz-Signature=b&X-Amz-Credential=c&api-key=d&safe=ok',
+    config,
+  );
+  assert.equal(result.kind, 'internal');
+  if (result.kind === 'internal') {
+    assert.deepEqual(result.route.params, { safe: 'ok' });
+  }
+});
+
 test('params are bounded (count + value length)', () => {
   const bounded: LinkingConfig = { ...config, maxParams: 2, maxParamValueLength: 3 };
   const result = resolveLink('myapp://home?a=11111&b=2&c=3&d=4', bounded);
