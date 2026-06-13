@@ -85,11 +85,16 @@ const STATE_KEYS: readonly (keyof A11yState)[] = [
  * Merge two a11y states; defined keys in `override` win over `base`. Returns a
  * new object (inputs untouched). `undefined` override values are ignored.
  */
-export function mergeA11yState(base: A11yState, override: A11yState): A11yState {
+export function mergeA11yState(
+  base: A11yState | null | undefined,
+  override: A11yState | null | undefined,
+): A11yState {
+  const safeBase = base ?? {};
+  const safeOverride = override ?? {};
   const result: Record<string, boolean | 'mixed'> = {};
   for (const key of STATE_KEYS) {
-    const overrideValue = override[key];
-    const baseValue = base[key];
+    const overrideValue = safeOverride[key];
+    const baseValue = safeBase[key];
     const value = overrideValue !== undefined ? overrideValue : baseValue;
     if (value !== undefined) {
       result[key] = value;
@@ -102,6 +107,6 @@ export function mergeA11yState(base: A11yState, override: A11yState): A11yState 
  * Safe descriptor of an a11y state for logs — the booleans/enum only (NO user
  * content can ever be present here).
  */
-export function describeA11yStateForLog(state: A11yState): A11yState {
+export function describeA11yStateForLog(state: A11yState | null | undefined): A11yState {
   return mergeA11yState({}, state);
 }

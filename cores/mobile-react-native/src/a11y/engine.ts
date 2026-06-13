@@ -23,7 +23,7 @@ import {
 
 export interface A11yService {
   /** Announce a message via the screen reader (sanitised; never throws). */
-  announce(input: string | { message?: unknown; assertive?: unknown }): void;
+  announce(input: unknown): void;
   /** Move accessibility focus to a logical target (best-effort; never throws). */
   focus(target: A11yFocusTarget): void;
   /** Whether a screen reader is active (defaults to `false` on error). */
@@ -40,7 +40,7 @@ export interface A11yServiceOptions {
 export function createA11yService(options: A11yServiceOptions): A11yService {
   const { adapter, logger } = options;
 
-  function announce(input: string | { message?: unknown; assertive?: unknown }): void {
+  function announce(input: unknown): void {
     const announcement: A11yAnnouncement = sanitizeAnnouncement(input);
     if (announcement.message.length === 0) {
       return; // nothing to announce

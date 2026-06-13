@@ -27,9 +27,14 @@ export interface A11yAnnouncement {
  * Never throws.
  */
 export function sanitizeAnnouncement(
-  input: string | { message?: unknown; assertive?: unknown },
+  input: unknown,
 ): A11yAnnouncement {
-  const raw = typeof input === 'string' ? { message: input } : input;
+  const raw =
+    typeof input === 'string'
+      ? { message: input }
+      : input !== null && typeof input === 'object'
+        ? (input as { message?: unknown; assertive?: unknown })
+        : {};
   const message =
     typeof raw.message === 'string'
       ? raw.message.replace(/\s+/g, ' ').trim().slice(0, MAX_ANNOUNCEMENT_LENGTH)

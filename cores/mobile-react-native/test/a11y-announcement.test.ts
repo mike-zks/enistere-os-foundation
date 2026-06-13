@@ -29,6 +29,8 @@ test('sanitizeAnnouncement reads { message, assertive }', () => {
 test('sanitizeAnnouncement caps length and tolerates invalid input', () => {
   assert.equal(sanitizeAnnouncement('y'.repeat(MAX_ANNOUNCEMENT_LENGTH + 50)).message.length, MAX_ANNOUNCEMENT_LENGTH);
   assert.deepEqual(sanitizeAnnouncement({ message: 99 }), { message: '', assertive: false });
+  assert.deepEqual(sanitizeAnnouncement(null), { message: '', assertive: false });
+  assert.deepEqual(sanitizeAnnouncement(undefined), { message: '', assertive: false });
   assert.deepEqual(sanitizeAnnouncement(''), { message: '', assertive: false });
 });
 

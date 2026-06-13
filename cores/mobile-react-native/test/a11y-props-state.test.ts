@@ -56,6 +56,7 @@ test('buildAccessibilityState keeps only RN-native keys, drops focused/pressed/i
 
 test('buildAccessibilityState returns undefined when no native key is set', () => {
   assert.equal(buildAccessibilityState({ focused: true, pressed: true, invalid: true }), undefined);
+  assert.equal(buildAccessibilityState(null), undefined);
 });
 
 test('buildA11yProps composes RN-compatible props', () => {
@@ -76,6 +77,8 @@ test('buildA11yProps composes RN-compatible props', () => {
 
 test('buildA11yProps omits empty fields and leaves accessible undefined when nothing set', () => {
   assert.deepEqual(buildA11yProps({}), {});
+  assert.deepEqual(buildA11yProps(), {});
+  assert.deepEqual(buildA11yProps(null), {});
   assert.deepEqual(buildA11yProps({ label: '   ' }), {});
   assert.deepEqual(buildA11yProps({ accessible: false, role: 'text' }), {
     accessible: false,
@@ -88,4 +91,10 @@ test('describeA11yStateForLog returns only booleans/enums (no user content possi
     disabled: true,
     invalid: true,
   });
+  assert.deepEqual(describeA11yStateForLog(null), {});
+});
+
+test('mergeA11yState tolerates nullish inputs', () => {
+  assert.deepEqual(mergeA11yState(null, { busy: true }), { busy: true });
+  assert.deepEqual(mergeA11yState({ disabled: true }, null), { disabled: true });
 });
