@@ -2,10 +2,11 @@
  * Authenticated placeholder screen. Shows the (generic) session and a sign-out
  * action. NO business content (spec §6).
  */
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { View } from 'react-native';
 
 import { useAuth } from '@/auth';
+import { ROUTES } from '@/navigation';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
@@ -33,6 +34,11 @@ export default function HomeScreen(): React.JSX.Element {
             variant="secondary"
             loading={status === 'refreshing'}
             onPress={() => void refreshSession()}
+          />
+          <Button
+            title="Open settings"
+            variant="secondary"
+            onPress={() => router.push(ROUTES.settings)}
           />
           <Button title="Sign out" variant="secondary" onPress={() => void signOut()} />
         </View>

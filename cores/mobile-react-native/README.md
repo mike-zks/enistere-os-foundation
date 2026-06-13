@@ -1,6 +1,6 @@
-# Mobile Core React Native — Telemetry Coordinator Primitives
+# Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`TELEMETRY_COORDINATOR_READY`** (V1 — RN 25 ; socle RN 1 → retry/backoff RN 24)
+> Statut : **`STARTER_SETTINGS_READY`** (V1 — RN 26 ; socle RN 1 → telemetry coordinator RN 25)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -12,7 +12,8 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 
 | Brique | Module | Notes |
 |---|---|---|
-| Navigation | `app/` (Expo Router) + `src/navigation` | stacks **publique** `(public)` et **authentifiée** `(app)`, gate de redirection, **gardes durcies** (`expired`/`refreshing`), écran *not-found* |
+| Navigation | `app/` (Expo Router) + `src/navigation` | stacks **publique** `(public)` et **authentifiée** `(app)`, gate de redirection, **gardes durcies** (`expired`/`refreshing`), routes `home` + **`settings` protégée**, écran *not-found* |
+| **Starter shell / Settings (RN 26)** | `app/(app)/settings.tsx` | Écran Settings générique protégé aligné `strategy/04_ROADMAP_GLOBAL.md` Mobile V1 : section session (statut, refresh, sign out), Preferences/UI (lecture `themePreference` Zustand RN 6 + reset UI), Privacy/Telemetry (statuts consentement via placeholder RN 21 local, **sans wiring global**), Environment (contexte safe RN 22 via placeholder/service, **sans identifiant**), Foundation diagnostics (auth/query/upload/logger/consent/telemetry coordinator/retry). **Aucun réseau, aucun endpoint métier, aucun SDK réel, aucune persistance, aucun retry branché** ; lien depuis Home. |
 | Auth engine | `src/auth/auth-engine.ts` | **machine d'état framework-agnostique** (no React/RN) : `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`, **expiration**, **refresh coalescé** |
 | Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` ; **`EnistereAuthApi`** (réel) + `MobileAuthSessionAdapter` ; `PlaceholderAuthApi` (repli sans backend) |
 | Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
@@ -67,7 +68,8 @@ cores/mobile-react-native/
 │   │   └── sign-in.tsx       # écran placeholder public
 │   ├── (app)/                # navigation authentifiée (protégée)
 │   │   ├── _layout.tsx       # garde de route
-│   │   └── home.tsx          # écran placeholder authentifié
+│   │   ├── home.tsx          # écran placeholder authentifié + lien Settings
+│   │   └── settings.tsx      # settings/diagnostics génériques protégés (RN 26)
 │   └── +not-found.tsx        # fallback
 ├── src/
 │   ├── a11y/                 # accessibilité (agnostiques) : state + props + announcement + adapter + engine + placeholder (RN 14)
@@ -187,6 +189,12 @@ RN 19. Le coordinateur n'émet jamais au démarrage, ne persiste rien, ne logge 
 `allowSensitive`) ; lecture **explicite** `const text = await clip.getString()` (jamais
 loggée) ; `await clip.clear()` après usage sensible. Le contenu **n'est jamais loggé**
 et le clipboard (transitoire/non fiable) **n'est jamais persisté**.
+
+**Usage court (RN 26)** : depuis Home, ouvrir Settings pour vérifier le shell V1 :
+statut session, refresh/sign out, préférence UI in-memory, consentements placeholder,
+contexte environnement safe et diagnostics de primitives. Cet écran est une surface de
+démarrage et de diagnostic : il ne lance aucun SDK, ne fait aucun appel réseau et ne
+persiste rien.
 
 **Usage court (RN 22)** : `const env = createAppEnvironmentService({ adapter })` puis,
 dans un futur adaptateur télémétrie : `if (await consent.isAllowed('crash'))
@@ -318,13 +326,12 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **355 cas `test(...)`** (`node --test` : … retry, **telemetry-context-gate, telemetry-service** — RN 25).
+- `test` : ✅ **355 cas `test(...)`** (`node --test` ; RN 26 ajoute uniquement des écrans Expo/React, donc pas de helper pur à tester).
 - `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 24 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 26 — intégration explicite d'un adaptateur natif sûr**
-: choisir un seul adaptateur placeholder→réel (par exemple device/app info ou
-clipboard) avec gate/documentation projet, sans SDK télémétrie réel, sans logique
-métier et sans modifier AuthEngine, QueryClient ou mutations.
+**Mobile Core React Native 27 — durcissement runtime du starter Expo**
+: vérifier le rendu device/simulateur du shell public/protégé/settings, sans logique
+métier, puis documenter les captures et éventuelles corrections d'ergonomie.

@@ -345,6 +345,21 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
+**Mobile Core React Native 26 — V1 usable starter shell / settings générique** (`cores/mobile-react-native/`,
+périmètre `app/**` + `src/navigation/**` + docs) : ajoute une route Settings protégée pour rendre le starter
+mobile plus exploitable sans logique métier, conformément à `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile Core React
+Native V1. `mobile-react-native` → **`STARTER_SETTINGS_READY`**. `ROUTES.settings = '/settings'`,
+`app/(app)/settings.tsx` et un lien depuis Home complètent la navigation privée. L'écran expose : session
+(statut, refresh, sign out), Preferences/UI (`themePreference` Zustand RN6 + reset UI), Privacy/Telemetry
+(statuts RN21 via placeholder local, sans wiring global), Environment (contexte safe RN22 via placeholder/service,
+sans identifiant) et Foundation diagnostics (auth, query, upload, logger, consent, telemetry coordinator, retry).
+**Aucun réseau, endpoint métier, SDK réel analytics/crash, adaptateur natif réel, persistance nouvelle, retry branché
+ni modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Aucun helper pur ajouté : rendu
+runtime différé, validation par typecheck/lint + non-régression `node --test`. Vérifs : **typecheck + lint + test
++ expo-doctor 19/19 + git diff --check verts**. Commit attendu :
+`feat(mobile): add generic settings starter shell`. **Prochaine action : Mobile Core React Native 27 — durcissement
+runtime du starter Expo**.
+
 **Mobile Core React Native 25 — telemetry context composition opt-in** (`cores/mobile-react-native/`, périmètre
 `src/telemetry` + `test/telemetry-*` + docs) : ajoute une couche **opt-in** qui compose explicitement le
 consentement RN 21, le contexte environnement safe RN 22 et les services analytics RN 13 / crash RN 19.
@@ -358,7 +373,7 @@ persistance, identify/user-id, émission automatique, branchement analytics/cras
 RN 25 ne décide pas ADR-038/ADR-019/ADR-018. **+9 cas `node --test`** (`telemetry-context-gate`,
 `telemetry-service`) → **355 cas `test(...)`**. Vérifs : **typecheck + lint + test + expo-doctor 19/19 +
 git diff --check verts**. Commit attendu : `feat(mobile): add telemetry coordinator primitives`.
-**Prochaine action : Mobile Core React Native 26 — intégration explicite d'un adaptateur natif sûr**.
+**Historique : RN26 a finalement livré le Settings starter shell V1.**
 
 **Mobile Core React Native 24 — retry / backoff primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/retry` + `test/retry-*` + docs) : ajoute des primitives **pures et déterministes** sans réseau réel, sans dépendance

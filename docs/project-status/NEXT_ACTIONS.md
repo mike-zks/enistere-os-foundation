@@ -5,6 +5,19 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Mobile Core React Native 26 : RÉALISÉ** (`mobile-react-native` →
+> **`STARTER_SETTINGS_READY`**). RN 26 ajoute une route Settings protégée
+> (`app/(app)/settings.tsx` + `ROUTES.settings`) et un lien depuis Home pour
+> aligner le starter avec `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile Core React
+> Native V1. L'écran expose session, reset UI Zustand, consentement placeholder
+> RN21, contexte safe RN22 et diagnostics de primitives, sans réseau, endpoint
+> métier, SDK réel, adaptateur natif réel, persistance nouvelle ni retry branché.
+>
+> **Prochaine action UNIQUE : Mobile Core React Native 27 — durcissement runtime
+> du starter Expo** : vérifier le rendu device/simulateur du shell public/protégé/
+> settings, documenter les captures et corriger uniquement les défauts d'ergonomie
+> du starter.
+
 > ✅ **Mobile Core React Native 25 : RÉALISÉ** (`mobile-react-native` →
 > **`TELEMETRY_COORDINATOR_READY`**). RN 25 ajoute `src/telemetry` : contexte
 > télémétrie sûr basé RN 22, gate consentement RN 21 default-deny, et
@@ -14,11 +27,8 @@
 > Logs sûrs `{operation,category,allowed}`. **355 cas `test(...)`** ; typecheck,
 > lint, test, doctor et `git diff --check` verts.
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 26 — intégration explicite
-> d'un adaptateur natif sûr** : choisir un seul adaptateur placeholder→réel
-> (device/app info, clipboard ou équivalent) avec gate/documentation projet, sans
-> SDK télémétrie réel, sans logique métier, sans modifier AuthEngine, QueryClient
-> ou mutations.
+> **Historique RN25** : la prochaine action était RN26 ; elle est désormais
+> réalisée sous forme de starter Settings V1.
 
 > ✅ **Mobile Core React Native 1→24 : RÉALISÉS** (`mobile-react-native` → **`RETRY_READY`**). RN 4/4B/5 :
 > client officiel **`@enistere/api-client-fetch`** intégré + **pont 401** `authedRequest` + **couche server-state**
@@ -209,10 +219,11 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 23. ✅ **Mobile Core React Native 23 — presse-papiers (clipboard) sécurisé primitives génériques (seam, sans `expo-clipboard` réel)** — **RÉALISÉ** : `src/clipboard` — `ClipboardSensitivity` (`normal`/`sensitive`) + `ClipboardOperationResult` (`success`/`unavailable`/`rejected`/`error`) + `normalizeClipboardText` (borné) + **`isSensitiveClipboardText`** (redaction RN 8) + `describeClipboardTextForLog` (`{length,sensitivity}`) ; `ClipboardAdapter` (seam `expo-clipboard`, `ClipboardAdapterError`) + placeholder mémoire (slot transitoire) + `createClipboardService` (`copy`/`getString`/`hasString`/`clear`, **refuse le contenu sensible sans opt-in → `rejected` adapter non appelé**, `getString` opt-in jamais loggé, `clear` no-op sûr, best-effort, **logs sans contenu**) ; **aucun log de contenu ; clipboard non stocké ; sans `expo-clipboard` réel/réseau/persistance/UI/lecture auto** ; **330 tests** ; typecheck/lint/test/doctor + `git diff --check` verts. *(Sans logique métier ; un seul core.)*
 24. ✅ **Mobile Core React Native 24 — retry / backoff primitives génériques (purs, horloge injectée)** — **RÉALISÉ** : `src/retry` — `RetryPolicy` borné (`maxAttempts` inclut l'appel initial), `computeBackoffDelay` exponentiel borné + jitter déterministe via `rng`, `isRetryableError`/`getRetryDecision` structurels, `withRetry(fn, policy, {sleep, rng, shouldRetry?, logger?})` à `sleep` injecté ; **401/403/session-expired hard-blockés**, erreur finale originale propagée, logs `{attempt,delayMs}` seuls ; **aucun branchement AuthEngine/withAuthRetry/QueryClient/mutations** ; **346 tests** ; typecheck/lint/test/doctor + `git diff --check` verts. *(Sans logique métier ; un seul core.)*
 25. ✅ **Mobile Core React Native 25 — telemetry context composition opt-in** — **RÉALISÉ** : `src/telemetry` compose consentement RN 21 + contexte safe RN 22 + services analytics RN 13/crash RN 19 ; no-op si consentement absent/refusé ; logs `{operation,category,allowed}` ; aucun SDK réel/réseau/persistance/identity/auto-start/retry RN 24 ; **355 cas `test(...)`** ; typecheck/lint/test/doctor + `git diff --check` verts.
-26. **Mobile Core React Native 26 — intégration explicite d'un adaptateur natif sûr** — choisir un seul adaptateur placeholder→réel, sans SDK télémétrie réel, sans logique métier, sans modifier AuthEngine/QueryClient/mutations.
-26. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-27. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-28. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+26. ✅ **Mobile Core React Native 26 — V1 usable starter shell / settings générique** — **RÉALISÉ** : route protégée Settings, lien depuis Home, diagnostics session/UI/consent placeholder/environnement safe/foundation ; aligné `strategy/04_ROADMAP_GLOBAL.md` §9 ; aucun réseau/endpoint métier/SDK réel/adaptateur natif/persistance/retry branché ; typecheck/lint/test/doctor + `git diff --check` verts.
+27. **Mobile Core React Native 27 — durcissement runtime du starter Expo** — vérifier le rendu device/simulateur public/protégé/settings, documenter les captures et corriger uniquement l'ergonomie du starter.
+28. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+29. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+30. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -269,7 +280,8 @@ deux cores. À arbitrer par décision humaine.
 | **Mobile Core React Native 23 — presse-papiers (clipboard) sécurisé primitives génériques (seam, sans `expo-clipboard` réel)** | **FAIT** — `mobile-react-native` → **`CLIPBOARD_READY`** : `src/clipboard` — `ClipboardSensitivity` (`normal`/`sensitive`) + `ClipboardOperationResult` (`success`/`unavailable`/`rejected`/`error`) + `normalizeClipboardText` (borné `MAX_CLIPBOARD_TEXT_LENGTH`) + **`isSensitiveClipboardText`** (réutilise la **redaction RN 8** : Bearer/JWT/email/URL signée/URI `file`/`content` → sensible) + `classifyClipboardSensitivity` + **`describeClipboardTextForLog`** → **`{length,sensitivity}` seul** (jamais le contenu) ; `ClipboardAdapter` (seam `expo-clipboard` : `setString`/`getString?`/`hasString?`/`clear?`) + **`ClipboardAdapterError`** contrôlé + **placeholder** mémoire (slot transitoire, `peek` test-only) + **`createClipboardService`** (`copy`/`getString`/`hasString`/`clear` — **`copy` refuse un texte sensible** (détecté **ou** `markSensitive`) sauf `allowSensitive:true` → **`rejected`, adapter NON appelé** ; **`getString` opt-in explicite** jamais auto, valeur sensible renvoyée mais **jamais loggée** ; **`clear` no-op sûr** si absent ; **best-effort non-intrusif** — adapter qui throw → `error` sans throw ; **logs sûrs** `{operation,result,sensitivity,length}` — **jamais le contenu**) ; **canal transitoire/non fiable ; clipboard NON stocké (pas de preferences/Zustand/Query/SecureStore) ; aucun `expo-clipboard` réel/réseau/persistance/UI/lecture auto** ; **330 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** + `git diff --check` verts |
 | **Mobile Core React Native 24 — retry / backoff primitives génériques (purs, horloge injectée)** | **FAIT** — `mobile-react-native` → **`RETRY_READY`** : `src/retry` — `RetryPolicy` **borné** (`maxAttempts` **inclut l'appel initial**) + `normalizeRetryPolicy` ; **`computeBackoffDelay(attempt, policy, rng?)`** (exponentiel borné + jitter déterministe via `rng`) ; **`isRetryableError`/`getRetryDecision`** (network/timeout/408/429/5xx retryable ; 4xx/401/403/session-expired/inconnu non retryable ; raison enum sûre) + `isAuthOwnedError` ; **`withRetry(fn, policy, {sleep, rng, shouldRetry?, logger?})`** (`sleep` injecté, **401/403/session-expired hard-blockés même via `shouldRetry`**, erreur finale originale propagée, logs `{attempt,delayMs}` seuls). **Aucun réseau réel, aucune dépendance, aucun `Date.now()` testé, aucun branchement automatique sur AuthEngine/withAuthRetry/QueryClient/mutations** ; **346 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** + `git diff --check` verts |
 | **Mobile Core React Native 25 — telemetry context composition opt-in** | **FAIT** — `mobile-react-native` → **`TELEMETRY_COORDINATOR_READY`** : `src/telemetry` compose consentement RN 21 default-deny + contexte environnement safe RN 22 + services analytics RN 13/crash RN 19 ; `track`/`captureError`/`captureMessage` opt-in ; no-op contrôlé si consentement absent/refusé ; logs `{operation,category,allowed}` seuls ; aucun SDK réel/réseau/persistance/identity/auto-start/retry RN 24 ; **355 cas `test(...)`** ; typecheck/lint/test + expo-doctor 19/19 + `git diff --check` verts |
-| **Mobile Core React Native 26 — intégration explicite d'un adaptateur natif sûr** | **PROCHAINE MISSION** — choisir un seul adaptateur placeholder→réel, sans SDK télémétrie réel, sans logique métier, sans modifier AuthEngine/QueryClient/mutations |
+| **Mobile Core React Native 26 — V1 usable starter shell / settings générique** | **FAIT** — `mobile-react-native` → **`STARTER_SETTINGS_READY`** : route Settings protégée + lien Home ; sections Session, Preferences/UI, Privacy/Telemetry placeholder RN21, Environment safe RN22, Foundation diagnostics ; aligne le starter avec `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile V1 ; aucun réseau/endpoint métier/SDK réel/adaptateur natif/persistance/retry branché ; typecheck/lint/test + expo-doctor 19/19 + `git diff --check` verts |
+| **Mobile Core React Native 27 — durcissement runtime du starter Expo** | **PROCHAINE MISSION** — vérifier rendu device/simulateur du shell public/protégé/settings, documenter captures et corriger l'ergonomie du starter |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |

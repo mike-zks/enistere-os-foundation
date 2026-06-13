@@ -41,12 +41,14 @@ spécification ne prouve pas un starter ; un dossier vide ne prouve aucune impl�
 
 ## 3. Architecture du repository
 
-> **Mise à jour RN25** : le statut courant du core `mobile-react-native` est
-> **`TELEMETRY_COORDINATOR_READY`**. RN25 ajoute `src/telemetry` : composition
-> opt-in consentement RN21 + contexte environnement safe RN22 + analytics RN13 /
-> crash RN19, sans SDK réel, réseau, persistance, identify/user-id, émission
-> automatique ni retry RN24. Vérification locale : typecheck, lint, test
-> (**355 cas `test(...)`**), doctor 19/19 et `git diff --check` verts.
+> **Mise à jour RN26** : le statut courant du core `mobile-react-native` est
+> **`STARTER_SETTINGS_READY`**. RN26 ajoute une route Settings protégée et une
+> surface de diagnostic fondation alignée `strategy/04_ROADMAP_GLOBAL.md` §9
+> Mobile Core React Native V1 : session, UI state, consentement placeholder,
+> environnement safe et primitives disponibles. Aucun réseau, endpoint métier,
+> SDK réel, adaptateur natif réel, persistance nouvelle ni retry branché.
+> Vérification locale : typecheck, lint, test, doctor 19/19 et `git diff --check`
+> verts.
 
 ```
 enistere-os-foundation/
@@ -264,9 +266,12 @@ mutations** ; **346 tests `node --test`**, typecheck/lint/test/doctor + `git dif
 telemetry context composition opt-in RÉALISÉ** (`mobile-react-native` → **TELEMETRY_COORDINATOR_READY** ;
 `src/telemetry`, consentement RN21 default-deny + contexte RN22 safe + analytics RN13/crash RN19 opt-in, sans SDK réel/
 réseau/persistance/identity/auto-start/retry RN24 ; **355 cas `test(...)`**, typecheck/lint/test/doctor +
-`git diff --check` verts). Cloud Core reste
-**PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE**. **Prochaine action** : **Mobile Core React Native 26 —
-intégration explicite d'un adaptateur natif sûr** ; **actions humaines** : protection de branche `main` + rendre
+`git diff --check` verts), puis **RN 26 — V1 usable starter shell / settings générique RÉALISÉ**
+(`mobile-react-native` → **STARTER_SETTINGS_READY** ; route Settings protégée, lien Home, diagnostics session/UI/
+consent placeholder/environnement safe/primitives, aligné roadmap Mobile V1, sans réseau/endpoint métier/SDK réel/
+adaptateur natif/persistance/retry branché). Cloud Core reste
+**PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE**. **Prochaine action** : **Mobile Core React Native 27 —
+durcissement runtime du starter Expo** ; **actions humaines** : protection de branche `main` + rendre
 `api-smoke` requis.
 
 ## 12. Documentation
