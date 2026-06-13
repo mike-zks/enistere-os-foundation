@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`ANALYTICS_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`A11Y_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -155,13 +155,20 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   exact/substring ; `sanitizeAnalyticsEvent` **supprime les clés sensibles** + **scrube les valeurs via `redactString`**
   + **borne**, **sans throw**) ; `AnalyticsAdapter` (`track`/`flush?`, **PAS de `identify`**) + `createAnalyticsService`
   (track **best-effort non-intrusif**, **logs RN 8 sûrs** `{eventName,propertyCount}`, erreurs adapter **contrôlées**) ;
-  **placeholder** mémoire (tests) ; **aucun SDK réel/réseau/persistance/user-id réel/token**. Layout **plat** +
-  **autonome**. **175 tests `node --test`** (… + linking-resolve + **analytics-event + analytics-engine**). Vérifs :
-  **typecheck + lint + test 175/175 + expo-doctor 19/19 verts** (**RN 13 n'ajoute aucune dépendance**) ; packages liés
-  `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**,
-  **push distant réel + token device**, **adaptateurs Expo réels** (permissions/notifications/localisation/linking),
-  **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **a11y** (= RN 14), **backend
-  d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  **placeholder** mémoire (tests) ; **aucun SDK réel/réseau/persistance/user-id réel/token**. **+ RN 14 — accessibilité
+  (a11y) primitives génériques** (ADR-010 §16 / spec §45) : props RN-compatibles (`buildA11yProps`/`normalizeA11yText`
+  borné) + **`A11yState`** normalisé (quartet `disabled`/`focused`/`pressed`/`invalid` + RN `accessibilityState` ;
+  `mergeA11yState`/`isInteractiveRole`) + **annonce** lecteur d'écran (`sanitizeAnnouncement` ; **`describeAnnouncementForLog`
+  sans texte**) + `A11yAdapter` (announce/focus?/isScreenReaderEnabled?, **`A11yAdapterError`** contrôlé) + **placeholder**
+  mémoire + `createA11yService` (best-effort **non-intrusif**, `isScreenReaderEnabled` **défaut `false`** en erreur, **logs
+  RN 8 sûrs** `{length,assertive}`) ; **aucun `AccessibilityInfo` réel/provider global/stockage/UI/dépendance**. Layout
+  **plat** + **autonome**. **196 tests `node --test`** (… + analytics-engine + **a11y-props-state + a11y-announcement +
+  a11y-engine**). Vérifs : **typecheck + lint + test 196/196 + expo-doctor 19/19 + git diff --check verts** (**RN 14
+  n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
+  métier.** Différés : **écran/picker d'upload**, **push distant réel + token device**, **adaptateurs natifs réels**
+  (permissions/notifications/localisation/linking/AccessibilityInfo), **catalogues métier i18n + routes concrètes**,
+  **SDK analytics réel** (sous ADR), **application des props a11y dans des composants**, **app lifecycle** (= RN 15),
+  **backend d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -208,8 +215,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`ANALYTICS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie**, 175 tests + bundle Metro).
+`A11Y_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y**, 196 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -240,7 +247,35 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)**
+**Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** (`cores/mobile-react-native/`, périmètre
+`src/a11y` + `test/**` + docs) : ajoute une **couche d'accessibilité générique** (ADR-010 §16, spec §45), **pure et
+testable**, **sans dépendance native** (`AccessibilityInfo` réel), **sans écran/composant UI, sans provider global
+obligatoire, sans stockage**. `mobile-react-native` → **`A11Y_READY`**. **Aucune dépendance ajoutée.** **État**
+(`src/a11y/state.ts`, agnostique) : `A11yRole` (sous-ensemble RN curé) ; **`A11yState`** = **quartet ADR-010 §16**
+(`disabled`/`focused`/`pressed`/`invalid`) + RN `accessibilityState` (`selected`/`checked`/`busy`/`expanded`) ;
+`isInteractiveRole`, `mergeA11yState` (override défini gagne), `describeA11yStateForLog` (booléens/enum seulement).
+**Props** (`props.ts`) : `normalizeA11yText` (trim/collapse/**borne**), **`buildAccessibilityState`** (sous-ensemble RN
+natif, drop `focused`/`pressed`/`invalid`), **`buildA11yProps`** (props RN-compatibles `accessible`/`accessibilityRole`/
+`accessibilityLabel`/`accessibilityHint`/`accessibilityState`) ; **ne rend rien, n'importe pas React/RN, ne logge pas**
+(labels = contenu utilisateur). **Annonce** (`announcement.ts`) : `A11yAnnouncement {message, assertive}` **borné** ;
+`sanitizeAnnouncement` (sans throw) ; message **prononcé** (non redacté) mais **jamais loggé** → **`describeAnnouncementForLog`**
+= `{length, assertive}` (sans texte). **Adaptateur + placeholder + service** : `A11yAdapter` (`announce`/`focus?`/
+`isScreenReaderEnabled?`, `A11yFocusTarget {id}`) + **`A11yAdapterError`** contrôlé (seul `operation`) ;
+`createPlaceholderA11yAdapter` (mémoire, no native dep) ; **`createA11yService`** (best-effort **non-intrusif** — ne
+casse jamais le flux app, `isScreenReaderEnabled` **défaut `false`** en erreur, **logs RN 8 sûrs** `{length,assertive}`/
+`{operation}` — jamais le texte brut). **Sécurité (07_SECURITY / ADR-010 §16)** : aucun contenu/label/message en log ;
+aucun stockage ; aucune dépendance ; aucun provider global obligatoire. **+21 tests `node --test`** (`a11y-props-state` :
+normalisation, rôle interactif, **merge d'états**, `buildAccessibilityState`, `buildA11yProps`, `describeA11yStateForLog`
+sans contenu ; `a11y-announcement` : sanitize borné, **`describeAnnouncementForLog` sans texte** ; `a11y-engine` :
+announce/focus/isScreenReaderEnabled, **erreurs adapter contrôlées — pas de throw**, **logger ne reçoit jamais le texte
+brut**, `A11yAdapterError`) → **196 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
+typecheck-only). Vérifs : **typecheck + lint + test 196/196 + expo-doctor 19/19 + git diff --check verts** (**RN 14
+n'ajoute aucune dépendance**). **`DECISIONS_REGISTER` : ADR-010 reste `PARTIELLEMENT_IMPLEMENTE`** (note a11y ajoutée,
+**aucun changement de statut**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
+modifié** ; aucun autre core. Commit `feat(mobile): add generic accessibility primitives`. **Prochaine action : Mobile
+Core React Native 15 — app lifecycle / état d'application primitives génériques.**
+
+**Étape précédente — Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)**
 (`cores/mobile-react-native/`, périmètre `src/analytics` + `test/**` + docs) : ajoute une **couche générique
 d'analytics/télémétrie** au-dessus du logger/redaction RN 8, **sans SDK réel** (Sentry/Amplitude/GA/Segment/Firebase/
 OTel), **sans réseau, sans persistance, sans identité utilisateur réelle, sans logique métier, sans UI**.
