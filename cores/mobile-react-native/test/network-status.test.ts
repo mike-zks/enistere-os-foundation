@@ -40,10 +40,17 @@ test('normalizeConnectionType folds known types; unknown string -> other', () =>
 test('networkState carries an optional type without breaking the RN 3 shape', () => {
   assert.deepEqual(networkState('online', 5), { status: 'online', changedAt: 5 });
   assert.deepEqual(networkState('online', 5, 'wifi'), { status: 'online', changedAt: 5, type: 'wifi' });
+  assert.deepEqual(networkState('CONNECTED', Number.NaN, 'vpn'), {
+    status: 'online',
+    changedAt: null,
+    type: 'other',
+  });
 });
 
 test('RN 3 compatibility: shouldQueueMutations queues unless positively online', () => {
   assert.equal(shouldQueueMutations(networkState('online', 1, 'wifi')), false);
   assert.equal(shouldQueueMutations(networkState('offline', 1)), true);
   assert.equal(shouldQueueMutations(networkState('unknown')), true);
+  assert.equal(shouldQueueMutations(null), true);
+  assert.equal(shouldQueueMutations({ status: 'CONNECTED' }), false);
 });

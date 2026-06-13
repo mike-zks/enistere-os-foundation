@@ -19,6 +19,12 @@ test('reads the initial reading from the adapter (with type)', () => {
   assert.equal(service.shouldQueue(), false);
 });
 
+test('uses a deterministic default clock when none is injected', () => {
+  const adapter = createPlaceholderNetworkAdapter('online');
+  const service = createNetworkService({ adapter });
+  assert.equal(service.getStatus().changedAt, 0);
+});
+
 test('an unknown initial reading keeps changedAt null (RN 3 initial shape)', () => {
   const adapter = createPlaceholderNetworkAdapter('unknown');
   const service = createNetworkService({ adapter, clock });

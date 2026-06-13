@@ -53,21 +53,26 @@ export const initialNetworkState: NetworkState = {
 
 /** Builds a {@link NetworkState} for a status at a given (injected) instant. */
 export function networkState(
-  status: NetworkStatus,
-  changedAt: number | null = null,
-  type?: NetworkConnectionType,
+  status: unknown,
+  changedAt: unknown = null,
+  type?: unknown,
 ): NetworkState {
-  return type !== undefined ? { status, changedAt, type } : { status, changedAt };
+  const normalisedStatus = normalizeNetworkStatus(status);
+  const normalisedChangedAt = typeof changedAt === 'number' && Number.isFinite(changedAt) ? changedAt : null;
+  const normalisedType = type === undefined ? undefined : normalizeConnectionType(type);
+  return normalisedType !== undefined
+    ? { status: normalisedStatus, changedAt: normalisedChangedAt, type: normalisedType }
+    : { status: normalisedStatus, changedAt: normalisedChangedAt };
 }
 
 /** True only when connectivity is positively known to be available. */
-export function isOnline(state: NetworkState): boolean {
-  return state.status === 'online';
+export function isOnline(state: unknown): boolean {
+  return readNetworkStatus(state) === 'online';
 }
 
 /** True only when connectivity is positively known to be unavailable. */
-export function isOffline(state: NetworkState): boolean {
-  return state.status === 'offline';
+export function isOffline(state: unknown): boolean {
+  return readNetworkStatus(state) === 'offline';
 }
 
 /**
@@ -76,8 +81,8 @@ export function isOffline(state: NetworkState): boolean {
  * Conservative by design: queue while `offline` AND while `unknown` (we have no
  * positive proof of connectivity yet), send only when positively `online`.
  */
-export function shouldQueueMutations(state: NetworkState): boolean {
-  return state.status !== 'online';
+export function shouldQueueMutations(state: unknown): boolean {
+  return readNetworkStatus(state) !== 'online';
 }
 
 // --- RN 16: connectivity normalisation (additive; RN 3 contract unchanged) ---
@@ -135,4 +140,11 @@ export function normalizeConnectionType(value: unknown): NetworkConnectionType {
     return 'unknown';
   }
   return CONNECTION_TYPE_MAP[key] ?? 'other';
+}
+
+function readNetworkStatus(state: unknown): NetworkStatus {
+  if (typeof state === 'object' && state !== null && 'status' in state) {
+    return normalizeNetworkStatus((state as { status?: unknown }).status);
+  }
+  return normalizeNetworkStatus(state);
 }
