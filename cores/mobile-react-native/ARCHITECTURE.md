@@ -627,3 +627,57 @@ locale, sans UI**. Les **projets dérivés apportent leurs catalogues métier**.
   locale**, hook React + provider, RTL appliqué à l'UI, `Intl.RelativeTimeFormat`/
   `ListFormat`, chargement paresseux des catalogues, extraction/outillage de
   traduction.
+
+## 21. Deep-linking / routing — primitives génériques (RN 12)
+
+RN 12 ajoute une **couche pure de résolution de liens/deep-links vers routes
+internes validées**, **sans dépendance native, sans logique métier, sans UI,
+sans schéma métier**. Elle prépare le **tap de notification (RN 10)** et les liens
+entrants futurs. **Les projets dérivés définissent leurs routes concrètes** en
+mappant `route.path`/`route.params`.
+
+- **Parseur pur (`src/linking/url.ts`, agnostique)** : `parseDeepLink(input)` →
+  `{scheme, host, path, query, fragment}` — gère **custom schemes**
+  (`myapp://home/details?id=1`) **et** `https` universal links, **sans** utiliser
+  le `URL` global (comportement variable RN/Hermes/Node) → **déterministe**.
+  `decodeSafe` (`decodeURIComponent` **sans throw**), `normalizeUrl` (trim +
+  scheme/host en minuscule). **Ne parse que** — ne suit jamais, ne logge jamais,
+  ne stocke jamais d'URL.
+- **Modèle (`src/linking/resolve.ts`, agnostique)** : `AllowedScheme`,
+  `LinkRoute` `{path, params}`, **`LinkResolution`** discriminé = **`internal`**
+  (route sûre) · **`externalBlocked`** (`external_scheme`/`external_host`/
+  `insecure_scheme`/`open_redirect`) · **`invalid`** (`empty`/`unparseable`/
+  `unsafe_path`). `LinkingConfig` : **allowlist** `schemes` (custom + `https`) +
+  `hosts` (universal links), `sensitiveParams`, bornes (`maxParams`/
+  `maxParamValueLength`/`maxPathLength`).
+- **Résolution (`resolveLink(input, config)`, jamais de throw)** — **sécurité
+  (07_SECURITY §7/§8)** :
+  - **Allowlist stricte** : custom scheme inconnu → `external_scheme` ; `https`
+    host hors liste → `external_host` ; **`http` → `insecure_scheme`** ; tout
+    autre → `external_scheme`.
+  - **Anti open-redirect** : une route qui encode encore `//authority` ou un
+    `scheme://` absolu → **`open_redirect`** ; **traversal** `..`/`.` →
+    `unsafe_path`.
+  - **Params sensibles supprimés** (`token`/`access_token`/`secret`/`code`/
+    `signature`/`key`/`jwt`/`otp`/… + `config.sensitiveParams`) — **jamais
+    conservés** dans la route ; **aucune URL complète/sensible gardée**.
+  - **Bornes** : nombre de params, longueur des valeurs, longueur du path.
+  - `isInternalRoute(input, config)` = `resolveLink(...).kind === 'internal'`.
+- **Intégration notification (`resolveNotificationLink(data, config, options?)`)** :
+  lit une **clé configurable** (défaut `link`) dans le `data` d'une notification
+  (RN 10) — **aucune supposition de contenu métier** ; valeur absente/non-string
+  → `invalid`.
+- **Sécurité / gouvernance** : **aucun log** (donc aucun log de query sensible) ;
+  **aucun stockage** de lien/token/URL ; **aucune dépendance** (parseur maison) ;
+  l'application des routes (navigation réelle) appartient au projet dérivé.
+- **Tests** (`node --test`) : `linking-url` (decodeSafe **sans throw**,
+  parseDeepLink custom/https/relatif/invalide, normalizeUrl) + `linking-resolve`
+  (custom scheme valide, universal link valide, **host externe bloqué**, **http
+  bloqué**, **open-redirect** `//`/`scheme://`/`..` bloqué/rejeté, **params
+  sensibles retirés**, **bornes** count/longueur, **input invalide sans throw**,
+  `resolveNotificationLink` clé configurable). Module **entièrement agnostique**
+  (aucun hook → rien en typecheck-only).
+- **Différés** : adaptateur `expo-linking` réel (récupération de l'URL entrante/
+  initiale), **câblage navigation** (Expo Router) des routes résolues, schémas/
+  routes **concrets** (projets dérivés), liens authentifiés/différés post-login,
+  app links Android / universal links iOS (config natale).
