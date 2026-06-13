@@ -26,7 +26,9 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > analytics/crash ; environnement / métadonnées app RN 22 — contexte **coarse et
 > NON identifiant** (allow-list, version majeure, aucun device/installation id),
 > **ne décide ni ADR-038/ADR-019/ADR-018**, sans `expo-device`/`expo-application`
-> réel, ne collecte rien automatiquement).
+> réel, ne collecte rien automatiquement ; presse-papiers sécurisé RN 23 — seam
+> `expo-clipboard` **sans clipboard natif réel**, **aucun log de contenu**, refus du
+> contenu sensible sans opt-in, clipboard non persisté).
 > Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
