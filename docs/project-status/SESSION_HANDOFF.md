@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`I18N_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`LINKING_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -144,12 +144,18 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   interpolation `{name}`, **pluralisation `Intl.PluralRules`**, clé inconnue **sans throw**) + **formatters `Intl`**
   (`formatDate`/`formatNumber`/`formatCurrency` — devise requise, **ne lèvent jamais**) ; `LocaleAdapter` + **placeholder**
   (no native dep, no persistence) + `createLocalization` ; **aucune dépendance** (Intl built-in), aucun réseau/persistance/
-  UI, **catalogues métier = projets dérivés**. Layout **plat** + **autonome**. **144 tests `node --test`** (… +
-  notification-engine + **i18n-locale + i18n-catalog + i18n-format + i18n-engine**). Vérifs : **typecheck + lint + test
-  144/144 + expo-doctor 19/19 verts** (**RN 11 n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 +
-  `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel + token
-  device**, **adaptateurs Expo réels** (permissions/notifications/localisation), **catalogues métier i18n**,
-  **deep-linking** (= RN 12), **backend d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  UI, **catalogues métier = projets dérivés**. **+ RN 12 — deep-linking / routing primitives génériques** (07_SECURITY
+  §7/§8) : parseur pur (`parseDeepLink`/`decodeSafe`/`normalizeUrl`, custom schemes + `https`, **sans `URL` global**) +
+  **`resolveLink`** (`internal`/`externalBlocked`/`invalid`) — **allowlist stricte** schemes/hosts (**`http` →
+  `insecure_scheme`**), **anti-open-redirect** (`//`/`scheme://`/`..`), **params sensibles supprimés**, **bornes** ;
+  `isInternalRoute` ; **`resolveNotificationLink`** (clé configurable, tap notification RN 10) ; **aucun log** (ni query
+  sensible), **aucun stockage** de lien/URL, **aucune dépendance** ; routes concrètes = projets dérivés. Layout **plat**
+  + **autonome**. **159 tests `node --test`** (… + i18n-engine + **linking-url + linking-resolve**). Vérifs : **typecheck
+  + lint + test 159/159 + expo-doctor 19/19 verts** (**RN 12 n'ajoute aucune dépendance**) ; packages liés
+  `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**,
+  **push distant réel + token device**, **adaptateurs Expo réels** (permissions/notifications/localisation/linking),
+  **catalogues métier i18n + routes concrètes**, **analytics/télémétrie** (= RN 13), **backend d'observabilité**
+  (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -196,8 +202,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`I18N_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation**, 144 tests + bundle Metro).
+`LINKING_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing**, 159 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -228,7 +234,34 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 11 — i18n / localisation primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 12 — deep-linking / routing primitives génériques** (`cores/mobile-react-native/`, périmètre
+`src/linking` + `test/**` + docs) : ajoute une **couche pure de résolution de liens/deep-links vers routes internes
+validées**, **sans dépendance native, sans logique métier, sans UI, sans schéma métier**. `mobile-react-native` →
+**`LINKING_READY`**. **Aucune dépendance ajoutée.** Prépare le **tap de notification (RN 10)** ; **les projets dérivés
+définissent leurs routes concrètes**. **Parseur pur** (`src/linking/url.ts`, agnostique) : `parseDeepLink` →
+`{scheme,host,path,query,fragment}` — gère **custom schemes** (`myapp://home/details?id=1`) **et** `https` universal
+links, **sans** le `URL` global (comportement variable RN/Hermes/Node) → **déterministe** ; `decodeSafe`
+(`decodeURIComponent` **sans throw**), `normalizeUrl` (trim + scheme/host minuscule). **Modèle/résolution**
+(`src/linking/resolve.ts`, agnostique) : **`LinkResolution`** = **`internal`** (route sûre) / **`externalBlocked`**
+(`external_scheme`/`external_host`/`insecure_scheme`/`open_redirect`) / **`invalid`** (`empty`/`unparseable`/
+`unsafe_path`) ; `LinkingConfig` (**allowlist** `schemes` custom + `https`, `hosts`, `sensitiveParams`, bornes).
+**Sécurité (07_SECURITY §7/§8)** : **allowlist stricte** (**`http` → `insecure_scheme`**) ; **anti-open-redirect** (une
+route encodant `//authority` ou `scheme://` absolu → bloquée ; traversal `..`/`.` → `unsafe_path`) ; **params sensibles
+supprimés** (token/secret/code/signature/key/jwt/otp/… + config) — **jamais conservés**, aucune URL complète gardée ;
+**bornes** (count/longueur/path) ; `isInternalRoute`. **Intégration notification** : `resolveNotificationLink(data,
+config, options?)` lit une **clé configurable** (défaut `link`) du `data` (RN 10), **sans supposition métier** ;
+absente/non-string → `invalid`. **Gouvernance** : **aucun log** (donc aucune query sensible loggée), **aucun stockage**
+de lien/token/URL, **aucune dépendance** (parseur maison) ; la navigation réelle appartient au projet dérivé. **+15
+tests `node --test`** (`linking-url` : decodeSafe **sans throw**, parseDeepLink custom/https/relatif/invalide,
+normalizeUrl ; `linking-resolve` : custom valide, universal valide, **host externe bloqué**, **http bloqué**,
+**open-redirect** `//`/`scheme://`/`..` bloqué/rejeté, **params sensibles retirés**, **bornes**, **input invalide sans
+throw**, `resolveNotificationLink` clé configurable) → **159 tests** ; module **entièrement agnostique** (aucun hook →
+rien en typecheck-only). Vérifs : **typecheck + lint + test 159/159 + expo-doctor 19/19 verts** (**RN 12 n'ajoute aucune
+dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+core. Commit `feat(mobile): add generic deep-linking routing primitives`. **Prochaine action : Mobile Core React Native
+13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel).**
+
+**Étape précédente — Mobile Core React Native 11 — i18n / localisation primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/i18n` + `test/**` + docs) : ajoute des **primitives i18n/localisation génériques**, testables, **sans contenu
 métier, sans dépendance native, sans appel réseau, sans persistance de locale, sans UI**. `mobile-react-native` →
 **`I18N_READY`**. **Aucune dépendance ajoutée** (tout via `Intl` built-in). **Modèle de locale** (`src/i18n/locale.ts`,
