@@ -35,6 +35,11 @@
 > aucun transport d'observabilité, ne remplace pas l'UI de consentement et ne
 > décide pas ADR-038/ADR-019/ADR-018 ; elle renforce seulement l'application
 > locale d'ADR-040 par des logs `{operation,category,allowed}`.
+>
+> **Note RN26 (roadmap Mobile V1)** : le Settings shell protégé aligne le core
+> avec `strategy/04_ROADMAP_GLOBAL.md` §9 (settings screen + starter exploitable).
+> Il ne crée pas de nouvel ADR : aucun SDK, endpoint métier, adaptateur natif,
+> persistance ou politique de retry n'est décidé.
 
 ## 2. Décisions validées — état d'application
 

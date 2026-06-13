@@ -1398,3 +1398,49 @@ délibérément hors circuit.
 - **Différés** : UI de consentement, choix d'un SDK analytics/crash réel,
   transport observabilité, adaptateurs natifs d'environnement, hooks React,
   émission au lifecycle, batching/flush, corrélation cross-service.
+
+## 35. Starter shell Settings — surface V1 utilisable (RN 26)
+
+RN 26 ajoute une route protégée `app/(app)/settings.tsx` et le lien depuis
+`home.tsx` pour aligner le starter avec `strategy/04_ROADMAP_GLOBAL.md` §9
+Mobile Core React Native V1 : la roadmap demande une base réellement exploitable
+avec navigation auth/private, home screen, settings screen, services génériques
+branchables, états UI standards et composants de base. RN 26 ne crée aucune
+logique métier ; il rend simplement les primitives existantes inspectables depuis
+un écran sobre.
+
+- **Navigation** : `ROUTES.settings = '/settings'` est ajoutée à
+  `src/navigation/routes.ts`. La route vit dans le groupe protégé `(app)` et
+  bénéficie donc du guard existant : `loading`/`refreshing` affichent un loading
+  state, `unauthenticated`/`expired` redirigent vers le sign-in, `authenticated`
+  rend la stack privée. Home ajoute un bouton vers Settings.
+- **Session** : l'écran lit `useAuth()` et affiche le statut, l'utilisateur si
+  présent et l'expiration. Les actions `refreshSession` et `signOut` réutilisent
+  le provider existant ; RN 26 ne modifie pas `AuthEngine`, `withAuthRetry`,
+  `authedRequest`, QueryClient ni les mutations.
+- **Preferences / UI** : l'écran lit `themePreference` depuis `useUiStore`
+  (Zustand RN 6) et expose `reset()` pour réinitialiser l'état UI in-memory. Rien
+  n'est persisté et aucun secret n'entre dans le store.
+- **Privacy / Telemetry** : l'écran instancie localement un
+  `ConsentService` avec `createPlaceholderConsentStore()`. Il affiche les statuts
+  `analytics`/`crash`/`performance`/`diagnostics` en `unknown` par défaut. Ce
+  n'est pas un provider global, pas une UI de consentement projet, pas un câblage
+  d'émission analytics/crash et pas une décision ADR-038.
+- **Environment** : l'écran instancie localement un `AppEnvironmentService` sur
+  placeholder RN 22 et affiche uniquement `describeForContext()` : contexte safe,
+  coarse, non identifiant. Aucun adaptateur `expo-device`/`expo-application`
+  réel n'est ajouté.
+- **Foundation diagnostics** : l'écran expose une liste statique de primitives
+  disponibles (`auth`, `query`, `upload`, `logger`, `consent`, `telemetry
+  coordinator`, `retry`) sans aucun appel réseau, sans endpoint métier et sans
+  retry branché.
+- **UI** : RN 26 réutilise `Screen`, `Text` et `Button`; les sections et lignes
+  restent locales au fichier Settings pour éviter une abstraction UI prématurée.
+  Le rendu est mobile-friendly via `ScrollView`, spacing token-driven et texte
+  compact.
+- **Tests** : aucun helper pur n'est ajouté. La validation repose sur
+  `typecheck`/`lint` pour les écrans Expo/React et sur la non-régression
+  `node --test` existante. Le rendu runtime device/simulateur reste différé.
+- **Différés** : captures device, ergonomie détaillée, vraie UI de consentement,
+  adaptateurs natifs réels, diagnostics dynamiques, paramètres métier, versioning
+  d'app réel et toute émission télémétrie automatique.

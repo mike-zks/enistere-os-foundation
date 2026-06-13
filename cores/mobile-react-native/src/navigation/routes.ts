@@ -13,6 +13,8 @@ export const ROUTES = {
   signIn: '/sign-in',
   /** Authenticated placeholder screen (protected stack). */
   home: '/home',
+  /** Generic protected settings / foundation diagnostics screen. */
+  settings: '/settings',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 26 — V1 usable starter shell / settings générique
+
+- **Mobile Core React Native 26** (`cores/mobile-react-native/`) : ajoute un écran Settings générique protégé pour rendre le starter V1 plus exploitable, conformément à `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile Core React Native V1. `mobile-react-native` passe de `TELEMETRY_COORDINATOR_READY` à **`STARTER_SETTINGS_READY`**.
+  - **Navigation** : nouvelle route `ROUTES.settings = '/settings'`, fichier `app/(app)/settings.tsx` dans la stack protégée, lien depuis `home.tsx`.
+  - **Settings** : sections Session (statut, refresh session, sign out), Preferences/UI (`themePreference` Zustand RN 6 + reset UI), Privacy/Telemetry (consentement RN 21 via placeholder local), Environment (contexte safe RN 22 via placeholder/service), Foundation diagnostics (auth/query/upload/logger/consent/telemetry coordinator/retry).
+  - **Contraintes** : aucun endpoint métier, aucun appel réseau, aucune dépendance, aucun adaptateur natif réel, aucun SDK analytics/crash réel, aucune persistance nouvelle, aucun retry branché, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations.
+  - **Tests** : aucun helper pur ajouté ; validation par typecheck/lint pour les écrans Expo/React + non-régression `npm test` existante (**355 cas `test(...)`**).
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test`, `expo-doctor 19/19`, `git diff --check`.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §35 ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 27 — durcissement runtime du starter Expo.** Commit `feat(mobile): add generic settings starter shell`.
+
 ### Mobile Core React Native 25 — telemetry context composition opt-in
 
 - **Mobile Core React Native 25** (`cores/mobile-react-native/`) : ajoute `src/telemetry` — des primitives de composition télémétrie **opt-in** qui combinent explicitement le consentement RN 21, le contexte environnement sûr RN 22 et les services analytics RN 13 / crash RN 19. `mobile-react-native` passe de `RETRY_READY` à **`TELEMETRY_COORDINATOR_READY`**. **Aucun SDK réel, aucun réseau, aucune persistance, aucun identify/user-id, aucune émission automatique et aucun usage du retry RN 24**.
@@ -15,7 +25,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
   - **Logs** : uniquement `{operation,category,allowed}` ; jamais event name, payload, body, URL, token, error message, stack ni contexte détaillé.
   - **Tests** : **+9** cas `node --test` — `telemetry-context-gate` et `telemetry-service` → **355 cas `test(...)`**.
   - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (355 cas `test(...)`), `expo-doctor 19/19`, `git diff --check`.
-  - **Docs** : `README.md` + `ARCHITECTURE.md` §34 ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 26 — intégrer un adaptateur natif sûr explicite, sans SDK télémétrie réel ni logique métier.** Commit `feat(mobile): add telemetry coordinator primitives`.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §34 ; checkpoint `docs/project-status/` synchronisé. **Historique : RN26 a finalement livré le Settings starter shell V1.** Commit `feat(mobile): add telemetry coordinator primitives`.
 
 ### Mobile Core React Native 24 — retry / backoff primitives génériques
 
