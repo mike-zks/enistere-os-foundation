@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Deep-Linking / Routing Primitives
+# Mobile Core React Native — Generic Analytics / Telemetry Primitives
 
-> Statut : **`LINKING_READY`** (V1 — RN 12 ; socle RN 1 → i18n RN 11)
+> Statut : **`ANALYTICS_READY`** (V1 — RN 13 ; socle RN 1 → deep-linking RN 12)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -25,12 +25,13 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Notifications locales (RN 10)** | `src/notifications` | `NotificationMessage` **borné/sûr** (`sanitizeNotificationMessage`, `describeNotificationForLog` **sans contenu**) + `NotificationDeliveryState`/`NotificationTrigger` (`normalizeTrigger`) ; `NotificationAdapter` (seam Expo) + **`createNotificationService`** (gate sur la permission `notifications` RN 9 — **jamais de schedule sans permission usable**, `schedule`/`cancel`/`cancelAll`/`getDelivered`, **logs sûrs** via logger RN 8, `NotificationError` contrôlé) ; **adaptateur placeholder** (no native dep). **LOCAL uniquement** : **aucun push réel**, **aucun token device/FCM/APNs**, **aucun stockage**, **aucune UI**. |
 | **i18n / localisation (RN 11)** | `src/i18n` | Modèle de locale (`normalizeLocale` via `Intl`, `getLocaleDirection` ltr/rtl, `resolveLocale`) + **catalogue typé** (`createTranslator` : `t`/`has`/`plural`, **interpolation `{name}`**, **pluralisation `Intl.PluralRules`**, clé inconnue **sans throw**) + **formatters `Intl`** (`formatDate`/`formatNumber`/`formatCurrency` — devise requise, **ne lèvent jamais**) ; `LocaleAdapter` (seam Expo) + **adaptateur placeholder** (no native dep) + **`createLocalization`** (résout locale + catalogue + formatters). **Aucune dépendance** (tout via `Intl`), **aucun réseau/persistance/UI** ; **catalogues métier = projets dérivés**. |
 | **Deep-linking / routing (RN 12)** | `src/linking` | Parseur pur (`parseDeepLink`, `decodeSafe`, `normalizeUrl` — custom schemes + `https`, sans `URL` global) + **`resolveLink`** (`LinkResolution` `internal`/`externalBlocked`/`invalid`) : **allowlist stricte** schemes/hosts, **anti-open-redirect** (`//`/`scheme://`/`..`), **params sensibles supprimés**, bornes ; `isInternalRoute` ; **`resolveNotificationLink`** (clé configurable, tap notification RN 10). **Aucun log** (donc aucune query sensible loggée), **aucun stockage** de lien/URL, **aucune dépendance native**, **aucune UI** ; **routes concrètes = projets dérivés**. |
+| **Analytics / télémétrie (RN 13)** | `src/analytics` | `AnalyticsEvent` borné aux primitives + **redaction dédiée basée RN 8** (`sanitizeAnalyticsEvent` : `isSensitiveProperty` réutilise `isSensitiveKey` + scrub valeurs via `redactString`, bornes, **sans throw**) ; `AnalyticsAdapter` (track/flush?, **pas de `identify`**) + **`createAnalyticsService`** (track **best-effort non-intrusif**, **logs sûrs** `{eventName,propertyCount}` via logger RN 8 — jamais les valeurs, erreurs adapter **contrôlées**) ; **adaptateur placeholder** mémoire (tests). **Aucun SDK réel** (Sentry/Amplitude/GA/Segment/Firebase/OTel), **aucun réseau/persistance/user-id réel/token** ; SDK réel = **ADR projet dérivé**. |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine, **linking-url, linking-resolve**) — **159 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve, **analytics-event, analytics-engine**) — **175 tests** |
 
 ## Stack
 
@@ -57,6 +58,7 @@ cores/mobile-react-native/
 │   │   └── home.tsx          # écran placeholder authentifié
 │   └── +not-found.tsx        # fallback
 ├── src/
+│   ├── analytics/            # analytics/télémétrie (agnostiques) : event+redaction (basée RN 8) + adapter + engine + placeholder (RN 13)
 │   ├── api/                  # client OFFICIEL @enistere/api-client-fetch (index.ts) + with-auth-retry (pont 401, agnostique)
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
@@ -76,7 +78,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve)
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve, analytics-event, analytics-engine)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -103,6 +105,7 @@ cores/mobile-react-native/
 | **07_SECURITY §13 / ADR-040** Logs | **notifications locales (RN 10)** : le **contenu** (`title`/`body`/`data`) est potentiellement de la PII → **jamais loggé** (`describeNotificationForLog` = métadonnées seules) ; **aucun token device/push/FCM/APNs** ; **aucun stockage** ; planification **gouvernée** par la permission `notifications` (RN 9) — voir ARCHITECTURE §19 |
 | **08_STANDARDS / 06_DEPENDENCY** i18n | **localisation (RN 11)** : primitives génériques **via `Intl` built-in** (**aucune dépendance** ajoutée, pas de framework i18n lourd) ; **aucun réseau**, **aucune persistance de locale**, **aucun contenu métier** (catalogues = projets dérivés) — voir ARCHITECTURE §20 |
 | **07_SECURITY §7/§8** Deep-linking | **routing (RN 12)** : **allowlist stricte** schemes/hosts ; **rejet open-redirect** (`//`/`scheme://`/`..`) + URLs externes ; **params sensibles supprimés** ; **aucun log** de query, **aucun stockage** de lien/URL ; parseur **maison** (no native dep) ; routes concrètes = projets dérivés — voir ARCHITECTURE §21 |
+| **07_SECURITY §13 / ADR-040** Analytics | **télémétrie (RN 13)** : redaction **basée RN 8** (clés sensibles supprimées + valeurs scrubbées via `redactString`) ; **aucun SDK réel/réseau/persistance**, **aucun user-id réel/token/Authorization/URL signée/URI device** ; logs **sûrs** (`{eventName,propertyCount}` — jamais les valeurs) ; SDK réel = **ADR projet dérivé** — voir ARCHITECTURE §22 |
 
 ## Commandes
 
@@ -141,7 +144,11 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
 ## Hors périmètre de cette mission (différé)
 
 Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
-de mission. **Le deep-linking (RN 12) livre les primitives** (parseur,
+de mission. **L'analytics (RN 13) livre les primitives** (modèle + redaction
+basée RN 8, adapter, service, placeholder) mais **PAS** de **SDK réel**
+(Sentry/Amplitude/GA/Segment/Firebase/OTel — sous ADR/validation), de transport
+réseau/batching, de **consentement** opt-in/out, de `identify`/user-id ni de
+crash reporting. **Le deep-linking (RN 12) livre les primitives** (parseur,
 `resolveLink`, `resolveNotificationLink`) mais **PAS** d'adaptateur `expo-linking`
 réel (récupération de l'URL entrante/initiale), de câblage navigation (Expo
 Router) des routes résolues, de **schémas/routes concrets** (projets dérivés) ni
@@ -178,16 +185,16 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **159/159** (`node --test` : … i18n-locale, i18n-catalog, i18n-format, i18n-engine, **linking-url + linking-resolve** — RN 12).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 12 n'ajoute aucune dépendance)*.
+- `test` : ✅ **175/175** (`node --test` : … linking-url, linking-resolve, **analytics-event + analytics-engine** — RN 13).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 13 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec
-redaction, sans SDK réel)** : une couche d'événements typés au-dessus de la
-redaction RN 8 (`AnalyticsAdapter` seam + service qui **redacte** les propriétés
-sensibles, **aucune PII/token**), **adaptateur placeholder**, **sans SDK réel
-(Sentry/Amplitude/GA)**, **sans réseau**, **mappée purement** et **testable**.
-Une seule mission à la fois. *(Adaptateurs Expo réels, push distant et offline
-sync — ADR-029 — restent différés.)*
+**Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** : des
+helpers a11y purs (constructeurs de props `role`/`label`/`state`/`hint`, modèle
+d'annonce lecteur d'écran via `A11yAdapter` + placeholder, ordre/gestion de focus),
+**mappés purement** et **testables**, **sans dépendance native** ni UI — alignés
+avec les erreurs accessibles des forms (RN 3) et le UI Kit. Une seule mission à la
+fois. *(SDK analytics réel, adaptateurs Expo réels et offline sync — ADR-029 —
+restent différés.)*
