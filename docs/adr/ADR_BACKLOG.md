@@ -20,7 +20,10 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > crash/error-reporting RN 19 — primitive préparatoire qui **ne décide pas ADR-019**,
 > sans SDK réel/réseau/persistance ; préférences non sensibles RN 20 — seam
 > MMKV/AsyncStorage **sans store natif réel**, données non sensibles uniquement,
-> ne décide aucun choix de stockage natif — ADR-015 §15/§16).
+> ne décide aucun choix de stockage natif — ADR-015 §15/§16 ; consentement
+> télémétrie / privacy gate RN 21 — primitive préparatoire **default-deny** qui
+> **ne décide pas ADR-038**, sans SDK/réseau/UI/identifiant/PII, ne câble pas
+> analytics/crash).
 > Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
@@ -114,7 +117,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-035 | Angular UI : Angular Material vs PrimeNG | Future | ui-kit, web-angular | Non | À rédiger | À traiter avant Web Core Angular. |
 | ADR-036 | Observabilité distribuée et tracing | Future | cloud, api-nestjs, web-nextjs | Non | À rédiger | Après monitoring de base. |
 | ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Utile pour SaaS et rollout progressif. RN 17 livre seulement des primitives config/flags locales génériques, sans remote-config, réseau, persistance ni ciblage utilisateur. |
-| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | À cadrer avec confidentialité, consentement et coûts. RN 13 livre seulement un modèle d'événements/redaction + adapter placeholder, sans SDK réel, transport ni identify. |
+| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | À cadrer avec confidentialité, consentement et coûts. RN 13 livre seulement un modèle d'événements/redaction + adapter placeholder, sans SDK réel, transport ni identify. **RN 21 livre seulement un gate de consentement générique (default-deny, persistance déléguée aux préférences RN 20), sans SDK/réseau/UI/identifiant/PII — RN 21 ne décide pas cet ADR et ne choisit aucun SDK, coût, politique privacy ou UI de consentement.** |
 
 ## 7. Tableau synthétique des ADR
 
@@ -157,7 +160,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-035 | Angular UI | Future | ui-kit, web-angular | Non | À rédiger | Angular Material vs PrimeNG. |
 | ADR-036 | Observabilité distribuée | Future | cloud, api-nestjs, web-nextjs | Non | À rédiger | Tracing futur. |
 | ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Rollout progressif ; RN 17 ne décide pas d'un remote-config réel. |
-| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/consentement/coûts ; RN 13 ne décide pas d'un SDK réel. |
+| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/consentement/coûts ; RN 13 ne décide pas d'un SDK réel ; RN 21 = gate de consentement générique préparatoire (ne décide pas cet ADR). |
 | ADR-039 | Hachage mots de passe : Argon2id vs bcrypt | Haute | api-nestjs | Oui | Validé | Standard Argon2id ; requis avant Auth 2. |
 | ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Pino (moteur officiel) ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, Loki/Grafana côté Cloud Core ; AuditLog séparé. Recommandé avant release V1. |
 
