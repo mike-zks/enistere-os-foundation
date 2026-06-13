@@ -41,13 +41,14 @@ export interface AccessibilityStateProp {
  * subset (drops `focused`/`pressed`/`invalid` — RN has no native field for them;
  * the consumer uses those for styling / hints). Only defined keys are included.
  */
-export function buildAccessibilityState(state: A11yState): AccessibilityStateProp | undefined {
+export function buildAccessibilityState(state: A11yState | null | undefined): AccessibilityStateProp | undefined {
+  const safeState = state ?? {};
   const out: Record<string, boolean | 'mixed'> = {};
-  if (state.disabled !== undefined) out.disabled = state.disabled;
-  if (state.selected !== undefined) out.selected = state.selected;
-  if (state.checked !== undefined) out.checked = state.checked;
-  if (state.busy !== undefined) out.busy = state.busy;
-  if (state.expanded !== undefined) out.expanded = state.expanded;
+  if (safeState.disabled !== undefined) out.disabled = safeState.disabled;
+  if (safeState.selected !== undefined) out.selected = safeState.selected;
+  if (safeState.checked !== undefined) out.checked = safeState.checked;
+  if (safeState.busy !== undefined) out.busy = safeState.busy;
+  if (safeState.expanded !== undefined) out.expanded = safeState.expanded;
   return Object.keys(out).length > 0 ? (out as AccessibilityStateProp) : undefined;
 }
 
@@ -70,12 +71,13 @@ export interface A11yProps {
 }
 
 /** Build a complete, bounded {@link A11yProps} object. Never throws. */
-export function buildA11yProps(options: A11yPropsOptions): A11yProps {
-  const label = normalizeA11yText(options.label, MAX_LABEL_LENGTH);
-  const hint = normalizeA11yText(options.hint, MAX_HINT_LENGTH);
-  const accessibilityState = options.state ? buildAccessibilityState(options.state) : undefined;
+export function buildA11yProps(options: A11yPropsOptions | null | undefined = {}): A11yProps {
+  const safeOptions = options ?? {};
+  const label = normalizeA11yText(safeOptions.label, MAX_LABEL_LENGTH);
+  const hint = normalizeA11yText(safeOptions.hint, MAX_HINT_LENGTH);
+  const accessibilityState = safeOptions.state ? buildAccessibilityState(safeOptions.state) : undefined;
   const accessible =
-    options.accessible ?? (options.role !== undefined || label !== undefined ? true : undefined);
+    safeOptions.accessible ?? (safeOptions.role !== undefined || label !== undefined ? true : undefined);
 
   const props: {
     accessible?: boolean;
@@ -85,7 +87,7 @@ export function buildA11yProps(options: A11yPropsOptions): A11yProps {
     accessibilityState?: AccessibilityStateProp;
   } = {};
   if (accessible !== undefined) props.accessible = accessible;
-  if (options.role !== undefined) props.accessibilityRole = options.role;
+  if (safeOptions.role !== undefined) props.accessibilityRole = safeOptions.role;
   if (label !== undefined) props.accessibilityLabel = label;
   if (hint !== undefined) props.accessibilityHint = hint;
   if (accessibilityState !== undefined) props.accessibilityState = accessibilityState;
