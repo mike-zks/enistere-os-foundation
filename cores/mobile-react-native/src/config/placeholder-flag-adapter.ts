@@ -23,7 +23,7 @@ export function createPlaceholderFlagAdapter(initial: unknown = {}): Placeholder
   const listeners = new Set<(flags: FlagSet) => void>();
 
   return {
-    getFlags: () => current,
+    getFlags: () => ({ ...current }),
     subscribe: (listener) => {
       listeners.add(listener);
       return () => {
@@ -31,12 +31,12 @@ export function createPlaceholderFlagAdapter(initial: unknown = {}): Placeholder
       };
     },
     async refresh(): Promise<FlagSet> {
-      return current;
+      return { ...current };
     },
     setFlags: (input) => {
       current = sanitizeFlagSet(input);
       for (const listener of listeners) {
-        listener(current);
+        listener({ ...current });
       }
     },
   };

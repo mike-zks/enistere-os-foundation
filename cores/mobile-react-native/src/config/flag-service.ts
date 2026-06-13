@@ -72,7 +72,7 @@ export function createFlagService(options: FlagServiceOptions): FlagService {
     logger?.debug('flags updated', { ...describeFlagsForLog(current) });
     for (const listener of listeners) {
       try {
-        listener(current);
+        listener({ ...current });
       } catch {
         logger?.warn('flags listener failed');
       }

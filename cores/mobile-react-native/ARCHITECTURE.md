@@ -877,7 +877,7 @@ reste dans **`src/offline`** (pas de module `src/network` concurrent).
   (compose avec `shouldQueueMutations`), **`shouldQueue()`** (raccourci =
   `shouldQueueMutations(getStatus())`), `subscribe`, `transition(input)` (status
   nu/`{status,type}`/garbage tolérés), `dispose`. **`changedAt` stampé sur
-  changement de STATUS** via **horloge injectée** (défaut `Date.now`) — un
+  changement de STATUS** via **horloge injectée** (défaut déterministe `0`) — un
   changement de type seul conserve `changedAt` (contrat RN 3). **Best-effort /
   non-intrusif** : erreurs adapter `getStatus`/`subscribe` **capturées** + `warn`
   sûr, défaut `unknown` ; **listener qui throw isolé**. **Logs RN 8 sûrs** : que

@@ -75,6 +75,9 @@ test('typed getters return the value only when the type matches (safe defaults)'
   // generic getFlagValue mirrors the type-match rule
   assert.equal(getFlagValue(set, 'b', false), true);
   assert.equal(getFlagValue(set, 'b', 'x'), 'x'); // type mismatch -> default
+  assert.equal(getBooleanFlag(null, 'b', false), false);
+  assert.equal(getStringFlag(undefined, 's', 'def'), 'def');
+  assert.equal(getNumberFlag(set, 'bad key', 3), 3);
 });
 
 test('describeFlagsForLog exposes a count ONLY (no keys/values)', () => {
@@ -82,4 +85,5 @@ test('describeFlagsForLog exposes a count ONLY (no keys/values)', () => {
   assert.deepEqual(safe, { count: 2 });
   assert.ok(!JSON.stringify(safe).includes('secret-xyz'));
   assert.ok(!JSON.stringify(safe).includes('feature.secret'));
+  assert.deepEqual(describeFlagsForLog(null), { count: 0 });
 });
