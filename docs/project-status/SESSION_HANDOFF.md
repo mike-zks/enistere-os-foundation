@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`BIOMETRIC_GATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`CRASH_REPORTING_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -193,17 +193,29 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (`getAvailability`/`isAvailable`/`authenticate`, **stateless**, **aucun faux succès** — `unavailable` **sans prompt** si
   inutilisable, adapter qui throw → `error`, **ne throw jamais**, **logs sûrs** `{availability,type}`/`{outcome}`/
   `{operation}` — **jamais prompt ni cause native**) ; **gate d'UX local — ne remplace JAMAIS l'auth serveur (API Core =
-  autorité)** ; **aucun `LocalAuthentication`/Keychain réel/secret/biométrie/résultat/profil stocké**. Layout **plat** +
-  **autonome**. **262 tests `node --test`** (… + config-flags + config-flag-service + **biometrics-model +
-  biometrics-engine**). Vérifs : **typecheck + lint + test 262/262 + expo-doctor 19/19 + git diff --check verts** (**RN 18
-  n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
-  métier.** Différés : **écran/picker d'upload**, **push distant réel + token device**, **adaptateurs natifs réels**
-  (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/NetInfo/**LocalAuthentication/Keychain**),
-  **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props a11y / câblage
-  des effets lifecycle dans des composants**, **source remote-config/local réelle des feature flags**, **activation
-  biométrique réelle + fallback concret** (par projet, documenté — ADR-015 §20/§31), **crash/error-reporting réel** (= RN
-  19, ADR-019), **offline sync réelle** (ADR-029), **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand`
-  au root inchangée — mobile autonome, hors scope.)*
+  autorité)** ; **aucun `LocalAuthentication`/Keychain réel/secret/biométrie/résultat/profil stocké**. **+ RN 19 — crash /
+  error-reporting primitives génériques (seam, sans SDK réel)** (ADR-040 §17/§18/§19 / ADR-015 §12/§21/§24) : **ajoute
+  `src/crash-reporting`** — `CrashReportEvent` borné (`severity`/`source`/`name`/`message`/`stack?`/`context`) **rédigé via
+  la redaction centrale RN 8** + bornes (`sanitizeCrashMessage`/**`sanitizeCrashStack`** — chemins device/tokens/URL
+  signées/emails scrubés + cap frames, **jamais de stack brute** ; `sanitizeCrashContext` — clés sensibles → `[Redacted]`,
+  primitives bornées) + `normalizeCrashSeverity`/`normalizeCrashSource` tolérants + `createCrashReportEvent` (**gelé**) +
+  `describeCrashEventForLog` → **`{severity,source}` seul** ; `CrashReporterAdapter` (seam Sentry/Crashlytics ; ne reçoit
+  QUE des événements **assainis**) + **`CrashReporterAdapterError`** + **placeholder** mémoire (copies défensives) +
+  `createCrashReporterService` (`captureError`/`captureMessage`/`setContext`/`flush`, **best-effort non-intrusif** — sync
+  throw + async reject **capturés**, **jamais de faux succès / re-throw / rejection non gérée**, **logs sûrs**
+  `{operation,severity,source}` — **jamais le contenu**) ; **primitive préparatoire — ne décide PAS ADR-019** ; **sans SDK
+  réel/réseau/persistance/batching/crash handler global ; aucun token/cookie/URL signée/URI device/PII/body/stack brute/
+  user-id réel**. Layout **plat** + **autonome**. **279 tests `node --test`** (… + biometrics-model + biometrics-engine +
+  **crash-reporting-event + crash-reporting-engine**). Vérifs : **typecheck + lint + test 279/279 + expo-doctor 19/19 +
+  git diff --check verts** (**RN 19 n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 +
+  `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel + token
+  device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/
+  NetInfo/LocalAuthentication/Keychain), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR),
+  **application des props a11y / câblage des effets lifecycle dans des composants**, **source remote-config/local réelle
+  des feature flags**, **activation biométrique réelle + fallback concret** (par projet, documenté — ADR-015 §20/§31),
+  **SDK crash réel (Sentry/Crashlytics) + crash handlers globaux** (ADR-019), **préférences persistantes non sensibles
+  réelles** (= RN 20, MMKV/AsyncStorage), **offline sync réelle** (ADR-029), **backend d'observabilité** (ADR-018/036).
+  *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -250,8 +262,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`BIOMETRIC_GATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local**, 262 tests + bundle Metro).
+`CRASH_REPORTING_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting**, 279 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -282,7 +294,45 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 18 — gate biométrique local primitives génériques** (`cores/mobile-react-native/`,
+**Mobile Core React Native 19 — crash / error-reporting primitives génériques (seam, sans SDK réel)**
+(`cores/mobile-react-native/`, périmètre `src/crash-reporting` + `test/**` + docs) : ajoute une **couche de crash /
+error-reporting générique**, **pure et testable**, **sans SDK réel** (Sentry/Crashlytics/Bugsnag/Firebase/OTel), **sans
+réseau, sans persistance, sans batching, sans crash handler global obligatoire, sans logique métier**.
+`mobile-react-native` → **`CRASH_REPORTING_READY`**. **Aucune dépendance ajoutée.** C'est une **primitive préparatoire**
+qui **ne décide PAS ADR-019** (qui reste à rédiger). **Sécurité (ADR-040 §17/§18/§19, ADR-015 §12/§21/§24)** : toute
+donnée passe par la **redaction centrale RN 8** (`redactValue`/`redactString`) puis est **bornée** ; **jamais** token/
+cookie/Authorization/URL signée/URI device/PII/body, **jamais de stack brute**, **aucun user-id réel** (`identify`
+absent), **aucun crash handler global** imposé. **Modèle** (`event.ts`, agnostique) : `CrashReportEvent` borné
+(`severity`/`source`/`name`/`message`/`stack?`/`context`) ; `CrashSeverity` (`fatal`/`error`/`warning`/`info`) +
+`CrashSource` (`unhandled`/`unhandledRejection`/`caught`/`manual`/`unknown`) + `CrashContext` (primitives seulement) ;
+**`sanitizeCrashMessage`** (redaction + `MAX_MESSAGE_LENGTH`), **`sanitizeCrashStack`** (redaction chemins device/tokens/
+URL signées/emails + cap `MAX_STACK_FRAMES`/`MAX_STACK_LENGTH` — **jamais de stack brute**), **`sanitizeCrashContext`**
+(clés sensibles → `[Redacted]`, valeurs string rédigées+bornées, primitives gardées, non-primitifs droppés, cap
+`MAX_CONTEXT_KEYS`) ; `normalizeCrashSeverity`/`normalizeCrashSource` **tolérants** (junk → `error`/`unknown`) ;
+`createCrashReportEvent` (objet **gelé**, ne throw jamais) + `cloneCrashReportEvent` (copie défensive gelée) ;
+`describeCrashEventForLog` → **`{severity,source}` UNIQUEMENT**. **Adaptateur** (`adapter.ts`) : `CrashReporterAdapter`
+(seam Sentry/Crashlytics : `captureError`/`captureMessage`/`setContext?`/`flush?`) — ne reçoit **QUE** des
+`CrashReportEvent` **déjà assainis** ; **`CrashReporterAdapterError`** contrôlé (`operation` seul). **Placeholder**
+(`placeholder-adapter.ts`) : mémoire ; `getErrors`/`getMessages`/`getContext` renvoient des **copies défensives** (re-clone
+gelé) ; `flushCount` ; no dep / réseau / persistance. **Service** (`engine.ts`, agnostique) :
+`createCrashReporterService({adapter, logger?, context?})` → `captureError(error, opts?)` (défaut `error`/`caught`),
+`captureMessage(message, opts?)` (défaut `info`/`manual`), `setContext` (merge + assainit l'ambient), `flush`
+(best-effort, **ne rejette jamais**). **Best-effort non-intrusif** : un adapter qui **throw** (sync) **ou rejette**
+(async) est **capturé** → `warn` sûr — **jamais re-throw, jamais de faux succès** (aucun `debug "reported"` si l'op a
+échoué), **jamais de rejection non gérée**. **Logs RN 8 sûrs** : `{operation,severity,source}` (captures) /
+`{operation}` (setContext/flush) — **jamais le message/stack/context**. **+17 tests `node --test`**
+(`crash-reporting-event` : normalisation severity/source, **sanitization message/stack/context** — tokens/JWT/Bearer/
+emails/URL signées/URI device rédigés, bornes, cap frames/keys, **tolérance input invalide**, objets **gelés**,
+`describe*ForLog` enums ; `crash-reporting-engine` : capture error/message assainies → adapter, **setContext mergé/
+assaini**, **capture ne throw jamais** (adapter sync qui throw), **adapter async qui rejette swallowed — pas de faux
+succès**, **flush best-effort**, **logs `{operation,severity,source}` sans contenu sensible**, **placeholder copies
+défensives**) → **279 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+Vérifs : **typecheck + lint + test 279/279 + expo-doctor 19/19 + git diff --check verts** (**RN 19 n'ajoute aucune
+dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+core. Commit `feat(mobile): add crash reporting primitives`. **Prochaine action : Mobile Core React Native 20 —
+préférences non sensibles persistantes primitives génériques (seam, sans MMKV/AsyncStorage réel — ADR-015 §15/§16).**
+
+**Étape précédente — Mobile Core React Native 18 — gate biométrique local primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/biometrics` + `test/**` + docs) : ajoute une **couche de gate biométrique local générique**, **pure et
 testable**, **sans Expo `LocalAuthentication` réel, sans Keychain, sans module natif, sans écran/provider/hook
 obligatoire, sans logique métier**. `mobile-react-native` → **`BIOMETRIC_GATE_READY`**. **Aucune dépendance ajoutée.**
@@ -315,8 +365,6 @@ availability/type/outcome incl. **junk → `unknown`/`error` jamais `success`**,
 agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 262/262 + expo-doctor
 19/19 + git diff --check verts** (**RN 18 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
 `ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add biometric gate primitives`.
-**Prochaine action : Mobile Core React Native 19 — crash / error-reporting primitives génériques (seam, sans SDK réel —
-ADR-019).**
 
 **Étape précédente — Mobile Core React Native 17 — feature flags / config primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/config` + `test/**` + docs) : **étend** les primitives de configuration (env) avec une **couche de
