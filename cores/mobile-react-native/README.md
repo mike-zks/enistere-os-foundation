@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Secure Clipboard Primitives
+# Mobile Core React Native — Generic Retry / Backoff Primitives
 
-> Statut : **`CLIPBOARD_READY`** (V1 — RN 23 ; socle RN 1 → métadonnées app RN 22)
+> Statut : **`RETRY_READY`** (V1 — RN 24 ; socle RN 1 → presse-papiers sécurisé RN 23)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -40,8 +40,9 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Consentement télémétrie / privacy gate (RN 21)** | `src/consent` | `ConsentCategory` (`analytics`/`crash`/`performance`/`diagnostics`) + `ConsentStatus` (`granted`/`denied`/`unknown`) + `ConsentSet` ; helpers `normalizeConsentCategory`/`normalizeConsentStatus`/`sanitizeConsentSet`/`isConsentGranted`/**`isTelemetryAllowed`** (**default-deny** — `granted` seul autorise, `unknown`/`denied`/absent/invalide bloquent) ; `ConsentStore` (seam, `ConsentStoreError`) + **`createPreferenceConsentStore`** (persistance **déléguée aux préférences RN 20** sous clés non sensibles `privacy.consent.*`, `clear()` ne touche que ces clés) + **placeholder** mémoire (copies défensives) + **`createConsentService`** (`get`/`set`/`isAllowed`/`getAll`/`clear`/`subscribe`, **best-effort** — store défaillant → non autorisé, listener isolé, **logs `{operation,category,status}`/`{operation,count}`**). **Gate à consulter AVANT émission** (analytics RN 13 / crash RN 19) ; **sans SDK réel/réseau/UI/identifiant/PII** ; **ne décide pas ADR-038**, **ne câble pas** analytics/crash. |
 | **Environnement / métadonnées app (RN 22)** | `src/app-environment` | `AppEnvironmentSnapshot` **borné, allow-list stricte, non identifiant** (`os` ios/android/web/unknown + `osVersionMajor` **majeur seulement** + `appVersion`/`buildNumber`/`buildChannel`/`locale`/`environment`) ; normalizers tolérants (`normalizeOs`/**`normalizeMajorVersion`** `17.5.1`→`17`/`normalizeAppVersion`/`normalizeBuildChannel`/`normalizeRuntimeEnvironment`/`normalizeLocaleField` via i18n) + **`sanitizeAppEnvironmentSnapshot`** (lit **uniquement** les clés autorisées → **drop** deviceId/IDFA/AndroidID/pushToken/serial/model/IP) + `describeAppEnvironmentForLog` (champs grossiers) ; `AppEnvironmentAdapter` (seam `expo-application`/`expo-device`, `AppEnvironmentAdapterError`) + **placeholder** mémoire (copies défensives) + **`createAppEnvironmentService`** (`getSnapshot`/`describeForContext`, **best-effort** — adapter défaillant → `{os:unknown}`, **ne persiste rien**, **logs `{operation}`+grossiers**). **Contexte sûr pour analytics RN 13 / crash RN 19 — gaté par le consentement RN 21** ; **sans `expo-device`/`expo-application` réel/réseau/identifiant device/PII/collecte auto**. |
 | **Presse-papiers sécurisé (RN 23)** | `src/clipboard` | `ClipboardSensitivity` (`normal`/`sensitive`) + `ClipboardOperationResult` (`success`/`unavailable`/`rejected`/`error`) ; `normalizeClipboardText` (borné) + **`isSensitiveClipboardText`** (réutilise la **redaction RN 8** : Bearer/JWT/email/URL signée/URI `file`/`content` → sensible) + `describeClipboardTextForLog` (**`{length,sensitivity}` seul**, jamais le contenu) ; `ClipboardAdapter` (seam `expo-clipboard` : `setString`/`getString?`/`hasString?`/`clear?`, `ClipboardAdapterError`) + **placeholder** mémoire (slot transitoire) + **`createClipboardService`** (`copy`/`getString`/`hasString`/`clear`). **Politique** : `copy` **refuse** un texte sensible (`rejected`, adapter non appelé) sauf `allowSensitive:true` ; **`getString` opt-in explicite** (valeur sensible renvoyée à l'appelant mais **jamais loggée**) ; **`clear` no-op sûr** si absent ; **best-effort** (adapter throw → `error`). **Aucun log de contenu** ; **clipboard non stocké** (pas de preferences/Zustand/Query/SecureStore) ; **sans `expo-clipboard` réel/réseau/persistance/UI/lecture auto**. |
+| **Retry / backoff (RN 24)** | `src/retry` | `RetryPolicy` **bornée** (`maxAttempts` **inclut l'appel initial** + `baseDelayMs`/`maxDelayMs`/`factor`/`jitter`) + `normalizeRetryPolicy` (clampe, junk → défauts) ; **`computeBackoffDelay(attempt, policy, rng?)`** (exponentiel **borné** + **jitter déterministe via `rng` injecté**, **aucune horloge globale/`Math.random()`**) ; **`isRetryableError`/`getRetryDecision`** (structurel duck-typing, **sans import ESM** ; retryable network/timeout/408/429/5xx, non retryable 4xx/401/403/session-expired/inconnu ; raison **enum sûre**) + `isAuthOwnedError` ; **`withRetry(fn, policy, {sleep, rng, shouldRetry?, logger?})`** (**`sleep` injecté**, **blocage dur 401/403/session** qu'aucun `shouldRetry` ne contourne, **propage l'erreur originale finale**, **logs `{attempt,delayMs}` seuls**). **Purs/déterministes** ; **ne modifient AUCUN chemin existant** (pont 401 RN 4B + QueryClient RN 5 inchangés, propriétaires du 401) ; **sans dépendance/réseau réel/`Date.now()` testé**. |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (… consent-model, consent-service, consent-preference-store, app-environment-model, app-environment-service, **clipboard-model, clipboard-service**) — **330 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (… consent-model, consent-service, consent-preference-store, app-environment-model, app-environment-service, clipboard-model, clipboard-service, **retry-policy-backoff, retry-retryable-error, retry-with-retry**) — **346 tests** |
 
 ## Stack
 
@@ -304,21 +305,15 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **330/330** (`node --test` : … consent-model, consent-service, consent-preference-store, app-environment-model, app-environment-service, **clipboard-model + clipboard-service** — RN 23).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 23 n'ajoute aucune dépendance)*.
+- `test` : ✅ **346/346** (`node --test` : … clipboard-model, clipboard-service, **retry-policy-backoff, retry-retryable-error, retry-with-retry** — RN 24).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 24 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 24 — retry / backoff primitives génériques (purs, horloge
-injectée)** : helpers **purs et déterministes** pour la couche HTTP/offline (RN 3/4/16)
-— `RetryPolicy` borné (`maxAttempts`/`baseDelayMs`/`factor`/`maxDelayMs`/`jitter`),
-**`computeBackoffDelay(attempt, policy, rng?)`** (exponentiel borné + jitter optionnel),
-**`isRetryableError`** (classifie réseau/5xx/timeout vs 4xx définitif, **jamais** 401/403
-sans stratégie auth — RN 4 reste autoritaire), **`withRetry(fn, policy, {sleep, rng})`**
-(`sleep`/horloge **injectés**, ne masque pas l'échec final, **logs sûrs**
-`{attempt,delayMs}` sans payload), **mappé purement** et **testable**, **sans
-dépendance, sans `Date.now()` dans le chemin testé, sans réseau réel**. Une seule
-mission à la fois. *(Adaptateurs natifs réels — crash SDK, biométrie, remote-config,
-MMKV/AsyncStorage, device info, clipboard — et offline sync ADR-029 restent
-différés.)*
+**Mobile Core React Native 25 — consommation opt-in des primitives transverses**
+: choisir un seul branchement concret et gouverné (par exemple un futur appel
+réseau/offline lecture-only) pour consommer explicitement les primitives existantes
+sans changer le pont 401, sans retenter les mutations et sans introduire de logique
+métier. *(Adaptateurs natifs réels — crash SDK, biométrie, remote-config,
+MMKV/AsyncStorage, device info, clipboard — et offline sync ADR-029 restent différés.)*

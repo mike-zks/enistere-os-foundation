@@ -1290,3 +1290,60 @@ partagé et non fiable** : son **contenu n'est JAMAIS loggé** (métadonnées se
   (aucun hook/provider → rien en typecheck-only).
 - **Différés** : adaptateur réel `expo-clipboard`, `clearAfter` automatique (timer
   d'effacement), hook `useClipboard` optionnel, support d'images/types riches.
+
+## 33. Retry / backoff — primitives génériques (RN 24)
+
+RN 24 ajoute `src/retry` : des **primitives de retry / backoff génériques, pures
+et déterministes**, réutilisables par de **futurs** appels réseau/offline, **sans
+réseau réel, sans `Date.now()` dans le chemin testé, sans dépendance** (mission).
+Elles **ne modifient AUCUN chemin existant** : le **pont 401 RN 4B**
+(`withAuthRetry`/AuthEngine) et le **QueryClient RN 5** restent inchangés et
+**propriétaires du 401** ; RN 24 **ne retente jamais 401/403**, **ne rafraîchit
+aucun token/session**, **ne reconstruit pas de multipart** et **ne masque jamais
+l'échec final**.
+
+- **Policy (`src/retry/policy.ts`, agnostique)** : `RetryPolicy` **bornée**
+  (`maxAttempts` **inclut l'appel initial** — `maxAttempts <= 1` ⇒ aucun retry ;
+  `baseDelayMs`/`maxDelayMs`/`factor`/`jitter`) + bornes défensives
+  (`MAX_RETRY_ATTEMPTS`/`MAX_RETRY_DELAY_MS`/`MAX_RETRY_FACTOR`) +
+  **`normalizeRetryPolicy`** (tolérant — clampe chaque champ, junk → défauts,
+  `baseDelayMs ≤ maxDelayMs`, `maxAttempts` entier ≥ 1).
+- **Backoff (`src/retry/backoff.ts`, agnostique)** : **`computeBackoffDelay(attempt,
+  policy, rng?)`** — exponentiel `baseDelayMs · factor^(attempt-1)` **borné** à
+  `maxDelayMs` (un exposant énorme → cap, jamais `Infinity`) ; **jitter
+  déterministe** via **`rng` injecté** (`rng() · cappedDelay`, clampé `[0,1]`) —
+  appliqué **uniquement** si `policy.jitter` ET `rng` présents ; **aucune horloge
+  globale, aucun `Math.random()`** ; `attempt < 1` → `0`.
+- **Classifieur (`src/retry/retryable-error.ts`, agnostique)** : **`isRetryableError`**/
+  **`getRetryDecision`** — **structurel** (duck-typing `status`/`kind`/`isUnauthorized`/
+  `isForbidden`, **sans import ESM `@enistere/*`**, aligné `ApiClientError`/
+  `QueryError` RN 5). **Retryable** : network/timeout/408/429/5xx. **Non
+  retryable** : 400/401/403/404/409/validation/`invalid_response`/`session_expired`
+  + tout inconnu (conservateur — ne retente jamais un bug). `getRetryDecision`
+  renvoie une **raison enum sûre** (`status-5xx`/`network`/… — **jamais** le
+  message). **`isAuthOwnedError`** = 401/403/`isUnauthorized`/`isForbidden`/
+  `session_expired` (territoire AuthEngine).
+- **Runner (`src/retry/with-retry.ts`, agnostique)** : **`withRetry(fn, policy,
+  {sleep, rng, shouldRetry?, logger?})`** — **`sleep` injecté** (aucun timer
+  global) ; **`maxAttempts` inclut l'appel initial** ; **blocage dur 401/403/
+  session-expired** (qu'aucun `shouldRetry` ne peut contourner) ; `shouldRetry`
+  custom **réduit** (ou redéfinit) la décision, sinon `isRetryableError` ;
+  **propage l'erreur originale du dernier essai** (jamais wrappée/masquée). **Logs
+  RN 8 sûrs** : `{attempt,delayMs}` **uniquement** — **jamais** message/body/url/
+  token.
+- **Sécurité / gouvernance (ADR-040 §17/§18, ADR-004/011)** : **401/403 jamais
+  retentés** (le refresh reste possédé par l'AuthEngine/`withAuthRetry`) ; **aucun
+  log d'erreur sensible** ; **aucune dépendance ajoutée** ; **aucun chemin existant
+  modifié** (branchement laissé aux futurs appels, opt-in).
+- **Tests** (`node --test`) : `retry-policy-backoff` (normalisation/bornes,
+  **exponentiel borné**, **jitter déterministe via rng**) + `retry-retryable-error`
+  (network/timeout/408/429/5xx retryable, 4xx/401/403/session-expired non
+  retryable, raison enum sûre, `isAuthOwnedError`) + `retry-with-retry` (succès
+  sans/avec retry, **`maxAttempts` respecté** + `sleep` reçoit les **bons délais**,
+  **échec final = erreur originale**, **401/403 jamais retenté même via
+  `shouldRetry`**, **4xx métier non retenté**, **`maxAttempts ≤ 1` sans retry**,
+  **`shouldRetry` réduit**, **logs `{attempt,delayMs}` sans message**). Module
+  **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : branchement réel dans une future couche d'appels réseau/offline
+  (opt-in, jamais sur le 401), `Retry-After` (429/503) honoré, circuit-breaker,
+  hook `useRetry` optionnel.

@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 24 — retry / backoff primitives génériques
+
+- **Mobile Core React Native 24** (`cores/mobile-react-native/`) : ajoute `src/retry` — des **primitives génériques de retry/backoff**, **pures et déterministes**, sans réseau réel, sans dépendance, sans `Date.now()` dans le chemin testé. `mobile-react-native` passe de `CLIPBOARD_READY` à **`RETRY_READY`**. **Aucun chemin existant modifié** : AuthEngine, `withAuthRetry`/`authedRequest`, QueryClient et mutations existantes restent inchangés.
+  - **Policy/backoff** : `RetryPolicy` borné (`maxAttempts` **inclut l'appel initial**) + `normalizeRetryPolicy` ; `computeBackoffDelay(attempt, policy, rng?)` exponentiel borné, jitter déterministe via `rng` injecté, aucune horloge globale ni `Math.random()`.
+  - **Décision retryable** : `isRetryableError` / `getRetryDecision` structurels — retryable network/timeout/408/429/5xx ; non retryable 4xx/401/403/session-expired/inconnu ; raison enum sûre, jamais le contenu de l'erreur.
+  - **Runner** : `withRetry(fn, policy, { sleep, rng, shouldRetry?, logger? })` avec `sleep` injecté ; blocage dur 401/403/session-expired même si `shouldRetry` tente de forcer ; propage l'erreur originale finale ; logs sûrs `{attempt,delayMs}` uniquement.
+  - **Tests** : **+16** `node --test` — `retry-policy-backoff` (normalisation/bornes, exponentiel borné, jitter déterministe), `retry-retryable-error` (network/timeout/408/429/5xx retryable, 4xx/auth/session non retryable, raison sûre), `retry-with-retry` (succès, delays, `maxAttempts`, erreur finale originale, hard-block auth, logs sûrs) → **346 tests**.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test 346/346`, `expo-doctor 19/19`, `git diff --check`.
+
 ### Mobile Core React Native 23 — presse-papiers (clipboard) sécurisé primitives génériques
 
 - **Mobile Core React Native 23** (`cores/mobile-react-native/`) : ajoute `src/clipboard` — des **primitives de presse-papiers sécurisé génériques**, **pures et testables**, avec un **seam futur `expo-clipboard`** mais **sans `expo-clipboard` réel, sans réseau, sans persistance, sans UI, sans lecture automatique au démarrage**. `mobile-react-native` passe de `APP_ENVIRONMENT_READY` à **`CLIPBOARD_READY`**. **Aucune dépendance ajoutée** ; **aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; périmètre `src/clipboard` + `test/**` + docs. Le presse-papiers est un **canal transitoire, partagé et non fiable** : son **contenu n'est JAMAIS loggé** (métadonnées seules) et **n'est jamais persisté** (pas de preferences/Zustand/Query/SecureStore).
