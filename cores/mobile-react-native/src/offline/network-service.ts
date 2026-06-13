@@ -47,7 +47,7 @@ export interface NetworkServiceOptions {
   readonly adapter: NetworkAdapter;
   /** Optional RN 8 logger (enum metadata only). */
   readonly logger?: Logger;
-  /** Injected clock for `changedAt` (default `Date.now`). */
+  /** Injected clock for `changedAt` (default deterministic `0`). */
   readonly clock?: () => number;
 }
 
@@ -65,7 +65,7 @@ function readStatus(input: unknown): { status: NetworkStatus; type: NetworkConne
 /** Build a {@link NetworkService} over a network adapter (+ optional logger/clock). */
 export function createNetworkService(options: NetworkServiceOptions): NetworkService {
   const { adapter, logger } = options;
-  const clock = options.clock ?? (() => Date.now());
+  const clock = options.clock ?? (() => 0);
 
   let current: NetworkState;
   try {

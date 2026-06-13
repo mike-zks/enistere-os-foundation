@@ -21,13 +21,16 @@ test('isOnline / isOffline reflect the status only when positively known', () =>
   assert.equal(isOnline(networkState('online', 5)), true);
   assert.equal(isOnline(networkState('offline')), false);
   assert.equal(isOnline(networkState('unknown')), false);
+  assert.equal(isOnline(null), false);
   assert.equal(isOffline(networkState('offline')), true);
   assert.equal(isOffline(networkState('online')), false);
   assert.equal(isOffline(networkState('unknown')), false);
+  assert.equal(isOffline(undefined), false);
 });
 
 test('shouldQueueMutations queues unless positively online (conservative)', () => {
   assert.equal(shouldQueueMutations(networkState('online')), false);
   assert.equal(shouldQueueMutations(networkState('offline')), true);
   assert.equal(shouldQueueMutations(networkState('unknown')), true);
+  assert.equal(shouldQueueMutations(undefined), true);
 });
