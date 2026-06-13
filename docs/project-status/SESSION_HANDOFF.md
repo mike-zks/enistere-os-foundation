@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`NETWORK_STATUS_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`FEATURE_FLAGS_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -175,14 +175,23 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **`NetworkAdapterError`** + **placeholder** mémoire + `createNetworkService` (`getStatus(): NetworkState`/`shouldQueue`/
   `subscribe`/`transition`/`dispose`, `changedAt` via **horloge injectée**, **best-effort non-intrusif** — erreurs adapter
   contrôlées + **listener isolé**, **logs sûrs** `{from,to,type}` enums) ; **aucun NetInfo réel/dépendance/offline sync/
-  persistance/donnée sensible**. Layout **plat** + **autonome**. **227 tests `node --test`** (… + app-lifecycle-engine +
-  **network-state (RN 3) + network-status + network-service**). Vérifs : **typecheck + lint + test 227/227 + expo-doctor
-  19/19 + git diff --check verts** (**RN 16 n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 +
-  `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel + token
-  device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/
-  NetInfo), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props
-  a11y / câblage des effets lifecycle dans des composants**, **feature flags** (= RN 17), **offline sync réelle**
-  (ADR-029), **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  persistance/donnée sensible**. **+ RN 17 — feature flags / config primitives génériques** (ADR-015 §19/§21 / 06) :
+  **étend `src/config`** (env inchangé, **distinct des `flags` UI Zustand RN 6**) — `FlagValue` (boolean/string/number) +
+  `FlagSet` **bornés** (`MAX_FLAG_KEY_LENGTH`/`MAX_FLAG_VALUE_LENGTH`/`MAX_FLAGS`) + `isValidFlagKey`/`normalizeFlagValue`/
+  **`sanitizeFlagSet`** tolérants + **getters typés à défaut sûr** (`getBooleanFlag`/`getStringFlag`/`getNumberFlag`/
+  `getFlagValue<T>` — valeur rendue **seulement si le type correspond**) + **`describeFlagsForLog`** → **`{count}`
+  seulement** ; `FlagAdapter` (seam local/remote-config) + **`FlagAdapterError`** + **placeholder** mémoire +
+  `createFlagService` (`getFlag`/`getAll`/`subscribe`/`refresh`/`dispose`, **best-effort non-intrusif** — erreurs adapter
+  contrôlées + **listener isolé**, **logs sûrs** `{count}`/`{operation}` — **jamais clé ni valeur**) ; **aucun SDK
+  remote-config réel/réseau/persistance/user targeting réel/secret/donnée sensible**. Layout **plat** + **autonome**.
+  **244 tests `node --test`** (… + network-status + network-service + **config-flags + config-flag-service**). Vérifs :
+  **typecheck + lint + test 244/244 + expo-doctor 19/19 + git diff --check verts** (**RN 17 n'ajoute aucune dépendance**) ;
+  packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker
+  d'upload**, **push distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/
+  linking/AccessibilityInfo/AppState/NetInfo), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous
+  ADR), **application des props a11y / câblage des effets lifecycle dans des composants**, **source remote-config/local
+  réelle des feature flags**, **gate biométrique** (= RN 18), **offline sync réelle** (ADR-029), **backend
+  d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -229,8 +238,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`NETWORK_STATUS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau**, 227 tests + bundle Metro).
+`FEATURE_FLAGS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config**, 244 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -261,7 +270,37 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** (`cores/mobile-react-native/`,
+**Mobile Core React Native 17 — feature flags / config primitives génériques** (`cores/mobile-react-native/`,
+périmètre `src/config` + `test/**` + docs) : **étend** les primitives de configuration (env) avec une **couche de
+feature flags / config générique**, **pure et testable**, **sans SDK remote-config réel, sans réseau, sans persistance,
+sans user targeting réel, sans secret/token/URL signée/payload serveur/PII, sans écran/hook obligatoire/provider
+global**. `mobile-react-native` → **`FEATURE_FLAGS_READY`**. **Aucune dépendance ajoutée** ; **distinct des `flags` UI
+Zustand RN 6** (config ≠ état UI local). **Modèle** (`src/config/flag-model.ts`, agnostique) : **`FlagValue`**
+(`boolean`/`string`/`number`) + **`FlagSet`** ; bornes `MAX_FLAG_KEY_LENGTH` (64) / `MAX_FLAG_VALUE_LENGTH` (256) /
+`MAX_FLAGS` (200) ; **`isValidFlagKey`** (identifiant borné) ; **`normalizeFlagValue`** (primitives ; **strings
+bornées** ; non-finis/objets droppés) ; **`sanitizeFlagSet`** (clés valides + valeurs primitives, cap `MAX_FLAGS`,
+**tolère tout input invalide** → `{}`) ; **getters typés à défaut sûr** `getBooleanFlag`/`getStringFlag`/`getNumberFlag`/
+`getFlagValue<T>` (la valeur n'est rendue **que si le type correspond**, sinon le défaut) ; **`describeFlagsForLog`** →
+**`{count}` UNIQUEMENT** (jamais clés ni valeurs). **Adaptateur** (`flag-adapter.ts`) : **`FlagAdapter`** (seam
+local/remote-config : `getFlags(): FlagSet`/`subscribe?`/`refresh?`) + **`FlagAdapterError`** contrôlé (`operation`
+seul). **Placeholder** (`placeholder-flag-adapter.ts`) : mémoire ; `setFlags` (assaini + notifie) simule une source ;
+no native dep / no réseau / no persistance. **Service** (`flag-service.ts`, agnostique) :
+`createFlagService({adapter, defaults?, logger?})` → résout `{...defaults, ...adapterFlags}` (assainis, **adapter >
+defaults**) puis `getFlag(key, default)` (typé, **défaut sûr**), `getAll()` (copie), `subscribe`, `refresh()`
+(best-effort, **ne throw jamais**), `dispose()` ; **best-effort non-intrusif** (erreurs adapter `getFlags`/`subscribe`/
+`refresh` **capturées** + `warn` sûr, défauts conservés ; **listener qui throw isolé**) ; **logs RN 8 sûrs** : que des
+**`{count}`** (au changement) / **`{operation}`** (en erreur) — **jamais clé ni valeur**. **+17 tests `node --test`**
+(`config-flags` : validation clés, normalisation/bornage, `sanitizeFlagSet`, **getters à défaut sûr** sur type
+mismatch, `describeFlagsForLog` **sans clé/valeur**, tolérance input invalide ; `config-flag-service` : résolution
+defaults⊕adapter (**adapter gagne**), `getFlag`/`getAll`, **subscribe/unsubscribe déterministe**, changements adapter,
+**refresh best-effort + erreur contrôlée**, **listener isolé**, **erreurs adapter contrôlées**, **logs sans clé/valeur**,
+`dispose`, tolérance input invalide) → **244 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
+typecheck-only). Vérifs : **typecheck + lint + test 244/244 + expo-doctor 19/19 + git diff --check verts** (**RN 17
+n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
+modifié** ; aucun autre core. Commit `feat(mobile): add generic feature flag primitives`. **Prochaine action : Mobile
+Core React Native 18 — gate biométrique local primitives génériques (ADR-015 §20).**
+
+**Étape précédente — Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/offline` + `test/**` + docs) : **étend** les primitives offline de RN 3 avec une **couche de connectivité
 générique**, **pure et testable**, **sans dépendance native** (NetInfo réel), **sans offline sync, sans rejeu auto, sans
 persistance, sans écran/hook obligatoire/provider global**. `mobile-react-native` → **`NETWORK_STATUS_READY`**. **Aucune
@@ -286,8 +325,7 @@ déterministe**, **listener isolé**, **erreurs adapter contrôlées sans throw*
 **227 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck +
 lint + test 227/227 + expo-doctor 19/19 + git diff --check verts** (**RN 16 n'ajoute aucune dépendance**). **Aucun
 fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
-`feat(mobile): add generic network status primitives`. **Prochaine action : Mobile Core React Native 17 — feature flags /
-config primitives génériques.**
+`feat(mobile): add generic network status primitives`.
 
 **Étape précédente — Mobile Core React Native 15 — app lifecycle primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/app-lifecycle` + `test/**` + docs) : ajoute une **couche générique de cycle de vie applicatif**, **pure et
