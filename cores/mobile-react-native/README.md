@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Telemetry Consent / Privacy-Gate Primitives
+# Mobile Core React Native — Generic Non-Identifying App-Environment Primitives
 
-> Statut : **`CONSENT_GATE_READY`** (V1 — RN 21 ; socle RN 1 → préférences non sensibles RN 20)
+> Statut : **`APP_ENVIRONMENT_READY`** (V1 — RN 22 ; socle RN 1 → consentement télémétrie RN 21)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -38,8 +38,9 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Crash / error-reporting (RN 19)** | `src/crash-reporting` | `CrashReportEvent` **borné** (`severity`/`source`/`name`/`message`/`stack?`/`context`) **rédigé via la redaction RN 8** (`sanitizeCrashMessage`/**`sanitizeCrashStack`** — chemins device/tokens/URL signées/emails scrubés + cap frames, **jamais de stack brute** ; `sanitizeCrashContext` — clés sensibles → `[Redacted]`, primitives bornées) ; `createCrashReportEvent` (gelé, tolérant) + `describeCrashEventForLog` (**`{severity,source}` seul**) ; `CrashReporterAdapter` (seam Sentry/Crashlytics, `CrashReporterAdapterError`) + **placeholder** mémoire (copies défensives) + **`createCrashReporterService`** (`captureError`/`captureMessage`/`setContext`/`flush`, **best-effort non-intrusif** — sync throw + async reject capturés, **jamais de faux succès**, **logs `{operation,severity,source}`**). **Sans SDK réel/réseau/persistance/batching/crash handler global** ; **ne décide pas ADR-019**. **Aucun token/cookie/URL signée/URI device/PII/body/stack brute/user-id réel.** |
 | **Préférences non sensibles (RN 20)** | `src/preferences` | `PreferenceValue` (bool/string/number) + `PreferenceSet` + bornes + `isValidPreferenceKey` (format **+ non sensible**, réutilise `isSensitiveKey`) + `normalizePreferenceValue` + **`isSensitivePreferenceValue`** (string que la redaction RN 8 modifierait) + `sanitizePreferenceSet` + getters typés à **défaut sûr** ; `PreferenceStore` (seam **async** MMKV/AsyncStorage, `PreferenceStoreError`) + **placeholder** mémoire (copies défensives) + **`createPreferenceService`** (`get`/`getBoolean`/`getString`/`getNumber`/`set`/`remove`/`clear`/`getAll`/`subscribe` — **garde les écritures** + **assainit les lectures**, **best-effort** non-intrusif, listener isolé, **logs `{operation,count}`**). **Données NON sensibles persistables uniquement** — distinct de SecureStore (secrets), Zustand RN 6 (UI in-memory) et TanStack Query (server-state). **Aucun MMKV/AsyncStorage réel, aucun secret/token/PII** ; **clé/valeur sensible → drop** (jamais persister un secret masqué). |
 | **Consentement télémétrie / privacy gate (RN 21)** | `src/consent` | `ConsentCategory` (`analytics`/`crash`/`performance`/`diagnostics`) + `ConsentStatus` (`granted`/`denied`/`unknown`) + `ConsentSet` ; helpers `normalizeConsentCategory`/`normalizeConsentStatus`/`sanitizeConsentSet`/`isConsentGranted`/**`isTelemetryAllowed`** (**default-deny** — `granted` seul autorise, `unknown`/`denied`/absent/invalide bloquent) ; `ConsentStore` (seam, `ConsentStoreError`) + **`createPreferenceConsentStore`** (persistance **déléguée aux préférences RN 20** sous clés non sensibles `privacy.consent.*`, `clear()` ne touche que ces clés) + **placeholder** mémoire (copies défensives) + **`createConsentService`** (`get`/`set`/`isAllowed`/`getAll`/`clear`/`subscribe`, **best-effort** — store défaillant → non autorisé, listener isolé, **logs `{operation,category,status}`/`{operation,count}`**). **Gate à consulter AVANT émission** (analytics RN 13 / crash RN 19) ; **sans SDK réel/réseau/UI/identifiant/PII** ; **ne décide pas ADR-038**, **ne câble pas** analytics/crash. |
+| **Environnement / métadonnées app (RN 22)** | `src/app-environment` | `AppEnvironmentSnapshot` **borné, allow-list stricte, non identifiant** (`os` ios/android/web/unknown + `osVersionMajor` **majeur seulement** + `appVersion`/`buildNumber`/`buildChannel`/`locale`/`environment`) ; normalizers tolérants (`normalizeOs`/**`normalizeMajorVersion`** `17.5.1`→`17`/`normalizeAppVersion`/`normalizeBuildChannel`/`normalizeRuntimeEnvironment`/`normalizeLocaleField` via i18n) + **`sanitizeAppEnvironmentSnapshot`** (lit **uniquement** les clés autorisées → **drop** deviceId/IDFA/AndroidID/pushToken/serial/model/IP) + `describeAppEnvironmentForLog` (champs grossiers) ; `AppEnvironmentAdapter` (seam `expo-application`/`expo-device`, `AppEnvironmentAdapterError`) + **placeholder** mémoire (copies défensives) + **`createAppEnvironmentService`** (`getSnapshot`/`describeForContext`, **best-effort** — adapter défaillant → `{os:unknown}`, **ne persiste rien**, **logs `{operation}`+grossiers**). **Contexte sûr pour analytics RN 13 / crash RN 19 — gaté par le consentement RN 21** ; **sans `expo-device`/`expo-application` réel/réseau/identifiant device/PII/collecte auto**. |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (… crash-reporting-event, crash-reporting-engine, preferences-model, preferences-service, **consent-model, consent-service, consent-preference-store**) — **309 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (… preferences-model, preferences-service, consent-model, consent-service, consent-preference-store, **app-environment-model, app-environment-service**) — **320 tests** |
 
 ## Stack
 
@@ -69,6 +70,7 @@ cores/mobile-react-native/
 │   ├── a11y/                 # accessibilité (agnostiques) : state + props + announcement + adapter + engine + placeholder (RN 14)
 │   ├── analytics/            # analytics/télémétrie (agnostiques) : event+redaction (basée RN 8) + adapter + engine + placeholder (RN 13)
 │   ├── api/                  # client OFFICIEL @enistere/api-client-fetch (index.ts) + with-auth-retry (pont 401, agnostique)
+│   ├── app-environment/      # environnement/métadonnées app (agnostiques) NON identifiantes : model + adapter + placeholder + service — seam expo-application/device (RN 22)
 │   ├── app-lifecycle/        # cycle de vie app (agnostiques) : state + adapter + placeholder + engine (RN 15)
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
 │   ├── biometrics/           # gate biométrique local (agnostiques) : model + adapter + placeholder + engine — gate UX, jamais l'auth serveur (RN 18)
@@ -92,7 +94,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (… biometrics-*, crash-reporting-event, crash-reporting-engine, preferences-model, preferences-service, consent-model, consent-service, consent-preference-store)
+├── test/                     # node --test (… preferences-model, preferences-service, consent-model, consent-service, consent-preference-store, app-environment-model, app-environment-service)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -128,6 +130,7 @@ cores/mobile-react-native/
 | **ADR-040 §17/§18/§19 · ADR-015 §12/§21/§24** Crash reporting | **crash/error-reporting (RN 19)** : toute donnée passe par la **redaction centrale RN 8** puis est **bornée** (message/stack/context) — **jamais** token/cookie/Authorization/URL signée/URI device/PII/body, **jamais de stack brute** (rédigée + cap frames), **aucun user-id réel** ; **best-effort non-intrusif** (ne casse jamais le flux, jamais de faux succès) ; logs **`{operation,severity,source}` seulement** ; **sans SDK réel** — **ne décide pas ADR-019** — voir ARCHITECTURE §28 |
 | **ADR-015 §11/§15/§16/§17/§21 · ADR-012** Préférences | **préférences non sensibles (RN 20)** : couche **persistée NON sensible** distincte de SecureStore (secrets), Zustand RN 6 (UI in-memory) et TanStack Query (server-state) ; **clé sensible refusée** (réutilise `isSensitiveKey`), **valeur sensible droppée** (si `redactString(v) !== v` — jamais persister un secret masqué) ; lectures **assainies** (défense en profondeur) ; **best-effort non-intrusif** ; logs **`{operation,count}` seulement** ; **seam MMKV/AsyncStorage — aucun store natif réel, RN 20 ne décide pas le choix** — voir ARCHITECTURE §29 |
 | **ADR-038 · 07_SECURITY** Consentement télémétrie | **consent / privacy gate (RN 21)** : règle **default-deny** (`isAllowed` true **seulement** si `granted` ; `unknown`/`denied`/absent bloquent) ; **gate à consulter AVANT émission** analytics (RN 13) / crash (RN 19) ; persistance **déléguée aux préférences RN 20** (clés non sensibles `privacy.consent.*`) ; **sans SDK réel/réseau/UI/identifiant utilisateur/PII** ; logs **enums/count seulement** ; **ne décide pas ADR-038** et **ne câble pas** analytics/crash — voir ARCHITECTURE §30 |
+| **07_SECURITY · ADR-040/ADR-038** Environnement app | **métadonnées app (RN 22)** : snapshot **coarse et NON identifiant** (allow-list stricte ; `osVersion` réduit au **majeur** ; tout `deviceId`/IDFA/AndroidID/`pushToken`/serial/model/IP d'un input brut **droppé**) ; **aucune collecte automatique**, **ne persiste rien** ; **contexte sûr** pour analytics (RN 13)/crash (RN 19) — **le consentement RN 21 reste le gate** ; logs **`{operation}`+champs grossiers** ; **sans `expo-device`/`expo-application` réel** ; **ne décide ni ADR-038/ADR-019/ADR-018** — voir ARCHITECTURE §31 |
 
 ## Commandes
 
@@ -164,6 +167,13 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
   sensible dans le store local Zustand** (primitives UI non sensibles uniquement).
 
 ## Hors périmètre de cette mission (différé)
+
+**Usage court (RN 22)** : `const env = createAppEnvironmentService({ adapter })` puis,
+dans un futur adaptateur télémétrie : `if (await consent.isAllowed('crash'))
+crash.setContext(env.describeForContext())` — le contexte est **coarse et non
+identifiant** (OS + version **majeure** + app/build version + channel + locale +
+environnement) ; **aucun identifiant device, aucune PII, aucune collecte auto**, et
+**le consentement RN 21 reste le gate**.
 
 **Usage court (RN 21)** : `const consent = createConsentService({ store:
 createPreferenceConsentStore(prefs) })` puis, dans un futur adaptateur analytics/
@@ -270,28 +280,31 @@ anti-secret) + store (seam) + placeholder + service, **sans** MMKV/AsyncStorage 
 stockage natif** (ADR-015 §15/§16). **Le consentement reste un gate préparatoire** :
 `src/consent` fournit modèle + store (seam + RN20-backed) + placeholder + service
 **default-deny**, **sans** SDK/réseau/UI/identifiant/PII, **ne câble pas** analytics
-(RN 13)/crash (RN 19) et **ne décide pas ADR-038**. Voir la roadmap du spec (§37/§53)
-et `docs/project-status/NEXT_ACTIONS.md`.
+(RN 13)/crash (RN 19) et **ne décide pas ADR-038**. **Les métadonnées app restent un
+contexte sûr** : `src/app-environment` fournit modèle (borné, allow-list, non
+identifiant) + adapter (seam) + placeholder + service, **sans** `expo-device`/
+`expo-application` **réel**, **sans** identifiant device/PII/collecte auto, et **ne
+décide ni ADR-038/ADR-019/ADR-018** (le consentement RN 21 reste le gate). Voir la
+roadmap du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 ## Vérification
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **309/309** (`node --test` : … crash-reporting-event, crash-reporting-engine, preferences-model, preferences-service, **consent-model + consent-service + consent-preference-store** — RN 21).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 21 n'ajoute aucune dépendance)*.
+- `test` : ✅ **320/320** (`node --test` : … preferences-model, preferences-service, consent-model, consent-service, consent-preference-store, **app-environment-model + app-environment-service** — RN 22).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 22 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 22 — environnement / métadonnées app primitives génériques
-(seam, non identifiant)** : un `EnvironmentAdapter` (seam pour un futur
-`expo-application`/`expo-device`) + un modèle **borné et non identifiant** de
-métadonnées (`os` `ios`/`android`/`web`/`unknown`, `osVersion` majeur, `appVersion`,
-`buildChannel` `development`/`preview`/`production`/`unknown`, `locale`) avec
-**allow-list stricte** + service (`get`/`describeForContext`) + placeholder, **mappé
-purement** et **testable**, **sans `expo-device`/`expo-application` réel, sans réseau,
-sans identifiant d'appareil (IDFA/Android ID/installation id), sans PII**, conçu pour
-fournir un **contexte sûr** aux télémétries analytics (RN 13) / crash (RN 19) — gaté
-par le consentement RN 21. Une seule mission à la fois. *(Adaptateurs natifs réels —
-crash SDK, biométrie, remote-config, MMKV/AsyncStorage, device info — et offline sync
-ADR-029 restent différés.)*
+**Mobile Core React Native 23 — presse-papiers (clipboard) sécurisé primitives
+génériques (seam, sans `expo-clipboard` réel)** : un `ClipboardAdapter` (seam pour un
+futur `expo-clipboard`) + des helpers de **garde de contenu** (jamais logger le
+contenu copié/collé ; marqueur `sensitive` → **effacement auto** recommandé après
+lecture, réutilise la redaction RN 8 pour les logs) + service (`copy`/`getString`/
+`clear` + `hasString?`), **mappé purement** et **testable**, **sans `expo-clipboard`
+réel, sans réseau, sans persistance, sans log de contenu**, conçu pour copier/coller
+du texte non sensible (codes courts, liens) **sans fuite**. Une seule mission à la
+fois. *(Adaptateurs natifs réels — crash SDK, biométrie, remote-config,
+MMKV/AsyncStorage, device info, clipboard — et offline sync ADR-029 restent
+différés.)*
