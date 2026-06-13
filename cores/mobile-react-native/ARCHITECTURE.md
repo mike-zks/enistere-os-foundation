@@ -796,3 +796,53 @@ adaptateur réel.
   optionnel, application des props dans des composants concrets (projets dérivés
   / UI Kit), gestion fine de l'ordre de focus liée au rendu, audit a11y
   automatisé, contraste/tailles tactiles (relèvent des **tokens UI Kit**, ADR-008).
+
+## 24. App lifecycle / état d'application — primitives génériques (RN 15)
+
+RN 15 ajoute une **couche générique de cycle de vie applicatif**, **pure et
+testable**, **sans dépendance native** (RN `AppState` réel), **sans écran, sans
+hook obligatoire, sans provider global, sans stockage, sans logique métier**.
+Elle prépare le **flush analytics (RN 13)**, le **refresh de session au retour
+au premier plan** et la **planification de notifications (RN 10)** — sans les
+implémenter.
+
+- **État (`src/app-lifecycle/state.ts`, agnostique)** : **`AppLifecycleState`** =
+  `active`/`background`/`inactive`/`unknown`. `normalizeAppLifecycleState`
+  replie les valeurs RN `AppStateStatus` (incl. `extension` → `background`),
+  **tolère tout input invalide** → `unknown` (jamais de throw). Helpers purs :
+  `isForeground`/`isBackground` ; **`isValidTransition`** (matrice : même état =
+  no-op ; `unknown` → n'importe ; **un état déterminé ne revient jamais à
+  `unknown`** ; états réels interchangeables) ; **`nextAppLifecycleState(current,
+  candidate)`** (applique si valide, sinon conserve ; both inputs tolérés).
+- **Adaptateur (`src/app-lifecycle/adapter.ts`, agnostique)** : `AppLifecycleAdapter`
+  = seam RN `AppState` (`getState()`, `subscribe(listener)→unsubscribe`).
+  **`AppLifecycleAdapterError`** contrôlé (seulement `operation`, aucune cause
+  sensible).
+- **Placeholder (`src/app-lifecycle/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderAppLifecycleAdapter(initial?)` — **mémoire** ; `setState`
+  simule un changement OS (normalise + notifie au changement) ; **aucune
+  dépendance native / persistance**.
+- **Service (`src/app-lifecycle/engine.ts`, agnostique)** :
+  `createAppLifecycleService({adapter, logger?})` → **`getState`** (état validé
+  courant), **`subscribe`** (changements validés ; unsubscribe), **`transition`**
+  (pousse un candidat via la validation), **`dispose`** (désabonne l'adapter +
+  vide les listeners). **Best-effort / non-intrusif** : `getState`/`subscribe`
+  adapter en échec → **capturé** + `warn` sûr (`{operation}`), état défaut
+  `unknown` ; un **listener qui throw est isolé** (les autres reçoivent quand
+  même). **Logs RN 8 sûrs** : le cycle de vie **ne porte aucune donnée
+  utilisateur** → logge **uniquement** des enums (`{from, to}` au changement,
+  `{operation}` en erreur).
+- **Sécurité / gouvernance** : **aucune donnée utilisateur/sensible** (que des
+  enums) ; **aucun stockage** ; **aucune dépendance** ; **aucun provider global
+  obligatoire** ; transitions **validées** (machine déterministe).
+- **Tests** (`node --test`) : `app-lifecycle-state` (normalisation incl.
+  `extension`/garbage, `isValidTransition` matrice, `nextAppLifecycleState`
+  valide/ignoré/toléré) + `app-lifecycle-engine` (état initial, **changements
+  adapter → service + subscribers**, transition validée, **subscribe/unsubscribe
+  déterministe**, no-op même état, **listener isolé**, **erreurs adapter
+  contrôlées sans throw**, `dispose`, **logs enums seulement**). Module
+  **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur RN `AppState` réel + hook/`useAppLifecycle` optionnel,
+  **câblage** des effets concrets (flush analytics / refresh session au
+  foreground / planification notifications), gestion de l'état au démarrage à
+  froid / deep-link, débounce des transitions rapides.

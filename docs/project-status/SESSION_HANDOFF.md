@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`A11Y_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`APP_LIFECYCLE_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -161,13 +161,20 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   `mergeA11yState`/`isInteractiveRole`) + **annonce** lecteur d'écran (`sanitizeAnnouncement` ; **`describeAnnouncementForLog`
   sans texte**) + `A11yAdapter` (announce/focus?/isScreenReaderEnabled?, **`A11yAdapterError`** contrôlé) + **placeholder**
   mémoire + `createA11yService` (best-effort **non-intrusif**, `isScreenReaderEnabled` **défaut `false`** en erreur, **logs
-  RN 8 sûrs** `{length,assertive}`) ; **aucun `AccessibilityInfo` réel/provider global/stockage/UI/dépendance**. Layout
-  **plat** + **autonome**. **196 tests `node --test`** (… + analytics-engine + **a11y-props-state + a11y-announcement +
-  a11y-engine**). Vérifs : **typecheck + lint + test 196/196 + expo-doctor 19/19 + git diff --check verts** (**RN 14
-  n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
-  métier.** Différés : **écran/picker d'upload**, **push distant réel + token device**, **adaptateurs natifs réels**
-  (permissions/notifications/localisation/linking/AccessibilityInfo), **catalogues métier i18n + routes concrètes**,
-  **SDK analytics réel** (sous ADR), **application des props a11y dans des composants**, **app lifecycle** (= RN 15),
+  RN 8 sûrs** `{length,assertive}`) ; **aucun `AccessibilityInfo` réel/provider global/stockage/UI/dépendance**. **+ RN 15
+  — app lifecycle primitives génériques** (02/06 / ADR-040) : modèle **`AppLifecycleState`** (`active`/`background`/
+  `inactive`/`unknown`) + helpers purs (`normalizeAppLifecycleState` tolérant — incl. `extension`→`background`,
+  `isForeground`/`isBackground`, **`isValidTransition`** matrice, `nextAppLifecycleState`) ; `AppLifecycleAdapter` (seam
+  RN `AppState`) + **`AppLifecycleAdapterError`** contrôlé + **placeholder** mémoire + `createAppLifecycleService`
+  (`getState`/`subscribe`/`transition`/`dispose`, transitions **validées** ; **best-effort non-intrusif** — erreurs
+  adapter contrôlées + **listener isolé** ; **logs RN 8 sûrs** `{from,to}`/`{operation}` enums seulement, **aucune donnée
+  utilisateur**) ; **aucun `AppState` réel/provider global/stockage/dépendance**. Layout **plat** + **autonome**. **212
+  tests `node --test`** (… + a11y-engine + **app-lifecycle-state + app-lifecycle-engine**). Vérifs : **typecheck + lint +
+  test 212/212 + expo-doctor 19/19 + git diff --check verts** (**RN 15 n'ajoute aucune dépendance**) ; packages liés
+  `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**,
+  **push distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/
+  AccessibilityInfo/AppState), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR),
+  **application des props a11y / câblage des effets lifecycle dans des composants**, **connectivité réseau** (= RN 16),
   **backend d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
@@ -215,8 +222,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`A11Y_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y**, 196 tests + bundle Metro).
+`APP_LIFECYCLE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle**, 212 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -247,7 +254,32 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 15 — app lifecycle primitives génériques** (`cores/mobile-react-native/`, périmètre
+`src/app-lifecycle` + `test/**` + docs) : ajoute une **couche générique de cycle de vie applicatif**, **pure et
+testable**, **sans dépendance native** (RN `AppState` réel), **sans écran, sans hook obligatoire, sans provider global,
+sans stockage, sans logique métier**. `mobile-react-native` → **`APP_LIFECYCLE_READY`**. **Aucune dépendance ajoutée.**
+Prépare le **flush analytics (RN 13)**, le **refresh session au premier plan** et la **planif notifications (RN 10)** —
+sans les implémenter. **État** (`src/app-lifecycle/state.ts`, agnostique) : **`AppLifecycleState`** (`active`/`background`/
+`inactive`/`unknown`) ; `normalizeAppLifecycleState` (RN `AppStateStatus` incl. `extension`→`background` ; **tolère tout
+input invalide** → `unknown`, jamais de throw) ; helpers `isForeground`/`isBackground`, **`isValidTransition`** (matrice :
+même état no-op ; `unknown`→n'importe ; **un état déterminé ne revient jamais à `unknown`** ; états réels
+interchangeables), **`nextAppLifecycleState`** (applique si valide, sinon conserve ; both inputs tolérés). **Adaptateur**
+(`adapter.ts`) : `AppLifecycleAdapter` (seam RN `AppState` : `getState`/`subscribe`) + **`AppLifecycleAdapterError`**
+contrôlé. **Placeholder** (`placeholder-adapter.ts`) : mémoire ; `setState` simule un changement OS ; no native dep.
+**Service** (`engine.ts`, agnostique) : `createAppLifecycleService({adapter, logger?})` → `getState`/`subscribe`/
+`transition`/`dispose` ; transitions **validées** ; **best-effort non-intrusif** (erreurs adapter `getState`/`subscribe`
+**capturées** + `warn` sûr, défaut `unknown` ; **listener qui throw isolé**) ; **logs RN 8 sûrs** : que des **enums**
+(`{from,to}` au changement, `{operation}` en erreur) — **aucune donnée utilisateur** ; **aucun `Date.now()`**. **+16
+tests `node --test`** (`app-lifecycle-state` : normalisation incl. `extension`/garbage, `isValidTransition` matrice,
+`nextAppLifecycleState` valide/ignoré/toléré ; `app-lifecycle-engine` : état initial, **changements adapter → service +
+subscribers**, transition validée, **subscribe/unsubscribe déterministe**, no-op même état, **listener isolé**, **erreurs
+adapter contrôlées sans throw**, `dispose`, **logs enums seulement**) → **212 tests** ; module **entièrement agnostique**
+(aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 212/212 + expo-doctor 19/19 + git
+diff --check verts** (**RN 15 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/
+`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add generic app lifecycle primitives`.
+**Prochaine action : Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques.**
+
+**Étape précédente — Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/a11y` + `test/**` + docs) : ajoute une **couche d'accessibilité générique** (ADR-010 §16, spec §45), **pure et
 testable**, **sans dépendance native** (`AccessibilityInfo` réel), **sans écran/composant UI, sans provider global
 obligatoire, sans stockage**. `mobile-react-native` → **`A11Y_READY`**. **Aucune dépendance ajoutée.** **État**
