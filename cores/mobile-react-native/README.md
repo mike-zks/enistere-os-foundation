@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Local Notification Primitives
+# Mobile Core React Native — Generic i18n / Localization Primitives
 
-> Statut : **`NOTIFICATIONS_READY`** (V1 — RN 10 ; socle RN 1 → permissions RN 9)
+> Statut : **`I18N_READY`** (V1 — RN 11 ; socle RN 1 → notifications RN 10)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -23,12 +23,13 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Logger / observabilité (RN 8)** | `src/logger` | Logger générique typé (`createLogger` : `debug`/`info`/`warn`/`error`, **niveaux**, **sink pluggable**, **horloge injectée**, corrélation `child`/`withRequestId`) ; **redaction centrale** (`redactValue`/`redactString` : tokens, `Authorization`, cookies, JWT, **URL signées**, **chemins device**, **PII/email**) appliquée **avant** tout sink ; `safeErrorFields(QueryError)`. **Aucune persistance, aucun transport réseau, aucun service externe, aucun log de body** (ADR-040). |
 | **Permissions natives (RN 9)** | `src/permissions` | Modèle pur `PermissionKind`/`PermissionStatus` + helpers (`normalizePermissionStatus`, `canRequestPermission`, `isPermissionGranted`…) ; `PermissionAdapter` (seam Expo) + **`createPermissionService`** (live `getStatus`/`request`/`ensure`/`openSettings`, **logs sûrs** via logger RN 8, `PermissionAdapterError` contrôlé) ; **adaptateur placeholder** (no native dep) ; hook **`usePermission`** (status/loading/error, **no UI**). **Statut jamais persisté** (ni SecureStore/Zustand/Query) ; **API Core = autorité** (07_SECURITY §6). Prépare picker/upload/notifications, **ne les livre pas**. |
 | **Notifications locales (RN 10)** | `src/notifications` | `NotificationMessage` **borné/sûr** (`sanitizeNotificationMessage`, `describeNotificationForLog` **sans contenu**) + `NotificationDeliveryState`/`NotificationTrigger` (`normalizeTrigger`) ; `NotificationAdapter` (seam Expo) + **`createNotificationService`** (gate sur la permission `notifications` RN 9 — **jamais de schedule sans permission usable**, `schedule`/`cancel`/`cancelAll`/`getDelivered`, **logs sûrs** via logger RN 8, `NotificationError` contrôlé) ; **adaptateur placeholder** (no native dep). **LOCAL uniquement** : **aucun push réel**, **aucun token device/FCM/APNs**, **aucun stockage**, **aucune UI**. |
+| **i18n / localisation (RN 11)** | `src/i18n` | Modèle de locale (`normalizeLocale` via `Intl`, `getLocaleDirection` ltr/rtl, `resolveLocale`) + **catalogue typé** (`createTranslator` : `t`/`has`/`plural`, **interpolation `{name}`**, **pluralisation `Intl.PluralRules`**, clé inconnue **sans throw**) + **formatters `Intl`** (`formatDate`/`formatNumber`/`formatCurrency` — devise requise, **ne lèvent jamais**) ; `LocaleAdapter` (seam Expo) + **adaptateur placeholder** (no native dep) + **`createLocalization`** (résout locale + catalogue + formatters). **Aucune dépendance** (tout via `Intl`), **aucun réseau/persistance/UI** ; **catalogues métier = projets dérivés**. |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, **notification-message, notification-engine**) — **122 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, **i18n-locale, i18n-catalog, i18n-format, i18n-engine**) — **144 tests** |
 
 ## Stack
 
@@ -59,6 +60,7 @@ cores/mobile-react-native/
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
+│   ├── i18n/                 # localisation (agnostiques) : locale + catalog + format (Intl) + adapter + placeholder + engine (RN 11)
 │   ├── logger/               # logger/observabilité (agnostiques) : redaction centrale + createLogger + error-fields (RN 8)
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
 │   ├── notifications/        # notifications locales (agnostiques) : message + types + engine + placeholder (RN 10)
@@ -72,7 +74,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine)
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -97,6 +99,7 @@ cores/mobile-react-native/
 | **ADR-040** Logging structuré | **logger client (RN 8)** : `createLogger` (niveaux, sink pluggable, corrélation `requestId`) + **redaction centrale** (tokens/`Authorization`/cookies/JWT/URL signées/chemins device/PII) appliquée **avant** tout sink ; **JSON structuré**, **sans transport réseau/persistance/backend d'observabilité** ni log de body — voir ARCHITECTURE §17 |
 | **07_SECURITY §6** Autorisation | **permissions runtime (RN 9)** : une permission device est une **capacité locale**, **pas** une barrière de sécurité — l'**API Core reste l'autorité** ; statut **jamais persisté** (ni SecureStore/Zustand/Query) ; logs **sûrs** via le logger RN 8 (`{kind,status}` uniquement) — voir ARCHITECTURE §18 |
 | **07_SECURITY §13 / ADR-040** Logs | **notifications locales (RN 10)** : le **contenu** (`title`/`body`/`data`) est potentiellement de la PII → **jamais loggé** (`describeNotificationForLog` = métadonnées seules) ; **aucun token device/push/FCM/APNs** ; **aucun stockage** ; planification **gouvernée** par la permission `notifications` (RN 9) — voir ARCHITECTURE §19 |
+| **08_STANDARDS / 06_DEPENDENCY** i18n | **localisation (RN 11)** : primitives génériques **via `Intl` built-in** (**aucune dépendance** ajoutée, pas de framework i18n lourd) ; **aucun réseau**, **aucune persistance de locale**, **aucun contenu métier** (catalogues = projets dérivés) — voir ARCHITECTURE §20 |
 
 ## Commandes
 
@@ -135,7 +138,12 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
 ## Hors périmètre de cette mission (différé)
 
 Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
-de mission. **Les notifications (RN 10) livrent les primitives locales** (message
+de mission. **L'i18n (RN 11) livre les primitives** (locale, catalogue typé,
+interpolation/pluralisation, formatters `Intl`, adapter, placeholder, service)
+mais **PAS** d'adaptateur `expo-localization` réel, de **persistance du choix de
+locale**, de hook/provider React, d'application RTL à l'UI, de chargement
+paresseux des catalogues ni de **catalogues métier** (apportés par les projets
+dérivés). **Les notifications (RN 10) livrent les primitives locales** (message
 borné, modèle, service gouverné par la permission RN 9, placeholder) mais **PAS**
 de **push distant réel** (Expo Push/FCM/APNs), de **token device**, d'adaptateur
 `expo-notifications` réel, de handler de tap/routing, de catégories/actions/badges
@@ -162,15 +170,16 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **122/122** (`node --test` : … logger, permission-status, permission-engine, **notification-message + notification-engine** — RN 10).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 10 n'ajoute aucune dépendance)*.
+- `test` : ✅ **144/144** (`node --test` : … notification-message, notification-engine, **i18n-locale + i18n-catalog + i18n-format + i18n-engine** — RN 11).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 11 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 11 — i18n / localisation primitives génériques** :
-une couche de localisation générique (détection de locale **abstraite**, catalogue
-de messages typé + interpolation/pluralisation, formatage via `Intl`), **mappée
-purement** et **testable**, **sans contenu métier** ni **dépendance native** —
-unblocke tous les écrans. Une seule mission à la fois. *(Adaptateurs Expo réels
-— permissions/notifications — et offline sync — ADR-029 — restent différés.)*
+**Mobile Core React Native 12 — deep-linking / routing primitives génériques** :
+au-dessus de notifications (RN 10) et navigation, une couche générique de
+résolution de liens (parsing d'URL/deep-link → route interne **validée** + params,
+**anti-open-redirect** comme le `returnTo` Web, schémas autorisés), **mappée
+purement** et **testable**, **sans dépendance native** ni logique métier — gère le
+tap de notification. Une seule mission à la fois. *(Adaptateurs Expo réels,
+push distant et offline sync — ADR-029 — restent différés.)*
