@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`CONSENT_GATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`APP_ENVIRONMENT_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -226,18 +226,30 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   `createConsentService` (`get`/`set`/`isAllowed`/`getAll`/`clear`/`subscribe` ; **best-effort non-intrusif** — store qui
   throw → `unknown` (**non autorisé**) sans throw, catégorie inconnue ignorée, **listener isolé** ; **logs sûrs**
   `{operation,category,status}`/`{operation,count}` — **jamais de valeur utilisateur**) ; **aucun SDK réel/réseau/UI/
-  identifiant/PII**. Layout **plat** + **autonome**. **309 tests `node --test`** (… + preferences-model + preferences-service
-  + **consent-model + consent-service + consent-preference-store**). Vérifs : **typecheck + lint + test 309/309 +
-  expo-doctor 19/19 + git diff --check verts** (**RN 21 n'ajoute aucune dépendance**) ; packages liés `api-contracts`
-  11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel +
-  token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/
-  NetInfo/LocalAuthentication/Keychain/MMKV/AsyncStorage), **catalogues métier i18n + routes concrètes**, **SDK analytics
-  réel** (sous ADR), **application des props a11y / câblage des effets lifecycle dans des composants**, **source
-  remote-config/local réelle des feature flags**, **activation biométrique réelle + fallback concret** (par projet,
-  documenté — ADR-015 §20/§31), **SDK crash réel (Sentry/Crashlytics) + crash handlers globaux** (ADR-019), **store de
-  préférences natif réel** (MMKV/AsyncStorage, ADR-015 §15/§16), **SDK télémétrie réel + UI de consentement + câblage du
-  gate dans analytics/crash** (ADR-038), **environnement / device info** (= RN 22), **offline sync réelle** (ADR-029),
-  **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  identifiant/PII**. **+ RN 22 — environnement / métadonnées app primitives génériques non identifiantes (seam, sans
+  `expo-application`/`expo-device` réel)** : **ajoute `src/app-environment`** — contexte **coarse et NON identifiant** pour
+  télémétries (analytics RN 13/crash RN 19) **gaté par le consentement RN 21** ; RN 22 **ne câble pas** analytics/crash ;
+  `AppEnvironmentSnapshot` **borné, allow-list stricte** (`os` ios/android/web/unknown + `osVersionMajor` **majeur** +
+  `appVersion`/`buildNumber`/`buildChannel`/`locale`/`environment`) + normalizers tolérants (**`normalizeMajorVersion`**
+  `17.5.1`→`17`, `normalizeLocaleField` via i18n) + **`sanitizeAppEnvironmentSnapshot`** (lit **uniquement** les clés
+  autorisées → **drop** deviceId/IDFA/AndroidID/installationId/pushToken/serial/model/IP ; gelé) + `describeAppEnvironmentForLog`
+  (grossier) ; `AppEnvironmentAdapter` (seam synchrone) + **`AppEnvironmentAdapterError`** + **placeholder** mémoire (copies
+  défensives, strippe les identifiants seedés) + `createAppEnvironmentService` (`getSnapshot`/`describeForContext`,
+  **best-effort** → `{os:unknown}` sans throw, **ne persiste rien**, **ne collecte rien auto**, **logs sûrs** `{operation}`+
+  grossiers) ; **aucun `expo-device`/`expo-application` réel/identifiant device/PII/collecte auto ; ne décide ni
+  ADR-038/ADR-019/ADR-018**. Layout **plat** + **autonome**. **320 tests `node --test`** (… + consent-model + consent-service
+  + consent-preference-store + **app-environment-model + app-environment-service**). Vérifs : **typecheck + lint + test
+  320/320 + expo-doctor 19/19 + git diff --check verts** (**RN 22 n'ajoute aucune dépendance**) ; packages liés
+  `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push
+  distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/
+  AccessibilityInfo/AppState/NetInfo/LocalAuthentication/Keychain/MMKV/AsyncStorage/**expo-application/expo-device**),
+  **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props a11y / câblage
+  des effets lifecycle dans des composants**, **source remote-config/local réelle des feature flags**, **activation
+  biométrique réelle + fallback concret** (par projet, documenté — ADR-015 §20/§31), **SDK crash réel (Sentry/Crashlytics)
+  + crash handlers globaux** (ADR-019), **store de préférences natif réel** (MMKV/AsyncStorage, ADR-015 §15/§16), **SDK
+  télémétrie réel + UI de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte
+  environnement dans les télémétries** (après gate consentement), **presse-papiers sécurisé** (= RN 23), **offline sync
+  réelle** (ADR-029), **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -284,8 +296,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`CONSENT_GATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie**, 309 tests + bundle Metro).
+`APP_ENVIRONMENT_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes**, 320 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -316,7 +328,41 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives génériques** (`cores/mobile-react-native/`,
+**Mobile Core React Native 22 — environnement / métadonnées app primitives génériques non identifiantes (seam, sans
+`expo-application`/`expo-device` réel)** (`cores/mobile-react-native/`, périmètre `src/app-environment` + `test/**` +
+docs) : ajoute une **couche d'environnement / métadonnées app générique, NON IDENTIFIANTE**, **pure et testable**, **sans
+`expo-device`/`expo-application` réel, sans réseau, sans collecte automatique**. `mobile-react-native` →
+**`APP_ENVIRONMENT_READY`**. **Aucune dépendance ajoutée.** Elle fournit un **contexte technique sûr et grossier** destiné
+à être attaché **plus tard** aux télémétries (analytics RN 13 / crash RN 19) **une fois gaté par le consentement RN 21** ;
+RN 22 **ne câble pas** analytics/crash et **ne consulte pas RN 21 directement** (le futur adaptateur appliquera le gate).
+**Modèle** (`model.ts`, agnostique) : `AppEnvironmentSnapshot` **borné, allow-list stricte** — `os`
+(`ios`/`android`/`web`/`unknown`) + `osVersionMajor?` (**version MAJEURE seulement**) + `appVersion?`/`buildNumber?`/
+`buildChannel?`/`locale?`/`environment?` (`local`/`development`/`staging`/`production`/`test`). Normalizers **tolérants** :
+`normalizeOs` (alias → enum, sinon `unknown`), **`normalizeMajorVersion`** (`17.5.1` → `17`, borné), `normalizeAppVersion`/
+`normalizeBuildNumber` (token allow-listé borné — texte libre/espaces droppés), `normalizeBuildChannel` (slug borné),
+`normalizeRuntimeEnvironment` (allow-listé), **`normalizeLocaleField`** (réutilise **`normalizeLocale` i18n**, sans cycle).
+**`sanitizeAppEnvironmentSnapshot`** ne lit **QUE** les clés autorisées → tout champ identifiant d'un input brut
+(`deviceId`/`idfa`/`androidId`/`installationId`/`pushToken`/`serial`/`model`/`ip`…) est **droppé** ; objet **gelé**.
+`describeAppEnvironmentForLog` → **champs grossiers seulement** (`os`/`osVersionMajor`/`buildChannel`/`environment` — **ni
+version exacte ni locale**). **Adaptateur** (`adapter.ts`) : `AppEnvironmentAdapter` (seam **synchrone**
+`expo-application`/`expo-device` : `getSnapshot()`) + **`AppEnvironmentAdapterError`** contrôlé (`operation` seul) ; un
+adaptateur réel **ne doit lire aucun identifiant**. **Placeholder** (`placeholder-adapter.ts`) : mémoire ; `getSnapshot`/
+`setSnapshot` **assainissent** (un seed avec identifiant est strippé) ; **copies défensives** (objet gelé) ; aucune
+persistance. **Service** (`service.ts`, agnostique) : `createAppEnvironmentService({adapter, logger?})` → **`getSnapshot()`**
+(assaini, gelé) + **`describeForContext()`** (record gelé des champs définis, prêt à attacher à une télémétrie).
+**Best-effort non-intrusif** : un adapter qui throw → repli `{os:'unknown'}` + `warn`, **ne throw jamais** ; **ne persiste
+rien** ; **ne collecte rien automatiquement**. **Logs RN 8 sûrs** : `{operation}` + champs grossiers — **jamais
+d'identifiant/PII/version exacte**. **+11 tests `node --test`** (`app-environment-model` : normalisation OS/versions,
+**`17.5.1` → `17`**, strings bornées, **champs identifiants droppés** d'un input brut, snapshot **gelé**, `describe*ForLog`
+grossier ; `app-environment-service` : snapshot assaini gelé, **placeholder strippe les identifiants seedés**,
+`describeForContext` champs autorisés seulement, **adapter défaillant → `{os:unknown}` sans throw**, **logs sans
+identifiant/PII/version exacte**) → **320 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
+typecheck-only). Vérifs : **typecheck + lint + test 320/320 + expo-doctor 19/19 + git diff --check verts** (**RN 22
+n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ;
+aucun autre core. Commit `feat(mobile): add safe app environment primitives`. **Prochaine action : Mobile Core React
+Native 23 — presse-papiers (clipboard) sécurisé primitives génériques (seam, sans `expo-clipboard` réel).**
+
+**Étape précédente — Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/consent` + `test/**` + docs) : ajoute une **couche de consentement télémétrie / privacy gate générique**,
 **pure et testable**, **sans SDK analytics/crash réel, sans réseau, sans UI de consentement, sans identifiant utilisateur
 réel, sans PII**. `mobile-react-native` → **`CONSENT_GATE_READY`**. **Aucune dépendance ajoutée.** C'est une **primitive
@@ -345,8 +391,7 @@ throw**, **listener isolé**, **logs enums/count** ; `consent-preference-store` 
 sensible**, round-trip, **`clear()` ne touche que le consentement**) → **309 tests** ; module **entièrement agnostique**
 (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 309/309 + expo-doctor 19/19 + git diff
 --check verts** (**RN 21 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
-`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add telemetry consent primitives`. **Prochaine
-action : Mobile Core React Native 22 — environnement / métadonnées app primitives génériques (seam, non identifiant).**
+`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add telemetry consent primitives`.
 
 **Étape précédente — Mobile Core React Native 20 — préférences non sensibles persistantes primitives génériques (seam, sans MMKV/AsyncStorage
 réel)** (`cores/mobile-react-native/`, périmètre `src/preferences` + `test/**` + docs) : ajoute une **couche de

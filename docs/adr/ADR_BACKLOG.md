@@ -23,7 +23,10 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > ne décide aucun choix de stockage natif — ADR-015 §15/§16 ; consentement
 > télémétrie / privacy gate RN 21 — primitive préparatoire **default-deny** qui
 > **ne décide pas ADR-038**, sans SDK/réseau/UI/identifiant/PII, ne câble pas
-> analytics/crash).
+> analytics/crash ; environnement / métadonnées app RN 22 — contexte **coarse et
+> NON identifiant** (allow-list, version majeure, aucun device/installation id),
+> **ne décide ni ADR-038/ADR-019/ADR-018**, sans `expo-device`/`expo-application`
+> réel, ne collecte rien automatiquement).
 > Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de

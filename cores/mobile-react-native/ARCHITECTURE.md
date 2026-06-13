@@ -1181,3 +1181,62 @@ RN 21 **ne câble pas** ces services et **ne déclenche aucun envoi**.
 - **Différés** : SDK réel + politique privacy/coûts/consentement réel (sous
   **ADR-038**), UI de consentement, câblage du gate dans les services analytics
   (RN 13) / crash (RN 19), géo-règles (RGPD/CCPA).
+
+## 31. Environnement / métadonnées app — primitives génériques non identifiantes (RN 22)
+
+RN 22 ajoute `src/app-environment` : des **primitives d'environnement /
+métadonnées app génériques**, **pures, testables et NON IDENTIFIANTES**, avec un
+**seam futur `expo-application`/`expo-device`** mais **sans `expo-device`/
+`expo-application` réel, sans réseau, sans collecte automatique** (mission). Elles
+fournissent un **contexte technique sûr et grossier** destiné à être attaché
+**plus tard** aux télémétries (analytics RN 13 / crash RN 19) — **une fois gaté par
+le consentement RN 21**. RN 22 **ne câble pas** analytics/crash et **ne consulte
+pas RN 21 directement** (le futur adaptateur appliquera le gate).
+
+- **Modèle (`src/app-environment/model.ts`, agnostique)** : `AppEnvironmentSnapshot`
+  **borné** et **allow-list stricte** — `os` (`ios`/`android`/`web`/`unknown`) +
+  `osVersionMajor?` (**version majeure seulement**) + `appVersion?` + `buildNumber?`
+  + `buildChannel?` + `locale?` + `environment?` (`local`/`development`/`staging`/
+  `production`/`test`). Normalizers **tolérants** : `normalizeOs` (alias → enum, sinon
+  `unknown`), **`normalizeMajorVersion`** (`17.5.1` → `17`, borné), `normalizeAppVersion`/
+  `normalizeBuildNumber` (token allow-listé borné — texte libre/espaces droppés),
+  `normalizeBuildChannel` (slug borné), `normalizeRuntimeEnvironment` (allow-listé),
+  `normalizeLocaleField` (réutilise **`normalizeLocale` i18n**, sans cycle).
+  **`sanitizeAppEnvironmentSnapshot`** ne lit **QUE** les clés autorisées → tout
+  champ identifiant d'un input brut (`deviceId`/`idfa`/`androidId`/`installationId`/
+  `pushToken`/`serial`/`model`/`ip`…) est **droppé** ; objet **gelé**.
+  `describeAppEnvironmentForLog` → **champs grossiers seulement** (`os`/
+  `osVersionMajor`/`buildChannel`/`environment` — **ni version exacte ni locale**).
+- **Adaptateur (`src/app-environment/adapter.ts`, agnostique)** :
+  `AppEnvironmentAdapter` (seam **synchrone** `expo-application`/`expo-device` :
+  `getSnapshot()`) + **`AppEnvironmentAdapterError`** contrôlé (`operation` seul).
+  Un adaptateur réel **ne doit lire aucun identifiant** device/installation.
+- **Placeholder (`src/app-environment/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderAppEnvironmentAdapter(initial?)` — **mémoire** ; `getSnapshot`/
+  `setSnapshot` **assainissent** (un seed avec identifiant est strippé) ; **copies
+  défensives** (objet gelé) ; aucune persistance.
+- **Service (`src/app-environment/service.ts`, agnostique)** :
+  `createAppEnvironmentService({adapter, logger?})` — **`getSnapshot()`** (assaini,
+  gelé) + **`describeForContext()`** (record gelé des champs définis, prêt à être
+  attaché à une télémétrie). **Best-effort non-intrusif** : un adapter qui throw →
+  repli `{os:'unknown'}` + `warn`, **ne throw jamais** ; **ne persiste rien** ; **ne
+  collecte rien automatiquement**. **Logs RN 8 sûrs** : `{operation}` + champs
+  grossiers — **jamais d'identifiant/PII/version exacte**.
+- **Sécurité / gouvernance (07_SECURITY / ADR-040 / ADR-038)** : snapshot **coarse
+  et non identifiant** (allow-list, version majeure) ; **aucun device/installation/
+  vendor id (IDFA/Android ID/push token/serial/MAC/IP), aucun modèle précis, aucune
+  PII, aucune collecte auto** ; **contexte sûr uniquement** — le **consentement RN 21**
+  reste le gate avant tout usage télémétrie. **Aucune dépendance ajoutée. Ne décide
+  ni analytics produit (ADR-038), ni crash reporting (ADR-019), ni monitoring
+  (ADR-018).**
+- **Tests** (`node --test`) : `app-environment-model` (normalisation OS/versions,
+  **`17.5.1` → `17`**, strings bornées, **champs identifiants droppés** d'un input
+  brut, snapshot **gelé**, `describe*ForLog` grossier) + `app-environment-service`
+  (snapshot assaini gelé, **placeholder strippe les identifiants seedés**,
+  `describeForContext` champs autorisés seulement, **adapter défaillant → `{os:
+  unknown}` sans throw**, **logs sans identifiant/PII/version exacte**). Module
+  **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur réel `expo-application`/`expo-device` (sous projet,
+  **sans identifiant**), câblage du contexte dans les adaptateurs analytics (RN 13)/
+  crash (RN 19) **après gate consentement RN 21**, métadonnées additionnelles sous
+  revue privacy.
