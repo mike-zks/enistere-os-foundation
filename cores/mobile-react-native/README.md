@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic App Lifecycle Primitives
+# Mobile Core React Native — Generic Network Connectivity Primitives
 
-> Statut : **`APP_LIFECYCLE_READY`** (V1 — RN 15 ; socle RN 1 → a11y RN 14)
+> Statut : **`NETWORK_STATUS_READY`** (V1 — RN 16 ; socle RN 1 → app lifecycle RN 15)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -32,8 +32,9 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
+| **Connectivité réseau (RN 16)** | `src/offline` | **étend** RN 3 : `NetworkConnectionType` borné + `normalizeNetworkStatus`/`normalizeConnectionType` ; `NetworkAdapter` (seam RN NetInfo, `NetworkAdapterError`) + **placeholder** mémoire + **`createNetworkService`** (`getStatus(): NetworkState`/`shouldQueue()`/`subscribe`/`transition`/`dispose`, `changedAt` via horloge injectée, **logs sûrs** `{from,to,type}` enums, erreurs contrôlées, listener isolé). **`shouldQueueMutations` reste l'API canonique** (queue sauf online). **Aucun NetInfo réel/dépendance/offline sync/persistance/donnée sensible.** |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (… logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve, analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, **app-lifecycle-state, app-lifecycle-engine**) — **212 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (… i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve, analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine, **network-state (RN 3), network-status, network-service**) — **227 tests** |
 
 ## Stack
 
@@ -72,7 +73,7 @@ cores/mobile-react-native/
 │   ├── logger/               # logger/observabilité (agnostiques) : redaction centrale + createLogger + error-fields (RN 8)
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
 │   ├── notifications/        # notifications locales (agnostiques) : message + types + engine + placeholder (RN 10)
-│   ├── offline/              # primitives offline-ready : network-state, mutation, queue mémoire (agnostiques)
+│   ├── offline/              # offline-ready + connectivité : network-state(+RN16) + network-adapter/placeholder/service + mutation + queue mémoire (agnostiques)
 │   ├── permissions/          # permissions runtime (agnostiques) : status + adapter + engine + placeholder + usePermission (RN 9)
 │   ├── query/                # server-state : QueryClient/provider + query-keys + query-errors (agnostiques) + useAuthedQuery/Mutation + invalidation
 │   ├── states/               # états UI standards
@@ -82,7 +83,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (… upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine, i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve, analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine)
+├── test/                     # node --test (… analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine, network-state, network-status, network-service)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -112,6 +113,7 @@ cores/mobile-react-native/
 | **07_SECURITY §13 / ADR-040** Analytics | **télémétrie (RN 13)** : redaction **basée RN 8** (clés sensibles supprimées + valeurs scrubbées via `redactString`) ; **aucun SDK réel/réseau/persistance**, **aucun user-id réel/token/Authorization/URL signée/URI device** ; logs **sûrs** (`{eventName,propertyCount}` — jamais les valeurs) ; SDK réel = **ADR projet dérivé** — voir ARCHITECTURE §22 |
 | **ADR-010 §16 / spec §45** Accessibilité | **a11y (RN 14)** : états **disabled/focused/pressed/invalid** + rôle/label/hint via props RN-compatibles ; **support lecteur d'écran** (annonce bornée) ; **aucun contenu/label/message utilisateur en log** (`describe*ForLog` = métadonnées) ; **aucun stockage**, **aucune dépendance**, **aucun provider global** ; non supposé par une lib externe — voir ARCHITECTURE §23 |
 | **02/06 / ADR-040** App lifecycle | **cycle de vie (RN 15)** : modèle d'état normalisé + transitions **validées** ; **aucune donnée utilisateur** (que des enums : `{from,to}`/`{operation}`) ; **aucun `AppState` réel**, **aucune dépendance**, **aucun stockage**, **aucun provider global** ; prépare flush analytics / refresh session / notifications — voir ARCHITECTURE §24 |
+| **ADR-015 §19 / 06** Connectivité | **réseau (RN 16)** : **étend `src/offline`** (pas de module concurrent) ; **`shouldQueueMutations` canonique** (queue sauf online) ; `type` borné non identifiant ; **aucun NetInfo réel/dépendance/offline sync/persistance** ; logs **enums seulement** (`{from,to,type}`/`{operation}`) — aucune donnée device/PII — voir ARCHITECTURE §25 |
 
 ## Commandes
 
@@ -148,6 +150,11 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
   sensible dans le store local Zustand** (primitives UI non sensibles uniquement).
 
 ## Hors périmètre de cette mission (différé)
+
+**Usage court (RN 16)** : `const net = createNetworkService({ adapter })` puis
+`if (shouldQueueMutations(net.getStatus())) enqueue(...)` ou `net.subscribe((s) =>
+{ if (s.status === 'online') drainQueue(); })` ; l'adaptateur réel (projet dérivé)
+relaie RN NetInfo.
 
 **Usage court (RN 15)** : `const lifecycle = createAppLifecycleService({ adapter })`
 puis `lifecycle.subscribe((s) => { if (s === 'active') refresh(); if (s ===
@@ -199,26 +206,29 @@ package, non câblés).
 Et tout V2/V3 (maps, tracking, carousels, bottom sheets, crash reporting).
 **Le store local Zustand n'est PAS persisté** (in-memory ; persistance de
 préférences non sensibles = option future, ADR-015 §16).
-**L'offline reste préparatoire** : `src/offline` fournit les briques
-(état réseau abstrait + queue mémoire), **sans** persistance, **sans** rejeu
-automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
-(ADR-029 futur). Voir la roadmap du spec (§37/§53) et
+**L'offline reste préparatoire** : `src/offline` fournit les briques (état réseau
+abstrait + **couche connectivité RN 16** : adapter/placeholder/service +
+normalisation + `type`, alimentant `shouldQueueMutations`) + queue mémoire,
+**sans** persistance, **sans** rejeu automatique, **sans** détection de
+connectivité **réelle** (pas de NetInfo — adapter placeholder seulement) ni
+**sync** réelle (ADR-029 futur). Voir la roadmap du spec (§37/§53) et
 `docs/project-status/NEXT_ACTIONS.md`.
 
 ## Vérification
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **212/212** (`node --test` : … a11y-props-state, a11y-announcement, a11y-engine, **app-lifecycle-state + app-lifecycle-engine** — RN 15).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 15 n'ajoute aucune dépendance)*.
+- `test` : ✅ **227/227** (`node --test` : … app-lifecycle-state, app-lifecycle-engine, **network-state (RN 3 inchangé) + network-status + network-service** — RN 16).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 16 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 16 — connectivité réseau (network status) primitives
-génériques** : un `NetworkAdapter` (seam RN NetInfo) + un modèle de connectivité
-normalisé (online/offline/unknown + type de connexion) + service (`subscribe`/
-`getStatus`) + placeholder, **alimentant** la décision offline de RN 3
-(`shouldQueueMutations`/`NetworkStatus`) **sans** détection native réelle (pas de
-NetInfo), **mappé purement** et **testable**. Une seule mission à la fois.
-*(Adaptateurs natifs réels, offline sync réelle — ADR-029 — restent différés.)*
+**Mobile Core React Native 17 — feature flags / config primitives génériques** :
+un `FlagAdapter` (seam pour une future source de config/remote-config) + un modèle
+de flags **typés** (boolean/string/number) avec **valeurs par défaut sûres** et
+bornes + service (`getFlag`/`getAll`/`subscribe`) + placeholder, **mappé purement**
+et **testable**, **sans SDK remote-config réel, sans réseau, sans persistance, sans
+donnée sensible** (séparé des `flags` UI Zustand RN 6). Une seule mission à la fois.
+*(Adaptateurs natifs réels, SDK remote-config réel et offline sync — ADR-029 —
+restent différés.)*

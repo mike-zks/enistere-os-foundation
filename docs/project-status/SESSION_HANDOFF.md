@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`APP_LIFECYCLE_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`NETWORK_STATUS_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -168,14 +168,21 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   RN `AppState`) + **`AppLifecycleAdapterError`** contrôlé + **placeholder** mémoire + `createAppLifecycleService`
   (`getState`/`subscribe`/`transition`/`dispose`, transitions **validées** ; **best-effort non-intrusif** — erreurs
   adapter contrôlées + **listener isolé** ; **logs RN 8 sûrs** `{from,to}`/`{operation}` enums seulement, **aucune donnée
-  utilisateur**) ; **aucun `AppState` réel/provider global/stockage/dépendance**. Layout **plat** + **autonome**. **212
-  tests `node --test`** (… + a11y-engine + **app-lifecycle-state + app-lifecycle-engine**). Vérifs : **typecheck + lint +
-  test 212/212 + expo-doctor 19/19 + git diff --check verts** (**RN 15 n'ajoute aucune dépendance**) ; packages liés
-  `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**,
-  **push distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/
-  AccessibilityInfo/AppState), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR),
-  **application des props a11y / câblage des effets lifecycle dans des composants**, **connectivité réseau** (= RN 16),
-  **backend d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  utilisateur**) ; **aucun `AppState` réel/provider global/stockage/dépendance**. **+ RN 16 — connectivité réseau
+  (network status) primitives génériques** (ADR-015 §19 / 06) : **étend `src/offline`** (RN 3 inchangé,
+  **`shouldQueueMutations` canonique**) — `NetworkConnectionType` **borné** (jamais SSID/carrier/IP) +
+  `normalizeNetworkStatus`/`normalizeConnectionType` tolérants ; `NetworkAdapter` (seam RN NetInfo) +
+  **`NetworkAdapterError`** + **placeholder** mémoire + `createNetworkService` (`getStatus(): NetworkState`/`shouldQueue`/
+  `subscribe`/`transition`/`dispose`, `changedAt` via **horloge injectée**, **best-effort non-intrusif** — erreurs adapter
+  contrôlées + **listener isolé**, **logs sûrs** `{from,to,type}` enums) ; **aucun NetInfo réel/dépendance/offline sync/
+  persistance/donnée sensible**. Layout **plat** + **autonome**. **227 tests `node --test`** (… + app-lifecycle-engine +
+  **network-state (RN 3) + network-status + network-service**). Vérifs : **typecheck + lint + test 227/227 + expo-doctor
+  19/19 + git diff --check verts** (**RN 16 n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 +
+  `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel + token
+  device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/
+  NetInfo), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props
+  a11y / câblage des effets lifecycle dans des composants**, **feature flags** (= RN 17), **offline sync réelle**
+  (ADR-029), **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -222,8 +229,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`APP_LIFECYCLE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle**, 212 tests + bundle Metro).
+`NETWORK_STATUS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau**, 227 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -254,7 +261,35 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 15 — app lifecycle primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** (`cores/mobile-react-native/`,
+périmètre `src/offline` + `test/**` + docs) : **étend** les primitives offline de RN 3 avec une **couche de connectivité
+générique**, **pure et testable**, **sans dépendance native** (NetInfo réel), **sans offline sync, sans rejeu auto, sans
+persistance, sans écran/hook obligatoire/provider global**. `mobile-react-native` → **`NETWORK_STATUS_READY`**. **Aucune
+dépendance ajoutée** ; **aucun module `src/network` concurrent** (la vérité réseau reste dans `src/offline`). **Modèle
+étendu** (`network-state.ts`, additif) : RN 3 **inchangé** (`NetworkStatus`/`NetworkState`/`networkState`/`isOnline`/
+`isOffline`/**`shouldQueueMutations`** = **API canonique**, queue sauf positivement `online`) ; ajouts :
+`NetworkConnectionType` **borné** (`wifi`/`cellular`/`ethernet`/`other`/`none`/`unknown` — **jamais** SSID/carrier/IP) ;
+`type?` optionnel sur `NetworkState` ; `NetworkSnapshot` ; **`normalizeNetworkStatus`** (booléen/strings → status ;
+garbage → `unknown`) et **`normalizeConnectionType`** (tolérants, sans throw). **Adaptateur** (`network-adapter.ts`) :
+`NetworkAdapter` (seam RN NetInfo : `getStatus(): NetworkSnapshot`/`subscribe`) + **`NetworkAdapterError`** contrôlé.
+**Placeholder** (`placeholder-network-adapter.ts`) : mémoire ; `setStatus` (status nu ou `{status,type}`) simule un
+changement OS ; no native dep. **Service** (`network-service.ts`, agnostique) : `createNetworkService({adapter, logger?,
+clock?})` → `getStatus(): NetworkState`/`shouldQueue`/`subscribe`/`transition`/`dispose` ; **`changedAt` stampé sur
+changement de STATUS** via **horloge injectée** (défaut `Date.now`) — type-only conserve `changedAt` (contrat RN 3) ;
+**best-effort non-intrusif** (erreurs adapter `getStatus`/`subscribe` **capturées** + `warn` sûr, défaut `unknown` ;
+**listener qui throw isolé**) ; **logs RN 8 sûrs** : que des **enums** (`{from,to,type}` au changement, `{operation}` en
+erreur) — aucune donnée device/PII. **Intégration RN 3** : `shouldQueueMutations(service.getStatus())` reste canonique.
+**+15 tests `node --test`** (`network-state` RN 3 **inchangé** — compat prouvée ; `network-status` : normalisation
+status/type, `NetworkSnapshot`, `shouldQueueMutations` inchangé ; `network-service` : lecture initiale, **changements
+adapter → service + subscribers**, `changedAt` sur status, type-only conserve `changedAt`, **subscribe/unsubscribe
+déterministe**, **listener isolé**, **erreurs adapter contrôlées sans throw**, `dispose`, **logs enums seulement**) →
+**227 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck +
+lint + test 227/227 + expo-doctor 19/19 + git diff --check verts** (**RN 16 n'ajoute aucune dépendance**). **Aucun
+fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
+`feat(mobile): add generic network status primitives`. **Prochaine action : Mobile Core React Native 17 — feature flags /
+config primitives génériques.**
+
+**Étape précédente — Mobile Core React Native 15 — app lifecycle primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/app-lifecycle` + `test/**` + docs) : ajoute une **couche générique de cycle de vie applicatif**, **pure et
 testable**, **sans dépendance native** (RN `AppState` réel), **sans écran, sans hook obligatoire, sans provider global,
 sans stockage, sans logique métier**. `mobile-react-native` → **`APP_LIFECYCLE_READY`**. **Aucune dépendance ajoutée.**

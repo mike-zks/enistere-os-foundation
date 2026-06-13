@@ -20,11 +20,29 @@
  */
 export type NetworkStatus = 'online' | 'offline' | 'unknown';
 
+/**
+ * Optional, bounded connection type (RN 16). Generic — never a carrier/SSID/IP
+ * or any device-identifying value. `unknown` when undetermined.
+ */
+export type NetworkConnectionType = 'wifi' | 'cellular' | 'ethernet' | 'other' | 'none' | 'unknown';
+
 /** Abstract, serialisable snapshot of connectivity. Carries no device/PII data. */
 export interface NetworkState {
   readonly status: NetworkStatus;
   /** Epoch ms of the last status change, or `null` while still `unknown`. */
   readonly changedAt: number | null;
+  /** Optional connection type (RN 16). Absent on RN 3 states. */
+  readonly type?: NetworkConnectionType;
+}
+
+/**
+ * A lightweight connectivity reading emitted by a {@link NetworkAdapter} (RN 16):
+ * a normalised status + optional type, WITHOUT a timestamp (the service stamps
+ * `changedAt` via its injected clock).
+ */
+export interface NetworkSnapshot {
+  readonly status: NetworkStatus;
+  readonly type?: NetworkConnectionType;
 }
 
 /** The starting state: connectivity is not yet known. */
@@ -34,8 +52,12 @@ export const initialNetworkState: NetworkState = {
 };
 
 /** Builds a {@link NetworkState} for a status at a given (injected) instant. */
-export function networkState(status: NetworkStatus, changedAt: number | null = null): NetworkState {
-  return { status, changedAt };
+export function networkState(
+  status: NetworkStatus,
+  changedAt: number | null = null,
+  type?: NetworkConnectionType,
+): NetworkState {
+  return type !== undefined ? { status, changedAt, type } : { status, changedAt };
 }
 
 /** True only when connectivity is positively known to be available. */
@@ -56,4 +78,61 @@ export function isOffline(state: NetworkState): boolean {
  */
 export function shouldQueueMutations(state: NetworkState): boolean {
   return state.status !== 'online';
+}
+
+// --- RN 16: connectivity normalisation (additive; RN 3 contract unchanged) ---
+
+const STATUS_MAP: Readonly<Record<string, NetworkStatus>> = {
+  online: 'online',
+  connected: 'online',
+  reachable: 'online',
+  offline: 'offline',
+  disconnected: 'offline',
+  notconnected: 'offline',
+  none: 'offline',
+  unknown: 'unknown',
+};
+
+const CONNECTION_TYPE_MAP: Readonly<Record<string, NetworkConnectionType>> = {
+  wifi: 'wifi',
+  wlan: 'wifi',
+  cellular: 'cellular',
+  cell: 'cellular',
+  mobile: 'cellular',
+  ethernet: 'ethernet',
+  wired: 'ethernet',
+  none: 'none',
+  unknown: 'unknown',
+};
+
+/**
+ * Fold a raw connectivity value into a {@link NetworkStatus}. Accepts a boolean
+ * (`true`→online, `false`→offline) or a status-like string
+ * (`online`/`connected`/`offline`/`disconnected`/`none`…). Anything else →
+ * `unknown` (conservative). Never throws.
+ */
+export function normalizeNetworkStatus(value: unknown): NetworkStatus {
+  if (typeof value === 'boolean') {
+    return value ? 'online' : 'offline';
+  }
+  if (typeof value === 'string') {
+    return STATUS_MAP[value.trim().toLowerCase()] ?? 'unknown';
+  }
+  return 'unknown';
+}
+
+/**
+ * Fold a raw connection-type value into a {@link NetworkConnectionType}.
+ * Unknown/nullish → `unknown`; an unrecognised non-empty string → `other`.
+ * Never throws.
+ */
+export function normalizeConnectionType(value: unknown): NetworkConnectionType {
+  if (typeof value !== 'string') {
+    return 'unknown';
+  }
+  const key = value.trim().toLowerCase();
+  if (key.length === 0) {
+    return 'unknown';
+  }
+  return CONNECTION_TYPE_MAP[key] ?? 'other';
 }

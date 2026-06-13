@@ -1,10 +1,12 @@
 /**
- * Offline-ready primitives (RN 3).
+ * Offline-ready + network connectivity primitives (RN 3 + RN 16).
  *
- * PREPARATORY only: an abstract network-state model, a neutral offline-mutation
- * envelope, and an in-memory FIFO queue. No connectivity detection, no
- * persistence, no automatic replay, no sensitive data (ADR-015 §19). See each
- * module header and `ARCHITECTURE.md` §11.
+ * PREPARATORY only: an abstract network-state model (RN 3) extended with a
+ * generic connectivity layer (RN 16 — adapter seam, placeholder, service), a
+ * neutral offline-mutation envelope, and an in-memory FIFO queue. No real
+ * NetInfo detection, no persistence, no automatic replay, no sensitive data
+ * (ADR-015 §19). `shouldQueueMutations` stays the CANONICAL queue decision. See
+ * each module header and `ARCHITECTURE.md` §11 / §25.
  */
 export {
   initialNetworkState,
@@ -12,8 +14,24 @@ export {
   isOnline,
   isOffline,
   shouldQueueMutations,
+  normalizeNetworkStatus,
+  normalizeConnectionType,
 } from './network-state';
-export type { NetworkStatus, NetworkState } from './network-state';
+export type {
+  NetworkStatus,
+  NetworkState,
+  NetworkConnectionType,
+  NetworkSnapshot,
+} from './network-state';
+
+export { NetworkAdapterError } from './network-adapter';
+export type { NetworkAdapter } from './network-adapter';
+
+export { createPlaceholderNetworkAdapter } from './placeholder-network-adapter';
+export type { PlaceholderNetworkAdapter } from './placeholder-network-adapter';
+
+export { createNetworkService } from './network-service';
+export type { NetworkService, NetworkServiceOptions } from './network-service';
 
 export {
   createOfflineMutation,
