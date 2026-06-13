@@ -41,6 +41,13 @@ spécification ne prouve pas un starter ; un dossier vide ne prouve aucune impl�
 
 ## 3. Architecture du repository
 
+> **Mise à jour RN25** : le statut courant du core `mobile-react-native` est
+> **`TELEMETRY_COORDINATOR_READY`**. RN25 ajoute `src/telemetry` : composition
+> opt-in consentement RN21 + contexte environnement safe RN22 + analytics RN13 /
+> crash RN19, sans SDK réel, réseau, persistance, identify/user-id, émission
+> automatique ni retry RN24. Vérification locale : typecheck, lint, test
+> (**355 cas `test(...)`**), doctor 19/19 et `git diff --check` verts.
+
 ```
 enistere-os-foundation/
   strategy/            10 docs Phase 0 (01..10)
@@ -253,9 +260,13 @@ RÉALISÉ** (`mobile-react-native` → **RETRY_READY** ; **ajoute `src/retry`** 
 borné avec jitter déterministe via `rng`, classification retryable structurelle, `withRetry` à `sleep` injecté,
 **401/403/session-expired hard-blockés**, erreur finale originale propagée, logs `{attempt,delayMs}` seuls ; **aucun
 réseau réel, aucune dépendance, aucun `Date.now()` testé, aucun branchement AuthEngine/withAuthRetry/QueryClient/
-mutations** ; **346 tests `node --test`**, typecheck/lint/test/doctor + `git diff --check` verts). Cloud Core reste
-**PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE**. **Prochaine action** : **Mobile Core React Native 25 —
-consommation opt-in des primitives transverses** ; **actions humaines** : protection de branche `main` + rendre
+mutations** ; **346 tests `node --test`**, typecheck/lint/test/doctor + `git diff --check` verts), puis **RN 25 —
+telemetry context composition opt-in RÉALISÉ** (`mobile-react-native` → **TELEMETRY_COORDINATOR_READY** ;
+`src/telemetry`, consentement RN21 default-deny + contexte RN22 safe + analytics RN13/crash RN19 opt-in, sans SDK réel/
+réseau/persistance/identity/auto-start/retry RN24 ; **355 cas `test(...)`**, typecheck/lint/test/doctor +
+`git diff --check` verts). Cloud Core reste
+**PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE**. **Prochaine action** : **Mobile Core React Native 26 —
+intégration explicite d'un adaptateur natif sûr** ; **actions humaines** : protection de branche `main` + rendre
 `api-smoke` requis.
 
 ## 12. Documentation
