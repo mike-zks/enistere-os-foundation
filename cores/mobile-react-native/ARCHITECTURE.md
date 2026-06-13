@@ -846,3 +846,55 @@ implémenter.
   **câblage** des effets concrets (flush analytics / refresh session au
   foreground / planification notifications), gestion de l'état au démarrage à
   froid / deep-link, débounce des transitions rapides.
+
+## 25. Connectivité réseau — primitives génériques (RN 16)
+
+RN 16 **étend** les primitives offline de RN 3 (`src/offline`, §11) avec une
+**couche de connectivité générique**, **pure et testable**, **sans dépendance
+native** (NetInfo réel), **sans offline sync, sans rejeu automatique, sans
+persistance, sans écran/hook obligatoire/provider global**. La vérité réseau
+reste dans **`src/offline`** (pas de module `src/network` concurrent).
+
+- **Modèle étendu (`src/offline/network-state.ts`, agnostique — additif)** :
+  RN 3 inchangé (`NetworkStatus`/`NetworkState`/`networkState`/`isOnline`/
+  `isOffline`/**`shouldQueueMutations`** = **API canonique**, queue sauf
+  positivement `online`). **Ajouts RN 16** : `NetworkConnectionType` **borné**
+  (`wifi`/`cellular`/`ethernet`/`other`/`none`/`unknown` — **jamais** SSID/
+  carrier/IP) ; `type?` **optionnel** sur `NetworkState` (absent sur les états
+  RN 3) ; `NetworkSnapshot` `{status, type?}` (émission adapter, sans
+  timestamp) ; **`normalizeNetworkStatus`** (booléen/`online`/`connected`/
+  `offline`/`disconnected`/`none`… → status ; garbage → `unknown`) et
+  **`normalizeConnectionType`** (tolérants, jamais de throw).
+- **Adaptateur (`src/offline/network-adapter.ts`, agnostique)** : `NetworkAdapter`
+  = seam RN NetInfo (`getStatus(): NetworkSnapshot`, `subscribe(listener)→
+  unsubscribe`). **`NetworkAdapterError`** contrôlé (seulement `operation`).
+- **Placeholder (`src/offline/placeholder-network-adapter.ts`, agnostique)** :
+  `createPlaceholderNetworkAdapter(initial?)` — **mémoire** ; `setStatus`
+  (status nu **ou** `{status,type}`) simule un changement OS (normalise + notifie
+  au changement) ; **aucune dépendance native / persistance**.
+- **Service (`src/offline/network-service.ts`, agnostique)** :
+  `createNetworkService({adapter, logger?, clock?})` → **`getStatus(): NetworkState`**
+  (compose avec `shouldQueueMutations`), **`shouldQueue()`** (raccourci =
+  `shouldQueueMutations(getStatus())`), `subscribe`, `transition(input)` (status
+  nu/`{status,type}`/garbage tolérés), `dispose`. **`changedAt` stampé sur
+  changement de STATUS** via **horloge injectée** (défaut `Date.now`) — un
+  changement de type seul conserve `changedAt` (contrat RN 3). **Best-effort /
+  non-intrusif** : erreurs adapter `getStatus`/`subscribe` **capturées** + `warn`
+  sûr, défaut `unknown` ; **listener qui throw isolé**. **Logs RN 8 sûrs** : que
+  des **enums** (`{from, to, type}` au changement, `{operation}` en erreur) —
+  **aucune donnée device/PII**.
+- **Intégration RN 3 / sécurité** : **`shouldQueueMutations` reste l'API
+  canonique** (inchangée) ; `getStatus()` renvoie un `NetworkState` qui s'y
+  branche. **Aucun token/URL signée/payload serveur/donnée sensible** ; le `type`
+  est un enum non identifiant. **Aucune dépendance ajoutée.**
+- **Tests** (`node --test`) : `network-state` (RN 3, **inchangé** — compat
+  prouvée) + `network-status` (normalisation status/type, `NetworkSnapshot`,
+  `shouldQueueMutations` inchangé) + `network-service` (lecture initiale,
+  **changements adapter → service + subscribers**, `changedAt` sur status,
+  type-only conserve `changedAt`, **subscribe/unsubscribe déterministe**,
+  **listener isolé**, **erreurs adapter contrôlées sans throw**, `dispose`,
+  **logs enums seulement**). Module **entièrement agnostique** (aucun hook/
+  provider → rien en typecheck-only).
+- **Différés** : adaptateur NetInfo réel + hook/`useNetworkStatus` optionnel,
+  **offline sync / rejeu** (ADR-029), persistance, débounce des transitions
+  flappantes, métriques de qualité de lien.
