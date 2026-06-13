@@ -1240,3 +1240,53 @@ pas RN 21 directement** (le futur adaptateur appliquera le gate).
   **sans identifiant**), câblage du contexte dans les adaptateurs analytics (RN 13)/
   crash (RN 19) **après gate consentement RN 21**, métadonnées additionnelles sous
   revue privacy.
+
+## 32. Presse-papiers sécurisé — primitives génériques (RN 23)
+
+RN 23 ajoute `src/clipboard` : des **primitives de presse-papiers sécurisé
+génériques**, **pures et testables**, avec un **seam futur `expo-clipboard`** mais
+**sans `expo-clipboard` réel, sans réseau, sans persistance, sans UI, sans lecture
+automatique au démarrage** (mission). Le presse-papiers est un **canal transitoire,
+partagé et non fiable** : son **contenu n'est JAMAIS loggé** (métadonnées seules).
+
+- **Modèle (`src/clipboard/model.ts`, agnostique)** : `ClipboardSensitivity`
+  (`normal`/`sensitive`) + `ClipboardOperationResult` (`success`/`unavailable`/
+  `rejected`/`error`) ; `normalizeClipboardText` (coercition + borne
+  `MAX_CLIPBOARD_TEXT_LENGTH`) ; **`isSensitiveClipboardText`** (réutilise la
+  **redaction RN 8** `redactString` : Bearer/JWT/email/URL signée/URI
+  `file://`/`content://` → **sensible**) ; `classifyClipboardSensitivity` ;
+  **`describeClipboardTextForLog`** → **`{length,sensitivity}` SEULEMENT** (jamais
+  le contenu) ; `describeClipboardResultForLog` → `{result}`.
+- **Adaptateur (`src/clipboard/adapter.ts`, agnostique)** : `ClipboardAdapter`
+  (seam `expo-clipboard` : `setString` requis ; `getString?`/`hasString?`/`clear?`
+  optionnels — **async**). **`ClipboardAdapterError`** contrôlé (`operation` seul,
+  **jamais le texte**).
+- **Placeholder (`src/clipboard/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderClipboardAdapter` — **slot mémoire transitoire** ; `peek()`
+  (test-only) ; **aucune persistance durable**.
+- **Service (`src/clipboard/service.ts`, agnostique)** : `createClipboardService(
+  {adapter, logger?})` — `copy(text, options?)` / `getString()` / `hasString()` /
+  `clear()`. **Politique** : `copy` **refuse** un texte `sensitive` (détecté **ou**
+  `markSensitive`) sauf `allowSensitive: true` → **`rejected`, adaptateur NON
+  appelé** ; avec opt-in il copie mais **logge des métadonnées seulement** (le
+  projet **devrait** `clear()` ensuite) ; **`getString` est opt-in explicite**
+  (jamais automatique) — une valeur sensible **peut** être renvoyée à l'appelant
+  explicite mais **n'est jamais loggée** ; **`clear` = no-op sûr** si non supporté.
+  **Best-effort non-intrusif** : un adapter qui throw → `error` contrôlé + `warn`,
+  **ne throw jamais**. **Logs RN 8 sûrs** : `{operation,result,sensitivity,length}`
+  — **jamais le contenu**.
+- **Sécurité / gouvernance (ADR-040 §17/§18, ADR-015 §21/§24)** : **aucun log de
+  contenu** copié/collé ; **aucun token/cookie/URL signée/URI device/PII** dans les
+  logs ; le clipboard **n'est PAS stocké** dans preferences (RN 20)/Zustand (RN 6)/
+  TanStack Query (RN 5)/SecureStore ; **transitoire et non fiable** (documenté).
+  **Aucune dépendance ajoutée.**
+- **Tests** (`node --test`) : `clipboard-model` (normalisation/borne, **détection
+  sensible** Bearer/JWT/email/URL signée/`file`/`content` URI, `describe*ForLog`
+  **sans contenu**) + `clipboard-service` (`copy` normal → `success`, **`copy`
+  sensible sans opt-in → `rejected` (adapter non appelé)**, **`copy` sensible avec
+  opt-in/markSensitive**, **`getString` ne logge jamais le contenu**, **`clear`
+  fonctionne / no-op si absent**, **adapter qui throw → `error` sans throw brut**,
+  placeholder, **logs sans token/PII/contenu**). Module **entièrement agnostique**
+  (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur réel `expo-clipboard`, `clearAfter` automatique (timer
+  d'effacement), hook `useClipboard` optionnel, support d'images/types riches.

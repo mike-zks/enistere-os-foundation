@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`APP_ENVIRONMENT_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`CLIPBOARD_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -237,19 +237,30 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   défensives, strippe les identifiants seedés) + `createAppEnvironmentService` (`getSnapshot`/`describeForContext`,
   **best-effort** → `{os:unknown}` sans throw, **ne persiste rien**, **ne collecte rien auto**, **logs sûrs** `{operation}`+
   grossiers) ; **aucun `expo-device`/`expo-application` réel/identifiant device/PII/collecte auto ; ne décide ni
-  ADR-038/ADR-019/ADR-018**. Layout **plat** + **autonome**. **320 tests `node --test`** (… + consent-model + consent-service
-  + consent-preference-store + **app-environment-model + app-environment-service**). Vérifs : **typecheck + lint + test
-  320/320 + expo-doctor 19/19 + git diff --check verts** (**RN 22 n'ajoute aucune dépendance**) ; packages liés
-  `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push
-  distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/
-  AccessibilityInfo/AppState/NetInfo/LocalAuthentication/Keychain/MMKV/AsyncStorage/**expo-application/expo-device**),
-  **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props a11y / câblage
-  des effets lifecycle dans des composants**, **source remote-config/local réelle des feature flags**, **activation
-  biométrique réelle + fallback concret** (par projet, documenté — ADR-015 §20/§31), **SDK crash réel (Sentry/Crashlytics)
-  + crash handlers globaux** (ADR-019), **store de préférences natif réel** (MMKV/AsyncStorage, ADR-015 §15/§16), **SDK
-  télémétrie réel + UI de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte
-  environnement dans les télémétries** (après gate consentement), **presse-papiers sécurisé** (= RN 23), **offline sync
-  réelle** (ADR-029), **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  ADR-038/ADR-019/ADR-018**. **+ RN 23 — presse-papiers (clipboard) sécurisé primitives génériques (seam, sans
+  `expo-clipboard` réel)** (ADR-040 §17/§18 / ADR-015 §21/§24) : **ajoute `src/clipboard`** — canal **transitoire/partagé/
+  non fiable** dont le **contenu n'est JAMAIS loggé** (métadonnées seules) ni persisté ; `ClipboardSensitivity` (`normal`/
+  `sensitive`) + `ClipboardOperationResult` (`success`/`unavailable`/`rejected`/`error`) + `normalizeClipboardText` (borné)
+  + **`isSensitiveClipboardText`** (redaction RN 8 : Bearer/JWT/email/URL signée/URI device → sensible) +
+  `describeClipboardTextForLog` (**`{length,sensitivity}` seul**) ; `ClipboardAdapter` (seam `expo-clipboard`) +
+  **`ClipboardAdapterError`** + **placeholder** mémoire (slot transitoire) + `createClipboardService` (`copy`/`getString`/
+  `hasString`/`clear` — **`copy` refuse un texte sensible sans `allowSensitive` → `rejected` adapter NON appelé** ;
+  **`getString` opt-in explicite** jamais auto, valeur sensible **jamais loggée** ; **`clear` no-op sûr** ; **best-effort**
+  — adapter throw → `error` sans throw ; **logs sûrs** `{operation,result,sensitivity,length}` — **jamais le contenu**) ;
+  **clipboard NON stocké (pas de preferences/Zustand/Query/SecureStore) ; aucun `expo-clipboard` réel/réseau/persistance/
+  UI/lecture auto**. Layout **plat** + **autonome**. **330 tests `node --test`** (… + app-environment-model +
+  app-environment-service + **clipboard-model + clipboard-service**). Vérifs : **typecheck + lint + test 330/330 +
+  expo-doctor 19/19 + git diff --check verts** (**RN 23 n'ajoute aucune dépendance**) ; packages liés `api-contracts`
+  11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel +
+  token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/
+  NetInfo/LocalAuthentication/Keychain/MMKV/AsyncStorage/expo-application/expo-device/**expo-clipboard**), **catalogues
+  métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props a11y / câblage des effets
+  lifecycle dans des composants**, **source remote-config/local réelle des feature flags**, **activation biométrique réelle
+  + fallback concret** (par projet, documenté — ADR-015 §20/§31), **SDK crash réel (Sentry/Crashlytics) + crash handlers
+  globaux** (ADR-019), **store de préférences natif réel** (MMKV/AsyncStorage, ADR-015 §15/§16), **SDK télémétrie réel + UI
+  de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
+  télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
+  d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -296,8 +307,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`APP_ENVIRONMENT_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes**, 320 tests + bundle Metro).
+`CLIPBOARD_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé**, 330 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -328,7 +339,39 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 22 — environnement / métadonnées app primitives génériques non identifiantes (seam, sans
+**Mobile Core React Native 23 — presse-papiers (clipboard) sécurisé primitives génériques (seam, sans `expo-clipboard`
+réel)** (`cores/mobile-react-native/`, périmètre `src/clipboard` + `test/**` + docs) : ajoute une **couche de
+presse-papiers sécurisé générique**, **pure et testable**, **sans `expo-clipboard` réel, sans réseau, sans persistance,
+sans UI, sans lecture automatique au démarrage**. `mobile-react-native` → **`CLIPBOARD_READY`**. **Aucune dépendance
+ajoutée.** Le presse-papiers est un **canal transitoire, partagé et NON fiable** : son **contenu n'est JAMAIS loggé**
+(métadonnées seules) et **n'est jamais persisté** (sécurité ADR-040 §17/§18, ADR-015 §21/§24). **Modèle** (`model.ts`,
+agnostique) : `ClipboardSensitivity` (`normal`/`sensitive`) + `ClipboardOperationResult` (`success`/`unavailable`/
+`rejected`/`error`) ; `normalizeClipboardText` (coercition + borne `MAX_CLIPBOARD_TEXT_LENGTH`) ;
+**`isSensitiveClipboardText`** (réutilise la **redaction RN 8** `redactString` : Bearer/JWT/email/URL signée/URI
+`file://`/`content://` → **sensible**) + `classifyClipboardSensitivity` ; **`describeClipboardTextForLog`** →
+**`{length,sensitivity}` SEULEMENT** (jamais le contenu) + `describeClipboardResultForLog` → `{result}`. **Adaptateur**
+(`adapter.ts`) : `ClipboardAdapter` (seam `expo-clipboard` : `setString` requis ; `getString?`/`hasString?`/`clear?`
+optionnels, **async**) + **`ClipboardAdapterError`** contrôlé (`operation` seul, **jamais le texte**). **Placeholder**
+(`placeholder-adapter.ts`) : slot **mémoire transitoire** + `peek()` (test-only) ; **aucune persistance durable**.
+**Service** (`service.ts`, agnostique) : `createClipboardService({adapter, logger?})` → `copy(text, options?)`/
+`getString()`/`hasString()`/`clear()`. **Politique** : `copy` **refuse** un texte `sensitive` (détecté **ou**
+`markSensitive`) sauf `allowSensitive: true` → **`rejected`, adaptateur NON appelé** ; avec opt-in il copie mais **logge
+des métadonnées seulement** (le projet **devrait** `clear()` ensuite) ; **`getString` est opt-in explicite** (jamais
+automatique) — une valeur sensible **peut** être renvoyée à l'appelant explicite mais **n'est jamais loggée** ; **`clear`
+= no-op sûr** si non supporté. **Best-effort non-intrusif** : un adapter qui throw → `error` contrôlé + `warn`, **ne throw
+jamais**. **Logs RN 8 sûrs** : `{operation,result,sensitivity,length}` — **jamais le contenu**. **Le clipboard n'est PAS
+stocké** dans preferences (RN 20)/Zustand (RN 6)/TanStack Query (RN 5)/SecureStore. **+10 tests `node --test`**
+(`clipboard-model` : normalisation/borne, **détection sensible** Bearer/JWT/email/URL signée/`file`/`content` URI,
+`describe*ForLog` **sans contenu** ; `clipboard-service` : `copy` normal → `success`, **`copy` sensible sans opt-in →
+`rejected` (adapter non appelé)**, **opt-in/markSensitive**, **`getString` ne logge jamais le contenu**, **`clear` /
+no-op si absent**, **adapter qui throw → `error` sans throw brut**, placeholder, **logs sans token/PII/contenu**) →
+**330 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck +
+lint + test 330/330 + expo-doctor 19/19 + git diff --check verts** (**RN 23 n'ajoute aucune dépendance**). **Aucun fichier
+`cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add
+secure clipboard primitives`. **Prochaine action : Mobile Core React Native 24 — retry / backoff primitives génériques
+(purs, horloge injectée).**
+
+**Étape précédente — Mobile Core React Native 22 — environnement / métadonnées app primitives génériques non identifiantes (seam, sans
 `expo-application`/`expo-device` réel)** (`cores/mobile-react-native/`, périmètre `src/app-environment` + `test/**` +
 docs) : ajoute une **couche d'environnement / métadonnées app générique, NON IDENTIFIANTE**, **pure et testable**, **sans
 `expo-device`/`expo-application` réel, sans réseau, sans collecte automatique**. `mobile-react-native` →
@@ -359,8 +402,7 @@ grossier ; `app-environment-service` : snapshot assaini gelé, **placeholder str
 identifiant/PII/version exacte**) → **320 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
 typecheck-only). Vérifs : **typecheck + lint + test 320/320 + expo-doctor 19/19 + git diff --check verts** (**RN 22
 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ;
-aucun autre core. Commit `feat(mobile): add safe app environment primitives`. **Prochaine action : Mobile Core React
-Native 23 — presse-papiers (clipboard) sécurisé primitives génériques (seam, sans `expo-clipboard` réel).**
+aucun autre core. Commit `feat(mobile): add safe app environment primitives`.
 
 **Étape précédente — Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/consent` + `test/**` + docs) : ajoute une **couche de consentement télémétrie / privacy gate générique**,
