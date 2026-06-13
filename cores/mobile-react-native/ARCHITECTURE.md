@@ -898,3 +898,52 @@ reste dans **`src/offline`** (pas de module `src/network` concurrent).
 - **Différés** : adaptateur NetInfo réel + hook/`useNetworkStatus` optionnel,
   **offline sync / rejeu** (ADR-029), persistance, débounce des transitions
   flappantes, métriques de qualité de lien.
+
+## 26. Feature flags / config — primitives génériques (RN 17)
+
+RN 17 **étend** `src/config` (env, §8) avec des **primitives de feature flags /
+config génériques**, **pures et testables**, **sans SDK remote-config réel, sans
+réseau, sans persistance, sans user targeting réel, sans écran/hook obligatoire/
+provider global**. **À distinguer des `flags` UI Zustand (RN 6)** : RN 17 = config/
+feature flags génériques (boolean/string/number), **pas** d'état UI local éphémère.
+
+- **Modèle (`src/config/flag-model.ts`, agnostique)** : `FlagValue`
+  (`boolean`/`string`/`number`) + `FlagSet` ; bornes `MAX_FLAG_KEY_LENGTH`/
+  `MAX_FLAG_VALUE_LENGTH`/`MAX_FLAGS` ; `isValidFlagKey` (identifiants
+  `feature.x`) ; `normalizeFlagValue` (primitives ; **strings bornées** ; nombres
+  non finis droppés ; sinon `undefined`) ; **`sanitizeFlagSet`** (garde clés/
+  valeurs valides, cap count ; tolérant). **Getters typés à défaut sûr** :
+  `getBooleanFlag`/`getStringFlag`/`getNumberFlag` + `getFlagValue<T>` — renvoient
+  le flag **uniquement si le type correspond**, sinon le défaut. `describeFlagsForLog`
+  → **`{count}` SEULEMENT** (jamais clés ni valeurs).
+- **Adaptateur (`src/config/flag-adapter.ts`, agnostique)** : `FlagAdapter` = seam
+  source locale/remote-config (`getFlags(): FlagSet`, `subscribe?`, `refresh?():
+  Promise<FlagSet>`). **`FlagAdapterError`** contrôlé.
+- **Placeholder (`src/config/placeholder-flag-adapter.ts`, agnostique)** :
+  `createPlaceholderFlagAdapter(initial?)` — **mémoire** ; `setFlags` (assaini +
+  notifie) ; `refresh` renvoie l'ensemble courant ; **aucune dépendance/réseau/
+  persistance**.
+- **Service (`src/config/flag-service.ts`, agnostique)** : `createFlagService(
+  {adapter, defaults?, logger?})` — résout `{...defaults, ...adapterFlags}`
+  (assainis ; **adapter > defaults**) → **`getFlag(key, default)`** (typé, **défaut
+  sûr** si absent/mal typé), **`getAll`** (copie), **`subscribe`**, **`refresh`**
+  (best-effort, **ne throw jamais**), **`dispose`**. **Non-intrusif** : erreurs
+  adapter **capturées** + `warn` sûr, défauts conservés ; **listener qui throw
+  isolé**. **Logs RN 8 sûrs** : `{count}` (maj) / `{operation}` (erreur) — **jamais
+  de clé ni de valeur**.
+- **Sécurité / gouvernance (07_SECURITY / ADR-015 §19/§21)** : un flag est de la
+  **config** — **jamais** un secret/token/URL signée/payload serveur/PII
+  (responsabilité de l'appelant) ; valeurs **bornées** et **jamais loggées** ;
+  **aucun réseau/persistance/user targeting réel** ; **séparé** de l'état UI
+  Zustand (RN 6). **Aucune dépendance ajoutée.**
+- **Tests** (`node --test`) : `config-flags` (validation clés, normalisation/
+  bornage valeurs, `sanitizeFlagSet`, **getters à défaut sûr** sur type mismatch,
+  `describeFlagsForLog` **sans clé/valeur**, **tolérance input invalide**) +
+  `config-flag-service` (résolution defaults⊕adapter, `getFlag`/`getAll`,
+  **subscribe/unsubscribe déterministe**, **changements adapter**, **refresh
+  best-effort + erreur contrôlée**, **listener isolé**, **erreurs adapter
+  contrôlées**, **logs sans clé/valeur**, `dispose`, **tolérance input invalide**).
+  Module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur remote-config réel (sous **ADR/validation**), **user
+  targeting** (cohortes/règles, sous revue privacy), persistance du cache de
+  config, A/B testing, hook/`useFlag` optionnel.

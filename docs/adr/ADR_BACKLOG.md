@@ -12,6 +12,15 @@ Ce backlog ADR consolide les décisions structurantes identifiées après la rev
 
 Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécessaires avant l'implémentation des starters réels.
 
+> Note de cohérence — 2026-06-13 : ce backlog reste la liste des **ADR à rédiger**
+> ou déjà validés. Certaines briques préparatoires ont depuis été livrées dans les
+> starters, notamment dans `mobile-react-native` (logger/redaction RN 8, analytics
+> primitives RN 13, offline/connectivité RN 3/RN 16, feature flags/config RN 17).
+> Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
+> sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
+> Les lignes concernées sont annotées pour éviter de confondre "primitive de
+> fondation" et "décision stratégique".
+
 ## 2. Objectif du backlog ADR
 
 Le backlog ADR a pour objectifs :
@@ -72,8 +81,8 @@ Ces ADR peuvent suivre un starter minimal si les fonctionnalités concernées re
 |---|---|---|---|---|---|---|
 | ADR-016 | OpenAPI et génération de clients typés | Moyenne | api-nestjs, web-nextjs, mobile-react-native | Non | Validé | Contrat OpenAPI canonique versionné ; `openapi-typescript` (types) + `openapi-fetch` (client Fetch) + wrappers Enistere ; hooks TanStack Query maintenus dans les cores ; Orval en repli ; adaptateur Angular et générateur Dart décidés par preuve. |
 | ADR-017 | Queue/jobs : BullMQ vs alternative | Moyenne | api-nestjs, cloud | Non | À rédiger | Bloquant seulement si jobs V1 deviennent critiques. |
-| ADR-018 | Monitoring avancé | Moyenne | cloud, api-nestjs, web-nextjs, mobile-react-native | Non | À rédiger | Prometheus/Grafana/Loki/Sentry ou alternatives à cadrer. |
-| ADR-019 | Crash/error reporting mobile et web | Moyenne | mobile-react-native, web-nextjs, quality-core futur | Non | À rédiger | Sentry ou alternative. Peut attendre avant production. |
+| ADR-018 | Monitoring avancé | Moyenne | cloud, api-nestjs, web-nextjs, mobile-react-native | Non | À rédiger | Prometheus/Grafana/Loki/Sentry ou alternatives à cadrer. Les primitives de logs/redaction mobile RN 8 et API ADR-040 ne décident pas du backend de monitoring. |
+| ADR-019 | Crash/error reporting mobile et web | Moyenne | mobile-react-native, web-nextjs, quality-core futur | Non | À rédiger | Sentry ou alternative. Peut attendre avant production. Les primitives analytics/logs mobiles ne branchent aucun crash reporter. |
 | ADR-020 | Documentation visuelle UI Kit | Moyenne | ui-kit, docs-core futur, quality-core futur | Non | À rédiger | Storybook, Ladle, documentation statique ou alternative. |
 | ADR-021 | Tests E2E : Playwright vs Cypress | Moyenne | web-nextjs, quality-core futur | Non | À rédiger | À trancher avant E2E structuré. |
 | ADR-022 | Tests visuels UI Kit | Moyenne | ui-kit, web-nextjs, mobile-react-native, quality-core futur | Non | À rédiger | À cadrer avant régression visuelle systématique. |
@@ -91,7 +100,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-026 | OSRM et fallback routing Mapbox/Google | Future | cloud, api-nestjs, mobile-react-native, web-nextjs | Non | À rédiger | Critique pour projets maps/tracking, pas pour starter minimal. |
 | ADR-027 | Maps mobile : react-native-maps vs MapLibre | Future | mobile-react-native, ui-kit, cloud | Non | À rédiger | À traiter avant module maps mobile. |
 | ADR-028 | Maps web | Future | web-nextjs, ui-kit, cloud | Non | À rédiger | MapLibre ou autre solution selon besoins web. |
-| ADR-029 | Stratégie offline mobile | Future | mobile-react-native, api-nestjs | Non | À rédiger | Synchronisation, conflits, stockage local et sécurité. |
+| ADR-029 | Stratégie offline mobile | Future | mobile-react-native, api-nestjs | Non | À rédiger | Synchronisation, conflits, stockage local et sécurité. RN 3/RN 16 livrent seulement queue mémoire + connectivité générique, sans persistance ni sync. |
 | ADR-030 | Sauvegardes externalisées et chiffrement | Future | cloud | Non | À rédiger | À traiter avant production critique. |
 | ADR-031 | Déploiement avancé : blue/green, canary, orchestration | Future | cloud, web-nextjs, api-nestjs | Non | À rédiger | À traiter après stabilisation CI/CD. |
 | ADR-032 | Charts web et UI Kit | Future | web-nextjs, ui-kit | Non | À rédiger | Recharts ou alternative si dashboards avancés. |
@@ -99,8 +108,8 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-034 | Flutter UI : Material 3 vs composants maison | Future | ui-kit, mobile-flutter | Non | À rédiger | À traiter avant Mobile Core Flutter. |
 | ADR-035 | Angular UI : Angular Material vs PrimeNG | Future | ui-kit, web-angular | Non | À rédiger | À traiter avant Web Core Angular. |
 | ADR-036 | Observabilité distribuée et tracing | Future | cloud, api-nestjs, web-nextjs | Non | À rédiger | Après monitoring de base. |
-| ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Utile pour SaaS et rollout progressif. |
-| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | À cadrer avec confidentialité et coûts. |
+| ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Utile pour SaaS et rollout progressif. RN 17 livre seulement des primitives config/flags locales génériques, sans remote-config, réseau, persistance ni ciblage utilisateur. |
+| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | À cadrer avec confidentialité, consentement et coûts. RN 13 livre seulement un modèle d'événements/redaction + adapter placeholder, sans SDK réel, transport ni identify. |
 
 ## 7. Tableau synthétique des ADR
 
@@ -123,8 +132,8 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-015 | Stockage mobile sécurisé | Haute | mobile-react-native, api-nestjs | Oui | Validé | SecureStore/Keychain. |
 | ADR-016 | OpenAPI et clients typés | Moyenne | api-nestjs, web-nextjs, mobile-react-native | Non | Validé | Contrat canonique + `openapi-typescript`/`openapi-fetch` + wrappers ; TanStack Query séparé. |
 | ADR-017 | Queue/jobs | Moyenne | api-nestjs, cloud | Non | À rédiger | BullMQ ou alternative. |
-| ADR-018 | Monitoring avancé | Moyenne | cloud, api-nestjs, web-nextjs, mobile-react-native | Non | À rédiger | Prometheus/Grafana/Loki/Sentry. |
-| ADR-019 | Crash/error reporting | Moyenne | mobile-react-native, web-nextjs | Non | À rédiger | Sentry ou alternative. |
+| ADR-018 | Monitoring avancé | Moyenne | cloud, api-nestjs, web-nextjs, mobile-react-native | Non | À rédiger | Prometheus/Grafana/Loki/Sentry ; non couvert par les primitives de logs/redaction. |
+| ADR-019 | Crash/error reporting | Moyenne | mobile-react-native, web-nextjs | Non | À rédiger | Sentry ou alternative ; aucun crash reporter réel dans les cores. |
 | ADR-020 | Documentation visuelle UI Kit | Moyenne | ui-kit, docs-core futur | Non | À rédiger | Storybook/Ladle/static docs. |
 | ADR-021 | Tests E2E | Moyenne | web-nextjs, quality-core futur | Non | À rédiger | Playwright vs Cypress. |
 | ADR-022 | Tests visuels UI Kit | Moyenne | ui-kit, quality-core futur | Non | À rédiger | Régression visuelle. |
@@ -134,7 +143,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-026 | OSRM et fallback routing | Future | cloud, api-nestjs, mobile-react-native, web-nextjs | Non | À rédiger | Routing avancé. |
 | ADR-027 | Maps mobile | Future | mobile-react-native, ui-kit, cloud | Non | À rédiger | react-native-maps vs MapLibre. |
 | ADR-028 | Maps web | Future | web-nextjs, ui-kit, cloud | Non | À rédiger | MapLibre ou autre. |
-| ADR-029 | Stratégie offline mobile | Future | mobile-react-native, api-nestjs | Non | À rédiger | Sync et conflits. |
+| ADR-029 | Stratégie offline mobile | Future | mobile-react-native, api-nestjs | Non | À rédiger | Sync et conflits ; RN 3/RN 16 restent préparatoires. |
 | ADR-030 | Backups externalisés | Future | cloud | Non | À rédiger | Chiffrement, rétention. |
 | ADR-031 | Déploiement avancé | Future | cloud, web-nextjs, api-nestjs | Non | À rédiger | Blue/green, canary. |
 | ADR-032 | Charts web/UI Kit | Future | web-nextjs, ui-kit | Non | À rédiger | Recharts ou alternative. |
@@ -142,8 +151,8 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-034 | Flutter UI | Future | ui-kit, mobile-flutter | Non | À rédiger | Material 3 ou maison. |
 | ADR-035 | Angular UI | Future | ui-kit, web-angular | Non | À rédiger | Angular Material vs PrimeNG. |
 | ADR-036 | Observabilité distribuée | Future | cloud, api-nestjs, web-nextjs | Non | À rédiger | Tracing futur. |
-| ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Rollout progressif. |
-| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/coûts. |
+| ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Rollout progressif ; RN 17 ne décide pas d'un remote-config réel. |
+| ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/consentement/coûts ; RN 13 ne décide pas d'un SDK réel. |
 | ADR-039 | Hachage mots de passe : Argon2id vs bcrypt | Haute | api-nestjs | Oui | Validé | Standard Argon2id ; requis avant Auth 2. |
 | ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Pino (moteur officiel) ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, Loki/Grafana côté Cloud Core ; AuditLog séparé. Recommandé avant release V1. |
 
@@ -187,4 +196,4 @@ Ignorer ces ADR peut entraîner :
 
 ## 10. Conclusion
 
-Les cinq cores prioritaires sont cohérents et prêts à passer à une phase de décisions d'architecture. Le prochain jalon recommandé est de rédiger les ADR bloquants V1 dans l'ordre proposé, avant toute génération de code ou de starter technique.
+Les cinq cores prioritaires restent gouvernés par les ADR validés et par ce backlog. Les ADR bloquants V1 ont été rédigés ou remplacés par des décisions validées (`ADR-001` à `ADR-016`, puis `ADR-039` et `ADR-040`). Les ADR `017` à `038` restent à rédiger lorsqu'un projet ou un core franchit le seuil correspondant : backend de monitoring, crash reporting réel, offline sync, feature flags distants, analytics produit, maps, etc. Les primitives préparatoires déjà livrées dans les starters ne doivent pas être interprétées comme ces décisions stratégiques.

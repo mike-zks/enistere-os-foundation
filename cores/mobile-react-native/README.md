@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Network Connectivity Primitives
+# Mobile Core React Native — Generic Feature Flag / Config Primitives
 
-> Statut : **`NETWORK_STATUS_READY`** (V1 — RN 16 ; socle RN 1 → app lifecycle RN 15)
+> Statut : **`FEATURE_FLAGS_READY`** (V1 — RN 17 ; socle RN 1 → connectivité réseau RN 16)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -33,8 +33,9 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | **Connectivité réseau (RN 16)** | `src/offline` | **étend** RN 3 : `NetworkConnectionType` borné + `normalizeNetworkStatus`/`normalizeConnectionType` ; `NetworkAdapter` (seam RN NetInfo, `NetworkAdapterError`) + **placeholder** mémoire + **`createNetworkService`** (`getStatus(): NetworkState`/`shouldQueue()`/`subscribe`/`transition`/`dispose`, `changedAt` via horloge injectée, **logs sûrs** `{from,to,type}` enums, erreurs contrôlées, listener isolé). **`shouldQueueMutations` reste l'API canonique** (queue sauf online). **Aucun NetInfo réel/dépendance/offline sync/persistance/donnée sensible.** |
+| **Feature flags / config (RN 17)** | `src/config` | **étend** `config` (env) : `FlagValue` (bool/string/number) + `FlagSet` + bornes + `isValidFlagKey`/`normalizeFlagValue`/`sanitizeFlagSet` + getters typés à **défaut sûr** (`getBooleanFlag`/`getStringFlag`/`getNumberFlag`/`getFlagValue`) ; `FlagAdapter` (seam local/remote-config, `FlagAdapterError`) + **placeholder** mémoire + **`createFlagService`** (`getFlag`/`getAll`/`subscribe`/`refresh`/`dispose`, defaults⊕adapter, **logs sûrs** `{count}`, erreurs contrôlées, listener isolé). **Distinct des `flags` UI Zustand RN 6.** **Aucun SDK remote-config réel/réseau/persistance/user targeting/donnée sensible.** |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (… i18n-locale, i18n-catalog, i18n-format, i18n-engine, linking-url, linking-resolve, analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine, **network-state (RN 3), network-status, network-service**) — **227 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (… linking-url, linking-resolve, analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine, network-state (RN 3), network-status, network-service, **config-flags, config-flag-service**) — **244 tests** |
 
 ## Stack
 
@@ -66,7 +67,7 @@ cores/mobile-react-native/
 │   ├── api/                  # client OFFICIEL @enistere/api-client-fetch (index.ts) + with-auth-retry (pont 401, agnostique)
 │   ├── app-lifecycle/        # cycle de vie app (agnostiques) : state + adapter + placeholder + engine (RN 15)
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
-│   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret
+│   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret + feature flags génériques (flag-model/adapter/placeholder/service, RN 17)
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
 │   ├── i18n/                 # localisation (agnostiques) : locale + catalog + format (Intl) + adapter + placeholder + engine (RN 11)
 │   ├── linking/              # deep-linking/routing (agnostiques) : url (parseDeepLink) + resolve (resolveLink/resolveNotificationLink) (RN 12)
@@ -83,7 +84,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (… analytics-event, analytics-engine, a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine, network-state, network-status, network-service)
+├── test/                     # node --test (… a11y-props-state, a11y-announcement, a11y-engine, app-lifecycle-state, app-lifecycle-engine, network-state, network-status, network-service, config-flags, config-flag-service)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -114,6 +115,7 @@ cores/mobile-react-native/
 | **ADR-010 §16 / spec §45** Accessibilité | **a11y (RN 14)** : états **disabled/focused/pressed/invalid** + rôle/label/hint via props RN-compatibles ; **support lecteur d'écran** (annonce bornée) ; **aucun contenu/label/message utilisateur en log** (`describe*ForLog` = métadonnées) ; **aucun stockage**, **aucune dépendance**, **aucun provider global** ; non supposé par une lib externe — voir ARCHITECTURE §23 |
 | **02/06 / ADR-040** App lifecycle | **cycle de vie (RN 15)** : modèle d'état normalisé + transitions **validées** ; **aucune donnée utilisateur** (que des enums : `{from,to}`/`{operation}`) ; **aucun `AppState` réel**, **aucune dépendance**, **aucun stockage**, **aucun provider global** ; prépare flush analytics / refresh session / notifications — voir ARCHITECTURE §24 |
 | **ADR-015 §19 / 06** Connectivité | **réseau (RN 16)** : **étend `src/offline`** (pas de module concurrent) ; **`shouldQueueMutations` canonique** (queue sauf online) ; `type` borné non identifiant ; **aucun NetInfo réel/dépendance/offline sync/persistance** ; logs **enums seulement** (`{from,to,type}`/`{operation}`) — aucune donnée device/PII — voir ARCHITECTURE §25 |
+| **ADR-015 §19/§21 / 06** Feature flags | **config (RN 17)** : un flag = **config** (jamais secret/token/URL signée/PII) ; valeurs **bornées** et **jamais loggées** (`{count}` seulement) ; **aucun SDK remote-config réel/réseau/persistance/user targeting** ; **distinct** des `flags` UI Zustand RN 6 — voir ARCHITECTURE §26 |
 
 ## Commandes
 
@@ -150,6 +152,11 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
   sensible dans le store local Zustand** (primitives UI non sensibles uniquement).
 
 ## Hors périmètre de cette mission (différé)
+
+**Usage court (RN 17)** : `const flags = createFlagService({ adapter, defaults: {
+'feature.newCheckout': false } })` puis `if (flags.getFlag('feature.newCheckout',
+false)) {...}` (défaut sûr si absent/mal typé) ; l'adaptateur réel (projet dérivé)
+relaie une source locale / remote-config sous ADR.
 
 **Usage court (RN 16)** : `const net = createNetworkService({ adapter })` puis
 `if (shouldQueueMutations(net.getStatus())) enqueue(...)` ou `net.subscribe((s) =>
@@ -218,17 +225,18 @@ connectivité **réelle** (pas de NetInfo — adapter placeholder seulement) ni
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **227/227** (`node --test` : … app-lifecycle-state, app-lifecycle-engine, **network-state (RN 3 inchangé) + network-status + network-service** — RN 16).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 16 n'ajoute aucune dépendance)*.
+- `test` : ✅ **244/244** (`node --test` : … network-state, network-status, network-service, **config-flags + config-flag-service** — RN 17).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 17 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 17 — feature flags / config primitives génériques** :
-un `FlagAdapter` (seam pour une future source de config/remote-config) + un modèle
-de flags **typés** (boolean/string/number) avec **valeurs par défaut sûres** et
-bornes + service (`getFlag`/`getAll`/`subscribe`) + placeholder, **mappé purement**
-et **testable**, **sans SDK remote-config réel, sans réseau, sans persistance, sans
-donnée sensible** (séparé des `flags` UI Zustand RN 6). Une seule mission à la fois.
-*(Adaptateurs natifs réels, SDK remote-config réel et offline sync — ADR-029 —
-restent différés.)*
+**Mobile Core React Native 18 — gate biométrique local primitives génériques
+(ADR-015 §20)** : un `BiometricAdapter` (seam pour une future `LocalAuthentication`/
+Keychain) + un modèle de disponibilité/résultat normalisé (`available`/`unavailable`/
+`enrolled` ; `success`/`failed`/`cancelled`/`unavailable`) + service
+(`isAvailable`/`authenticate`) + placeholder, **mappé purement** et **testable**,
+**sans `LocalAuthentication` réel, sans secret/biométrie stockée**, et **la
+biométrie ne remplace JAMAIS l'authentification serveur** (gate local d'UX
+uniquement). Une seule mission à la fois. *(Adaptateurs natifs réels, SDK
+remote-config réel et offline sync — ADR-029 — restent différés.)*
