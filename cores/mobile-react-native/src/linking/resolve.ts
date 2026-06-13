@@ -84,6 +84,33 @@ const MAX_PARAMS = 32;
 const MAX_PARAM_VALUE_LENGTH = 512;
 const MAX_PATH_LENGTH = 1024;
 
+function normaliseParamName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function isSensitiveParam(name: string, sensitive: ReadonlySet<string>): boolean {
+  const normalised = normaliseParamName(name);
+  if (sensitive.has(normalised)) {
+    return true;
+  }
+  return (
+    normalised.includes('token') ||
+    normalised.includes('secret') ||
+    normalised.includes('signature') ||
+    normalised.includes('credential') ||
+    normalised.includes('password') ||
+    normalised.includes('authorization') ||
+    normalised.includes('apikey') ||
+    normalised === 'key' ||
+    normalised === 'code' ||
+    normalised === 'sig' ||
+    normalised === 'otp' ||
+    normalised === 'jwt' ||
+    normalised === 'auth' ||
+    normalised === 'bearer'
+  );
+}
+
 /** Reject path traversal; ensure a single leading `/`. Returns null if unsafe. */
 function sanitizePath(input: string): string | null {
   let path = input.length === 0 ? '/' : input;
@@ -102,7 +129,7 @@ function sanitizeParams(
   config: LinkingConfig,
 ): Record<string, string> {
   const sensitive = new Set(
-    [...DEFAULT_SENSITIVE_PARAMS, ...(config.sensitiveParams ?? [])].map((p) => p.toLowerCase()),
+    [...DEFAULT_SENSITIVE_PARAMS, ...(config.sensitiveParams ?? [])].map(normaliseParamName),
   );
   const maxParams = config.maxParams ?? MAX_PARAMS;
   const maxValue = config.maxParamValueLength ?? MAX_PARAM_VALUE_LENGTH;
@@ -112,7 +139,7 @@ function sanitizeParams(
     if (kept >= maxParams) {
       break;
     }
-    if (sensitive.has(key.toLowerCase())) {
+    if (isSensitiveParam(key, sensitive)) {
       continue; // sensitive param dropped entirely (never kept/redacted in a route)
     }
     out[key] = value.slice(0, maxValue);
