@@ -45,6 +45,15 @@ test('sanitizeAnalyticsEvent keeps primitives and a name', () => {
   assert.deepEqual(event.properties, { screen: 'home', index: 3, active: true });
 });
 
+test('sanitizeAnalyticsEvent scrubs sensitive substrings inside the event name', () => {
+  const event = sanitizeAnalyticsEvent({
+    name: 'opened jane.doe@example.com with Bearer secret-xyz',
+  });
+  assert.ok(!event.name.includes('jane.doe@example.com'));
+  assert.ok(!event.name.includes('secret-xyz'));
+  assert.match(event.name, /\[Redacted\]/);
+});
+
 test('sanitizeAnalyticsEvent drops sensitive keys and non-primitive values', () => {
   const event = sanitizeAnalyticsEvent({
     name: 'login',

@@ -98,7 +98,7 @@ function sanitizeName(name: unknown): string {
   if (typeof name !== 'string') {
     return 'unknown';
   }
-  const trimmed = name.trim().slice(0, MAX_EVENT_NAME_LENGTH);
+  const trimmed = redactString(name.trim()).slice(0, MAX_EVENT_NAME_LENGTH);
   return trimmed.length > 0 ? trimmed : 'unknown';
 }
 
