@@ -1006,3 +1006,63 @@ n'est loggé**.
 - **Différés** : adaptateur réel Expo `LocalAuthentication`/Keychain (sous projet,
   **chaque activation documentée** — ADR-015 §20/§31), `useBiometricGate` optionnel,
   stratégie de fallback concrète, liaison à une action locale précise.
+
+## 28. Crash / error-reporting — primitives génériques (RN 19)
+
+RN 19 ajoute `src/crash-reporting` : des **primitives de crash / error-reporting
+génériques**, **pures et testables**, **sans SDK réel** (Sentry/Crashlytics/
+Bugsnag/Firebase/OTel), **sans réseau, sans persistance, sans batching, sans crash
+handler global obligatoire, sans logique métier**. C'est une **primitive
+préparatoire** : elle **ne décide PAS ADR-019** (qui reste à rédiger).
+
+- **Modèle (`src/crash-reporting/event.ts`, agnostique)** : `CrashReportEvent`
+  **borné** (`severity`/`source`/`name`/`message`/`stack?`/`context`) ;
+  `CrashSeverity` (`fatal`/`error`/`warning`/`info`) + `CrashSource`
+  (`unhandled`/`unhandledRejection`/`caught`/`manual`/`unknown`) ; `CrashContext`
+  = `Record<string, string|number|boolean>` (primitives seulement). **Toute valeur
+  est rédigée via la redaction centrale RN 8** (`redactValue`/`redactString`) puis
+  **bornée** : `sanitizeCrashMessage` (redaction + `MAX_MESSAGE_LENGTH`),
+  **`sanitizeCrashStack`** (redaction des chemins device/tokens/URL signées/emails +
+  cap `MAX_STACK_FRAMES`/`MAX_STACK_LENGTH` — **jamais de stack brute**, ADR-040
+  §19/ADR-015 §21), `sanitizeCrashContext` (clés sensibles → `[Redacted]`, valeurs
+  string rédigées+bornées, primitives gardées, non-primitifs droppés, cap
+  `MAX_CONTEXT_KEYS`) ; helpers `normalizeCrashSeverity`/`normalizeCrashSource`
+  **tolérants** (junk → `error`/`unknown`) ; `createCrashReportEvent` (objet
+  **gelé**, ne throw jamais) + `cloneCrashReportEvent` (copie défensive gelée) ;
+  `describeCrashEventForLog` → **`{severity,source}` UNIQUEMENT** (jamais message/
+  stack/context).
+- **Adaptateur (`adapter.ts`, agnostique)** : `CrashReporterAdapter` (seam futur
+  Sentry/Crashlytics : `captureError`/`captureMessage`/`setContext?`/`flush?`) — il
+  ne reçoit **QUE** des `CrashReportEvent` **déjà assainis**. **`CrashReporterAdapterError`**
+  contrôlé (`operation` seul, **sans cause sensible**).
+- **Placeholder (`placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderCrashReporterAdapter` — **mémoire** ; `getErrors`/`getMessages`/
+  `getContext` renvoient des **copies défensives** (re-clone gelé) ; `flushCount` ;
+  **aucune dépendance/réseau/persistance**.
+- **Service (`engine.ts`, agnostique)** : `createCrashReporterService(
+  {adapter, logger?, context?})` — `captureError(error, opts?)` (défaut
+  `error`/`caught`), `captureMessage(message, opts?)` (défaut `info`/`manual`),
+  `setContext(context)` (merge + assainit l'ambient), `flush()` (best-effort, **ne
+  rejette jamais**). **Best-effort non-intrusif** : un adapter qui **throw** (sync)
+  **ou rejette** (async) est **capturé** → `warn` sûr — **jamais re-throw, jamais de
+  faux succès** (aucun `debug "reported"` si l'opération a échoué), **jamais de
+  rejection non gérée**. **Logs RN 8 sûrs** : `{operation,severity,source}`
+  (captures) / `{operation}` (setContext/flush) — **jamais le message/stack/context**.
+- **Sécurité / gouvernance (ADR-040 §17/§18/§19, ADR-015 §12/§21/§24)** : toute
+  donnée passe par la redaction **centrale** (jamais redéfinie ici) ; **jamais** de
+  token/cookie/Authorization/URL signée/URI device/PII/body/stack brute ; **aucun
+  user-id réel** (`identify` absent) ; **aucun crash handler global** imposé.
+  **Aucune dépendance ajoutée.**
+- **Tests** (`node --test`) : `crash-reporting-event` (normalisation severity/source,
+  **sanitization message/stack/context** — tokens/JWT/Bearer/emails/URL signées/URI
+  device rédigés, bornes, cap frames/keys, **tolérance input invalide**, objets
+  **gelés**, `describe*ForLog` enums) + `crash-reporting-engine` (capture
+  error/message assainies vers l'adapter, **setContext mergé/assaini**, **capture ne
+  throw jamais** (adapter sync qui throw), **adapter async qui rejette swallowed —
+  pas de faux succès**, **flush best-effort**, **logs `{operation,severity,source}`
+  sans contenu sensible**, **placeholder copies défensives**). Module **entièrement
+  agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur réel (Sentry/Crashlytics/Bugsnag, sous **ADR-019**),
+  crash handlers globaux (`ErrorUtils`/unhandled rejection), batching/réseau/
+  persistance, `breadcrumbs`, corrélation `traceId`/`spanId` (ADR-036), choix du
+  backend (ADR-018).

@@ -16,7 +16,9 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > ou déjà validés. Certaines briques préparatoires ont depuis été livrées dans les
 > starters, notamment dans `mobile-react-native` (logger/redaction RN 8, analytics
 > primitives RN 13, offline/connectivité RN 3/RN 16, feature flags/config RN 17,
-> gate biométrique local RN 18 — gate d'UX, jamais un substitut à l'auth serveur).
+> gate biométrique local RN 18 — gate d'UX, jamais un substitut à l'auth serveur ;
+> crash/error-reporting RN 19 — primitive préparatoire qui **ne décide pas ADR-019**,
+> sans SDK réel/réseau/persistance).
 > Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
@@ -83,7 +85,7 @@ Ces ADR peuvent suivre un starter minimal si les fonctionnalités concernées re
 | ADR-016 | OpenAPI et génération de clients typés | Moyenne | api-nestjs, web-nextjs, mobile-react-native | Non | Validé | Contrat OpenAPI canonique versionné ; `openapi-typescript` (types) + `openapi-fetch` (client Fetch) + wrappers Enistere ; hooks TanStack Query maintenus dans les cores ; Orval en repli ; adaptateur Angular et générateur Dart décidés par preuve. |
 | ADR-017 | Queue/jobs : BullMQ vs alternative | Moyenne | api-nestjs, cloud | Non | À rédiger | Bloquant seulement si jobs V1 deviennent critiques. |
 | ADR-018 | Monitoring avancé | Moyenne | cloud, api-nestjs, web-nextjs, mobile-react-native | Non | À rédiger | Prometheus/Grafana/Loki/Sentry ou alternatives à cadrer. Les primitives de logs/redaction mobile RN 8 et API ADR-040 ne décident pas du backend de monitoring. |
-| ADR-019 | Crash/error reporting mobile et web | Moyenne | mobile-react-native, web-nextjs, quality-core futur | Non | À rédiger | Sentry ou alternative. Peut attendre avant production. Les primitives analytics/logs mobiles ne branchent aucun crash reporter. |
+| ADR-019 | Crash/error reporting mobile et web | Moyenne | mobile-react-native, web-nextjs, quality-core futur | Non | À rédiger | Sentry ou alternative. Peut attendre avant production. Les primitives analytics/logs mobiles ne branchent aucun crash reporter. **Mobile RN 19 livre seulement des primitives génériques de crash/error-reporting (modèle rédigé/borné + adapter seam + placeholder + service best-effort), sans SDK réel/réseau/persistance ni crash handler global — RN 19 ne décide pas cet ADR.** |
 | ADR-020 | Documentation visuelle UI Kit | Moyenne | ui-kit, docs-core futur, quality-core futur | Non | À rédiger | Storybook, Ladle, documentation statique ou alternative. |
 | ADR-021 | Tests E2E : Playwright vs Cypress | Moyenne | web-nextjs, quality-core futur | Non | À rédiger | À trancher avant E2E structuré. |
 | ADR-022 | Tests visuels UI Kit | Moyenne | ui-kit, web-nextjs, mobile-react-native, quality-core futur | Non | À rédiger | À cadrer avant régression visuelle systématique. |
@@ -134,7 +136,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-016 | OpenAPI et clients typés | Moyenne | api-nestjs, web-nextjs, mobile-react-native | Non | Validé | Contrat canonique + `openapi-typescript`/`openapi-fetch` + wrappers ; TanStack Query séparé. |
 | ADR-017 | Queue/jobs | Moyenne | api-nestjs, cloud | Non | À rédiger | BullMQ ou alternative. |
 | ADR-018 | Monitoring avancé | Moyenne | cloud, api-nestjs, web-nextjs, mobile-react-native | Non | À rédiger | Prometheus/Grafana/Loki/Sentry ; non couvert par les primitives de logs/redaction. |
-| ADR-019 | Crash/error reporting | Moyenne | mobile-react-native, web-nextjs | Non | À rédiger | Sentry ou alternative ; aucun crash reporter réel dans les cores. |
+| ADR-019 | Crash/error reporting | Moyenne | mobile-react-native, web-nextjs | Non | À rédiger | Sentry ou alternative ; aucun crash reporter réel dans les cores (RN 19 = primitives génériques préparatoires, ne décide pas cet ADR). |
 | ADR-020 | Documentation visuelle UI Kit | Moyenne | ui-kit, docs-core futur | Non | À rédiger | Storybook/Ladle/static docs. |
 | ADR-021 | Tests E2E | Moyenne | web-nextjs, quality-core futur | Non | À rédiger | Playwright vs Cypress. |
 | ADR-022 | Tests visuels UI Kit | Moyenne | ui-kit, quality-core futur | Non | À rédiger | Régression visuelle. |

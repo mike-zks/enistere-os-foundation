@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Local Biometric Gate Primitives
+# Mobile Core React Native — Generic Crash / Error-Reporting Primitives
 
-> Statut : **`BIOMETRIC_GATE_READY`** (V1 — RN 18 ; socle RN 1 → feature flags RN 17)
+> Statut : **`CRASH_REPORTING_READY`** (V1 — RN 19 ; socle RN 1 → gate biométrique RN 18)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -35,8 +35,9 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Connectivité réseau (RN 16)** | `src/offline` | **étend** RN 3 : `NetworkConnectionType` borné + `normalizeNetworkStatus`/`normalizeConnectionType` ; `NetworkAdapter` (seam RN NetInfo, `NetworkAdapterError`) + **placeholder** mémoire + **`createNetworkService`** (`getStatus(): NetworkState`/`shouldQueue()`/`subscribe`/`transition`/`dispose`, `changedAt` via horloge injectée, **logs sûrs** `{from,to,type}` enums, erreurs contrôlées, listener isolé). **`shouldQueueMutations` reste l'API canonique** (queue sauf online). **Aucun NetInfo réel/dépendance/offline sync/persistance/donnée sensible.** |
 | **Feature flags / config (RN 17)** | `src/config` | **étend** `config` (env) : `FlagValue` (bool/string/number) + `FlagSet` + bornes + `isValidFlagKey`/`normalizeFlagValue`/`sanitizeFlagSet` + getters typés à **défaut sûr** (`getBooleanFlag`/`getStringFlag`/`getNumberFlag`/`getFlagValue`) ; `FlagAdapter` (seam local/remote-config, `FlagAdapterError`) + **placeholder** mémoire + **`createFlagService`** (`getFlag`/`getAll`/`subscribe`/`refresh`/`dispose`, defaults⊕adapter, **logs sûrs** `{count}`, erreurs contrôlées, listener isolé). **Distinct des `flags` UI Zustand RN 6.** **Aucun SDK remote-config réel/réseau/persistance/user targeting/donnée sensible.** |
 | **Gate biométrique local (RN 18)** | `src/biometrics` | **disponibilité** normalisée (`available`/`notEnrolled`/`unsupported`/`unknown`) + **type** borné (`fingerprint`/`facial`/`iris`/`unknown`) + **résultat** (`success`/`refused`/`cancelled`/`lockout`/`unavailable`/`error`) ; helpers tolérants (**junk → `unknown`/`error`, jamais `success`**) + objets **gelés** ; `BiometricAdapter` (seam Expo `LocalAuthentication`/Keychain, `BiometricAdapterError`) + **placeholder** mémoire + **`createBiometricService`** (`getAvailability`/`isAvailable`/`authenticate`, **gate sans faux succès** — `unavailable` sans prompt si inutilisable, **logs sûrs** `{availability,type}`/`{outcome}`/`{operation}`). **Gate local d'UX uniquement — ne remplace JAMAIS l'auth serveur** (ADR-015 §20). **Aucun `LocalAuthentication`/Keychain réel, aucun secret/biométrie/résultat stocké ou loggé.** |
+| **Crash / error-reporting (RN 19)** | `src/crash-reporting` | `CrashReportEvent` **borné** (`severity`/`source`/`name`/`message`/`stack?`/`context`) **rédigé via la redaction RN 8** (`sanitizeCrashMessage`/**`sanitizeCrashStack`** — chemins device/tokens/URL signées/emails scrubés + cap frames, **jamais de stack brute** ; `sanitizeCrashContext` — clés sensibles → `[Redacted]`, primitives bornées) ; `createCrashReportEvent` (gelé, tolérant) + `describeCrashEventForLog` (**`{severity,source}` seul**) ; `CrashReporterAdapter` (seam Sentry/Crashlytics, `CrashReporterAdapterError`) + **placeholder** mémoire (copies défensives) + **`createCrashReporterService`** (`captureError`/`captureMessage`/`setContext`/`flush`, **best-effort non-intrusif** — sync throw + async reject capturés, **jamais de faux succès**, **logs `{operation,severity,source}`**). **Sans SDK réel/réseau/persistance/batching/crash handler global** ; **ne décide pas ADR-019**. **Aucun token/cookie/URL signée/URI device/PII/body/stack brute/user-id réel.** |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (… app-lifecycle-state, app-lifecycle-engine, network-state (RN 3), network-status, network-service, config-flags, config-flag-service, **biometrics-model, biometrics-engine**) — **262 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (… network-state (RN 3), network-status, network-service, config-flags, config-flag-service, biometrics-model, biometrics-engine, **crash-reporting-event, crash-reporting-engine**) — **279 tests** |
 
 ## Stack
 
@@ -70,6 +71,7 @@ cores/mobile-react-native/
 │   ├── auth/                 # auth-engine (agnostique), auth-api (seam) + enistere-auth-api (réel) + session-adapter + token-mapping, AuthProvider, hook
 │   ├── biometrics/           # gate biométrique local (agnostiques) : model + adapter + placeholder + engine — gate UX, jamais l'auth serveur (RN 18)
 │   ├── config/               # env (EXPO_PUBLIC_*) — aucun secret + feature flags génériques (flag-model/adapter/placeholder/service, RN 17)
+│   ├── crash-reporting/      # crash/error-reporting (agnostiques) : event (rédigé/borné) + adapter + placeholder + engine — sans SDK réel (RN 19)
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
 │   ├── i18n/                 # localisation (agnostiques) : locale + catalog + format (Intl) + adapter + placeholder + engine (RN 11)
 │   ├── linking/              # deep-linking/routing (agnostiques) : url (parseDeepLink) + resolve (resolveLink/resolveNotificationLink) (RN 12)
@@ -86,7 +88,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (… app-lifecycle-state, app-lifecycle-engine, network-state, network-status, network-service, config-flags, config-flag-service, biometrics-model, biometrics-engine)
+├── test/                     # node --test (… network-status, network-service, config-flags, config-flag-service, biometrics-model, biometrics-engine, crash-reporting-event, crash-reporting-engine)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -119,6 +121,7 @@ cores/mobile-react-native/
 | **ADR-015 §19 / 06** Connectivité | **réseau (RN 16)** : **étend `src/offline`** (pas de module concurrent) ; **`shouldQueueMutations` canonique** (queue sauf online) ; `type` borné non identifiant ; **aucun NetInfo réel/dépendance/offline sync/persistance** ; logs **enums seulement** (`{from,to,type}`/`{operation}`) — aucune donnée device/PII — voir ARCHITECTURE §25 |
 | **ADR-015 §19/§21 / 06** Feature flags | **config (RN 17)** : un flag = **config** (jamais secret/token/URL signée/PII) ; valeurs **bornées** et **jamais loggées** (`{count}` seulement) ; **aucun SDK remote-config réel/réseau/persistance/user targeting** ; **distinct** des `flags` UI Zustand RN 6 — voir ARCHITECTURE §26 |
 | **ADR-015 §20/§21** Biométrie | **gate biométrique local (RN 18)** : **gate d'UX local uniquement** — **ne remplace JAMAIS** login/refresh/session serveur (**API Core = autorité**), reste **optionnel** + **fallback projet**, **aucun faux succès** (device inutilisable → `unavailable` sans prompt) ; **aucun secret/biométrie/résultat/profil stocké** ; logs **enums seulement** (`{availability,type}`/`{outcome}`/`{operation}`) — **jamais le prompt ni la cause native** — voir ARCHITECTURE §27 |
+| **ADR-040 §17/§18/§19 · ADR-015 §12/§21/§24** Crash reporting | **crash/error-reporting (RN 19)** : toute donnée passe par la **redaction centrale RN 8** puis est **bornée** (message/stack/context) — **jamais** token/cookie/Authorization/URL signée/URI device/PII/body, **jamais de stack brute** (rédigée + cap frames), **aucun user-id réel** ; **best-effort non-intrusif** (ne casse jamais le flux, jamais de faux succès) ; logs **`{operation,severity,source}` seulement** ; **sans SDK réel** — **ne décide pas ADR-019** — voir ARCHITECTURE §28 |
 
 ## Commandes
 
@@ -155,6 +158,12 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
   sensible dans le store local Zustand** (primitives UI non sensibles uniquement).
 
 ## Hors périmètre de cette mission (différé)
+
+**Usage court (RN 19)** : `const crash = createCrashReporterService({ adapter, logger })`
+puis `try { risky(); } catch (e) { crash.captureError(e, { severity: 'error', context:
+{ screen } }); }` — l'événement est **rédigé + borné** (redaction RN 8) avant d'atteindre
+l'adaptateur ; l'échec de l'adaptateur reste **interne** (best-effort, ne casse jamais le
+flux). L'adaptateur réel (projet dérivé) relaie Sentry/Crashlytics **sous ADR-019**.
 
 **Usage court (RN 18)** : `const bio = createBiometricService({ adapter })` puis
 `if (await bio.isAvailable()) { const { outcome } = await bio.authenticate({ reason });
@@ -232,25 +241,29 @@ connectivité **réelle** (pas de NetInfo — adapter placeholder seulement) ni
 `src/biometrics` fournit modèle + adapter (seam) + placeholder + service, **sans**
 Expo `LocalAuthentication`/Keychain **réel**, **sans** secret/biométrie/résultat
 stocké, et **ne remplace jamais** l'authentification serveur (ADR-015 §20 ; chaque
-activation réelle = décision documentée par projet dérivé). Voir la roadmap du spec
-(§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
+activation réelle = décision documentée par projet dérivé). **Le crash/error-reporting
+reste préparatoire** : `src/crash-reporting` fournit modèle (rédigé/borné) + adapter
+(seam) + placeholder + service, **sans** SDK réel (Sentry/Crashlytics/Bugsnag), **sans**
+réseau/persistance/batching/crash handler global, et **ne décide pas ADR-019**. Voir la
+roadmap du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 ## Vérification
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **262/262** (`node --test` : … network-status, network-service, config-flags, config-flag-service, **biometrics-model + biometrics-engine** — RN 18).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 18 n'ajoute aucune dépendance)*.
+- `test` : ✅ **279/279** (`node --test` : … config-flags, config-flag-service, biometrics-model, biometrics-engine, **crash-reporting-event + crash-reporting-engine** — RN 19).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 19 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 19 — crash / error-reporting primitives génériques
-(seam, sans SDK réel — ADR-019)** : un `CrashReporterAdapter` (seam pour un futur
-Sentry/Crashlytics) + un modèle d'événement d'erreur **borné et rédigé** (réutilise
-la redaction RN 8 : ni token/PII/contenu utilisateur, ni stack brute non filtrée) +
-service (`captureError`/`captureMessage`/`setContext` sûr) + placeholder mémoire,
-**mappé purement** et **testable**, **sans Sentry/Crashlytics/Bugsnag réel, sans
-réseau, sans persistance, sans donnée sensible**, et **non-intrusif** (ne casse
-jamais le flux applicatif). Une seule mission à la fois. *(Adaptateurs natifs réels
-— biométrie, crash SDK, remote-config — et offline sync ADR-029 restent différés.)*
+**Mobile Core React Native 20 — préférences non sensibles persistantes primitives
+génériques (seam, sans MMKV/AsyncStorage réel — ADR-015 §15/§16)** : un
+`PreferenceStore` (seam pour un futur MMKV/AsyncStorage) + un modèle **borné** de
+préférences **non sensibles** (thème/langue/onboarding/filtres non sensibles) avec
+**garde anti-secret** (réutilise `isSensitiveKey` — **refuse** token/PII/secret) +
+service (`get`/`set`/`remove`/`clear`) + placeholder mémoire, **mappé purement** et
+**testable**, **sans MMKV/AsyncStorage réel, sans réseau, sans secret/token/PII**,
+et **distinct** de SecureStore (secrets) et du store Zustand RN 6 (UI in-memory).
+Une seule mission à la fois. *(Adaptateurs natifs réels — crash SDK, biométrie,
+remote-config, MMKV/AsyncStorage — et offline sync ADR-029 restent différés.)*
