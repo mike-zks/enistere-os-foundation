@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`FEATURE_FLAGS_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`BIOMETRIC_GATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -183,15 +183,27 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   seulement** ; `FlagAdapter` (seam local/remote-config) + **`FlagAdapterError`** + **placeholder** mémoire +
   `createFlagService` (`getFlag`/`getAll`/`subscribe`/`refresh`/`dispose`, **best-effort non-intrusif** — erreurs adapter
   contrôlées + **listener isolé**, **logs sûrs** `{count}`/`{operation}` — **jamais clé ni valeur**) ; **aucun SDK
-  remote-config réel/réseau/persistance/user targeting réel/secret/donnée sensible**. Layout **plat** + **autonome**.
-  **244 tests `node --test`** (… + network-status + network-service + **config-flags + config-flag-service**). Vérifs :
-  **typecheck + lint + test 244/244 + expo-doctor 19/19 + git diff --check verts** (**RN 17 n'ajoute aucune dépendance**) ;
-  packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker
-  d'upload**, **push distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/
-  linking/AccessibilityInfo/AppState/NetInfo), **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous
-  ADR), **application des props a11y / câblage des effets lifecycle dans des composants**, **source remote-config/local
-  réelle des feature flags**, **gate biométrique** (= RN 18), **offline sync réelle** (ADR-029), **backend
-  d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  remote-config réel/réseau/persistance/user targeting réel/secret/donnée sensible**. **+ RN 18 — gate biométrique local
+  primitives génériques** (ADR-015 §20/§21) : **ajoute `src/biometrics`** — `BiometricAvailability` (`available`/
+  `notEnrolled`/`unsupported`/`unknown`) + `BiometricType` **borné** (`fingerprint`/`facial`/`iris`/`unknown`) +
+  `BiometricAuthOutcome` (`success`/`refused`/`cancelled`/`lockout`/`unavailable`/`error`) ; helpers **tolérants**
+  (**junk → `unknown`/`error`, jamais `success`**) + objets **gelés** ; `BiometricAdapter` (seam Expo
+  `LocalAuthentication`/Keychain, **async** ; `reason` du prompt **jamais loggé**) + **`BiometricAdapterError`** +
+  **placeholder** mémoire (`setAvailability`/`setNextOutcome` + compteur `authenticateCalls`) + `createBiometricService`
+  (`getAvailability`/`isAvailable`/`authenticate`, **stateless**, **aucun faux succès** — `unavailable` **sans prompt** si
+  inutilisable, adapter qui throw → `error`, **ne throw jamais**, **logs sûrs** `{availability,type}`/`{outcome}`/
+  `{operation}` — **jamais prompt ni cause native**) ; **gate d'UX local — ne remplace JAMAIS l'auth serveur (API Core =
+  autorité)** ; **aucun `LocalAuthentication`/Keychain réel/secret/biométrie/résultat/profil stocké**. Layout **plat** +
+  **autonome**. **262 tests `node --test`** (… + config-flags + config-flag-service + **biometrics-model +
+  biometrics-engine**). Vérifs : **typecheck + lint + test 262/262 + expo-doctor 19/19 + git diff --check verts** (**RN 18
+  n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique
+  métier.** Différés : **écran/picker d'upload**, **push distant réel + token device**, **adaptateurs natifs réels**
+  (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/NetInfo/**LocalAuthentication/Keychain**),
+  **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **application des props a11y / câblage
+  des effets lifecycle dans des composants**, **source remote-config/local réelle des feature flags**, **activation
+  biométrique réelle + fallback concret** (par projet, documenté — ADR-015 §20/§31), **crash/error-reporting réel** (= RN
+  19, ADR-019), **offline sync réelle** (ADR-029), **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand`
+  au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -238,8 +250,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`FEATURE_FLAGS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config**, 244 tests + bundle Metro).
+`BIOMETRIC_GATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local**, 262 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -270,7 +282,43 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 17 — feature flags / config primitives génériques** (`cores/mobile-react-native/`,
+**Mobile Core React Native 18 — gate biométrique local primitives génériques** (`cores/mobile-react-native/`,
+périmètre `src/biometrics` + `test/**` + docs) : ajoute une **couche de gate biométrique local générique**, **pure et
+testable**, **sans Expo `LocalAuthentication` réel, sans Keychain, sans module natif, sans écran/provider/hook
+obligatoire, sans logique métier**. `mobile-react-native` → **`BIOMETRIC_GATE_READY`**. **Aucune dépendance ajoutée.**
+**Gouvernance (ADR-015 §20/§21)** : la biométrie est un **gate d'UX LOCAL uniquement** — un `success` signifie que le
+*device* a validé localement, **ce n'est PAS une session serveur** et **ne remplace JAMAIS** login/refresh/session
+(**l'API Core reste l'autorité**) ; elle **ne compense pas** une stratégie de token faible, **reste optionnelle** et
+**laisse un fallback** au projet pour tout outcome non-`success` ; **rien de sensible n'est stocké ou loggé**. **Modèle**
+(`src/biometrics/model.ts`, agnostique) : **`BiometricAvailability`** (`available`/`notEnrolled`/`unsupported`/
+`unknown`) + **`BiometricType`** borné (`fingerprint`/`facial`/`iris`/`unknown` — jamais un descripteur natif
+identifiant) + **`BiometricAuthOutcome`** (`success`/`refused`/`cancelled`/`lockout`/`unavailable`/`error`). Helpers
+**tolérants** (`normalizeBiometric*` : alias/booléens → enum ; **junk → `unknown`/`error`, jamais `success`**) ;
+`normalizeAvailabilityState`/`normalizeAuthResult` renvoient des objets **gelés** ; `isAvailabilityUsable` (`true`
+**seulement** si `available`) ; `isAuthSuccess` (`true` **seulement** si `success`) ; `describeAvailabilityForLog` →
+`{availability,type}`, `describeAuthResultForLog` → `{outcome}` — **enums uniquement**. **Adaptateur** (`adapter.ts`) :
+**`BiometricAdapter`** (seam Expo `LocalAuthentication`/Keychain : `getAvailability`/`authenticate`, **async** comme les
+API natives) ; `BiometricAuthRequest { reason? }` = **prompt forwardé tel quel, jamais loggé** ;
+**`BiometricAdapterError`** contrôlé (`operation` seul, **sans cause sensible**). **Placeholder**
+(`placeholder-adapter.ts`) : mémoire ; `setAvailability`/`setNextOutcome` simulent le device ; compteur
+`authenticateCalls` (prouve que le service **gate** le prompt) ; no native dep / no persistance. **Service**
+(`engine.ts`, agnostique) : `createBiometricService({adapter, logger?})` → `getAvailability` (gelé)/`isAvailable`/
+`authenticate` ; **stateless** (ne stocke aucun résultat) ; **aucun faux succès** — `authenticate` vérifie la
+disponibilité **d'abord** et renvoie `unavailable` **sans prompter** si le device est inutilisable, un adapter qui throw
+→ `error`, un outcome inconnu → `error`, **ne throw jamais** ; **logs RN 8 sûrs** : `{availability,type}` / `{outcome}` /
+`{operation}` — **jamais le prompt ni la cause native**. **+18 tests `node --test`** (`biometrics-model` : normalisation
+availability/type/outcome incl. **junk → `unknown`/`error` jamais `success`**, type guards, objets **gelés**,
+`isAvailabilityUsable`/`isAuthSuccess`, `describe*ForLog` enums ; `biometrics-engine` : `getAvailability`/`isAvailable`,
+`authenticate` success/refused/cancelled/lockout/error, **device inutilisable → `unavailable` sans prompt**
+(`authenticateCalls === 0`), **erreurs adapter contrôlées (`getAvailability`/`authenticate`) sans throw**, **junk →
+`error`**, **logs sans prompt ni cause** (`operation` seul), placeholder) → **262 tests** ; module **entièrement
+agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 262/262 + expo-doctor
+19/19 + git diff --check verts** (**RN 18 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
+`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add biometric gate primitives`.
+**Prochaine action : Mobile Core React Native 19 — crash / error-reporting primitives génériques (seam, sans SDK réel —
+ADR-019).**
+
+**Étape précédente — Mobile Core React Native 17 — feature flags / config primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/config` + `test/**` + docs) : **étend** les primitives de configuration (env) avec une **couche de
 feature flags / config générique**, **pure et testable**, **sans SDK remote-config réel, sans réseau, sans persistance,
 sans user targeting réel, sans secret/token/URL signée/payload serveur/PII, sans écran/hook obligatoire/provider
@@ -297,8 +345,7 @@ defaults⊕adapter (**adapter gagne**), `getFlag`/`getAll`, **subscribe/unsubscr
 `dispose`, tolérance input invalide) → **244 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
 typecheck-only). Vérifs : **typecheck + lint + test 244/244 + expo-doctor 19/19 + git diff --check verts** (**RN 17
 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
-modifié** ; aucun autre core. Commit `feat(mobile): add generic feature flag primitives`. **Prochaine action : Mobile
-Core React Native 18 — gate biométrique local primitives génériques (ADR-015 §20).**
+modifié** ; aucun autre core. Commit `feat(mobile): add generic feature flag primitives`.
 
 **Étape précédente — Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** (`cores/mobile-react-native/`,
 périmètre `src/offline` + `test/**` + docs) : **étend** les primitives offline de RN 3 avec une **couche de connectivité
