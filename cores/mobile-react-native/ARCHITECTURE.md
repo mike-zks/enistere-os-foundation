@@ -947,3 +947,62 @@ feature flags génériques (boolean/string/number), **pas** d'état UI local ép
 - **Différés** : adaptateur remote-config réel (sous **ADR/validation**), **user
   targeting** (cohortes/règles, sous revue privacy), persistance du cache de
   config, A/B testing, hook/`useFlag` optionnel.
+
+## 27. Gate biométrique local — primitives génériques (RN 18)
+
+RN 18 ajoute `src/biometrics` : des **primitives de gate biométrique local**,
+**pures et testables**, **sans Expo `LocalAuthentication` réel, sans Keychain, sans
+module natif, sans écran/provider/hook obligatoire, sans logique métier**. La
+biométrie est un **gate local d'UX** (ADR-015 §20) : elle peut protéger une action
+locale mais **ne remplace JAMAIS** login/refresh/session serveur, **ne compense
+jamais** une stratégie de token faible, **reste optionnelle** et **laisse place à
+un fallback** défini par le projet dérivé. **Aucun secret/token/biométrie/résultat/
+profil n'est stocké** ; **aucun prompt/message utilisateur ni cause native brute
+n'est loggé**.
+
+- **Modèle (`src/biometrics/model.ts`, agnostique)** : **disponibilité** normalisée
+  `BiometricAvailability` (`available`/`notEnrolled`/`unsupported`/`unknown`) ;
+  **type** borné `BiometricType` (`fingerprint`/`facial`/`iris`/`unknown` — jamais
+  un descripteur natif identifiant) ; **résultat** `BiometricAuthOutcome`
+  (`success`/`refused`/`cancelled`/`lockout`/`unavailable`/`error`). Helpers
+  **tolérants** (`normalizeBiometric*`, alias/booléens → enum ; **junk → `unknown`/
+  `error`, jamais `success`**) ; `normalizeAvailabilityState`/`normalizeAuthResult`
+  renvoient des objets **gelés** ; `isAvailabilityUsable` (`true` **seulement** si
+  `available`), `isAuthSuccess` (`true` **seulement** si `success`) ;
+  `describeAvailabilityForLog` → `{availability,type}`, `describeAuthResultForLog`
+  → `{outcome}` — **enums uniquement**.
+- **Adaptateur (`src/biometrics/adapter.ts`, agnostique)** : `BiometricAdapter` =
+  seam futur Expo `LocalAuthentication`/Keychain (`getAvailability(): Promise<…>`,
+  `authenticate(request?): Promise<…>` — **async**, comme les API natives).
+  `BiometricAuthRequest { reason? }` = **prompt forwardé tel quel, jamais loggé**.
+  **`BiometricAdapterError`** contrôlé (`operation` seul, **sans cause sensible**).
+- **Placeholder (`src/biometrics/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderBiometricAdapter` — **mémoire** ; `setAvailability`/
+  `setNextOutcome` simulent le device ; compteur `authenticateCalls` (pour prouver
+  que le service **gate** le prompt) ; **aucune dépendance/natif/persistance**.
+- **Service (`src/biometrics/engine.ts`, agnostique)** : `createBiometricService(
+  {adapter, logger?})` — **`getAvailability`** (gelé, normalisé), **`isAvailable`**
+  (`true` seulement si `available`), **`authenticate(request?)`**. **Stateless**
+  (ne stocke aucun résultat). **Garanties** : **aucun faux succès** —
+  `authenticate` vérifie d'abord la disponibilité et renvoie `unavailable`
+  **sans prompter** si le device est inutilisable ; un adapter qui throw → `error` ;
+  un outcome inconnu → `error` ; **ne throw jamais**. **Logs RN 8 sûrs** :
+  `{availability,type}` / `{outcome}` / `{operation}` — **jamais le prompt ni la
+  cause native**.
+- **Sécurité / gouvernance (ADR-015 §20/§21)** : gate **local d'UX uniquement** ;
+  **l'API Core reste l'autorité** d'authentification/session ; la biométrie
+  **n'autorise rien côté serveur** ; **optionnelle** + **fallback projet** pour tout
+  outcome non-`success` ; **rien de sensible stocké ou loggé**. **Aucune dépendance
+  ajoutée.**
+- **Tests** (`node --test`) : `biometrics-model` (normalisation availability/type/
+  outcome incl. junk → `unknown`/`error`, **jamais `success`** ; type guards ;
+  objets **gelés** ; `isAvailabilityUsable`/`isAuthSuccess` ; `describe*ForLog`
+  enums) + `biometrics-engine` (`getAvailability`/`isAvailable`, `authenticate`
+  success/refused/cancelled/lockout/error, **device inutilisable → `unavailable`
+  sans prompt** (`authenticateCalls === 0`), **erreurs adapter contrôlées
+  (`getAvailability`/`authenticate`) sans throw**, **junk → `error`**, **logs sans
+  prompt ni cause** (`operation` seul), placeholder). Module **entièrement
+  agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur réel Expo `LocalAuthentication`/Keychain (sous projet,
+  **chaque activation documentée** — ADR-015 §20/§31), `useBiometricGate` optionnel,
+  stratégie de fallback concrète, liaison à une action locale précise.

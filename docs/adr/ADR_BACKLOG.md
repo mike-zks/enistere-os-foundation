@@ -15,7 +15,8 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > Note de cohérence — 2026-06-13 : ce backlog reste la liste des **ADR à rédiger**
 > ou déjà validés. Certaines briques préparatoires ont depuis été livrées dans les
 > starters, notamment dans `mobile-react-native` (logger/redaction RN 8, analytics
-> primitives RN 13, offline/connectivité RN 3/RN 16, feature flags/config RN 17).
+> primitives RN 13, offline/connectivité RN 3/RN 16, feature flags/config RN 17,
+> gate biométrique local RN 18 — gate d'UX, jamais un substitut à l'auth serveur).
 > Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
