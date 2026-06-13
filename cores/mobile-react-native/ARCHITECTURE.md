@@ -1125,3 +1125,59 @@ persisté ici.
 - **Différés** : adaptateur réel MMKV/AsyncStorage (sous **ADR-015 §15/§16** — choix
   par projet, **RN 20 ne décide aucun stockage natif réel**), chiffrement local,
   hook `usePreference` optionnel, migration/versioning de schéma de préférences.
+
+## 30. Consentement télémétrie / privacy gate — primitives génériques (RN 21)
+
+RN 21 ajoute `src/consent` : des **primitives de consentement télémétrie / privacy
+gate génériques**, **pures et testables**, **sans SDK analytics/crash réel, sans
+réseau, sans UI de consentement, sans identifiant utilisateur réel, sans PII**
+(mission). C'est une **primitive préparatoire** : elle **ne décide PAS ADR-038**.
+Son rôle unique : répondre « cette catégorie de télémétrie a-t-elle le droit
+d'émettre ? » selon une règle **default-deny**. Elle est destinée à être consultée
+par un futur adaptateur analytics (RN 13) / crash (RN 19) **avant** tout envoi —
+RN 21 **ne câble pas** ces services et **ne déclenche aucun envoi**.
+
+- **Modèle (`src/consent/model.ts`, agnostique)** : `ConsentCategory`
+  (`analytics`/`crash`/`performance`/`diagnostics`) + `ConsentStatus`
+  (`granted`/`denied`/`unknown`) + `ConsentSet` (map partielle catégorie→statut) ;
+  `CONSENT_CATEGORIES` (ensemble fermé) ; `normalizeConsentCategory` (catégorie
+  inconnue → `undefined`, **ignorée**) ; `normalizeConsentStatus` (alias tolérés ;
+  junk → `unknown`, **jamais `granted` par défaut**) ; **`sanitizeConsentSet`**
+  (catégories connues, statut normalisé, drop `unknown` ; tolérant) ;
+  `isConsentGranted` (true **seulement** si `granted`) ; **`isTelemetryAllowed(set,
+  category)`** = **default-deny** (true **seulement** si catégorie connue ET
+  `granted` ; `denied`/`unknown`/absent/invalide → `false`) ;
+  `describeConsentEntryForLog` → `{category,status}` (enums) / `describeConsentForLog`
+  → `{count}` — **jamais de valeur utilisateur**.
+- **Store (`src/consent/store.ts`, agnostique)** : `ConsentStore` seam (`get`/`set`/
+  `getAll`/`clear`/`subscribe?`, **async**) + **`ConsentStoreError`** contrôlé
+  (`operation` seul). **`createPreferenceConsentStore(preferenceService)`** : la
+  persistance est **déléguée aux préférences non sensibles RN 20** sous des clés
+  **préfixées non sensibles** `privacy.consent.<category>` (un consentement
+  granted/denied est de la config, **pas un secret**) ; **`clear()` ne supprime que
+  les clés `privacy.consent.*`** (jamais tout le store de préférences).
+- **Placeholder (`src/consent/placeholder-store.ts`, agnostique)** :
+  `createPlaceholderConsentStore(initial?)` — **mémoire** ; **copies défensives** ;
+  notifie au changement ; aucune persistance.
+- **Service (`src/consent/service.ts`, agnostique)** : `createConsentService(
+  {store, logger?})` — `get`/`set`/`isAllowed`/`getAll`/`clear`/`subscribe`.
+  **`isAllowed` = default-deny** (true **seulement** si `granted`). **Best-effort
+  non-intrusif** : un store qui throw → repli `unknown` (**= non autorisé**, le
+  défaut privacy sûr), **ne throw jamais** ; catégorie inconnue sur `set` →
+  **ignorée** ; **listener isolé**. **Logs RN 8 sûrs** : `{operation,category,status}`
+  (enums) / `{operation,count}` — **jamais de valeur utilisateur**.
+- **Sécurité / gouvernance (ADR-038 / 07_SECURITY)** : **default-deny** (`unknown`
+  bloque) ; **aucun SDK réel/réseau/UI/identifiant/PII** ; persistance via RN 20
+  (clés non sensibles), **aucun contournement** des préférences ; **ne câble pas**
+  analytics/crash. **Aucune dépendance ajoutée. Ne décide PAS ADR-038.**
+- **Tests** (`node --test`) : `consent-model` (catégories/statuts, **junk →
+  non autorisé**, **granted seul autorise**, `denied`/`unknown` bloquent,
+  `sanitizeConsentSet` tolérant, `describe*ForLog` enums/count) + `consent-service`
+  (get/set/isAllowed/getAll/clear, **catégorie inconnue ignorée**, **store
+  défaillant → non autorisé sans throw**, **listener isolé**, **logs enums/count**)
+  + `consent-preference-store` (mapping `privacy.consent.*` **non sensible**,
+  round-trip, **`clear()` ne touche que le consentement**). Module **entièrement
+  agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : SDK réel + politique privacy/coûts/consentement réel (sous
+  **ADR-038**), UI de consentement, câblage du gate dans les services analytics
+  (RN 13) / crash (RN 19), géo-règles (RGPD/CCPA).

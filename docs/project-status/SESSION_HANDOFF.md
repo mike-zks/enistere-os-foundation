@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`PREFERENCES_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`CONSENT_GATE_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -215,18 +215,29 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (`get`/`getBoolean`/`getString`/`getNumber`/`set`/`remove`/`clear`/`getAll`/`subscribe` — **garde les écritures**
   (clé/valeur sensible → **drop**) + **assainit les lectures**, **best-effort non-intrusif** sans throw, **listener
   isolé**, **logs sûrs** `{operation,count}` — **jamais clé ni valeur**) ; **aucun MMKV/AsyncStorage réel/réseau/secret/
-  PII ; ne décide aucun stockage natif**. Layout **plat** + **autonome**. **294 tests `node --test`** (… +
-  crash-reporting-event + crash-reporting-engine + **preferences-model + preferences-service**). Vérifs : **typecheck +
-  lint + test 294/294 + expo-doctor 19/19 + git diff --check verts** (**RN 20 n'ajoute aucune dépendance**) ; packages
-  liés `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**,
-  **push distant réel + token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/
-  AccessibilityInfo/AppState/NetInfo/LocalAuthentication/Keychain/**MMKV/AsyncStorage**), **catalogues métier i18n +
-  routes concrètes**, **SDK analytics réel** (sous ADR), **application des props a11y / câblage des effets lifecycle dans
-  des composants**, **source remote-config/local réelle des feature flags**, **activation biométrique réelle + fallback
-  concret** (par projet, documenté — ADR-015 §20/§31), **SDK crash réel (Sentry/Crashlytics) + crash handlers globaux**
-  (ADR-019), **store de préférences natif réel** (MMKV/AsyncStorage, ADR-015 §15/§16), **consentement télémétrie** (= RN
-  21, ADR-038), **offline sync réelle** (ADR-029), **backend d'observabilité** (ADR-018/036).
-  *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  PII ; ne décide aucun stockage natif**. **+ RN 21 — consentement télémétrie / privacy gate primitives génériques**
+  (ADR-038) : **ajoute `src/consent`** — **primitive préparatoire** qui **ne décide PAS ADR-038** et **ne câble pas**
+  analytics (RN 13)/crash (RN 19) ; `ConsentCategory` (`analytics`/`crash`/`performance`/`diagnostics`) + `ConsentStatus`
+  (`granted`/`denied`/`unknown`) + `ConsentSet` ; `normalizeConsentCategory` (inconnue → ignorée) + `normalizeConsentStatus`
+  (junk → `unknown`, **jamais `granted`**) + **`sanitizeConsentSet`** + `isConsentGranted` + **`isTelemetryAllowed`** =
+  **default-deny** (true **seulement** si catégorie connue ET `granted`) + `describe*ForLog` ; `ConsentStore` (seam async)
+  + **`ConsentStoreError`** + **`createPreferenceConsentStore`** (persistance **déléguée aux préférences RN 20**, clés non
+  sensibles `privacy.consent.*`, **`clear()` ne touche que ces clés**) + **placeholder** mémoire (copies défensives) +
+  `createConsentService` (`get`/`set`/`isAllowed`/`getAll`/`clear`/`subscribe` ; **best-effort non-intrusif** — store qui
+  throw → `unknown` (**non autorisé**) sans throw, catégorie inconnue ignorée, **listener isolé** ; **logs sûrs**
+  `{operation,category,status}`/`{operation,count}` — **jamais de valeur utilisateur**) ; **aucun SDK réel/réseau/UI/
+  identifiant/PII**. Layout **plat** + **autonome**. **309 tests `node --test`** (… + preferences-model + preferences-service
+  + **consent-model + consent-service + consent-preference-store**). Vérifs : **typecheck + lint + test 309/309 +
+  expo-doctor 19/19 + git diff --check verts** (**RN 21 n'ajoute aucune dépendance**) ; packages liés `api-contracts`
+  11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant réel +
+  token device**, **adaptateurs natifs réels** (permissions/notifications/localisation/linking/AccessibilityInfo/AppState/
+  NetInfo/LocalAuthentication/Keychain/MMKV/AsyncStorage), **catalogues métier i18n + routes concrètes**, **SDK analytics
+  réel** (sous ADR), **application des props a11y / câblage des effets lifecycle dans des composants**, **source
+  remote-config/local réelle des feature flags**, **activation biométrique réelle + fallback concret** (par projet,
+  documenté — ADR-015 §20/§31), **SDK crash réel (Sentry/Crashlytics) + crash handlers globaux** (ADR-019), **store de
+  préférences natif réel** (MMKV/AsyncStorage, ADR-015 §15/§16), **SDK télémétrie réel + UI de consentement + câblage du
+  gate dans analytics/crash** (ADR-038), **environnement / device info** (= RN 22), **offline sync réelle** (ADR-029),
+  **backend d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -273,8 +284,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`PREFERENCES_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles**, 294 tests + bundle Metro).
+`CONSENT_GATE_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie**, 309 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -305,7 +316,39 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 20 — préférences non sensibles persistantes primitives génériques (seam, sans MMKV/AsyncStorage
+**Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives génériques** (`cores/mobile-react-native/`,
+périmètre `src/consent` + `test/**` + docs) : ajoute une **couche de consentement télémétrie / privacy gate générique**,
+**pure et testable**, **sans SDK analytics/crash réel, sans réseau, sans UI de consentement, sans identifiant utilisateur
+réel, sans PII**. `mobile-react-native` → **`CONSENT_GATE_READY`**. **Aucune dépendance ajoutée.** C'est une **primitive
+préparatoire** : elle **ne décide PAS ADR-038**, **ne câble pas** les services analytics (RN 13)/crash (RN 19) et
+**n'émet rien** ; son rôle unique = répondre « cette catégorie peut-elle émettre ? » selon une règle **default-deny**.
+**Modèle** (`model.ts`, agnostique) : `ConsentCategory` (`analytics`/`crash`/`performance`/`diagnostics`) +
+`ConsentStatus` (`granted`/`denied`/`unknown`) + `ConsentSet` (map partielle) ; `normalizeConsentCategory` (catégorie
+inconnue → `undefined`, **ignorée**) ; `normalizeConsentStatus` (alias tolérés ; junk → `unknown`, **jamais `granted`**) ;
+**`sanitizeConsentSet`** (catégories connues, drop `unknown` ; tolérant) ; `isConsentGranted` (true **seulement** si
+`granted`) ; **`isTelemetryAllowed(set, category)`** = **default-deny** (true **seulement** si catégorie connue ET
+`granted` ; `denied`/`unknown`/absent/invalide → `false`) ; `describeConsentEntryForLog` → `{category,status}` /
+`describeConsentForLog` → `{count}` — **jamais de valeur utilisateur**. **Store** (`store.ts`, agnostique) : `ConsentStore`
+seam (`get`/`set`/`getAll`/`clear`/`subscribe?`, **async**) + **`ConsentStoreError`** contrôlé (`operation` seul) ;
+**`createPreferenceConsentStore(preferenceService)`** : la persistance est **déléguée aux préférences non sensibles RN 20**
+sous clés **préfixées non sensibles** `privacy.consent.<category>` (un consentement = config, **pas un secret**) ;
+**`clear()` ne supprime que les clés `privacy.consent.*`** (jamais tout le store de préférences). **Placeholder**
+(`placeholder-store.ts`) : mémoire ; **copies défensives** ; notifie au changement ; aucune persistance. **Service**
+(`service.ts`, agnostique) : `createConsentService({store, logger?})` → `get`/`set`/`isAllowed`/`getAll`/`clear`/
+`subscribe`. **`isAllowed` = default-deny** (true **seulement** si `granted`). **Best-effort non-intrusif** : un store qui
+throw → repli `unknown` (**= non autorisé**, défaut privacy sûr), **ne throw jamais** ; catégorie inconnue sur `set` →
+**ignorée** ; **listener isolé**. **Logs RN 8 sûrs** : `{operation,category,status}` (enums) / `{operation,count}` —
+**jamais de valeur utilisateur**. **+15 tests `node --test`** (`consent-model` : catégories/statuts, **junk → non
+autorisé**, **granted seul autorise**, `denied`/`unknown` bloquent, `sanitizeConsentSet`, `describe*ForLog` enums/count ;
+`consent-service` : get/set/isAllowed/getAll/clear, **catégorie inconnue ignorée**, **store défaillant → non autorisé sans
+throw**, **listener isolé**, **logs enums/count** ; `consent-preference-store` : mapping `privacy.consent.*` **non
+sensible**, round-trip, **`clear()` ne touche que le consentement**) → **309 tests** ; module **entièrement agnostique**
+(aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 309/309 + expo-doctor 19/19 + git diff
+--check verts** (**RN 21 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
+`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add telemetry consent primitives`. **Prochaine
+action : Mobile Core React Native 22 — environnement / métadonnées app primitives génériques (seam, non identifiant).**
+
+**Étape précédente — Mobile Core React Native 20 — préférences non sensibles persistantes primitives génériques (seam, sans MMKV/AsyncStorage
 réel)** (`cores/mobile-react-native/`, périmètre `src/preferences` + `test/**` + docs) : ajoute une **couche de
 préférences persistantes NON SENSIBLES générique**, **pure et testable**, avec un **seam futur MMKV/AsyncStorage** mais
 **sans MMKV réel, sans AsyncStorage réel, sans SecureStore (secrets), sans Zustand persistant, sans réseau, sans logique
@@ -338,8 +381,7 @@ défaillant best-effort sans throw**, **listener isolé**, **logs `{operation,co
 invalide) → **294 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs :
 **typecheck + lint + test 294/294 + expo-doctor 19/19 + git diff --check verts** (**RN 20 n'ajoute aucune dépendance**).
 **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
-`feat(mobile): add non-sensitive preferences primitives`. **Prochaine action : Mobile Core React Native 21 —
-consentement télémétrie / privacy gate primitives génériques (ADR-038).**
+`feat(mobile): add non-sensitive preferences primitives`.
 
 **Étape précédente — Mobile Core React Native 19 — crash / error-reporting primitives génériques (seam, sans SDK réel)**
 (`cores/mobile-react-native/`, périmètre `src/crash-reporting` + `test/**` + docs) : ajoute une **couche de crash /
