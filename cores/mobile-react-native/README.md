@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Crash / Error-Reporting Primitives
+# Mobile Core React Native — Generic Non-Sensitive Preferences Primitives
 
-> Statut : **`CRASH_REPORTING_READY`** (V1 — RN 19 ; socle RN 1 → gate biométrique RN 18)
+> Statut : **`PREFERENCES_READY`** (V1 — RN 20 ; socle RN 1 → crash/error-reporting RN 19)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -36,8 +36,9 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Feature flags / config (RN 17)** | `src/config` | **étend** `config` (env) : `FlagValue` (bool/string/number) + `FlagSet` + bornes + `isValidFlagKey`/`normalizeFlagValue`/`sanitizeFlagSet` + getters typés à **défaut sûr** (`getBooleanFlag`/`getStringFlag`/`getNumberFlag`/`getFlagValue`) ; `FlagAdapter` (seam local/remote-config, `FlagAdapterError`) + **placeholder** mémoire + **`createFlagService`** (`getFlag`/`getAll`/`subscribe`/`refresh`/`dispose`, defaults⊕adapter, **logs sûrs** `{count}`, erreurs contrôlées, listener isolé). **Distinct des `flags` UI Zustand RN 6.** **Aucun SDK remote-config réel/réseau/persistance/user targeting/donnée sensible.** |
 | **Gate biométrique local (RN 18)** | `src/biometrics` | **disponibilité** normalisée (`available`/`notEnrolled`/`unsupported`/`unknown`) + **type** borné (`fingerprint`/`facial`/`iris`/`unknown`) + **résultat** (`success`/`refused`/`cancelled`/`lockout`/`unavailable`/`error`) ; helpers tolérants (**junk → `unknown`/`error`, jamais `success`**) + objets **gelés** ; `BiometricAdapter` (seam Expo `LocalAuthentication`/Keychain, `BiometricAdapterError`) + **placeholder** mémoire + **`createBiometricService`** (`getAvailability`/`isAvailable`/`authenticate`, **gate sans faux succès** — `unavailable` sans prompt si inutilisable, **logs sûrs** `{availability,type}`/`{outcome}`/`{operation}`). **Gate local d'UX uniquement — ne remplace JAMAIS l'auth serveur** (ADR-015 §20). **Aucun `LocalAuthentication`/Keychain réel, aucun secret/biométrie/résultat stocké ou loggé.** |
 | **Crash / error-reporting (RN 19)** | `src/crash-reporting` | `CrashReportEvent` **borné** (`severity`/`source`/`name`/`message`/`stack?`/`context`) **rédigé via la redaction RN 8** (`sanitizeCrashMessage`/**`sanitizeCrashStack`** — chemins device/tokens/URL signées/emails scrubés + cap frames, **jamais de stack brute** ; `sanitizeCrashContext` — clés sensibles → `[Redacted]`, primitives bornées) ; `createCrashReportEvent` (gelé, tolérant) + `describeCrashEventForLog` (**`{severity,source}` seul**) ; `CrashReporterAdapter` (seam Sentry/Crashlytics, `CrashReporterAdapterError`) + **placeholder** mémoire (copies défensives) + **`createCrashReporterService`** (`captureError`/`captureMessage`/`setContext`/`flush`, **best-effort non-intrusif** — sync throw + async reject capturés, **jamais de faux succès**, **logs `{operation,severity,source}`**). **Sans SDK réel/réseau/persistance/batching/crash handler global** ; **ne décide pas ADR-019**. **Aucun token/cookie/URL signée/URI device/PII/body/stack brute/user-id réel.** |
+| **Préférences non sensibles (RN 20)** | `src/preferences` | `PreferenceValue` (bool/string/number) + `PreferenceSet` + bornes + `isValidPreferenceKey` (format **+ non sensible**, réutilise `isSensitiveKey`) + `normalizePreferenceValue` + **`isSensitivePreferenceValue`** (string que la redaction RN 8 modifierait) + `sanitizePreferenceSet` + getters typés à **défaut sûr** ; `PreferenceStore` (seam **async** MMKV/AsyncStorage, `PreferenceStoreError`) + **placeholder** mémoire (copies défensives) + **`createPreferenceService`** (`get`/`getBoolean`/`getString`/`getNumber`/`set`/`remove`/`clear`/`getAll`/`subscribe` — **garde les écritures** + **assainit les lectures**, **best-effort** non-intrusif, listener isolé, **logs `{operation,count}`**). **Données NON sensibles persistables uniquement** — distinct de SecureStore (secrets), Zustand RN 6 (UI in-memory) et TanStack Query (server-state). **Aucun MMKV/AsyncStorage réel, aucun secret/token/PII** ; **clé/valeur sensible → drop** (jamais persister un secret masqué). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (… network-state (RN 3), network-status, network-service, config-flags, config-flag-service, biometrics-model, biometrics-engine, **crash-reporting-event, crash-reporting-engine**) — **279 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (… config-flags, config-flag-service, biometrics-model, biometrics-engine, crash-reporting-event, crash-reporting-engine, **preferences-model, preferences-service**) — **294 tests** |
 
 ## Stack
 
@@ -80,6 +81,7 @@ cores/mobile-react-native/
 │   ├── notifications/        # notifications locales (agnostiques) : message + types + engine + placeholder (RN 10)
 │   ├── offline/              # offline-ready + connectivité : network-state(+RN16) + network-adapter/placeholder/service + mutation + queue mémoire (agnostiques)
 │   ├── permissions/          # permissions runtime (agnostiques) : status + adapter + engine + placeholder + usePermission (RN 9)
+│   ├── preferences/          # préférences NON sensibles persistantes (agnostiques) : model + adapter + placeholder + service — seam MMKV/AsyncStorage, sans store réel (RN 20)
 │   ├── query/                # server-state : QueryClient/provider + query-keys + query-errors (agnostiques) + useAuthedQuery/Mutation + invalidation
 │   ├── states/               # états UI standards
 │   ├── store/                # état local UI (Zustand) : ui-state (pur, agnostique) + ui-store (useUiStore)
@@ -88,7 +90,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (… network-status, network-service, config-flags, config-flag-service, biometrics-model, biometrics-engine, crash-reporting-event, crash-reporting-engine)
+├── test/                     # node --test (… config-flags, config-flag-service, biometrics-model, biometrics-engine, crash-reporting-event, crash-reporting-engine, preferences-model, preferences-service)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -122,6 +124,7 @@ cores/mobile-react-native/
 | **ADR-015 §19/§21 / 06** Feature flags | **config (RN 17)** : un flag = **config** (jamais secret/token/URL signée/PII) ; valeurs **bornées** et **jamais loggées** (`{count}` seulement) ; **aucun SDK remote-config réel/réseau/persistance/user targeting** ; **distinct** des `flags` UI Zustand RN 6 — voir ARCHITECTURE §26 |
 | **ADR-015 §20/§21** Biométrie | **gate biométrique local (RN 18)** : **gate d'UX local uniquement** — **ne remplace JAMAIS** login/refresh/session serveur (**API Core = autorité**), reste **optionnel** + **fallback projet**, **aucun faux succès** (device inutilisable → `unavailable` sans prompt) ; **aucun secret/biométrie/résultat/profil stocké** ; logs **enums seulement** (`{availability,type}`/`{outcome}`/`{operation}`) — **jamais le prompt ni la cause native** — voir ARCHITECTURE §27 |
 | **ADR-040 §17/§18/§19 · ADR-015 §12/§21/§24** Crash reporting | **crash/error-reporting (RN 19)** : toute donnée passe par la **redaction centrale RN 8** puis est **bornée** (message/stack/context) — **jamais** token/cookie/Authorization/URL signée/URI device/PII/body, **jamais de stack brute** (rédigée + cap frames), **aucun user-id réel** ; **best-effort non-intrusif** (ne casse jamais le flux, jamais de faux succès) ; logs **`{operation,severity,source}` seulement** ; **sans SDK réel** — **ne décide pas ADR-019** — voir ARCHITECTURE §28 |
+| **ADR-015 §11/§15/§16/§17/§21 · ADR-012** Préférences | **préférences non sensibles (RN 20)** : couche **persistée NON sensible** distincte de SecureStore (secrets), Zustand RN 6 (UI in-memory) et TanStack Query (server-state) ; **clé sensible refusée** (réutilise `isSensitiveKey`), **valeur sensible droppée** (si `redactString(v) !== v` — jamais persister un secret masqué) ; lectures **assainies** (défense en profondeur) ; **best-effort non-intrusif** ; logs **`{operation,count}` seulement** ; **seam MMKV/AsyncStorage — aucun store natif réel, RN 20 ne décide pas le choix** — voir ARCHITECTURE §29 |
 
 ## Commandes
 
@@ -158,6 +161,13 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
   sensible dans le store local Zustand** (primitives UI non sensibles uniquement).
 
 ## Hors périmètre de cette mission (différé)
+
+**Usage court (RN 20)** : `const prefs = createPreferenceService({ store })` puis
+`await prefs.set('theme', 'dark')` / `const theme = await prefs.getString('theme',
+'system')` — **données non sensibles uniquement** (une clé/valeur sensible est
+**droppée**, jamais persistée) ; **secrets → SecureStore**, état UI in-memory →
+Zustand RN 6, server-state → TanStack Query. L'adaptateur réel (projet dérivé) relaie
+MMKV/AsyncStorage **sous ADR-015 §15/§16**.
 
 **Usage court (RN 19)** : `const crash = createCrashReporterService({ adapter, logger })`
 puis `try { risky(); } catch (e) { crash.captureError(e, { severity: 'error', context:
@@ -244,26 +254,29 @@ stocké, et **ne remplace jamais** l'authentification serveur (ADR-015 §20 ; ch
 activation réelle = décision documentée par projet dérivé). **Le crash/error-reporting
 reste préparatoire** : `src/crash-reporting` fournit modèle (rédigé/borné) + adapter
 (seam) + placeholder + service, **sans** SDK réel (Sentry/Crashlytics/Bugsnag), **sans**
-réseau/persistance/batching/crash handler global, et **ne décide pas ADR-019**. Voir la
-roadmap du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
+réseau/persistance/batching/crash handler global, et **ne décide pas ADR-019**. **Les
+préférences restent un seam** : `src/preferences` fournit modèle (borné, garde
+anti-secret) + store (seam) + placeholder + service, **sans** MMKV/AsyncStorage **réel**,
+**données non sensibles uniquement** (secrets → SecureStore), et **ne décide aucun
+stockage natif** (ADR-015 §15/§16). Voir la roadmap du spec (§37/§53) et
+`docs/project-status/NEXT_ACTIONS.md`.
 
 ## Vérification
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **279/279** (`node --test` : … config-flags, config-flag-service, biometrics-model, biometrics-engine, **crash-reporting-event + crash-reporting-engine** — RN 19).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 19 n'ajoute aucune dépendance)*.
+- `test` : ✅ **294/294** (`node --test` : … biometrics-model, biometrics-engine, crash-reporting-event, crash-reporting-engine, **preferences-model + preferences-service** — RN 20).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 20 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 20 — préférences non sensibles persistantes primitives
-génériques (seam, sans MMKV/AsyncStorage réel — ADR-015 §15/§16)** : un
-`PreferenceStore` (seam pour un futur MMKV/AsyncStorage) + un modèle **borné** de
-préférences **non sensibles** (thème/langue/onboarding/filtres non sensibles) avec
-**garde anti-secret** (réutilise `isSensitiveKey` — **refuse** token/PII/secret) +
-service (`get`/`set`/`remove`/`clear`) + placeholder mémoire, **mappé purement** et
-**testable**, **sans MMKV/AsyncStorage réel, sans réseau, sans secret/token/PII**,
-et **distinct** de SecureStore (secrets) et du store Zustand RN 6 (UI in-memory).
-Une seule mission à la fois. *(Adaptateurs natifs réels — crash SDK, biométrie,
-remote-config, MMKV/AsyncStorage — et offline sync ADR-029 restent différés.)*
+**Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives
+génériques (ADR-038)** : un modèle de **consentement** par catégorie
+(`analytics`/`crash`/`...` → `granted`/`denied`/`unknown`) + un `ConsentStore` (seam,
+persistance non sensible déléguée aux préférences RN 20) + `createConsentService`
+(`isAllowed(category)`/`set`/`getAll`/`subscribe`), **mappé purement** et **testable**,
+**sans UI de consentement réelle, sans réseau, sans SDK, sans PII**, conçu pour
+**gater** l'émission analytics (RN 13) et crash (RN 19) **avant** tout envoi. Une seule
+mission à la fois. *(Adaptateurs natifs réels — crash SDK, biométrie, remote-config,
+MMKV/AsyncStorage — et offline sync ADR-029 restent différés.)*

@@ -1066,3 +1066,62 @@ préparatoire** : elle **ne décide PAS ADR-019** (qui reste à rédiger).
   crash handlers globaux (`ErrorUtils`/unhandled rejection), batching/réseau/
   persistance, `breadcrumbs`, corrélation `traceId`/`spanId` (ADR-036), choix du
   backend (ADR-018).
+
+## 29. Préférences non sensibles persistantes — primitives génériques (RN 20)
+
+RN 20 ajoute `src/preferences` : des **primitives de préférences persistantes NON
+SENSIBLES**, **pures et testables**, avec un **seam futur MMKV/AsyncStorage** mais
+**sans MMKV réel, sans AsyncStorage réel, sans SecureStore (secrets), sans Zustand
+persistant, sans réseau, sans logique métier** (ADR-015 §15/§16). **Séparation
+explicite des couches** (ADR-015 / ADR-012) : **SecureStore** = secrets (refresh
+token) ; **Préférences (RN 20)** = données **non sensibles persistables** (thème,
+langue, onboarding vu, filtres non sensibles) ; **Zustand (RN 6)** = état UI
+**in-memory** non persisté ; **TanStack Query (RN 5)** = server-state, **jamais**
+persisté ici.
+
+- **Modèle (`src/preferences/model.ts`, agnostique)** : `PreferenceValue`
+  (`boolean`/`string`/`number`) + `PreferenceSet` ; bornes `MAX_PREFERENCE_KEY_LENGTH`/
+  `MAX_PREFERENCE_VALUE_LENGTH`/`MAX_PREFERENCES` ; **`isValidPreferenceKey`** =
+  identifiant borné **ET non sensible** (réutilise **`isSensitiveKey`** RN 8 — une
+  clé sensible n'est **jamais** une clé de préférence valide) ; `normalizePreferenceValue`
+  (primitives ; strings bornées ; sinon `undefined`) ; **`isSensitivePreferenceValue`**
+  (une string que la redaction RN 8 **modifierait** — Bearer/JWT/URL signée/URI
+  device/email — est considérée sensible) ; **`sanitizePreferenceSet`** (garde
+  clés/valeurs valides **et non sensibles**, cap count ; tolérant — défense en
+  profondeur sur ce qu'un store renvoie) ; **getters typés à défaut sûr**
+  (`getBooleanPreference`/`getStringPreference`/`getNumberPreference`/`getPreferenceValue<T>`)
+  ; `describePreferencesForLog` → **`{count}` SEULEMENT** (jamais clé ni valeur).
+- **Adaptateur (`src/preferences/adapter.ts`, agnostique)** : `PreferenceStore` =
+  seam **async** MMKV/AsyncStorage (`get`/`set`/`remove`/`clear`/`getAll?`/
+  `subscribe?`) — **store « bête »**, le **service** est le garde.
+  **`PreferenceStoreError`** contrôlé (`operation` seul).
+- **Placeholder (`src/preferences/placeholder-store.ts`, agnostique)** :
+  `createPlaceholderPreferenceStore` — **mémoire** ; **copies défensives**
+  (`snapshot`/`getAll` gèlent) ; stocke les valeurs telles quelles (pour prouver
+  que le **service** assainit en lecture) ; **aucune persistance réelle**.
+- **Service (`src/preferences/service.ts`, agnostique)** : `createPreferenceService(
+  {store, logger?})` — `get`/`getBoolean`/`getString`/`getNumber`/`set`/`remove`/
+  `clear`/`getAll`/`subscribe` (**async**, sauf `subscribe`). **Garde les écritures**
+  (clé invalide/sensible **ou** valeur sensible → **drop**, jamais persister un
+  secret masqué) et **assainit les lectures** (`get`/`getAll` rejettent toute
+  clé/valeur sensible présente dans le store). **Best-effort non-intrusif** : un
+  store qui throw → défaut sûr / no-op + `warn`, **ne throw jamais** ; **listener
+  isolé**. **Logs RN 8 sûrs** : `{operation,count}` — **jamais clé ni valeur**.
+- **Sécurité / gouvernance (ADR-015 §11/§15/§16/§17/§21)** : une préférence n'est
+  **jamais** un secret/token/cookie/URL signée/URI device/PII/payload serveur/
+  profil ; **stratégie de valeur** : si `redactString(value) !== value`, la valeur
+  est **droppée** (jamais persistée masquée) ; **distinct** de SecureStore, du
+  store Zustand RN 6 et de TanStack Query. **Aucune dépendance ajoutée.**
+- **Tests** (`node --test`) : `preferences-model` (validation clés incl. **rejet
+  des clés sensibles**, normalisation/bornage, **`isSensitivePreferenceValue`**,
+  `sanitizePreferenceSet` (drop clés/valeurs sensibles + cap), getters à défaut
+  sûr, `describePreferencesForLog` **sans clé/valeur**) + `preferences-service`
+  (round-trip get/set/remove/clear, **refus des clés sensibles** token/accessToken/
+  refresh_token/password/email/phone/signedUrl/apiKey, **refus des valeurs
+  sensibles** Bearer/JWT/email/URL signée/URI device, **lecture assainie**
+  défense-en-profondeur, **store défaillant best-effort sans throw**, **listener
+  isolé**, **logs `{operation,count}` sans clé/valeur**, tolérance input invalide).
+  Module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
+- **Différés** : adaptateur réel MMKV/AsyncStorage (sous **ADR-015 §15/§16** — choix
+  par projet, **RN 20 ne décide aucun stockage natif réel**), chiffrement local,
+  hook `usePreference` optionnel, migration/versioning de schéma de préférences.

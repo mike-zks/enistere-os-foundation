@@ -18,7 +18,9 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > primitives RN 13, offline/connectivité RN 3/RN 16, feature flags/config RN 17,
 > gate biométrique local RN 18 — gate d'UX, jamais un substitut à l'auth serveur ;
 > crash/error-reporting RN 19 — primitive préparatoire qui **ne décide pas ADR-019**,
-> sans SDK réel/réseau/persistance).
+> sans SDK réel/réseau/persistance ; préférences non sensibles RN 20 — seam
+> MMKV/AsyncStorage **sans store natif réel**, données non sensibles uniquement,
+> ne décide aucun choix de stockage natif — ADR-015 §15/§16).
 > Ces briques **ne remplacent pas** les ADR futurs : elles restent génériques,
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
