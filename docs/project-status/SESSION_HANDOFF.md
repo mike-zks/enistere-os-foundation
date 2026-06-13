@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`LINKING_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`ANALYTICS_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -149,13 +149,19 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **`resolveLink`** (`internal`/`externalBlocked`/`invalid`) — **allowlist stricte** schemes/hosts (**`http` →
   `insecure_scheme`**), **anti-open-redirect** (`//`/`scheme://`/`..`), **params sensibles supprimés**, **bornes** ;
   `isInternalRoute` ; **`resolveNotificationLink`** (clé configurable, tap notification RN 10) ; **aucun log** (ni query
-  sensible), **aucun stockage** de lien/URL, **aucune dépendance** ; routes concrètes = projets dérivés. Layout **plat**
-  + **autonome**. **159 tests `node --test`** (… + i18n-engine + **linking-url + linking-resolve**). Vérifs : **typecheck
-  + lint + test 159/159 + expo-doctor 19/19 verts** (**RN 12 n'ajoute aucune dépendance**) ; packages liés
+  sensible), **aucun stockage** de lien/URL, **aucune dépendance** ; routes concrètes = projets dérivés. **+ RN 13 —
+  analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)** (07_SECURITY §13 / ADR-040) :
+  `AnalyticsEvent` borné + **redaction dédiée BASÉE sur RN 8** (`isSensitiveProperty` **réutilise `isSensitiveKey`** +
+  exact/substring ; `sanitizeAnalyticsEvent` **supprime les clés sensibles** + **scrube les valeurs via `redactString`**
+  + **borne**, **sans throw**) ; `AnalyticsAdapter` (`track`/`flush?`, **PAS de `identify`**) + `createAnalyticsService`
+  (track **best-effort non-intrusif**, **logs RN 8 sûrs** `{eventName,propertyCount}`, erreurs adapter **contrôlées**) ;
+  **placeholder** mémoire (tests) ; **aucun SDK réel/réseau/persistance/user-id réel/token**. Layout **plat** +
+  **autonome**. **175 tests `node --test`** (… + linking-resolve + **analytics-event + analytics-engine**). Vérifs :
+  **typecheck + lint + test 175/175 + expo-doctor 19/19 verts** (**RN 13 n'ajoute aucune dépendance**) ; packages liés
   `api-contracts` 11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**,
   **push distant réel + token device**, **adaptateurs Expo réels** (permissions/notifications/localisation/linking),
-  **catalogues métier i18n + routes concrètes**, **analytics/télémétrie** (= RN 13), **backend d'observabilité**
-  (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  **catalogues métier i18n + routes concrètes**, **SDK analytics réel** (sous ADR), **a11y** (= RN 14), **backend
+  d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -202,8 +208,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`LINKING_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing**, 159 tests + bundle Metro).
+`ANALYTICS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie**, 175 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -234,7 +240,35 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 12 — deep-linking / routing primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)**
+(`cores/mobile-react-native/`, périmètre `src/analytics` + `test/**` + docs) : ajoute une **couche générique
+d'analytics/télémétrie** au-dessus du logger/redaction RN 8, **sans SDK réel** (Sentry/Amplitude/GA/Segment/Firebase/
+OTel), **sans réseau, sans persistance, sans identité utilisateur réelle, sans logique métier, sans UI**.
+`mobile-react-native` → **`ANALYTICS_READY`**. **Aucune dépendance ajoutée.** Le branchement d'un SDK réel relève d'un
+**ADR/validation** côté projet dérivé. **Modèle + redaction** (`src/analytics/event.ts`, agnostique) : `AnalyticsEvent`
+`{name, properties?, timestamp?}` ; properties **bornées aux primitives**. **Redaction dédiée mais BASÉE sur RN 8**
+(pas de contournement) : `isSensitiveProperty` **réutilise `isSensitiveKey` (RN 8)** + couche normalisée exact/substring
+(même durcissement que le filtre de liens RN 12) ; **`sanitizeAnalyticsEvent`** (jamais de throw) **supprime les clés
+sensibles** (token/secret/signature/credential/password/authorization/apiKey/auth/jwt/otp/key/code/sig/email/phone/…),
+**scrube les valeurs string via `redactString` (RN 8)** (Bearer/JWT/device-uri/URL signée/email) et **borne**
+count/longueur. `describeAnalyticsEventForLog` → **`{eventName, propertyCount}`** (jamais de valeur). **Adaptateur**
+(`adapter.ts`) : `AnalyticsAdapter` — `track(event)` (déjà assaini), `flush?()`. **PAS de `identify`** *par design* (pas
+d'identifiant utilisateur réel dans la fondation ; un projet dérivé l'ajoute sous sa propre revue privacy). **Service**
+(`engine.ts`, agnostique) : `createAnalyticsService({adapter, logger?})` → `track(name, properties?)` **assaini avant**
+l'adapter ; **best-effort / non-intrusif** : un adapter qui échoue **ne casse jamais** le flux app (erreur capturée +
+`warn` **sûr** sans cause sensible) ; **logs RN 8 sûrs** `{eventName, propertyCount}` — **jamais les valeurs** ;
+`flush()` best-effort ; **aucun `Date.now()`**. **Placeholder** (`placeholder-adapter.ts`) : buffer **mémoire POUR
+TESTS** (`getEvents`/`clear`), **aucun SDK/réseau/persistance**. **+16 tests `node --test`** (`analytics-event` :
+`isSensitiveProperty`, bornage, **clés sensibles supprimées**, **valeurs scrubbées (RN 8)**, **valeur longue tronquée**,
+**sans throw**, `describeAnalyticsEventForLog` sans valeur ; `analytics-engine` : événement assaini dans l'adapter,
+**l'adapter ne reçoit jamais de valeur sensible**, **erreur adapter contrôlée — track ne throw pas**, **logger ne reçoit
+que `{eventName,propertyCount}`**, `flush` délégué/no-op/échec contrôlé, **sans throw**) → **175 tests** ; module
+**entièrement agnostique** (aucun hook → rien en typecheck-only). Vérifs : **typecheck + lint + test 175/175 +
+expo-doctor 19/19 verts** (**RN 13 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
+`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add generic analytics telemetry
+primitives`. **Prochaine action : Mobile Core React Native 14 — accessibilité (a11y) primitives génériques.**
+
+**Étape précédente — Mobile Core React Native 12 — deep-linking / routing primitives génériques** (`cores/mobile-react-native/`, périmètre
 `src/linking` + `test/**` + docs) : ajoute une **couche pure de résolution de liens/deep-links vers routes internes
 validées**, **sans dépendance native, sans logique métier, sans UI, sans schéma métier**. `mobile-react-native` →
 **`LINKING_READY`**. **Aucune dépendance ajoutée.** Prépare le **tap de notification (RN 10)** ; **les projets dérivés

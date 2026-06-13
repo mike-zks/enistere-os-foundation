@@ -681,3 +681,57 @@ mappant `route.path`/`route.params`.
   initiale), **câblage navigation** (Expo Router) des routes résolues, schémas/
   routes **concrets** (projets dérivés), liens authentifiés/différés post-login,
   app links Android / universal links iOS (config natale).
+
+## 22. Analytics / télémétrie — primitives génériques (RN 13)
+
+RN 13 ajoute une **couche générique d'analytics/télémétrie** au-dessus du
+logger/redaction RN 8, **sans SDK réel** (Sentry/Amplitude/GA/Segment/Firebase/
+OTel), **sans réseau, sans persistance, sans identité utilisateur réelle, sans
+logique métier, sans UI**. Elle laisse les projets dérivés tracer des événements
+typés **sans fuite de PII/token/URL sensible** ; le branchement d'un SDK réel
+relève d'un **ADR/validation** côté projet dérivé.
+
+- **Modèle + redaction (`src/analytics/event.ts`, agnostique)** : `AnalyticsEvent`
+  `{name, properties?, timestamp?}` ; `AnalyticsEventProperties` **bornées aux
+  primitives** (string/number/boolean). **Redaction dédiée mais BASÉE sur RN 8**
+  (mission ; **pas de contournement**) : `isSensitiveProperty` **réutilise
+  `isSensitiveKey` (RN 8)** + une couche normalisée exact/substring (même
+  durcissement que le filtre de liens RN 12) ; **`sanitizeAnalyticsEvent`**
+  (jamais de throw) **supprime les clés sensibles** (token/secret/signature/
+  credential/password/authorization/apiKey/auth/jwt/otp/key/code/sig/email/
+  phone/…), **scrube les valeurs string via `redactString` (RN 8)** (Bearer/JWT/
+  device-uri/URL signée/email) et **borne** count/longueur ; ne garde que les
+  primitives. `describeAnalyticsEventForLog` → **`{eventName, propertyCount}`**
+  (jamais de valeur).
+- **Adaptateur (`src/analytics/adapter.ts`, agnostique)** : `AnalyticsAdapter` =
+  seam plateforme — `track(event)` (reçoit un événement **déjà assaini**),
+  `flush?()`. **PAS de `identify`** *par design* (pas d'**identifiant utilisateur
+  réel** dans la fondation, mission ; un projet dérivé l'ajoute sous sa propre
+  revue privacy).
+- **Service (`src/analytics/engine.ts`, agnostique)** : `createAnalyticsService(
+  {adapter, logger?})` → `track(name, properties?)` **assaini avant** l'adapter ;
+  **best-effort / non-intrusif** : un adapter qui échoue **ne casse jamais** le
+  flux app — l'erreur est **capturée** et un `warn` **sûr** est loggé (**aucune
+  cause sensible**). **Logs RN 8 sûrs** : `track` logge **uniquement**
+  `{eventName, propertyCount}` (debug) ou `{eventName}` (warn) — **jamais les
+  valeurs**, redaction RN 8 **non contournée**. `flush()` best-effort (no-op si
+  non supporté). **Aucun `Date.now()`** (timestamp = caller/SDK).
+- **Placeholder (`src/analytics/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderAnalyticsAdapter` — **buffer mémoire POUR TESTS**, `getEvents`/
+  `clear` ; **AUCUN SDK, réseau ni persistance**.
+- **Sécurité / gouvernance (ADR-015/040)** : **aucun SDK/réseau/persistance** ;
+  **aucun identifiant utilisateur réel** ; **aucun token/device token/cookie/
+  `Authorization`/URL signée/URI device** ne survit (clés droppées + valeurs
+  scrubbées) ; **aucun contournement** de la redaction RN 8.
+- **Tests** (`node --test`) : `analytics-event` (`isSensitiveProperty`, bornage
+  count/longueur, **clés sensibles supprimées**, **valeurs scrubbées (RN 8)**,
+  **valeur longue tronquée**, **sans throw** sur input invalide,
+  `describeAnalyticsEventForLog` sans valeur) + `analytics-engine` (track →
+  événement assaini dans l'adapter, **l'adapter ne reçoit jamais de valeur
+  sensible**, **erreur adapter contrôlée — track ne throw pas**, **logger ne reçoit
+  que `{eventName, propertyCount}`**, `flush` délégué/no-op/échec contrôlé, **sans
+  throw**). Module **entièrement agnostique** (aucun hook → rien en typecheck-only).
+- **Différés** : adaptateur SDK réel (Sentry/Amplitude/GA/Segment/Firebase) **sous
+  ADR/validation**, transport réseau + batching, **consentement utilisateur**
+  (opt-in/opt-out), `identify`/user-id (sous revue privacy), crash reporting,
+  session/écran auto, sampling.
