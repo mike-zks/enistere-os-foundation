@@ -519,3 +519,60 @@ les livre pas.
 - **Différés** : adaptateurs Expo réels (caméra/médias/notifications/localisation),
   picker/upload (RN 7 = primitives), **notifications push réelles**, demande de
   permission au bon moment dans un écran.
+
+## 19. Notifications locales — primitives génériques (RN 10)
+
+RN 10 ajoute une **couche générique de primitives de notifications locales**
+au-dessus du modèle permissions RN 9, **sans push réel, sans Expo Notifications
+réel, sans backend, sans token device, sans logique métier, sans UI**.
+
+- **Message sûr (`src/notifications/message.ts`, agnostique)** : `NotificationMessage`
+  `{ title, body, data? }` **borné** (`MAX_TITLE_LENGTH`/`MAX_BODY_LENGTH`/
+  `MAX_DATA_KEYS`/`MAX_DATA_VALUE_LENGTH`). `sanitizeNotificationMessage` **trim +
+  cap** title/body et ne garde dans `data` que des **primitives** (string/number/
+  boolean, bornées ; objets/arrays/fonctions **droppés**) — **point de contrôle
+  unique**. **Sécurité (07_SECURITY §13 / ADR-040)** : title/body/data sont du
+  **contenu** (PII possible) → **jamais loggés** ; `describeNotificationForLog`
+  renvoie **uniquement** des **métadonnées** (`{titleLength, bodyLength,
+  dataKeyCount}`), **aucun contenu**. **Aucun push/device token** n'a sa place
+  dans un message (mission).
+- **Modèle (`src/notifications/types.ts`, agnostique)** : `NotificationDeliveryState`
+  (`scheduled`/`delivered`/`cancelled`/`failed`/`unknown`) + gardes
+  (`isNotificationDeliveryState`, `isTerminalDeliveryState`) ; **trigger borné**
+  `NotificationTrigger` (`immediate`/`delay{seconds≥0}`/`date{timestamp}`) +
+  `normalizeTrigger` (invalide → `immediate`, delay clampé) ; `LocalNotificationRequest`,
+  `ScheduledNotification`. **`NotificationAdapter`** = **seam** plateforme
+  (`getPermissionStatus`/`requestPermission`/`scheduleLocal`/`cancel`/`cancelAll`/
+  `getDelivered?`).
+- **Service (`src/notifications/engine.ts`, agnostique)** : `createNotificationService(
+  {adapter, permissionService?, logger?})`. **Réutilise RN 9** : pilote un
+  `PermissionService` pour le kind `notifications` (injecté, ou **construit depuis
+  l'adapter** via un `PermissionAdapter` qui mappe `getPermissionStatus`/
+  `requestPermission`). **`schedule(request)`** : `ensure('notifications')` →
+  **si `!isPermissionUsable(status)` → `{state:'blocked', reason:'permission',
+  status}` SANS toucher l'adapter** (on ne planifie **jamais** sans permission
+  utilisable, mission) ; sinon **message assaini** + **trigger normalisé** →
+  `adapter.scheduleLocal` → `{state:'scheduled', id}`. `cancel`/`cancelAll`/
+  `getDelivered` (no-op `[]` si non supporté). **Logs via le logger RN 8** avec
+  **champs sûrs uniquement** (`{id}`/`{status}`/`{state}`/`{count}` — **jamais**
+  le contenu) ; échec adapter → **warn + `NotificationError`** contrôlé (seulement
+  `operation`, **aucune cause sensible**).
+- **Placeholder (`src/notifications/placeholder-adapter.ts`, agnostique)** :
+  `createPlaceholderNotificationAdapter({permission?, onRequest?, idPrefix?})` —
+  **simulation mémoire, AUCUNE dépendance native** ; ids = **compteur
+  déterministe** (`local-1`/`local-2`… → pas de `Date.now()`/`Math.random()`,
+  tests reproductibles) ; in-memory, jamais persisté.
+- **Sécurité / gouvernance (ADR-015/040)** : **aucun stockage** (ni SecureStore/
+  Zustand/Query) ; **aucun token device/push/FCM/APNs** ; **aucun contenu** de
+  notification dans les logs ; permission notifications **gouvernée par RN 9**
+  (API Core reste l'autorité applicative).
+- **Tests** (`node --test`) : `notification-message` (bornage title/body/data,
+  garde, `describeNotificationForLog` **sans contenu**, `normalizeTrigger`) +
+  `notification-engine` (**permission refusée → pas de schedule**, granted/limited/
+  unknown→request → schedule, `cancel`/`cancelAll`, **erreur adapter →
+  `NotificationError` sans cause brute**, `getDelivered` no-op, **aucune donnée
+  sensible loggée**). Module **entièrement agnostique** (aucun hook → rien en
+  typecheck-only).
+- **Différés** : adaptateur Expo réel (`expo-notifications`), **push distant
+  (Expo Push/FCM/APNs) + token device**, handler de réponse/tap (routing),
+  catégories/actions, badges, écran/réglages de notifications.

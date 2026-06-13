@@ -1,6 +1,6 @@
-# Mobile Core React Native — Generic Governed Native Permissions
+# Mobile Core React Native — Generic Local Notification Primitives
 
-> Statut : **`PERMISSIONS_READY`** (V1 — RN 9 ; socle RN 1 → logger RN 8)
+> Statut : **`NOTIFICATIONS_READY`** (V1 — RN 10 ; socle RN 1 → permissions RN 9)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -22,12 +22,13 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Upload sécurisé (RN 7)** | `src/upload` | `MobileFile` `{uri,name,type}` + helpers purs (`isMobileFile`, `describeFileForLog` → **`{type,extension}`**, sans `uri` ni nom brut, RN 8, `isAllowedFileType` UX) ; **`useUploadMutation`** (via `useAuthedMutation` → `apiClient.files.upload`, pont 401 `authedRequest`, `FormData` reconstruit au retry). **Mutation** → pas de clé de cache ; **aucun fichier/URL signée/token en cache/log/store** ; validation **backend autoritaire** (ADR-007). **Aucun écran, aucun endpoint métier.** |
 | **Logger / observabilité (RN 8)** | `src/logger` | Logger générique typé (`createLogger` : `debug`/`info`/`warn`/`error`, **niveaux**, **sink pluggable**, **horloge injectée**, corrélation `child`/`withRequestId`) ; **redaction centrale** (`redactValue`/`redactString` : tokens, `Authorization`, cookies, JWT, **URL signées**, **chemins device**, **PII/email**) appliquée **avant** tout sink ; `safeErrorFields(QueryError)`. **Aucune persistance, aucun transport réseau, aucun service externe, aucun log de body** (ADR-040). |
 | **Permissions natives (RN 9)** | `src/permissions` | Modèle pur `PermissionKind`/`PermissionStatus` + helpers (`normalizePermissionStatus`, `canRequestPermission`, `isPermissionGranted`…) ; `PermissionAdapter` (seam Expo) + **`createPermissionService`** (live `getStatus`/`request`/`ensure`/`openSettings`, **logs sûrs** via logger RN 8, `PermissionAdapterError` contrôlé) ; **adaptateur placeholder** (no native dep) ; hook **`usePermission`** (status/loading/error, **no UI**). **Statut jamais persisté** (ni SecureStore/Zustand/Query) ; **API Core = autorité** (07_SECURITY §6). Prépare picker/upload/notifications, **ne les livre pas**. |
+| **Notifications locales (RN 10)** | `src/notifications` | `NotificationMessage` **borné/sûr** (`sanitizeNotificationMessage`, `describeNotificationForLog` **sans contenu**) + `NotificationDeliveryState`/`NotificationTrigger` (`normalizeTrigger`) ; `NotificationAdapter` (seam Expo) + **`createNotificationService`** (gate sur la permission `notifications` RN 9 — **jamais de schedule sans permission usable**, `schedule`/`cancel`/`cancelAll`/`getDelivered`, **logs sûrs** via logger RN 8, `NotificationError` contrôlé) ; **adaptateur placeholder** (no native dep). **LOCAL uniquement** : **aucun push réel**, **aucun token device/FCM/APNs**, **aucun stockage**, **aucune UI**. |
 | Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
 | États standards | `src/states` | `LoadingState`, `ErrorState`, `EmptyState`, `OfflineState`, `UnauthorizedState` |
-| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, **permission-status, permission-engine**) — **106 tests** |
+| Tests | `test/` | **`node --test`** sur le cœur agnostique (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, **notification-message, notification-engine**) — **122 tests** |
 
 ## Stack
 
@@ -60,6 +61,7 @@ cores/mobile-react-native/
 │   ├── forms/                # RHF + Zod : FormField/FormLabel/FormError/TextInputField + validation/form-errors (agnostiques) + resolver
 │   ├── logger/               # logger/observabilité (agnostiques) : redaction centrale + createLogger + error-fields (RN 8)
 │   ├── navigation/           # constantes de routes + gardes (expired/refreshing)
+│   ├── notifications/        # notifications locales (agnostiques) : message + types + engine + placeholder (RN 10)
 │   ├── offline/              # primitives offline-ready : network-state, mutation, queue mémoire (agnostiques)
 │   ├── permissions/          # permissions runtime (agnostiques) : status + adapter + engine + placeholder + usePermission (RN 9)
 │   ├── query/                # server-state : QueryClient/provider + query-keys + query-errors (agnostiques) + useAuthedQuery/Mutation + invalidation
@@ -70,7 +72,7 @@ cores/mobile-react-native/
 │   ├── types/                # types génériques partagés
 │   ├── ui/                   # primitives UI maison
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
-├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine)
+├── test/                     # node --test (auth-engine, session-store, validation, form-errors, offline-queue, network-state, token-mapping, with-auth-retry, query-keys, query-errors, ui-state, invalidation, upload-file, logger-redaction, logger, permission-status, permission-engine, notification-message, notification-engine)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
 └── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
@@ -94,6 +96,7 @@ cores/mobile-react-native/
 | **ADR-016** Client typé OpenAPI | **INTÉGRÉ** : `@enistere/api-client-fetch` + `@enistere/api-contracts` consommés réellement (liés `file:`, Metro) ; refresh possédé par l'AuthEngine (`enableRefresh:false`) — voir ARCHITECTURE §12 |
 | **ADR-040** Logging structuré | **logger client (RN 8)** : `createLogger` (niveaux, sink pluggable, corrélation `requestId`) + **redaction centrale** (tokens/`Authorization`/cookies/JWT/URL signées/chemins device/PII) appliquée **avant** tout sink ; **JSON structuré**, **sans transport réseau/persistance/backend d'observabilité** ni log de body — voir ARCHITECTURE §17 |
 | **07_SECURITY §6** Autorisation | **permissions runtime (RN 9)** : une permission device est une **capacité locale**, **pas** une barrière de sécurité — l'**API Core reste l'autorité** ; statut **jamais persisté** (ni SecureStore/Zustand/Query) ; logs **sûrs** via le logger RN 8 (`{kind,status}` uniquement) — voir ARCHITECTURE §18 |
+| **07_SECURITY §13 / ADR-040** Logs | **notifications locales (RN 10)** : le **contenu** (`title`/`body`/`data`) est potentiellement de la PII → **jamais loggé** (`describeNotificationForLog` = métadonnées seules) ; **aucun token device/push/FCM/APNs** ; **aucun stockage** ; planification **gouvernée** par la permission `notifications` (RN 9) — voir ARCHITECTURE §19 |
 
 ## Commandes
 
@@ -132,11 +135,14 @@ Seules les variables **`EXPO_PUBLIC_*`** sont exposées au bundle — elles sont
 ## Hors périmètre de cette mission (différé)
 
 Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
-de mission : **notifications push réelles**. **Les permissions (RN 9) livrent
-l'abstraction** (modèle, adapter, service, placeholder, `usePermission`) mais
-**PAS** d'adaptateurs Expo réels (caméra/médias/notifications/localisation),
-d'écran ni de demande de permission contextualisée. **Le logger (RN 8) livre les
-primitives** (`createLogger`, redaction centrale, `safeErrorFields`) mais **PAS**
+de mission. **Les notifications (RN 10) livrent les primitives locales** (message
+borné, modèle, service gouverné par la permission RN 9, placeholder) mais **PAS**
+de **push distant réel** (Expo Push/FCM/APNs), de **token device**, d'adaptateur
+`expo-notifications` réel, de handler de tap/routing, de catégories/actions/badges
+ni d'écran. **Les permissions (RN 9) livrent l'abstraction** (modèle, adapter,
+service, placeholder, `usePermission`) mais **PAS** d'adaptateurs Expo réels
+(caméra/médias/notifications/localisation), d'écran ni de demande de permission
+contextualisée. **Le logger (RN 8) livre les primitives** (`createLogger`, redaction centrale, `safeErrorFields`) mais **PAS**
 de backend d'observabilité, de transport réseau, de persistance de logs ni de
 recâblage des `console.*` existants ; la collecte/observabilité relève d'un
 ADR/Cloud Core futur (ADR-018/036). **L'upload (RN 7) livre les primitives**
@@ -156,15 +162,15 @@ automatique, **sans** détection de connectivité (NetInfo) ni **sync** réelle
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **106/106** (`node --test` : … upload-file, logger-redaction, logger, **permission-status + permission-engine** — RN 9).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 9 n'ajoute aucune dépendance)*.
+- `test` : ✅ **122/122** (`node --test` : … logger, permission-status, permission-engine, **notification-message + notification-engine** — RN 10).
+- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 10 n'ajoute aucune dépendance)*.
 - **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 10 — notifications client (cadrage + primitives
-génériques, sans push réel)** : modèle/permission de notification déjà préparés
-(RN 9) → ajouter une abstraction générique de gestion des notifications locales
-(types, état, handlers) **mappée purement** et **testable**, **sans** service push
-réel (Expo/FCM/APNs), **sans** projet ni logique métier. Une seule mission à la
-fois. *(Adaptateurs Expo réels et offline sync — ADR-029 — restent différés.)*
+**Mobile Core React Native 11 — i18n / localisation primitives génériques** :
+une couche de localisation générique (détection de locale **abstraite**, catalogue
+de messages typé + interpolation/pluralisation, formatage via `Intl`), **mappée
+purement** et **testable**, **sans contenu métier** ni **dépendance native** —
+unblocke tous les écrans. Une seule mission à la fois. *(Adaptateurs Expo réels
+— permissions/notifications — et offline sync — ADR-029 — restent différés.)*
