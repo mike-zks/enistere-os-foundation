@@ -39,6 +39,17 @@ test('adapter-driven changes update the service and notify subscribers', () => {
   assert.deepEqual(seen[0], { 'feature.x': true, 'feature.y': 'on' });
 });
 
+test('subscriber mutations do not corrupt the service state', () => {
+  const adapter = createPlaceholderFlagAdapter({ a: true });
+  const service = createFlagService({ adapter });
+  service.subscribe((flags) => {
+    (flags as Record<string, unknown>).a = false;
+    (flags as Record<string, unknown>).extra = 'mutated';
+  });
+  adapter.setFlags({ a: true });
+  assert.deepEqual(service.getAll(), { a: true });
+});
+
 test('subscribe/unsubscribe is deterministic', () => {
   const adapter = createPlaceholderFlagAdapter({});
   const service = createFlagService({ adapter });

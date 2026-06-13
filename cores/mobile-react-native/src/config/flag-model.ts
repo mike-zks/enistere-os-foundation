@@ -92,26 +92,26 @@ function matchesType(value: FlagValue | undefined, sample: FlagValue): boolean {
 }
 
 /** Read a boolean flag, falling back to `defaultValue` when absent/mistyped. */
-export function getBooleanFlag(set: FlagSet, key: string, defaultValue: boolean): boolean {
-  const value = set[key];
+export function getBooleanFlag(set: unknown, key: string, defaultValue: boolean): boolean {
+  const value = readFlagValue(set, key);
   return typeof value === 'boolean' ? value : defaultValue;
 }
 
 /** Read a string flag, falling back to `defaultValue` when absent/mistyped. */
-export function getStringFlag(set: FlagSet, key: string, defaultValue: string): string {
-  const value = set[key];
+export function getStringFlag(set: unknown, key: string, defaultValue: string): string {
+  const value = readFlagValue(set, key);
   return typeof value === 'string' ? value : defaultValue;
 }
 
 /** Read a number flag, falling back to `defaultValue` when absent/mistyped. */
-export function getNumberFlag(set: FlagSet, key: string, defaultValue: number): number {
-  const value = set[key];
+export function getNumberFlag(set: unknown, key: string, defaultValue: number): number {
+  const value = readFlagValue(set, key);
   return typeof value === 'number' && Number.isFinite(value) ? value : defaultValue;
 }
 
 /** Generic typed read: returns the flag only when it matches `defaultValue`'s type. */
-export function getFlagValue<T extends FlagValue>(set: FlagSet, key: string, defaultValue: T): T {
-  const value = set[key];
+export function getFlagValue<T extends FlagValue>(set: unknown, key: string, defaultValue: T): T {
+  const value = readFlagValue(set, key);
   return value !== undefined && matchesType(value, defaultValue) ? (value as T) : defaultValue;
 }
 
@@ -121,6 +121,13 @@ export interface SafeFlagsDescriptor {
 }
 
 /** Reduce a flag set to non-sensitive log metadata (NEVER keys or values). */
-export function describeFlagsForLog(set: FlagSet): SafeFlagsDescriptor {
-  return { count: Object.keys(set).length };
+export function describeFlagsForLog(set: unknown): SafeFlagsDescriptor {
+  return { count: Object.keys(sanitizeFlagSet(set)).length };
+}
+
+function readFlagValue(set: unknown, key: string): FlagValue | undefined {
+  if (!isValidFlagKey(key) || typeof set !== 'object' || set === null) {
+    return undefined;
+  }
+  return normalizeFlagValue((set as Record<string, unknown>)[key]);
 }
