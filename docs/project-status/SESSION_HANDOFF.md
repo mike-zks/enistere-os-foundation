@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`PERMISSIONS_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`NOTIFICATIONS_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -132,12 +132,18 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   booléens, **conservateur**) + helpers ; `PermissionAdapter` (seam Expo) + `createPermissionService` (live
   `getStatus`/`request`/`ensure`/`openSettings`, **logs sûrs** `{kind,status}` via logger RN 8, **`PermissionAdapterError`**
   contrôlé sans cause sensible) ; **adaptateur placeholder** (no native dep) ; hook `usePermission` (**no UI**) ;
-  **statut jamais persisté** ; **API Core = autorité**. Layout **plat** + **autonome**. **106 tests `node --test`**
-  (… + logger + **permission-status + permission-engine**). Vérifs : **typecheck + lint + test 106/106 + expo-doctor
-  19/19 verts** (**RN 9 n'ajoute aucune dépendance**) ; packages liés `api-contracts` 11/11 + `api-client-fetch` 29/29.
-  **Aucune logique métier.** Différés : **écran/picker d'upload**, **notifications push réelles** (= RN 10),
-  **adaptateurs Expo de permissions réels**, **backend d'observabilité** (ADR-018/036), **offline sync réelle**
-  (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
+  **statut jamais persisté** ; **API Core = autorité**. **+ RN 10 — notifications locales génériques** (07_SECURITY
+  §13 / ADR-040) : `NotificationMessage` **borné/sûr** (`sanitizeNotificationMessage` ; `describeNotificationForLog`
+  **sans contenu** — title/body/data jamais loggés) + modèle (delivery-state/`normalizeTrigger`) ; `NotificationAdapter`
+  (seam Expo) + `createNotificationService` **réutilisant RN 9** (gate sur la permission `notifications` — **jamais de
+  schedule sans permission usable**), `schedule`/`cancel`/`cancelAll`/`getDelivered`, **logs sûrs** `{id,status,state,
+  count}`, **`NotificationError`** contrôlé ; **adaptateur placeholder** (no native dep, ids déterministes) ; **LOCAL
+  only** (aucun push/token device/FCM/APNs, aucun stockage, aucune UI). Layout **plat** + **autonome**. **122 tests
+  `node --test`** (… + permission-engine + **notification-message + notification-engine**). Vérifs : **typecheck + lint
+  + test 122/122 + expo-doctor 19/19 verts** (**RN 10 n'ajoute aucune dépendance**) ; packages liés `api-contracts`
+  11/11 + `api-client-fetch` 29/29. **Aucune logique métier.** Différés : **écran/picker d'upload**, **push distant
+  réel + token device**, **adaptateurs Expo réels** (permissions/notifications), **i18n** (= RN 11), **backend
+  d'observabilité** (ADR-018/036), **offline sync réelle** (ADR-029). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -184,8 +190,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`PERMISSIONS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime**, 106 tests + bundle Metro).
+`NOTIFICATIONS_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
+`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales**, 122 tests + bundle Metro).
 
 ## 6. Packages
 
@@ -216,7 +222,36 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 9 — permissions natives génériques gouvernées** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 10 — notifications client (primitives locales génériques, sans push réel)**
+(`cores/mobile-react-native/`, périmètre `src/notifications` + `test/**` + docs) : ajoute une **couche générique de
+primitives de notifications locales** au-dessus du modèle permissions RN 9, **sans push réel, sans Expo Notifications
+réel, sans backend, sans token device, sans logique métier, sans UI**. `mobile-react-native` → **`NOTIFICATIONS_READY`**.
+**Aucune dépendance ajoutée.** **Message sûr** (`src/notifications/message.ts`, agnostique) : `NotificationMessage`
+`{title,body,data?}` **borné** (`MAX_TITLE_LENGTH`/`MAX_BODY_LENGTH`/`MAX_DATA_KEYS`/`MAX_DATA_VALUE_LENGTH`) ;
+`sanitizeNotificationMessage` trim+cap title/body et ne garde dans `data` que des **primitives** (objets/arrays/fonctions
+droppés). **Sécurité (07_SECURITY §13 / ADR-040)** : title/body/data = **contenu** (PII possible) → **jamais loggés** ;
+`describeNotificationForLog` → **métadonnées seules** (`{titleLength,bodyLength,dataKeyCount}`). **Aucun push/device
+token** dans un message. **Modèle** (`types.ts`) : `NotificationDeliveryState` + gardes ; **trigger borné**
+`NotificationTrigger` (`immediate`/`delay{seconds≥0}`/`date{timestamp}`) + `normalizeTrigger` ; `NotificationAdapter`
+(seam Expo : `getPermissionStatus`/`requestPermission`/`scheduleLocal`/`cancel`/`cancelAll`/`getDelivered?`). **Service**
+(`engine.ts`, agnostique) : `createNotificationService({adapter, permissionService?, logger?})` — **réutilise RN 9**
+(pilote un `PermissionService` pour le kind `notifications`, injecté ou construit depuis l'adapter). **`schedule`** :
+`ensure('notifications')` → **si `!isPermissionUsable` → `{state:'blocked', reason:'permission', status}` SANS toucher
+l'adapter** (jamais de schedule sans permission usable) ; sinon message assaini + trigger normalisé → `scheduleLocal` →
+`{state:'scheduled', id}`. `cancel`/`cancelAll`/`getDelivered` (no-op `[]` si non supporté). **Logs RN 8 sûrs**
+(`{id}`/`{status}`/`{state}`/`{count}` — **jamais le contenu**) ; échec adapter → **`NotificationError`** contrôlé (seul
+`operation`, **aucune cause sensible**). **Placeholder** (`placeholder-adapter.ts`) : **simulation mémoire, AUCUNE
+dépendance native** ; ids = **compteur déterministe** (`local-1`/`local-2`… → pas de `Date.now()`/`Math.random()`) ;
+jamais persisté. **+16 tests `node --test`** (`notification-message` : bornage title/body/data, garde,
+`describeNotificationForLog` **sans contenu**, `normalizeTrigger` ; `notification-engine` : **permission refusée → pas
+de schedule**, granted/limited/unknown→request → schedule, `cancel`/`cancelAll`, **erreur adapter → `NotificationError`
+sans cause brute**, `getDelivered` no-op, **aucune donnée sensible loggée**) → **122 tests** ; module **entièrement
+agnostique** (aucun hook → rien en typecheck-only). Vérifs : **typecheck + lint + test 122/122 + expo-doctor 19/19
+verts** (**RN 10 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
+`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add generic local notification primitives`.
+**Prochaine action : Mobile Core React Native 11 — i18n / localisation primitives génériques.**
+
+**Étape précédente — Mobile Core React Native 9 — permissions natives génériques gouvernées** (`cores/mobile-react-native/`, périmètre
 `src/permissions` + `test/**` + docs) : ajoute une **abstraction générique, testable et gouvernée** des permissions
 runtime mobiles, **sans logique métier, sans écran/picker, sans notification push réelle, sans upload réel**.
 `mobile-react-native` → **`PERMISSIONS_READY`**. **Aucune dépendance ajoutée.** **Modèle pur**
