@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 28 — smoke visuel device/simulateur du starter
+
+- **Mobile Core React Native 28** (`cores/mobile-react-native/`) : vérifie le starter Expo public/protégé/settings sur Android Emulator réel sans nouvelle primitive ni logique métier. `mobile-react-native` passe de `STARTER_RUNTIME_HARDENED` à **`STARTER_VISUAL_SMOKE_READY`**.
+  - **Runtime** : Android Emulator `Pixel_6a` via Expo Go et Metro ; iOS Simulator non disponible sur l'hôte Linux (`xcrun` absent). Login/refresh testés avec un mock auth local temporaire exposé par `adb reverse`, sans backend réel ni code applicatif modifié.
+  - **Parcours** : sign-in public → Home protégé → Settings protégé → scroll Settings → retour Home → refresh session → sign out → public.
+  - **Résultat** : aucune correction UI/runtime requise ; pas d'overflow bloquant, bouton coupé, scroll absent, route inaccessible ou header incohérent constaté.
+  - **Contraintes** : aucune dépendance, aucun endpoint métier, aucun SDK/adaptateur natif réel, aucun retry branché, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations.
+  - **Vérifications** (locales) : smoke Android réel, captures temporaires dans `/tmp`, `tsc --noEmit`, `expo lint`, `npm test` (**54 fichiers `node --test`**), `expo-doctor 19/19`, `expo export -p ios`, `git diff --check`.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §37 + `docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md` ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 29 — automatisation du smoke runtime starter.** Commit `fix(mobile): verify starter visual smoke`.
+
 ### Mobile Core React Native 27 — durcissement runtime du starter Expo
 
 - **Mobile Core React Native 27** (`cores/mobile-react-native/`) : durcit le shell runtime Expo public/protégé/settings sans nouvelle primitive ni logique métier. `mobile-react-native` passe de `STARTER_SETTINGS_READY` à **`STARTER_RUNTIME_HARDENED`**.
