@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 27 — durcissement runtime du starter Expo
+
+- **Mobile Core React Native 27** (`cores/mobile-react-native/`) : durcit le shell runtime Expo public/protégé/settings sans nouvelle primitive ni logique métier. `mobile-react-native` passe de `STARTER_SETTINGS_READY` à **`STARTER_RUNTIME_HARDENED`**.
+  - **Runtime** : `expo export -p ios` réussit ; `npm start -- --localhost --non-interactive` démarre le projet mais Expo indique que `--non-interactive` n'est plus supporté. Export web tenté, bloqué par l'absence volontaire de `react-native-web` ; aucune dépendance ajoutée.
+  - **Ergonomie** : boutons bornés/full-width avec label réductible, conteneur Sign-in centré et contraint, conteneur Home contraint, lignes Settings wrap-safe pour éviter les débordements sur petit écran.
+  - **Contraintes** : aucun endpoint métier, aucun réseau ajouté, aucune dépendance, aucun SDK/adaptateur natif réel, aucun retry branché, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**54 fichiers `node --test`**), `expo-doctor 19/19`, `expo export -p ios`, tentative `npm start`, `git diff --check`.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §36 ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 28 — smoke visuel device/simulateur du starter.** Commit `fix(mobile): harden starter runtime shell`.
+
 ### Mobile Core React Native 26 — V1 usable starter shell / settings générique
 
 - **Mobile Core React Native 26** (`cores/mobile-react-native/`) : ajoute un écran Settings générique protégé pour rendre le starter V1 plus exploitable, conformément à `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile Core React Native V1. `mobile-react-native` passe de `TELEMETRY_COORDINATOR_READY` à **`STARTER_SETTINGS_READY`**.

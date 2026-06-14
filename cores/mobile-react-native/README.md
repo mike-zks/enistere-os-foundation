@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`STARTER_SETTINGS_READY`** (V1 — RN 26 ; socle RN 1 → telemetry coordinator RN 25)
+> Statut : **`STARTER_RUNTIME_HARDENED`** (V1 — RN 27 ; starter public/protégé/settings durci)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -14,6 +14,7 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 |---|---|---|
 | Navigation | `app/` (Expo Router) + `src/navigation` | stacks **publique** `(public)` et **authentifiée** `(app)`, gate de redirection, **gardes durcies** (`expired`/`refreshing`), routes `home` + **`settings` protégée**, écran *not-found* |
 | **Starter shell / Settings (RN 26)** | `app/(app)/settings.tsx` | Écran Settings générique protégé aligné `strategy/04_ROADMAP_GLOBAL.md` Mobile V1 : section session (statut, refresh, sign out), Preferences/UI (lecture `themePreference` Zustand RN 6 + reset UI), Privacy/Telemetry (statuts consentement via placeholder RN 21 local, **sans wiring global**), Environment (contexte safe RN 22 via placeholder/service, **sans identifiant**), Foundation diagnostics (auth/query/upload/logger/consent/telemetry coordinator/retry). **Aucun réseau, aucun endpoint métier, aucun SDK réel, aucune persistance, aucun retry branché** ; lien depuis Home. |
+| **Durcissement runtime starter (RN 27)** | `app/**` + `src/ui/Button.tsx` | Vérification Expo du shell public/protégé/settings et correction d'ergonomie ciblée : boutons full-width bornés avec label réductible, conteneurs Sign-in/Home contraints, lignes Settings wrap-safe. **Aucune nouvelle primitive**, aucun réseau, aucune dépendance, aucun endpoint métier, aucun SDK/adaptateur natif réel, aucun retry branché. `expo export -p ios` réussit ; l'export web est non applicable sans `react-native-web` (dépendance volontairement non ajoutée). |
 | Auth engine | `src/auth/auth-engine.ts` | **machine d'état framework-agnostique** (no React/RN) : `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`, **expiration**, **refresh coalescé** |
 | Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` ; **`EnistereAuthApi`** (réel) + `MobileAuthSessionAdapter` ; `PlaceholderAuthApi` (repli sans backend) |
 | Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
@@ -326,12 +327,12 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **355 cas `test(...)`** (`node --test` ; RN 26 ajoute uniquement des écrans Expo/React, donc pas de helper pur à tester).
-- `doctor` : ✅ **expo-doctor 19/19** *(les checks réseau Expo API / RN Directory flappent transitoirement dans cet environnement ; RN 24 n'ajoute aucune dépendance)*.
-- **bundle Metro** : ✅ `expo export -p ios` réussit — bundle Hermes embarquant le client (RN 4).
+- `test` : ✅ **54 fichiers `node --test`** (primitives existantes inchangées ; RN 27 n'ajoute aucun helper pur).
+- `doctor` : ✅ **expo-doctor 19/19**.
+- **runtime / bundle Expo** : ✅ `expo export -p ios` réussit ; `npm start -- --localhost --non-interactive` démarre le projet mais Expo signale que `--non-interactive` n'est plus supporté. Export web tenté : bloqué par l'absence volontaire de `react-native-web` (aucune dépendance ajoutée en RN 27).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 27 — durcissement runtime du starter Expo**
-: vérifier le rendu device/simulateur du shell public/protégé/settings, sans logique
-métier, puis documenter les captures et éventuelles corrections d'ergonomie.
+**Mobile Core React Native 28 — smoke visuel device/simulateur du starter**
+: exécuter le shell public/protégé/settings sur un device ou simulateur réel,
+capturer le rendu et corriger uniquement les défauts visuels résiduels.

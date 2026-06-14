@@ -4,7 +4,7 @@
  * Strictly generic — NO business onboarding/registration workflow (spec §17).
  */
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useAuth } from '@/auth';
 import { useTheme } from '@/theme';
@@ -26,7 +26,7 @@ export default function SignInScreen(): React.JSX.Element {
 
   return (
     <Screen centered>
-      <View style={{ gap: theme.spacing.md, alignItems: 'center' }}>
+      <View style={[styles.container, { gap: theme.spacing.md }]}>
         <Text variant="heading">Enistere Mobile Starter</Text>
         <Text variant="body" tone="muted" style={{ textAlign: 'center' }}>
           Public placeholder screen. This is a generic foundation — no business logic.
@@ -46,3 +46,11 @@ export default function SignInScreen(): React.JSX.Element {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    maxWidth: 420,
+    width: '100%',
+  },
+});

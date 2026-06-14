@@ -1444,3 +1444,33 @@ un écran sobre.
 - **Différés** : captures device, ergonomie détaillée, vraie UI de consentement,
   adaptateurs natifs réels, diagnostics dynamiques, paramètres métier, versioning
   d'app réel et toute émission télémétrie automatique.
+
+## 36. Durcissement runtime du starter Expo (RN 27)
+
+RN 27 vérifie et durcit le shell Expo public/protégé/settings sans ajouter de
+primitive ni logique métier. Le statut mobile passe à
+**`STARTER_RUNTIME_HARDENED`**.
+
+- **Runtime Expo** : `expo export -p ios` réussit et bundle la stack
+  Expo Router. `npm start -- --localhost --non-interactive` démarre le projet,
+  puis est arrêté manuellement ; Expo indique que `--non-interactive` n'est plus
+  supporté et doit être remplacé par `CI=1` si nécessaire. L'export web a été
+  tenté mais reste bloqué par l'absence de `react-native-web`, dépendance que RN
+  27 n'ajoute pas volontairement.
+- **Ergonomie starter** : `Button` devient full-width borné dans son parent, avec
+  label réductible et centré pour éviter les débordements sur petits écrans.
+  Sign-in et Home contraignent leur largeur de contenu, et les lignes Settings
+  acceptent le retour multi-ligne pour les libellés/statuts longs.
+- **Navigation** : la route protégée Settings et le lien Home restent inchangés.
+  RN 27 ne modifie ni le guard `(app)`, ni `ROUTES.settings`, ni les transitions
+  auth.
+- **Frontières** : aucun changement AuthEngine, `withAuthRetry`, `authedRequest`,
+  QueryClient, mutations, retry, telemetry coordinator, consentement ou
+  environnement. Aucun réseau, endpoint métier, SDK/adaptateur natif réel,
+  persistance ou dépendance ajoutée.
+- **Tests** : aucun helper pur ajouté ; la validation repose sur
+  `typecheck`/`lint`, la non-régression `node --test`, `expo-doctor`,
+  `expo export -p ios` et `git diff --check`.
+- **Différés** : exécution sur device/simulateur réel avec captures visuelles,
+  car l'environnement courant ne fournit pas de device Expo ni de navigateur web
+  exploitable sans dépendance supplémentaire.

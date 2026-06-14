@@ -188,13 +188,18 @@ const styles = StyleSheet.create({
   row: {
     alignItems: 'flex-start',
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   rowLabel: {
     flex: 1,
+    flexShrink: 1,
+    minWidth: 120,
   },
   rowValue: {
     flex: 1,
+    flexShrink: 1,
+    minWidth: 120,
     textAlign: 'right',
   },
 });
