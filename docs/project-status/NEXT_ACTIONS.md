@@ -5,6 +5,19 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Mobile Core React Native 27 : RÉALISÉ** (`mobile-react-native` →
+> **`STARTER_RUNTIME_HARDENED`**). RN 27 durcit le shell Expo
+> public/protégé/settings sans nouvelle primitive ni logique métier : boutons
+> bornés/full-width avec label réductible, conteneurs Sign-in/Home contraints,
+> lignes Settings wrap-safe. `expo export -p ios`, typecheck, lint, test,
+> expo-doctor et `git diff --check` sont verts. L'export web reste non applicable
+> sans `react-native-web`, dépendance non ajoutée.
+>
+> **Prochaine action UNIQUE : Mobile Core React Native 28 — smoke visuel
+> device/simulateur du starter** : exécuter le shell public/protégé/settings sur
+> device ou simulateur réel, capturer le rendu et corriger uniquement les défauts
+> visuels résiduels.
+
 > ✅ **Mobile Core React Native 26 : RÉALISÉ** (`mobile-react-native` →
 > **`STARTER_SETTINGS_READY`**). RN 26 ajoute une route Settings protégée
 > (`app/(app)/settings.tsx` + `ROUTES.settings`) et un lien depuis Home pour
@@ -13,10 +26,8 @@
 > RN21, contexte safe RN22 et diagnostics de primitives, sans réseau, endpoint
 > métier, SDK réel, adaptateur natif réel, persistance nouvelle ni retry branché.
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 27 — durcissement runtime
-> du starter Expo** : vérifier le rendu device/simulateur du shell public/protégé/
-> settings, documenter les captures et corriger uniquement les défauts d'ergonomie
-> du starter.
+> **Historique RN26** : cette prochaine action était RN27 ; elle est désormais
+> réalisée sous forme de durcissement runtime starter.
 
 > ✅ **Mobile Core React Native 25 : RÉALISÉ** (`mobile-react-native` →
 > **`TELEMETRY_COORDINATOR_READY`**). RN 25 ajoute `src/telemetry` : contexte
@@ -220,10 +231,11 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 24. ✅ **Mobile Core React Native 24 — retry / backoff primitives génériques (purs, horloge injectée)** — **RÉALISÉ** : `src/retry` — `RetryPolicy` borné (`maxAttempts` inclut l'appel initial), `computeBackoffDelay` exponentiel borné + jitter déterministe via `rng`, `isRetryableError`/`getRetryDecision` structurels, `withRetry(fn, policy, {sleep, rng, shouldRetry?, logger?})` à `sleep` injecté ; **401/403/session-expired hard-blockés**, erreur finale originale propagée, logs `{attempt,delayMs}` seuls ; **aucun branchement AuthEngine/withAuthRetry/QueryClient/mutations** ; **346 tests** ; typecheck/lint/test/doctor + `git diff --check` verts. *(Sans logique métier ; un seul core.)*
 25. ✅ **Mobile Core React Native 25 — telemetry context composition opt-in** — **RÉALISÉ** : `src/telemetry` compose consentement RN 21 + contexte safe RN 22 + services analytics RN 13/crash RN 19 ; no-op si consentement absent/refusé ; logs `{operation,category,allowed}` ; aucun SDK réel/réseau/persistance/identity/auto-start/retry RN 24 ; **355 cas `test(...)`** ; typecheck/lint/test/doctor + `git diff --check` verts.
 26. ✅ **Mobile Core React Native 26 — V1 usable starter shell / settings générique** — **RÉALISÉ** : route protégée Settings, lien depuis Home, diagnostics session/UI/consent placeholder/environnement safe/foundation ; aligné `strategy/04_ROADMAP_GLOBAL.md` §9 ; aucun réseau/endpoint métier/SDK réel/adaptateur natif/persistance/retry branché ; typecheck/lint/test/doctor + `git diff --check` verts.
-27. **Mobile Core React Native 27 — durcissement runtime du starter Expo** — vérifier le rendu device/simulateur public/protégé/settings, documenter les captures et corriger uniquement l'ergonomie du starter.
-28. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-29. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-30. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+27. ✅ **Mobile Core React Native 27 — durcissement runtime du starter Expo** — **RÉALISÉ** : export Expo iOS vert, tentative `npm start`, correction d'ergonomie starter public/Home/Settings ; aucun réseau, dépendance, SDK/adaptateur natif réel, endpoint métier, retry ou changement Auth/Query.
+28. **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** — exécuter public/protégé/settings sur device ou simulateur réel, capturer le rendu et corriger uniquement les défauts visuels résiduels.
+29. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+30. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+31. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -281,7 +293,8 @@ deux cores. À arbitrer par décision humaine.
 | **Mobile Core React Native 24 — retry / backoff primitives génériques (purs, horloge injectée)** | **FAIT** — `mobile-react-native` → **`RETRY_READY`** : `src/retry` — `RetryPolicy` **borné** (`maxAttempts` **inclut l'appel initial**) + `normalizeRetryPolicy` ; **`computeBackoffDelay(attempt, policy, rng?)`** (exponentiel borné + jitter déterministe via `rng`) ; **`isRetryableError`/`getRetryDecision`** (network/timeout/408/429/5xx retryable ; 4xx/401/403/session-expired/inconnu non retryable ; raison enum sûre) + `isAuthOwnedError` ; **`withRetry(fn, policy, {sleep, rng, shouldRetry?, logger?})`** (`sleep` injecté, **401/403/session-expired hard-blockés même via `shouldRetry`**, erreur finale originale propagée, logs `{attempt,delayMs}` seuls). **Aucun réseau réel, aucune dépendance, aucun `Date.now()` testé, aucun branchement automatique sur AuthEngine/withAuthRetry/QueryClient/mutations** ; **346 tests `node --test`** ; typecheck/lint/test + **expo-doctor 19/19** + `git diff --check` verts |
 | **Mobile Core React Native 25 — telemetry context composition opt-in** | **FAIT** — `mobile-react-native` → **`TELEMETRY_COORDINATOR_READY`** : `src/telemetry` compose consentement RN 21 default-deny + contexte environnement safe RN 22 + services analytics RN 13/crash RN 19 ; `track`/`captureError`/`captureMessage` opt-in ; no-op contrôlé si consentement absent/refusé ; logs `{operation,category,allowed}` seuls ; aucun SDK réel/réseau/persistance/identity/auto-start/retry RN 24 ; **355 cas `test(...)`** ; typecheck/lint/test + expo-doctor 19/19 + `git diff --check` verts |
 | **Mobile Core React Native 26 — V1 usable starter shell / settings générique** | **FAIT** — `mobile-react-native` → **`STARTER_SETTINGS_READY`** : route Settings protégée + lien Home ; sections Session, Preferences/UI, Privacy/Telemetry placeholder RN21, Environment safe RN22, Foundation diagnostics ; aligne le starter avec `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile V1 ; aucun réseau/endpoint métier/SDK réel/adaptateur natif/persistance/retry branché ; typecheck/lint/test + expo-doctor 19/19 + `git diff --check` verts |
-| **Mobile Core React Native 27 — durcissement runtime du starter Expo** | **PROCHAINE MISSION** — vérifier rendu device/simulateur du shell public/protégé/settings, documenter captures et corriger l'ergonomie du starter |
+| **Mobile Core React Native 27 — durcissement runtime du starter Expo** | **FAIT** — `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`** : shell Expo public/protégé/settings durci ; boutons wrap-safe/full-width, conteneurs Sign-in/Home contraints, lignes Settings multi-ligne ; `expo export -p ios` OK, `npm start` tenté, export web bloqué par absence volontaire de `react-native-web` ; aucun réseau/dépendance/SDK/adaptateur natif réel/endpoint métier/retry/câblage Auth-Query modifié |
+| **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** | **PROCHAINE MISSION** — exécuter le shell public/protégé/settings sur device ou simulateur réel, capturer le rendu et corriger uniquement les défauts visuels résiduels |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |

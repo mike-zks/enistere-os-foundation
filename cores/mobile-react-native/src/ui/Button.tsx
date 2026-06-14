@@ -56,7 +56,7 @@ export function Button({
             color={variant === 'secondary' ? theme.colors.text : theme.colors.primaryText}
           />
         ) : (
-          <Text variant="title" tone={labelTone}>
+          <Text variant="title" tone={labelTone} style={styles.label}>
             {title}
           </Text>
         )}
@@ -82,7 +82,9 @@ function backgroundFor(
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
+    alignSelf: 'stretch',
     justifyContent: 'center',
+    maxWidth: '100%',
     borderWidth: 1,
   },
   outlined: {
@@ -92,6 +94,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    maxWidth: '100%',
+  },
+  label: {
+    flexShrink: 1,
+    textAlign: 'center',
   },
   pressed: {
     opacity: 0.85,

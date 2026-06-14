@@ -3,7 +3,7 @@
  * action. NO business content (spec §6).
  */
 import { Stack, router } from 'expo-router';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useAuth } from '@/auth';
 import { ROUTES } from '@/navigation';
@@ -21,7 +21,7 @@ export default function HomeScreen(): React.JSX.Element {
     <>
       <Stack.Screen options={{ title: 'Home' }} />
       <Screen>
-        <View style={{ gap: theme.spacing.md }}>
+        <View style={[styles.container, { gap: theme.spacing.md }]}>
           <Text variant="heading">Home</Text>
           <Text variant="body" tone="muted">
             Authenticated placeholder screen. This is a generic foundation — no business logic.
@@ -46,3 +46,10 @@ export default function HomeScreen(): React.JSX.Element {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: 560,
+    width: '100%',
+  },
+});

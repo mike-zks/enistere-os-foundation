@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-13.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-14.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`RETRY_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle durci** : `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -345,6 +345,18 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
+**Mobile Core React Native 27 — durcissement runtime du starter Expo** (`cores/mobile-react-native/`,
+périmètre `app/**` + `src/ui/**` + docs) : durcit le shell public/protégé/settings sans nouvelle primitive ni
+logique métier. `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`**. Corrections : `Button` borné/full-width
+avec label réductible, conteneur Sign-in centré et contraint, conteneur Home contraint, lignes Settings multi-ligne.
+Runtime : `expo export -p ios` réussit ; `npm start -- --localhost --non-interactive` démarre le projet mais Expo
+signale que `--non-interactive` n'est plus supporté ; export web tenté mais non applicable sans `react-native-web`,
+dépendance non ajoutée. **Aucun réseau, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance nouvelle,
+retry branché ni modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Vérifs :
+**typecheck + lint + test 54 fichiers `node --test` + expo-doctor 19/19 + expo export iOS + git diff --check verts**.
+Commit attendu : `fix(mobile): harden starter runtime shell`. **Prochaine action : Mobile Core React Native 28 —
+smoke visuel device/simulateur du starter**.
+
 **Mobile Core React Native 26 — V1 usable starter shell / settings générique** (`cores/mobile-react-native/`,
 périmètre `app/**` + `src/navigation/**` + docs) : ajoute une route Settings protégée pour rendre le starter
 mobile plus exploitable sans logique métier, conformément à `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile Core React
@@ -357,8 +369,7 @@ sans identifiant) et Foundation diagnostics (auth, query, upload, logger, consen
 ni modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Aucun helper pur ajouté : rendu
 runtime différé, validation par typecheck/lint + non-régression `node --test`. Vérifs : **typecheck + lint + test
 + expo-doctor 19/19 + git diff --check verts**. Commit attendu :
-`feat(mobile): add generic settings starter shell`. **Prochaine action : Mobile Core React Native 27 — durcissement
-runtime du starter Expo**.
+`feat(mobile): add generic settings starter shell`. **Historique : RN27 a depuis durci le runtime starter.**
 
 **Mobile Core React Native 25 — telemetry context composition opt-in** (`cores/mobile-react-native/`, périmètre
 `src/telemetry` + `test/telemetry-*` + docs) : ajoute une couche **opt-in** qui compose explicitement le

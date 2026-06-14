@@ -40,6 +40,12 @@
 > avec `strategy/04_ROADMAP_GLOBAL.md` §9 (settings screen + starter exploitable).
 > Il ne crée pas de nouvel ADR : aucun SDK, endpoint métier, adaptateur natif,
 > persistance ou politique de retry n'est décidé.
+>
+> **Note RN27 (runtime starter Expo)** : le durcissement du shell
+> public/protégé/settings reste une correction d'ergonomie et de vérification
+> runtime. Il ne crée pas de nouvel ADR, n'ajoute aucune dépendance
+> (`react-native-web` reste volontairement absent), ne choisit aucun adaptateur
+> natif réel et ne modifie pas les décisions Auth/Query/Retry/Telemetry.
 
 ## 2. Décisions validées — état d'application
 
