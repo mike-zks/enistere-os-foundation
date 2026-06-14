@@ -1474,3 +1474,36 @@ primitive ni logique métier. Le statut mobile passe à
 - **Différés** : exécution sur device/simulateur réel avec captures visuelles,
   car l'environnement courant ne fournit pas de device Expo ni de navigateur web
   exploitable sans dépendance supplémentaire.
+
+## 37. Smoke visuel device/simulateur du starter (RN 28)
+
+RN 28 exécute le starter Expo sur simulateur réel et vérifie visuellement les
+écrans publics/protégés/settings sans ajouter de primitive ni logique métier. Le
+statut mobile passe à **`STARTER_VISUAL_SMOKE_READY`**.
+
+- **Runtime Android** : vérification sur Android Emulator `Pixel_6a` via Expo Go
+  et Metro (`npx expo start --android --localhost -c`). L'iOS Simulator n'est pas
+  disponible sur l'hôte Linux (`xcrun` absent). Un mock auth local temporaire
+  exposé sur `localhost:3000` via `adb reverse tcp:3000 tcp:3000` a servi
+  uniquement à franchir le shell protégé ; aucun backend réel, endpoint métier ou
+  changement de code n'a été utilisé.
+- **Parcours vérifié** : écran public sign-in, login mock vers Home protégé,
+  navigation Home → Settings, scroll du contenu Settings jusqu'aux diagnostics,
+  retour Settings → Home, `refreshSession` mocké, puis `signOut` vers l'écran
+  public.
+- **Résultat UI** : aucun overflow bloquant, bouton coupé, scroll manquant,
+  header incohérent ou route inaccessible constaté. La date d'expiration sur
+  Settings peut se replier sur plusieurs lignes sur le profil `Pixel_6a`, mais
+  reste lisible et dans son conteneur.
+- **Frontières** : aucun changement AuthEngine, `withAuthRetry`, `authedRequest`,
+  QueryClient, mutations, retry, telemetry coordinator, consentement ou
+  environnement. Aucune dépendance, aucun SDK/adaptateur natif réel, aucun réseau
+  métier et aucune persistance nouvelle.
+- **Preuves** : captures locales produites dans `/tmp` (`rn28-after-login.png`,
+  `rn28-settings-top.png`, `rn28-settings-bottom.png`,
+  `rn28-return-home.png`, `rn28-signout-public.png`) et rapport gouverné dans
+  `docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md`. Les PNG ne sont pas
+  versionnés pour éviter des artefacts binaires temporaires.
+- **Différés** : automatisation reproductible du smoke runtime, exécution iOS
+  Simulator/macOS, device physique, états `expired` manipulés sans backend réel,
+  et éventuelles captures CI.

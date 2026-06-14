@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle durci** : `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle vérifié visuellement** : `mobile-react-native` → **`STARTER_VISUAL_SMOKE_READY`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -345,17 +345,24 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
+**Mobile Core React Native 28 — smoke visuel device/simulateur du starter** (`cores/mobile-react-native/`,
+périmètre runtime + docs) : vérifie le shell public/protégé/settings sur Android Emulator `Pixel_6a` via Expo Go
+sans nouvelle primitive ni logique métier. `mobile-react-native` → **`STARTER_VISUAL_SMOKE_READY`**. Parcours
+validé : sign-in public, login via mock auth local temporaire exposé par `adb reverse`, Home protégé, Settings
+protégé, scroll Settings, retour Home, refresh session et sign out. Aucune correction UI/runtime requise ; les
+captures locales ont été produites dans `/tmp` et le rapport gouverné est
+`docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md`. iOS Simulator non exécuté sur l'hôte Linux (`xcrun`
+absent). **Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance nouvelle,
+retry branché ni modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Vérifs :
+**typecheck + lint + test 54 fichiers `node --test` + expo-doctor 19/19 + expo export iOS + smoke Android réel +
+git diff --check verts**. Commit attendu : `fix(mobile): verify starter visual smoke`. **Prochaine action :
+Mobile Core React Native 29 — automatisation du smoke runtime starter**.
+
 **Mobile Core React Native 27 — durcissement runtime du starter Expo** (`cores/mobile-react-native/`,
 périmètre `app/**` + `src/ui/**` + docs) : durcit le shell public/protégé/settings sans nouvelle primitive ni
 logique métier. `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`**. Corrections : `Button` borné/full-width
 avec label réductible, conteneur Sign-in centré et contraint, conteneur Home contraint, lignes Settings multi-ligne.
-Runtime : `expo export -p ios` réussit ; `npm start -- --localhost --non-interactive` démarre le projet mais Expo
-signale que `--non-interactive` n'est plus supporté ; export web tenté mais non applicable sans `react-native-web`,
-dépendance non ajoutée. **Aucun réseau, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance nouvelle,
-retry branché ni modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Vérifs :
-**typecheck + lint + test 54 fichiers `node --test` + expo-doctor 19/19 + expo export iOS + git diff --check verts**.
-Commit attendu : `fix(mobile): harden starter runtime shell`. **Prochaine action : Mobile Core React Native 28 —
-smoke visuel device/simulateur du starter**.
+Runtime : `expo export -p ios` réussit ; export web non applicable sans `react-native-web`, dépendance non ajoutée.
 
 **Mobile Core React Native 26 — V1 usable starter shell / settings générique** (`cores/mobile-react-native/`,
 périmètre `app/**` + `src/navigation/**` + docs) : ajoute une route Settings protégée pour rendre le starter

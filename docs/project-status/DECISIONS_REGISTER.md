@@ -46,6 +46,13 @@
 > runtime. Il ne crée pas de nouvel ADR, n'ajoute aucune dépendance
 > (`react-native-web` reste volontairement absent), ne choisit aucun adaptateur
 > natif réel et ne modifie pas les décisions Auth/Query/Retry/Telemetry.
+>
+> **Note RN28 (smoke visuel device/simulateur)** : le smoke Android Emulator du
+> starter public/protégé/settings confirme le comportement runtime du shell et
+> produit un rapport gouverné. Il ne crée pas de nouvel ADR, n'ajoute aucune
+> dépendance, ne choisit aucun SDK/adaptateur natif réel, ne branche aucun retry
+> et ne modifie pas Auth/Query/Telemetry. Le mock auth local utilisé est une
+> fixture temporaire de smoke, non versionnée et sans endpoint métier.
 
 ## 2. Décisions validées — état d'application
 
