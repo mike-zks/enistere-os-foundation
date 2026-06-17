@@ -16,6 +16,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
   - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**54 fichiers `node --test`**), `expo-doctor 19/19`, `expo export -p ios`, `npm run smoke:android` sur Android Emulator `emulator-5554` (`passed`), `git diff --check`.
   - **Docs** : `README.md` + `ARCHITECTURE.md` §38 + `docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md` ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity.** Commit `chore(mobile): add runtime smoke automation`.
 
+### Foundation CI Audit 1 — déblocage npm audit root/API
+
+- **CI audit root/API** : corrige les vulnérabilités transverses `form-data` et `js-yaml` qui bloquaient les checks `audit` et `api-runtime`, sans affaiblir les gates et sans `npm audit fix --force`.
+  - **Racine** : `form-data` passe à `4.0.6` ; `@redocly/openapi-core` est verrouillé en `1.34.7` dans le lockfile racine, version 1.x compatible avec `openapi-typescript`, afin de dédupliquer `js-yaml` vers `4.2.0` sans saut majeur Redocly.
+  - **API Core** : overrides npm bornés pour forcer `form-data@4.0.6` et `js-yaml@4.2.0` sur les chemins `@nestjs/swagger`, Jest/Istanbul et Supertest/Superagent.
+  - **RN29** : non responsable ; la PR RN29 ne modifie pas les dépendances root/API et reste limitée au smoke runtime mobile + documentation de statut.
+
 ### Mobile Core React Native 28 — smoke visuel device/simulateur du starter
 
 - **Mobile Core React Native 28** (`cores/mobile-react-native/`) : vérifie le starter Expo public/protégé/settings sur Android Emulator réel sans nouvelle primitive ni logique métier. `mobile-react-native` passe de `STARTER_RUNTIME_HARDENED` à **`STARTER_VISUAL_SMOKE_READY`**.

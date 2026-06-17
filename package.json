@@ -10,6 +10,8 @@
     "cores/web-nextjs"
   ],
   "overrides": {
+    "form-data": "^4.0.6",
+    "js-yaml": "^4.2.0",
     "postcss": "^8.5.15"
   },
   "scripts": {
