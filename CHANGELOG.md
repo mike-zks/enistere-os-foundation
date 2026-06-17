@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 29 — automatisation locale du smoke runtime starter
+
+- **Mobile Core React Native 29** (`cores/mobile-react-native/`) : ajoute un smoke runtime Android local reproductible pour le starter Expo public/protégé/settings. `mobile-react-native` passe de `STARTER_VISUAL_SMOKE_READY` à **`STARTER_SMOKE_AUTOMATION_READY`**.
+  - **Script** : `npm run smoke:android` (`scripts/smoke-android.js`) utilise uniquement Node stdlib + `adb` + Expo CLI existant. Il vérifie les prérequis, démarre un mock auth local temporaire, configure `adb reverse`, lance Expo Android, pilote les labels UI via `uiautomator` et produit des logs JSON + un rapport `/tmp/enistere-mobile-rn29-smoke-report.json`.
+  - **Parcours** : sign-in public → Home protégé → Settings protégé → scroll diagnostics → retour Home → refresh session → sign out → public.
+  - **Positionnement** : RN28 = smoke manuel visuel ; RN29 = smoke local reproductible semi-automatisé ; E2E mobile complet futur sous décision de dépendance/ADR. RN29 ne prétend pas remplacer Detox/Maestro/Appium/Playwright mobile.
+  - **Contraintes** : aucune dépendance, aucun backend réel, aucun endpoint métier, aucun SDK/adaptateur natif réel, aucun retry branché, aucune persistance nouvelle, aucun secret réel, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**54 fichiers `node --test`**), `expo-doctor 19/19`, `expo export -p ios`, `npm run smoke:android` sur Android Emulator `emulator-5554` (`passed`), `git diff --check`.
+  - **Docs** : `README.md` + `ARCHITECTURE.md` §38 + `docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md` ; checkpoint `docs/project-status/` synchronisé. **Prochaine mission recommandée (unique) : Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity.** Commit `chore(mobile): add runtime smoke automation`.
+
 ### Foundation CI Audit 1 — déblocage npm audit root/API
 
 - **CI audit root/API** : corrige les vulnérabilités transverses `form-data` et `js-yaml` qui bloquaient les checks `audit` et `api-runtime`, sans affaiblir les gates et sans `npm audit fix --force`.

@@ -53,6 +53,15 @@
 > dépendance, ne choisit aucun SDK/adaptateur natif réel, ne branche aucun retry
 > et ne modifie pas Auth/Query/Telemetry. Le mock auth local utilisé est une
 > fixture temporaire de smoke, non versionnée et sans endpoint métier.
+>
+> **Note RN29 (automatisation locale du smoke runtime)** : `npm run
+> smoke:android` formalise le smoke Android local en script reproductible, avec
+> mock auth temporaire, `adb reverse`, Expo Android, pilotage par labels UI et
+> rapport JSON. Cette automatisation ne crée pas de nouvel ADR, n'ajoute aucune
+> dépendance et ne décide aucun framework E2E mobile (Detox/Maestro/Appium/
+> Playwright mobile ou équivalent). Elle reste une validation runtime locale
+> semi-automatisée, sans backend réel, endpoint métier, SDK/adaptateur natif réel,
+> persistance, retry branché ni modification Auth/Query/Telemetry.
 
 ## 2. Décisions validées — état d'application
 

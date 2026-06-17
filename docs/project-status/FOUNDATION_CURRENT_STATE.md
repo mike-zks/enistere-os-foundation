@@ -1,7 +1,7 @@
 # FOUNDATION_CURRENT_STATE.md — État courant officiel d'Enistere OS Foundation
 
 > **Photographie officielle** de l'état réel du repository, vérifiée fichier par fichier.
-> **Dernière mise à jour : 2026-06-14.**
+> **Dernière mise à jour : 2026-06-16.**
 >
 > ⚠️ **Ne pas supposer qu'un core est implémenté parce que sa spécification existe.** Un
 > `CORE_SPECIFICATION.md` ≠ un starter ; un README ≠ une implémentation ; un rapport ≠ une preuve
@@ -25,7 +25,7 @@ pas une application ni une bibliothèque complète).
 | Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth) + **Files lecture/téléchargement** (Web Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, validation UUID, **CSRF/Origin** sur download-url, client BFF navigateur, `fileKeys`, `useFileMetadata` + `useCreateDownloadUrl` (**URL signée jamais en cache/log**), page `/protected/files/[id]`, **404 anti-énumération** ; **aucun upload/suppression/admin**, **aucun champ interne** exposé). **307 tests** + preuves API réelles (Auth/session **26/26** + login **22/22** + **Files API+MinIO 21/21**). **Pas de middleware, pas de Server Action Auth, pas de token en JS, pas de proxy générique.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
-| Core mobile (socle) | **`mobile-react-native`** — **STARTER_VISUAL_SMOKE_READY** : socle Expo SDK 55 / Expo Router RN 1→28. Primitives RN 1→25 inchangées, Settings protégé RN26, shell public/protégé/settings durci RN27, smoke visuel Android Emulator RN28 validé. Preuves : typecheck + lint + `npm test` 54 fichiers `node --test` + expo-doctor 19/19 + `expo export -p ios` + smoke Expo Go Android `Pixel_6a` + `git diff --check` verts. Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, retry branché ni changement Auth/Query. |
+| Core mobile (socle) | **`mobile-react-native`** — **STARTER_SMOKE_AUTOMATION_READY** : socle Expo SDK 55 / Expo Router RN 1→29. Primitives RN 1→25 inchangées, Settings protégé RN26, shell public/protégé/settings durci RN27, smoke visuel Android Emulator RN28 validé, smoke runtime local reproductible RN29 ajouté. Preuves : typecheck + lint + `npm test` 54 fichiers `node --test` + expo-doctor 19/19 + `expo export -p ios` + `npm run smoke:android` passed sur Android Emulator `emulator-5554` + `git diff --check` verts. Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, retry branché ni changement Auth/Query. |
 | Cores documentaires | _(aucun ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée** (CC8, `api-smoke` gate le push) + **exécution staging contrôlée LOCALE** (CC9 : images corrigées `sha-d1e6242`, stack `healthy`, endpoint Option A joignable), `EXECUTION_LOCALE_CONTROLEE` ; **déploiement sur serveur réel / HTTPS / URL signée bout-en-bout non encore réalisés** |
@@ -41,14 +41,16 @@ spécification ne prouve pas un starter ; un dossier vide ne prouve aucune impl�
 
 ## 3. Architecture du repository
 
-> **Mise à jour RN28** : le statut courant du core `mobile-react-native` est
-> **`STARTER_VISUAL_SMOKE_READY`**. RN28 vérifie le shell Expo
-> public/protégé/settings sur Android Emulator `Pixel_6a` via Expo Go : sign-in,
-> Home, Settings, scroll, retour, refresh session et sign out. Aucun défaut UI
-> bloquant n'a nécessité de correction. Aucun réseau métier, endpoint métier, SDK
-> réel, adaptateur natif réel, dépendance, persistance nouvelle ni retry branché.
-> Vérification locale : typecheck, lint, test, doctor 19/19, `expo export -p ios`,
-> smoke Android réel et `git diff --check` verts.
+> **Mise à jour RN29** : le statut courant du core `mobile-react-native` est
+> **`STARTER_SMOKE_AUTOMATION_READY`**. RN29 formalise un smoke runtime Android
+> local reproductible (`npm run smoke:android`) pour rejouer le shell Expo
+> public/protégé/settings sans backend réel. RN28 reste le smoke manuel visuel ;
+> RN29 ajoute le script semi-automatisé, le mock auth local temporaire, `adb
+> reverse`, le pilotage par labels UI Android et le rapport JSON. Aucun réseau
+> métier, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance
+> nouvelle, retry branché ou changement Auth/Query. Vérification locale :
+> typecheck, lint, test, doctor 19/19, `expo export -p ios`,
+> `npm run smoke:android` passed sur `emulator-5554` et `git diff --check` verts.
 
 ```
 enistere-os-foundation/
@@ -62,7 +64,7 @@ enistere-os-foundation/
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
     web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
     cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles)
-    mobile-react-native/  STARTER_VISUAL_SMOKE_READY (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell public/protégé/settings durci RN27 ; smoke visuel Android Emulator RN28 validé ; aucune logique métier, aucun réseau métier/dépendance/SDK/adaptateur natif réel/retry branché ; typecheck/lint/test/doctor/export iOS/smoke Android verts)
+    mobile-react-native/  STARTER_SMOKE_AUTOMATION_READY (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell public/protégé/settings durci RN27 ; smoke visuel Android Emulator RN28 validé ; smoke runtime local reproductible RN29 ; aucune logique métier, aucun réseau métier/dépendance/SDK/adaptateur natif réel/retry branché ; typecheck/lint/test/doctor/export iOS/smoke Android verts)
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -80,7 +82,7 @@ enistere-os-foundation/
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs ; pas d'infra déploiement) | **IMPLEMENTATION_PARTIELLE** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture) | **IMPLEMENTATION_PARTIELLE** |
-| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 du shell public/protégé/settings ; smoke visuel Android Emulator RN28 public/Home/Settings/retour/refresh/sign out validé ; aucun réseau métier/dépendance/SDK/adaptateur natif réel/endpoint métier/retry branché) | **STARTER_VISUAL_SMOKE_READY** |
+| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 du shell public/protégé/settings ; smoke visuel Android Emulator RN28 public/Home/Settings/retour/refresh/sign out validé ; smoke runtime local reproductible RN29 ; aucun réseau métier/dépendance/SDK/adaptateur natif réel/endpoint métier/retry branché) | **STARTER_SMOKE_AUTOMATION_READY** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -276,8 +278,11 @@ contraints, lignes Settings wrap-safe ; `expo export -p ios` vert ; export web n
 volontairement non ajouté). Puis **RN 28 — smoke visuel device/simulateur du starter RÉALISÉ**
 (`mobile-react-native` → **STARTER_VISUAL_SMOKE_READY** ; Android Emulator `Pixel_6a` via Expo Go, sign-in public,
 Home protégé, Settings protégé, scroll, retour, refresh session et sign out validés avec mock auth local temporaire ;
-aucune correction UI/runtime requise). **Prochaine action** : **Mobile Core React Native 29 — automatisation du
-smoke runtime starter** ; **actions humaines** : protection de branche `main` + rendre `api-smoke` requis.
+aucune correction UI/runtime requise). Puis **RN 29 — automatisation locale du smoke runtime starter RÉALISÉ**
+(`mobile-react-native` → **STARTER_SMOKE_AUTOMATION_READY** ; `npm run smoke:android`, mock auth local, `adb
+reverse`, pilotage par labels UI Android, rapport JSON `passed` sur `emulator-5554`, sans backend réel ni dépendance).
+**Prochaine action** : **Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity** ;
+**actions humaines** : protection de branche `main` + rendre `api-smoke` requis.
 
 ## 12. Documentation
 
@@ -292,7 +297,7 @@ détaillée du API Core.
 2. **Packages intégrés (public + authentifié)** — UI Kit consommé + `api-client-fetch` **instancié**
    (endpoints publics **et** BFF Auth) par le Web Core ; types Auth dérivés via `SchemaOf<>`. Risque de
    dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
-3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose d'un socle vérifié visuellement (**STARTER_VISUAL_SMOKE_READY** : primitives RN 1→25 + Settings protégé RN26 + shell public/protégé/settings durci RN27 + smoke Android RN28) ≠ implémentation complète (V1 partielle : écran/picker d'upload, push distant réel + token device, adaptateurs natifs réels, catalogues métier i18n + routes concrètes, SDK analytics/crash réels, application exhaustive des props a11y, offline sync réelle, remote-config réel, biométrie réelle, store préférences natif, UI consentement, backend d'observabilité — différés).
+3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose d'un socle vérifié et rejouable localement (**STARTER_SMOKE_AUTOMATION_READY** : primitives RN 1→25 + Settings protégé RN26 + shell public/protégé/settings durci RN27 + smoke Android RN28 + automatisation locale RN29) ≠ implémentation complète (V1 partielle : écran/picker d'upload, push distant réel + token device, adaptateurs natifs réels, catalogues métier i18n + routes concrètes, SDK analytics/crash réels, application exhaustive des props a11y, offline sync réelle, remote-config réel, biométrie réelle, store préférences natif, UI consentement, backend d'observabilité — différés).
 4. **CI minimale en place** (`.github/workflows/ci.yml`) — non-régression du monorepo automatisée (ordre de
    build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
    navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.

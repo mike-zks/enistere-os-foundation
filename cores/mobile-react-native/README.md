@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`STARTER_VISUAL_SMOKE_READY`** (V1 — RN 28 ; starter public/protégé/settings vérifié sur Android Emulator)
+> Statut : **`STARTER_SMOKE_AUTOMATION_READY`** (V1 — RN 29 ; smoke runtime local reproductible pour le starter Expo)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -16,6 +16,7 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Starter shell / Settings (RN 26)** | `app/(app)/settings.tsx` | Écran Settings générique protégé aligné `strategy/04_ROADMAP_GLOBAL.md` Mobile V1 : section session (statut, refresh, sign out), Preferences/UI (lecture `themePreference` Zustand RN 6 + reset UI), Privacy/Telemetry (statuts consentement via placeholder RN 21 local, **sans wiring global**), Environment (contexte safe RN 22 via placeholder/service, **sans identifiant**), Foundation diagnostics (auth/query/upload/logger/consent/telemetry coordinator/retry). **Aucun réseau, aucun endpoint métier, aucun SDK réel, aucune persistance, aucun retry branché** ; lien depuis Home. |
 | **Durcissement runtime starter (RN 27)** | `app/**` + `src/ui/Button.tsx` | Vérification Expo du shell public/protégé/settings et correction d'ergonomie ciblée : boutons full-width bornés avec label réductible, conteneurs Sign-in/Home contraints, lignes Settings wrap-safe. **Aucune nouvelle primitive**, aucun réseau, aucune dépendance, aucun endpoint métier, aucun SDK/adaptateur natif réel, aucun retry branché. `expo export -p ios` réussit ; l'export web est non applicable sans `react-native-web` (dépendance volontairement non ajoutée). |
 | **Smoke visuel device/simulateur (RN 28)** | Expo Go + Android Emulator `Pixel_6a` | Exécution réelle du starter sur émulateur Android : écran public sign-in, login via mock auth local temporaire + `adb reverse`, Home protégé, Settings protégé, scroll Settings, retour Home, refresh session et sign out. **Aucune correction code requise** ; aucun endpoint métier, SDK réel, dépendance, retry ou changement Auth/Query. Rapport : [`MOBILE_RN28_VISUAL_SMOKE_REPORT.md`](../../docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md). |
+| **Smoke runtime local reproductible (RN 29)** | `scripts/smoke-android.js` + `npm run smoke:android` | Script Node stdlib uniquement : préflight `adb`/`npx`/device, mock auth local temporaire sur `127.0.0.1:3000`, `adb reverse`, lancement Expo Android, interaction semi-automatisée par labels UI Android (`uiautomator`) et rapport JSON structuré. Rejoue public sign-in → Home protégé → Settings → scroll diagnostics → retour Home → refresh session → sign out. **Pas un E2E complet** : dépend d'un émulateur/device + Expo Go et ne remplace pas une future décision Detox/Maestro/Appium/Playwright mobile. Aucun backend réel, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance, retry ou changement Auth/Query. |
 | Auth engine | `src/auth/auth-engine.ts` | **machine d'état framework-agnostique** (no React/RN) : `restoreSession`/`signIn`/`signOut`/`refreshSession`/`clearSession`, **expiration**, **refresh coalescé** |
 | Auth shell (React) | `src/auth` | états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ; `AuthProvider` (binding `useSyncExternalStore`), `signIn`/`signOut`/`restoreSession`/`refreshSession`/`clearSession` ; **`EnistereAuthApi`** (réel) + `MobileAuthSessionAdapter` ; `PlaceholderAuthApi` (repli sans backend) |
 | Secure storage | `src/storage` | `SecureStorage` (interface) + `ExpoSecureStorage` (SecureStore) + `InMemorySecureStorage` ; **`SessionStore`** (persiste refresh token + expiry + user, **validation**) ; **access token en mémoire** |
@@ -152,6 +153,7 @@ npm run typecheck    # tsc --noEmit (strict) — contre les types réels du cont
 npm run lint         # expo lint (eslint-config-expo)
 npm test             # nettoie build-test, tsc -p tsconfig.test.json && node --test (cœur agnostique)
 npm run doctor       # npx expo-doctor
+npm run smoke:android # smoke local Android semi-automatisé (adb + Expo Go + mock auth local ; rapport JSON)
 npm start            # démarre le serveur de dev Expo
 ```
 
@@ -328,12 +330,12 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **54 fichiers `node --test`** (primitives existantes inchangées ; RN 28 n'ajoute aucun helper pur).
+- `test` : ✅ **54 fichiers `node --test`** (primitives existantes inchangées ; RN 29 n'ajoute aucun helper pur).
 - `doctor` : ✅ **expo-doctor 19/19**.
-- **runtime / bundle Expo** : ✅ `expo export -p ios` réussit. ✅ Smoke réel Android Emulator `Pixel_6a` via Expo Go : sign-in public, Home protégé, Settings protégé, scroll Settings, retour Home, refresh session et sign out. Le login/refresh utilise un mock auth local temporaire via `adb reverse`, sans endpoint métier ni changement de code. Voir [`MOBILE_RN28_VISUAL_SMOKE_REPORT.md`](../../docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md). Export web déjà qualifié non applicable sans `react-native-web` (dépendance volontairement non ajoutée).
+- **runtime / bundle Expo** : ✅ `expo export -p ios` réussit. ✅ Smoke manuel Android RN 28 via Expo Go documenté dans [`MOBILE_RN28_VISUAL_SMOKE_REPORT.md`](../../docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md). ✅ Smoke local reproductible RN 29 via `npm run smoke:android` sur Android Emulator `emulator-5554` : rapport JSON `passed` dans `/tmp/enistere-mobile-rn29-smoke-report.json` et synthèse [`MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md`](../../docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md). Export web déjà qualifié non applicable sans `react-native-web` (dépendance volontairement non ajoutée).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 29 — automatisation du smoke runtime starter**
-: formaliser un script/fixture de smoke local pour rejouer le parcours public →
-protégé → settings sans backend réel, en conservant l'absence de logique métier.
+**Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity**
+: rejouer le starter sur iOS Simulator/macOS ou device physique quand
+l'environnement le permet, sans ajouter de dépendance ni logique métier.
