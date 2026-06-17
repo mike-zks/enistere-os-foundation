@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 30 — smoke runtime iOS / parity device
+
+- **Mobile Core React Native 30** (`cores/mobile-react-native/`) : documente la parité runtime iOS du starter Expo public/protégé/settings et ajoute un préflight local `npm run smoke:ios` sans dépendance. `mobile-react-native` passe de `STARTER_SMOKE_AUTOMATION_READY` à **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**.
+  - **Résultat iOS** : exécution runtime iOS réelle bloquée par l'environnement local — hôte `Linux greenovate 7.0.10-201.fc44.x86_64`, `xcrun` absent (`command not found`). Aucune preuve iOS artificielle n'est créée.
+  - **Script** : `scripts/smoke-ios.js` vérifie macOS/`xcrun`/`simctl`/`npx`, produit des événements JSON et un rapport `/tmp/enistere-mobile-rn30-ios-smoke-report.json` (`status: blocked` ici), et fournit une procédure prête à exécuter sur macOS/iOS device.
+  - **Parité conservée** : Android reste couvert par RN28 (smoke visuel réel Android Emulator) et RN29 (`npm run smoke:android` semi-automatisé).
+  - **Contraintes** : aucune dépendance, aucun backend réel, aucun endpoint métier, aucun SDK/adaptateur natif réel, aucun retry branché, aucune persistance nouvelle, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**54 fichiers `node --test`**), `expo-doctor 19/19`, `expo export -p ios`, `npm run smoke:ios` (`blocked` documenté), `npm audit`, `git diff --check`. **Prochaine mission recommandée (unique) : Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel.** Commit `docs(mobile): document ios smoke runtime blocker`.
+
 ### Mobile Core React Native 29 — automatisation locale du smoke runtime starter
 
 - **Mobile Core React Native 29** (`cores/mobile-react-native/`) : ajoute un smoke runtime Android local reproductible pour le starter Expo public/protégé/settings. `mobile-react-native` passe de `STARTER_VISUAL_SMOKE_READY` à **`STARTER_SMOKE_AUTOMATION_READY`**.

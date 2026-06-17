@@ -17,7 +17,8 @@
     "lint": "expo lint",
     "test": "node -e \"require('node:fs').rmSync('build-test',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test build-test/test/*.test.js",
     "doctor": "npx expo-doctor",
-    "smoke:android": "node scripts/smoke-android.js"
+    "smoke:android": "node scripts/smoke-android.js",
+    "smoke:ios": "node scripts/smoke-ios.js"
   },
   "dependencies": {
     "@enistere/api-client-fetch": "file:../../packages/api-client-fetch",

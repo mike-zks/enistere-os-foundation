@@ -96,7 +96,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle smoke automatisé** : `mobile-react-native` → **`STARTER_SMOKE_AUTOMATION_READY`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle smoke automatisé + iOS parity documentée** : `mobile-react-native` → **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -345,19 +345,20 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile Core React Native 29 — automatisation locale du smoke runtime starter** (`cores/mobile-react-native/`,
-périmètre `scripts/**` + `package.json` + docs) : formalise un smoke Android local reproductible sans backend réel,
-sans nouvelle dépendance ni logique métier. `mobile-react-native` → **`STARTER_SMOKE_AUTOMATION_READY`**. Script
-ajouté : `npm run smoke:android` (`scripts/smoke-android.js`) — préflight `adb`/`npx`/device, mock auth local
-temporaire sur `127.0.0.1:3000`, `adb reverse`, lancement Expo Android, attente Metro prêt, pilotage par labels UI
-Android (`uiautomator`) et rapport JSON structuré. Parcours validé sur Android Emulator `emulator-5554` : sign-in
-public, Home protégé, Settings protégé, scroll diagnostics, retour Home, refresh session et sign out. RN29 reste un
-smoke semi-automatisé, pas un E2E mobile complet ; Detox/Maestro/Appium/Playwright mobile restent différés sous
-décision de dépendance/ADR. **Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance,
-persistance nouvelle, retry branché ni modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**.
-Vérifs : **typecheck + lint + test 54 fichiers `node --test` + expo-doctor 19/19 + expo export iOS + smoke Android
-`passed` + git diff --check verts**. Commit attendu : `chore(mobile): add runtime smoke automation`. **Prochaine
-action : Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity**.
+**Mobile Core React Native 30 — smoke runtime iOS / parity device** (`cores/mobile-react-native/`,
+périmètre `scripts/**` + `package.json` + docs) : documente la parité runtime iOS du starter Expo
+public/protégé/settings. `mobile-react-native` → **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**. Script ajouté :
+`npm run smoke:ios` (`scripts/smoke-ios.js`) — préflight macOS/`xcrun`/`simctl`/`npx`, rapport JSON structuré et
+procédure macOS/device prête à exécuter. Résultat local : **bloqué** sur hôte Linux `greenovate` sans `xcrun`
+(`detectedPlatform: linux`, `expectedPlatform: darwin`) ; aucun runtime iOS réel exécuté et aucune preuve
+artificielle créée. Android reste couvert par RN28 (smoke visuel réel Android Emulator) et RN29
+(`npm run smoke:android` `passed` sur `emulator-5554`). RN30 ne devient pas un E2E mobile complet ;
+Detox/Maestro/Appium/Playwright mobile/XCTest custom restent différés sous décision de dépendance/ADR.
+**Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance nouvelle, retry branché ni
+modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Vérifs : **typecheck + lint + test 54
+fichiers `node --test` + expo-doctor 19/19 + expo export iOS + smoke iOS blocked documenté + npm audit +
+git diff --check verts**. Commit attendu : `docs(mobile): document ios smoke runtime blocker`. **Prochaine action :
+Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel**.
 
 **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** (`cores/mobile-react-native/`,
 périmètre runtime + docs) : vérifie le shell public/protégé/settings sur Android Emulator `Pixel_6a` via Expo Go
