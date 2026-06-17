@@ -29,6 +29,10 @@
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   },
+  "overrides": {
+    "form-data": "^4.0.6",
+    "js-yaml": "^4.2.0"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",
     "@aws-sdk/s3-request-presigner": "^3.1063.0",
