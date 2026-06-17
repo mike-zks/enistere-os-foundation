@@ -1,21 +1,22 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-06-14). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-06-16). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Mobile Core React Native 28 : RÉALISÉ** (`mobile-react-native` →
-> **`STARTER_VISUAL_SMOKE_READY`**). RN 28 vérifie le shell Expo
-> public/protégé/settings sur Android Emulator `Pixel_6a` via Expo Go : sign-in,
-> Home, Settings, scroll, retour, refresh session et sign out. Aucun défaut UI
-> bloquant n'a nécessité de correction. `expo export -p ios`, typecheck, lint,
-> test, expo-doctor, smoke Android réel et `git diff --check` sont verts.
+> ✅ **Mobile Core React Native 29 : RÉALISÉ** (`mobile-react-native` →
+> **`STARTER_SMOKE_AUTOMATION_READY`**). RN 29 formalise `npm run
+> smoke:android` : smoke Android local reproductible du shell Expo
+> public/protégé/settings avec mock auth temporaire, `adb reverse`, Expo Go,
+> pilotage par labels UI Android et rapport JSON. `expo export -p ios`,
+> typecheck, lint, test, expo-doctor, smoke Android `passed` sur `emulator-5554`
+> et `git diff --check` sont verts.
 >
-> **Prochaine action UNIQUE : Mobile Core React Native 29 — automatisation du
-> smoke runtime starter** : formaliser un script/fixture local pour rejouer le
-> parcours public → protégé → settings sans backend réel, sans dépendance et sans
-> logique métier.
+> **Prochaine action UNIQUE : Mobile Core React Native 30 — smoke runtime
+> iOS/simulateur ou device parity** : rejouer le starter sur iOS Simulator/macOS
+> ou device physique quand l'environnement le permet, sans ajouter de dépendance
+> ni logique métier.
 
 > ✅ **Mobile Core React Native 27 : RÉALISÉ** (`mobile-react-native` →
 > **`STARTER_RUNTIME_HARDENED`**). RN 27 durcit le shell Expo
@@ -243,10 +244,11 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 26. ✅ **Mobile Core React Native 26 — V1 usable starter shell / settings générique** — **RÉALISÉ** : route protégée Settings, lien depuis Home, diagnostics session/UI/consent placeholder/environnement safe/foundation ; aligné `strategy/04_ROADMAP_GLOBAL.md` §9 ; aucun réseau/endpoint métier/SDK réel/adaptateur natif/persistance/retry branché ; typecheck/lint/test/doctor + `git diff --check` verts.
 27. ✅ **Mobile Core React Native 27 — durcissement runtime du starter Expo** — **RÉALISÉ** : export Expo iOS vert, tentative `npm start`, correction d'ergonomie starter public/Home/Settings ; aucun réseau, dépendance, SDK/adaptateur natif réel, endpoint métier, retry ou changement Auth/Query.
 28. ✅ **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** — **RÉALISÉ** : Android Emulator `Pixel_6a` via Expo Go, public/Home/Settings/scroll/retour/refresh/sign out validés ; aucune correction code nécessaire.
-29. **Mobile Core React Native 29 — automatisation du smoke runtime starter** — formaliser un script/fixture local pour rejouer le parcours public → protégé → settings sans backend réel.
-30. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-31. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-32. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+29. ✅ **Mobile Core React Native 29 — automatisation du smoke runtime starter** — **RÉALISÉ** : `npm run smoke:android` rejoue localement public → Home → Settings → scroll → retour → refresh → sign out sans backend réel, via mock auth temporaire + `adb reverse` + Expo Android + labels UI Android.
+30. **Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity** — rejouer le starter sur iOS Simulator/macOS ou device physique quand l'environnement le permet, sans ajouter de dépendance ni logique métier.
+31. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+32. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+33. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste
@@ -306,7 +308,8 @@ deux cores. À arbitrer par décision humaine.
 | **Mobile Core React Native 26 — V1 usable starter shell / settings générique** | **FAIT** — `mobile-react-native` → **`STARTER_SETTINGS_READY`** : route Settings protégée + lien Home ; sections Session, Preferences/UI, Privacy/Telemetry placeholder RN21, Environment safe RN22, Foundation diagnostics ; aligne le starter avec `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile V1 ; aucun réseau/endpoint métier/SDK réel/adaptateur natif/persistance/retry branché ; typecheck/lint/test + expo-doctor 19/19 + `git diff --check` verts |
 | **Mobile Core React Native 27 — durcissement runtime du starter Expo** | **FAIT** — `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`** : shell Expo public/protégé/settings durci ; boutons wrap-safe/full-width, conteneurs Sign-in/Home contraints, lignes Settings multi-ligne ; `expo export -p ios` OK, `npm start` tenté, export web bloqué par absence volontaire de `react-native-web` ; aucun réseau/dépendance/SDK/adaptateur natif réel/endpoint métier/retry/câblage Auth-Query modifié |
 | **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** | **FAIT** — `mobile-react-native` → **`STARTER_VISUAL_SMOKE_READY`** : Android Emulator `Pixel_6a` via Expo Go ; sign-in public, Home protégé, Settings protégé, scroll, retour Home, refresh session et sign out validés avec mock auth local temporaire ; aucune correction UI/runtime requise ; typecheck/lint/test/doctor/export iOS/smoke Android + `git diff --check` verts |
-| **Mobile Core React Native 29 — automatisation du smoke runtime starter** | **PROCHAINE MISSION** — formaliser un script/fixture local pour rejouer le parcours public → protégé → settings sans backend réel, sans dépendance, sans SDK/adaptateur natif réel et sans logique métier |
+| **Mobile Core React Native 29 — automatisation du smoke runtime starter** | **FAIT** — `mobile-react-native` → **`STARTER_SMOKE_AUTOMATION_READY`** : `npm run smoke:android` ajoute un smoke Android local reproductible sans backend réel ; mock auth temporaire, `adb reverse`, Expo Android, pilotage par labels UI Android, rapport JSON `passed` sur `emulator-5554` ; aucun réseau métier/dépendance/SDK/adaptateur natif réel/retry/changement Auth-Query |
+| **Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity** | **PROCHAINE MISSION** — rejouer le starter sur iOS Simulator/macOS ou device physique quand l'environnement le permet, sans ajouter de dépendance ni logique métier |
 | Files Web (upload) | **débloqué** — c'est **Web Core Files 2** ; non prioritaire (pas de défaut bloquant ; CI désormais en place) |
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |

@@ -1507,3 +1507,40 @@ statut mobile passe à **`STARTER_VISUAL_SMOKE_READY`**.
 - **Différés** : automatisation reproductible du smoke runtime, exécution iOS
   Simulator/macOS, device physique, états `expired` manipulés sans backend réel,
   et éventuelles captures CI.
+
+## 38. Automatisation locale du smoke runtime starter (RN 29)
+
+RN 29 formalise le smoke runtime Android du starter Expo dans un script local
+reproductible, sans ajouter de dépendance ni framework E2E mobile. Le statut
+mobile passe à **`STARTER_SMOKE_AUTOMATION_READY`**.
+
+- **Script** : `scripts/smoke-android.js` est exposé par
+  `npm run smoke:android`. Il utilise uniquement la stdlib Node et des outils
+  déjà attendus localement (`adb`, `npx`/Expo CLI). Il vérifie les prérequis,
+  détecte le device connecté, démarre un mock auth local temporaire sur
+  `127.0.0.1:3000`, configure `adb reverse`, lance
+  `npx expo start --android --localhost -c`, puis pilote le starter par labels
+  visibles via `uiautomator` plutôt que par coordonnées codées en dur.
+- **Parcours automatisé** : écran public sign-in, login mocké, Home protégé,
+  Settings protégé, scroll jusqu'aux diagnostics fondation, retour Home,
+  refresh session mocké et sign out vers l'écran public.
+- **Rapport structuré** : le script écrit des événements JSON ligne par ligne et
+  un rapport final dans `RN_SMOKE_REPORT_PATH` (par défaut
+  `/tmp/enistere-mobile-rn29-smoke-report.json`). Les statuts sont explicites :
+  `passed`, `failed` ou `blocked` si l'environnement local ne fournit pas `adb`,
+  `npx` ou un device utilisable.
+- **Frontières** : le mock auth est une fixture runtime locale, pas un backend
+  réel. RN 29 ne modifie ni AuthEngine, ni `withAuthRetry`, ni `authedRequest`,
+  ni QueryClient, ni les mutations. Aucun endpoint métier, SDK/adaptateur natif
+  réel, retry branché, persistance nouvelle, secret réel ou dépendance n'est
+  ajouté.
+- **Positionnement tests** : RN 28 reste le smoke manuel visuel sur device/sim ;
+  RN 29 ajoute un smoke local reproductible semi-automatisé. Un E2E mobile
+  complet (Detox/Maestro/Appium/Playwright mobile ou équivalent) reste différé
+  et doit passer par une décision explicite de dépendance/ADR.
+- **Preuve RN29** : `npm run smoke:android` a été exécuté sur Android Emulator
+  `emulator-5554` et a produit un rapport `passed` pour le parcours complet.
+  Synthèse : `docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md`.
+- **Différés** : exécution iOS Simulator/macOS, device physique, captures CI,
+  assertion d'états `expired` sans backend réel et éventuel framework E2E mobile
+  sous décision de dépendance.
