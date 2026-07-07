@@ -62,6 +62,13 @@
 > Playwright mobile ou équivalent). Elle reste une validation runtime locale
 > semi-automatisée, sans backend réel, endpoint métier, SDK/adaptateur natif réel,
 > persistance, retry branché ni modification Auth/Query/Telemetry.
+>
+> **Note RN30 (smoke runtime iOS / parity device)** : `npm run smoke:ios`
+> formalise un préflight iOS local sans dépendance et documente le blocage
+> environnemental courant (hôte Linux sans `xcrun`). RN30 ne crée pas de preuve
+> iOS artificielle, ne décide aucun framework E2E mobile ou XCTest custom,
+> n'ajoute aucun SDK/adaptateur natif réel, et conserve Android RN28/RN29 comme
+> preuves runtime existantes.
 
 ## 2. Décisions validées — état d'application
 

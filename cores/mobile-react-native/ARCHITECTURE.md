@@ -1544,3 +1544,34 @@ mobile passe à **`STARTER_SMOKE_AUTOMATION_READY`**.
 - **Différés** : exécution iOS Simulator/macOS, device physique, captures CI,
   assertion d'états `expired` sans backend réel et éventuel framework E2E mobile
   sous décision de dépendance.
+
+## 39. Smoke runtime iOS / parity device (RN 30)
+
+RN 30 vérifie explicitement la disponibilité d'un runtime iOS pour rejouer le
+starter Expo public/protégé/settings. Dans l'environnement courant, l'exécution
+iOS réelle est **bloquée par l'environnement** : l'hôte est Linux
+(`Linux greenovate 7.0.10-201.fc44.x86_64`) et `xcrun` est absent. Le statut
+mobile passe donc à **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**.
+
+- **Préflight iOS** : `scripts/smoke-ios.js` est exposé par
+  `npm run smoke:ios`. Il utilise uniquement la stdlib Node et les outils locaux
+  attendus (`npx`, `xcrun`, `simctl`) ; il écrit un rapport JSON dans
+  `RN_SMOKE_IOS_REPORT_PATH` (par défaut
+  `/tmp/enistere-mobile-rn30-ios-smoke-report.json`).
+- **Résultat local RN30** : `npm run smoke:ios` retourne `blocked` avec
+  `detectedPlatform: linux` et `expectedPlatform: darwin`. Aucune preuve iOS
+  artificielle n'est créée et aucun succès runtime iOS n'est revendiqué.
+- **Procédure prête macOS/device** : sur macOS avec Xcode CLI, exécuter
+  `npm run smoke:ios` pour vérifier `xcrun simctl list devices available`, puis
+  lancer `npx expo start --ios --localhost -c` et rejouer manuellement le
+  parcours RN28/RN29 : sign-in public, Home protégé, Settings protégé, scroll
+  diagnostics, retour Home, refresh session et sign out, avec mock auth local
+  temporaire et sans backend réel.
+- **Frontières** : aucun backend réel, endpoint métier, SDK/adaptateur natif
+  réel, retry branché, persistance nouvelle, secret réel ou dépendance n'est
+  ajouté. RN 30 ne modifie ni AuthEngine, ni `withAuthRetry`, ni
+  `authedRequest`, ni QueryClient, ni les mutations.
+- **Positionnement tests** : Android reste couvert par RN28 (smoke visuel réel)
+  et RN29 (smoke local reproductible). RN30 ne remplace pas un E2E mobile
+  complet ; Detox, Maestro, Appium, Playwright mobile, XCTest custom ou autre
+  framework restent différés sous décision explicite de dépendance/ADR.
