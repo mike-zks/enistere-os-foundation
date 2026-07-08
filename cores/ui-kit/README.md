@@ -18,6 +18,9 @@ ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js
 ```ts
 import { Button, Input, Label, Text, Spinner, VisuallyHidden } from '@enistere/ui-kit';
 import { Alert, Card, CardHeader, CardTitle, CardContent, FormField, FormFieldLabel } from '@enistere/ui-kit';
+import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '@enistere/ui-kit';
+import { Select } from '@enistere/ui-kit';
+import { Toast, ToastRegion } from '@enistere/ui-kit';
 import '@enistere/ui-kit/styles.css'; // tokens + styles des primitives (une seule feuille)
 ```
 
@@ -27,9 +30,9 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
 <html data-theme="dark"> … </html>
 ```
 
-## Primitives Web (V2 + Web UI 1)
+## Primitives Web (V2 + Web UI 1 + UI Kit 4)
 
-**Neuf** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
+**Douze** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
 
 - **Button** — `variant` (primary/secondary/outline/ghost/danger), `size` (sm/md/lg), `loading`,
   `loadingText`. `type="button"` par défaut, désactivé réel en `loading` (donc pas d'`onClick`),
@@ -50,6 +53,17 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
 - **FormField** — association **explicite** label/champ/aide/erreur (`FormField`/`FormFieldLabel`/
   `FormFieldDescription`/`FormFieldError`) ; **pas d'injection magique** (le consommateur câble
   `htmlFor`/`id`/`aria-describedby`/`aria-invalid`).
+- **Dialog** — modale `<dialog>` native (`showModal()`/`close()`) — focus trap, ESC et backdrop fournis
+  nativement. Props : `open` (booléen contrôlé), `onDismiss`. Sous-composants : `DialogHeader`,
+  `DialogTitle` (prop `as`, défaut `h2`), `DialogDescription`, `DialogContent`, `DialogFooter`.
+  `aria-modal="true"`. **Pas de Radix/Portal.**
+- **Select** — `<select>` natif dans un `<span>` wrapper + chevron CSS-only (aucune image, aucun SVG).
+  Props : `size` (sm/md/lg), `invalid` (→ `aria-invalid`). `forwardRef` cible le `<select>` ;
+  `className`/`style` vont sur le `<span>` wrapper pour le layout.
+- **Toast** / **ToastRegion** — notification non-modale. `variant` (info/success/warning/danger) →
+  ARIA (`role="alert"` + `aria-live="assertive"` pour `danger` ; `role="status"` + `aria-live="polite"`
+  sinon) + `aria-atomic="true"`. `ToastRegion` : conteneur positionné (6 positions top/bottom ×
+  left/center/right), `aria-label="Notifications"`. **Aucun timer** — le consommateur gère le cycle de vie.
 
 ```tsx
 <Button variant="primary" size="md" loading loadingText="Envoi…">Envoyer</Button>
@@ -194,19 +208,14 @@ nouvelle valeur cohérente.
 
 ## 18. Limites actuelles
 
-V2 = tokens + **6 primitives Web minimales**. Pas de bibliothèque complète, pas de Storybook, pas
-d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les
-tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger
-zéro-dépendance). Accessibilité : `jest-axe` couvre Button/Input+Label/Spinner ; les **contrastes**
-réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` +
-`global-jsdom` + Testing Library (un seul runner, **0 vulnérabilité**).
+UI Kit 4 = tokens + **12 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**121 tests**, un seul runner, **0 vulnérabilité**).
 
 ## 19. Non implémenté (volontaire)
 
-Dialog, Modal, Drawer, Select, Combobox, Dropdown, Toast, Table, Pagination, Form complet, DatePicker,
-Upload, navigation ; `asChild`/polymorphisme Radix ; ThemeProvider ; adaptateurs
-Tailwind/Radix/shadcn/NativeWind ; Storybook/Ladle ; icônes ; documentation visuelle ; publication npm
-— réservés aux missions et ADR ultérieurs. Composants Web ≠ React Native.
+Modal, Drawer, Combobox, Dropdown, Table, Pagination, Form complet, DatePicker, Upload, navigation ;
+`asChild`/polymorphisme Radix ; ThemeProvider ; adaptateurs Tailwind/Radix/shadcn/NativeWind ;
+Storybook/Ladle ; icônes ; documentation visuelle ; publication npm — réservés aux missions et ADR
+ultérieurs. Composants Web ≠ React Native.
 
 ## 20. Sécurité
 

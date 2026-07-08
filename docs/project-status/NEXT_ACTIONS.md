@@ -5,13 +5,27 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **UI Kit 4 : RÉALISÉ** (`ui-kit` → **12 primitives Web React**). UI Kit 4 ajoute
+> Dialog (modale `<dialog>` native, `showModal()`/`close()`, focus trap, ESC, backdrop nativement,
+> `aria-modal`), Select (`<select>` natif + chevron CSS-only, `size`, `invalid` → `aria-invalid`,
+> `forwardRef` sur `<select>`) et Toast/ToastRegion (notification non-modale, `variant` →
+> `role`/`aria-live`/`aria-atomic`, 6 positions). Aucune logique métier, aucun Radix/shadcn/Tailwind
+> (ADR-009). `@enistere/ui-kit` passe de 9 à **12 primitives**, 78 → **121 tests** (0 régression).
+> `npm run tokens:generate` régénéré, `npm run tokens:check` vert, `npm run lint` vert,
+> `git diff --check` vert.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Web Core Files 2** (upload sécurisé Web, multipart) maintenant que le UI Kit débloque les
+> contrôles interactifs, ou **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode).
+
 > ✅ **Mobile Core React Native 34 : RÉALISÉ** (`mobile-react-native` →
 > **`STARTER_EXPO_DOCTOR_GREEN`**). RN 34 aligne les patchs Expo SDK 55
 > nécessaires (`expo` 55.0.26→55.0.27, `expo-linking` 55.0.15→55.0.16,
 > `expo-secure-store` 55.0.14→55.0.15) pour ramener expo-doctor de 18/19 à
 > **19/19**. Aucun changement de code runtime. Typecheck, lint, test 355/355,
 > expo-doctor **19/19**, expo export -p ios, npm audit 0 vuln, git diff --check
-> verts.
+> verts. **`npm run smoke:android` passed** (`emulator-5554` / Pixel_6a, 2026-07-08 —
+> loginCount=1, refreshCount=1).
 >
 > **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
 > **Mobile Core React Native 31** dès qu'un hôte macOS/Xcode est disponible
@@ -286,7 +300,7 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 32. ✅ **Mobile Core React Native 32 — formulaire sign-in générique RHF/Zod** — **RÉALISÉ** : `app/(public)/sign-in.tsx` remplace le bouton hardcodé par un formulaire email/password RHF+Zod via primitives RN3 (`emailField`, `requiredText`, `TextInputField`, `createZodResolver`) ; `smoke-android.js` adapté (`findInputByLabel`, `tapInputAndType`) ; `smoke-ios.js` procédure mise à jour ; aucune dépendance, aucun endpoint métier, aucun changement AuthEngine/QueryClient/mutations ; typecheck/lint/test 355/355/export iOS/audit verts. `mobile-react-native` → **`STARTER_SIGN_IN_FORM_READY`**.
 33. ✅ **Mobile Core React Native 33 — câblage préférence de thème** — **RÉALISÉ** : `ThemePreferenceProvider` (`src/theme/`) lit `useUiStore.themePreference` et passe `scheme` au `ThemeProvider` (`'system'`→OS, `'light'`/`'dark'`→forcé) ; Settings expose 3 boutons System/Light/Dark ; `reset()` remet à `'system'` ; in-memory uniquement (ADR-015 §16) ; aucune dépendance, aucun endpoint métier, aucun changement AuthEngine/QueryClient/mutations ; typecheck/lint/test 355/355/export iOS/audit verts. `mobile-react-native` → **`STARTER_THEME_PREFERENCE_READY`**.
 34. ✅ **Mobile Core React Native 34 — alignement patch Expo SDK / doctor green** — **RÉALISÉ** : `expo` 55.0.26→55.0.27, `expo-linking` 55.0.15→55.0.16, `expo-secure-store` 55.0.14→55.0.15 via `npx expo install` ; aucun changement code runtime ; expo-doctor **19/19** ; typecheck/lint/test 355/355/export iOS/audit verts. `mobile-react-native` → **`STARTER_EXPO_DOCTOR_GREEN`**.
-35. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+35. ✅ **UI Kit 4** — primitives interactives Dialog/Select/Toast — **RÉALISÉ** : 12 primitives Web React, 121 tests, tokens CSS only, a11y jest-axe, React 19, aucune régression.
 36. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
 37. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 

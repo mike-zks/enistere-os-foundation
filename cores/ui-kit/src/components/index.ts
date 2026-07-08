@@ -36,3 +36,30 @@ export type {
   FormFieldDescriptionProps,
   FormFieldErrorProps,
 } from './form-field/form-field.types.js';
+
+export {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogContent,
+  DialogFooter,
+} from './dialog/dialog.js';
+export type {
+  DialogProps,
+  DialogSectionProps,
+  DialogTitleProps,
+  DialogTitleElement,
+  DialogDescriptionProps,
+} from './dialog/dialog.types.js';
+
+export { Select } from './select/select.js';
+export type { SelectProps, SelectSize } from './select/select.types.js';
+
+export { Toast, ToastRegion } from './toast/toast.js';
+export type {
+  ToastProps,
+  ToastVariant,
+  ToastRegionProps,
+  ToastRegionPosition,
+} from './toast/toast.types.js';

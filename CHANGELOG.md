@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### UI Kit 4 — primitives interactives Dialog / Select / Toast
+
+- **UI Kit 4** (`cores/ui-kit/`) : ajoute trois primitives interactives accessibles. `@enistere/ui-kit` passe de **9** à **12 primitives Web React**, de **78** à **121 tests** (0 régression).
+  - **Dialog** (`dialog/dialog.tsx`, `dialog.types.ts`, `dialog.css`) : modale `<dialog>` native — `showModal()`/`close()` pour focus trap, ESC, backdrop nativement. Props : `open`, `onDismiss`. Sous-composants : `DialogHeader`, `DialogTitle` (prop `as`, défaut `h2`), `DialogDescription`, `DialogContent`, `DialogFooter`. `aria-modal="true"` ; polyfill `showModal/close` dans le dom-setup tests (jsdom).
+  - **Select** (`select/select.tsx`, `select.types.ts`, `select.css`) : `<select>` natif dans un `<span>` wrapper + chevron CSS-only (`::after` + `rotate(45deg)`). Props : `size` (sm/md/lg), `invalid` (→ `aria-invalid`). `forwardRef` cible `<select>` ; `className`/`style` vont sur le `<span>` wrapper.
+  - **Toast** (`toast/toast.tsx`, `toast.types.ts`, `toast.css`) : notification non-modale. `variant` (`info`/`success`/`warning`/`danger`) → ARIA (`role="alert"` + `aria-live="assertive"` pour `danger` ; `role="status"` + `aria-live="polite"` sinon) + `aria-atomic="true"`. `ToastRegion` : conteneur de positionnement (6 positions) + `aria-label="Notifications"`. Aucun timer — le consommateur gère le cycle de vie.
+  - **CSS** : `generated/css/styles.css` régénéré (inclut Dialog/Select/Toast). Tokens CSS uniquement (`var(--enistere-*)`), aucun hex, classes préfixées `enistere-`, `:focus-visible`, `:disabled`, `prefers-reduced-motion`.
+  - **Exports** : `src/components/index.ts` étendu + `test/consumers/react.consumer.tsx` mis à jour.
+  - **Contraintes** : aucune logique métier, aucun Radix/shadcn/Tailwind/Portal (ADR-009), compatibles React 19, sans régression des 78 tests existants.
+  - **Vérifications** : `tsc --noEmit`, `npm run lint`, `npm test` (**121/121**), `npm run tokens:generate`, `npm run tokens:check`, `git diff --check`. Commit `feat(ui-kit): add Dialog, Select, Toast interactive primitives`.
+
 ### Mobile Core React Native 34 — alignement patch Expo SDK / doctor green
 
 - **Mobile Core React Native 34** (`cores/mobile-react-native/`) : aligne les patchs Expo SDK 55 nécessaires pour ramener `expo-doctor` de 18/19 à **19/19**. `mobile-react-native` passe de `STARTER_THEME_PREFERENCE_READY` à **`STARTER_EXPO_DOCTOR_GREEN`**.
@@ -13,7 +24,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
   - **`package-lock.json`** : mises à jour transitives dans l'arbre `expo` 55.0.27 — tous des packages `@expo/*` CLI internes (non-runtime) et `postcss` patch.
   - **Aucun changement de code** : aucun fichier `app/`, `src/`, `scripts/` ou `test/` modifié.
   - **Contraintes** : aucune nouvelle dépendance, aucun changement SDK majeur/mineur, aucun changement AuthEngine/QueryClient/mutations.
-  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **19/19**, `expo export -p ios`, `npm run smoke:android` (`blocked` — aucun device), `npm run smoke:ios` (`blocked` — Linux), `npm audit` root (0 vuln), `git diff --check`. Commit `chore(mobile): align expo sdk patch versions`.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **19/19**, `expo export -p ios`, `npm run smoke:android` (**passed** — `emulator-5554` / Pixel_6a, loginCount=1, refreshCount=1, 2026-07-08), `npm run smoke:ios` (`blocked` — Linux), `npm audit` root (0 vuln), `git diff --check`. Commit `chore(mobile): align expo sdk patch versions`.
 
 ### Mobile Core React Native 33 — câblage préférence de thème
 

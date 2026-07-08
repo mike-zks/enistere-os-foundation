@@ -318,6 +318,114 @@
   align-items: center;
 }
 
+/* src/components/dialog/dialog.css */
+/* Dialog — modale native (<dialog>). Focus trap + ESC via showModal(). Backdrop natif (::backdrop).
+   Light/dark via variables. Aucun hex, aucun sélecteur global destructif. */
+
+.enistere-dialog {
+  /* Reset des styles natifs du navigateur */
+  position: fixed;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: var(--enistere-spacing-4);
+  border: none;
+  background: transparent;
+  z-index: var(--enistere-z-index-modal);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+/* showModal() ajoute l'attribut [open] sur l'élément */
+.enistere-dialog[open] {
+  display: flex;
+}
+.enistere-dialog::backdrop {
+  background-color: var(--enistere-color-overlay);
+  opacity: 0.5;
+}
+.enistere-dialog__panel {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  max-height: calc(100vh - var(--enistere-spacing-8));
+  overflow-y: auto;
+  background-color: var(--enistere-color-background-elevated);
+  border: 1px solid var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-lg);
+  box-shadow: var(--enistere-shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+.enistere-dialog__header {
+  padding: var(--enistere-spacing-5) var(--enistere-spacing-6) var(--enistere-spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-1);
+}
+.enistere-dialog__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-lg);
+  font-weight: var(--enistere-font-weight-semibold);
+  line-height: var(--enistere-line-height-tight);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-dialog__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-foreground-muted);
+}
+.enistere-dialog__content {
+  padding: var(--enistere-spacing-3) var(--enistere-spacing-6);
+  flex: 1;
+  min-height: 0;
+}
+.enistere-dialog__footer {
+  padding: var(--enistere-spacing-3) var(--enistere-spacing-6) var(--enistere-spacing-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--enistere-spacing-2);
+  justify-content: flex-end;
+}
+
+/* Entrée animée du panneau */
+.enistere-dialog[open] .enistere-dialog__panel {
+  animation: enistere-dialog-in var(--enistere-duration-normal) var(--enistere-easing-decelerate);
+}
+@keyframes enistere-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--enistere-spacing-2) * -1)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Focus visible sur le dialogue lui-même (si focusé directement) */
+.enistere-dialog:focus-visible {
+  outline: none;
+}
+
+/* Désactivé : non applicable (<dialog> ne supporte pas :disabled directement)
+   — la propriété est ici pour satisfaire la parité CSS des composants interactifs */
+.enistere-dialog[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-dialog[open] .enistere-dialog__panel {
+    animation: none;
+  }
+}
+
 /* src/components/form-field/form-field.css */
 /* FormField — composition label/champ/aide/erreur pilotée par tokens. Light/dark via variables. */
 .enistere-form-field {
@@ -401,6 +509,104 @@
 }
 .enistere-label__required {
   color: var(--enistere-color-status-danger);
+}
+
+/* src/components/select/select.css */
+/* Select — champ natif stylisé. Flèche CSS pure (chevron border, currentColor → dark safe).
+   Wrapper <span> requis pour positionner la flèche. Light/dark via variables. */
+
+.enistere-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+/* Chevron CSS pur : angle bas-droit en border — adapte currentColor (dark mode automatique) */
+.enistere-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: var(--enistere-spacing-3);
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--enistere-color-foreground-muted);
+  border-bottom: 1.5px solid var(--enistere-color-foreground-muted);
+  transform: translateY(calc(-50% - 2px)) rotate(45deg);
+  pointer-events: none;
+}
+
+.enistere-select {
+  display: block;
+  width: 100%;
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-default);
+  background-color: var(--enistere-color-background-elevated);
+  border: 1px solid var(--enistere-color-border-strong);
+  border-radius: var(--enistere-radius-md);
+  cursor: pointer;
+  appearance: none;
+  /* Espace à droite pour le chevron CSS */
+  padding-right: var(--enistere-spacing-10);
+  transition:
+    border-color var(--enistere-duration-fast) var(--enistere-easing-standard),
+    box-shadow var(--enistere-duration-fast) var(--enistere-easing-standard);
+}
+.enistere-select:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 2px;
+  border-color: var(--enistere-color-border-focus);
+}
+.enistere-select:disabled {
+  cursor: not-allowed;
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-muted);
+  border-color: var(--enistere-color-border-default);
+  opacity: 0.6;
+}
+.enistere-select--invalid {
+  border-color: var(--enistere-color-status-danger);
+}
+.enistere-select--invalid:focus-visible {
+  outline-color: var(--enistere-color-status-danger);
+}
+
+/* Sizes — alignées sur Input pour la cohérence */
+.enistere-select--sm {
+  min-height: var(--enistere-spacing-8);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-select--md {
+  min-height: var(--enistere-spacing-10);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-md);
+}
+.enistere-select--lg {
+  min-height: var(--enistere-spacing-12);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--enistere-spacing-4);
+  font-size: var(--enistere-font-size-lg);
+}
+
+/* Wrapper taille (pour min-height cohérente avec le select interne) */
+.enistere-select-wrapper--sm {
+  min-height: var(--enistere-spacing-8);
+}
+.enistere-select-wrapper--md {
+  min-height: var(--enistere-spacing-10);
+}
+.enistere-select-wrapper--lg {
+  min-height: var(--enistere-spacing-12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-select {
+    transition: none;
+  }
 }
 
 /* src/components/spinner/spinner.css */
@@ -505,6 +711,178 @@
 }
 .enistere-text--tone-info {
   color: var(--enistere-color-status-info);
+}
+
+/* src/components/toast/toast.css */
+/* Toast — notification temporaire. Glyphe + bordure latérale (pas couleur seule).
+   Rôle assertif (danger) ou poli (reste). Light/dark via variables. */
+
+.enistere-toast {
+  display: flex;
+  gap: var(--enistere-spacing-3);
+  align-items: flex-start;
+  min-width: 240px;
+  max-width: 400px;
+  padding: var(--enistere-spacing-3) var(--enistere-spacing-4);
+  border: 1px solid var(--enistere-color-border-default);
+  border-left-width: 4px;
+  border-radius: var(--enistere-radius-md);
+  background-color: var(--enistere-color-background-elevated);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-sm);
+  box-shadow: var(--enistere-shadow-md);
+  animation: enistere-toast-in var(--enistere-duration-normal) var(--enistere-easing-decelerate);
+}
+.enistere-toast__icon {
+  flex: none;
+  font-size: var(--enistere-font-size-md);
+  line-height: 1.4;
+}
+.enistere-toast__icon::before {
+  content: "";
+}
+.enistere-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+.enistere-toast__title {
+  margin: 0 0 var(--enistere-spacing-1);
+  font-weight: var(--enistere-font-weight-semibold);
+}
+.enistere-toast__content {
+  margin: 0;
+}
+.enistere-toast__close {
+  flex: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--enistere-spacing-6);
+  height: var(--enistere-spacing-6);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--enistere-radius-sm);
+  cursor: pointer;
+  color: var(--enistere-color-foreground-muted);
+  font-size: var(--enistere-font-size-md);
+  line-height: 1;
+}
+.enistere-toast__close::before {
+  content: "\00D7"; /* × */
+}
+.enistere-toast__close:hover {
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-toast__close:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 2px;
+}
+.enistere-toast__close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Variantes — accent bordure gauche + glyphe */
+.enistere-toast--info {
+  border-left-color: var(--enistere-color-status-info);
+}
+.enistere-toast--info .enistere-toast__icon {
+  color: var(--enistere-color-status-info);
+}
+.enistere-toast--info .enistere-toast__icon::before {
+  content: "\2139"; /* ℹ */
+}
+.enistere-toast--success {
+  border-left-color: var(--enistere-color-status-success);
+}
+.enistere-toast--success .enistere-toast__icon {
+  color: var(--enistere-color-status-success);
+}
+.enistere-toast--success .enistere-toast__icon::before {
+  content: "\2713"; /* ✓ */
+}
+.enistere-toast--warning {
+  border-left-color: var(--enistere-color-status-warning);
+}
+.enistere-toast--warning .enistere-toast__icon {
+  color: var(--enistere-color-status-warning);
+}
+.enistere-toast--warning .enistere-toast__icon::before {
+  content: "\26A0"; /* ⚠ */
+}
+.enistere-toast--danger {
+  border-left-color: var(--enistere-color-status-danger);
+}
+.enistere-toast--danger .enistere-toast__icon {
+  color: var(--enistere-color-status-danger);
+}
+.enistere-toast--danger .enistere-toast__icon::before {
+  content: "\2715"; /* ✕ */
+}
+
+/* Région de positionnement fixe */
+.enistere-toast-region {
+  position: fixed;
+  z-index: var(--enistere-z-index-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-2);
+  width: calc(100vw - var(--enistere-spacing-8));
+  max-width: 400px;
+  pointer-events: none;
+}
+.enistere-toast-region > * {
+  pointer-events: auto;
+}
+
+/* Positions */
+.enistere-toast-region--top-left {
+  top: var(--enistere-spacing-4);
+  left: var(--enistere-spacing-4);
+}
+.enistere-toast-region--top-center {
+  top: var(--enistere-spacing-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.enistere-toast-region--top-right {
+  top: var(--enistere-spacing-4);
+  right: var(--enistere-spacing-4);
+}
+.enistere-toast-region--bottom-left {
+  bottom: var(--enistere-spacing-4);
+  left: var(--enistere-spacing-4);
+}
+.enistere-toast-region--bottom-center {
+  bottom: var(--enistere-spacing-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.enistere-toast-region--bottom-right {
+  bottom: var(--enistere-spacing-4);
+  right: var(--enistere-spacing-4);
+}
+
+/* Animation d'entrée */
+@keyframes enistere-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--enistere-spacing-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-toast {
+    animation: none;
+  }
 }
 
 /* src/components/visually-hidden/visually-hidden.css */
