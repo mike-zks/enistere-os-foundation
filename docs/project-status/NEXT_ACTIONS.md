@@ -1,9 +1,33 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-06-16). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-07-08). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
+
+> ✅ **Mobile Core React Native 32 : RÉALISÉ** (`mobile-react-native` →
+> **`STARTER_SIGN_IN_FORM_READY`**). RN 32 remplace le bouton sign-in avec
+> credentials hardcodés par un formulaire générique email/password utilisant RHF
+> + Zod via les primitives RN3 existantes (`emailField`, `requiredText`,
+> `TextInputField`, `createZodResolver`). Erreurs de champ accessibles, état
+> loading, erreur auth générique sans fuite. `scripts/smoke-android.js` adapté
+> pour remplir les champs du formulaire (`tapInputAndType`, `findInputByLabel`).
+> `scripts/smoke-ios.js` procedure mise à jour. Typecheck, lint, test 355/355,
+> expo export -p ios, npm audit et git diff --check verts.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 33** (durcissement UX formulaire ou autre livrable
+> V1), **UI Kit 4** (primitives interactives Dialog/Select/Toast), ou
+> **Mobile Core React Native 31** dès qu'un hôte macOS/Xcode est disponible
+> (exécution iOS smoke réelle — précondition externe).
+
+> ✅ **Mobile Core React Native 31 : EN ATTENTE PRÉCONDITION EXTERNE**
+> (`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT` maintenu). Hôte Linux,
+> `xcrun` absent. Aucun smoke iOS réel ne peut être exécuté ici. RN31 est
+> prête à exécuter sur macOS/Xcode — procédure documentée dans
+> `docs/project-status/MOBILE_RN30_IOS_SMOKE_PARITY.md` et mise à jour
+> dans `scripts/smoke-ios.js` (RN32) pour le formulaire. RN32 progresse
+> sur un livrable V1 actionnable dans l'environnement courant.
 
 > ✅ **Mobile Core React Native 30 : RÉALISÉ / BLOQUÉ ENVIRONNEMENT** (`mobile-react-native` →
 > **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**). RN 30 ajoute
@@ -12,11 +36,6 @@
 > exécuté ici. Android reste couvert par RN28/RN29. `expo export -p ios`,
 > typecheck, lint, test, expo-doctor, smoke iOS `blocked` documenté et
 > `git diff --check` sont verts.
->
-> **Prochaine action UNIQUE : Mobile Core React Native 31 — exécution iOS smoke
-> sur macOS/device réel** : rejouer le starter sur iOS Simulator ou device
-> physique dès qu'un environnement macOS/Xcode est disponible, sans ajouter de
-> dépendance ni logique métier.
 
 > ✅ **Mobile Core React Native 27 : RÉALISÉ** (`mobile-react-native` →
 > **`STARTER_RUNTIME_HARDENED`**). RN 27 durcit le shell Expo
@@ -246,8 +265,9 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 28. ✅ **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** — **RÉALISÉ** : Android Emulator `Pixel_6a` via Expo Go, public/Home/Settings/scroll/retour/refresh/sign out validés ; aucune correction code nécessaire.
 29. ✅ **Mobile Core React Native 29 — automatisation du smoke runtime starter** — **RÉALISÉ** : `npm run smoke:android` rejoue localement public → Home → Settings → scroll → retour → refresh → sign out sans backend réel, via mock auth temporaire + `adb reverse` + Expo Android + labels UI Android.
 30. ✅ **Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity** — **RÉALISÉ / BLOQUÉ ENVIRONNEMENT** : `npm run smoke:ios` vérifie macOS/`xcrun`/`simctl`/`npx`, produit un rapport JSON `blocked` sur l'hôte Linux sans `xcrun`, et documente la procédure macOS/device ; aucune preuve iOS artificielle, aucune dépendance/logique métier.
-31. **Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel** — rejouer le starter sur iOS Simulator ou device physique dès qu'un environnement macOS/Xcode est disponible, sans ajouter de dépendance ni logique métier.
-32. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+31. **Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel** — **EN ATTENTE PRÉCONDITION EXTERNE** : Linux, `xcrun` absent. Procédure mise à jour par RN32 pour le formulaire sign-in. À rejouer sur macOS/Xcode dès disponibilité.
+32. ✅ **Mobile Core React Native 32 — formulaire sign-in générique RHF/Zod** — **RÉALISÉ** : `app/(public)/sign-in.tsx` remplace le bouton hardcodé par un formulaire email/password RHF+Zod via primitives RN3 (`emailField`, `requiredText`, `TextInputField`, `createZodResolver`) ; `smoke-android.js` adapté (`findInputByLabel`, `tapInputAndType`) ; `smoke-ios.js` procédure mise à jour ; aucune dépendance, aucun endpoint métier, aucun changement AuthEngine/QueryClient/mutations ; typecheck/lint/test 355/355/export iOS/audit verts. `mobile-react-native` → **`STARTER_SIGN_IN_FORM_READY`**.
+33. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
 33. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
 34. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 

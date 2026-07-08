@@ -25,7 +25,7 @@ pas une application ni une bibliothèque complète).
 | Web Core | **`@enistere/web-nextjs`** — **IMPLEMENTATION_PARTIELLE** : Next 16 App Router + React 19, UI Kit + **API publique (Health) + TanStack Query** + **BFF Auth** (`login`/`refresh`/`logout`/`csrf`, cookies `HttpOnly`, **CSRF**, Origin/Referer) + **session/autorisations** (`me`/`authorization` read-only, `useSession`/`useAuthorization`, purge au logout) + **layout protégé** (résolution Auth **serveur** read-only Option C + hydratation, page `/protected`) + **page de connexion `/login`** (formulaire accessible, login BFF, `returnTo` interne assaini anti open-redirect, navigation `replace`/`refresh`) + **états UI & composants structurels** (Web UI 1 : `Alert`/`Card`/`FormField` consommés ; `LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/`PageHeader`, intégrés accueil/Health/frontières/Auth) + **Files lecture/téléchargement** (Web Files 1 : BFF ciblé `GET /api/files/:id` + `POST /api/files/:id/download-url`, validation UUID, **CSRF/Origin** sur download-url, client BFF navigateur, `fileKeys`, `useFileMetadata` + `useCreateDownloadUrl` (**URL signée jamais en cache/log**), page `/protected/files/[id]`, **404 anti-énumération** ; **aucun upload/suppression/admin**, **aucun champ interne** exposé). **307 tests** + preuves API réelles (Auth/session **26/26** + login **22/22** + **Files API+MinIO 21/21**). **Pas de middleware, pas de Server Action Auth, pas de token en JS, pas de proxy générique.** |
 | Packages officiels | `@enistere/api-contracts`, `@enistere/api-client-fetch` (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle) |
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) ; **aucune infra de déploiement/registry/monitoring** |
-| Core mobile (socle) | **`mobile-react-native`** — **STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT** : socle Expo SDK 55 / Expo Router RN 1→30. Primitives RN 1→25 inchangées, Settings protégé RN26, shell public/protégé/settings durci RN27, smoke visuel Android Emulator RN28 validé, smoke runtime local reproductible RN29 ajouté, préflight iOS RN30 documenté et bloqué par l'environnement Linux sans `xcrun`. Preuves : typecheck + lint + `npm test` 54 fichiers `node --test` + expo-doctor 19/19 + `expo export -p ios` + `npm run smoke:android` passed sur Android Emulator `emulator-5554` + `npm run smoke:ios` blocked (`detectedPlatform: linux`, `expectedPlatform: darwin`) + `git diff --check` verts. Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, retry branché ni changement Auth/Query. |
+| Core mobile (socle) | **`mobile-react-native`** — **STARTER_SIGN_IN_FORM_READY** : socle Expo SDK 55 / Expo Router RN 1→32. Primitives RN 1→25 inchangées, Settings protégé RN26, shell public/protégé/settings durci RN27, smoke visuel Android Emulator RN28 validé, smoke runtime local reproductible RN29 ajouté, préflight iOS RN30 documenté et bloqué par l'environnement Linux sans `xcrun`, RN31 en attente macOS/Xcode, **RN32 formulaire sign-in générique RHF+Zod** (`app/(public)/sign-in.tsx`, `TextInputField` email/password, erreurs accessibles, smoke-android adapté). Preuves : typecheck + lint + `npm test` 355/355 `node --test` + `expo export -p ios` + `npm audit` 0 vuln + `git diff --check` verts. Expo-doctor 18/19 (drift patch pré-existant non causé par RN32). `npm run smoke:android` blocked (Linux, aucun device). `npm run smoke:ios` blocked (`linux`, pas de macOS/xcrun). Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, retry branché ni changement Auth/Query. |
 | Cores documentaires | _(aucun ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel)** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (build + push images GHCR, **images publiques validées** ; ADR-013/014 **partiels**) ; **Dockerfiles** API/Web (multi-stage, non-root) ; **staging cadré** (CC6) + **dry-run** (CC7) + **image API corrigée** (CC8, `api-smoke` gate le push) + **exécution staging contrôlée LOCALE** (CC9 : images corrigées `sha-d1e6242`, stack `healthy`, endpoint Option A joignable), `EXECUTION_LOCALE_CONTROLEE` ; **déploiement sur serveur réel / HTTPS / URL signée bout-en-bout non encore réalisés** |
@@ -41,16 +41,17 @@ spécification ne prouve pas un starter ; un dossier vide ne prouve aucune impl�
 
 ## 3. Architecture du repository
 
-> **Mise à jour RN30** : le statut courant du core `mobile-react-native` est
-> **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**. RN30 ajoute le préflight
-> `npm run smoke:ios` et documente la parité iOS : l'environnement local est
-> Linux (`greenovate`) et `xcrun` est absent, donc aucun runtime iOS réel ne peut
-> être exécuté ici. Android reste couvert par RN28 (smoke visuel réel) et RN29
-> (`npm run smoke:android` passed sur `emulator-5554`). Aucun réseau métier,
+> **Mise à jour RN32** : le statut courant du core `mobile-react-native` est
+> **`STARTER_SIGN_IN_FORM_READY`**. RN32 remplace le bouton sign-in avec
+> credentials hardcodés par un formulaire générique email/password RHF+Zod via
+> primitives RN3 (`emailField`, `requiredText`, `TextInputField`,
+> `createZodResolver`). Erreurs de champ accessibles, état loading, erreur auth
+> générique sans fuite. `smoke-android.js` adapté (`findInputByLabel`,
+> `tapInputAndType`). `smoke-ios.js` procédure mise à jour. Aucun réseau métier,
 > endpoint métier, SDK/adaptateur natif réel, dépendance, persistance nouvelle ni
-> retry branché. Vérification locale : typecheck, lint, test, doctor 19/19,
-> `expo export -p ios`, `npm run smoke:ios` blocked documenté et
-> `git diff --check` verts.
+> retry branché. RN31 (iOS smoke) reste en attente macOS/Xcode. Vérification
+> locale : typecheck, lint, test 355/355, expo export -p ios, npm audit 0 vuln,
+> git diff --check verts. Expo-doctor 18/19 (drift patch pré-existant).
 
 ```
 enistere-os-foundation/
@@ -64,7 +65,7 @@ enistere-os-foundation/
     ui-kit/            STARTER (tokens + 6 primitives Web, React 19) — v0.1.1
     web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
     cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles)
-    mobile-react-native/  STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell public/protégé/settings durci RN27 ; smoke visuel Android Emulator RN28 validé ; smoke runtime local reproductible RN29 ; préflight iOS RN30 bloqué par Linux sans xcrun ; aucune logique métier, aucun réseau métier/dépendance/SDK/adaptateur natif réel/retry branché ; typecheck/lint/test/doctor/export iOS/smoke Android/smoke iOS blocked verts)
+    mobile-react-native/  STARTER_SIGN_IN_FORM_READY (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell durci RN27 ; smoke Android RN28 ; smoke automation RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 formulaire sign-in générique RHF+Zod email/password accessible ; aucune logique métier, aucun réseau métier/dépendance/SDK/adaptateur natif réel/retry branché ; typecheck/lint/test 355/355/export iOS/audit verts)
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -82,7 +83,7 @@ enistere-os-foundation/
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs ; pas d'infra déploiement) | **IMPLEMENTATION_PARTIELLE** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture) | **IMPLEMENTATION_PARTIELLE** |
-| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 du shell public/protégé/settings ; smoke visuel Android Emulator RN28 public/Home/Settings/retour/refresh/sign out validé ; smoke runtime local reproductible RN29 ; préflight iOS RN30 bloqué par environnement Linux sans `xcrun` ; aucun réseau métier/dépendance/SDK/adaptateur natif réel/endpoint métier/retry branché) | **STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT** |
+| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 ; smoke visuel Android Emulator RN28 ; smoke runtime local RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; **formulaire sign-in générique RHF+Zod RN32** email/password accessible, smoke-android adapté ; aucun réseau métier/dépendance/SDK/adaptateur natif réel/endpoint métier/retry branché) | **STARTER_SIGN_IN_FORM_READY** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
