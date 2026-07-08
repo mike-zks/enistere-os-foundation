@@ -1,7 +1,7 @@
 # FOUNDATION_CURRENT_STATE.md — État courant officiel d'Enistere OS Foundation
 
 > **Photographie officielle** de l'état réel du repository, vérifiée fichier par fichier.
-> **Dernière mise à jour : 2026-06-16.**
+> **Dernière mise à jour : 2026-07-08.**
 >
 > ⚠️ **Ne pas supposer qu'un core est implémenté parce que sa spécification existe.** Un
 > `CORE_SPECIFICATION.md` ≠ un starter ; un README ≠ une implémentation ; un rapport ≠ une preuve
@@ -61,7 +61,7 @@ enistere-os-foundation/
     ui-kit/            IMPLEMENTATION_PARTIELLE (tokens + 12 primitives Web React, React 19) — v0.1.1
     web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement)
     cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles)
-    mobile-react-native/  STARTER_SIGN_IN_FORM_READY (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell durci RN27 ; smoke Android RN28 ; smoke automation RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 formulaire sign-in générique RHF+Zod email/password accessible ; aucune logique métier, aucun réseau métier/dépendance/SDK/adaptateur natif réel/retry branché ; typecheck/lint/test 355/355/export iOS/audit verts)
+    mobile-react-native/  STARTER_EXPO_DOCTOR_GREEN (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell durci RN27 ; smoke Android RN28/RN29/RN34B ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 formulaire sign-in générique RHF+Zod ; RN33 thème ; RN34 patch Expo SDK aligné ; typecheck/lint/test 355/355/expo-doctor 19/19/export iOS/audit verts)
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -79,7 +79,7 @@ enistere-os-foundation/
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs ; pas d'infra déploiement) | **IMPLEMENTATION_PARTIELLE** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture) | **IMPLEMENTATION_PARTIELLE** |
-| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 ; smoke visuel Android Emulator RN28 ; smoke runtime local RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; **formulaire sign-in générique RHF+Zod RN32** email/password accessible, smoke-android adapté ; aucun réseau métier/dépendance/SDK/adaptateur natif réel/endpoint métier/retry branché) | **STARTER_SIGN_IN_FORM_READY** |
+| `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 ; smoke visuel Android Emulator RN28 ; smoke runtime local RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; **formulaire sign-in RN32**, **préférence thème RN33**, **doctor Expo green RN34**, **smoke Android RN34B passé**) | **STARTER_EXPO_DOCTOR_GREEN** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -138,8 +138,9 @@ Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 
 API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
 jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
-+ preuve live **16/16** (client officiel vs API réelle). UI Kit : **78 tests** (`node:test` + `global-jsdom`
-+ Testing Library + jest-axe, **React 19**), **100 % couverture** (9 primitives, dont Alert/Card/FormField).
++ preuve live **16/16** (client officiel vs API réelle). UI Kit : **121 tests** (`node:test` + `global-jsdom`
++ Testing Library + jest-axe, **React 19**) couvrant **12 primitives** (Button/Input/Label/Text/Spinner/
++ VisuallyHidden + Alert/Card/FormField + Dialog/Select/Toast).
 Web Core : **307 tests** (`node:test` :
 config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
 UI, mapping d'erreurs, garde anti-réseau, **Auth** : cookie-config, session adapter, factory
@@ -297,7 +298,7 @@ détaillée du API Core.
 2. **Packages intégrés (public + authentifié)** — UI Kit consommé + `api-client-fetch` **instancié**
    (endpoints publics **et** BFF Auth) par le Web Core ; types Auth dérivés via `SchemaOf<>`. Risque de
    dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
-3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose d'un socle vérifié et rejouable localement (**STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT** : primitives RN 1→25 + Settings protégé RN26 + shell public/protégé/settings durci RN27 + smoke Android RN28 + automatisation locale RN29 + préflight iOS RN30 bloqué par environnement Linux sans `xcrun`) ≠ implémentation complète (V1 partielle : écran/picker d'upload, push distant réel + token device, adaptateurs natifs réels, catalogues métier i18n + routes concrètes, SDK analytics/crash réels, application exhaustive des props a11y, offline sync réelle, remote-config réel, biométrie réelle, store préférences natif, UI consentement, backend d'observabilité — différés).
+3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose d'un socle vérifié et rejouable localement (**STARTER_EXPO_DOCTOR_GREEN** : primitives RN 1→25 + Settings RN26 + runtime RN27 + smoke Android RN28/RN29/RN34B + préflight iOS RN30 bloqué Linux + formulaire RN32 + thème RN33 + Expo doctor RN34) ≠ implémentation complète (V1 partielle : écran/picker d'upload, push distant réel + token device, adaptateurs natifs réels, catalogues métier i18n + routes concrètes, SDK analytics/crash réels, application exhaustive des props a11y, offline sync réelle, remote-config réel, biométrie réelle, store préférences natif, UI consentement, backend d'observabilité — différés).
 4. **CI minimale en place** (`.github/workflows/ci.yml`) — non-régression du monorepo automatisée (ordre de
    build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
    navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.
@@ -336,7 +337,7 @@ Server Action Auth, sans token en JS** (**263 tests** + preuves API réelles **2
 redirect**, session cohérente, contenu privé jamais exposé, droits sans nouveau JWT), **263 tests fiables ×2** +
 **runtime 33/33**, **aucun défaut bloquant** ; réserves **opérationnelles** (CI, E2E navigateur,
 streaming-redirect, multi-onglets, CSP/HSTS). Puis **Web Core UI 1** a livré les **états UI & composants
-structurels** : primitives UI Kit `Alert`/`Card`/`FormField` (**78 tests**) + compositions Web
+structurels** : primitives UI Kit `Alert`/`Card`/`FormField` (socle UI Kit désormais **121 tests**) + compositions Web
 (`LoadingState`/`EmptyState`/`ErrorState`/`UnauthorizedState`(401)/`ForbiddenState`(403)/`ServiceUnavailableState`/
 `PageHeader`, **270 tests**), intégrées (accueil/Health/frontières/Auth), accessibles (axe), **sans donnée
 sensible** (détail [`ui-states.md`](../../cores/web-nextjs/docs/ui-states.md)). Enfin **Web Core Files 1** a livré
