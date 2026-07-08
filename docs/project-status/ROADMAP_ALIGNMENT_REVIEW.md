@@ -6,7 +6,8 @@
 >
 > ⚠️ **Document HISTORIQUE (instantané post-Cloud Core 9).** Sa **décision** — « revenir aux priorités V1 →
 > Mobile Core RN » — a depuis été **exécutée** : **RN 1** (starter, PR #11), **RN 2** (auth/session hardening) et
-> **RN 3** (forms/validation/offline) sont **réalisés** (`mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`**).
+> **RN 34** (Expo doctor green) + smoke Android RN34B sont **réalisés** (`mobile-react-native` →
+> **`STARTER_EXPO_DOCTOR_GREEN`**) ; RN31 iOS reste bloqué par l'environnement Linux sans `xcrun`.
 > Ne pas lire cette revue comme l'**état courant** : l'état réel à jour est dans
 > [`FOUNDATION_CURRENT_STATE.md`](./FOUNDATION_CURRENT_STATE.md) / [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md)
 > / [`SESSION_HANDOFF.md`](./SESSION_HANDOFF.md).
@@ -35,10 +36,10 @@ registry/staging.
 | **API Core NestJS** | `IMPLEMENTATION_AVANCEE` | 377 u + 101 e2e, 3 revues, image runtime **corrigée & bootable** | CC8 (fix image) | **V1 backend complet** (auth/RBAC/files/health/OpenAPI) | Redis/queues/mail (V2+) | hardening/review (optionnel) | basse (stable) |
 | `@enistere/api-contracts` | `AVANCEE` (local) | 11 tests, generate:check | — | contrat typé canonique | publication | publier (non requis V1) | basse |
 | `@enistere/api-client-fetch` | `AVANCEE` (local) | 29 + live 16/16 | intégré Web | client typé réutilisable | publication | publier (non requis V1) | basse |
-| **UI Kit** | `IMPLEMENTATION_PARTIELLE` | 9 primitives Web, 78 tests 100 % | Web UI 1 | tokens + primitives **consommés par Web** | primitives interactives ; **ThemeProvider RN absent** ; Tailwind/shadcn absents | UI Kit 4 (Dialog/Select/Toast) | **moyenne** |
+| **UI Kit** | `IMPLEMENTATION_PARTIELLE` | 12 primitives Web, 121 tests | UI Kit 4 | tokens + primitives **consommés par Web** | composants avancés restants ; **ThemeProvider RN absent** ; Tailwind/shadcn absents | Décision humaine | **moyenne** |
 | **Web Core Next.js** | `IMPLEMENTATION_PARTIELLE` | 307 tests ×2, runtime 49/49 | Files 1 | Health + **Auth BFF** + UI + Files lecture | upload Web (Files 2) ; CSP/HSTS | Files 2 (optionnel) | moyenne-basse |
 | **Cloud Core** | `IMPLEMENTATION_PARTIELLE` | 4 workflows CI + GHCR + staging local exécuté | CC9 (exécution locale) | **CI non-régression, images bootables, runbooks, api-smoke** | **serveur réel/HTTPS/déploiement (CC10)** ; **compose local V1 Traefik/Redis NON livré** | **PAUSE contrôlée** ; CC10 quand serveur réel dispo | **EN PAUSE** |
-| **Mobile Core React Native** | `SPECIFICATION_DOCUMENTAIRE` | spec (1013 l), **ZÉRO code** | aucune | **aucune** (gap V1 #2) | **tout le starter** | **Mobile Core RN 1 — starter** | **HAUTE (prioritaire)** |
+| **Mobile Core React Native** | `STARTER_EXPO_DOCTOR_GREEN` | RN 1→34 + smoke Android passé | RN34/RN34B | socle Expo exploitable | iOS smoke réel bloqué macOS/Xcode ; adaptateurs natifs réels différés | RN31 si environnement disponible | **moyenne** |
 | Mobile Core Flutter | `DOSSIER_SEULEMENT` | — | — | — | spec + ADR-034 | V3 | très basse |
 | API Core Spring Boot | `DOSSIER_SEULEMENT` | — | — | — | spec | V3 | très basse |
 | Web Core Angular | `DOSSIER_SEULEMENT` | — | — | — | spec + ADR-035 | V3 | très basse |

@@ -10,10 +10,12 @@
 `react` est une **peerDependency** (`>=18`) — fournie par l'application consommatrice. Les composants
 ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js, ni de React Native.
 
-> **Compatibilité React 19 (v0.1.1).** Le UI Kit est développé et **testé sous React 19** (les 64 tests
-> passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19 sont tous deux
-> supportés** (les primitives n'utilisent ni hook ni API spécifique de version, et sont sûres en Server
-> Component). Alignement effectué lors de l'initialisation du **Web Core Next.js** (Next 16 / React 19).
+> **Compatibilité React 19 (v0.1.1).** Le UI Kit est développé et **testé sous React 19** (les
+> **121 tests** passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19
+> sont tous deux supportés**. Les primitives statiques restent consommables depuis les Server
+> Components ; `Dialog` est explicitement marqué **Client Component** (`'use client'`) car il utilise
+> des hooks pour piloter le `<dialog>` natif. Alignement vérifié avec le **Web Core Next.js** (Next 16 /
+> React 19).
 
 ```ts
 import { Button, Input, Label, Text, Spinner, VisuallyHidden } from '@enistere/ui-kit';

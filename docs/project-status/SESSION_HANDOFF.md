@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-06-14.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-08.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -26,10 +26,11 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique) — 377 tests unitaires + 101 e2e + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
-- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 9 primitives Web React**
-  (Button, Input, Label, Text, Spinner, VisuallyHidden + **Alert, Card, FormField** — Web UI 1) pilotées par
-  tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19** (**78 tests, 100 %**,
-  jest-axe). CSS via `@enistere/ui-kit/styles.css`. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
+- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 12 primitives Web React**
+  (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + **Dialog, Select, Toast** —
+  UI Kit 4) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
+  (**121 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
+  compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
   Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
@@ -96,7 +97,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
   staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
   monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
-- **Socle smoke automatisé + iOS parity documentée** : `mobile-react-native` → **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle mobile Expo doctor green + smoke Android validé** : `mobile-react-native` → **`STARTER_EXPO_DOCTOR_GREEN`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -1290,7 +1291,7 @@ standardise les états d'interface et ajoute 3 primitives structurelles. Statuts
 `IMPLEMENTATION_PARTIELLE`. **UI Kit** : `Alert` (variant info/success/warning/danger ; rôle status sauf
 danger→alert ; glyphe+bordure+titre, jamais couleur seule), `Card` (slots ; `CardTitle` n'impose aucun
 niveau), `FormField` (composition **explicite**, aucune injection magique) — CSS **tokens-only** (aucun hex),
-`styles.css` régénéré, **78 tests** (+ jest-axe), `pack:check` OK. **Web Core** (`src/shared/components/`) :
+`styles.css` régénéré, socle UI Kit désormais **121 tests** (+ jest-axe après UI Kit 4), `pack:check` OK. **Web Core** (`src/shared/components/`) :
 `LoadingState`, `EmptyState`, `ErrorState` (+`requestId`), **`UnauthorizedState`(401) ≠ `ForbiddenState`(403,
 permission non révélée)**, `ServiceUnavailableState` (≠ session anonyme), `PageHeader` (h1 par défaut) — chacun
 `inline?`, **aucune donnée sensible**. **Intégrations** : `PageHeader` + galerie `StatesShowcase` (accueil),
@@ -1416,9 +1417,9 @@ primitives** — **React Hook Form + Zod**, primitives form compatibles UI Kit, 
 (workspace + Metro), Zustand, upload, notifications, logger.) Le **Cloud Core 9** (exécution
 staging **locale** Type D) est **terminé** : stack réelle (images
 corrigées) `healthy`, health 200, endpoint Option A joignable ; URL signée + Auth/Files **non validés en réel**
-(repris en **CC10 sur serveur**). **Actions HUMAINES** : confirmer la protection de branche `main` (7 checks +
-`images`) et **rendre `api-smoke` requis**. **Alternative (décision humaine)** : UI Kit 4 (primitives
-interactives) ; reprise **Cloud Core 10** si un serveur réel devient disponible. **Ne pas créer de production ni
+(repris en **CC10 sur serveur**). **Actions HUMAINES** : confirmer la protection de branche `main` (checks CI +
+`images`) et **rendre `api-smoke` requis**. **Alternative (décision humaine)** : **Web Core Files 2** ou **RN31**
+si un environnement macOS/Xcode devient disponible ; reprise **Cloud Core 10** si un serveur réel devient disponible. **Ne pas créer de production ni
 d'automatisation de déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
