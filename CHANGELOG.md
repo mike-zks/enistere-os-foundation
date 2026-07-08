@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 34 — alignement patch Expo SDK / doctor green
+
+- **Mobile Core React Native 34** (`cores/mobile-react-native/`) : aligne les patchs Expo SDK 55 nécessaires pour ramener `expo-doctor` de 18/19 à **19/19**. `mobile-react-native` passe de `STARTER_THEME_PREFERENCE_READY` à **`STARTER_EXPO_DOCTOR_GREEN`**.
+  - **`package.json`** : `expo` `~55.0.0`→`~55.0.27`, `expo-linking` `~55.0.15`→`~55.0.16`, `expo-secure-store` `~55.0.14`→`~55.0.15` (3 pins de patch uniquement).
+  - **`package-lock.json`** : mises à jour transitives dans l'arbre `expo` 55.0.27 — tous des packages `@expo/*` CLI internes (non-runtime) et `postcss` patch.
+  - **Aucun changement de code** : aucun fichier `app/`, `src/`, `scripts/` ou `test/` modifié.
+  - **Contraintes** : aucune nouvelle dépendance, aucun changement SDK majeur/mineur, aucun changement AuthEngine/QueryClient/mutations.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **19/19**, `expo export -p ios`, `npm run smoke:android` (`blocked` — aucun device), `npm run smoke:ios` (`blocked` — Linux), `npm audit` root (0 vuln), `git diff --check`. Commit `chore(mobile): align expo sdk patch versions`.
+
 ### Mobile Core React Native 33 — câblage préférence de thème
 
 - **Mobile Core React Native 33** (`cores/mobile-react-native/`) : câble la préférence de thème locale au `ThemeProvider`. `mobile-react-native` passe de `STARTER_SIGN_IN_FORM_READY` à **`STARTER_THEME_PREFERENCE_READY`**.
