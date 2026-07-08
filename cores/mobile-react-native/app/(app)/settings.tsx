@@ -14,6 +14,7 @@ import { CONSENT_CATEGORIES, createConsentService, createPlaceholderConsentStore
 import type { ConsentCategory, ConsentStatus } from '@/consent';
 import { useAuth } from '@/auth';
 import { useUiStore } from '@/store/ui-store';
+import type { ThemePreference } from '@/store';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
@@ -33,6 +34,7 @@ export default function SettingsScreen(): React.JSX.Element {
   const { session, status, refreshSession, signOut } = useAuth();
   const theme = useTheme();
   const themePreference = useUiStore((state) => state.themePreference);
+  const setThemePreference = useUiStore((state) => state.setThemePreference);
   const resetUiState = useUiStore((state) => state.reset);
   const [consentStatuses, setConsentStatuses] = useState<ConsentStatusMap>(() => emptyConsentStatuses());
 
@@ -97,6 +99,7 @@ export default function SettingsScreen(): React.JSX.Element {
 
           <Section title="Preferences / UI">
             <Row label="Theme preference" value={themePreference} />
+            <ThemeSelector current={themePreference} onSelect={setThemePreference} />
             <Button title="Reset UI state" variant="secondary" onPress={resetUiState} />
           </Section>
 
@@ -126,6 +129,35 @@ export default function SettingsScreen(): React.JSX.Element {
         </ScrollView>
       </Screen>
     </>
+  );
+}
+
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
+
+function ThemeSelector({
+  current,
+  onSelect,
+}: {
+  readonly current: ThemePreference;
+  readonly onSelect: (pref: ThemePreference) => void;
+}): React.JSX.Element {
+  const theme = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+      {THEME_OPTIONS.map(({ value, label }) => (
+        <View key={value} style={{ flex: 1 }}>
+          <Button
+            title={label}
+            variant={current === value ? 'primary' : 'secondary'}
+            onPress={() => onSelect(value)}
+          />
+        </View>
+      ))}
+    </View>
   );
 }
 

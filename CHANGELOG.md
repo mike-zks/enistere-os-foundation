@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 33 — câblage préférence de thème
+
+- **Mobile Core React Native 33** (`cores/mobile-react-native/`) : câble la préférence de thème locale au `ThemeProvider`. `mobile-react-native` passe de `STARTER_SIGN_IN_FORM_READY` à **`STARTER_THEME_PREFERENCE_READY`**.
+  - **`ThemePreferenceProvider`** (`src/theme/ThemePreferenceProvider.tsx`) : binding React qui lit `useUiStore(state => state.themePreference)` et passe `scheme={undefined}` quand `'system'` (→ suit l'OS via `useColorScheme`), ou `scheme='light'`/`'dark'` pour les surcharges explicites.
+  - **`_layout.tsx`** : remplace `<ThemeProvider>` par `<ThemePreferenceProvider>` — seul changement dans le layout racine.
+  - **Settings** : section "Preferences / UI" étend `ThemeSelector` (3 boutons System/Light/Dark, bouton actif en `variant="primary"`). Lecture `themePreference` + `setThemePreference` + `reset()` depuis `useUiStore`.
+  - **Reset** : `reset()` remet `themePreference` à `'system'` (logique inchangée dans `ui-state.ts` — `resetUiState()` déjà confirmée par `ui-state.test.ts`).
+  - **Non-persistance** : la préférence est in-memory uniquement (ADR-015 §16) ; elle disparaît au redémarrage et au reset UI.
+  - **Contraintes** : aucune dépendance nouvelle, aucun endpoint métier, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations, aucun stockage sensible.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **18/19** (drift patch pré-existant non causé par RN33), `expo export -p ios`, `npm run smoke:android` (`blocked` — aucun device), `npm run smoke:ios` (`blocked` — Linux, pas de macOS/xcrun), `npm audit` (0 vuln), `git diff --check`. Commit `feat(mobile): wire theme preference`.
+
 ### Mobile Core React Native 32 — formulaire sign-in générique RHF/Zod
 
 - **Mobile Core React Native 32** (`cores/mobile-react-native/`) : remplace le bouton sign-in placeholder avec credentials hardcodés par un formulaire générique email/password utilisant React Hook Form + Zod via les primitives existantes RN3. `mobile-react-native` passe de `STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT` à **`STARTER_SIGN_IN_FORM_READY`**.

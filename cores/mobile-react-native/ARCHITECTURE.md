@@ -30,13 +30,13 @@ avec la description du `package.json` racine (« les cores restent autonomes »)
 Conséquence directe : ce socle **ne consomme pas** les packages `@enistere/*`
 (workspace) — voir §4.
 
-## 3. Thème : bridge tokens + ThemeProvider (ADR-008 / ADR-010)
+## 3. Thème : bridge tokens + ThemeProvider + ThemePreferenceProvider (ADR-008 / ADR-010)
 
 ADR-010 impose « tokens Enistere + **ThemeProvider** + composants maison », sans
 NativeWind ni librairie UI complète. Le socle fournit donc un `ThemeProvider`
-(contexte, light/dark via `useColorScheme`) et des primitives maison
-(`Screen`/`Text`/`Button`) pilotées par tokens, avec un plancher de cible tactile
-(a11y).
+(contexte, light/dark via `useColorScheme` ou `scheme` forcé) et des primitives
+maison (`Screen`/`Text`/`Button`) pilotées par tokens, avec un plancher de cible
+tactile (a11y).
 
 `@enistere/ui-kit` (ADR-008) reste la **source de vérité** des tokens et est déjà
 RN-safe. La mission autorisant explicitement un « bridge minimal », `src/theme/
@@ -44,6 +44,15 @@ tokens.ts` **mire la forme** des tokens UI Kit avec des **valeurs placeholder**
 (neutres, pas une identité de marque). Quand la surface tokens mobile de l'UI Kit
 sera disponible, on remplacera ces littéraux par des imports
 `@enistere/ui-kit/tokens` — le `ThemeProvider` et les composants ne changent pas.
+
+**RN 33 — câblage `themePreference`** : `ThemePreferenceProvider` (dans
+`src/theme/ThemePreferenceProvider.tsx`) est le seul point de couplage entre
+`src/theme` et `src/store`. Il lit `useUiStore(state => state.themePreference)` et
+passe `scheme={undefined}` (→ OS via `useColorScheme`) quand `'system'`, ou
+`scheme='light'`/`'dark'` pour les surcharges explicites. `_layout.tsx` utilise
+désormais `<ThemePreferenceProvider>` au lieu de `<ThemeProvider>`. La préférence
+est **in-memory uniquement** : `reset()` la remet à `'system'` ; aucune persistance
+(ADR-015 §16). L'écran Settings expose les boutons System/Light/Dark.
 
 ## 4. API : transport `fetch` générique = **seam** vers `@enistere/api-client-fetch`
 

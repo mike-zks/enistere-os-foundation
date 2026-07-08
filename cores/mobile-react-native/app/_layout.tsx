@@ -11,19 +11,19 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from '@/auth';
 import { QueryProvider } from '@/query';
-import { ThemeProvider } from '@/theme';
+import { ThemePreferenceProvider } from '@/theme';
 
 export default function RootLayout(): React.JSX.Element {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
+      <ThemePreferenceProvider>
         <QueryProvider>
           <AuthProvider>
             <StatusBar style="auto" />
             <Stack screenOptions={{ headerShown: false }} />
           </AuthProvider>
         </QueryProvider>
-      </ThemeProvider>
+      </ThemePreferenceProvider>
     </SafeAreaProvider>
   );
 }
