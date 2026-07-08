@@ -5,6 +5,19 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core Files 2 : RÉALISÉ** (`web-nextjs` → **333 tests**). Files 2 ajoute l'upload Web
+> sécurisé BFF multipart : BFF ciblé `POST /api/files/upload` (CSRF/Origin obligatoires, validation
+> fichier+catégorie, client `writable`), client BFF navigateur `uploadFile` (FormData sans
+> Content-Type forcé, same-origin, aucun Bearer), mutation `useUploadFile` (sans `mutationKey`,
+> anti-double-soumission, résultat jamais en QueryCache), `UploadForm` (9 catégories Select,
+> fichier+subjectId, Alert erreur/succès), page `/protected/files/upload`, mapping 413/415.
+> L'API Core reste l'autorité MIME/taille/permissions (ADR-007). Aucun upload direct MinIO/S3,
+> aucun log de nom/contenu. **333/333 tests**, typecheck/lint/test/build/audit verts.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
+> ou **Web Core** (suite Files : delete, admin, prévisualisation).
+
 > ✅ **UI Kit 4 : RÉALISÉ** (`ui-kit` → **12 primitives Web React**). UI Kit 4 ajoute
 > Dialog (modale `<dialog>` native, `showModal()`/`close()`, focus trap, ESC, backdrop nativement,
 > `aria-modal`), Select (`<select>` natif + chevron CSS-only, `size`, `invalid` → `aria-invalid`,
@@ -13,10 +26,6 @@
 > (ADR-009). `@enistere/ui-kit` passe de 9 à **12 primitives**, 78 → **121 tests** (0 régression).
 > `npm run tokens:generate` régénéré, `npm run tokens:check` vert, `npm run lint` vert,
 > `git diff --check` vert.
->
-> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
-> **Web Core Files 2** (upload sécurisé Web, multipart) maintenant que le UI Kit débloque les
-> contrôles interactifs, ou **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode).
 
 > ✅ **Mobile Core React Native 34 : RÉALISÉ** (`mobile-react-native` →
 > **`STARTER_EXPO_DOCTOR_GREEN`**). RN 34 aligne les patchs Expo SDK 55

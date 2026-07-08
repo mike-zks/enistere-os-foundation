@@ -6,6 +6,21 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 2 — upload sécurisé BFF multipart
+
+- **Web Core Files 2** (`cores/web-nextjs/`) : ajoute l'upload Web sécurisé côté `@enistere/web-nextjs`. **333 tests** (307 + 26 nouveaux, 0 régression). BFF ciblé uniquement, jamais un proxy générique. API Core reste l'autorité MIME/taille/permissions (ADR-007). Session via cookies HttpOnly, CSRF obligatoire (ADR-005).
+  - **Handler BFF** (`src/core/files/handlers/upload-file-handler.ts`) : `POST /api/files/upload` — ordre sécurisé : méthode (405) → Origin/Referer + CSRF (403, **aucun appel API** avant validation) → validation fichier+catégorie (400) → client `writable` (un seul refresh coordonné) → réponse `PublicStoredFileDto`, `no-store`. 9 catégories validées enum-closed.
+  - **Route** (`src/app/api/files/upload/route.ts`) : `dynamic = "force-dynamic"`, `POST` only.
+  - **BFF client navigateur** (`uploadFile` dans `files-bff-client.ts`) : `POST /api/files/upload` avec `FormData` — **jamais de `Content-Type` forcé** (boundary posé par le runtime), `credentials:"include"`, `X-CSRF-Token`, aucun Bearer.
+  - **Mapping erreurs étendu** (`files-response.ts`) : 413 → `FILE_TOO_LARGE`, 415 → `UNSUPPORTED_MEDIA_TYPE` (en plus des 400/401/403/404/409/429/502/503/504 existants).
+  - **`FileErrorKind`** étendu (`file-error.ts`) : `too_large` (413) et `unsupported_type` (415) en plus des kinds existants.
+  - **Mutation hook** (`src/features/files/use-upload-file.ts`) : `useUploadFile()` — `useMutation` **sans `mutationKey`** (résultat jamais en cache), `getCsrfToken()` → `FormData` → `uploadFile()`, **anti-double-soumission** (`useRef`), `uploadedFile` retourné dans l'état React (jamais en QueryCache), `reset()` exposé.
+  - **UI** (`src/features/files/upload-form.tsx`) : Client Component `"use client"` — `FormField`/`FormFieldLabel`/`FormFieldError` + `Input` (file) + `Select` (9 catégories) + `Input` (subjectId optionnel, max 128) + `Button` (anti-double via `useUploadFile`) + `Alert` danger/success. Validation UX uniquement.
+  - **Page protégée** (`src/app/(protected)/protected/files/upload/page.tsx`) : `dynamic = "force-dynamic"`, route privée héritée du layout.
+  - **Contraintes** : aucun upload direct MinIO/S3, aucune URL signée côté client, aucun log de nom/chemin/contenu, aucun `Authorization` Bearer navigateur, aucun delete/list/admin/preview/multi-upload.
+  - **Tests** : `test/upload-handler.test.ts` (15 cas : CSRF/Origin, fichier absent, catégorie invalide/absente, toutes catégories valides, 401/403/413/415/429/503, requestId, champs publics) + `test/upload-bff-client.test.ts` (5 cas : same-origin, no Content-Type, 413/415, réseau) + `test/use-upload-file.test.tsx` (8 cas : succès/no-cache, double-clic, 413/415/401, reset, subjectId, isPending).
+  - **Vérifications** : `tsc --noEmit`, `npm run lint`, `npm test` (**333/333**), `npm run build`, `npm audit` (0 vuln), `git diff --check`. Commit `feat(web): add secure multipart file upload (Files 2)`.
+
 ### UI Kit 4 — primitives interactives Dialog / Select / Toast
 
 - **UI Kit 4** (`cores/ui-kit/`) : ajoute trois primitives interactives accessibles. `@enistere/ui-kit` passe de **9** à **12 primitives Web React**, de **78** à **121 tests** (0 régression).

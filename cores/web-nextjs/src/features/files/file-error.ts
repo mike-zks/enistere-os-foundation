@@ -1,7 +1,14 @@
 import { BffAuthError } from "../../core/auth/client/bff-error.js";
 
 /** Classe d'état UI dérivée d'une erreur Files (mappe vers les états standardisés du Web Core). */
-export type FileErrorKind = "notfound" | "forbidden" | "unauthorized" | "unavailable" | "error";
+export type FileErrorKind =
+  | "notfound"
+  | "forbidden"
+  | "unauthorized"
+  | "unavailable"
+  | "too_large"
+  | "unsupported_type"
+  | "error";
 
 export interface FileError {
   readonly kind: FileErrorKind;
@@ -31,6 +38,10 @@ export function classifyFileError(error: unknown): FileError {
         return { kind: "notfound", message: "Fichier introuvable.", ...base };
       case 409:
         return { kind: "error", message: "Ce fichier n'est pas téléchargeable.", ...base };
+      case 413:
+        return { kind: "too_large", message: "Fichier trop volumineux.", ...base };
+      case 415:
+        return { kind: "unsupported_type", message: "Type de fichier non accepté.", ...base };
       case 429:
         return { kind: "error", message: "Trop de requêtes. Réessayez plus tard.", ...base };
       case 503:

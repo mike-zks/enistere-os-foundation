@@ -29,6 +29,10 @@ export function filesErrorResponse(error: unknown, requestId?: string): Response
         return jsonError(404, "NOT_FOUND", "Fichier introuvable.", { requestId });
       case 409:
         return jsonError(409, "NOT_DOWNLOADABLE", "Fichier non téléchargeable.", { requestId });
+      case 413:
+        return jsonError(413, "FILE_TOO_LARGE", "Fichier trop volumineux.", { requestId });
+      case 415:
+        return jsonError(415, "UNSUPPORTED_MEDIA_TYPE", "Type de fichier non accepté.", { requestId });
       case 429:
         return jsonError(429, "RATE_LIMITED", "Trop de requêtes. Réessayez plus tard.", { requestId });
       case 503:
