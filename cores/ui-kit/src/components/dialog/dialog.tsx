@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, type ReactElement } from 'react';
 
 import { mergeClassNames } from '../../utilities/merge-class-names.js';
