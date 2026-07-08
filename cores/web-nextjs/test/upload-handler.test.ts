@@ -25,7 +25,14 @@ const ERR = (status: number): MockResponseSpec => ({
 });
 
 function makeUploadRequest(
-  opts: { csrf?: string; origin?: string | null; file?: Blob; category?: string; subjectId?: string } = {},
+  opts: {
+    csrf?: string;
+    origin?: string | null;
+    file?: Blob;
+    category?: string;
+    subjectId?: string;
+    contentLength?: string;
+  } = {},
 ): Request {
   const form = new FormData();
   form.append("file", opts.file ?? FILE_DATA, "photo.jpg");
@@ -36,6 +43,7 @@ function makeUploadRequest(
   const origin = "origin" in opts ? opts.origin : "http://localhost:3100";
   if (origin !== null && origin !== undefined) headers.set("origin", origin);
   if (opts.csrf) headers.set("x-csrf-token", opts.csrf);
+  if (opts.contentLength !== undefined) headers.set("content-length", opts.contentLength);
 
   return new Request("https://web.test/api/files/upload", {
     method: "POST",
@@ -142,6 +150,36 @@ test("upload : catégorie invalide → 400 sans appel API", async () => {
   assert.equal(res.status, 400);
   const body = (await res.json()) as { errorCode: string };
   assert.equal(body.errorCode, "INVALID_CATEGORY");
+  assert.equal(mock.calls.length, 0);
+});
+
+test("upload : Content-Length trop grand → 413 sans parsing utile ni appel API", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  const csrf = seedCsrf(store);
+  const mock = createMockFetch({ body: apiEnvelope(UPLOADED) });
+  const res = await handleUploadFile(
+    makeUploadRequest({ csrf, contentLength: String(11 * 1024 * 1024) }),
+    makeDeps(store, mock),
+  );
+  assert.equal(res.status, 413);
+  const body = (await res.json()) as { errorCode: string };
+  assert.equal(body.errorCode, "FILE_TOO_LARGE");
+  assert.equal(mock.calls.length, 0);
+});
+
+test("upload : subjectId trop long → 400 sans appel API", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  const csrf = seedCsrf(store);
+  const mock = createMockFetch({ body: apiEnvelope(UPLOADED) });
+  const res = await handleUploadFile(
+    makeUploadRequest({ csrf, subjectId: "x".repeat(256) }),
+    makeDeps(store, mock),
+  );
+  assert.equal(res.status, 400);
+  const body = (await res.json()) as { errorCode: string };
+  assert.equal(body.errorCode, "INVALID_SUBJECT_ID");
   assert.equal(mock.calls.length, 0);
 });
 

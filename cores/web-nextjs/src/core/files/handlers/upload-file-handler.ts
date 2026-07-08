@@ -18,8 +18,28 @@ const FILE_CATEGORIES = [
   "OTHER",
 ] as const satisfies readonly FileCategory[];
 
+const DEFAULT_FILE_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
+const SUBJECT_ID_MAX_LENGTH = 255;
+
 function isValidCategory(v: unknown): v is FileCategory {
   return FILE_CATEGORIES.includes(v as FileCategory);
+}
+
+function readMaxUploadBodyBytes(): number {
+  const raw = process.env.FILE_MAX_SIZE_BYTES;
+  const parsed = raw === undefined ? DEFAULT_FILE_MAX_SIZE_BYTES : Number.parseInt(raw, 10);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    return DEFAULT_FILE_MAX_SIZE_BYTES + MULTIPART_OVERHEAD_BYTES;
+  }
+  return parsed + MULTIPART_OVERHEAD_BYTES;
+}
+
+function isContentLengthTooLarge(request: Request): boolean {
+  const raw = request.headers.get("content-length");
+  if (raw === null) return false;
+  const length = Number.parseInt(raw, 10);
+  return Number.isSafeInteger(length) && length > readMaxUploadBodyBytes();
 }
 
 /**
@@ -38,6 +58,10 @@ export async function handleUploadFile(request: Request, deps: AuthHandlerDeps):
 
   const securityError = checkOriginAndCsrf(request, deps, requestId);
   if (securityError) return securityError;
+
+  if (isContentLengthTooLarge(request)) {
+    return jsonError(413, "FILE_TOO_LARGE", "Fichier trop volumineux.", { requestId });
+  }
 
   let file: Blob;
   let category: FileCategory;
@@ -58,8 +82,11 @@ export async function handleUploadFile(request: Request, deps: AuthHandlerDeps):
 
     file = fileEntry;
     category = categoryRaw;
-    subjectId =
-      typeof subjectIdRaw === "string" && subjectIdRaw.length > 0 ? subjectIdRaw : undefined;
+    const normalizedSubjectId = typeof subjectIdRaw === "string" ? subjectIdRaw.trim() : "";
+    if (normalizedSubjectId.length > SUBJECT_ID_MAX_LENGTH) {
+      return jsonError(400, "INVALID_SUBJECT_ID", "Référence invalide.", { requestId });
+    }
+    subjectId = normalizedSubjectId.length > 0 ? normalizedSubjectId : undefined;
   } catch {
     return jsonError(400, "INVALID_FORM", "Corps de la requête invalide.", { requestId });
   }
