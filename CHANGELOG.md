@@ -13,7 +13,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
   - **`package-lock.json`** : mises à jour transitives dans l'arbre `expo` 55.0.27 — tous des packages `@expo/*` CLI internes (non-runtime) et `postcss` patch.
   - **Aucun changement de code** : aucun fichier `app/`, `src/`, `scripts/` ou `test/` modifié.
   - **Contraintes** : aucune nouvelle dépendance, aucun changement SDK majeur/mineur, aucun changement AuthEngine/QueryClient/mutations.
-  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **19/19**, `expo export -p ios`, `npm run smoke:android` (`blocked` — aucun device), `npm run smoke:ios` (`blocked` — Linux), `npm audit` root (0 vuln), `git diff --check`. Commit `chore(mobile): align expo sdk patch versions`.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **19/19**, `expo export -p ios`, `npm run smoke:android` (**passed** — `emulator-5554` / Pixel_6a, loginCount=1, refreshCount=1, 2026-07-08), `npm run smoke:ios` (`blocked` — Linux), `npm audit` root (0 vuln), `git diff --check`. Commit `chore(mobile): align expo sdk patch versions`.
 
 ### Mobile Core React Native 33 — câblage préférence de thème
 

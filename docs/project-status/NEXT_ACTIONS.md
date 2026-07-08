@@ -11,7 +11,8 @@
 > `expo-secure-store` 55.0.14→55.0.15) pour ramener expo-doctor de 18/19 à
 > **19/19**. Aucun changement de code runtime. Typecheck, lint, test 355/355,
 > expo-doctor **19/19**, expo export -p ios, npm audit 0 vuln, git diff --check
-> verts.
+> verts. **`npm run smoke:android` passed** (`emulator-5554` / Pixel_6a, 2026-07-08 —
+> loginCount=1, refreshCount=1).
 >
 > **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
 > **Mobile Core React Native 31** dès qu'un hôte macOS/Xcode est disponible
