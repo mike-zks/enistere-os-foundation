@@ -66,3 +66,20 @@ export function createFileDownloadUrl(
     signal,
   );
 }
+
+/**
+ * `POST /api/files/upload` → métadonnées du fichier enregistré (`PublicStoredFile`).
+ * Envoie un `FormData` multipart : **ne force jamais `Content-Type`** (le runtime pose le boundary).
+ * Same-origin, `credentials:"include"`, CSRF en header. Jamais de Bearer navigateur.
+ */
+export function uploadFile(
+  formData: FormData,
+  csrfToken: string,
+  signal?: AbortSignal,
+): Promise<PublicStoredFile> {
+  return bffFetch<PublicStoredFile>(
+    "/api/files/upload",
+    { method: "POST", headers: { "X-CSRF-Token": csrfToken, Accept: "application/json" }, body: formData },
+    signal,
+  );
+}
