@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core React Native 32 — formulaire sign-in générique RHF/Zod
+
+- **Mobile Core React Native 32** (`cores/mobile-react-native/`) : remplace le bouton sign-in placeholder avec credentials hardcodés par un formulaire générique email/password utilisant React Hook Form + Zod via les primitives existantes RN3. `mobile-react-native` passe de `STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT` à **`STARTER_SIGN_IN_FORM_READY`**.
+  - **Formulaire sign-in** : `app/(public)/sign-in.tsx` — `useForm` + `createZodResolver` + schéma local (`emailField()` + `requiredText()`), champs `TextInputField` email (email-address, returnKeyType="next") et password (secureTextEntry, returnKeyType="send", `onSubmitEditing` → submit), erreurs de champ accessibles via `FormField`/`FormError` (live region polite, ADR-010 §16), erreur auth affichée comme message générique sans fuite sensible, état loading via `isSubmitting`, credentials hardcodés supprimés.
+  - **Smoke Android** : `scripts/smoke-android.js` adapté — ajout de `SMOKE_EMAIL`/`SMOKE_PASSWORD` (env `RN_SMOKE_EMAIL`/`RN_SMOKE_PASSWORD`, défauts `smoke@example.com`/`smoke`), `findInputByLabel` (recherche par `content-desc` uniquement pour cibler les `EditText` RN vs les `TextView` des `FormLabel`), `waitForInputByLabel`, `tapInputAndType`, flux sign-in mis à jour (`tapInputAndType('Email', ...)` + `tapInputAndType('Password', ...)` + `keyevent 66`).
+  - **Smoke iOS** : `scripts/smoke-ios.js` procédure mise à jour pour décrire le formulaire RN32 et les credentials de smoke.
+  - **RN31** : précondition macOS/Xcode toujours non satisfaite (Linux, `xcrun` absent) — statut en attente environnement externe, non répété.
+  - **Contraintes** : aucune dépendance nouvelle, aucun endpoint métier, aucun register/forgot password/OAuth, aucun changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations, aucun stockage ni log de password/email brut.
+  - **Vérifications** (locales) : `tsc --noEmit`, `expo lint`, `npm test` (**355/355 `node --test`**), expo-doctor **18/19** (drift patch pré-existant), `expo export -p ios`, `npm run smoke:android` (`blocked` — Linux, aucun device), `npm run smoke:ios` (`blocked` — Linux, pas de macOS/xcrun), `npm audit` (0 vuln), `git diff --check`. Commit `feat(mobile): add generic sign-in form`.
+
 ### Mobile Core React Native 30 — smoke runtime iOS / parity device
 
 - **Mobile Core React Native 30** (`cores/mobile-react-native/`) : documente la parité runtime iOS du starter Expo public/protégé/settings et ajoute un préflight local `npm run smoke:ios` sans dépendance. `mobile-react-native` passe de `STARTER_SMOKE_AUTOMATION_READY` à **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**.

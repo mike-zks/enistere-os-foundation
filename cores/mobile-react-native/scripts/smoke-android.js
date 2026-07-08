@@ -15,6 +15,11 @@ const REPORT_PATH =
 const STEP_TIMEOUT_MS = Number(process.env.RN_SMOKE_STEP_TIMEOUT_MS || '45000');
 const BOOT_TIMEOUT_MS = Number(process.env.RN_SMOKE_BOOT_TIMEOUT_MS || '120000');
 
+// Smoke credentials — used only with the local mock auth server (no real backend).
+// Override via env; defaults are non-sensitive placeholders that match the mock.
+const SMOKE_EMAIL = process.env.RN_SMOKE_EMAIL || 'smoke@example.com';
+const SMOKE_PASSWORD = process.env.RN_SMOKE_PASSWORD || 'smoke';
+
 const state = {
   startedAt: new Date().toISOString(),
   status: 'running',
@@ -288,6 +293,66 @@ async function getScreenSize() {
   return { width: Number(match[1]), height: Number(match[2]) };
 }
 
+/**
+ * Finds a form input field by its accessibilityLabel (content-desc) only.
+ *
+ * This is distinct from findNode() which matches both text= and content-desc=.
+ * The form label text (e.g. "Email") appears as text= on the TextView node,
+ * while the actual TextInput appears as content-desc= on its EditText node.
+ * Searching by content-desc only avoids tapping the label instead of the input.
+ */
+function findInputByLabel(xml, label) {
+  const nodePattern = /<node\b[^>]*>/g;
+  let match;
+  while ((match = nodePattern.exec(xml)) !== null) {
+    const node = match[0];
+    const desc = /content-desc="([^"]*)"/.exec(node);
+    if (!desc) continue;
+    const rawLabel = decodeXml(desc[1]);
+    if (rawLabel !== label) continue;
+    const bounds = /bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/.exec(node);
+    if (!bounds) continue;
+    const x1 = Number(bounds[1]);
+    const y1 = Number(bounds[2]);
+    const x2 = Number(bounds[3]);
+    const y2 = Number(bounds[4]);
+    return {
+      label,
+      x: Math.round((x1 + x2) / 2),
+      y: Math.round((y1 + y2) / 2),
+      bounds: [x1, y1, x2, y2],
+    };
+  }
+  return undefined;
+}
+
+async function waitForInputByLabel(label, timeoutMs = STEP_TIMEOUT_MS) {
+  const deadline = Date.now() + timeoutMs;
+  let lastXml = '';
+  while (Date.now() < deadline) {
+    const xml = await dumpUi();
+    lastXml = xml;
+    const node = findInputByLabel(xml, label);
+    if (node) {
+      record('ui-found-input', { label, bounds: node.bounds });
+      return node;
+    }
+    await delay(1000);
+  }
+  throw new Error(`Input field "${label}" not found before timeout.\n${lastXml.slice(0, 2000)}`);
+}
+
+/** Taps an input field (by accessibilityLabel/content-desc) then types the given text. */
+async function tapInputAndType(label, text) {
+  const node = await waitForInputByLabel(label);
+  await run('adb', ['shell', 'input', 'tap', String(node.x), String(node.y)]);
+  record('ui-tap-input', { label });
+  await delay(400);
+  await run('adb', ['shell', 'input', 'text', text]);
+  record('ui-type', { label, length: text.length });
+  await delay(300);
+}
+
 async function scrollDown() {
   const { width, height } = await getScreenSize();
   await run('adb', [
@@ -385,7 +450,13 @@ async function main() {
 
     const xml = await dumpUi();
     if (findNode(xml, 'Sign in')) {
-      await tapLabel('Sign in');
+      // RN 32: sign-in screen now has email/password form fields.
+      // Fill credentials (non-sensitive smoke defaults, mock auth only).
+      await tapInputAndType('Email', SMOKE_EMAIL);
+      await tapInputAndType('Password', SMOKE_PASSWORD);
+      // Press Enter/Send on the password field — triggers onSubmitEditing → form submit.
+      await run('adb', ['shell', 'input', 'keyevent', '66']);
+      record('ui-submit-form', { method: 'keyevent-enter' });
       await waitForMockCount('loginCount', 1);
       await waitForNode('Open settings', STEP_TIMEOUT_MS);
     } else {

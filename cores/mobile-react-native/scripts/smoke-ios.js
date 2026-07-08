@@ -25,11 +25,12 @@ const state = {
   procedure: [
     'Run this command on macOS with Xcode command line tools installed: npm run smoke:ios',
     'Ensure xcrun simctl list devices shows an available iOS Simulator, or connect an iOS device with Expo Go.',
-    'Start the local mock auth service or use the script-provided preflight output to configure a temporary mock only.',
+    'Start the local mock auth server (same as smoke-android.js: Node http on port 3000, POST /auth/login + POST /auth/refresh).',
     'Run npx expo start --ios --localhost -c from cores/mobile-react-native.',
-    'In Expo Go / Simulator, replay: sign-in public -> Home -> Settings -> scroll diagnostics -> back Home -> refresh session -> sign out.',
+    'The sign-in screen (RN 32) shows an email/password form — fill with smoke credentials: RN_SMOKE_EMAIL (default smoke@example.com) and RN_SMOKE_PASSWORD (default smoke). The mock auth accepts any credentials.',
+    'Replay the full starter parcours: fill sign-in form -> tap Sign in -> Home protected -> Settings protected -> scroll diagnostics -> back Home -> Refresh session -> Sign out.',
     'Do not use a real backend, real secret, SDK, native adapter, or business endpoint for this smoke.',
-    'Record the device/simulator name, Expo target, result, and any visual/runtime defects in the RN30 report.',
+    'Record the device/simulator name, iOS version, Expo target, result, and any visual/runtime defects in the RN31 report.',
   ],
 };
 
