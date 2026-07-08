@@ -5,6 +5,22 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Mobile Core React Native 33 : RÉALISÉ** (`mobile-react-native` →
+> **`STARTER_THEME_PREFERENCE_READY`**). RN 33 câble la préférence de thème
+> locale (`system`/`light`/`dark`) au `ThemeProvider` via
+> `ThemePreferenceProvider` (lit `useUiStore.themePreference`, passe `scheme` ou
+> `undefined` pour suivre l'OS). L'écran Settings expose un sélecteur
+> System/Light/Dark. `reset()` remet la préférence à `'system'`. In-memory
+> uniquement (ADR-015 §16). Typecheck, lint, test 355/355, expo export -p ios,
+> npm audit 0 vuln, git diff --check verts. Expo-doctor 18/19 (drift patch
+> pré-existant).
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 31** dès qu'un hôte macOS/Xcode est disponible
+> (exécution iOS smoke réelle — précondition externe), **RN 34** (persistance
+> `themePreference` via `PreferenceService` RN 20 si besoin), ou
+> **UI Kit 4** (primitives interactives Dialog/Select/Toast).
+
 > ✅ **Mobile Core React Native 32 : RÉALISÉ** (`mobile-react-native` →
 > **`STARTER_SIGN_IN_FORM_READY`**). RN 32 remplace le bouton sign-in avec
 > credentials hardcodés par un formulaire générique email/password utilisant RHF
@@ -14,12 +30,6 @@
 > pour remplir les champs du formulaire (`tapInputAndType`, `findInputByLabel`).
 > `scripts/smoke-ios.js` procedure mise à jour. Typecheck, lint, test 355/355,
 > expo export -p ios, npm audit et git diff --check verts.
->
-> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
-> **Mobile Core React Native 33** (durcissement UX formulaire ou autre livrable
-> V1), **UI Kit 4** (primitives interactives Dialog/Select/Toast), ou
-> **Mobile Core React Native 31** dès qu'un hôte macOS/Xcode est disponible
-> (exécution iOS smoke réelle — précondition externe).
 
 > ✅ **Mobile Core React Native 31 : EN ATTENTE PRÉCONDITION EXTERNE**
 > (`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT` maintenu). Hôte Linux,
@@ -267,9 +277,10 @@ RN 1 (PR #11), RN 2 et RN 3 (PR #12). `main` est aligné sur `origin/main` au me
 30. ✅ **Mobile Core React Native 30 — smoke runtime iOS/simulateur ou device parity** — **RÉALISÉ / BLOQUÉ ENVIRONNEMENT** : `npm run smoke:ios` vérifie macOS/`xcrun`/`simctl`/`npx`, produit un rapport JSON `blocked` sur l'hôte Linux sans `xcrun`, et documente la procédure macOS/device ; aucune preuve iOS artificielle, aucune dépendance/logique métier.
 31. **Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel** — **EN ATTENTE PRÉCONDITION EXTERNE** : Linux, `xcrun` absent. Procédure mise à jour par RN32 pour le formulaire sign-in. À rejouer sur macOS/Xcode dès disponibilité.
 32. ✅ **Mobile Core React Native 32 — formulaire sign-in générique RHF/Zod** — **RÉALISÉ** : `app/(public)/sign-in.tsx` remplace le bouton hardcodé par un formulaire email/password RHF+Zod via primitives RN3 (`emailField`, `requiredText`, `TextInputField`, `createZodResolver`) ; `smoke-android.js` adapté (`findInputByLabel`, `tapInputAndType`) ; `smoke-ios.js` procédure mise à jour ; aucune dépendance, aucun endpoint métier, aucun changement AuthEngine/QueryClient/mutations ; typecheck/lint/test 355/355/export iOS/audit verts. `mobile-react-native` → **`STARTER_SIGN_IN_FORM_READY`**.
-33. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
-33. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
-34. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
+33. ✅ **Mobile Core React Native 33 — câblage préférence de thème** — **RÉALISÉ** : `ThemePreferenceProvider` (`src/theme/`) lit `useUiStore.themePreference` et passe `scheme` au `ThemeProvider` (`'system'`→OS, `'light'`/`'dark'`→forcé) ; Settings expose 3 boutons System/Light/Dark ; `reset()` remet à `'system'` ; in-memory uniquement (ADR-015 §16) ; aucune dépendance, aucun endpoint métier, aucun changement AuthEngine/QueryClient/mutations ; typecheck/lint/test 355/355/export iOS/audit verts. `mobile-react-native` → **`STARTER_THEME_PREFERENCE_READY`**.
+34. **UI Kit 4** — primitives interactives (Dialog/Select/Toast) — débloque Mobile/Web riches.
+35. **Cloud Core 10 — préparation serveur staging sécurisé** — **reporté** (dépend d'un serveur réel + HTTPS/DNS/pare-feu ; Cloud en **pause contrôlée**).
+36. **Web Core Files 2** — upload sécurisé côté Web (multipart, finalisation, états).
 
 **Alternative envisageable (justifiée)** : avancer **Cloud Core / CI-CD (ADR-013)** plus tôt pour
 sécuriser la non-régression (aucune CI aujourd'hui) et préparer la publication des packages. Reste

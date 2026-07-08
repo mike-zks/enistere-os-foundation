@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`** (V1 — RN 30 ; smoke iOS documenté, bloqué localement par absence macOS/Xcode)
+> Statut : **`STARTER_THEME_PREFERENCE_READY`** (V1 — RN 33 ; préférence thème system/light/dark câblée, smoke iOS bloqué localement par absence macOS/Xcode)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -33,7 +33,7 @@ standardisée et gouvernée. **Il ne contient aucune logique métier.**
 | **Analytics / télémétrie (RN 13)** | `src/analytics` | `AnalyticsEvent` borné aux primitives + **redaction dédiée basée RN 8** (`sanitizeAnalyticsEvent` : `isSensitiveProperty` réutilise `isSensitiveKey` + scrub valeurs via `redactString`, bornes, **sans throw**) ; `AnalyticsAdapter` (track/flush?, **pas de `identify`**) + **`createAnalyticsService`** (track **best-effort non-intrusif**, **logs sûrs** `{eventName,propertyCount}` via logger RN 8 — jamais les valeurs, erreurs adapter **contrôlées**) ; **adaptateur placeholder** mémoire (tests). **Aucun SDK réel** (Sentry/Amplitude/GA/Segment/Firebase/OTel), **aucun réseau/persistance/user-id réel/token** ; SDK réel = **ADR projet dérivé**. |
 | **Accessibilité a11y (RN 14)** | `src/a11y` | Props **RN-compatibles** (`buildA11yProps` : `role`/`label`/`hint`/`state`, `normalizeA11yText` borné) + **`A11yState`** normalisé (ADR-010 §16 : `disabled`/`focused`/`pressed`/`invalid` + RN state) avec `mergeA11yState`/`isInteractiveRole` ; **annonce** lecteur d'écran (`sanitizeAnnouncement`, `describeAnnouncementForLog` **sans texte**) ; `A11yAdapter` (announce/focus?/isScreenReaderEnabled?, `A11yAdapterError` contrôlé) + **placeholder** mémoire + **`createA11yService`** (best-effort **non-intrusif**, **logs sûrs** `{length,assertive}` — jamais le texte). **Aucun `AccessibilityInfo` réel**, **aucun provider global**, **aucun stockage/UI** ; props appliquées par les **projets dérivés**. |
 | **App lifecycle (RN 15)** | `src/app-lifecycle` | Modèle d'état **`AppLifecycleState`** (`active`/`background`/`inactive`/`unknown`) + helpers purs (`normalizeAppLifecycleState`, `isForeground`/`isBackground`, `isValidTransition`, `nextAppLifecycleState`) ; `AppLifecycleAdapter` (seam RN `AppState` : `getState`/`subscribe`, `AppLifecycleAdapterError` contrôlé) + **placeholder** mémoire + **`createAppLifecycleService`** (`getState`/`subscribe`/`transition`/`dispose`, transitions **validées**, **logs sûrs** `{from,to}` — que des enums, erreurs adapter **contrôlées**, listener **isolé**). **Aucun `AppState` réel**, **aucun provider global**, **aucun stockage/UI/logique métier** ; prépare flush analytics (RN 13) / refresh session foreground / planif notifications (RN 10). |
-| Thème / tokens | `src/theme` | `ThemeProvider` + bridge tokens placeholder (light/dark) |
+| **Thème / tokens (RN 33)** | `src/theme` | `ThemeProvider` + `ThemePreferenceProvider` câblé sur `useUiStore.themePreference` + bridge tokens placeholder (light/dark). Préférence `system`/`light`/`dark` sélectionnable depuis Settings, in-memory uniquement. |
 | UI primitives | `src/ui` | `Screen`, `Text`, `Button` (token-driven, a11y) |
 | **Formulaires / validation** | `src/forms` | **React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` (token-driven, a11y), helpers `validateWith` + mapping erreurs Zod/RHF, resolver. **UX uniquement** (backend = autorité, ADR-003 §18). **Aucun formulaire métier.** |
 | **Offline-ready (préparatoire)** | `src/offline` | état réseau **abstrait**, enveloppe de **mutation offline**, **queue mémoire** FIFO (`enqueue`/`dequeue`/`peek`/`clear`). **Sans persistance, sans rejeu auto, sans NetInfo/MMKV/AsyncStorage/SQLite, sans donnée sensible** (ADR-015 §19). |
@@ -332,13 +332,14 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **54 fichiers `node --test`** (primitives existantes inchangées ; RN 30 n'ajoute aucun helper pur).
-- `doctor` : ✅ **expo-doctor 19/19**.
-- **runtime / bundle Expo** : ✅ `expo export -p ios` réussit. ✅ Smoke manuel Android RN 28 via Expo Go documenté dans [`MOBILE_RN28_VISUAL_SMOKE_REPORT.md`](../../docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md). ✅ Smoke local reproductible RN 29 via `npm run smoke:android` sur Android Emulator `emulator-5554` : rapport JSON `passed` dans `/tmp/enistere-mobile-rn29-smoke-report.json` et synthèse [`MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md`](../../docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md). ⚠️ Smoke runtime iOS RN 30 bloqué localement : hôte `Linux greenovate`, `xcrun` absent ; `npm run smoke:ios` produit `/tmp/enistere-mobile-rn30-ios-smoke-report.json` avec `status: blocked`. Export web déjà qualifié non applicable sans `react-native-web` (dépendance volontairement non ajoutée).
+- `test` : ✅ **355 cas `node --test`** (RN 33 n'ajoute aucun helper pur — `ThemePreferenceProvider` est un binding React non testable sous `node --test` ; la logique de transition `themePreference` est couverte par `ui-state.test.ts` existant).
+- `doctor` : ⚠️ **expo-doctor 18/19** — 1 check échoue sur drift patch Expo SDK (`expo`/`expo-linking`/`expo-secure-store` 1–2 versions de patch en retard) ; condition **pré-existante depuis RN 30**, non causée par RN 33.
+- **runtime / bundle Expo** : ✅ `expo export -p ios` réussit. ✅ Smoke manuel Android RN 28 via Expo Go documenté dans [`MOBILE_RN28_VISUAL_SMOKE_REPORT.md`](../../docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md). ✅ Smoke local reproductible RN 29 via `npm run smoke:android` sur Android Emulator `emulator-5554` : rapport JSON `passed` dans `/tmp/enistere-mobile-rn29-smoke-report.json` et synthèse [`MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md`](../../docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md). ⚠️ Smoke runtime iOS bloqué localement : hôte `Linux greenovate`, `xcrun` absent ; `npm run smoke:ios` produit un rapport JSON avec `status: blocked`. ⚠️ Smoke Android RN 33 : aucun émulateur/device connecté lors de cette vérification — `npm run smoke:android` sort avec `blocked` (preflight `adb devices` vide). Export web non applicable sans `react-native-web` (dépendance volontairement non ajoutée).
 
 ## Prochaine mission recommandée
 
 **Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel**
 : rejouer le parcours RN28/RN29 sur iOS Simulator ou device physique dès qu'un
 environnement macOS/Xcode est disponible, sans ajouter de dépendance ni logique
-métier.
+métier. Candidat alternatif : RN 34 (formulaire sign-in form — ajout persistance
+`themePreference` via `PreferenceService` RN 20 MMKV/AsyncStorage si applicable).
