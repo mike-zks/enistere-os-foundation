@@ -1,0 +1,96 @@
+/* Select — champ natif stylisé. Flèche CSS pure (chevron border, currentColor → dark safe).
+   Wrapper <span> requis pour positionner la flèche. Light/dark via variables. */
+
+.enistere-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+/* Chevron CSS pur : angle bas-droit en border — adapte currentColor (dark mode automatique) */
+.enistere-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: var(--enistere-spacing-3);
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--enistere-color-foreground-muted);
+  border-bottom: 1.5px solid var(--enistere-color-foreground-muted);
+  transform: translateY(calc(-50% - 2px)) rotate(45deg);
+  pointer-events: none;
+}
+
+.enistere-select {
+  display: block;
+  width: 100%;
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-default);
+  background-color: var(--enistere-color-background-elevated);
+  border: 1px solid var(--enistere-color-border-strong);
+  border-radius: var(--enistere-radius-md);
+  cursor: pointer;
+  appearance: none;
+  /* Espace à droite pour le chevron CSS */
+  padding-right: var(--enistere-spacing-10);
+  transition:
+    border-color var(--enistere-duration-fast) var(--enistere-easing-standard),
+    box-shadow var(--enistere-duration-fast) var(--enistere-easing-standard);
+}
+.enistere-select:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 2px;
+  border-color: var(--enistere-color-border-focus);
+}
+.enistere-select:disabled {
+  cursor: not-allowed;
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-muted);
+  border-color: var(--enistere-color-border-default);
+  opacity: 0.6;
+}
+.enistere-select--invalid {
+  border-color: var(--enistere-color-status-danger);
+}
+.enistere-select--invalid:focus-visible {
+  outline-color: var(--enistere-color-status-danger);
+}
+
+/* Sizes — alignées sur Input pour la cohérence */
+.enistere-select--sm {
+  min-height: var(--enistere-spacing-8);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-sm);
+}
+.enistere-select--md {
+  min-height: var(--enistere-spacing-10);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--enistere-spacing-3);
+  font-size: var(--enistere-font-size-md);
+}
+.enistere-select--lg {
+  min-height: var(--enistere-spacing-12);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--enistere-spacing-4);
+  font-size: var(--enistere-font-size-lg);
+}
+
+/* Wrapper taille (pour min-height cohérente avec le select interne) */
+.enistere-select-wrapper--sm {
+  min-height: var(--enistere-spacing-8);
+}
+.enistere-select-wrapper--md {
+  min-height: var(--enistere-spacing-10);
+}
+.enistere-select-wrapper--lg {
+  min-height: var(--enistere-spacing-12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-select {
+    transition: none;
+  }
+}

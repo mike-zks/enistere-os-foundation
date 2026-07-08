@@ -1,0 +1,170 @@
+/* Toast — notification temporaire. Glyphe + bordure latérale (pas couleur seule).
+   Rôle assertif (danger) ou poli (reste). Light/dark via variables. */
+
+.enistere-toast {
+  display: flex;
+  gap: var(--enistere-spacing-3);
+  align-items: flex-start;
+  min-width: 240px;
+  max-width: 400px;
+  padding: var(--enistere-spacing-3) var(--enistere-spacing-4);
+  border: 1px solid var(--enistere-color-border-default);
+  border-left-width: 4px;
+  border-radius: var(--enistere-radius-md);
+  background-color: var(--enistere-color-background-elevated);
+  color: var(--enistere-color-foreground-default);
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-sm);
+  box-shadow: var(--enistere-shadow-md);
+  animation: enistere-toast-in var(--enistere-duration-normal) var(--enistere-easing-decelerate);
+}
+.enistere-toast__icon {
+  flex: none;
+  font-size: var(--enistere-font-size-md);
+  line-height: 1.4;
+}
+.enistere-toast__icon::before {
+  content: "";
+}
+.enistere-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+.enistere-toast__title {
+  margin: 0 0 var(--enistere-spacing-1);
+  font-weight: var(--enistere-font-weight-semibold);
+}
+.enistere-toast__content {
+  margin: 0;
+}
+.enistere-toast__close {
+  flex: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--enistere-spacing-6);
+  height: var(--enistere-spacing-6);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--enistere-radius-sm);
+  cursor: pointer;
+  color: var(--enistere-color-foreground-muted);
+  font-size: var(--enistere-font-size-md);
+  line-height: 1;
+}
+.enistere-toast__close::before {
+  content: "\00D7"; /* × */
+}
+.enistere-toast__close:hover {
+  background-color: var(--enistere-color-background-muted);
+  color: var(--enistere-color-foreground-default);
+}
+.enistere-toast__close:focus-visible {
+  outline: 2px solid var(--enistere-color-focus-ring);
+  outline-offset: 2px;
+}
+.enistere-toast__close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Variantes — accent bordure gauche + glyphe */
+.enistere-toast--info {
+  border-left-color: var(--enistere-color-status-info);
+}
+.enistere-toast--info .enistere-toast__icon {
+  color: var(--enistere-color-status-info);
+}
+.enistere-toast--info .enistere-toast__icon::before {
+  content: "\2139"; /* ℹ */
+}
+.enistere-toast--success {
+  border-left-color: var(--enistere-color-status-success);
+}
+.enistere-toast--success .enistere-toast__icon {
+  color: var(--enistere-color-status-success);
+}
+.enistere-toast--success .enistere-toast__icon::before {
+  content: "\2713"; /* ✓ */
+}
+.enistere-toast--warning {
+  border-left-color: var(--enistere-color-status-warning);
+}
+.enistere-toast--warning .enistere-toast__icon {
+  color: var(--enistere-color-status-warning);
+}
+.enistere-toast--warning .enistere-toast__icon::before {
+  content: "\26A0"; /* ⚠ */
+}
+.enistere-toast--danger {
+  border-left-color: var(--enistere-color-status-danger);
+}
+.enistere-toast--danger .enistere-toast__icon {
+  color: var(--enistere-color-status-danger);
+}
+.enistere-toast--danger .enistere-toast__icon::before {
+  content: "\2715"; /* ✕ */
+}
+
+/* Région de positionnement fixe */
+.enistere-toast-region {
+  position: fixed;
+  z-index: var(--enistere-z-index-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-2);
+  width: calc(100vw - var(--enistere-spacing-8));
+  max-width: 400px;
+  pointer-events: none;
+}
+.enistere-toast-region > * {
+  pointer-events: auto;
+}
+
+/* Positions */
+.enistere-toast-region--top-left {
+  top: var(--enistere-spacing-4);
+  left: var(--enistere-spacing-4);
+}
+.enistere-toast-region--top-center {
+  top: var(--enistere-spacing-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.enistere-toast-region--top-right {
+  top: var(--enistere-spacing-4);
+  right: var(--enistere-spacing-4);
+}
+.enistere-toast-region--bottom-left {
+  bottom: var(--enistere-spacing-4);
+  left: var(--enistere-spacing-4);
+}
+.enistere-toast-region--bottom-center {
+  bottom: var(--enistere-spacing-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.enistere-toast-region--bottom-right {
+  bottom: var(--enistere-spacing-4);
+  right: var(--enistere-spacing-4);
+}
+
+/* Animation d'entrée */
+@keyframes enistere-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--enistere-spacing-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enistere-toast {
+    animation: none;
+  }
+}
