@@ -5,6 +5,19 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core Files 7 : RÉALISÉ** (`web-nextjs/` → **446 tests**, +53). Files 7 ajoute les BFF
+> handlers et primitives UI minimales pour les actions admin quarantaine/restauration. Handlers
+> `handleQuarantineFile` + `handleRestoreFile`, routes `/api/files/[id]/quarantine` + `/restore`,
+> client BFF `quarantineFile`/`restoreFile` (same-origin, credentials:include, CSRF, jamais Bearer),
+> hooks `useQuarantineFile`/`useRestoreFile` (mutation sans mutationKey, anti-double-soumission,
+> `fileKeys.all` invalidation), `AdminFileActions` (rendu conditionnel par permission), page admin
+> `/protected/files/[id]/admin`. CSRF+Origin sur toutes les mutations. L'API reste l'autorité.
+> `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts. Branch `web-core-files-7-admin-bff`.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
+> **Web Core — CI minimale** (ADR-013 — réserve transverse n°1).
+
 > ✅ **Web Core Files 6 : RÉALISÉ** (`web-nextjs/` → **393 tests**, +3). Files 6 réalise la revue
 > globale Files V1 bout-en-bout. 4 défauts corrigés : D1 (cache delete→list, `useDeleteFile.onSuccess`),
 > D2 (cache upload→list, `useUploadFile.onSuccess` manquant), D3 (message 409 neutre dans `classifyFileError`),
@@ -13,9 +26,7 @@
 > (6 réserves documentées R1–R6, aucune bloquante). `typecheck`/`lint`/`test 393/393`/`build`/`audit`/
 > `diff --check` verts. Branch `web-core-files-6-v1-review`.
 >
-> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
-> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
-> **Web Core Files admin BFF** (quarantaine/restauration — si besoin produit).
+> **Prochaine action UNIQUE** : décidée → **Web Core Files 7** (admin BFF quarantaine/restauration, ci-dessus).
 
 > ✅ **Web Core Files 5 : RÉALISÉ** (`web-nextjs/e2e/` → **12 tests E2E**, +5). Files 5 ajoute 5
 > tests Playwright pour `/protected/files` : propriétaire voit le fichier seedé (champs publics,
