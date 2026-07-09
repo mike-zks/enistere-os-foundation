@@ -345,16 +345,18 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Web Core Files 5 — E2E Playwright liste fichiers** (`cores/web-nextjs/e2e/`) :
-ajoute 5 tests Playwright pour `/protected/files` dans la stack réelle `web-e2e-ci.yml` (API + PostgreSQL +
-MinIO + Web + Chromium). Couverture ajoutée : propriétaire voit le fichier seedé avec champs publics uniquement
-et aucun champ interne ; clic liste → détail `/protected/files/:id` ; un seul fichier seedé → aucune pagination ;
-anonyme → redirection `/login` ; utilisateur sans permission → état erreur générique `role="alert"` (skippé si
-`E2E_NOPERM_EMAIL` absent). Le parcours reste déterministe via le fichier `VALIDATED` seedé par `global-setup.ts`,
-sans token, URL signée, champ interne, contenu fichier ou secret dans le DOM/logs. **E2E 7 → 12 tests**.
-**Vérifications CI PR #61** : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`,
-`api-runtime`, `web-e2e`, `api-smoke`, images API/Web tous verts. Commit merge : `1bf13cc`.
-**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou Web Core Files admin BFF (quarantaine/restauration, si besoin produit).**
+**Web Core Files 7 — Admin BFF quarantaine/restauration** (`cores/web-nextjs/`) :
+ajoute les BFF handlers et primitives UI minimales pour consommer les capacités admin Files déjà présentes côté
+API, sans nouveau comportement API et sans proxy générique. Livrables : `handleQuarantineFile` /
+`handleRestoreFile` (ordre `assertPost` → UUID → CSRF+Origin → client `writable` → 409 explicite
+`NOT_QUARANTINABLE` / `NOT_RESTORABLE`), routes `/api/files/[id]/quarantine` et `/restore`, client BFF
+navigateur `quarantineFile` / `restoreFile` (same-origin, `credentials:include`, CSRF, jamais Bearer),
+hooks `useQuarantineFile` / `useRestoreFile` (mutation sans `mutationKey`, anti-double-soumission, invalidation
+`fileKeys.all`), `AdminFileActions` (rendu conditionnel par permissions `files.quarantine` / `files.restore`)
+et page séparée `/protected/files/[id]/admin`. **+53 tests, Web 393 → 446**. CI PR #64 verte :
+`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`,
+images API/Web.
+**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou Web Core — CI minimale / réserve transverse ADR-013.**
 
 **Étape précédente — API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
 ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant.

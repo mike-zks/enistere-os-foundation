@@ -127,12 +127,13 @@ Implémenté + testé + revu : Auth, sessions, refresh, RBAC, permissions, audit
 logging structuré, contrat OpenAPI canonique. Implémenté côté Web Core : UI Kit consommé, API publique
 (Health) + TanStack Query (SSR/hydratation), **BFF Auth** (cookies `HttpOnly`, CSRF double-submit,
 Origin/Referer), **état de session/autorisations** (`me`/`authorization` read-only, `useSession`/
-`useAuthorization`, purge cache au logout), **états UI standardisés** (UI 1) et **Files Web 1→4** :
-lecture/téléchargement, upload multipart BFF, suppression BFF et liste paginée BFF. Les flux Files restent
+`useAuthorization`, purge cache au logout), **états UI standardisés** (UI 1) et **Files Web 1→7** :
+lecture/téléchargement, upload multipart BFF, suppression BFF, liste paginée BFF, revue V1 et admin
+quarantaine/restauration BFF. Les flux Files restent
 des BFF ciblés, jamais un proxy générique ; l'API Core reste l'autorité ownership/permissions ; aucun token,
 champ interne, URL signée ou contenu fichier n'est exposé au client, aux logs ou aux clés de cache. Implémenté
 (local, non publié) : packages clients. Décidé mais non implémenté : secure storage mobile, **SSR Auth complet**,
-**admin/quarantaine/restauration Files côté Web**, CI/CD, registry.
+CI/CD, registry.
 Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 
 ## 9. Tests
@@ -142,7 +143,7 @@ jetables), couverture disponible. Packages : api-contracts **12**, api-client-fe
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **121 tests** (`node:test` + `global-jsdom`
 + Testing Library + jest-axe, **React 19**) couvrant **12 primitives** (Button/Input/Label/Text/Spinner/
 + VisuallyHidden + Alert/Card/FormField + Dialog/Select/Toast).
-Web Core : **393 tests** (`node:test` :
+Web Core : **446 tests** (`node:test` :
 config/URL, clients serveur/public, QueryClient/retry, query keys, transport Health, hooks, **hydratation**,
 UI, mapping d'erreurs, garde anti-réseau, **Auth** : cookie-config, session adapter, factory
 read-only/writable, **CSRF** (gén/validation temps constant), **Origin/Referer**, validation login, handlers
@@ -348,7 +349,7 @@ la **première feature de données** en **lecture seule** : deux **Route Handler
 **client BFF navigateur** (aucun Bearer), `fileKeys` **disjoints**, `useFileMetadata` (query) + **`useCreateDownloadUrl`**
 (**mutation** : URL signée **consommée puis abandonnée**, jamais en cache/log), téléchargement par **ancre
 temporaire** (`https`-only), et une page privée `/protected/files/[id]` réutilisant les états UI — **l'API restant
-l'autorité** (permission + ownership), **aucun champ interne** exposé. **Web Core Files 2** a livré l'**upload sécurisé BFF multipart** : BFF ciblé `POST /api/files/upload` (CSRF/Origin obligatoires, validation fichier+catégorie, client `writable` avec un seul refresh coordonné), client BFF navigateur `uploadFile` (**FormData sans Content-Type forcé**, same-origin, aucun Bearer), mutation `useUploadFile` (**sans `mutationKey`**, anti-double-soumission, résultat jamais en QueryCache), `UploadForm` (9 catégories Select, fichier+subjectId, Alert erreur/succès), page `/protected/files/upload`, mapping 413/415 — **l'API Core reste l'autorité** MIME/taille/permissions (ADR-007), **aucun upload direct MinIO/S3**, **aucun log de nom/contenu**. **Web Core Files 3** a livré la **suppression sécurisée BFF** : `DELETE /api/files/:id` (`assertDelete`, UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404), client BFF `deleteFile`, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav`. **Web Core Files 4** a livré la **liste paginée BFF** : `GET /api/files`, validation `limit`/`offset` 400 avant appel API, client `read-only`, `FileListResponse`, `listFiles`, `fileKeys.list`, `useFileList` (`retry:false`), `FileListView` et page `/protected/files` (**390 tests** + **preuve API + MinIO réelle 21/21**). **Web Core Files 6** a réalisé la **revue globale Files V1** : 4 défauts corrigés (D1 cache delete→list, D2 cache upload→list, D3 message 409 neutre, D4 upload 409→QUOTA_EXCEEDED), 3 tests ajoutés, verdict **stable avec réserves mineures** (**393 tests**). La **Revue globale Web
+l'autorité** (permission + ownership), **aucun champ interne** exposé. **Web Core Files 2** a livré l'**upload sécurisé BFF multipart** : BFF ciblé `POST /api/files/upload` (CSRF/Origin obligatoires, validation fichier+catégorie, client `writable` avec un seul refresh coordonné), client BFF navigateur `uploadFile` (**FormData sans Content-Type forcé**, same-origin, aucun Bearer), mutation `useUploadFile` (**sans `mutationKey`**, anti-double-soumission, résultat jamais en QueryCache), `UploadForm` (9 catégories Select, fichier+subjectId, Alert erreur/succès), page `/protected/files/upload`, mapping 413/415 — **l'API Core reste l'autorité** MIME/taille/permissions (ADR-007), **aucun upload direct MinIO/S3**, **aucun log de nom/contenu**. **Web Core Files 3** a livré la **suppression sécurisée BFF** : `DELETE /api/files/:id` (`assertDelete`, UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404), client BFF `deleteFile`, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav`. **Web Core Files 4** a livré la **liste paginée BFF** : `GET /api/files`, validation `limit`/`offset` 400 avant appel API, client `read-only`, `FileListResponse`, `listFiles`, `fileKeys.list`, `useFileList` (`retry:false`), `FileListView` et page `/protected/files` (**390 tests** + **preuve API + MinIO réelle 21/21**). **Web Core Files 6** a réalisé la **revue globale Files V1** : 4 défauts corrigés (D1 cache delete→list, D2 cache upload→list, D3 message 409 neutre, D4 upload 409→QUOTA_EXCEEDED), 3 tests ajoutés, verdict **stable avec réserves mineures** (**393 tests**). **Web Core Files 7** a livré l'**admin BFF quarantaine/restauration** : handlers ciblés `POST /api/files/:id/quarantine|restore`, routes BFF, client navigateur same-origin sans Bearer, hooks mutations sans `mutationKey` avec anti-double-soumission et invalidation `fileKeys.all`, UI admin conditionnelle par permission et page `/protected/files/[id]/admin` ; CSRF+Origin obligatoires et API autoritaire (**446 tests**). La **Revue globale Web
 Core — incrément V1** a traité l'incrément complet (Health + Auth 1→5 + UI 1 + Files 1) comme **un système
 unique** : verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (rapport
 [`WEB_CORE_V1_INCREMENT_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md)) — socle **sûr
