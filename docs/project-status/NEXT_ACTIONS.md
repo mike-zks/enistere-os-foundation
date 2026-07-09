@@ -12,7 +12,8 @@
 > Réponse publique : `{ items: PublicStoredFile[], limit, offset, nextOffset: number | null }` — aucun
 > champ interne. `FileListQueryDto` + `FileListResponseDto` ajoutés. `FilesService.listOwnedFiles()`.
 > OpenAPI régénéré (`files_list`, `FileListResponseDto`). `api-contracts` régénéré. `FilesApi.list()`.
-> **386/386 tests unitaires**, typecheck/build (api-contracts + api-client-fetch) verts.
+> **386/386 tests unitaires API**, `api-contracts` **12/12**, `api-client-fetch` **30/30**,
+> typecheck/build verts.
 >
 > **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
 > **Web Core Files 4** (liste BFF `GET /api/files` — consomme `FilesApi.list()`, `useFileList` hook,

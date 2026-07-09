@@ -7,13 +7,14 @@ export class FileListResponseDto {
   @ApiProperty({ type: () => [PublicStoredFileDto], description: 'Fichiers de la page courante.' })
   items!: PublicStoredFile[];
 
-  @ApiProperty({ example: 20, description: 'Limite appliquée.' })
+  @ApiProperty({ type: 'integer', example: 20, description: 'Limite appliquée.' })
   limit!: number;
 
-  @ApiProperty({ example: 0, description: 'Offset appliqué.' })
+  @ApiProperty({ type: 'integer', example: 0, description: 'Offset appliqué.' })
   offset!: number;
 
   @ApiProperty({
+    type: 'integer',
     example: 20,
     nullable: true,
     description: 'Offset de la page suivante, null si dernière page.',

@@ -1,5 +1,5 @@
 /**
- * Tests de l'artefact généré : 14 opérations, formes critiques, absence de champs sensibles.
+ * Tests de l'artefact généré : 15 opérations, formes critiques, absence de champs sensibles.
  * La reproductibilité et la détection de divergence sont couvertes par `npm run generate:check`.
  */
 import assert from 'node:assert/strict';
@@ -20,6 +20,7 @@ const OPERATION_IDS = [
   'auth_logout',
   'auth_getProfile',
   'auth_getAuthorization',
+  'files_list',
   'files_upload',
   'files_getMetadata',
   'files_createDownloadUrl',
@@ -39,7 +40,7 @@ test('expose paths, components et operations', () => {
   assert.match(schema, /export interface operations/);
 });
 
-test('contient les 14 operationId Health/Auth/Files', () => {
+test('contient les 15 operationId Health/Auth/Files', () => {
   for (const id of OPERATION_IDS) {
     assert.ok(schema.includes(`${id}:`), `operationId manquant : ${id}`);
   }

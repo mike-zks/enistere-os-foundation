@@ -1784,17 +1784,17 @@
             }
           },
           "limit": {
-            "type": "number",
+            "type": "integer",
             "example": 20,
             "description": "Limite appliquée."
           },
           "offset": {
-            "type": "number",
+            "type": "integer",
             "example": 0,
             "description": "Offset appliqué."
           },
           "nextOffset": {
-            "type": "object",
+            "type": "integer",
             "example": 20,
             "nullable": true,
             "description": "Offset de la page suivante, null si dernière page."

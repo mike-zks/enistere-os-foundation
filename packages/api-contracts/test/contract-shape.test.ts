@@ -20,6 +20,8 @@ export type _ContractTypeAssertions = [
   Expect<[OperationJsonRequestBody<'files_upload'>] extends [never] ? true : false>,
   // La suppression (204) n'a pas de corps JSON de succès.
   Expect<[OperationJsonResponse<'files_delete', 204>] extends [never] ? true : false>,
+  // La liste est un GET : pas de corps JSON.
+  Expect<[OperationJsonRequestBody<'files_list'>] extends [never] ? true : false>,
 ];
 
 test('SchemaOf<PublicStoredFileDto> : size string + enums fermées', () => {
@@ -37,6 +39,18 @@ test('SchemaOf<PublicStoredFileDto> : size string + enums fermées', () => {
   };
   assert.equal(typeof file.size, 'string');
   assert.equal(file.category, 'IMAGE');
+});
+
+test('SchemaOf<FileListResponseDto> : pagination publique typée', () => {
+  const page: SchemaOf<'FileListResponseDto'> = {
+    items: [],
+    limit: 20,
+    offset: 0,
+    nextOffset: null,
+  };
+  page.nextOffset = 20;
+  assert.equal(typeof page.limit, 'number');
+  assert.equal(page.nextOffset, 20);
 });
 
 test('OperationJsonRequestBody<auth_login> : email + password', () => {

@@ -357,10 +357,11 @@ interne (`bucket`, `storageKey`, `checksum`, `ownerId`). **Nouveaux fichiers** :
 `createdAt desc`, pagination + nextOffset, champs internes absents, offset hors-borne). **Fichiers modifiés** :
 `files.service.ts` (`listOwnedFiles()`, trick limit+1), `files.controller.ts` (`FilesService` ajouté,
 `@Get()` avant `@Get(':id')`), `files.controller.spec.ts` (+6 cas), `files.service.spec.ts` (+3 cas).
-OpenAPI régénéré (`files_list`, `FileListResponseDto`, `limit`/`offset` typés `integer`). `api-contracts`
+OpenAPI régénéré (`files_list`, `FileListResponseDto`, `limit`/`offset`/`nextOffset` typés `integer`, `nextOffset` nullable). `api-contracts`
 régénéré (`files_list`, `FileListResponseDto` dans `schema.ts`). `FilesApi.list({ limit?, offset? })`
-ajouté dans `api-client-fetch`. **Vérifications** : `npm test` **386/386** + `npm run build`
-(api-contracts + api-client-fetch) + `openapi:generate` + contracts `generate` verts.
+ajouté dans `api-client-fetch`. **Vérifications** : `npm test` API **386/386**, `api-contracts`
+**12/12**, `api-client-fetch` **30/30** + `npm run build` (api-contracts + api-client-fetch) +
+`openapi:generate` + contracts `generate` verts.
 Commit : `feat(api): add paginated owned file list endpoint (Files 5)`.
 **Prochaine action : Web Core Files 4 (BFF liste) ou Mobile Core React Native 31 (iOS smoke).**
 
