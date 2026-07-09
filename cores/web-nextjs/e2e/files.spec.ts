@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { NOPERM_EMAIL, OWNER_EMAIL, PASSWORD, expectNoSensitiveLeak, loginViaUi, readState } from "./helpers.js";
+import {
+  NOPERM_EMAIL,
+  OWNER_EMAIL,
+  PASSWORD,
+  expectNoSensitiveLeak,
+  loginViaUi,
+  readState,
+} from "./helpers.js";
 
 const RANDOM_UUID = "00000000-0000-4000-8000-000000000000";
 
@@ -46,5 +53,76 @@ test.describe("Files (lecture / téléchargement)", () => {
     await loginViaUi(page, NOPERM_EMAIL, PASSWORD);
     await page.goto(`/protected/files/${fileId}`);
     await expect(page.getByText("Accès refusé")).toBeVisible();
+  });
+});
+
+test.describe("Files (liste paginée)", () => {
+  test("propriétaire : fichier seedé visible, champs publics affichés, aucun champ interne", async ({
+    page,
+  }) => {
+    const { originalName } = readState();
+    await loginViaUi(page, OWNER_EMAIL, PASSWORD);
+
+    await page.goto("/protected/files");
+
+    // La liste est rendue et le fichier seedé apparaît.
+    await expect(page.getByRole("list", { name: "Liste des fichiers" })).toBeVisible();
+    await expect(page.getByText(originalName, { exact: false })).toBeVisible();
+
+    // Aucun champ interne exposé dans la page.
+    const html = await page.content();
+    for (const internal of ["storageKey", "bucket", "checksum", "ownerId", "X-Amz-Signature"]) {
+      expect(html).not.toContain(internal);
+    }
+    await expectNoSensitiveLeak(page);
+  });
+
+  test("propriétaire : clic sur le fichier → navigation vers /protected/files/:id", async ({ page }) => {
+    const { fileId, originalName } = readState();
+    await loginViaUi(page, OWNER_EMAIL, PASSWORD);
+
+    await page.goto("/protected/files");
+    await expect(page.getByText(originalName, { exact: false })).toBeVisible();
+
+    // Le lien du fichier doit pointer vers la page de détail.
+    const fileLink = page.getByRole("link", { name: originalName, exact: false });
+    const href = await fileLink.getAttribute("href");
+    expect(href).toContain(`/protected/files/${fileId}`);
+
+    await fileLink.click();
+    await page.waitForURL(`**/protected/files/${fileId}`, { timeout: 15_000 });
+    await expect(page.getByRole("heading", { level: 1, name: originalName })).toBeVisible();
+  });
+
+  test("propriétaire : 1 fichier seedé → pas de pagination (nextOffset null)", async ({ page }) => {
+    await loginViaUi(page, OWNER_EMAIL, PASSWORD);
+
+    await page.goto("/protected/files");
+    await expect(page.getByRole("list", { name: "Liste des fichiers" })).toBeVisible();
+
+    // Avec exactement 1 fichier seedé (< limit default 20) : ni « Précédent » ni « Suivant ».
+    await expect(page.getByRole("link", { name: "Précédent" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Suivant" })).toHaveCount(0);
+  });
+
+  test("anonyme : /protected/files redirige vers /login", async ({ page }) => {
+    await page.goto("/protected/files");
+    await page.waitForURL("**/login**", { timeout: 15_000 });
+    await expect(page.getByLabel("Adresse e-mail")).toBeVisible();
+    // Aucun contenu privé avant authentification.
+    await expect(page.getByRole("list", { name: "Liste des fichiers" })).toHaveCount(0);
+  });
+
+  test("sans permission : liste → état erreur générique (403)", async ({ page }) => {
+    test.skip(NOPERM_EMAIL === "", "E2E_NOPERM_EMAIL non fourni");
+    await loginViaUi(page, NOPERM_EMAIL, PASSWORD);
+
+    await page.goto("/protected/files");
+
+    // L'API retourne 403 (files.read requis) → FileListView affiche une Alert role=alert.
+    await expect(page.getByRole("alert")).toBeVisible();
+    // Aucun fichier d'un autre propriétaire affiché.
+    await expect(page.getByRole("list", { name: "Liste des fichiers" })).toHaveCount(0);
+    await expectNoSensitiveLeak(page);
   });
 });

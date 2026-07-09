@@ -79,7 +79,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   checklist protection de branche, politique CI 4 niveaux, secrets/registry, plans) **+ CC2 : CI runtime API**
   `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit + e2e, openapi:check) **+ CC3 : CI E2E
   navigateur** `web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ;
-  parcours **Health/Auth/Files**) **+ CC5 : registry GHCR** `registry-ci.yml` + **Dockerfiles** API/Web
+  parcours **Health/Auth/Files** ; **12 tests E2E** dont 5 nouveaux Web Core Files 5 pour `/protected/files`) **+ CC5 : registry GHCR** `registry-ci.yml` + **Dockerfiles** API/Web
   (multi-stage, non-root, Web **standalone**) — build PR sans push, **push images GHCR sur `main`** (tags
   immuables, labels OCI, `GITHUB_TOKEN`, **sans déploiement/secret/PAT/`.env`**) — **VALIDÉ** (Registry CI verte
   sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs` tags `main-`/`sha-`, aucun `latest`) **+ CC6 :

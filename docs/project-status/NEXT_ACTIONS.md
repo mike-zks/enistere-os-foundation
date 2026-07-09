@@ -5,6 +5,17 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core Files 5 : RÉALISÉ** (`web-nextjs/e2e/` → **12 tests E2E**, +5). Files 5 ajoute 5
+> tests Playwright pour `/protected/files` : propriétaire voit le fichier seedé (champs publics,
+> aucun champ interne) ; clic → navigation vers `/protected/files/:id` (href + heading h1) ; 1 fichier
+> seedé → aucune pagination ; anonyme → redirection `/login` ; sans permission → Alert `role=alert`
+> (`test.skip` si `E2E_NOPERM_EMAIL` absent). Déterministe (1 fichier VALIDATED via `global-setup.ts`),
+> compatible CI (`web-e2e-ci.yml`). **390/390 tests unitaires inchangés**, typecheck/lint/build/audit verts.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
+> **Web Core Files admin BFF** (quarantaine/restauration — si besoin produit).
+
 > ✅ **Web Core Files 4 : RÉALISÉ** (`web-nextjs` → **390 tests**). Files 4 ajoute la liste paginée
 > de fichiers BFF : `GET /api/files` handler (validation query limit 1–50 / offset ≥ 0, 400 sans
 > appel API si invalide, client `read-only`, `no-store`, aucun CSRF), `FileListResponse` type dérivé
@@ -14,10 +25,7 @@
 > Précédent/Suivant, liens `/protected/files/:id`), page `/protected/files` (Server Component, délègue
 > `searchParams` à `FileListView`). **390/390 tests**, typecheck/lint/test/build/audit verts.
 >
-> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
-> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
-> **Web Core Files 5** (admin BFF — si besoin produit),
-> **CI Files list** (test E2E Playwright pour la liste `/protected/files`).
+> **Prochaine action UNIQUE** : décidée → **Web Core Files 5** (E2E Playwright liste, ci-dessus).
 
 > ✅ **API Core Files 5 : RÉALISÉ** (`api-nestjs` → **386 tests unitaires + 7 e2e Files 5**). Files 5
 > ajoute `GET /files?limit=&offset=` — liste paginée read-only des fichiers du propriétaire courant.
