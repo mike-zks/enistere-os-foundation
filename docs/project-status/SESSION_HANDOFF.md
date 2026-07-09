@@ -24,7 +24,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 ## 3. État réel (résumé)
 
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
-  S3/MinIO, logging Pino, OpenAPI canonique) — 377 tests unitaires + 101 e2e + revues. Statut :
+  S3/MinIO, logging Pino, OpenAPI canonique, **`GET /files` liste paginée Files 5**) — **386 tests unitaires** + 101 e2e + **7 e2e Files 5** + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
 - **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 12 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + **Dialog, Select, Toast** —
@@ -345,6 +345,25 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
+**API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
+ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant.
+`files.read` requis, ownership-scoped, exclusion `DELETED` (`deletedAt: null`), tri `createdAt desc`,
+pagination offset-based (`limit` 1–50, défaut 20 ; `offset ≥ 0`). Trick limit+1 (aucun COUNT séparé).
+Réponse publique : `{ items: PublicStoredFile[], limit, offset, nextOffset: number | null }` — aucun champ
+interne (`bucket`, `storageKey`, `checksum`, `ownerId`). **Nouveaux fichiers** : `file-list-query.dto.ts`
+(`@Type(() => Number)` + `@IsInt` + `@Min`/`@Max` + `@ApiPropertyOptional({ type: 'integer' })`),
+`file-list-response.dto.ts` (`items: PublicStoredFile[]`, décoration Swagger avec `PublicStoredFileDto`),
+`test/files-list.e2e-spec.ts` (7 cas : liste vide, isolation ownership A≠B, exclusion DELETED, ordre
+`createdAt desc`, pagination + nextOffset, champs internes absents, offset hors-borne). **Fichiers modifiés** :
+`files.service.ts` (`listOwnedFiles()`, trick limit+1), `files.controller.ts` (`FilesService` ajouté,
+`@Get()` avant `@Get(':id')`), `files.controller.spec.ts` (+6 cas), `files.service.spec.ts` (+3 cas).
+OpenAPI régénéré (`files_list`, `FileListResponseDto`, `limit`/`offset` typés `integer`). `api-contracts`
+régénéré (`files_list`, `FileListResponseDto` dans `schema.ts`). `FilesApi.list({ limit?, offset? })`
+ajouté dans `api-client-fetch`. **Vérifications** : `npm test` **386/386** + `npm run build`
+(api-contracts + api-client-fetch) + `openapi:generate` + contracts `generate` verts.
+Commit : `feat(api): add paginated owned file list endpoint (Files 5)`.
+**Prochaine action : Web Core Files 4 (BFF liste) ou Mobile Core React Native 31 (iOS smoke).**
+
 **Mobile Core React Native 30 — smoke runtime iOS / parity device** (`cores/mobile-react-native/`,
 périmètre `scripts/**` + `package.json` + docs) : documente la parité runtime iOS du starter Expo
 public/protégé/settings. `mobile-react-native` → **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**. Script ajouté :
@@ -357,8 +376,7 @@ Detox/Maestro/Appium/Playwright mobile/XCTest custom restent différés sous dé
 **Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, dépendance, persistance nouvelle, retry branché ni
 modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Vérifs : **typecheck + lint + test 54
 fichiers `node --test` + expo-doctor 19/19 + expo export iOS + smoke iOS blocked documenté + npm audit +
-git diff --check verts**. Commit attendu : `docs(mobile): document ios smoke runtime blocker`. **Prochaine action :
-Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel**.
+git diff --check verts**. Commit attendu : `docs(mobile): document ios smoke runtime blocker`.
 
 **Mobile Core React Native 28 — smoke visuel device/simulateur du starter** (`cores/mobile-react-native/`,
 périmètre runtime + docs) : vérifie le shell public/protégé/settings sur Android Emulator `Pixel_6a` via Expo Go

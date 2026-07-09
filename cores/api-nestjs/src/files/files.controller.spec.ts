@@ -9,10 +9,31 @@ import { configureApp } from '../bootstrap/configure-app';
 import { FileAccessService } from './access/file-access.service';
 import { FileDeletionService } from './deletion/file-deletion.service';
 import { FilesController } from './files.controller';
+import { FilesService } from './files.service';
 import { FileQuarantineService } from './quarantine/file-quarantine.service';
 import { FileUploadService } from './upload/file-upload.service';
 
 const FILE_ID = '11111111-1111-4111-8111-111111111111';
+
+const fileListPage = {
+  items: [
+    {
+      id: FILE_ID,
+      originalName: 'photo.jpg',
+      mimeType: 'image/jpeg',
+      extension: 'jpg',
+      size: '6',
+      visibility: 'PRIVATE',
+      status: 'VALIDATED',
+      category: 'IMAGE',
+      createdAt: '2026-06-01T00:00:00.000Z',
+      updatedAt: '2026-06-01T00:00:00.000Z',
+    },
+  ],
+  limit: 20,
+  offset: 0,
+  nextOffset: null,
+};
 
 const publicFile = {
   id: FILE_ID,
@@ -51,6 +72,10 @@ function throttlers(uploadLimit: number, downloadLimit = 1000) {
   ];
 }
 
+function filesServiceStub() {
+  return { listOwnedFiles: jest.fn().mockResolvedValue(fileListPage) };
+}
+
 function uploadStub() {
   return { upload: jest.fn().mockResolvedValue(publicFile) };
 }
@@ -75,12 +100,14 @@ function quarantineStub() {
 
 describe('FilesController', () => {
   let app: INestApplication<App>;
+  let filesService: { listOwnedFiles: jest.Mock };
   let uploadService: { upload: jest.Mock };
   let accessService: { getMetadata: jest.Mock; issueDownloadUrl: jest.Mock };
   let deletionService: { delete: jest.Mock };
   let quarantineService: { quarantine: jest.Mock; restore: jest.Mock };
 
   beforeAll(async () => {
+    filesService = filesServiceStub();
     uploadService = uploadStub();
     accessService = accessStub();
     deletionService = deletionStub();
@@ -89,6 +116,7 @@ describe('FilesController', () => {
       imports: [ThrottlerModule.forRoot(throttlers(1000))],
       controllers: [FilesController],
       providers: [
+        { provide: FilesService, useValue: filesService },
         { provide: FileUploadService, useValue: uploadService },
         { provide: FileAccessService, useValue: accessService },
         { provide: FileDeletionService, useValue: deletionService },
@@ -104,6 +132,54 @@ describe('FilesController', () => {
 
   afterAll(async () => {
     await app.close();
+  });
+
+  it('GET /files returns a paginated list with defaults (200)', async () => {
+    await request(app.getHttpServer())
+      .get('/files')
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.success).toBe(true);
+        expect(body.data.items).toHaveLength(1);
+        expect(body.data.limit).toBe(20);
+        expect(body.data.offset).toBe(0);
+        expect(body.data.nextOffset).toBeNull();
+      });
+
+    expect(filesService.listOwnedFiles).toHaveBeenCalledWith('user-1', 20, 0);
+  });
+
+  it('GET /files?limit=5&offset=10 passes custom pagination to service', async () => {
+    await request(app.getHttpServer())
+      .get('/files?limit=5&offset=10')
+      .expect(200);
+
+    expect(filesService.listOwnedFiles).toHaveBeenCalledWith('user-1', 5, 10);
+  });
+
+  it('GET /files items do not expose internal fields (storageKey, bucket, checksum, ownerId)', async () => {
+    await request(app.getHttpServer())
+      .get('/files')
+      .expect(200)
+      .expect(({ body }) => {
+        const item: Record<string, unknown> = body.data.items[0];
+        expect(item).not.toHaveProperty('storageKey');
+        expect(item).not.toHaveProperty('bucket');
+        expect(item).not.toHaveProperty('checksum');
+        expect(item).not.toHaveProperty('ownerId');
+      });
+  });
+
+  it('GET /files?limit=0 returns 400 (below minimum)', async () => {
+    await request(app.getHttpServer()).get('/files?limit=0').expect(400);
+  });
+
+  it('GET /files?limit=51 returns 400 (exceeds maximum of 50)', async () => {
+    await request(app.getHttpServer()).get('/files?limit=51').expect(400);
+  });
+
+  it('GET /files?offset=-1 returns 400 (negative offset)', async () => {
+    await request(app.getHttpServer()).get('/files?offset=-1').expect(400);
   });
 
   it('uploads a file (201) and returns the public contract', async () => {
@@ -222,6 +298,7 @@ describe('FilesController (upload rate limiting)', () => {
       imports: [ThrottlerModule.forRoot(throttlers(2))],
       controllers: [FilesController],
       providers: [
+        { provide: FilesService, useValue: filesServiceStub() },
         { provide: FileUploadService, useValue: uploadStub() },
         { provide: FileAccessService, useValue: accessStub() },
         { provide: FileDeletionService, useValue: deletionStub() },
@@ -258,6 +335,7 @@ describe('FilesController (download-url rate limiting)', () => {
       imports: [ThrottlerModule.forRoot(throttlers(1000, 2))],
       controllers: [FilesController],
       providers: [
+        { provide: FilesService, useValue: filesServiceStub() },
         { provide: FileUploadService, useValue: uploadStub() },
         { provide: FileAccessService, useValue: accessStub() },
         { provide: FileDeletionService, useValue: deletionStub() },

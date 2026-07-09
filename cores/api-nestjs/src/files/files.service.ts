@@ -14,6 +14,7 @@ import { AppConfig } from '../config/configuration';
 import { PublicStoredFile } from './contracts/public-stored-file';
 import { StoredFileView } from './contracts/stored-file-view';
 import { CreatePendingFileInput } from './dto/create-pending-file.input';
+import { FileListResponseDto } from './dto/file-list-response.dto';
 import { toPublicStoredFile, toStoredFileView } from './files.mapper';
 import { FilesRepository, OwnerQuotaCreateOutcome } from './files.repository';
 import { FileQuotaService } from './quota/file-quota.service';
@@ -135,6 +136,23 @@ export class FilesService {
         // count_exceeded / size_exceeded → audit + 409 (ne revient jamais).
         return this.quotaService.rejectQuotaOutcome(result.outcome, ownerId, size);
     }
+  }
+
+  /**
+   * Liste paginée des fichiers possédés (non supprimés), triés par createdAt desc.
+   * Utilise le trick limit+1 pour éviter un COUNT séparé : si len > limit il y a une page
+   * suivante (nextOffset = offset + limit), sinon nextOffset = null.
+   */
+  async listOwnedFiles(userId: string, limit: number, offset: number): Promise<FileListResponseDto> {
+    const rows = await this.repository.listByOwner(userId, offset, limit + 1);
+    const hasNext = rows.length > limit;
+    const items = hasNext ? rows.slice(0, limit) : rows;
+    return {
+      items: items.map(toPublicStoredFile),
+      limit,
+      offset,
+      nextOffset: hasNext ? offset + limit : null,
+    };
   }
 
   /** Métadonnées publiques d'un fichier possédé. 404 si absent ou non possédé (anti-énumération). */

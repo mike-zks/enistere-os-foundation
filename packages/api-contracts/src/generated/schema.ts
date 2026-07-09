@@ -99,7 +99,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Liste paginée des fichiers possédés (permission files.read ; ownership ; sans DELETED ; triés createdAt desc). */
+        get: operations["files_list"];
         put?: never;
         /**
          * Upload multipart d’un fichier privé (permission files.upload, ownership = utilisateur courant).
@@ -292,6 +293,25 @@ export interface components {
              *     ]
              */
             roles: string[];
+        };
+        FileListResponseDto: {
+            /** @description Fichiers de la page courante. */
+            items: components["schemas"]["PublicStoredFileDto"][];
+            /**
+             * @description Limite appliquée.
+             * @example 20
+             */
+            limit: number;
+            /**
+             * @description Offset de la page suivante, null si dernière page.
+             * @example 20
+             */
+            nextOffset: Record<string, never> | null;
+            /**
+             * @description Offset appliqué.
+             * @example 0
+             */
+            offset: number;
         };
         HealthResponseDto: {
             /** @example api-nestjs-core */
@@ -753,6 +773,76 @@ export interface operations {
             };
             /** @description Trop de tentatives. */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Erreur interne. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    files_list: {
+        parameters: {
+            query?: {
+                /** @description Nombre de fichiers par page (1–50). */
+                limit?: number;
+                /** @description Position de départ (≥ 0). */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page de fichiers possédés. nextOffset est null à la dernière page. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FileListResponseDto"];
+                        /** @example true */
+                        success: boolean;
+                        /**
+                         * Format: date-time
+                         * @example 2026-06-09T12:00:00.000Z
+                         */
+                        timestamp: string;
+                    };
+                };
+            };
+            /** @description Paramètres de pagination invalides (limit 1–50, offset ≥ 0). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Authentification requise. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Permission files.read absente. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

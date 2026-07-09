@@ -53,6 +53,7 @@ describe('FilesService', () => {
     existsByStorageKey: jest.Mock;
     reject: jest.Mock;
     markDeleted: jest.Mock;
+    listByOwner: jest.Mock;
   };
   let storageKeyGenerator: { generate: jest.Mock };
   let validationPolicy: {
@@ -81,6 +82,7 @@ describe('FilesService', () => {
       existsByStorageKey: jest.fn().mockResolvedValue(false),
       reject: jest.fn().mockResolvedValue(buildFile({ status: FileStatus.REJECTED })),
       markDeleted: jest.fn().mockResolvedValue(buildFile({ status: FileStatus.DELETED })),
+      listByOwner: jest.fn().mockResolvedValue([]),
     };
     storageKeyGenerator = { generate: jest.fn(() => 'test/image/2026/06/uuid.png') };
     validationPolicy = {
@@ -211,6 +213,47 @@ describe('FilesService', () => {
       expect(repository.reject).toHaveBeenCalledWith('file-1');
       const events = recordedEvents(auditService.record);
       expect(events).toContain('FILE_REJECTED');
+    });
+  });
+
+  describe('listOwnedFiles', () => {
+    it('returns items and nextOffset=null when results ≤ limit', async () => {
+      const files = [buildFile(), buildFile({ id: '22222222-2222-2222-2222-222222222222' })];
+      repository.listByOwner.mockResolvedValue(files);
+
+      const result = await service.listOwnedFiles('user-1', 20, 0);
+
+      expect(repository.listByOwner).toHaveBeenCalledWith('user-1', 0, 21); // limit+1
+      expect(result.items).toHaveLength(2);
+      expect(result.limit).toBe(20);
+      expect(result.offset).toBe(0);
+      expect(result.nextOffset).toBeNull();
+      expect(result.items[0]).not.toHaveProperty('storageKey');
+      expect(result.items[0]).not.toHaveProperty('bucket');
+      expect(result.items[0]).not.toHaveProperty('ownerId');
+      expect(result.items[0]).not.toHaveProperty('checksum');
+    });
+
+    it('returns nextOffset = offset + limit when limit+1 rows are fetched', async () => {
+      // 6 rows fetched for limit=5 → has next page
+      const files = Array.from({ length: 6 }, (_, i) =>
+        buildFile({ id: `1111111${i}-1111-1111-1111-111111111111` }),
+      );
+      repository.listByOwner.mockResolvedValue(files);
+
+      const result = await service.listOwnedFiles('user-1', 5, 10);
+
+      expect(result.items).toHaveLength(5); // sliced to limit
+      expect(result.nextOffset).toBe(15);   // offset + limit = 10 + 5
+    });
+
+    it('returns an empty items array when no files exist', async () => {
+      repository.listByOwner.mockResolvedValue([]);
+
+      const result = await service.listOwnedFiles('user-1', 20, 0);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.nextOffset).toBeNull();
     });
   });
 });
