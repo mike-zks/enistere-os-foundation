@@ -83,3 +83,16 @@ export function uploadFile(
     signal,
   );
 }
+
+/** `DELETE /api/files/:id` → suppression du fichier. Same-origin, CSRF en header. Jamais de Bearer navigateur. */
+export async function deleteFile(
+  fileId: string,
+  csrfToken: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  await bffFetch<null>(
+    `/api/files/${encodeURIComponent(fileId)}`,
+    { method: "DELETE", headers: { "X-CSRF-Token": csrfToken, Accept: "application/json" } },
+    signal,
+  );
+}

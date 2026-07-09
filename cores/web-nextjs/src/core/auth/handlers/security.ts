@@ -18,6 +18,14 @@ export function assertPost(request: Request, requestId: string): Response | null
   return jsonError(405, "METHOD_NOT_ALLOWED", "Méthode non autorisée.", { requestId });
 }
 
+/** Refuse toute méthode autre que DELETE (générique 405). */
+export function assertDelete(request: Request, requestId: string): Response | null {
+  if (request.method === "DELETE") {
+    return null;
+  }
+  return jsonError(405, "METHOD_NOT_ALLOWED", "Méthode non autorisée.", { requestId });
+}
+
 /**
  * Vérifie l'**origine** (Origin sinon Referer, fail-closed) puis le **CSRF** (double-submit). Retourne
  * une réponse 403 générique en cas d'échec, ou `null` si tout est valide. **Aucun appel API** ne doit

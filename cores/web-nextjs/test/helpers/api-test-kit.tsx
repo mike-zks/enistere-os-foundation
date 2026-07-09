@@ -53,7 +53,9 @@ export function createMockFetch(spec: MockResponseSpec | ((req: Request) => Mock
       headers.set("x-request-id", s.requestId);
     }
     const status = s.status ?? 200;
-    const bodyText = s.body !== undefined ? JSON.stringify(s.body) : "";
+    // Status codes 204/304 must not carry a body (undici throws otherwise).
+    const nullBodyStatus = status === 204 || status === 304;
+    const bodyText = nullBodyStatus ? null : s.body !== undefined ? JSON.stringify(s.body) : "";
     return new Response(bodyText, { status, headers });
   };
   return Object.assign(fn, { calls });

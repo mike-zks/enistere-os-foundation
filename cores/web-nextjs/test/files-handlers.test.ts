@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { handleCreateDownloadUrl } from "../src/core/files/handlers/create-download-url-handler.js";
+import { handleDeleteFile } from "../src/core/files/handlers/delete-file-handler.js";
 import { handleGetFileMetadata } from "../src/core/files/handlers/get-file-metadata-handler.js";
 import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
 import { createMockFetch, type MockResponseSpec } from "./helpers/api-test-kit.js";
@@ -156,5 +157,104 @@ test("URL signée : 404/409/503 mappés distinctement", async () => {
       ID,
     );
     assert.equal(res.status, expected, `status ${status}`);
+  }
+});
+
+// ---------- suppression ----------
+
+const delReq = (id = ID, opts: { csrf?: string; origin?: string } = {}): Request =>
+  makeRequest(`/api/files/${id}`, { method: "DELETE", ...opts });
+
+test("suppression : GET refusé (405) sans appel API", async () => {
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(makeRequest(`/api/files/${ID}`, { method: "GET" }), makeDeps(new InMemoryCookieStore(), mock), ID);
+  assert.equal(res.status, 405);
+  assert.equal(mock.calls.length, 0);
+});
+
+test("suppression : UUID invalide → 400 sans appel API", async () => {
+  const store = new InMemoryCookieStore();
+  const csrf = seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(delReq(BAD_ID, { csrf }), makeDeps(store, mock), BAD_ID);
+  assert.equal(res.status, 400);
+  const body = (await res.json()) as { errorCode: string };
+  assert.equal(body.errorCode, "INVALID_ID");
+  assert.equal(mock.calls.length, 0);
+});
+
+test("suppression : Origin invalide → 403 sans appel API", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  const csrf = seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(delReq(ID, { csrf, origin: "https://evil.test" }), makeDeps(store, mock), ID);
+  assert.equal(res.status, 403);
+  assert.equal(mock.calls.length, 0);
+});
+
+test("suppression : CSRF invalide → 403 sans appel API", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(delReq(ID, { csrf: WRONG_CSRF }), makeDeps(store, mock), ID);
+  assert.equal(res.status, 403);
+  assert.equal(mock.calls.length, 0);
+});
+
+test("suppression : CSRF absent → 403 sans appel API", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(delReq(ID), makeDeps(store, mock), ID);
+  assert.equal(res.status, 403);
+  assert.equal(mock.calls.length, 0);
+});
+
+test("suppression : succès → 200 { success:true, data:null }, no-store, Authorization Bearer", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "ACCESS", "REFRESH");
+  const csrf = seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(delReq(ID, { csrf }), makeDeps(store, mock), ID);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  const body = (await res.json()) as { success: boolean; data: null };
+  assert.equal(body.success, true);
+  assert.equal(body.data, null);
+  assert.equal(mock.calls[0]?.headers["authorization"], "Bearer ACCESS");
+});
+
+test("suppression : requestId propagé navigateur → API → réponse", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  const csrf = seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const req = makeRequest(`/api/files/${ID}`, { method: "DELETE", csrf, requestId: "rid-del-1" });
+  const res = await handleDeleteFile(req, makeDeps(store, mock), ID);
+  assert.equal(res.headers.get("x-request-id"), "rid-del-1");
+  assert.equal(mock.calls[0]?.headers["x-request-id"], "rid-del-1");
+});
+
+test("suppression : 409 → NOT_DELETABLE (jamais NOT_DOWNLOADABLE)", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  const csrf = seedCsrf(store);
+  const res = await handleDeleteFile(delReq(ID, { csrf }), makeDeps(store, createMockFetch(ERR(409))), ID);
+  assert.equal(res.status, 409);
+  const body = (await res.json()) as { errorCode: string };
+  assert.equal(body.errorCode, "NOT_DELETABLE");
+  assert.notEqual(body.errorCode, "NOT_DOWNLOADABLE");
+});
+
+test("suppression : 401/403/404/429/503 mappés distinctement", async () => {
+  for (const status of [401, 403, 404, 429, 503] as const) {
+    const store = new InMemoryCookieStore();
+    seedAuth(store, "A", "R");
+    const csrf = seedCsrf(store);
+    const res = await handleDeleteFile(delReq(ID, { csrf }), makeDeps(store, createMockFetch(ERR(status))), ID);
+    assert.equal(res.status, status, `status ${status}`);
   }
 });
