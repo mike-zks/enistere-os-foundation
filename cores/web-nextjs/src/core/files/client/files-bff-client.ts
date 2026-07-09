@@ -113,3 +113,29 @@ export async function deleteFile(
     signal,
   );
 }
+
+/** `POST /api/files/:id/quarantine` → mise en quarantaine admin. Same-origin, CSRF en header. Jamais de Bearer navigateur. */
+export async function quarantineFile(
+  fileId: string,
+  csrfToken: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  await bffFetch<null>(
+    `/api/files/${encodeURIComponent(fileId)}/quarantine`,
+    { method: "POST", headers: { "X-CSRF-Token": csrfToken, Accept: "application/json" } },
+    signal,
+  );
+}
+
+/** `POST /api/files/:id/restore` → restauration admin (lève la quarantaine). Same-origin, CSRF en header. Jamais de Bearer navigateur. */
+export async function restoreFile(
+  fileId: string,
+  csrfToken: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  await bffFetch<null>(
+    `/api/files/${encodeURIComponent(fileId)}/restore`,
+    { method: "POST", headers: { "X-CSRF-Token": csrfToken, Accept: "application/json" } },
+    signal,
+  );
+}

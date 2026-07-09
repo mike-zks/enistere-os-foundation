@@ -6,6 +6,18 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 7 — Admin BFF quarantaine/restauration
+
+- **Web Core Files 7** (`cores/web-nextjs/`) : ajoute les **BFF handlers et primitives UI minimales** pour consommer les capacités admin Files déjà présentes côté API : **quarantaine** (`POST /api/files/:id/quarantine`) et **restauration** (`POST /api/files/:id/restore`). Aucun nouveau comportement API. **446 tests** (393 → 446, +53, 0 régression). Le Web reste un client gouverné de l'API Core.
+  - **Handlers BFF** (`src/core/files/handlers/`) : `handleQuarantineFile` + `handleRestoreFile` — pattern identique au handler delete : ordre `assertPost` (405) → UUID (400 sans appel API) → `checkOriginAndCsrf` (403 sans appel API) → client serveur **`writable`** → appel API → 409 catch explicite (`NOT_QUARANTINABLE` / `NOT_RESTORABLE` — jamais `NOT_DOWNLOADABLE`) → `filesErrorResponse`.
+  - **Routes** (`src/app/api/files/[id]/quarantine/route.ts`, `src/app/api/files/[id]/restore/route.ts`) : `force-dynamic`, `POST` uniquement, délèguent aux handlers.
+  - **Client BFF navigateur** (`files-bff-client.ts`) : `quarantineFile(fileId, csrfToken)` + `restoreFile(fileId, csrfToken)` — `POST`, same-origin, `credentials:"include"`, `X-CSRF-Token`, **jamais `Authorization`**, `encodeURIComponent(fileId)`.
+  - **Hooks** (`src/features/files/`) : `useQuarantineFile` + `useRestoreFile` — `useMutation<void, unknown, string>` **sans `mutationKey`**, `onSuccess: void queryClient.invalidateQueries({ queryKey: fileKeys.all })`, **anti-double-soumission** (`useRef(inFlight)`), retourne `{ requestQuarantine/requestRestore, isPending, isSuccess, error?, reset }`.
+  - **UI admin séparée** (`src/features/files/admin-file-actions.tsx`) : `AdminFileActions` — retourne `null` si l'utilisateur n'a ni `files.quarantine` ni `files.restore` ; boutons conditionnels + alertes succès/erreur ; **jamais de champ interne, token, URL signée** exposés. Page dédiée `/protected/files/[id]/admin/` séparée de la page utilisateur.
+  - **Sécurité** : CSRF + Origin/Referer sur toutes les mutations ; `checkOriginAndCsrf` avant tout appel API ; l'API reste l'autorité finale (`files.quarantine`/`files.restore` — sans ownership) ; **jamais de Bearer navigateur** ; anti-énumération conservée (404 mappé distinctement) ; 401/403/404/409 mappés clairement ; logs et tests sans secret ni champ interne.
+  - **Tests** (+53) : `test/admin-file-handlers.test.ts` (18 cas — méthode/UUID/CSRF/Origin/succès/409/401-403-404-503/requestId × 2 handlers) + `test/admin-bff-client.test.ts` (10 cas — same-origin/credentials/CSRF/sans Bearer/URL/erreurs × 2 fonctions) + `test/use-quarantine-file.test.tsx` + `test/use-restore-file.test.tsx` (8 cas chacun — CSRF→POST/fileKeys.all invalidé/anti-double/409/403/401/reset/isPending) + `test/admin-file-actions.test.tsx` (9 cas — null sans permission/boutons conditionnels/alerte succès-erreur × 2/sans Bearer).
+  - **Vérifications** : `tsc --noEmit` ✓, `npm run lint` ✓ (0 erreurs), `npm test` (446/446) ✓, `npm run build` ✓ (routes `/api/files/[id]/quarantine` + `/api/files/[id]/restore` + page `/protected/files/[id]/admin` dynamiques), `npm audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-files-7-admin-bff`.
+
 ### Web Core Files 6 — Revue globale Files V1 et durcissement de cohérence
 
 - **Web Core Files 6** (`cores/web-nextjs/`) : revue globale de la verticale Files V1 bout-en-bout (API + packages + Web BFF + hooks + UI + E2E). **4 défauts corrigés, 3 tests ajoutés, 1 test mis à jour. 393 tests** (390 → 393, +3, 0 régression). Rapport versionné `docs/project-status/WEB_FILES_V1_REVIEW.md`. **Verdict : Stable avec réserves mineures** (aucun bloquant — V1 livrable).
