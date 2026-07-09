@@ -345,7 +345,18 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
+**Web Core Files 5 — E2E Playwright liste fichiers** (`cores/web-nextjs/e2e/`) :
+ajoute 5 tests Playwright pour `/protected/files` dans la stack réelle `web-e2e-ci.yml` (API + PostgreSQL +
+MinIO + Web + Chromium). Couverture ajoutée : propriétaire voit le fichier seedé avec champs publics uniquement
+et aucun champ interne ; clic liste → détail `/protected/files/:id` ; un seul fichier seedé → aucune pagination ;
+anonyme → redirection `/login` ; utilisateur sans permission → état erreur générique `role="alert"` (skippé si
+`E2E_NOPERM_EMAIL` absent). Le parcours reste déterministe via le fichier `VALIDATED` seedé par `global-setup.ts`,
+sans token, URL signée, champ interne, contenu fichier ou secret dans le DOM/logs. **E2E 7 → 12 tests**.
+**Vérifications CI PR #61** : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`,
+`api-runtime`, `web-e2e`, `api-smoke`, images API/Web tous verts. Commit merge : `1bf13cc`.
+**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou Web Core Files admin BFF (quarantaine/restauration, si besoin produit).**
+
+**Étape précédente — API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
 ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant.
 `files.read` requis, ownership-scoped, exclusion `DELETED` (`deletedAt: null`), tri `createdAt desc`,
 pagination offset-based (`limit` 1–50, défaut 20 ; `offset ≥ 0`). Trick limit+1 (aucun COUNT séparé).
@@ -363,7 +374,6 @@ ajouté dans `api-client-fetch`. **Vérifications** : `npm test` API **386/386**
 **12/12**, `api-client-fetch` **30/30** + `npm run build` (api-contracts + api-client-fetch) +
 `openapi:generate` + contracts `generate` verts.
 Commit : `feat(api): add paginated owned file list endpoint (Files 5)`.
-**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou CI E2E Playwright pour la liste /protected/files.**
 
 **Mobile Core React Native 30 — smoke runtime iOS / parity device** (`cores/mobile-react-native/`,
 périmètre `scripts/**` + `package.json` + docs) : documente la parité runtime iOS du starter Expo
