@@ -203,6 +203,16 @@ test("suppression : CSRF invalide → 403 sans appel API", async () => {
   assert.equal(mock.calls.length, 0);
 });
 
+test("suppression : CSRF absent → 403 sans appel API", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  seedCsrf(store);
+  const mock = createMockFetch({ status: 204 });
+  const res = await handleDeleteFile(delReq(ID), makeDeps(store, mock), ID);
+  assert.equal(res.status, 403);
+  assert.equal(mock.calls.length, 0);
+});
+
 test("suppression : succès → 200 { success:true, data:null }, no-store, Authorization Bearer", async () => {
   const store = new InMemoryCookieStore();
   seedAuth(store, "ACCESS", "REFRESH");

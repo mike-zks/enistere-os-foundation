@@ -5,13 +5,13 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Web Core Files 3 : RÉALISÉ** (`web-nextjs` → **356 tests**). Files 3 ajoute la suppression
+> ✅ **Web Core Files 3 : RÉALISÉ** (`web-nextjs` → **357 tests**). Files 3 ajoute la suppression
 > fichier sécurisée BFF : `DELETE /api/files/:id` (UUID 400 avant appel API, CSRF/Origin 403 avant
 > appel API, client `writable`), client BFF `deleteFile` (same-origin, aucun Bearer), mutation
 > `useDeleteFile` (sans `mutationKey`, anti-double-soumission, `queryClient.removeQueries` après
 > succès), bouton « Supprimer » + Dialog confirmation UI Kit 4 dans `FileDetails`, navigation
 > post-succès via `onDeleteSuccess` prop, 409→NOT_DELETABLE, anti-énumération 404.
-> **356/356 tests**, typecheck/lint/test/build/audit verts.
+> **357/357 tests**, typecheck/lint/test/build/audit verts.
 >
 > **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
 > **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
