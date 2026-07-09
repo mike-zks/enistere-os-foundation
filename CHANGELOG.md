@@ -6,6 +6,22 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 4 — liste paginée BFF (read-only)
+
+- **Web Core Files 4** (`cores/web-nextjs/`) : ajoute la liste paginée de fichiers côté Web BFF. **390 tests** (357 → 390, +33 nouveaux, 0 régression). BFF ciblé uniquement. API Core reste l'autorité (ownership + permission `files.read`).
+  - **Handler BFF** (`src/core/files/handlers/list-files-handler.ts`) : `GET /api/files` — ordre : méthode (405) → validation query (`limit` 1–50, défaut 20 ; `offset` ≥ 0, défaut 0 — **400 sans appel API** si invalide) → client serveur **`read-only`** (`enableRefresh:false`) → `client.files.list()` → `jsonOk` ou `filesErrorResponse`. `no-store`. Aucun CSRF (GET non mutatif).
+  - **Route** (`src/app/api/files/route.ts`) : `dynamic = "force-dynamic"`, `GET` uniquement — délègue à `handleListFiles`.
+  - **Type `FileListResponse`** (`files-bff-client.ts`) : `SchemaOf<"FileListResponseDto">` — dérivé du contrat généré, aucun DTO recopié.
+  - **BFF client navigateur** (`listFiles` dans `files-bff-client.ts`) : `GET /api/files?limit=&offset=` — `credentials:"include"`, aucun Bearer, aucun CSRF, same-origin.
+  - **Query key** (`file-keys.ts`) : `fileKeys.list({ limit, offset })` → `["files", "list", { limit, offset }]` — stable, sérialisable, jamais de token/URL signée.
+  - **Hook** (`src/features/files/use-file-list.ts`) : `fileListQueryOptions({ limit?, offset? })` + `useFileList(params?)` — `retry:false`, params normalisés (défauts), `"use client"`.
+  - **Vue liste** (`src/features/files/file-list-view.tsx`) : `"use client"` — états loading (`role=status aria-live=polite`) / vide (`EmptyState` + lien upload) / erreur (`Alert role=alert` via `classifyFileError`) / liste (`<ul>` + `<li>` par fichier : originalName, mimeType, size formatée, category, status, visibility, createdAt formaté, lien `/protected/files/:id`) + pagination (`<nav aria-label="Pagination">` : Précédent si `offset > 0`, Suivant si `nextOffset !== null`). **Aucun champ interne** (bucket/storageKey/checksum/ownerId). Ancres `<a>` (compatibilité `tsconfig.test.json` `nodenext`).
+  - **Page** (`src/app/(protected)/protected/files/page.tsx`) : Server Component, `dynamic = "force-dynamic"`, lit `searchParams.limit`/`offset`, délègue à `FileListView`.
+  - **Erreurs mappées** : 400/401/403/429/503 + réseau/timeout via `filesErrorResponse` existant.
+  - **Contraintes** : aucun token exposé côté client, aucun proxy générique, aucun champ interne affiché, same-origin + `credentials:"include"` + aucun `Authorization` navigateur, aucun CSRF sur GET, l'API reste l'autorité.
+  - **Tests** (+33) : `test/list-files-handler.test.ts` (9 cas : succès no-store, défauts limit/offset, params transmis, limit invalide ×5, offset invalide ×3, erreurs API 4 statuts, read-only sans refresh, POST 405, no-store sur erreur, champs internes absents) + `test/list-bff-client.test.ts` (8 cas : same-origin GET, URL sans qs, qs correct, limit seul, 401/403/503→BffAuthError, réseau, JSON invalide, jamais API directe) + `test/use-file-list.test.tsx` (6 cas : clé stable, clé sans secret, clés distinctes, succès en cache, 503 retry:false, 401 immédiat) + `test/file-list-view.test.tsx` (8 cas : loading role=status, vide EmptyState, erreur Alert, champs publics affichés, champs internes absents, lien /protected/files/:id, Suivant si nextOffset, Précédent si offset>0).
+  - **Vérifications** : `tsc --noEmit`, `npm run lint` (0 erreurs), `npm test` (**390/390**), `npm run build` (routes `/api/files` + `/protected/files` dynamiques), `npm audit` (0 vuln), `git diff --check`. Commit + PR.
+
 ### API Core Files 5 — liste propriétaire de fichiers paginée (read-only)
 
 - **API Core Files 5** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) : ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant. **386 tests unitaires API** (377 → 386, +9). Tests e2e d'intégration ajoutés. Contrat OpenAPI régénéré + types `api-contracts` + `FilesApi.list()`.

@@ -5,6 +5,7 @@ import { BffAuthError, isRecord } from "../../auth/client/bff-error.js";
 // Types dérivés des contrats générés (ADR-016) — aucun DTO recopié.
 export type PublicStoredFile = SchemaOf<"PublicStoredFileDto">;
 export type SignedDownload = SchemaOf<"SignedDownloadResponseDto">;
+export type FileListResponse = SchemaOf<"FileListResponseDto">;
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -43,6 +44,22 @@ async function bffFetch<T>(path: string, init: RequestInit, external?: AbortSign
     throw new BffAuthError("invalid_response", response.status, null, "Réponse invalide.", requestId);
   }
   return body.data as T;
+}
+
+/** `GET /api/files` → liste paginée des fichiers possédés. Same-origin, read-only, aucun CSRF. */
+export function listFiles(
+  params?: { limit?: number; offset?: number },
+  signal?: AbortSignal,
+): Promise<FileListResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit !== undefined) query.set("limit", String(params.limit));
+  if (params?.offset !== undefined) query.set("offset", String(params.offset));
+  const qs = query.toString();
+  return bffFetch<FileListResponse>(
+    `/api/files${qs ? `?${qs}` : ""}`,
+    { method: "GET", headers: { Accept: "application/json" } },
+    signal,
+  );
 }
 
 /** `GET /api/files/:id` → métadonnées publiques. */

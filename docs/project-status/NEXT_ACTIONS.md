@@ -5,6 +5,20 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core Files 4 : RÉALISÉ** (`web-nextjs` → **390 tests**). Files 4 ajoute la liste paginée
+> de fichiers BFF : `GET /api/files` handler (validation query limit 1–50 / offset ≥ 0, 400 sans
+> appel API si invalide, client `read-only`, `no-store`, aucun CSRF), `FileListResponse` type dérivé
+> du contrat, `listFiles({ limit?, offset? })` client BFF navigateur (same-origin, `credentials:include`,
+> aucun Bearer), `fileKeys.list({ limit, offset })` clé stable, `useFileList` hook (`retry:false`),
+> `FileListView` composant client (états loading/vide/erreur/liste, champs publics uniquement, pagination
+> Précédent/Suivant, liens `/protected/files/:id`), page `/protected/files` (Server Component, délègue
+> `searchParams` à `FileListView`). **390/390 tests**, typecheck/lint/test/build/audit verts.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
+> **Web Core Files 5** (admin BFF — si besoin produit),
+> **CI Files list** (test E2E Playwright pour la liste `/protected/files`).
+
 > ✅ **API Core Files 5 : RÉALISÉ** (`api-nestjs` → **386 tests unitaires + 7 e2e Files 5**). Files 5
 > ajoute `GET /files?limit=&offset=` — liste paginée read-only des fichiers du propriétaire courant.
 > `files.read` requis, ownership-scoped, exclusion `DELETED` (`deletedAt: null`), tri `createdAt desc`,
