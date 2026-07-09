@@ -37,7 +37,7 @@ export function classifyFileError(error: unknown): FileError {
       case 404:
         return { kind: "notfound", message: "Fichier introuvable.", ...base };
       case 409:
-        return { kind: "error", message: "Ce fichier n'est pas téléchargeable.", ...base };
+        return { kind: "error", message: "Cette action n'est pas disponible pour ce fichier.", ...base };
       case 413:
         return { kind: "too_large", message: "Fichier trop volumineux.", ...base };
       case 415:

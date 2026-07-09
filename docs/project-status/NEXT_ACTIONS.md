@@ -5,6 +5,18 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core Files 6 : RÉALISÉ** (`web-nextjs/` → **393 tests**, +3). Files 6 réalise la revue
+> globale Files V1 bout-en-bout. 4 défauts corrigés : D1 (cache delete→list, `useDeleteFile.onSuccess`),
+> D2 (cache upload→list, `useUploadFile.onSuccess` manquant), D3 (message 409 neutre dans `classifyFileError`),
+> D4 (upload 409→`QUOTA_EXCEEDED`, handler ciblé avant `filesErrorResponse`). 3 tests ajoutés, 1 mis à jour.
+> Rapport versionné `docs/project-status/WEB_FILES_V1_REVIEW.md`. Verdict : **stable avec réserves mineures**
+> (6 réserves documentées R1–R6, aucune bloquante). `typecheck`/`lint`/`test 393/393`/`build`/`audit`/
+> `diff --check` verts. Branch `web-core-files-6-v1-review`.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
+> **Web Core Files admin BFF** (quarantaine/restauration — si besoin produit).
+
 > ✅ **Web Core Files 5 : RÉALISÉ** (`web-nextjs/e2e/` → **12 tests E2E**, +5). Files 5 ajoute 5
 > tests Playwright pour `/protected/files` : propriétaire voit le fichier seedé (champs publics,
 > aucun champ interne) ; clic → navigation vers `/protected/files/:id` (href + heading h1) ; 1 fichier
@@ -12,9 +24,7 @@
 > (`test.skip` si `E2E_NOPERM_EMAIL` absent). Déterministe (1 fichier VALIDATED via `global-setup.ts`),
 > compatible CI (`web-e2e-ci.yml`). **390/390 tests unitaires inchangés**, typecheck/lint/build/audit verts.
 >
-> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
-> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
-> **Web Core Files admin BFF** (quarantaine/restauration — si besoin produit).
+> **Prochaine action UNIQUE** : à décider → **Web Core Files 6** (revue globale Files V1, ci-dessus).
 
 > ✅ **Web Core Files 4 : RÉALISÉ** (`web-nextjs` → **390 tests**). Files 4 ajoute la liste paginée
 > de fichiers BFF : `GET /api/files` handler (validation query limit 1–50 / offset ≥ 0, 400 sans

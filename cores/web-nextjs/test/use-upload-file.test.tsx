@@ -59,6 +59,19 @@ test("succès : CSRF → POST upload ; uploadedFile retourné, JAMAIS dans Query
   assert.equal(result.current.error, undefined);
 });
 
+test("succès : fileKeys.list invalidé après upload", async () => {
+  const { client, result } = setup();
+  client.setQueryData(["files", "list", { limit: 20, offset: 0 }], { items: [], limit: 20, offset: 0, nextOffset: null });
+
+  await act(async () => {
+    result.current.upload({ file: JPEG, category: "IMAGE" });
+    await waitFor(() => assert.ok(result.current.uploadedFile !== undefined));
+  });
+
+  const listQuery = client.getQueryCache().find({ queryKey: ["files", "list", { limit: 20, offset: 0 }] });
+  assert.ok(listQuery === undefined || listQuery.state.isInvalidated, "query list doit être invalidée après upload");
+});
+
 test("double-clic empêché (un seul POST upload)", async () => {
   const { mock, result } = setup();
   await act(async () => {

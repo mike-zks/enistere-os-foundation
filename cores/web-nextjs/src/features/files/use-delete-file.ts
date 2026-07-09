@@ -32,6 +32,7 @@ export function useDeleteFile(): UseDeleteFileResult {
     },
     onSuccess: (_data, fileId) => {
       queryClient.removeQueries({ queryKey: fileKeys.detail(fileId) });
+      void queryClient.invalidateQueries({ queryKey: fileKeys.all });
     },
   });
 

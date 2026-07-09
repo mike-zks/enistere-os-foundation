@@ -59,12 +59,12 @@ test("double-clic empêché (un seul POST download-url)", async () => {
   assert.equal(mock.calls.filter((c) => c.url.includes("/download-url")).length, 1);
 });
 
-test("409 → erreur « non téléchargeable » exposée, aucune URL", async () => {
+test("409 → erreur action non disponible exposée, aucune URL", async () => {
   const { result } = setup(() => ({ status: 409, body: { success: false, errorCode: "NOT_DOWNLOADABLE" } }));
   await act(async () => {
     result.current.download(ID);
     await waitFor(() => assert.ok(result.current.error !== undefined));
   });
   assert.equal(result.current.error?.kind, "error");
-  assert.ok(result.current.error?.message.toLowerCase().includes("téléchargeable"));
+  assert.ok(result.current.error?.message.toLowerCase().includes("disponible"));
 });

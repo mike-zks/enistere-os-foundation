@@ -1,3 +1,4 @@
+import { ApiClientError } from "@enistere/api-client-fetch";
 import type { FileCategory } from "@enistere/api-client-fetch";
 
 import { createAuthenticatedServerApiClient } from "../../api/server/create-authenticated-server-api-client.js";
@@ -104,6 +105,9 @@ export async function handleUploadFile(request: Request, deps: AuthHandlerDeps):
     const uploaded = await client.files.upload(file, category, { subjectId });
     return jsonOk(uploaded, { requestId });
   } catch (error) {
+    if (error instanceof ApiClientError && error.status === 409) {
+      return jsonError(409, "QUOTA_EXCEEDED", "Quota de fichiers atteint.", { requestId });
+    }
     return filesErrorResponse(error, requestId);
   }
 }

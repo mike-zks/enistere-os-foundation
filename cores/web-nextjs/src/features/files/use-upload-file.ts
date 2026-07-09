@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
 import type { FileCategory } from "@enistere/api-client-fetch";
@@ -8,6 +8,7 @@ import type { FileCategory } from "@enistere/api-client-fetch";
 import { getCsrfToken } from "../../core/auth/client/csrf-client.js";
 import { uploadFile } from "../../core/files/client/files-bff-client.js";
 import type { PublicStoredFile } from "../../core/files/client/files-bff-client.js";
+import { fileKeys } from "../../core/query/keys/file-keys.js";
 import { classifyFileError, type FileError } from "./file-error.js";
 
 export interface UploadFileInput {
@@ -32,9 +33,13 @@ export interface UseUploadFileResult {
  * via `useRef`. Session via cookies HttpOnly uniquement (ADR-005). L'API Core reste l'autorité (ADR-007).
  */
 export function useUploadFile(): UseUploadFileResult {
+  const queryClient = useQueryClient();
   const inFlight = useRef(false);
 
   const mutation = useMutation<PublicStoredFile, unknown, UploadFileInput>({
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: fileKeys.all });
+    },
     mutationFn: async ({ file, category, subjectId }) => {
       const csrfToken = await getCsrfToken();
       const form = new FormData();
