@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 5 — E2E Playwright parcours liste fichiers (/protected/files)
+
+- **Web Core Files 5** (`cores/web-nextjs/e2e/`) : ajoute 5 tests Playwright pour la page `/protected/files`. **12 tests E2E** (7 → 12, +5 nouveaux, 0 régression). Aucun changement au code métier, ni au BFF, ni aux packages.
+  - **Test 1** : propriétaire — fichier seedé visible, champs publics affichés, aucun champ interne (`storageKey`/`bucket`/`checksum`/`ownerId`/`X-Amz-Signature`).
+  - **Test 2** : propriétaire — clic sur le fichier → navigation réelle vers `/protected/files/:id` (vérifie le `href` et le heading `<h1>` de la page de détail).
+  - **Test 3** : propriétaire — 1 fichier seedé (< limit défaut 20) → pas de pagination (ni « Précédent » ni « Suivant »).
+  - **Test 4** : anonyme — `/protected/files` redirige vers `/login` (aucun contenu privé avant authentification, liste absente).
+  - **Test 5** : sans permission (`E2E_NOPERM_EMAIL`) — liste → état erreur générique (`role="alert"`) ; `test.skip` si variable absente.
+  - **Contraintes** : aucun token/URL signée/champ interne dans les logs ou snapshots (`expectNoSensitiveLeak`) ; aucun contournement Auth/CSRF ; déterministe (1 fichier VALIDATED seedé par `global-setup.ts`) ; compatible CI (`web-e2e-ci.yml`).
+  - **Vérifications** : `tsc --noEmit` ✓, `npm run lint` ✓ (0 erreurs), `npm test` (390/390) ✓, `npm run build` ✓, `npm audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-files-5-e2e-list`.
+
 ### Web Core Files 4 — liste paginée BFF (read-only)
 
 - **Web Core Files 4** (`cores/web-nextjs/`) : ajoute la liste paginée de fichiers côté Web BFF. **390 tests** (357 → 390, +33 nouveaux, 0 régression). BFF ciblé uniquement. API Core reste l'autorité (ownership + permission `files.read`).
