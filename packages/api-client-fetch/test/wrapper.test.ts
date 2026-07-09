@@ -82,6 +82,23 @@ test('ApiClientError HTTP typée + requestId + helpers', async () => {
   );
 });
 
+test('files.list appelle GET /files avec pagination et retourne une page publique typée', async () => {
+  const { client, calls } = make(() => ({
+    status: 200,
+    body: successEnvelope({ items: [], limit: 10, offset: 20, nextOffset: null }),
+  }));
+  const page = await client.files.list({ limit: 10, offset: 20 });
+
+  assert.deepEqual(page.items, []);
+  assert.equal(page.limit, 10);
+  assert.equal(page.offset, 20);
+  assert.equal(page.nextOffset, null);
+  assert.equal(calls[0]?.method, 'GET');
+  assert.equal(calls[0]?.path, '/files');
+  assert.ok(calls[0]?.url.includes('limit=10'));
+  assert.ok(calls[0]?.url.includes('offset=20'));
+});
+
 test('erreur réseau (jamais une fausse 5xx)', async () => {
   const { client } = make(() => 'network-error');
   await assert.rejects(

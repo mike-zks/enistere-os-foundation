@@ -20,6 +20,7 @@ const EXPECTED_OPERATION_IDS = [
   'auth_logout',
   'auth_getProfile',
   'auth_getAuthorization',
+  'files_list',
   'files_upload',
   'files_getMetadata',
   'files_createDownloadUrl',

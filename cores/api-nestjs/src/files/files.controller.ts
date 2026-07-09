@@ -10,6 +10,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -34,6 +35,8 @@ import { FileAccessService } from './access/file-access.service';
 import { PublicStoredFile } from './contracts/public-stored-file';
 import { SignedDownloadResult } from './contracts/signed-download-result';
 import { FileDeletionService } from './deletion/file-deletion.service';
+import { FileListQueryDto } from './dto/file-list-query.dto';
+import { FileListResponseDto } from './dto/file-list-response.dto';
 import { PublicStoredFileDto } from './dto/public-stored-file.dto';
 import { DEFAULT_QUARANTINE_REASON, QuarantineFileDto } from './dto/quarantine-file.dto';
 import { SignedDownloadResponseDto } from './dto/signed-download-response.dto';
@@ -41,6 +44,7 @@ import { UploadFileDto } from './dto/upload-file.dto';
 import { FileQuarantineService } from './quarantine/file-quarantine.service';
 import { MulterExceptionFilter } from './upload/multer-exception.filter';
 import { FileUploadService } from './upload/file-upload.service';
+import { FilesService } from './files.service';
 
 // Multer protège la mémoire AVANT traitement : un seul fichier, taille bornée (lue au boot).
 const MULTER_OPTIONS = {
@@ -58,11 +62,38 @@ const MULTER_OPTIONS = {
 @Controller('files')
 export class FilesController {
   constructor(
+    private readonly filesService: FilesService,
     private readonly fileUploadService: FileUploadService,
     private readonly fileAccessService: FileAccessService,
     private readonly fileDeletionService: FileDeletionService,
     private readonly fileQuarantineService: FileQuarantineService,
   ) {}
+
+  /**
+   * Liste paginée des fichiers du propriétaire courant, triés par createdAt desc.
+   * Les fichiers DELETED sont exclus. Aucun champ interne n'est exposé.
+   * La pagination est offset-based avec un `limit` borné (max 50).
+   */
+  @Get()
+  @Permissions('files.read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    operationId: 'files_list',
+    summary: 'Liste paginée des fichiers possédés (permission files.read ; ownership ; sans DELETED ; triés createdAt desc).',
+  })
+  @ApiSuccessResponse(FileListResponseDto, {
+    description: 'Page de fichiers possédés. nextOffset est null à la dernière page.',
+  })
+  @ApiErrorResponse(400, 'Paramètres de pagination invalides (limit 1–50, offset ≥ 0).')
+  @ApiErrorResponse(401, 'Authentification requise.')
+  @ApiErrorResponse(403, 'Permission files.read absente.')
+  @ApiErrorResponse(500, 'Erreur interne.')
+  listFiles(
+    @Query() query: FileListQueryDto,
+    @CurrentUser('userId') userId: string,
+  ): Promise<FileListResponseDto> {
+    return this.filesService.listOwnedFiles(userId, query.limit, query.offset);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

@@ -1,9 +1,24 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-07-08). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-07-09). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
+
+> ✅ **API Core Files 5 : RÉALISÉ** (`api-nestjs` → **386 tests unitaires + 7 e2e Files 5**). Files 5
+> ajoute `GET /files?limit=&offset=` — liste paginée read-only des fichiers du propriétaire courant.
+> `files.read` requis, ownership-scoped, exclusion `DELETED` (`deletedAt: null`), tri `createdAt desc`,
+> pagination offset-based (`limit` 1–50, défaut 20 ; `offset ≥ 0`). Trick limit+1 (aucun COUNT séparé).
+> Réponse publique : `{ items: PublicStoredFile[], limit, offset, nextOffset: number | null }` — aucun
+> champ interne. `FileListQueryDto` + `FileListResponseDto` ajoutés. `FilesService.listOwnedFiles()`.
+> OpenAPI régénéré (`files_list`, `FileListResponseDto`). `api-contracts` régénéré. `FilesApi.list()`.
+> **386/386 tests unitaires API**, `api-contracts` **12/12**, `api-client-fetch` **30/30**,
+> typecheck/build verts.
+>
+> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
+> **Web Core Files 4** (liste BFF `GET /api/files` — consomme `FilesApi.list()`, `useFileList` hook,
+> page `/protected/files`),
+> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible).
 
 > ✅ **Web Core Files 3 : RÉALISÉ** (`web-nextjs` → **357 tests**). Files 3 ajoute la suppression
 > fichier sécurisée BFF : `DELETE /api/files/:id` (UUID 400 avant appel API, CSRF/Origin 403 avant
@@ -13,9 +28,7 @@
 > post-succès via `onDeleteSuccess` prop, 409→NOT_DELETABLE, anti-énumération 404.
 > **357/357 tests**, typecheck/lint/test/build/audit verts.
 >
-> **Prochaine action UNIQUE** : à décider par décision humaine. Candidats :
-> **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible),
-> ou **Web Core** (Files admin — liste, quarantaine/restauration).
+> **Prochaine action UNIQUE** : décidée → **API Core Files 5** (ci-dessus).
 
 > ✅ **Web Core Files 2 : RÉALISÉ** (`web-nextjs` → **333 tests**). Files 2 ajoute l'upload Web
 > sécurisé BFF multipart : BFF ciblé `POST /api/files/upload` (CSRF/Origin obligatoires, validation

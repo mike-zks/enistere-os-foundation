@@ -51,6 +51,20 @@ export class FilesApi {
     return result.data.data;
   }
 
+  async list(params?: { limit?: number; offset?: number }): Promise<SchemaOf<'FileListResponseDto'>> {
+    const result = await this.t.invokeRefreshable((signal) =>
+      this.t.raw.GET('/files', { params: { query: params }, signal }),
+    );
+    const error = toApiClientError(result);
+    if (error) {
+      throw error;
+    }
+    if (result.data === undefined) {
+      throw ApiClientError.fromHttp(result.response.status, undefined, this.t.requestId(result.response));
+    }
+    return result.data.data;
+  }
+
   async getMetadata(id: string): Promise<SchemaOf<'PublicStoredFileDto'>> {
     const result = await this.t.invokeRefreshable((signal) =>
       this.t.raw.GET('/files/{id}', { params: { path: { id } }, signal }),

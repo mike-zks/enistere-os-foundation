@@ -510,6 +510,116 @@
       }
     },
     "/files": {
+      "get": {
+        "operationId": "files_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Nombre de fichiers par page (1–50).",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Position de départ (≥ 0).",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "example": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page de fichiers possédés. nextOffset est null à la dernière page.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/FileListResponseDto"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2026-06-09T12:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Paramètres de pagination invalides (limit 1–50, offset ≥ 0).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission files.read absente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Liste paginée des fichiers possédés (permission files.read ; ownership ; sans DELETED ; triés createdAt desc).",
+        "tags": [
+          "Files"
+        ]
+      },
       "post": {
         "description": "Compatible `fetch + FormData` (web et React Native `{ uri, name, type }`). Le client NE force PAS `Content-Type: multipart/form-data` (boundary auto). Taille max = FILE_MAX_SIZE_BYTES ; types réels inspectés par signatures. Le client ne fournit ni ownerId ni clé de stockage.",
         "operationId": "files_upload",
@@ -1661,6 +1771,40 @@
           "category",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "FileListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Fichiers de la page courante.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicStoredFileDto"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "example": 20,
+            "description": "Limite appliquée."
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0,
+            "description": "Offset appliqué."
+          },
+          "nextOffset": {
+            "type": "integer",
+            "example": 20,
+            "nullable": true,
+            "description": "Offset de la page suivante, null si dernière page."
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "offset",
+          "nextOffset"
         ]
       },
       "SignedDownloadResponseDto": {

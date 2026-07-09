@@ -6,6 +6,23 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Files 5 — liste propriétaire de fichiers paginée (read-only)
+
+- **API Core Files 5** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) : ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant. **386 tests unitaires API** (377 → 386, +9). Tests e2e d'intégration ajoutés. Contrat OpenAPI régénéré + types `api-contracts` + `FilesApi.list()`.
+  - **`GET /files`** : protégé `files.read`, ownership utilisateur courant, exclusion `DELETED` (`deletedAt: null`), tri `createdAt desc`, pagination offset-based (`limit` 1–50, défaut 20 ; `offset ≥ 0`).
+  - **Réponse publique** : `{ items: PublicStoredFile[], limit, offset, nextOffset: number | null }` — aucun champ interne (`bucket`, `storageKey`, `checksum`, `ownerId`).
+  - **Trick limit+1** : `listByOwner(userId, offset, limit+1)` — si `len > limit` → `nextOffset = offset + limit` (page suivante), sinon `null`. Aucun `COUNT` séparé.
+  - **`FileListQueryDto`** (`file-list-query.dto.ts`) : `@Type(() => Number)` + `@IsInt` + `@Min`/`@Max` + `@ApiPropertyOptional({ type: 'integer' })` ; coercition query string → entier.
+  - **`FileListResponseDto`** (`file-list-response.dto.ts`) : `items: PublicStoredFile[]` (interface runtime), `@ApiProperty({ type: () => [PublicStoredFileDto] })` pour Swagger.
+  - **`FilesService.listOwnedFiles(userId, limit, offset)`** : nouveau ; délègue à `repository.listByOwner`, mappe via `toPublicStoredFile`.
+  - **`FilesController`** : `FilesService` ajouté (premier paramètre constructeur) ; `@Get()` (aucun paramètre → liste) précède `@Get(':id')` (NestJS distingue correctement).
+  - **`FilesApi.list({ limit?, offset? })`** (`packages/api-client-fetch`) : nouveau ; `GET /files`, retourne `SchemaOf<'FileListResponseDto'>`.
+  - **OpenAPI** régénéré (`openapi:generate`) : `files_list` opération, `FileListResponseDto` schéma, `limit`/`offset`/`nextOffset` typés `integer` (`nextOffset` nullable). **`api-contracts` régénéré** (`generate`) : types `files_list`, `FileListResponseDto` dans `schema.ts`.
+  - **Tests unitaires** (+9) : `files.service.spec.ts` — `listOwnedFiles` (appel limit+1, nextOffset null/présent, items vides) ; `files.controller.spec.ts` — 200 défauts, pagination custom, absence champs internes, 400 pour limit 0/51 et offset -1.
+  - **Tests e2e** (`test/files-list.e2e-spec.ts`) : liste vide, isolation ownership (A ≠ B), exclusion DELETED, ordre `createdAt desc`, pagination + nextOffset, champs internes absents, offset dépassant le total.
+  - **Contraintes** : aucun endpoint admin, aucune UI quarantaine, aucun BFF Web dans cette mission. Périmètre strict : `cores/api-nestjs/**`, `packages/api-contracts/**`, `packages/api-client-fetch/**`.
+  - **Vérifications** : `tsc` (via `ts-node` OpenAPI generate), `npm test` API (**386/386**), `api-contracts` (**12/12**), `api-client-fetch` (**30/30**), `npm run build` (api-contracts + api-client-fetch), `openapi:generate` vert, `generate` contracts vert. Commit `feat(api): add paginated owned file list endpoint (Files 5)`.
+
 ### Web Core Files 3 — suppression sécurisée BFF
 
 - **Web Core Files 3** (`cores/web-nextjs/`) : ajoute la suppression fichier sécurisée côté `@enistere/web-nextjs`. **357 tests** (333 + 24 nouveaux, 0 régression). BFF ciblé uniquement, jamais un proxy générique. API Core reste l'autorité ownership/permissions.
