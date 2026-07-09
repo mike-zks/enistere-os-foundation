@@ -59,7 +59,7 @@ enistere-os-foundation/
   cores/
     api-nestjs/        IMPLÉMENTÉ (src, prisma, test, openapi, scripts, docs, proofs/)
     ui-kit/            IMPLEMENTATION_PARTIELLE (tokens + 12 primitives Web React, React 19) — v0.1.1
-    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement + Files 2 upload sécurisé BFF)
+    web-nextjs/        PARTIEL (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth login/refresh/logout/csrf + me/authorization + session state + UI 1 états + Files 1 lecture/téléchargement + Files 2 upload sécurisé BFF + Files 3 suppression BFF + Files 4 liste paginée BFF)
     cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles)
     mobile-react-native/  STARTER_EXPO_DOCTOR_GREEN (Expo SDK 55 + Expo Router ; primitives RN 1→25 inchangées ; Settings protégé RN26 ; shell durci RN27 ; smoke Android RN28/RN29/RN34B ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 formulaire sign-in générique RHF+Zod ; RN33 thème ; RN34 patch Expo SDK aligné ; typecheck/lint/test 355/355/expo-doctor 19/19/export iOS/audit verts)
     ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
@@ -78,7 +78,7 @@ enistere-os-foundation/
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
 | `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs ; pas d'infra déploiement) | **IMPLEMENTATION_PARTIELLE** |
-| `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture + Files 2 upload BFF) | **IMPLEMENTATION_PARTIELLE** |
+| `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations + UI 1 états + Files 1 lecture + Files 2 upload BFF + Files 3 suppression BFF + Files 4 liste paginée BFF) | **IMPLEMENTATION_PARTIELLE** |
 | `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 ; smoke visuel Android Emulator RN28 ; smoke runtime local RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; **formulaire sign-in RN32**, **préférence thème RN33**, **doctor Expo green RN34**, **smoke Android RN34B passé**) | **STARTER_EXPO_DOCTOR_GREEN** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -99,8 +99,8 @@ seed RBAC, commandes CLI fichiers. Rapports : `API_CORE_V1_REVIEW`, `AUTH_RBAC_R
 
 | Package | Version | Privé | Build/Tests | Publié | Intégré dans un core |
 |---|---|---|---|---|---|
-| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 11 tests) | **non** | **consommé (types) dans `web-nextjs`** (Health + Auth + **Files** : `PublicStoredFileDto`/`SignedDownloadResponseDto` via `SchemaOf<>`) |
-| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (29 tests + live 16/16) | **non** | **instancié (public/Health + authentifié/BFF Auth + façade Files lecture) dans `web-nextjs`** |
+| `@enistere/api-contracts` | 0.1.0 | oui | oui (types-only, 12 tests) | **non** | **consommé (types) dans `web-nextjs`** (Health + Auth + **Files** : `PublicStoredFileDto`/`SignedDownloadResponseDto` via `SchemaOf<>`) |
+| `@enistere/api-client-fetch` | 0.1.0 | oui | oui (30 tests + live 16/16) | **non** | **instancié (public/Health + authentifié/BFF Auth + façade Files lecture) dans `web-nextjs`** |
 
 Dépendance à sens unique : `openapi.json → api-contracts → api-client-fetch`. Le **UI Kit** et les
 **paquets API** sont désormais **réellement intégrés** par le Web Core pour les endpoints **publics**
@@ -127,17 +127,18 @@ Implémenté + testé + revu : Auth, sessions, refresh, RBAC, permissions, audit
 logging structuré, contrat OpenAPI canonique. Implémenté côté Web Core : UI Kit consommé, API publique
 (Health) + TanStack Query (SSR/hydratation), **BFF Auth** (cookies `HttpOnly`, CSRF double-submit,
 Origin/Referer), **état de session/autorisations** (`me`/`authorization` read-only, `useSession`/
-`useAuthorization`, purge cache au logout), **états UI standardisés** (UI 1) **et Files en lecture** (Files 1 :
-BFF ciblé métadonnées + URL signée + téléchargement direct, `useFileMetadata`/`useCreateDownloadUrl`, page
-`/protected/files/[id]` — **sans upload/suppression/admin**, **404 anti-énumération**, URL signée jamais
-mise en cache/journalisée). Implémenté (local, non publié) : packages clients. Décidé mais non implémenté :
-secure storage mobile, **SSR Auth complet**, **upload/admin Files côté Web**, CI/CD, registry.
+`useAuthorization`, purge cache au logout), **états UI standardisés** (UI 1) et **Files Web 1→4** :
+lecture/téléchargement, upload multipart BFF, suppression BFF et liste paginée BFF. Les flux Files restent
+des BFF ciblés, jamais un proxy générique ; l'API Core reste l'autorité ownership/permissions ; aucun token,
+champ interne, URL signée ou contenu fichier n'est exposé au client, aux logs ou aux clés de cache. Implémenté
+(local, non publié) : packages clients. Décidé mais non implémenté : secure storage mobile, **SSR Auth complet**,
+**admin/quarantaine/restauration Files côté Web**, CI/CD, registry.
 Détail : [`IMPLEMENTATION_MATRIX.md`](./IMPLEMENTATION_MATRIX.md).
 
 ## 9. Tests
 
-API Core : **377 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
-jetables), couverture disponible. Packages : api-contracts **11**, api-client-fetch **29** (`node:test`),
+API Core : **386 tests unitaires** (47 suites) + **101 tests e2e** (12 suites, PostgreSQL + MinIO
+jetables), couverture disponible. Packages : api-contracts **12**, api-client-fetch **30** (`node:test`),
 + preuve live **16/16** (client officiel vs API réelle). UI Kit : **121 tests** (`node:test` + `global-jsdom`
 + Testing Library + jest-axe, **React 19**) couvrant **12 primitives** (Button/Input/Label/Text/Spinner/
 + VisuallyHidden + Alert/Card/FormField + Dialog/Select/Toast).
@@ -347,7 +348,7 @@ la **première feature de données** en **lecture seule** : deux **Route Handler
 **client BFF navigateur** (aucun Bearer), `fileKeys` **disjoints**, `useFileMetadata` (query) + **`useCreateDownloadUrl`**
 (**mutation** : URL signée **consommée puis abandonnée**, jamais en cache/log), téléchargement par **ancre
 temporaire** (`https`-only), et une page privée `/protected/files/[id]` réutilisant les états UI — **l'API restant
-l'autorité** (permission + ownership), **aucun champ interne** exposé. **Web Core Files 2** a livré l'**upload sécurisé BFF multipart** : BFF ciblé `POST /api/files/upload` (CSRF/Origin obligatoires, validation fichier+catégorie, client `writable` avec un seul refresh coordonné), client BFF navigateur `uploadFile` (**FormData sans Content-Type forcé**, same-origin, aucun Bearer), mutation `useUploadFile` (**sans `mutationKey`**, anti-double-soumission, résultat jamais en QueryCache), `UploadForm` (9 catégories Select, fichier+subjectId, Alert erreur/succès), page `/protected/files/upload`, mapping 413/415 — **l'API Core reste l'autorité** MIME/taille/permissions (ADR-007), **aucun upload direct MinIO/S3**, **aucun log de nom/contenu**. **Web Core Files 3** a livré la **suppression sécurisée BFF** : `DELETE /api/files/:id` (`assertDelete`, UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404), client BFF `deleteFile`, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav` (**357 tests** + **preuve API + MinIO réelle 21/21**). La **Revue globale Web
+l'autorité** (permission + ownership), **aucun champ interne** exposé. **Web Core Files 2** a livré l'**upload sécurisé BFF multipart** : BFF ciblé `POST /api/files/upload` (CSRF/Origin obligatoires, validation fichier+catégorie, client `writable` avec un seul refresh coordonné), client BFF navigateur `uploadFile` (**FormData sans Content-Type forcé**, same-origin, aucun Bearer), mutation `useUploadFile` (**sans `mutationKey`**, anti-double-soumission, résultat jamais en QueryCache), `UploadForm` (9 catégories Select, fichier+subjectId, Alert erreur/succès), page `/protected/files/upload`, mapping 413/415 — **l'API Core reste l'autorité** MIME/taille/permissions (ADR-007), **aucun upload direct MinIO/S3**, **aucun log de nom/contenu**. **Web Core Files 3** a livré la **suppression sécurisée BFF** : `DELETE /api/files/:id` (`assertDelete`, UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404), client BFF `deleteFile`, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav`. **Web Core Files 4** a livré la **liste paginée BFF** : `GET /api/files`, validation `limit`/`offset` 400 avant appel API, client `read-only`, `FileListResponse`, `listFiles`, `fileKeys.list`, `useFileList` (`retry:false`), `FileListView` et page `/protected/files` (**390 tests** + **preuve API + MinIO réelle 21/21**). La **Revue globale Web
 Core — incrément V1** a traité l'incrément complet (Health + Auth 1→5 + UI 1 + Files 1) comme **un système
 unique** : verdict **`WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS`** (rapport
 [`WEB_CORE_V1_INCREMENT_REVIEW.md`](../../cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md)) — socle **sûr

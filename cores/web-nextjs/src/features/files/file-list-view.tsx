@@ -45,7 +45,10 @@ export function FileListView({ limit = 20, offset = 0 }: FileListViewProps): Rea
       <EmptyState
         title="Aucun fichier"
         description="Vous n'avez pas encore déposé de fichier."
-        action={<a href="/protected/files/upload">Déposer un fichier</a>}
+        action={
+          // eslint-disable-next-line @next/next/no-html-link-for-pages -- Composant testé hors runtime Next/link.
+          <a href="/protected/files/upload">Déposer un fichier</a>
+        }
         inline
       />
     );

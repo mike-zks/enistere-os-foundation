@@ -306,7 +306,7 @@ export interface components {
              * @description Offset de la page suivante, null si dernière page.
              * @example 20
              */
-            nextOffset: Record<string, never> | null;
+            nextOffset: number | null;
             /**
              * @description Offset appliqué.
              * @example 0
