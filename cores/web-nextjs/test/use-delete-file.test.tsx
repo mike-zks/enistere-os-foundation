@@ -59,6 +59,21 @@ test("succès : fileKeys.detail(id) supprimé du QueryCache après delete", asyn
   assert.equal(cached, undefined);
 });
 
+test("succès : fileKeys.list invalidé après suppression", async () => {
+  const { client, result } = setup();
+  // Pré-remplir la liste en cache.
+  client.setQueryData(["files", "list", { limit: 20, offset: 0 }], { items: [{ id: ID }], limit: 20, offset: 0, nextOffset: null });
+
+  await act(async () => {
+    result.current.requestDelete(ID);
+    await waitFor(() => assert.ok(result.current.isSuccess));
+  });
+
+  // La query list doit être marquée stale (invalidée) — son état n'est plus "fresh".
+  const listQuery = client.getQueryCache().find({ queryKey: ["files", "list", { limit: 20, offset: 0 }] });
+  assert.ok(listQuery === undefined || listQuery.state.isInvalidated, "query list doit être invalidée après delete");
+});
+
 test("double-clic empêché (un seul DELETE)", async () => {
   const { mock, result } = setup();
   await act(async () => {

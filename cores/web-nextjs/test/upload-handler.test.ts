@@ -243,6 +243,20 @@ test("upload : 401/403/413/415/429/503 mappés distinctement", async () => {
   }
 });
 
+test("upload : 409 API (quota) → 409 QUOTA_EXCEEDED (jamais NOT_DOWNLOADABLE)", async () => {
+  const store = new InMemoryCookieStore();
+  seedAuth(store, "A", "R");
+  const csrf = seedCsrf(store);
+  const res = await handleUploadFile(
+    makeUploadRequest({ csrf }),
+    makeDeps(store, createMockFetch(ERR(409))),
+  );
+  assert.equal(res.status, 409);
+  const body = (await res.json()) as { errorCode: string };
+  assert.equal(body.errorCode, "QUOTA_EXCEEDED");
+  assert.notEqual(body.errorCode, "NOT_DOWNLOADABLE");
+});
+
 test("upload : requestId propagé navigateur → API → réponse", async () => {
   const store = new InMemoryCookieStore();
   seedAuth(store, "A", "R");

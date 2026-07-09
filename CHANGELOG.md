@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 6 — Revue globale Files V1 et durcissement de cohérence
+
+- **Web Core Files 6** (`cores/web-nextjs/`) : revue globale de la verticale Files V1 bout-en-bout (API + packages + Web BFF + hooks + UI + E2E). **4 défauts corrigés, 3 tests ajoutés, 1 test mis à jour. 393 tests** (390 → 393, +3, 0 régression). Rapport versionné `docs/project-status/WEB_FILES_V1_REVIEW.md`. **Verdict : Stable avec réserves mineures** (aucun bloquant — V1 livrable).
+  - **D1 (cache invalidation — delete)** : `useDeleteFile.onSuccess` ne rafraîchissait pas `fileKeys.list(...)`. Ajout de `void queryClient.invalidateQueries({ queryKey: fileKeys.all })`. Test ajouté : "succès : fileKeys.list invalidé après suppression".
+  - **D2 (cache invalidation — upload)** : `useUploadFile` n'avait aucun `onSuccess`. Ajout de `useQueryClient` + invalidation `fileKeys.all` après succès. Test ajouté : "succès : fileKeys.list invalidé après upload".
+  - **D3 (message 409 ambigu)** : `classifyFileError` renvoyait "Ce fichier n'est pas téléchargeable." pour tout 409 — affiché en contexte de suppression. Message remplacé par "Cette action n'est pas disponible pour ce fichier." (neutre). Test `use-create-download-url.test.tsx` mis à jour.
+  - **D4 (upload 409 → errorCode incorrect)** : le handler upload laissait passer le 409 API (quota) dans `filesErrorResponse`, renvoyant `NOT_DOWNLOADABLE`. Catch explicite 409 dans `upload-file-handler.ts` → `QUOTA_EXCEEDED`. Test ajouté : "upload : 409 API (quota) → 409 QUOTA_EXCEEDED (jamais NOT_DOWNLOADABLE)".
+  - **6 réserves documentées (non bloquantes)** : staleTime=0 sur list (R1), staleTime=30s détail/admin (R2), navigation post-delete vers /protected (R3), URL signée DOM transitoire (R4), cache admin quarantaine/restauration (R5), pagination sans staleTime (R6).
+  - **Sécurité** : conformité ADR-005/ADR-007 vérifiée — aucun token client, aucun proxy générique, aucun champ interne exposé, same-origin + credentials:include, CSRF sur mutations, l'API reste l'autorité.
+  - **Vérifications** : `tsc --noEmit` ✓, `npm run lint` ✓ (0 erreurs), `npm test` (393/393) ✓, `npm run build` ✓, `npm audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-files-6-v1-review`.
+
 ### Web Core Files 5 — E2E Playwright parcours liste fichiers (/protected/files)
 
 - **Web Core Files 5** (`cores/web-nextjs/e2e/`) : ajoute 5 tests Playwright pour la page `/protected/files`. **12 tests E2E** (7 → 12, +5 nouveaux, 0 régression). Aucun changement au code métier, ni au BFF, ni aux packages.
