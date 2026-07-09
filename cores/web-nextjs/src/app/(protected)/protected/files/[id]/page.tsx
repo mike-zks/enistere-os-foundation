@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { FileDetails } from "../../../../../features/files/file-details.js";
+import { FileDetailsWithNav } from "./file-details-with-nav.js";
 
 // Route privée technique (`/protected/files/[id]`) — héritée du layout protégé (session résolue côté
 // serveur). Dynamique (le détail dépend de la requête). Le build ne déclenche aucun appel API.
@@ -18,7 +18,7 @@ export default async function ProtectedFilePage({
   const { id } = await params;
   return (
     <main className="foundation" aria-label="Détail du fichier">
-      <FileDetails fileId={id} />
+      <FileDetailsWithNav fileId={id} />
     </main>
   );
 }

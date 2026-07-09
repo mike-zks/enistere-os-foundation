@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-08.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-09.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -66,8 +66,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **jamais** en cache/log/persistance) ; téléchargement via **ancre temporaire** (`rel="noopener noreferrer"`,
   URL `https`-only validée) ; page privée `/protected/files/[id]` avec états UI réutilisés ; **l'API reste
   l'autorité** (permission `files.read`/`files.download` + ownership), `useAuthorization` ne fait qu'afficher le
-  bouton ; **aucun champ interne** (storageKey/bucket/checksum/ownerId). **Sans middleware, sans Server Action
-  Auth, sans token en JS, sans upload/suppression/admin.** **307 tests** + preuves **API réelles** Auth/session
+  bouton ; **aucun champ interne** (storageKey/bucket/checksum/ownerId). **Files 2 (upload)** : `POST /api/files/upload` BFF ciblé, `FormData` multipart, validation fichier+catégorie, `useUploadFile`, `UploadForm`, page `/protected/files/upload`, 413/415. **Files 3 (suppression)** : `DELETE /api/files/:id` BFF ciblé (`assertDelete`, UUID avant CSRF, client `writable`, 409→NOT_DELETABLE, anti-énumération), `deleteFile` client BFF, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav`. **356 tests** + preuves **API réelles** Auth/session
   **+ protégé 26/26 + login 22/22 + Files (API + MinIO) 21/21** (PostgreSQL + MinIO jetables). Statut :
   **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
   (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
@@ -1411,16 +1410,9 @@ ADR-011 ; gardes `expired`/`refreshing` ; seam `@enistere/api-client-fetch` ADR-
 **21 tests `node --test`**. **typecheck + lint + test 21/21 + expo-doctor 19/19 verts** ; **aucune logique métier**.
 Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; aucun autre core démarré.
 
-**Action unique (mission Codex suivante)** : **Mobile Core React Native 3 — forms, validation and offline-ready
-primitives** — **React Hook Form + Zod**, primitives form compatibles UI Kit, état **offline/queue** préparatoire,
-**sans logique métier**, **un seul core**. (Différés au-delà : intégration `@enistere/api-client-fetch` réelle
-(workspace + Metro), Zustand, upload, notifications, logger.) Le **Cloud Core 9** (exécution
-staging **locale** Type D) est **terminé** : stack réelle (images
-corrigées) `healthy`, health 200, endpoint Option A joignable ; URL signée + Auth/Files **non validés en réel**
-(repris en **CC10 sur serveur**). **Actions HUMAINES** : confirmer la protection de branche `main` (checks CI +
-`images`) et **rendre `api-smoke` requis**. **Alternative (décision humaine)** : **Web Core Files 2** ou **RN31**
-si un environnement macOS/Xcode devient disponible ; reprise **Cloud Core 10** si un serveur réel devient disponible. **Ne pas créer de production ni
-d'automatisation de déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **356 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **356/356**/build/audit verts. Branche `feature/web-files-3-delete`.
+
+**Action unique suivante** : à décider par décision humaine. Candidats : **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou **Web Core Files admin** (liste, quarantaine/restauration). **Ne pas créer de production ni d'automatisation de déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

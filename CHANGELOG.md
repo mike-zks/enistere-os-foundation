@@ -6,6 +6,21 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 3 — suppression sécurisée BFF
+
+- **Web Core Files 3** (`cores/web-nextjs/`) : ajoute la suppression fichier sécurisée côté `@enistere/web-nextjs`. **356 tests** (333 + 23 nouveaux, 0 régression). BFF ciblé uniquement, jamais un proxy générique. API Core reste l'autorité ownership/permissions.
+  - **`assertDelete`** (`src/core/auth/handlers/security.ts`) : garde-méthode DELETE (405), symétrique à `assertPost`.
+  - **Handler BFF** (`src/core/files/handlers/delete-file-handler.ts`) : `DELETE /api/files/:id` — ordre sécurisé : méthode (405) → UUID (400, **aucun appel API**) → Origin/Referer + CSRF (403, **aucun appel API**) → client `writable` (un seul refresh coordonné) → `void` 204 API → `jsonOk(null)` 200 enveloppe. 409 → `NOT_DELETABLE` (jamais `NOT_DOWNLOADABLE`). 404 anti-énumération.
+  - **Route** (`src/app/api/files/[id]/route.ts`) : `DELETE` ajouté à côté de `GET` existant.
+  - **BFF client navigateur** (`deleteFile` dans `files-bff-client.ts`) : `DELETE /api/files/:id` — `credentials:"include"`, `X-CSRF-Token`, aucun Bearer, UUID encodé.
+  - **Mutation hook** (`src/features/files/use-delete-file.ts`) : `useDeleteFile()` — `useMutation` **sans `mutationKey`**, `getCsrfToken()` → `deleteFile()`, **anti-double-soumission** (`useRef`), `onSuccess` : `queryClient.removeQueries(fileKeys.detail(id))`, `isSuccess`/`error`/`reset` exposés.
+  - **UI détail fichier** (`src/features/files/file-details.tsx`) : bouton « Supprimer » conditionnel (`files.delete`), confirmation via `Dialog` UI Kit 4, erreur `Alert danger`, navigation post-succès via `onDeleteSuccess` prop (connexion Next.js dans `file-details-with-nav.tsx`).
+  - **Wrapper navigation** (`src/app/(protected)/protected/files/[id]/file-details-with-nav.tsx`) : `"use client"`, branche `useRouter().replace("/protected")` → `FileDetails.onDeleteSuccess` (hors périmètre test, exclut `next/navigation` du tsconfig.test.json).
+  - **Contraintes** : aucun bulk delete, aucune liste, aucune quarantaine/restauration, aucun Bearer navigateur, aucun proxy générique, anti-énumération 404 strict.
+  - **Tests** : `test/files-handlers.test.ts` (+8 cas delete : méthode 405, UUID 400, Origin 403, CSRF 403, succès 200 no-store, requestId, 409→NOT_DELETABLE, 401/403/404/429/503) + `test/delete-bff-client.test.ts` (5 cas : DELETE same-origin, UUID encodé, URL /api/files/:id, 403/404/409→BffAuthError, réseau) + `test/use-delete-file.test.tsx` (8 cas : succès, cache supprimé, double-clic, 409/404/401, reset, isPending).
+  - **Fix test helper** (`test/helpers/api-test-kit.tsx`) : `createMockFetch` utilise `null` body pour status 204/304 (undici interdit les corps sur ces codes).
+  - **Vérifications** : `tsc --noEmit`, `npm run lint`, `npm test` (**356/356**), `npm run build`, `npm audit` (0 vuln), `git diff --check`. Commit `feat(web): add secure file deletion`.
+
 ### Web Core Files 2 — upload sécurisé BFF multipart
 
 - **Web Core Files 2** (`cores/web-nextjs/`) : ajoute l'upload Web sécurisé côté `@enistere/web-nextjs`. **333 tests** (307 + 26 nouveaux, 0 régression). BFF ciblé uniquement, jamais un proxy générique. API Core reste l'autorité MIME/taille/permissions (ADR-007). Session via cookies HttpOnly, CSRF obligatoire (ADR-005).

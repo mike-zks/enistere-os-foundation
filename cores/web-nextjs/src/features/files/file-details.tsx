@@ -1,6 +1,18 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
+
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@enistere/ui-kit";
 
 import { isUuid } from "../../core/files/uuid.js";
 import { EmptyState } from "../../shared/components/empty-state.js";
@@ -14,17 +26,32 @@ import { classifyFileError } from "./file-error.js";
 import { FileMetadataView } from "./file-metadata-view.js";
 import { useFileMetadata } from "./file-queries.js";
 import { useCreateDownloadUrl } from "./use-create-download-url.js";
+import { useDeleteFile } from "./use-delete-file.js";
+
+export interface FileDetailsProps {
+  readonly fileId: string;
+  /** Appelé après suppression réussie (navigation côté page). */
+  readonly onDeleteSuccess?: () => void;
+}
 
 /**
  * Conteneur **client** du détail d'un fichier : métadonnées via TanStack Query, téléchargement via mutation,
- * et **états standardisés** (loading / introuvable / interdit / non authentifié / indisponible / erreur).
+ * suppression via mutation avec confirmation Dialog, et **états standardisés**.
  * La session est déjà validée par le **layout protégé**. L'API reste l'autorité (ownership + permission) ;
- * `useAuthorization` ne sert qu'à l'**affichage conditionnel** du bouton.
+ * `useAuthorization` ne sert qu'à l'**affichage conditionnel** des boutons.
  */
-export function FileDetails({ fileId }: { readonly fileId: string }): ReactElement {
+export function FileDetails({ fileId, onDeleteSuccess }: FileDetailsProps): ReactElement {
   const query = useFileMetadata(fileId);
   const authorization = useAuthorization();
   const downloader = useCreateDownloadUrl();
+  const deleter = useDeleteFile();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (deleter.isSuccess) {
+      onDeleteSuccess?.();
+    }
+  }, [deleter.isSuccess, onDeleteSuccess]);
 
   if (!isUuid(fileId)) {
     return <EmptyState title="Fichier introuvable" description="Ce fichier est introuvable." />;
@@ -49,16 +76,66 @@ export function FileDetails({ fileId }: { readonly fileId: string }): ReactEleme
   }
 
   const file = query.data;
-  // Affichage conditionnel uniquement : VALIDATED + permission ; l'API revérifie (409/403 font autorité).
   const canDownload = file.status === "VALIDATED" && authorization.hasPermission("files.download");
+  const canDelete = authorization.hasPermission("files.delete");
 
   return (
-    <FileMetadataView
-      file={file}
-      canDownload={canDownload}
-      onDownload={() => downloader.download(fileId)}
-      downloadPending={downloader.isPending}
-      downloadError={downloader.error?.message}
-    />
+    <>
+      <FileMetadataView
+        file={file}
+        canDownload={canDownload}
+        onDownload={() => downloader.download(fileId)}
+        downloadPending={downloader.isPending}
+        downloadError={downloader.error?.message}
+      />
+
+      {canDelete && (
+        <div className="foundation-delete-section">
+          <Button
+            variant="danger"
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={deleter.isPending}
+          >
+            Supprimer
+          </Button>
+          {deleter.error && (
+            <Alert variant="danger" role="alert">
+              {deleter.error.message}
+            </Alert>
+          )}
+        </div>
+      )}
+
+      <Dialog
+        open={deleteDialogOpen}
+        onDismiss={() => setDeleteDialogOpen(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-desc"
+      >
+        <DialogHeader>
+          <DialogTitle id="delete-dialog-title">Confirmer la suppression</DialogTitle>
+        </DialogHeader>
+        <DialogContent>
+          <DialogDescription id="delete-dialog-desc">
+            Cette action est irréversible. Le fichier sera définitivement supprimé.
+          </DialogDescription>
+        </DialogContent>
+        <DialogFooter>
+          <Button
+            variant="danger"
+            onClick={() => {
+              setDeleteDialogOpen(false);
+              deleter.requestDelete(fileId);
+            }}
+            disabled={deleter.isPending}
+          >
+            Supprimer définitivement
+          </Button>
+          <Button variant="secondary" onClick={() => setDeleteDialogOpen(false)}>
+            Annuler
+          </Button>
+        </DialogFooter>
+      </Dialog>
+    </>
   );
 }
