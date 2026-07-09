@@ -66,7 +66,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **jamais** en cache/log/persistance) ; téléchargement via **ancre temporaire** (`rel="noopener noreferrer"`,
   URL `https`-only validée) ; page privée `/protected/files/[id]` avec états UI réutilisés ; **l'API reste
   l'autorité** (permission `files.read`/`files.download` + ownership), `useAuthorization` ne fait qu'afficher le
-  bouton ; **aucun champ interne** (storageKey/bucket/checksum/ownerId). **Files 2 (upload)** : `POST /api/files/upload` BFF ciblé, `FormData` multipart, validation fichier+catégorie, `useUploadFile`, `UploadForm`, page `/protected/files/upload`, 413/415. **Files 3 (suppression)** : `DELETE /api/files/:id` BFF ciblé (`assertDelete`, UUID avant CSRF, client `writable`, 409→NOT_DELETABLE, anti-énumération), `deleteFile` client BFF, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav`. **357 tests** + preuves **API réelles** Auth/session
+  bouton ; **aucun champ interne** (storageKey/bucket/checksum/ownerId). **Files 2 (upload)** : `POST /api/files/upload` BFF ciblé, `FormData` multipart, validation fichier+catégorie, `useUploadFile`, `UploadForm`, page `/protected/files/upload`, 413/415. **Files 3 (suppression)** : `DELETE /api/files/:id` BFF ciblé (`assertDelete`, UUID avant CSRF, client `writable`, 409→NOT_DELETABLE, anti-énumération), `deleteFile` client BFF, `useDeleteFile` (anti-double-soumission, `removeQueries` après succès), Dialog confirmation UI Kit 4, prop `onDeleteSuccess`, `FileDetailsWithNav`. **Files 4 (liste)** : `GET /api/files` BFF ciblé, validation limit/offset (400 avant appel API), client `read-only`, `FileListResponse`, `listFiles` client BFF, `fileKeys.list` clé stable, `useFileList` (retry:false), `FileListView` (loading/vide/erreur/liste, champs publics, pagination Précédent/Suivant), page `/protected/files`. **390 tests** + preuves **API réelles** Auth/session
   **+ protégé 26/26 + login 22/22 + Files (API + MinIO) 21/21** (PostgreSQL + MinIO jetables). Statut :
   **IMPLEMENTATION_PARTIELLE**. Build/dev via **webpack**
   (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
@@ -362,7 +362,7 @@ régénéré (`files_list`, `FileListResponseDto` dans `schema.ts`). `FilesApi.l
 ajouté dans `api-client-fetch`. **Vérifications** : `npm test` **386/386** + `npm run build`
 (api-contracts + api-client-fetch) + `openapi:generate` + contracts `generate` verts.
 Commit : `feat(api): add paginated owned file list endpoint (Files 5)`.
-**Prochaine action : Web Core Files 4 (BFF liste) ou Mobile Core React Native 31 (iOS smoke).**
+**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou CI E2E Playwright pour la liste /protected/files.**
 
 **Mobile Core React Native 30 — smoke runtime iOS / parity device** (`cores/mobile-react-native/`,
 périmètre `scripts/**` + `package.json` + docs) : documente la parité runtime iOS du starter Expo

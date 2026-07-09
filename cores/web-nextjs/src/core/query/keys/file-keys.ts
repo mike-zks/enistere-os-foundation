@@ -5,4 +5,5 @@
 export const fileKeys = {
   all: ["files"] as const,
   detail: (fileId: string) => [...fileKeys.all, "detail", fileId] as const,
+  list: (params: { limit: number; offset: number }) => [...fileKeys.all, "list", params] as const,
 } as const;
