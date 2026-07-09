@@ -198,6 +198,7 @@ Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). 
 - **Pinning** : `@v4` (majeure) conservé ; **SHA pinning** = durcissement futur (requiert une politique de MAJ).
 - **Lint workflows** : `actionlint` **futur** (non installé) ; validation actuelle = parse YAML + simulations.
 
-**Aucun déploiement, aucun secret, aucun registry** dans ces workflows. ADR-013 reste
-**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 ; manquent protection de branche appliquée + niveau 4) ;
-ADR-014 reste **`NON_IMPLEMENTE`**.
+**Aucun déploiement** dans ces workflows (Cloud Core 4 n'ajoutait pas le registre). ADR-013 reste
+**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 + niveau 4 partiel [`registry-ci.yml`] ; manque
+protection de branche appliquée — action humaine) ; ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** (registry
+GHCR — `registry-ci.yml`, Cloud Core 5).
