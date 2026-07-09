@@ -370,7 +370,7 @@ API & E2E — **sans déploiement, Docker, registry, secret ni infra réelle**. 
 **`CADRAGE_OPERATIONNEL`** (Cloud Core 1). Puis le **Cloud Core 2** a livré la **CI runtime API NestJS**
 (niveau 2, `api-runtime-ci.yml`), et le **Cloud Core 3** la **CI E2E navigateur** (niveau 3,
 `web-e2e-ci.yml` : stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours
-**Health/Auth/Files** ; **sans secret/déploiement/registry** ; validé localement, **12 tests Playwright verts** (Health/Auth/Files lecture + **Files liste** — +5 Web Core Files 5))
+**Health/Auth/Files** ; **sans secret/déploiement/registry** ; validé localement, **12 tests Playwright verts** (Health/Auth/Files lecture + **Files liste** — +5 Web Core Files 5)
 — Cloud Core → **`IMPLEMENTATION_PARTIELLE`** (trois workflows CI niveaux 1–3). Enfin le **Cloud Core 4 —
 durcissement CI & gouvernance de branche** (documentaire) a **figé les 7 checks** à rendre bloquants sur `main`
 (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` + `api-runtime` + `web-e2e`) et **tranché les
