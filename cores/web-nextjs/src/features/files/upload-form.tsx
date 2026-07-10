@@ -10,10 +10,18 @@ import {
   Select,
   Text,
 } from "@enistere/ui-kit";
-import { useId, useRef, useState, type ChangeEvent, type FormEvent, type ReactElement } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useId, useRef, type ReactElement } from "react";
+import { useForm } from "react-hook-form";
 
 import type { FileCategory } from "@enistere/api-client-fetch";
 
+import {
+  FILE_CATEGORY_VALUES,
+  SUBJECT_ID_MAX_LENGTH,
+  uploadFormSchema,
+  type UploadFormValues,
+} from "./upload-form-schema.js";
 import { useUploadFile } from "./use-upload-file.js";
 
 const FILE_CATEGORIES: ReadonlyArray<{ value: FileCategory; label: string }> = [
@@ -27,8 +35,6 @@ const FILE_CATEGORIES: ReadonlyArray<{ value: FileCategory; label: string }> = [
   { value: "ATTACHMENT", label: "Pièce jointe" },
   { value: "OTHER", label: "Autre" },
 ];
-
-const SUBJECT_ID_MAX = 128;
 
 /**
  * Formulaire d'upload **présentationnel** (Client Component) : validation UX uniquement (l'API Core reste
@@ -44,39 +50,37 @@ export function UploadForm(): ReactElement {
   const subjectIdErrorId = `${subjectIdId}-error`;
 
   const { upload, isPending, uploadedFile, error, reset } = useUploadFile();
-
-  const [file, setFile] = useState<File | undefined>(undefined);
-  const [category, setCategory] = useState<FileCategory | "">("");
-  const [subjectId, setSubjectId] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const fileError = submitted && !file ? "Fichier requis." : undefined;
-  const categoryError = submitted && !category ? "Catégorie requise." : undefined;
-  const subjectIdError =
-    submitted && subjectId.length > SUBJECT_ID_MAX
-      ? `Maximum ${String(SUBJECT_ID_MAX)} caractères.`
-      : undefined;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset: rhfReset,
+    formState: { errors, isSubmitted },
+  } = useForm<UploadFormValues>({
+    resolver: zodResolver(uploadFormSchema),
+    defaultValues: { category: "" as UploadFormValues["category"], subjectId: "" },
+  });
+
+  const fileError = errors.file?.message;
+  const categoryError = errors.category?.message;
+  const subjectIdError = errors.subjectId?.message;
 
   const handleReset = (): void => {
     reset();
-    setFile(undefined);
-    setCategory("");
-    setSubjectId("");
-    setSubmitted(false);
+    rhfReset();
+    setValue("file", undefined as unknown as File);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSubmit = (ev: FormEvent<HTMLFormElement>): void => {
-    ev.preventDefault();
-    setSubmitted(true);
-    if (!file || !category || subjectId.length > SUBJECT_ID_MAX) return;
+  const onSubmit = (values: UploadFormValues): void => {
     reset();
-    upload({ file, category, subjectId: subjectId.trim() || undefined });
-  };
-
-  const handleFileChange = (ev: ChangeEvent<HTMLInputElement>): void => {
-    setFile(ev.target.files?.[0] ?? undefined);
+    upload({
+      file: values.file,
+      category: values.category,
+      subjectId: values.subjectId?.trim() || undefined,
+    });
   };
 
   if (uploadedFile) {
@@ -98,7 +102,7 @@ export function UploadForm(): ReactElement {
       aria-label="Envoi de fichier"
       aria-busy={isPending}
       noValidate
-      onSubmit={handleSubmit}
+      onSubmit={(ev) => void handleSubmit(onSubmit)(ev)}
     >
       <Text as="h1" variant="display">
         Envoyer un fichier
@@ -115,7 +119,9 @@ export function UploadForm(): ReactElement {
           Fichier
         </FormFieldLabel>
         <Input
-          ref={fileInputRef}
+          ref={(el) => {
+            fileInputRef.current = el;
+          }}
           id={fileInputId}
           name="file"
           type="file"
@@ -123,7 +129,12 @@ export function UploadForm(): ReactElement {
           invalid={fileError !== undefined}
           aria-describedby={fileError !== undefined ? fileErrorId : undefined}
           disabled={isPending}
-          onChange={handleFileChange}
+          onChange={(ev) => {
+            const f = ev.target.files?.[0];
+            setValue("file", f ?? (undefined as unknown as File), {
+              shouldValidate: isSubmitted,
+            });
+          }}
         />
         {fileError ? <FormFieldError id={fileErrorId}>{fileError}</FormFieldError> : null}
       </FormField>
@@ -133,16 +144,12 @@ export function UploadForm(): ReactElement {
           Catégorie
         </FormFieldLabel>
         <Select
+          {...register("category")}
           id={categoryId}
-          name="category"
           required
           invalid={categoryError !== undefined}
           aria-describedby={categoryError !== undefined ? categoryErrorId : undefined}
           disabled={isPending}
-          value={category}
-          onChange={(ev) => {
-            setCategory(ev.target.value as FileCategory | "");
-          }}
         >
           <option value="">-- Choisir une catégorie --</option>
           {FILE_CATEGORIES.map((c) => (
@@ -159,17 +166,13 @@ export function UploadForm(): ReactElement {
       <FormField>
         <FormFieldLabel htmlFor={subjectIdId}>Référence (optionnelle)</FormFieldLabel>
         <Input
+          {...register("subjectId")}
           id={subjectIdId}
-          name="subjectId"
           type="text"
-          maxLength={SUBJECT_ID_MAX}
+          maxLength={SUBJECT_ID_MAX_LENGTH}
           invalid={subjectIdError !== undefined}
           aria-describedby={subjectIdError !== undefined ? subjectIdErrorId : undefined}
           disabled={isPending}
-          value={subjectId}
-          onChange={(ev) => {
-            setSubjectId(ev.target.value);
-          }}
         />
         {subjectIdError ? (
           <FormFieldError id={subjectIdErrorId}>{subjectIdError}</FormFieldError>

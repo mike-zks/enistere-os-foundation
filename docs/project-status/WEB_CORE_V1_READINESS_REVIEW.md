@@ -1,7 +1,7 @@
 # WEB_CORE_V1_READINESS_REVIEW.md — Verdict de maturité Web Core Next.js V1
 
 > Branche : `web-core-v1-readiness-review`. Date de revue : 2026-07-10.
-> **Mise à jour : 2026-07-10 (post V1 Gap 2)** — critère #3 fermé, readiness 13/14. Seul #9 (RHF+Zod) reste.
+> **Mise à jour : 2026-07-10 (post V1 Gap 3)** — critère #9 fermé, readiness **14/14 — V1 pleinement stable**.
 > Sources : `CORE_SPECIFICATION.md` (§56 critères V1, §9 modules obligatoires, §10 modules optionnels),
 > `strategy/04_ROADMAP_GLOBAL.md` (§10 V1), `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`,
 > `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, `e2e/`, `src/`.
@@ -80,14 +80,14 @@ quarantaine, restauration). Vérification `Origin` + `Referer` dans handlers BFF
 `classifyFileError`), types erreurs exhaustifs, retry configuré, erreurs déshydratées proprement via
 TanStack Query. 446 tests unitaires couvrant les chemins d'erreur principaux.
 
-### 3.9 ❌ Les formulaires et validations fonctionnent
+### 3.9 ✅ Les formulaires et validations fonctionnent (fermé V1 Gap 3)
 
-**NON SATISFAIT.** `UploadForm` (seul formulaire applicatif) utilise `useState` local uniquement.
-Aucune intégration React Hook Form. Aucun schéma Zod côté client. Les modules §9 listent
-explicitement "React Hook Form" et "Zod" comme obligatoires. Aucun exemple de formulaire validé
-n'existe dans le core.
-
-**Impact :** Bloquant V1 — critère §56 et modules §9 obligatoires.
+**SATISFAIT.** `UploadForm` migré sur React Hook Form v7 + Zod v4 (V1 Gap 3 — 2026-07-10).
+Schéma Zod (`uploadFormSchema`) : `file` (`z.instanceof(File)`), `category` (`z.enum`), `subjectId`
+(`z.string().max(128)`). `useForm({ resolver: zodResolver(uploadFormSchema) })` : erreurs via
+`formState.errors`, `aria-describedby` sur chaque champ, submit bloqué si validation échoue.
+Modules §9 "React Hook Form" et "Zod" désormais présents. 4 tests unitaires couvrent les cas
+de validation. **Critère §56 #9 fermé.**
 
 ### 3.10 ✅ Les états loading/error/empty sont standardisés
 
@@ -137,8 +137,8 @@ protection), ADR-014 (GHCR registry).
 | Gestion erreurs API              | ✅ Présent    | Classification typée exhaustive                   |
 | TanStack Query / server state    | ✅ Présent    | TanStack Query v5, HydrationBoundary              |
 | State local minimal              | ✅ Présent    | `useState` et hooks dédiés                        |
-| React Hook Form                  | ❌ Absent     | UploadForm en `useState` uniquement               |
-| Zod                              | ❌ Absent     | Aucun schéma de validation client                 |
+| React Hook Form                  | ✅ Présent    | `useForm` + `zodResolver` dans `UploadForm`       |
+| Zod                              | ✅ Présent    | `uploadFormSchema` — `upload-form-schema.ts`      |
 | UI components minimal            | ✅ Présent    | UI Kit 4 (Alert/Button/Dialog/Select/Toast/…)     |
 | Theme system / design tokens     | ✅ Présent    | `data-theme`, `DEFAULT_THEME`, UI Kit tokens      |
 | Loading/empty/error states       | ✅ Présent    | Composants partagés standardisés                  |
@@ -147,7 +147,7 @@ protection), ADR-014 (GHCR registry).
 | Environment config               | ✅ Présent    | `server-config.ts`, `.env.example`                |
 | Constants                        | ✅ Présent    | `src/core/config/`                                |
 | Logger minimal                   | ✅ Présent    | `src/core/logger/`                                |
-| SEO baseline                     | ❌ Partiel    | Pages protégées non-indexables OK ; public absent |
+| SEO baseline                     | ✅ Présent    | Landing page publique indexable (Gap 1)           |
 | Accessibility baseline           | ✅ Présent    | Aria-labels, rôles ARIA, tests Playwright         |
 
 ---
@@ -184,15 +184,15 @@ Ces absences sont intentionnelles et documentées. Elles ne sont pas des gaps V1
 
 ## 7. Verdict de maturité V1
 
-**Statut : `IMPLEMENTATION_PARTIELLE` — V1 non déclarable en l'état (1 critère restant).**
+**Statut : `VALIDE_V1` — V1 pleinement stable (14/14 critères satisfaits).**
 
-**13/14 critères §56 satisfaits** (93 %, post V1 Gap 2). Un critère bloquant restant :
+**14/14 critères §56 satisfaits** (100 %, post V1 Gap 3 — 2026-07-10). Aucun critère bloquant restant.
 
-| Critère §56                                      | Statut  | Ce qui manque                              |
-|--------------------------------------------------|---------|--------------------------------------------|
-| 3. Les layouts standards existent                | ✅ Fermé V1 Gap 2 | — |
-| 9. Les formulaires et validations fonctionnent   | ❌      | React Hook Form + Zod (modules §9 absents) |
-| 11. Le SEO baseline est présent pour pages publiques | ✅ Fermé V1 Gap 1 | — |
+| Critère §56                                      | Statut  | Fermé par          |
+|--------------------------------------------------|---------|--------------------|
+| 3. Les layouts standards existent                | ✅ Fermé | V1 Gap 1 + Gap 2  |
+| 9. Les formulaires et validations fonctionnent   | ✅ Fermé | V1 Gap 3           |
+| 11. Le SEO baseline est présent pour pages publiques | ✅ Fermé | V1 Gap 1        |
 
 ---
 
@@ -225,13 +225,13 @@ indisponible sur Linux.
 - Intégré dans `(protected)/layout.tsx` sur le chemin authentifié uniquement.
 - Test E2E ajouté (nav dashboard visible — 15 tests).
 
-**Item 3 — React Hook Form + Zod : intégration UploadForm ou form example** (RESTANT — ferme critère #9)
-- Migrer `UploadForm` sur RHF + schéma Zod (`z.object({ file: z.instanceof(File), category: … })`),
-  ou créer un formulaire exemple dédié dans `features/` isolé (sans impacter Files prod).
-- Tests unitaires couvrant validation Zod.
-- Effort estimé : 1 session.
+**Item 3 — React Hook Form + Zod : intégration UploadForm** ✅ RÉALISÉ (2026-07-10 — branche `web-core-v1-gap-3-rhf-zod`)
+- `upload-form-schema.ts` : schéma Zod v4 (`uploadFormSchema`, `FILE_CATEGORY_VALUES`, `SUBJECT_ID_MAX_LENGTH`, `UploadFormValues`).
+- `upload-form.tsx` : migré vers `useForm({ resolver: zodResolver(uploadFormSchema) })` — erreurs RHF, `aria-describedby`, reset complet.
+- `test/upload-form.test.tsx` : 4 tests (fichier requis / catégorie requise / subjectId trop long / succès).
+- Dépendances : `react-hook-form@^7.81.0`, `zod@^4.4.3`, `@hookform/resolvers@^5.4.0`.
 
-**Ordre d'exécution :** Items 1 ✅ et 2 ✅ réalisés. Item 3 restant → V1 pleinement stable (14/14).
+**Ordre d'exécution :** Items 1 ✅, 2 ✅ et 3 ✅ réalisés. **V1 pleinement stable (14/14).**
 
 ---
 

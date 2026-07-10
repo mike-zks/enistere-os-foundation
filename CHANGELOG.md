@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core V1 Gap 3 — RHF + Zod UploadForm
+
+- **Web Core V1 Gap 3** (`cores/web-nextjs/src/features/files/`) : ferme le dernier critère d'acceptation V1 §56 n°9 ("les formulaires et validations fonctionnent"). **Readiness V1 : 13/14 → 14/14 — V1 pleinement stable.** Aucun changement Auth/BFF/Files/packages/workflows. **450 tests** (+4). **15 tests E2E** inchangés.
+  - **`upload-form-schema.ts`** (nouveau) : schéma Zod v4 UX — `z.object({ file: z.instanceof(File, { message: "Fichier requis." }), category: z.enum(FILE_CATEGORY_VALUES, { error: "Catégorie requise." }), subjectId: z.string().max(128, ...).optional() })`. Exporte `FILE_CATEGORY_VALUES`, `SUBJECT_ID_MAX_LENGTH`, `uploadFormSchema`, `UploadFormValues`. L'API Core reste l'autorité MIME/taille/permissions (ADR-007).
+  - **`upload-form.tsx`** (migré) : `useState` remplacé par `useForm<UploadFormValues>({ resolver: zodResolver(uploadFormSchema) })`. File input géré via `setValue("file", f)` (onChange custom) et `fileInputRef` (reset visuel). `<Select {...register("category")}>` + `<Input {...register("subjectId")}>`. `handleSubmit(onSubmit)` empêche la soumission si validation Zod échoue. Erreurs depuis `formState.errors` — `aria-describedby` sur chaque champ. `handleReset` : `reset()` useUploadFile + `rhfReset()` + `setValue("file", undefined)` + `fileInputRef.current.value = ""`. Aucun log de nom/chemin/contenu. Anti-double-soumission conservé dans `useUploadFile`. Section succès inchangée.
+  - **`test/upload-form.test.tsx`** (nouveau) : 4 tests avec `node:test` + `@testing-library/react` + `userEvent` + `fireEvent` + `createBrowserFetch` — (1) fichier requis : submit sans fichier → "Fichier requis." visible ; (2) catégorie requise : upload fichier + submit sans catégorie → "Catégorie requise." visible, aucune erreur fichier ; (3) référence trop longue : 129 chars via `fireEvent.change` → "Maximum 128 caractères." visible ; (4) succès : fichier + catégorie valides → fetch `/api/files/upload` appelé, section "Fichier envoyé" affichée.
+  - **`package.json`** : ajout `react-hook-form@^7.81.0`, `zod@^4.4.3`, `@hookform/resolvers@^5.4.0` en dépendances de production (modules §9 obligatoires).
+  - **Vérifications** : `typecheck` ✓, `lint` ✓, `test` 450/450 ✓ (446+4), `build` ✓, `audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-v1-gap-3-rhf-zod`.
+
 ### Web Core V1 Gap 2 — Dashboard layout minimal
 
 - **Web Core V1 Gap 2** (`cores/web-nextjs/src/features/dashboard/`) : ferme le critère d'acceptation V1 §56 n°3 ("les layouts standards existent"). **Readiness V1 : 12/14 → 13/14.** Aucun changement Auth/BFF/Files/packages/workflows. **446 tests** unitaires inchangés. **15 tests E2E** (+1 nav dashboard).
