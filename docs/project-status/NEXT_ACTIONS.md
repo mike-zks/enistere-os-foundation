@@ -1,9 +1,22 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-07-09). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-07-10). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
+
+> ✅ **Web Core Files 8 — E2E Playwright upload/suppression : RÉALISÉ** (2026-07-10).
+> Extension des tests E2E navigateur aux chemins d'écriture Files : upload (`UploadForm` → formulaire →
+> confirmation UI `<section aria-label="Fichier envoyé">` → liste → détail) et suppression (fixture API
+> isolée `uploadFileViaApi` → Dialog confirmation → `router.replace("/protected")` → anti-énumération 404
+> → liste sans fichier). **14 tests E2E** (12 → 14, +2). `helpers.ts` : `uploadFileViaApi` +
+> `TEST_PNG_B64` exportés ; `files.spec.ts` : deux nouveaux `describe` (`Files (upload)` + `Files
+> (suppression)`). Aucun workflow, runtime, BFF ni package modifié. **446 tests** unitaires inchangés.
+> `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts. Branch
+> `web-core-files-8-e2e-upload-delete`.
+>
+> **Prochaine action UNIQUE** : **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode — précondition
+> externe, non disponible sur Linux).
 
 > ✅ **Web/Core Governance 1 — alignement CI requise et ADR-013 : RÉALISÉ** (2026-07-09).
 > Revue de cohérence gouvernance/CI après Web Core Files 7. Vérifications (aucun blocage) :

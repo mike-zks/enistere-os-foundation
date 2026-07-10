@@ -3,9 +3,11 @@ import {
   NOPERM_EMAIL,
   OWNER_EMAIL,
   PASSWORD,
+  TEST_PNG_B64,
   expectNoSensitiveLeak,
   loginViaUi,
   readState,
+  uploadFileViaApi,
 } from "./helpers.js";
 
 const RANDOM_UUID = "00000000-0000-4000-8000-000000000000";
@@ -123,6 +125,89 @@ test.describe("Files (liste paginée)", () => {
     await expect(page.getByRole("alert")).toBeVisible();
     // Aucun fichier d'un autre propriétaire affiché.
     await expect(page.getByRole("list", { name: "Liste des fichiers" })).toHaveCount(0);
+    await expectNoSensitiveLeak(page);
+  });
+});
+
+test.describe("Files (upload)", () => {
+  test("propriétaire : upload formulaire → succès → fichier dans liste → navigation détail", async ({
+    page,
+  }) => {
+    await loginViaUi(page, OWNER_EMAIL, PASSWORD);
+
+    await page.goto("/protected/files/upload");
+    await expect(page.getByRole("heading", { level: 1, name: "Envoyer un fichier" })).toBeVisible();
+
+    // Attacher un PNG 1×1 jetable — aucun contenu réel, aucun fichier local requis.
+    await page.getByLabel("Fichier").setInputFiles({
+      name: "e2e-upload.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(TEST_PNG_B64, "base64"),
+    });
+    await page.getByLabel("Catégorie").selectOption("IMAGE");
+    await page.getByRole("button", { name: "Envoyer" }).click();
+
+    // Succès : section de confirmation visible, nom de fichier affiché, aucun champ interne.
+    await expect(page.getByRole("region", { name: "Fichier envoyé" })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByText("e2e-upload.png", { exact: false })).toBeVisible();
+    await expectNoSensitiveLeak(page);
+
+    // Le fichier apparaît dans la liste après upload.
+    await page.goto("/protected/files");
+    await expect(page.getByRole("list", { name: "Liste des fichiers" })).toBeVisible();
+    await expect(page.getByText("e2e-upload.png", { exact: false })).toBeVisible();
+
+    // Navigation vers le détail via le lien de la liste.
+    await page.getByRole("link", { name: "e2e-upload.png", exact: false }).first().click();
+    await page.waitForURL("**/protected/files/**", { timeout: 15_000 });
+    await expect(page.getByRole("heading", { level: 1, name: "e2e-upload.png" })).toBeVisible();
+    await expectNoSensitiveLeak(page);
+  });
+});
+
+test.describe("Files (suppression)", () => {
+  test("propriétaire : suppression via Dialog → confirmation → fichier introuvable et retiré de la liste", async ({
+    page,
+  }) => {
+    // Fixture isolée pour ce test : uploadée via API pour ne pas dépendre de l'UI upload.
+    const fileId = await uploadFileViaApi("e2e-delete-fixture.png");
+
+    await loginViaUi(page, OWNER_EMAIL, PASSWORD);
+    await page.goto(`/protected/files/${fileId}`);
+
+    // Détail chargé : le titre affiche le nom du fichier, aucun champ interne.
+    await expect(
+      page.getByRole("heading", { level: 1, name: "e2e-delete-fixture.png" }),
+    ).toBeVisible({ timeout: 15_000 });
+    await expectNoSensitiveLeak(page);
+
+    // Ouvrir le Dialog de confirmation.
+    await page.getByRole("button", { name: "Supprimer" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Confirmer la suppression" }),
+    ).toBeVisible();
+    await expect(page.getByText("Cette action est irréversible", { exact: false })).toBeVisible();
+
+    // Confirmer la suppression.
+    await page.getByRole("button", { name: "Supprimer définitivement" }).click();
+
+    // Après succès : navigation vers /protected (onDeleteSuccess → router.replace).
+    await page.waitForURL("**/protected", { timeout: 15_000 });
+    await expectNoSensitiveLeak(page);
+
+    // Le fichier n'est plus accessible par son id (anti-énumération → état introuvable).
+    await page.goto(`/protected/files/${fileId}`);
+    await expect(page.getByText("Fichier introuvable")).toBeVisible({ timeout: 10_000 });
+
+    // Le fichier ne figure plus dans la liste.
+    await page.goto("/protected/files");
+    await expect(page.getByRole("list", { name: "Liste des fichiers" })).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByText("e2e-delete-fixture.png", { exact: false })).toHaveCount(0);
     await expectNoSensitiveLeak(page);
   });
 });
