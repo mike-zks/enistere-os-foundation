@@ -129,7 +129,7 @@ protection), ADR-014 (GHCR registry).
 | Module §9                        | État          | Note                                              |
 |----------------------------------|---------------|---------------------------------------------------|
 | Structure Next.js App Router     | ✅ Présent    | `src/app/` structurée                             |
-| Layouts standards                | ❌ Partiel    | Seul `(protected)` — manque `(public)/(dashboard)`|
+| Layouts standards                | ✅ Présent    | `(public)` + `(protected)` avec `DashboardShell` |
 | Routing protégé                  | ✅ Présent    | Middleware + server check                         |
 | Auth flow                        | ✅ Présent    | BFF complet HttpOnly                              |
 | Session handling                 | ✅ Présent    | Token mémoire + refresh cookie                    |
