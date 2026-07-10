@@ -1,6 +1,7 @@
 # WEB_CORE_V1_READINESS_REVIEW.md — Verdict de maturité Web Core Next.js V1
 
 > Branche : `web-core-v1-readiness-review`. Date de revue : 2026-07-10.
+> **Mise à jour : 2026-07-10 (post V1 Gap 1)** — critère #11 fermé, #3 avancé. Readiness : 12/14.
 > Sources : `CORE_SPECIFICATION.md` (§56 critères V1, §9 modules obligatoires, §10 modules optionnels),
 > `strategy/04_ROADMAP_GLOBAL.md` (§10 V1), `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`,
 > `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, `e2e/`, `src/`.
@@ -42,15 +43,14 @@ déterministe, `next start` en dev disponible. App Router structurée sous `src/
 explicitement marqués `"use client"`, séparation `layout.tsx` / `page.tsx` respectée, `loading.tsx`
 et `error.tsx` à la racine, `not-found.tsx` global.
 
-### 3.3 ❌ Les layouts standards existent
+### 3.3 ⚠️ Les layouts standards existent (partiel — avancé V1 Gap 1)
 
-**NON SATISFAIT.** Structure cible (§8) : route groups `(public)/`, `(auth)/`, `(dashboard)/`.
-État actuel : seul le groupe `(protected)/` existe avec un layout minimal (aucun header, aucun
-sidebar, aucun app shell). Aucun groupe `(public)/` pour les pages publiques. Aucun layout
-dashboard fonctionnel. La page `/` est une page technique (health/session), pas une landing page
-dans un groupe public.
+**PARTIELLEMENT SATISFAIT.** Structure cible (§8) : route groups `(public)/`, `(auth)/`, `(dashboard)/`.
+État post V1 Gap 1 : groupe `(public)/` avec layout public (header nav + footer) — créé. Groupe
+`(protected)/` avec layout serveur (session read-only) — existant. Aucun groupe `(dashboard)/` ni
+layout dashboard (navigation latérale/app shell) — manquant (V1 Gap 2).
 
-**Impact :** Bloquant V1 — critère explicite §56 et livrable V1 du ROADMAP §10.
+**Impact résiduel :** Bloquant V1 partiel — dashboard layout absent. V1 Gap 2 à réaliser.
 
 ### 3.4 ✅ L'auth flow est fonctionnel
 
@@ -97,15 +97,13 @@ n'existe dans le core.
 Utilisés systématiquement dans tous les chemins Files (liste, détail, admin). Couverture test :
 états vérifiés en unit et E2E.
 
-### 3.11 ❌ Le SEO baseline est présent pour pages publiques
+### 3.11 ✅ Le SEO baseline est présent pour pages publiques
 
-**NON SATISFAIT.** Aucune page publique dédiée n'existe (pas de groupe `(public)/`). La page `/`
-est une page technique (health/session) — elle exporte `metadata` via `appMetadata` mais est
-dynamique (`force-dynamic`, pas de `revalidate`) et son contenu n'est pas destiné aux crawlers
-publics. Aucun `sitemap.ts`, aucun `robots.ts` autorisant l'indexation publique. §12 de la
-CORE_SPECIFICATION stipule : "metadata pour pages publiques".
-
-**Impact :** Bloquant V1 — critère §56 lié directement à l'absence de layout public (critère 3.3).
+**SATISFAIT (V1 Gap 1 — 2026-07-10).** Route group `(public)/` créé. Landing page statique à `/` :
+`metadata.robots = { index: true, follow: true }`, `openGraph` minimal, titre "Enistère OS Foundation".
+`robots.ts` : `allow: ["/", "/status"]`, `disallow: ["/protected/", "/api/", "/login"]`. `sitemap.ts` :
+liste `/` (priority 1) et `/status` (priority 0.5). Page technique `/status` hérite `noindex` du root
+layout. §12 : "metadata pour pages publiques" — satisfait. §56 critère #11 **fermé**.
 
 ### 3.12 ✅ Les dashboards/backoffices sont non indexables
 
@@ -188,18 +186,18 @@ Ces absences sont intentionnelles et documentées. Elles ne sont pas des gaps V1
 
 ## 7. Verdict de maturité V1
 
-**Statut : `IMPLEMENTATION_PARTIELLE` — V1 non déclarable en l'état.**
+**Statut : `IMPLEMENTATION_PARTIELLE` — V1 non déclarable en l'état (2 critères restants).**
 
-**11/14 critères §56 satisfaits** (79 %). Trois critères bloquants non satisfaits :
+**12/14 critères §56 satisfaits** (86 %, post V1 Gap 1). Deux critères bloquants restants :
 
 | Critère §56                                      | Statut  | Ce qui manque                              |
 |--------------------------------------------------|---------|--------------------------------------------|
-| 3. Les layouts standards existent                | ❌      | Groupe `(public)/` + layout dashboard      |
+| 3. Les layouts standards existent                | ⚠️ Partiel | Layout `(public)/` présent ; dashboard layout absent (V1 Gap 2) |
 | 9. Les formulaires et validations fonctionnent   | ❌      | React Hook Form + Zod (modules §9 absents) |
-| 11. Le SEO baseline est présent pour pages publiques | ❌  | Aucune page publique + metadata publiques  |
+| 11. Le SEO baseline est présent pour pages publiques | ✅ Fermé V1 Gap 1 | — |
 
-Les critères 3 et 11 sont liés : l'absence de layout `(public)/` entraîne mécaniquement l'absence
-de pages publiques avec SEO. Corriger le critère 3 résout en grande partie le critère 11.
+Critère #3 partiellement avancé : layout `(public)/` ajouté ; il reste le layout `(dashboard)/`
+(V1 Gap 2 — navigation latérale minimale sous `(protected)/` ou nouveau groupe `(dashboard)/`).
 
 ---
 
@@ -222,11 +220,10 @@ indisponible sur Linux.
 
 ### Plan Web Core V1 gap ciblé — 3 items ordonnés par impact/effort
 
-**Item 1 — Public layout + landing page minimale** (ferme critères 3 et 11 en partie)
-- Créer groupe route `(public)/` avec `layout.tsx` (header minimaliste, footer minimaliste).
-- Créer `(public)/page.tsx` : landing page statique (statiquement rendu, `revalidate: false`),
-  `metadata` exports (`title`, `description`, `openGraph`), `sitemap.ts`.
-- Effort estimé : 1 session.
+**Item 1 — Public layout + landing page minimale** ✅ RÉALISÉ (2026-07-10 — branche `web-core-v1-gap-1-public-layout`)
+- Route group `(public)/` avec `layout.tsx` (header nav "Enistère" + lien "Se connecter" + footer).
+- `(public)/page.tsx` : landing statique, `metadata` SEO (`robots:index:true`, `openGraph`), `sitemap.ts`, `robots.ts`.
+- Page technique `/status` (déplacée de `/`).
 
 **Item 2 — Dashboard layout minimal** (ferme critère 3 complètement)
 - Créer groupe route `(dashboard)/` ou étendre `(protected)/` avec un layout incluant navigation
