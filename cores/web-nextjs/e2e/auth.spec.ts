@@ -1,7 +1,17 @@
 import { expect, test } from "@playwright/test";
-import { OWNER_EMAIL, PASSWORD, expectNoSensitiveLeak } from "./helpers.js";
+import { OWNER_EMAIL, PASSWORD, expectNoSensitiveLeak, loginViaUi } from "./helpers.js";
 
 test.describe("Auth", () => {
+  test("utilisateur authentifié : navigation dashboard visible sur /protected", async ({ page }) => {
+    await loginViaUi(page, OWNER_EMAIL, PASSWORD);
+    const nav = page.getByRole("navigation", { name: "Navigation du tableau de bord" });
+    await expect(nav).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Accueil" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Fichiers" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Envoyer un fichier" })).toBeVisible();
+    await expectNoSensitiveLeak(page);
+  });
+
   test("anonyme : /protected redirige vers /login", async ({ page }) => {
     await page.goto("/protected");
     await page.waitForURL("**/login**", { timeout: 15_000 });

@@ -7,6 +7,7 @@ import { resolveNextServerSession } from "../../core/auth/server/protected-sessi
 import { createQueryClient } from "../../core/query/query-client.js";
 import { prefillSessionQuery } from "../../features/auth/auth-queries.js";
 import { ServiceUnavailableView } from "../../features/auth/service-unavailable-view.js";
+import { DashboardShell } from "../../features/dashboard/dashboard-shell.js";
 
 // Espace protégé = **dynamique** : la résolution lit les cookies par requête (jamais au build). Le `build`
 // ne déclenche donc aucune résolution ni appel API.
@@ -43,5 +44,9 @@ export default async function ProtectedLayout({
   const queryClient = createQueryClient();
   prefillSessionQuery(queryClient, decision.user);
 
-  return <HydrationBoundary state={dehydrate(queryClient)}>{children}</HydrationBoundary>;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <DashboardShell>{children}</DashboardShell>
+    </HydrationBoundary>
+  );
 }

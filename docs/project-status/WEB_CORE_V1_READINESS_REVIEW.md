@@ -1,7 +1,7 @@
 # WEB_CORE_V1_READINESS_REVIEW.md — Verdict de maturité Web Core Next.js V1
 
 > Branche : `web-core-v1-readiness-review`. Date de revue : 2026-07-10.
-> **Mise à jour : 2026-07-10 (post V1 Gap 1)** — critère #11 fermé, #3 avancé. Readiness : 12/14.
+> **Mise à jour : 2026-07-10 (post V1 Gap 2)** — critère #3 fermé, readiness 13/14. Seul #9 (RHF+Zod) reste.
 > Sources : `CORE_SPECIFICATION.md` (§56 critères V1, §9 modules obligatoires, §10 modules optionnels),
 > `strategy/04_ROADMAP_GLOBAL.md` (§10 V1), `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`,
 > `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, `e2e/`, `src/`.
@@ -43,14 +43,12 @@ déterministe, `next start` en dev disponible. App Router structurée sous `src/
 explicitement marqués `"use client"`, séparation `layout.tsx` / `page.tsx` respectée, `loading.tsx`
 et `error.tsx` à la racine, `not-found.tsx` global.
 
-### 3.3 ⚠️ Les layouts standards existent (partiel — avancé V1 Gap 1)
+### 3.3 ✅ Les layouts standards existent (fermé V1 Gap 2)
 
-**PARTIELLEMENT SATISFAIT.** Structure cible (§8) : route groups `(public)/`, `(auth)/`, `(dashboard)/`.
-État post V1 Gap 1 : groupe `(public)/` avec layout public (header nav + footer) — créé. Groupe
-`(protected)/` avec layout serveur (session read-only) — existant. Aucun groupe `(dashboard)/` ni
-layout dashboard (navigation latérale/app shell) — manquant (V1 Gap 2).
-
-**Impact résiduel :** Bloquant V1 partiel — dashboard layout absent. V1 Gap 2 à réaliser.
+**SATISFAIT.** Structure cible (§8) : route groups `(public)/`, `(auth)/`, `(dashboard)/`.
+État post V1 Gap 2 : groupe `(public)/` avec layout public (header nav + footer) — créé Gap 1.
+Groupe `(protected)/` avec layout serveur (session read-only) + `DashboardShell` (header nav
+protégé — Accueil/Fichiers/Envoyer) — créé Gap 2. Critère §56 #3 **fermé**.
 
 ### 3.4 ✅ L'auth flow est fonctionnel
 
@@ -131,7 +129,7 @@ protection), ADR-014 (GHCR registry).
 | Module §9                        | État          | Note                                              |
 |----------------------------------|---------------|---------------------------------------------------|
 | Structure Next.js App Router     | ✅ Présent    | `src/app/` structurée                             |
-| Layouts standards                | ❌ Partiel    | Seul `(protected)` — manque `(public)/(dashboard)`|
+| Layouts standards                | ✅ Présent    | `(public)` + `(protected)` avec `DashboardShell` |
 | Routing protégé                  | ✅ Présent    | Middleware + server check                         |
 | Auth flow                        | ✅ Présent    | BFF complet HttpOnly                              |
 | Session handling                 | ✅ Présent    | Token mémoire + refresh cookie                    |
@@ -186,18 +184,15 @@ Ces absences sont intentionnelles et documentées. Elles ne sont pas des gaps V1
 
 ## 7. Verdict de maturité V1
 
-**Statut : `IMPLEMENTATION_PARTIELLE` — V1 non déclarable en l'état (2 critères restants).**
+**Statut : `IMPLEMENTATION_PARTIELLE` — V1 non déclarable en l'état (1 critère restant).**
 
-**12/14 critères §56 satisfaits** (86 %, post V1 Gap 1). Deux critères bloquants restants :
+**13/14 critères §56 satisfaits** (93 %, post V1 Gap 2). Un critère bloquant restant :
 
 | Critère §56                                      | Statut  | Ce qui manque                              |
 |--------------------------------------------------|---------|--------------------------------------------|
-| 3. Les layouts standards existent                | ⚠️ Partiel | Layout `(public)/` présent ; dashboard layout absent (V1 Gap 2) |
+| 3. Les layouts standards existent                | ✅ Fermé V1 Gap 2 | — |
 | 9. Les formulaires et validations fonctionnent   | ❌      | React Hook Form + Zod (modules §9 absents) |
 | 11. Le SEO baseline est présent pour pages publiques | ✅ Fermé V1 Gap 1 | — |
-
-Critère #3 partiellement avancé : layout `(public)/` ajouté ; il reste le layout `(dashboard)/`
-(V1 Gap 2 — navigation latérale minimale sous `(protected)/` ou nouveau groupe `(dashboard)/`).
 
 ---
 
@@ -225,20 +220,18 @@ indisponible sur Linux.
 - `(public)/page.tsx` : landing statique, `metadata` SEO (`robots:index:true`, `openGraph`), `sitemap.ts`, `robots.ts`.
 - Page technique `/status` (déplacée de `/`).
 
-**Item 2 — Dashboard layout minimal** (ferme critère 3 complètement)
-- Créer groupe route `(dashboard)/` ou étendre `(protected)/` avec un layout incluant navigation
-  latérale minimale (lien "Fichiers", lien "Accueil").
-- Effort estimé : 1 session.
+**Item 2 — Dashboard layout minimal** ✅ RÉALISÉ (2026-07-10 — branche `web-core-v1-gap-2-dashboard-layout`)
+- `DashboardShell` Server Component (`src/features/dashboard/dashboard-shell.tsx`) — header nav avec 3 liens (Accueil/Fichiers/Envoyer) + lien marque "Enistère" → `/`.
+- Intégré dans `(protected)/layout.tsx` sur le chemin authentifié uniquement.
+- Test E2E ajouté (nav dashboard visible — 15 tests).
 
-**Item 3 — React Hook Form + Zod : intégration UploadForm ou form example** (ferme critère 9)
+**Item 3 — React Hook Form + Zod : intégration UploadForm ou form example** (RESTANT — ferme critère #9)
 - Migrer `UploadForm` sur RHF + schéma Zod (`z.object({ file: z.instanceof(File), category: … })`),
   ou créer un formulaire exemple dédié dans `features/` isolé (sans impacter Files prod).
 - Tests unitaires couvrant validation Zod.
 - Effort estimé : 1 session.
 
-**Ordre d'exécution recommandé :** Item 1 → Item 2 → Item 3.
-Items 1+2 ferment 2 des 3 critères bloquants et débloquent la déclaration "V1 stable avec réserves"
-(12/14). Item 3 complète les 14/14 et permet V1 pleinement stable.
+**Ordre d'exécution :** Items 1 ✅ et 2 ✅ réalisés. Item 3 restant → V1 pleinement stable (14/14).
 
 ---
 
