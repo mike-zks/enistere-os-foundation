@@ -6,14 +6,14 @@
 ## 1. Prochaine action UNIQUE
 
 > ✅ **UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton) : RÉALISÉ** (2026-07-10).
-> 3 nouvelles primitives. **12 → 15 primitives**. **121 → 143 tests** (+22, 0 régression). Aucune nouvelle
+> 3 nouvelles primitives. **12 → 15 primitives**. **121 → 146 tests** (+25, 0 régression). Aucune nouvelle
 > dépendance. CSS : uniquement `var(--enistere-*)`, classes préfixées `enistere-`. Badge : `<span>` inline,
 > `variant` (neutral/info/success/warning/danger), `size` (sm/md). Divider : `<div>` décoratif (`aria-hidden`)
 > ou sémantique avec `label` (`role="separator"` + `aria-orientation`). Skeleton : `<div>` `aria-hidden`, animation
 > pulse CSS conditionnelle `prefers-reduced-motion`. `test/components-css.test.ts` et `test/consumers/react.consumer.tsx`
 > mis à jour. `tokens:generate` régénéré, `tokens:check` up-to-date. Docs : `cores/ui-kit/docs/components.md`,
 > `cores/ui-kit/README.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `CHANGELOG.md` mis à jour.
-> `typecheck`/`lint`/`test 143/143`/`build`/`tokens:check`/`audit`/`diff --check` verts.
+> `typecheck`/`lint`/`test 146/146`/`build`/`tokens:check`/`audit`/`diff --check` verts.
 >
 > **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode (précondition
 > externe : hôte macOS indisponible sur Linux). En attente de disponibilité macOS. Alternatives disponibles

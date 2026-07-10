@@ -61,6 +61,20 @@ test('transmet className et attributs natifs', () => {
   assert.equal(el?.getAttribute('data-test'), 'd');
 });
 
+test('préserve le mode décoratif par défaut même si aria-hidden est passé', () => {
+  const { container } = render(<Divider aria-hidden="false" />);
+  const el = container.querySelector('.enistere-divider');
+  assert.equal(el?.getAttribute('aria-hidden'), 'true');
+  assert.equal(el?.getAttribute('role'), null);
+});
+
+test('préserve le rôle sémantique quand un label est fourni', () => {
+  render(<Divider label="OU" role="presentation" aria-orientation="vertical" />);
+  const el = document.querySelector('.enistere-divider');
+  assert.equal(el?.getAttribute('role'), 'separator');
+  assert.equal(el?.getAttribute('aria-orientation'), 'horizontal');
+});
+
 test('forwardRef expose le <div>', () => {
   const ref = createRef<HTMLDivElement>();
   render(<Divider ref={ref} />);

@@ -29,7 +29,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 15 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
   **Badge, Divider, Skeleton** — UI Kit 5) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
-  (**143 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
+  (**146 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
   compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
   Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,

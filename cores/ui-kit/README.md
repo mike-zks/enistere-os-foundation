@@ -11,7 +11,7 @@
 ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js, ni de React Native.
 
 > **Compatibilité React 19 (v0.1.1).** Le UI Kit est développé et **testé sous React 19** (les
-> **143 tests** passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19
+> **146 tests** passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19
 > sont tous deux supportés**. Les primitives statiques restent consommables depuis les Server
 > Components ; `Dialog` est explicitement marqué **Client Component** (`'use client'`) car il utilise
 > des hooks pour piloter le `<dialog>` natif. Alignement vérifié avec le **Web Core Next.js** (Next 16 /
@@ -219,7 +219,7 @@ nouvelle valeur cohérente.
 
 ## 18. Limites actuelles
 
-UI Kit 5 = tokens + **15 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**143 tests**, un seul runner, **0 vulnérabilité**).
+UI Kit 5 = tokens + **15 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**146 tests**, un seul runner, **0 vulnérabilité**).
 
 ## 19. Non implémenté (volontaire)
 

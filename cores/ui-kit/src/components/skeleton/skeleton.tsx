@@ -16,9 +16,9 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(function Skele
   return (
     <div
       ref={ref}
+      {...rest}
       aria-hidden="true"
       className={mergeClassNames('enistere-skeleton', `enistere-skeleton--${variant}`, className)}
-      {...rest}
     />
   );
 });

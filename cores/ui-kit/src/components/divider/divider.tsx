@@ -18,6 +18,7 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider
     return (
       <div
         ref={ref}
+        {...rest}
         role="separator"
         aria-orientation={orientation}
         className={mergeClassNames(
@@ -26,7 +27,6 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider
           'enistere-divider--labeled',
           className,
         )}
-        {...rest}
       >
         <span className="enistere-divider__line" aria-hidden="true" />
         <span className="enistere-divider__label">{label}</span>
@@ -38,9 +38,9 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider
   return (
     <div
       ref={ref}
+      {...rest}
       aria-hidden="true"
       className={mergeClassNames('enistere-divider', `enistere-divider--${orientation}`, className)}
-      {...rest}
     />
   );
 });

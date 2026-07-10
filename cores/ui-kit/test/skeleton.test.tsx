@@ -28,6 +28,12 @@ test('aria-hidden="true" par défaut', () => {
   assert.equal(el?.getAttribute('aria-hidden'), 'true');
 });
 
+test('préserve aria-hidden="true" même si une prop native tente de le modifier', () => {
+  const { container } = render(<Skeleton aria-hidden="false" />);
+  const el = container.querySelector('.enistere-skeleton');
+  assert.equal(el?.getAttribute('aria-hidden'), 'true');
+});
+
 test('variante block applique la classe appropriée', () => {
   const { container } = render(<Skeleton variant="block" />);
   const el = container.querySelector('.enistere-skeleton');
