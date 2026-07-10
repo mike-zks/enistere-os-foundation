@@ -139,7 +139,7 @@ test.describe("Files (upload)", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Envoyer un fichier" })).toBeVisible();
 
     // Attacher un PNG 1×1 jetable — aucun contenu réel, aucun fichier local requis.
-    await page.getByLabel("Fichier").setInputFiles({
+    await page.locator('input[type="file"][name="file"]').setInputFiles({
       name: "e2e-upload.png",
       mimeType: "image/png",
       buffer: Buffer.from(TEST_PNG_B64, "base64"),
