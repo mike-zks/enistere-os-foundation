@@ -8,22 +8,28 @@
 import { createRef, useState } from 'react';
 
 import {
+  Badge,
   Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Divider,
   Input,
   Label,
   Select,
+  Skeleton,
   Spinner,
   Text,
   Toast,
   ToastRegion,
   VisuallyHidden,
+  type BadgeVariant,
   type ButtonProps,
+  type DividerOrientation,
   type SelectSize,
+  type SkeletonVariant,
   type TextElement,
   type ToastRegionPosition,
   type ToastVariant,
@@ -36,6 +42,9 @@ export function DemoForm() {
   const variant: ButtonProps['variant'] = 'primary';
   const titleAs: TextElement = 'h1';
   const selectSize: SelectSize = 'md';
+  const badgeVariant: BadgeVariant = 'success';
+  const dividerOrientation: DividerOrientation = 'horizontal';
+  const skeletonVariant: SkeletonVariant = 'text';
   const [open, setOpen] = useState(false);
   const toastVariant: ToastVariant = 'success';
   const toastPos: ToastRegionPosition = 'bottom-right';
@@ -64,6 +73,11 @@ export function DemoForm() {
       </Button>
       <Spinner label="Chargement…" />
       <VisuallyHidden>Texte pour lecteur d&apos;écran</VisuallyHidden>
+
+      <Badge variant={badgeVariant}>Actif</Badge>
+      <Divider orientation={dividerOrientation} />
+      <Divider label="OU" />
+      <Skeleton variant={skeletonVariant} style={{ width: '120px' }} />
 
       <Dialog open={open} onDismiss={() => setOpen(false)} aria-labelledby="dlg-title">
         <DialogHeader>

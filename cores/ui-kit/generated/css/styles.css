@@ -184,6 +184,60 @@
   content: "\2715"; /* ✕ */
 }
 
+/* src/components/badge/badge.css */
+/* Badge — étiquette de statut en ligne. Variante portée par couleur de texte + bordure, jamais couleur seule.
+   Fond neutre par défaut. Tokens existants uniquement, aucun hex. */
+.enistere-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--enistere-spacing-2);
+  border: 1px solid;
+  border-radius: var(--enistere-radius-full);
+  font-family: var(--enistere-font-family-sans);
+  font-weight: var(--enistere-font-weight-medium);
+  line-height: var(--enistere-line-height-tight);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.enistere-badge--sm {
+  font-size: var(--enistere-font-size-xs);
+}
+
+.enistere-badge--md {
+  font-size: var(--enistere-font-size-sm);
+}
+
+.enistere-badge--neutral {
+  color: var(--enistere-color-foreground-muted);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-border-default);
+}
+
+.enistere-badge--info {
+  color: var(--enistere-color-status-info);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-info);
+}
+
+.enistere-badge--success {
+  color: var(--enistere-color-status-success);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-success);
+}
+
+.enistere-badge--warning {
+  color: var(--enistere-color-status-warning);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-warning);
+}
+
+.enistere-badge--danger {
+  color: var(--enistere-color-status-danger);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-danger);
+}
+
 /* src/components/button/button.css */
 /* Button — variantes/tailles pilotées par tokens. Light/dark via variables (aucune règle dark dédiée). */
 .enistere-button {
@@ -426,6 +480,70 @@
   }
 }
 
+/* src/components/divider/divider.css */
+/* Divider — séparateur visuel. Décoratif par défaut (aria-hidden) ; sémantique si label.
+   Tokens border/spacing/font existants uniquement, aucun hex. */
+.enistere-divider {
+  margin: 0;
+  border: none;
+  flex-shrink: 0;
+}
+
+/* Horizontal : ligne pleine-largeur */
+.enistere-divider--horizontal {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: var(--enistere-color-border-default);
+}
+
+/* Vertical : ligne pleine-hauteur dans un flex ou grid */
+.enistere-divider--vertical {
+  display: inline-block;
+  width: 1px;
+  height: 100%;
+  align-self: stretch;
+  background-color: var(--enistere-color-border-default);
+}
+
+/* Avec label : disposition flex (ligne – texte – ligne) */
+.enistere-divider--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--enistere-spacing-3);
+  height: auto;
+  background-color: transparent;
+}
+
+.enistere-divider--labeled.enistere-divider--vertical {
+  flex-direction: column;
+  width: auto;
+  height: 100%;
+  align-self: stretch;
+}
+
+.enistere-divider__line {
+  flex: 1 1 0%;
+  height: 1px;
+  background-color: var(--enistere-color-border-default);
+}
+
+.enistere-divider--vertical .enistere-divider__line {
+  flex: 1 1 0%;
+  width: 1px;
+  height: auto;
+}
+
+.enistere-divider__label {
+  flex: none;
+  color: var(--enistere-color-foreground-muted);
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-xs);
+  font-weight: var(--enistere-font-weight-medium);
+  line-height: var(--enistere-line-height-normal);
+  white-space: nowrap;
+}
+
 /* src/components/form-field/form-field.css */
 /* FormField — composition label/champ/aide/erreur pilotée par tokens. Light/dark via variables. */
 .enistere-form-field {
@@ -606,6 +724,42 @@
 @media (prefers-reduced-motion: reduce) {
   .enistere-select {
     transition: none;
+  }
+}
+
+/* src/components/skeleton/skeleton.css */
+/* Skeleton — placeholder de chargement. Couleur fond via token border. Animation réduite si
+   prefers-reduced-motion. aria-hidden géré dans le composant. Aucun hex. */
+.enistere-skeleton {
+  display: block;
+  background-color: var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-sm);
+}
+
+.enistere-skeleton--text {
+  height: var(--enistere-font-size-md);
+  width: 100%;
+}
+
+.enistere-skeleton--block {
+  height: var(--enistere-spacing-12);
+  width: 100%;
+  border-radius: var(--enistere-radius-md);
+}
+
+.enistere-skeleton--circle {
+  border-radius: var(--enistere-radius-full);
+}
+
+@keyframes enistere-skeleton-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .enistere-skeleton {
+    animation: enistere-skeleton-pulse 2s var(--enistere-easing-standard) infinite;
   }
 }
 

@@ -1,0 +1,34 @@
+/* Skeleton — placeholder de chargement. Couleur fond via token border. Animation réduite si
+   prefers-reduced-motion. aria-hidden géré dans le composant. Aucun hex. */
+.enistere-skeleton {
+  display: block;
+  background-color: var(--enistere-color-border-default);
+  border-radius: var(--enistere-radius-sm);
+}
+
+.enistere-skeleton--text {
+  height: var(--enistere-font-size-md);
+  width: 100%;
+}
+
+.enistere-skeleton--block {
+  height: var(--enistere-spacing-12);
+  width: 100%;
+  border-radius: var(--enistere-radius-md);
+}
+
+.enistere-skeleton--circle {
+  border-radius: var(--enistere-radius-full);
+}
+
+@keyframes enistere-skeleton-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .enistere-skeleton {
+    animation: enistere-skeleton-pulse 2s var(--enistere-easing-standard) infinite;
+  }
+}

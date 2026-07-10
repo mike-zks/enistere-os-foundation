@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton)
+
+- **UI Kit 5** (`cores/ui-kit/src/components/`) : ajout de 3 primitives data/feedback légères. **12 → 15 primitives**. **121 → 146 tests** (+25). Aucune nouvelle dépendance, aucun Radix/shadcn/Tailwind. Toutes les CSS consomment uniquement `var(--enistere-*)`. Toutes respectent `forwardRef`, `className` natif, attributs HTML natifs, accessibilité jest-axe. Générateur `styles.css` mis à jour (`tokens:generate`).
+  - **Badge** (`badge.types.ts` / `badge.css` / `badge.tsx`) : `<span>` inline, `variant` (`neutral`|`info`|`success`|`warning`|`danger`), `size` (`sm`|`md`). Fond `background-muted` + couleur de statut sur texte et bordure pour les variantes non-neutres. `user-select:none`. 6 tests : défaut, variante+taille, boucle toutes variantes, className passthrough, forwardRef, a11y toutes variantes.
+  - **Divider** (`divider.types.ts` / `divider.css` / `divider.tsx`) : `<div>`, `orientation` (`horizontal`|`vertical`). Décoratif par défaut (`aria-hidden="true"`, sans `role`, invariant non contournable par prop native). Avec `label` (ReactNode) → `role="separator"` + `aria-orientation` + deux lignes décoratives `aria-hidden` flanquant le label. 11 tests : défaut, vertical, label, label vertical, deux lignes, className+attributs, invariants ARIA, forwardRef, a11y décoratif, a11y séparateur.
+  - **Skeleton** (`skeleton.types.ts` / `skeleton.css` / `skeleton.tsx`) : `<div>`, `variant` (`text`|`block`|`circle`). Toujours `aria-hidden="true"` (invariant non contournable par prop native). Animation `@keyframes enistere-skeleton-pulse` activée uniquement via `@media (prefers-reduced-motion: no-preference)`. 8 tests : défaut, aria-hidden invariant, block, circle, className+style, forwardRef, a11y toutes variantes.
+  - **Infrastructure test** : `test/components-css.test.ts` — badge/divider/skeleton ajoutés à la liste de vérification. `test/consumers/react.consumer.tsx` — Badge, Divider, Skeleton importés et utilisés (types `BadgeVariant`, `DividerOrientation`, `SkeletonVariant` vérifiés).
+  - **Vérifications** : `typecheck` ✓, `lint` ✓, `test` 146/146 ✓, `build` ✓, `tokens:check` ✓ (up-to-date), `audit` 0 vuln ✓, `git diff --check` ✓. Branch `ui-kit-5-badge-divider-skeleton`.
+
 ### Web Core V1 Gap 3 — RHF + Zod UploadForm
 
 - **Web Core V1 Gap 3** (`cores/web-nextjs/src/features/files/`) : ferme le dernier critère d'acceptation V1 §56 n°9 ("les formulaires et validations fonctionnent"). **Readiness V1 : 13/14 → 14/14 — V1 pleinement stable.** Aucun changement Auth/BFF/Files/packages/workflows. **450 tests** (+4). **15 tests E2E** inchangés.
