@@ -5,6 +5,25 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core V1 Gap 1 — Public layout + landing page minimale : RÉALISÉ** (2026-07-10).
+> Route group `(public)/` ajouté — layout public (header nav Enistère + lien "Se connecter" + footer)
+> en Server Component pur, sans vérification de session. Landing page statique à `/` : h1 "Enistère OS
+> Foundation", description, liste des modules, liens vers `/login` et `/status`. Page technique de
+> statut déplacée de `/` vers `/status` (FoundationStatus + HealthPanel + SessionPanel conservés,
+> dynamique). SEO baseline : `metadata` par page (`robots: index: true` sur la landing, noindex sur
+> `/status` par héritage du root layout), `robots.ts`, `sitemap.ts` (NEXT_PUBLIC_APP_URL configurable).
+> E2E health test adapté (`page.goto("/")` → `"/status"`, 14 tests toujours verts). CSS public layout
+> + landing dans `globals.css`. Build : `/` = statique, `/status` = dynamique, `/robots.txt` et
+> `/sitemap.xml` présents. `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts.
+> **Critères §56 fermés : #11 (SEO baseline pages publiques). #3 avancé (layout public présent ;
+> dashboard layout = Item 2 restant). Readiness V1 passe de 11/14 à 12/14.** Branch
+> `web-core-v1-gap-1-public-layout`.
+>
+> **Prochaine action UNIQUE** : **Web Core V1 Gap 2** — dashboard layout minimal (ferme critère §56
+> n°3 complètement : groupe `(dashboard)/` ou extension `(protected)/` avec navigation latérale
+> minimale — lien "Fichiers", lien "Accueil"). Suivi : Item 3 (RHF+Zod, critère n°9). Après ces
+> 2 items : V1 pleinement stable (14/14).
+
 > ✅ **Web Core V1 Readiness Review : RÉALISÉ** (2026-07-10).
 > Revue de maturité complète du Web Core Next.js selon les 14 critères d'acceptation V1 (§56
 > `CORE_SPECIFICATION.md`). Verdict : **`IMPLEMENTATION_PARTIELLE` — 11/14 critères satisfaits**.

@@ -2,10 +2,10 @@ import { expect, test } from "@playwright/test";
 import { expectNoSensitiveLeak } from "./helpers.js";
 
 test.describe("Health / accueil", () => {
-  test("la page d'accueil charge avec un titre et l'état Health, sans fuite de config", async ({ page }) => {
-    await page.goto("/");
+  test("la page de statut charge avec un titre et l'état Health, sans fuite de config", async ({ page }) => {
+    await page.goto("/status");
 
-    // Un seul h1 (PageHeader) ; la page technique d'accueil est rendue.
+    // Un seul h1 (PageHeader) ; la page technique de statut est rendue.
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     // Panneau Health présent (libellé stable de la galerie de faits).

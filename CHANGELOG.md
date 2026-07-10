@@ -6,6 +6,20 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core V1 Gap 1 — Public layout + landing page minimale
+
+- **Web Core V1 Gap 1** (`cores/web-nextjs/src/app/(public)/`) : ferme les critères d'acceptation V1 §56 n°11 (SEO baseline pages publiques) et avance n°3 (layouts standards — layout public présent, dashboard layout = Gap 2). **Readiness V1 : 11/14 → 12/14.** Aucun changement Auth/BFF/Files/packages/workflows. **446 tests** inchangés. **14 tests E2E** (1 adapté : URL `/` → `/status`).
+  - **`(public)/layout.tsx`** : layout public Server Component pur — `<header>` avec `<nav>` (lien "Enistère" → `/` + lien "Se connecter" → `/login`), `<footer>` minimal. Aucune vérification de session.
+  - **`(public)/page.tsx`** : landing page statique (statiquement rendue au build, `○` dans `next build`). Métadonnées : `title: "Enistère OS Foundation"`, `description`, `robots: { index: true, follow: true }`, `openGraph` minimal. Contenu : `PageHeader` h1 "Enistère OS Foundation", liste des 5 modules disponibles, CTA "Se connecter" → `/login` + "État du socle" → `/status`. Aucune donnée dynamique ni privée.
+  - **`(public)/status/page.tsx`** : page technique de statut déplacée de `/` vers `/status`. Contenu identique (`FoundationStatus` + `HealthPanel` + `SessionPanel` + `StatesShowcase`, `force-dynamic`). Noindex par héritage du root layout (`appMetadata.robots`).
+  - **`sitemap.ts`** : liste `/` (priority 1, monthly) et `/status` (priority 0.5, weekly). URL canonique via `NEXT_PUBLIC_APP_URL` (défaut `http://localhost:3100`).
+  - **`robots.ts`** : `allow: ["/", "/status"]` ; `disallow: ["/protected/", "/api/", "/login"]` ; `sitemap` link.
+  - **`globals.css`** : classes `.public-header`, `.public-nav`, `.public-nav__brand`, `.public-nav__action`, `.public-main`, `.public-footer`, `.landing`, `.landing__features`, `.landing__actions`, `.landing__cta`, `.landing__cta--primary`, `.landing__cta--secondary`.
+  - **`.env.example`** : `NEXT_PUBLIC_APP_URL` documenté (commenté, facultatif).
+  - **`e2e/health.spec.ts`** : URL mise à jour `/` → `/status`, libellé du test adapté. 14 tests E2E toujours verts.
+  - **Build** : `/` = statique (`○`), `/status` = dynamique (`ƒ`), `/robots.txt` et `/sitemap.xml` = statiques (`○`).
+  - **Vérifications** : `typecheck` ✓, `lint` ✓ (0 erreurs), `test` 446/446 ✓, `build` ✓, `audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-v1-gap-1-public-layout`.
+
 ### Web Core Files 8 — E2E Playwright upload/suppression
 
 - **Web Core Files 8** (`cores/web-nextjs/e2e/`) : étend la couverture E2E navigateur aux chemins d'écriture Files. **14 tests E2E** (12 → 14, +2 nouveaux, 0 régression). Aucun changement BFF, runtime, package ni workflow.

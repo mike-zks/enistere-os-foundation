@@ -287,6 +287,7 @@ Puis **RN 30 — smoke runtime iOS / parity device BLOQUÉ PROPREMENT**
 **Prochaine action** : **Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel** (précondition externe — Linux sans `xcrun`) ; à défaut : **Web Core Files 8 — parcours E2E Playwright upload/suppression** (chemins d'écriture Files 2/3 non couverts par `web-e2e-ci.yml`).
 **Actions humaines** : protection de branche `main` (7 checks + `images` requis) + rendre `api-smoke` requis.
 > **Governance 1 (2026-07-09)** : revue de cohérence CI/gouvernance après Files 7. Checks CI vérifiés alignés avec la documentation (noms de jobs = checks documentés exactement). Corrections : `README.md` workflows (ADR-014 `NON_IMPLEMENTE` → `PARTIELLEMENT_IMPLEMENTE` + niveaux 1–3+4 partiel) ; `SESSION_HANDOFF.md` §5 (statut mobile `RETRY_READY` → `STARTER_EXPO_DOCTOR_GREEN`). Aucun workflow modifié.
+> **V1 Gap 1 (2026-07-10)** : route group `(public)/` ajouté — layout public Server Component (header nav + footer), landing page statique à `/` (SEO `robots:index:true`, `openGraph`, h1 "Enistère OS Foundation"), page technique de statut déplacée à `/status`, `robots.ts`, `sitemap.ts`. **Critère §56 #11 fermé** (SEO baseline). **Critère #3 avancé** (layout public présent, dashboard layout = V1 Gap 2). **Readiness V1 : 12/14.** `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts.
 
 ## 12. Documentation
 
