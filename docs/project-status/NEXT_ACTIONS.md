@@ -5,6 +5,24 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core V1 Readiness Review : RÉALISÉ** (2026-07-10).
+> Revue de maturité complète du Web Core Next.js selon les 14 critères d'acceptation V1 (§56
+> `CORE_SPECIFICATION.md`). Verdict : **`IMPLEMENTATION_PARTIELLE` — 11/14 critères satisfaits**.
+> 3 critères bloquants : (3) layouts standards absents (pas de groupe `(public)/` ni `(dashboard)/`),
+> (9) formulaires/validations sans RHF/Zod, (11) SEO baseline absent (aucune page publique).
+> Forces confirmées : auth BFF complet, Files V1 complet (upload/suppression/admin), 14 tests E2E,
+> CI 4 niveaux, UI Kit 4, TanStack Query v5, 446 tests unitaires, zéro secret exposé.
+> Faux négatifs : absence Tailwind/shadcn intentionnelle (ADR-009), data table optionnel (§10).
+> Rapport : `docs/project-status/WEB_CORE_V1_READINESS_REVIEW.md`. Branche
+> `web-core-v1-readiness-review`.
+>
+> **Prochaine action UNIQUE** : **Web Core V1 gap ciblé — Item 1** (public layout + landing page
+> minimale) — ferme les critères §56 n°3 et n°11 en une session. Suivi : Item 2 (dashboard layout
+> minimal, critère n°3 complet) puis Item 3 (RHF+Zod UploadForm ou form example, critère n°9).
+> Après Items 1+2 : déclaration "V1 stable avec réserves" (12/14). Après Item 3 : V1 pleinement
+> stable (14/14). Alternatives écartées : UI Kit 5 (0 critère §56 fermé), Cloud staging (dépendance
+> externe), RN31 macOS (hôte indisponible sur Linux).
+
 > ✅ **Web Core Files 8 — E2E Playwright upload/suppression : RÉALISÉ** (2026-07-10).
 > Extension des tests E2E navigateur aux chemins d'écriture Files : upload (`UploadForm` → formulaire →
 > confirmation UI `<section aria-label="Fichier envoyé">` → liste → détail) et suppression (fixture API
