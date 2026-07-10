@@ -5,6 +5,22 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core V1 Gap 2 — Dashboard layout minimal : RÉALISÉ** (2026-07-10).
+> `DashboardShell` Server Component ajouté (`src/features/dashboard/dashboard-shell.tsx`) — header de
+> navigation avec 3 liens (Accueil `/protected`, Fichiers `/protected/files`, Envoyer un fichier
+> `/protected/files/upload`) + lien de retour "Enistère" → `/`. Liens HTML natifs (`<a>`) pour
+> compatibilité `tsconfig.test.json` (pas de `next/link` dans `src/features/`). Intégré dans
+> `(protected)/layout.tsx` — uniquement sur le chemin authentifié, après résolution de session ;
+> le chemin `ServiceUnavailableView` reste sans shell. **Critère §56 #3 fermé** (layouts standards :
+> layout public ✓ Gap 1 + layout dashboard ✓ Gap 2). **Readiness V1 : 13/14.** Test E2E ajouté
+> (navigation dashboard visible après login — 14 → 15 tests). `typecheck`/`lint`/`test 446/446`/
+> `build`/`audit`/`diff --check` verts. Branch `web-core-v1-gap-2-dashboard-layout`.
+>
+> **Prochaine action UNIQUE** : **Web Core V1 Gap 3** — React Hook Form + Zod (critère §56 n°9 :
+> "les formulaires et validations fonctionnent"). Migration `UploadForm` sur RHF + schéma Zod, ou
+> création d'un formulaire exemple dédié. Ferme le dernier critère manquant → **V1 pleinement stable
+> 14/14**.
+
 > ✅ **Web Core V1 Gap 1 — Public layout + landing page minimale : RÉALISÉ** (2026-07-10).
 > Route group `(public)/` ajouté — layout public (header nav Enistère + lien "Se connecter" + footer)
 > en Server Component pur, sans vérification de session. Landing page statique à `/` : h1 "Enistère OS

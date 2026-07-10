@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core V1 Gap 2 — Dashboard layout minimal
+
+- **Web Core V1 Gap 2** (`cores/web-nextjs/src/features/dashboard/`) : ferme le critère d'acceptation V1 §56 n°3 ("les layouts standards existent"). **Readiness V1 : 12/14 → 13/14.** Aucun changement Auth/BFF/Files/packages/workflows. **446 tests** unitaires inchangés. **15 tests E2E** (+1 nav dashboard).
+  - **`dashboard-shell.tsx`** : Server Component `DashboardShell` — `<header class="dashboard-header">` + `<nav aria-label="Navigation du tableau de bord">` avec liens : "Enistère" → `/` (marque), "Accueil" → `/protected`, "Fichiers" → `/protected/files`, "Envoyer un fichier" → `/protected/files/upload`. Liens `<a>` natifs (compatibilité `tsconfig.test.json` : `next/link` indisponible hors runtime Next.js dans `src/features/`).
+  - **`(protected)/layout.tsx`** : import et intégration de `DashboardShell` uniquement sur le chemin authentifié (`HydrationBoundary` wrappé). Chemin `ServiceUnavailableView` inchangé (bare view, sans shell).
+  - **`globals.css`** : classes `.dashboard-layout`, `.dashboard-header`, `.dashboard-nav`, `.dashboard-nav__brand`, `.dashboard-nav__link` (tokens UI Kit existants, aucune palette dupliquée).
+  - **`e2e/auth.spec.ts`** : test ajouté "utilisateur authentifié : navigation dashboard visible sur /protected" — vérifie `role="navigation" name="Navigation du tableau de bord"` + liens Accueil/Fichiers/Envoyer un fichier + `expectNoSensitiveLeak`. **15 tests E2E** (14 → 15, +1).
+  - **Vérifications** : `typecheck` ✓, `lint` ✓, `test` 446/446 ✓, `build` ✓, `audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-v1-gap-2-dashboard-layout`.
+
 ### Web Core V1 Gap 1 — Public layout + landing page minimale
 
 - **Web Core V1 Gap 1** (`cores/web-nextjs/src/app/(public)/`) : ferme les critères d'acceptation V1 §56 n°11 (SEO baseline pages publiques) et avance n°3 (layouts standards — layout public présent, dashboard layout = Gap 2). **Readiness V1 : 11/14 → 12/14.** Aucun changement Auth/BFF/Files/packages/workflows. **446 tests** inchangés. **14 tests E2E** (1 adapté : URL `/` → `/status`).
