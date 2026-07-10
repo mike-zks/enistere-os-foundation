@@ -5,6 +5,22 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core V1 Gap 3 — RHF + Zod UploadForm : RÉALISÉ** (2026-07-10).
+> `uploadFormSchema` Zod v4 (`upload-form-schema.ts`) : `file` (`z.instanceof(File)`, "Fichier requis."),
+> `category` (`z.enum(FILE_CATEGORY_VALUES)`, "Catégorie requise."), `subjectId` (`z.string().max(128)`
+> optionnel). `UploadForm` migré de `useState` vers `useForm({ resolver: zodResolver(uploadFormSchema) })`
+> — `setValue("file", f)` dans onChange (file input non enregistré par RHF pour gérer `File` vs `FileList`),
+> `register("category")` + `register("subjectId")`, erreurs via `formState.errors` + `aria-describedby`.
+> Anti-double-soumission, section succès, reset complet : inchangés. 4 tests ajoutés (`test/upload-form.test.tsx`)
+> : fichier requis, catégorie requise, référence trop longue, succès. Dépendances ajoutées :
+> `react-hook-form@^7.81.0`, `zod@^4.4.3`, `@hookform/resolvers@^5.4.0`. **Critère §56 #9 fermé.**
+> **Readiness V1 : 13/14 → 14/14 — V1 pleinement stable.** **450 tests** (446+4). 15 tests E2E inchangés.
+> `typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts. Branch `web-core-v1-gap-3-rhf-zod`.
+>
+> **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode (précondition
+> externe : hôte macOS indisponible sur Linux). En attente de disponibilité macOS. Alternatives disponibles
+> si RN31 reste bloqué : UI Kit 5, Cloud Core CC10 (staging serveur réel), ou autre composant UI Kit.
+
 > ✅ **Web Core V1 Gap 2 — Dashboard layout minimal : RÉALISÉ** (2026-07-10).
 > `DashboardShell` Server Component ajouté (`src/features/dashboard/dashboard-shell.tsx`) — header de
 > navigation avec 3 liens (Accueil `/protected`, Fichiers `/protected/files`, Envoyer un fichier
