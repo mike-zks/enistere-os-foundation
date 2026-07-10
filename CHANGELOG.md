@@ -6,6 +6,20 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web/Core Governance 1 — alignement CI requise et ADR-013
+
+- **Web/Core Governance 1** (`.github/workflows/`, `docs/`) : revue de cohérence gouvernance/CI après Web Core Files 7. **Aucun workflow modifié.** Aucun blocage fonctionnel détecté. **5 corrections documentaires.**
+  - **Vérifications CI (aucun écart)** : les 7 noms de jobs requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`) + le 8ᵉ recommandé (`images`) correspondent **exactement** aux `name:` des jobs dans les 4 workflows. `api-smoke` précède `images` via `needs:` — rendre `images` requis suffit.
+  - **"CI minimale"** = `ci.yml` (niveau 1) = 5 jobs, non-régression monorepo, sans runtime/E2E/Docker/secrets. **"CI niveaux 1–3 + niveau 4 partiel"** : `ci.yml` (1) + `api-runtime-ci.yml` (2) + `web-e2e-ci.yml` (3) + `registry-ci.yml` (4 partiel — build + push GHCR, sans déploiement). **"Registry partiel"** = ADR-014 `PARTIELLEMENT_IMPLEMENTE` (build/push, pas de scan/signature/déploiement). **"Branch protection documentée/non appliquée"** = action humaine en attente dans GitHub Settings.
+  - **ADR-013** (`PARTIELLEMENT_IMPLEMENTE`) : niveaux 1–3 présents + niveau 4 partiel (`registry-ci.yml`) ; protection de branche non appliquée — action humaine. **ADR-014** (`PARTIELLEMENT_IMPLEMENTE`) : registry GHCR via `registry-ci.yml` (Cloud Core 5) — confirmé.
+  - **Corrections documentaires** :
+    - **`.github/workflows/README.md`** : dernier paragraphe corrigé — supprimé claim "ADR-014 NON_IMPLEMENTE" et "manque niveau 4" (obsolètes depuis Cloud Core 5) ; statuts ADR-013/014 mis à jour.
+    - **`docs/project-status/SESSION_HANDOFF.md`** §5 : statut mobile corrigé `RETRY_READY` → `STARTER_EXPO_DOCTOR_GREEN` (346 → 355 tests, expo-doctor 19/19, smoke Android passé — état réel post-RN26-34).
+    - **`docs/project-status/NEXT_ACTIONS.md`** : entrée Governance 1 ajoutée ; prochaine action unique documentée.
+    - **`docs/project-status/FOUNDATION_CURRENT_STATE.md`** §15 : prochaine action mise à jour (RN31 macOS ou à défaut Files 8 E2E upload/suppression ; actions humaines : 7 checks + `images` requis).
+    - **`docs/project-status/IMPLEMENTATION_MATRIX.md`** : ligne CI/CD mise à jour — "niveau 4 partiel (`registry-ci.yml`)" ajouté dans "Implémenté", "Prochaine condition" corrigée.
+  - **Vérifications** : `git diff --check` ✓. Aucun workflow, aucun code métier, aucun test modifié. Branch `web-core-governance-1-ci-alignment`.
+
 ### Web Core Files 7 — Admin BFF quarantaine/restauration
 
 - **Web Core Files 7** (`cores/web-nextjs/`) : ajoute les **BFF handlers et primitives UI minimales** pour consommer les capacités admin Files déjà présentes côté API : **quarantaine** (`POST /api/files/:id/quarantine`) et **restauration** (`POST /api/files/:id/restore`). Aucun nouveau comportement API. **446 tests** (393 → 446, +53, 0 régression). Le Web reste un client gouverné de l'API Core.

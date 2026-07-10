@@ -5,6 +5,24 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web/Core Governance 1 — alignement CI requise et ADR-013 : RÉALISÉ** (2026-07-09).
+> Revue de cohérence gouvernance/CI après Web Core Files 7. Vérifications (aucun blocage) :
+> (1) les noms des jobs CI (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` dans
+> `ci.yml`, `api-runtime` dans `api-runtime-ci.yml`, `web-e2e` dans `web-e2e-ci.yml`, `images` dans
+> `registry-ci.yml`) correspondent **exactement** aux 7+1 checks documentés (`README.md`,
+> `GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) ; (2) les 4 niveaux CI sont en place (niveaux 1–3 + niveau 4
+> partiel registry) ; (3) ADR-013 `PARTIELLEMENT_IMPLEMENTE` (branch protection non appliquée — action
+> humaine en attente) et ADR-014 `PARTIELLEMENT_IMPLEMENTE` (registry GHCR — CC5) confirmés.
+> **Corrections documentaires** : `README.md` workflows (dernier paragraphe obsolète : « ADR-014
+> `NON_IMPLEMENTE` » et « niveaux 1–3, manque niveau 4 » — corrigés) ; `SESSION_HANDOFF.md` §5
+> (statut mobile `RETRY_READY` → `STARTER_EXPO_DOCTOR_GREEN`, 346 → 355 tests). Aucun workflow
+> ni comportement runtime modifié. `git diff --check` vert.
+>
+> **Prochaine action UNIQUE** : **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode — précondition
+> externe, non disponible sur Linux) ; à défaut : **Web Core Files 8** (extension Playwright E2E pour
+> les parcours upload/suppression — `web-e2e-ci.yml` couvre la lecture mais pas les chemins d'écriture
+> Files 2/3).
+
 > ✅ **Web Core Files 7 : RÉALISÉ** (`web-nextjs/` → **446 tests**, +53). Files 7 ajoute les BFF
 > handlers et primitives UI minimales pour les actions admin quarantaine/restauration. Handlers
 > `handleQuarantineFile` + `handleRestoreFile`, routes `/api/files/[id]/quarantine` + `/restore`,

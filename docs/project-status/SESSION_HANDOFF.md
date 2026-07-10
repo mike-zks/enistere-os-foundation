@@ -313,8 +313,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-`RETRY_READY`, Expo SDK 55 ; auth/session + forms/validation + offline préparatoire + **client officiel
-`@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé**, 346 tests + bundle Metro).
+**`STARTER_EXPO_DOCTOR_GREEN`**, Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 ; expo-doctor **19/19** ; **355 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator**).
 
 ## 6. Packages
 
