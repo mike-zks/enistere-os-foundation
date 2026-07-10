@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Files 8 — E2E Playwright upload/suppression
+
+- **Web Core Files 8** (`cores/web-nextjs/e2e/`) : étend la couverture E2E navigateur aux chemins d'écriture Files. **14 tests E2E** (12 → 14, +2 nouveaux, 0 régression). Aucun changement BFF, runtime, package ni workflow.
+  - **`files.spec.ts` — upload (`Files (upload)`)** : login propriétaire → `/protected/files/upload` → formulaire `aria-label="Envoi de fichier"` → `page.setInputFiles` (PNG 1×1 `TEST_PNG_B64`, name `e2e-upload.png`, category `IMAGE`) → `<section aria-label="Fichier envoyé">` visible → nom fichier affiché → `expectNoSensitiveLeak` → liste `/protected/files` → fichier présent → navigation détail → heading `h1` correct → `expectNoSensitiveLeak`.
+  - **`files.spec.ts` — suppression (`Files (suppression)`)** : `uploadFileViaApi("e2e-delete-fixture.png")` (fixture API isolée du flux UI) → login → détail `fileId` → heading `h1` + `expectNoSensitiveLeak` → clic "Supprimer" → `role="dialog"` visible → heading `h2` "Confirmer la suppression" → texte "Cette action est irréversible" → clic "Supprimer définitivement" → `waitForURL("**/protected")` → `expectNoSensitiveLeak` → `/protected/files/${fileId}` → "Fichier introuvable" → liste `/protected/files` → fichier absent (`toHaveCount(0)`).
+  - **`helpers.ts`** : ajout `TEST_PNG_B64` (PNG 1×1 exporté), `API_URL` (interne), `uploadFileViaApi(name)` (login API Bearer → upload multipart → retourne `fileId` VALIDATED, aucun token journalisé).
+  - **Sécurité** : `expectNoSensitiveLeak` à chaque étape sensible ; aucun champ interne ni token (Bearer, URL signée) en DOM/log.
+  - **Isolement** : upload test crée `e2e-upload.png` (éphémère CI) ; delete test crée+supprime `e2e-delete-fixture.png` (net zero) ; fixture `global-setup.ts` inchangée. Tests sérialisés (`workers: 1`). Aucune dépendance inter-describe.
+  - **Vérifications** : `typecheck` ✓, `lint` ✓ (0 erreurs), `test` 446/446 ✓, `build` ✓ (20 routes dynamiques inchangées), `audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-files-8-e2e-upload-delete`.
+
 ### Web/Core Governance 1 — alignement CI requise et ADR-013
 
 - **Web/Core Governance 1** (`.github/workflows/`, `docs/`) : revue de cohérence gouvernance/CI après Web Core Files 7. **Aucun workflow modifié.** Aucun blocage fonctionnel détecté. **5 corrections documentaires.**
