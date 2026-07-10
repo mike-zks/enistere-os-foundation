@@ -1,0 +1,62 @@
+/* Divider — séparateur visuel. Décoratif par défaut (aria-hidden) ; sémantique si label.
+   Tokens border/spacing/font existants uniquement, aucun hex. */
+.enistere-divider {
+  margin: 0;
+  border: none;
+  flex-shrink: 0;
+}
+
+/* Horizontal : ligne pleine-largeur */
+.enistere-divider--horizontal {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: var(--enistere-color-border-default);
+}
+
+/* Vertical : ligne pleine-hauteur dans un flex ou grid */
+.enistere-divider--vertical {
+  display: inline-block;
+  width: 1px;
+  height: 100%;
+  align-self: stretch;
+  background-color: var(--enistere-color-border-default);
+}
+
+/* Avec label : disposition flex (ligne – texte – ligne) */
+.enistere-divider--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--enistere-spacing-3);
+  height: auto;
+  background-color: transparent;
+}
+
+.enistere-divider--labeled.enistere-divider--vertical {
+  flex-direction: column;
+  width: auto;
+  height: 100%;
+  align-self: stretch;
+}
+
+.enistere-divider__line {
+  flex: 1 1 0%;
+  height: 1px;
+  background-color: var(--enistere-color-border-default);
+}
+
+.enistere-divider--vertical .enistere-divider__line {
+  flex: 1 1 0%;
+  width: 1px;
+  height: auto;
+}
+
+.enistere-divider__label {
+  flex: none;
+  color: var(--enistere-color-foreground-muted);
+  font-family: var(--enistere-font-family-sans);
+  font-size: var(--enistere-font-size-xs);
+  font-weight: var(--enistere-font-weight-medium);
+  line-height: var(--enistere-line-height-normal);
+  white-space: nowrap;
+}

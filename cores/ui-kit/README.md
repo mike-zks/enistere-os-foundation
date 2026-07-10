@@ -1,7 +1,7 @@
 # @enistere/ui-kit
 
 > **Statut : IMPLEMENTATION_PARTIELLE.** Design tokens Enistere (ADR-008, source de vérité) **+
-> premières primitives Web accessibles** (React). **Privé / non publié** (`0.1.1`). **Pas de
+> 15 primitives Web accessibles** (React) — UI Kit V2/4/5. **Privé / non publié** (`0.1.1`). **Pas de
 > bibliothèque complète**, **pas de Tailwind/Radix/shadcn/NativeWind dans le package** (ADR-009/010 :
 > ces stacks vivent dans les cores clients ; le UI Kit reste piloté par les tokens).
 
@@ -11,7 +11,7 @@
 ne dépendent **pas** de `react-dom` (le consommateur l'a déjà), ni de Next.js, ni de React Native.
 
 > **Compatibilité React 19 (v0.1.1).** Le UI Kit est développé et **testé sous React 19** (les
-> **121 tests** passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19
+> **143 tests** passent, 0 régression) ; la peerDependency reste `react >=18`, donc **React 18 et 19
 > sont tous deux supportés**. Les primitives statiques restent consommables depuis les Server
 > Components ; `Dialog` est explicitement marqué **Client Component** (`'use client'`) car il utilise
 > des hooks pour piloter le `<dialog>` natif. Alignement vérifié avec le **Web Core Next.js** (Next 16 /
@@ -23,6 +23,7 @@ import { Alert, Card, CardHeader, CardTitle, CardContent, FormField, FormFieldLa
 import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '@enistere/ui-kit';
 import { Select } from '@enistere/ui-kit';
 import { Toast, ToastRegion } from '@enistere/ui-kit';
+import { Badge, Divider, Skeleton } from '@enistere/ui-kit';
 import '@enistere/ui-kit/styles.css'; // tokens + styles des primitives (une seule feuille)
 ```
 
@@ -32,9 +33,9 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
 <html data-theme="dark"> … </html>
 ```
 
-## Primitives Web (V2 + Web UI 1 + UI Kit 4)
+## Primitives Web (V2 + Web UI 1 + UI Kit 4 + UI Kit 5)
 
-**Douze** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
+**Quinze** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
 
 - **Button** — `variant` (primary/secondary/outline/ghost/danger), `size` (sm/md/lg), `loading`,
   `loadingText`. `type="button"` par défaut, désactivé réel en `loading` (donc pas d'`onClick`),
@@ -66,6 +67,14 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
   ARIA (`role="alert"` + `aria-live="assertive"` pour `danger` ; `role="status"` + `aria-live="polite"`
   sinon) + `aria-atomic="true"`. `ToastRegion` : conteneur positionné (6 positions top/bottom ×
   left/center/right), `aria-label="Notifications"`. **Aucun timer** — le consommateur gère le cycle de vie.
+- **Badge** — étiquette courte `<span>` inline. `variant` (neutral/info/success/warning/danger), `size`
+  (sm/md). Fond `background-muted` + couleur statut texte/bordure. `user-select:none`.
+- **Divider** — séparation `<div>`. `orientation` (horizontal/vertical). Décoratif par défaut
+  (`aria-hidden`). Avec `label` → `role="separator"` + `aria-orientation` + deux lignes flanquant
+  le libellé. Aucun enfant autorisé sans `label`.
+- **Skeleton** — placeholder de chargement `<div>`. `variant` (text/block/circle). Toujours
+  `aria-hidden="true"` (l'état de chargement est annoncé par un `role="status"` parent). Animation
+  `pulse` CSS uniquement si `prefers-reduced-motion: no-preference`.
 
 ```tsx
 <Button variant="primary" size="md" loading loadingText="Envoi…">Envoyer</Button>
@@ -210,7 +219,7 @@ nouvelle valeur cohérente.
 
 ## 18. Limites actuelles
 
-UI Kit 4 = tokens + **12 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**121 tests**, un seul runner, **0 vulnérabilité**).
+UI Kit 5 = tokens + **15 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**143 tests**, un seul runner, **0 vulnérabilité**).
 
 ## 19. Non implémenté (volontaire)
 

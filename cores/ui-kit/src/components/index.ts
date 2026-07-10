@@ -63,3 +63,12 @@ export type {
   ToastRegionProps,
   ToastRegionPosition,
 } from './toast/toast.types.js';
+
+export { Badge } from './badge/badge.js';
+export type { BadgeProps, BadgeVariant, BadgeSize } from './badge/badge.types.js';
+
+export { Divider } from './divider/divider.js';
+export type { DividerProps, DividerOrientation } from './divider/divider.types.js';
+
+export { Skeleton } from './skeleton/skeleton.js';
+export type { SkeletonProps, SkeletonVariant } from './skeleton/skeleton.types.js';

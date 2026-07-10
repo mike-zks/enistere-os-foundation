@@ -1,6 +1,6 @@
 # Primitives Web du UI Kit (V2)
 
-> Documentation légère des **9 primitives** (6 initiales + Alert/Card/FormField, Web UI 1). React
+> Documentation légère des **15 primitives** (6 initiales + Alert/Card/FormField, Web UI 1 + Dialog/Select/Toast, UI Kit 4 + Badge/Divider/Skeleton, UI Kit 5). React
 > (peerDependency `>=18`) + `import '@enistere/ui-kit/styles.css'`. Toutes : `className`, attributs HTML
 > natifs, accessibles, pilotées par les tokens, **sans logique métier ni connaissance HTTP/Auth**.
 
@@ -86,3 +86,32 @@
 - **Accessibilité** : composition lisible ; le label est associé via `htmlFor`/`id` ; aide & erreur référencées par `aria-describedby` ; `aria-invalid` sur le champ.
 - **Do** : composition explicite (cf. exemple) ; un `id` unique par aide/erreur.
 - **Don't** : ne pas cloner/écraser les enfants ; ne pas dupliquer une politique de mot de passe (validation API = autorité).
+
+## Badge
+
+- **Rôle** : étiquette sémantique courte (statut, catégorie, compteur). Élément `<span>` inline-flex.
+- **Props** : `variant` (`neutral`|`info`|`success`|`warning`|`danger`, défaut `neutral`), `size` (`sm`|`md`, défaut `md`), `children` (ReactNode), + attributs `span` natifs, `forwardRef`.
+- **Exemple** : `<Badge variant="success">Actif</Badge>`
+- **Accessibilité** : texte lisible par défaut ; le consommateur ajoute un `aria-label` si le contenu seul n'est pas suffisamment explicite hors contexte. `user-select:none` pour éviter les sélections parasites.
+- **Do** : texte court (1–3 mots) ; utiliser la variante cohérente avec la sémantique (succès → success, erreur → danger).
+- **Don't** : ne pas y mettre d'icône (hors périmètre V2) ; ne pas styliser via valeurs en dur.
+
+## Divider
+
+- **Rôle** : séparation visuelle horizontale ou verticale. Élément `<div>`.
+- **Props** : `orientation` (`horizontal`|`vertical`, défaut `horizontal`), `label?` (ReactNode — si fourni, le Divider devient un séparateur sémantique avec texte centré), + attributs `div` natifs (sauf `children`), `forwardRef`.
+- **Exemple décoratif** : `<Divider />` (pas de `role`, `aria-hidden="true"`)
+- **Exemple sémantique** : `<Divider label="OU" />` (`role="separator"`, `aria-orientation="horizontal"`, libellé centré entre deux lignes)
+- **Accessibilité** : sans `label` → `aria-hidden="true"` (décoration pure). Avec `label` → `role="separator"` + `aria-orientation`. Les lignes flanquant le label sont `aria-hidden`.
+- **Do** : utiliser `label` pour les séparateurs porteurs de sens (ex. « OU » dans un formulaire).
+- **Don't** : ne pas utiliser comme espaceur (préférer `margin`/`gap`).
+
+## Skeleton
+
+- **Rôle** : espace réservé de chargement (placeholder animé). Élément `<div>`.
+- **Props** : `variant` (`text`|`block`|`circle`, défaut `text`), + attributs `div` natifs, `forwardRef`. Dimensions ajustables via `style` (ex. `style={{ width: '120px', height: '120px' }}` pour un avatar circle).
+- **Exemple** : `<Skeleton variant="circle" style={{ width: '48px', height: '48px' }} />`
+- **Accessibilité** : toujours `aria-hidden="true"` — l'état de chargement est annoncé par un `role="status"` parent ou un `Spinner` séparé.
+- **Animation** : `@keyframes enistere-skeleton-pulse` (opacité 100→40→100 %) activée uniquement si `prefers-reduced-motion: no-preference` (animation désactivée pour les utilisateurs ayant coché « réduire les animations »).
+- **Do** : combiner avec un `Spinner` ou un `role="status"` parent pour annoncer l'état de chargement aux lecteurs d'écran.
+- **Don't** : ne pas utiliser `aria-label` sur le Skeleton (il est toujours `aria-hidden`) ; ne pas lui fournir de contenu textuel.

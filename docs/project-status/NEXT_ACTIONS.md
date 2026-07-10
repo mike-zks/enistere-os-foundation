@@ -5,6 +5,20 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton) : RÉALISÉ** (2026-07-10).
+> 3 nouvelles primitives. **12 → 15 primitives**. **121 → 143 tests** (+22, 0 régression). Aucune nouvelle
+> dépendance. CSS : uniquement `var(--enistere-*)`, classes préfixées `enistere-`. Badge : `<span>` inline,
+> `variant` (neutral/info/success/warning/danger), `size` (sm/md). Divider : `<div>` décoratif (`aria-hidden`)
+> ou sémantique avec `label` (`role="separator"` + `aria-orientation`). Skeleton : `<div>` `aria-hidden`, animation
+> pulse CSS conditionnelle `prefers-reduced-motion`. `test/components-css.test.ts` et `test/consumers/react.consumer.tsx`
+> mis à jour. `tokens:generate` régénéré, `tokens:check` up-to-date. Docs : `cores/ui-kit/docs/components.md`,
+> `cores/ui-kit/README.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `CHANGELOG.md` mis à jour.
+> `typecheck`/`lint`/`test 143/143`/`build`/`tokens:check`/`audit`/`diff --check` verts.
+>
+> **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode (précondition
+> externe : hôte macOS indisponible sur Linux). En attente de disponibilité macOS. Alternatives disponibles
+> si RN31 reste bloqué : Cloud Core CC10 (staging serveur réel), nouveaux composants UI Kit, ou Web Core follow-up.
+
 > ✅ **Web Core V1 Gap 3 — RHF + Zod UploadForm : RÉALISÉ** (2026-07-10).
 > `uploadFormSchema` Zod v4 (`upload-form-schema.ts`) : `file` (`z.instanceof(File)`, "Fichier requis."),
 > `category` (`z.enum(FILE_CATEGORY_VALUES)`, "Catégorie requise."), `subjectId` (`z.string().max(128)`
@@ -17,9 +31,7 @@
 > **Readiness V1 : 13/14 → 14/14 — V1 pleinement stable.** **450 tests** (446+4). 15 tests E2E inchangés.
 > `typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts. Branch `web-core-v1-gap-3-rhf-zod`.
 >
-> **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode (précondition
-> externe : hôte macOS indisponible sur Linux). En attente de disponibilité macOS. Alternatives disponibles
-> si RN31 reste bloqué : UI Kit 5, Cloud Core CC10 (staging serveur réel), ou autre composant UI Kit.
+> **Prochaine action UNIQUE** : **UI Kit 5** — Badge/Divider/Skeleton — réalisé (voir ci-dessus).
 
 > ✅ **Web Core V1 Gap 2 — Dashboard layout minimal : RÉALISÉ** (2026-07-10).
 > `DashboardShell` Server Component ajouté (`src/features/dashboard/dashboard-shell.tsx`) — header de

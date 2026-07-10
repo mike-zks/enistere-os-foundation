@@ -1,0 +1,52 @@
+/* Badge — étiquette de statut en ligne. Variante portée par couleur de texte + bordure, jamais couleur seule.
+   Fond neutre par défaut. Tokens existants uniquement, aucun hex. */
+.enistere-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--enistere-spacing-2);
+  border: 1px solid;
+  border-radius: var(--enistere-radius-full);
+  font-family: var(--enistere-font-family-sans);
+  font-weight: var(--enistere-font-weight-medium);
+  line-height: var(--enistere-line-height-tight);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.enistere-badge--sm {
+  font-size: var(--enistere-font-size-xs);
+}
+
+.enistere-badge--md {
+  font-size: var(--enistere-font-size-sm);
+}
+
+.enistere-badge--neutral {
+  color: var(--enistere-color-foreground-muted);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-border-default);
+}
+
+.enistere-badge--info {
+  color: var(--enistere-color-status-info);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-info);
+}
+
+.enistere-badge--success {
+  color: var(--enistere-color-status-success);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-success);
+}
+
+.enistere-badge--warning {
+  color: var(--enistere-color-status-warning);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-warning);
+}
+
+.enistere-badge--danger {
+  color: var(--enistere-color-status-danger);
+  background-color: var(--enistere-color-background-muted);
+  border-color: var(--enistere-color-status-danger);
+}
