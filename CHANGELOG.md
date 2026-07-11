@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### UI Kit V1 Readiness Review — Revue de stabilité V1
+
+- **Revue officielle** (2026-07-11) du UI Kit après UI Kit 6 et Web Core UI 2. Aucun composant ajouté, aucun token modifié.
+- **Score roadmap §12.4** : 3/4 (gap : cohérence visuelle mobile/web partielle). **Score spec §59** : 8/9 (gap : composants RN de base non implémentés).
+- **Décision** : statut `IMPLEMENTATION_PARTIELLE` → **`IMPLEMENTATION_AVANCEE`** — justifié par 19 primitives Web, 181 tests, tokens ADR-008 complets, états UI standards (LoadingState/EmptyState/ErrorState/SuccessState), consommation prouvée par Web Core VALIDE_V1.
+- **Gap bloquant VALIDE_V1** : composants React Native de base absents (différés ADR-010, à construire dans le Mobile Core).
+- **Gaps non-bloquants** : Tailwind/Radix/shadcn absents (intentionnel ADR-009), Storybook absent (différé spec §43), contrastes calculés non vérifiés (jsdom), icônes absentes (ADR futur).
+- **Prochaine mission unique** : **Mobile RN35** — aligner le starter mobile avec les états UI / UI Kit.
+- Rapport : `docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`.
+- Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
+
 ### Web Core UI 2 — Intégration des state primitives UI Kit 6
 
 - **Web Core UI 2** (`cores/web-nextjs/src/shared/components/`) : remplacement des états génériques Web par les primitives UI Kit 6. **0 régression** (450/450 tests). Aucune nouvelle dépendance, aucun changement BFF/Auth/Files/Cloud/Mobile.
