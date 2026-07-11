@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Cloud Core 10 — Staging réel HTTPS (Traefik + Let's Encrypt)
+
+- **CC10** (`cores/cloud/staging/`) : premier déploiement réel du stack complet sur serveur distant (`37.27.31.5`) avec HTTPS automatique. Supercède le schéma CC6 (ports hôte exposés).
+  - **`docker-compose.cc10.yml`** : Compose Traefik v3.0 — 4 services (`postgres:16`, `minio/minio`, `api-nestjs`, `web-nextjs`). Aucun port hôte publié. Labels Traefik sur `minio` (`s3-staging.enistere.com` → port 9000) et `web` (`staging.enistere.com` → port 3000). `extra_hosts: s3-staging.enistere.com:host-gateway` sur `api` (API → MinIO via Traefik local, sans Cloudflare). Réseau interne `staging-internal` + réseau externe `web` (Traefik existant). PostgreSQL et console MinIO (9001) non exposés.
+  - **`.env.staging.example`** : mis à jour CC10 — `S3_ENDPOINT=https://s3-staging.enistere.com` (HTTPS via Traefik), `APP_ENV=production` (cookies `__Host-` + Secure), `CORS_ORIGINS`/`WEB_ALLOWED_ORIGINS` HTTPS, Argon2 params renforcés (`memoryCost=65536`, `timeCost=3`). Ports hôte supprimés.
+  - **`CC10_STAGING_DEPLOYMENT_REPORT.md`** : rapport de déploiement (sans secrets) — architecture réseau, labels Traefik, étapes d'exécution, état des conteneurs, décisions techniques.
+  - **Seed RBAC** : 12 permissions structurelles (`files.*`, `users.read`, `roles.*`, `permissions.*`, `audit.read`) + rôles `administrator` (toutes permissions) / `user`. Script JS pur (`seed.js`) monté en volume dans le conteneur (pas de `ts-node` en prod ; `@node-rs/argon2` disponible). Idempotent.
+  - **Utilisateur test** : `admin@enistere-staging.local` / `Staging2026!`, argon2id, rôle `administrator`.
+  - **Validation bout-en-bout** : auth BFF CSRF → login **200**, `/me` **200**, `/authorization` **200** (12 permissions) ; upload PNG → MinIO **VALIDATED 200** ; URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement **200** (Cloudflare → Traefik → MinIO). **Validation complète.**
+  - **Aucun secret dans le dépôt.** `.env.staging` sur le serveur : `chmod 600`, hors dépôt.
+
 ### UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton)
 
 - **UI Kit 5** (`cores/ui-kit/src/components/`) : ajout de 3 primitives data/feedback légères. **12 → 15 primitives**. **121 → 146 tests** (+25). Aucune nouvelle dépendance, aucun Radix/shadcn/Tailwind. Toutes les CSS consomment uniquement `var(--enistere-*)`. Toutes respectent `forwardRef`, `className` natif, attributs HTML natifs, accessibilité jest-axe. Générateur `styles.css` mis à jour (`tokens:generate`).

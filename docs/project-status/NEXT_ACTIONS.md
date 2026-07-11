@@ -5,6 +5,18 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Cloud Core CC10 — Staging réel HTTPS : RÉALISÉ** (2026-07-11).
+> `docker-compose.cc10.yml` : Traefik v3.0 + Let's Encrypt HTTP-01, images `sha-5bf4c0f`, serveur `37.27.31.5`.
+> 4 conteneurs `healthy`. `staging.enistere.com` = **200 HTTPS** (Let's Encrypt valide via Cloudflare).
+> `s3-staging.enistere.com` = **200 HTTPS**. 5 migrations Prisma. Bucket MinIO privé `enistere-staging-files`.
+> Seed RBAC : 12 permissions + rôles `administrator`/`user` + utilisateur test (argon2id, JS pur via volume mount).
+> Auth BFF : CSRF → login **200**, `/me` **200**, `/authorization` **200** (12 permissions confirmées).
+> Upload PNG → MinIO **VALIDATED 200**. URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement
+> **200** (67 octets, Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.**
+>
+> **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode (précondition
+> externe : hôte macOS indisponible sur Linux).
+
 > ✅ **UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton) : RÉALISÉ** (2026-07-10).
 > 3 nouvelles primitives. **12 → 15 primitives**. **121 → 146 tests** (+25, 0 régression). Aucune nouvelle
 > dépendance. CSS : uniquement `var(--enistere-*)`, classes préfixées `enistere-`. Badge : `<span>` inline,
@@ -15,9 +27,7 @@
 > `cores/ui-kit/README.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `CHANGELOG.md` mis à jour.
 > `typecheck`/`lint`/`test 146/146`/`build`/`tokens:check`/`audit`/`diff --check` verts.
 >
-> **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode (précondition
-> externe : hôte macOS indisponible sur Linux). En attente de disponibilité macOS. Alternatives disponibles
-> si RN31 reste bloqué : Cloud Core CC10 (staging serveur réel), nouveaux composants UI Kit, ou Web Core follow-up.
+> **Prochaine action UNIQUE** : **Cloud Core CC10** — staging réel HTTPS (en cours ci-dessus).
 
 > ✅ **Web Core V1 Gap 3 — RHF + Zod UploadForm : RÉALISÉ** (2026-07-10).
 > `uploadFormSchema` Zod v4 (`upload-form-schema.ts`) : `file` (`z.instanceof(File)`, "Fichier requis."),
