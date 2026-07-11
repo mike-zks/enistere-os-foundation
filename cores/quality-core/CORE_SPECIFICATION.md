@@ -13,7 +13,11 @@ Cette spécification est documentaire. Elle ne crée pas de workflow GitHub, pas
 d'exécution destructrice, pas de dépendance, pas de configuration de package, pas de code
 applicatif et pas d'infrastructure réelle.
 
-Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 1, 2026-07-11).
+Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 2, 2026-07-11).
+
+> **Quality Core 2** ajoute `scripts/quality-gates.mjs` (Node 24, sans dépendance) :
+> sélection et exécution locale des gates qualité sûrs. Aucun workflow GitHub modifié.
+> Aucune dépendance ajoutée. Aucun changement runtime.
 
 ## 2. Rôle du core
 

@@ -1,6 +1,6 @@
 # Quality Core
 
-**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 1, 2026-07-11)
+**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 2, 2026-07-11)
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
@@ -11,9 +11,53 @@ monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les d�
 |---|---|
 | `CORE_SPECIFICATION.md` | Spécification complète : objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut |
 | `QUALITY_GATES_MATRIX.md` | Matrice gates × cores : commandes, environnements, CI existante, fréquence |
+| `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
+| `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
 | `../../docs/checklists/RELEASE_READINESS_CHECKLIST.md` | Checklist avant release / promotion de statut |
 | `../../docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md` | Checklist revue de statut d'un core |
+
+## Script quality-gates (Quality Core 2)
+
+Script Node 24 sans dépendance externe. Sélectionne et exécute les gates locaux sûrs.
+
+```bash
+# Lister les scopes disponibles
+node cores/quality-core/scripts/quality-gates.mjs list
+
+# Afficher le plan d'un scope (commandes dans l'ordre, sans exécuter)
+node cores/quality-core/scripts/quality-gates.mjs plan <scope>
+
+# Exécuter les gates du scope (arrêt au premier échec)
+node cores/quality-core/scripts/quality-gates.mjs run <scope>
+```
+
+### Scopes disponibles
+
+| Scope | Description |
+|---|---|
+| `docs` | `git diff --check` uniquement — PR docs-only |
+| `root-audit` | `npm audit` à la racine — 0 vuln requis |
+| `packages` | api-contracts + api-client-fetch : typecheck, build, generate:check, test |
+| `ui-kit` | typecheck, lint, test (181), build, tokens:check |
+| `web` | typecheck, lint, test (450), build |
+| `mobile-static` | typecheck, lint, test (367), doctor — **sans** expo export ni smoke |
+| `all-safe` | packages + ui-kit + web + root-audit — **sans** mobile, api-nestjs e2e, E2E, Cloud |
+
+### Gates explicitement exclus de `all-safe`
+
+- `mobile-static` — lancez séparément
+- `api-nestjs e2e` — PostgreSQL + MinIO requis
+- `E2E Playwright` — stack API + PG + MinIO + Chromium requise
+- `smoke:android / smoke:ios` — device ou émulateur requis
+- `Cloud / staging` — runbook CC11, non reproductibles localement
+
+### Lancer les tests du script
+
+```bash
+node --test cores/quality-core/scripts/quality-gates.test.mjs
+# 36/36 tests unitaires — vérification des plans sans exécution des commandes
+```
 
 ## Commandes existantes par core
 

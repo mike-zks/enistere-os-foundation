@@ -263,7 +263,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 1 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md`. Checklists : `docs/checklists/PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 2 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists + **`scripts/quality-gates.mjs`** (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>` ; 7 scopes ; arrêt au premier échec ; code de sortie propagé) + **`scripts/quality-gates.test.mjs`** (**36/36 tests node:test**). Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -306,7 +306,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores documentaires
 
-**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 1, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + checklists `docs/checklists/`. Core de gouvernance qualité : matrice gates × 8 cores, guide PR, règle tests Cloud, gouvernance promotion statut. Aucun workflow modifié. Aucune dépendance.
+**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 2, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists `docs/checklists/` + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Aucun workflow modifié. Aucune dépendance.
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
@@ -342,7 +342,10 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Quality Core 1 — cadrage opérationnel des gates qualité V2** (`cores/quality-core/`, `docs/checklists/`) (2026-07-11) :
+**Quality Core 2 — script local de sélection des gates qualité** (`cores/quality-core/scripts/`) (2026-07-11) :
+`scripts/quality-gates.mjs` (Node 24, sans dépendance) — `list` / `plan <scope>` / `run <scope>`. 7 scopes : `docs`, `packages`, `ui-kit`, `web`, `root-audit`, `mobile-static`, `all-safe`. Arrêt au premier échec, code de sortie propagé. Gates exclus par design : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e. `scripts/quality-gates.test.mjs` : **36/36 tests node:test** (plans vérifiés sans exécution). Vérifications : `list` ✓, `plan all-safe` ✓, `plan mobile-static` ✓, tests 36/36 ✓, `git diff --check` ✓, `npm audit` 0 vuln ✓.
+
+**Étape précédente — Quality Core 1 — cadrage opérationnel des gates qualité V2** (`cores/quality-core/`, `docs/checklists/`) (2026-07-11) :
 démarrage du Quality Core comme core de gouvernance qualité. Statut : **`SPECIFICATION_DOCUMENTAIRE`**. Fichiers créés : `CORE_SPECIFICATION.md` (objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut), `README.md` (commandes existantes par core, guide PR, responsabilités), `QUALITY_GATES_MATRIX.md` (8 cores × 11 types de gate : typecheck/lint/test/build/audit/e2e/smoke/images/doctor/tokens/openapi). Checklists : `PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`. Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime. Vérifications : `git diff --check` ✓, `npm audit` root 0 vuln ✓.
 
 **Étape précédente — UI Kit VALIDE_V1 review** (`docs/project-status/`) (2026-07-11) :

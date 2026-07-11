@@ -1,7 +1,10 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-11 (Quality Core 1).
+> Dernière mise à jour : 2026-07-11 (Quality Core 2).
+>
+> **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
+> Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `all-safe`
 >
 > Légende CI : **L1** = `ci.yml` (non-régression monorepo) ; **L2** = `api-runtime-ci.yml`
 > (runtime API : PG+MinIO) ; **L3** = `web-e2e-ci.yml` (E2E navigateur Playwright) ;
@@ -140,3 +143,33 @@
 | mobile-react-native | local RN35 2026-07-11 | 367/367 + doctor 19/19 + smoke Android verts |
 | api-nestjs | CI `main` (L2) | 386u + 101e2e verts |
 | cloud | CI `main` (L4) + staging CC10/CC11 | images GHCR + staging HTTPS validé |
+
+## 5. Script de sélection locale (Quality Core 2)
+
+Le script `cores/quality-core/scripts/quality-gates.mjs` fournit un accès programmatique aux
+gates locaux sûrs. Il ne remplace pas la CI et n'exécute jamais les gates Cloud/staging.
+
+```bash
+# Voir tous les scopes
+node cores/quality-core/scripts/quality-gates.mjs list
+
+# Voir le plan d'un scope sans l'exécuter
+node cores/quality-core/scripts/quality-gates.mjs plan all-safe
+node cores/quality-core/scripts/quality-gates.mjs plan mobile-static
+
+# Exécuter les gates d'un scope (arrêt au premier échec, code de sortie propagé)
+node cores/quality-core/scripts/quality-gates.mjs run packages
+node cores/quality-core/scripts/quality-gates.mjs run ui-kit
+```
+
+| Scope | Étapes | Gates exclus |
+|---|---|---|
+| `docs` | 1 (git diff --check) | — |
+| `root-audit` | 1 (npm audit) | — |
+| `packages` | 7 (api-contracts + api-client-fetch) | — |
+| `ui-kit` | 5 | — |
+| `web` | 4 | E2E Playwright |
+| `mobile-static` | 4 (typecheck, lint, test, doctor) | expo export, smoke:android, smoke:ios |
+| `all-safe` | 17 (packages + ui-kit + web + root-audit) | mobile, api-nestjs e2e, E2E, Cloud |
+
+Tests unitaires : `node --test cores/quality-core/scripts/quality-gates.test.mjs` — 36/36.

@@ -5,6 +5,16 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Quality Core 2 — script local de sélection des gates qualité : RÉALISÉ** (2026-07-11).
+> `scripts/quality-gates.mjs` ajouté dans `cores/quality-core/scripts/`. Node 24, sans dépendance.
+> Commandes : `list` / `plan <scope>` / `run <scope>`. 7 scopes : `docs`, `packages`, `ui-kit`, `web`, `root-audit`, `mobile-static`, `all-safe`.
+> Gates exclus par design : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e.
+> `scripts/quality-gates.test.mjs` : **36/36 tests node:test** (plans vérifiés sans exécution des commandes).
+> Vérifications : `node cores/quality-core/scripts/quality-gates.mjs list` ✅, `plan all-safe` ✅, `plan mobile-static` ✅, tests 36/36 ✅, `git diff --check` ✅, `npm audit` 0 vuln ✅.
+> Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime.
+>
+> **Prochaine action** : à décider. Candidats : Mobile Core RN31 (iOS smoke — macOS requis) ; API Core VALIDE_V1 review ; Quality Core V3 (runner CI local, intégration pre-commit).
+
 > ✅ **Quality Core 1 — cadrage opérationnel des gates qualité V2 : RÉALISÉ** (2026-07-11).
 > Démarrage de `cores/quality-core` comme core de gouvernance qualité. Statut : **`SPECIFICATION_DOCUMENTAIRE`**.
 > Fichiers créés : `CORE_SPECIFICATION.md` (objectif, périmètre V2, 4 niveaux, règle tests Cloud, gouvernance statut), `README.md` (commandes, guide PR, responsabilités), `QUALITY_GATES_MATRIX.md` (8 cores × 11 types de gate).
