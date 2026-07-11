@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-10.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-11.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -26,12 +26,13 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique, **`GET /files` liste paginée Files 5**) — **386 tests unitaires** + 101 e2e + **7 e2e Files 5** + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
-- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
+- **Avancé** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
   Badge, Divider, Skeleton — UI Kit 5 + **LoadingState, EmptyState, ErrorState, SuccessState** — UI Kit 6) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
   (**181 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
   compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
-  Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
+  Statut : **IMPLEMENTATION_AVANCEE** (depuis `IMPLEMENTATION_PARTIELLE`, revue V1 2026-07-11) ; **consommé par le Web Core VALIDE_V1**.
+  Gap bloquant VALIDE_V1 : composants React Native de base (différés ADR-010, à construire dans le Mobile Core via RN35).
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
   en-têtes sécurité + pas de `X-Powered-By`. **Intègre l'API publique (Health)** : factory serveur par
@@ -300,9 +301,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 4. Cores techniquement implémentés
 
-`cores/api-nestjs/` (avancé), `cores/ui-kit/` (starter tokens + primitives, React 19) et
-`cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + session/autorisations,
-**IMPLEMENTATION_PARTIELLE**).
+`cores/api-nestjs/` (avancé), `cores/ui-kit/` (**IMPLEMENTATION_AVANCEE** — tokens + 19 primitives Web + états UI, React 19 ; gap V1 : composants RN) et
+`cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + Files + RHF+Zod ; **VALIDE_V1** 14/14 critères §56).
 
 ## 5. Cores documentaires
 
@@ -340,14 +340,18 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Web Core UI 2 — Intégration des state primitives UI Kit 6** (`cores/web-nextjs/src/shared/components/`) :
-`LoadingState`, `EmptyState`, `ErrorState` réécrits comme wrappers minces vers UI Kit 6. Props conservées
-(rétrocompatibles). `role="status"`/`role="alert"` assurés par les primitives UI Kit. `requestId` composé
-dans `message`, `onReset` passé comme `<Button>` dans `action`. **0 régression** (450/450).
-États spécialisés conservés sans changement : `UnauthorizedState` (401), `ForbiddenState` (403),
-`ServiceUnavailableState`, `NotFoundState` (sémantique HTTP, Alert-based).
-`typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts. Aucune nouvelle dépendance.
-**Prochaine action : à décider.**
+**UI Kit V1 Readiness Review** (`docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`) :
+revue officielle du UI Kit après UI Kit 6 et Web Core UI 2. Lecture complète roadmap §12 + CORE_SPECIFICATION §59
++ ADR-008/009/010 + docs project-status. **Score : 3/4 critères §12.4 + 8/9 critères §59.**
+Décision : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`** (19 primitives Web, 181 tests, tokens complets,
+états UI, consommé par Web Core VALIDE_V1). Gap bloquant VALIDE_V1 : composants React Native de base (différés ADR-010).
+Gaps non-bloquants : Tailwind/Radix/shadcn (intentionnel ADR-009), Storybook (différé §43), contrastes calculés (jsdom),
+icônes (à trancher par ADR). Toutes les vérifications passées.
+**Prochaine action UNIQUE : Mobile RN35** — aligner le starter mobile avec les états UI / UI Kit.
+
+**Étape précédente — Web Core UI 2** (`cores/web-nextjs/src/shared/components/`) :
+`LoadingState`, `EmptyState`, `ErrorState` réécrits comme wrappers minces vers UI Kit 6.
+**0 régression** (450/450). `typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts.
 
 **Étape précédente — UI Kit 6 — State primitives** (`cores/ui-kit/`) :
 4 nouvelles primitives (`LoadingState`, `EmptyState`, `ErrorState`, `SuccessState`). **15 → 19 primitives**. **146 → 181 tests**.
