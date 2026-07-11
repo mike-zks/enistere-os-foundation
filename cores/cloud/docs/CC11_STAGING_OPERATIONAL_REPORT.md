@@ -1,6 +1,6 @@
 # CC11 — Rapport de durcissement opérationnel staging
 
-> **Cloud Core 11** | Environnement : `37.27.31.5` | Date : 2026-07-11
+> **Cloud Core 11** | Environnement : staging Enistere | Date : 2026-07-11
 >
 > **Contrainte sécurité :** aucun secret, token, credential, DATABASE_URL, cookie ou contenu
 > fichier dans ce document.
@@ -28,7 +28,7 @@ Le staging reste HTTPS fonctionnel au terme de CC11.
 
 ### 1.1 Endpoints externes
 
-Vérifiés depuis une machine extérieure (requêtes Cloudflare → Traefik → conteneurs internes) :
+Vérifiés depuis une machine extérieure (requêtes DNS/CDN → reverse proxy → conteneurs internes) :
 
 | Endpoint | Code HTTP |
 |----------|-----------|
@@ -191,7 +191,7 @@ a été appliquée avant le rollback, un restore DB (§2) est nécessaire en par
 
 ### 5.1 Contexte
 
-Compte `admin@enistere-staging.local` créé lors du seed CC10 (rôle `administrator`). Utilisé
+Compte smoke créé lors du seed CC10 (rôle `administrator`). Utilisé
 pour la validation end-to-end. Après la validation, le mot de passe est tourné pour que la
 valeur smoke ne reste pas valide indéfiniment.
 
@@ -205,7 +205,7 @@ shell persistante, `docker compose run --rm`).
 
 ```
 Rotation OK — nouveau mot de passe généré et écarté.
-Compte admin@enistere-staging.local : mot de passe tourné (valeur non conservée).
+Compte smoke staging : mot de passe tourné (valeur non conservée).
 ```
 
 Le compte existe en DB avec un hash valide inconnu. Pour un futur smoke test, relancer
@@ -237,6 +237,7 @@ la valeur en clair temporairement via une modification du script).
 
 **Prochaine action recommandée :**
 
-> **RN31** — iOS smoke parity : CI macOS, provisioning, XCTest runner.
-> Bloqueur actuel : iOS smoke non exécutable sur Linux (simulateur macOS requis).
+> **Hors Cloud réel immédiat** — poursuivre sur un core non bloqué ou une revue de cohérence.
+> RN31 reste en attente d'un hôte macOS/Xcode. Les prochains tests de déploiement Cloud réel doivent
+> être regroupés comme **gate final** avant promotion/release, sauf décision explicite de gouvernance.
 > Voir `docs/project-status/NEXT_ACTIONS.md`.

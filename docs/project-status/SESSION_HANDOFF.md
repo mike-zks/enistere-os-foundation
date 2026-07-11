@@ -80,15 +80,15 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   Dockerfiles (multi-stage, non-root) **+ CC6 staging manuel** + **CC7 dry-run** + **CC8 image API corrigée**
   (`debian-openssl-3.0.x`, `api-smoke` gate CI) **+ CC9 exécution locale** (`sha-d1e6242`, health 200) **+
   CC10 STAGING RÉEL HTTPS VALIDÉ** (`CC10_STAGING_DEPLOYMENT_REPORT.md`, `docker-compose.cc10.yml`) :
-  Traefik v3.0 + Let's Encrypt HTTP-01, images `sha-5bf4c0f`, `37.27.31.5` — **4 conteneurs `healthy`** ;
+  reverse proxy compatible Traefik + Let's Encrypt HTTP-01, images `sha-5bf4c0f`, serveur staging Enistere — **4 conteneurs `healthy`** ;
   `staging.enistere.com` **200 HTTPS** ; `s3-staging.enistere.com` **200 HTTPS** ; seed RBAC 12 permissions
   + rôles ; utilisateur test `administrator` non documenté ; **auth BFF 200** (CSRF → login → `/me` → `/authorization`) ;
   **upload PNG → MinIO VALIDATED 200** ; **URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement
-  200** (Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.**
+  200** (DNS/CDN → reverse proxy → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.**
   **+ CC11 SOCLE OPÉRATIONNEL VÉRIFIÉ** (`CC11_STAGING_OPERATIONAL_REPORT.md`, `CC11_OPERATIONAL_RUNBOOK.md`) :
   health HTTPS ×3 + TLS Let's Encrypt `Verify return code: 0` ; backup PG `staging-pg-*.sql.gz` **4.7 Ko** + restore
   validé (tous comptages) ; backup MinIO 1 fichier 67 B + restore test objet PASSED + nettoyé ; rollback
-  `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy ; rotation smoke `admin@enistere-staging.local`
+  `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy ; rotation compte smoke staging
   argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
   **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
   scan/signature image, `api-smoke` requis.
@@ -341,7 +341,7 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 ## 8. Dernière étape terminée
 
 **Cloud Core CC11 — Durcissement opérationnel staging** (`cores/cloud/`) :
-socle opérationnel du staging CC10 (`37.27.31.5`) vérifié et documenté sur 5 axes. Livrables :
+socle opérationnel du staging CC10 vérifié et documenté sur 5 axes. Livrables :
 `cores/cloud/staging/scripts/backup-postgres.sh` (pg_dump gzip horodaté `chmod 600`, credentials depuis `.env`) ;
 `cores/cloud/staging/scripts/backup-minio.sh` (`minio/mc mirror`, réseau interne, credentials depuis `.env`) ;
 `cores/cloud/staging/scripts/rotate-smoke-account.sh` (`crypto.randomBytes(32)` argon2id, valeur non conservée) ;
@@ -351,10 +351,10 @@ backup PG 4.7 Ko + restore validé tous comptages, backup MinIO 1 fichier 67 B +
 rollback `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy, rotation smoke) ;
 `cores/cloud/docs/STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md` mis à jour (annexes CC10/CC11).
 **Aucun secret dans le dépôt. Staging CC10 reste HTTPS et fonctionnel.**
-**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode — précondition externe, hôte Linux sans `xcrun`).**
+**Prochaine action : à décider hors Cloud réel immédiat. RN31 reste bloqué par précondition externe macOS/Xcode ; les prochains tests de déploiement Cloud réel doivent être regroupés comme gate final, sauf décision explicite.**
 
 **Étape précédente — Cloud Core CC10 — Staging réel HTTPS** (`cores/cloud/`) :
-`docker-compose.cc10.yml`, Traefik v3.0 + Let's Encrypt HTTP-01, `sha-5bf4c0f`, `37.27.31.5`. CI PR #73 verte.
+`docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, serveur staging Enistere. CI PR #73 verte.
 
 **Étape précédente — Web Core Files 7 — Admin BFF quarantaine/restauration** (`cores/web-nextjs/`) :
 ajoute les BFF handlers et primitives UI minimales pour consommer les capacités admin Files déjà présentes côté

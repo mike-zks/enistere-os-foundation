@@ -1,16 +1,16 @@
 # Runbook opérationnel staging (Cloud Core 11)
 
-> Gouvernance du staging CC10 (`37.27.31.5`) : vérification santé, backup, restore, rollback,
+> Gouvernance du staging CC10 : vérification santé, backup, restore, rollback,
 > rotation compte smoke. **Aucun secret dans ce document.** Exécuté le **2026-07-11**.
 >
-> Pré-requis : accès SSH `deploy@37.27.31.5`, staging CC10 en cours d'exécution, `.env.staging`
-> hors dépôt (`chmod 600`).
+> Pré-requis : accès SSH `deploy` au serveur staging Enistere, staging CC10 en cours d'exécution,
+> `.env.staging` hors dépôt (`chmod 600`).
 
 ---
 
 ## 1. Vérification de santé HTTPS
 
-### 1.1 Endpoints externes (Cloudflare → Traefik)
+### 1.1 Endpoints externes (DNS/CDN → reverse proxy)
 
 ```bash
 # Web Next.js
@@ -273,7 +273,7 @@ Après validation CC10/smoke, le mot de passe du compte de test staging est à t
 ```bash
 bash cores/cloud/staging/scripts/rotate-smoke-account.sh \
   /home/deploy/enistere-staging/.env.staging \
-  admin@enistere-staging.local
+  <smoke-account-email>
 ```
 
 Le script génère un nouveau mot de passe aléatoire (`crypto.randomBytes(32).toString('base64url')`),

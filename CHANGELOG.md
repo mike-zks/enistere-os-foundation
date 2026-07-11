@@ -8,7 +8,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ### Cloud Core 11 — Durcissement opérationnel staging
 
-- **CC11** (`cores/cloud/`) : socle opérationnel du staging CC10 (`37.27.31.5`) vérifié et documenté. **Aucun secret dans le dépôt.**
+- **CC11** (`cores/cloud/`) : socle opérationnel du staging CC10 vérifié et documenté. **Aucun secret dans le dépôt.**
   - **`backup-postgres.sh`** : script `pg_dump` via `docker exec`, gzip horodaté `staging-pg-YYYYMMDDTHHmmss.sql.gz`, `chmod 600`, credentials lus depuis `.env.staging`. Preuve : **4.7 Ko** compressé ; restore test `enistere_staging_restore` — comptages exacts (Permission 12, Role 2, User 1, RolePermission 12, UserRole 1) ; base temporaire supprimée.
   - **`backup-minio.sh`** : `minio/mc mirror` via conteneur éphémère sur `staging-internal`, credentials en variable d'environnement (jamais en argument CLI). Preuve : **1 fichier 67 B** ; restore test objet dans `restore-test/` **PASSED** ; nettoyé.
   - **`rotate-smoke-account.sh`** : `crypto.randomBytes(32).toString('base64url')` → argon2id via `.env.staging`, mise à jour Prisma via `docker compose run --rm`. Valeur en clair **non conservée** (pas de log, pas de variable shell persistante). Preuve : `Rotation OK — nouveau mot de passe généré et écarté.`
@@ -20,13 +20,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ### Cloud Core 10 — Staging réel HTTPS (Traefik + Let's Encrypt)
 
-- **CC10** (`cores/cloud/staging/`) : premier déploiement réel du stack complet sur serveur distant (`37.27.31.5`) avec HTTPS automatique. Supercède le schéma CC6 (ports hôte exposés).
-  - **`docker-compose.cc10.yml`** : Compose Traefik v3.0 — 4 services (`postgres:16`, `minio/minio`, `api-nestjs`, `web-nextjs`). Aucun port hôte publié. Labels Traefik sur `minio` (`s3-staging.enistere.com` → port 9000) et `web` (`staging.enistere.com` → port 3000). `extra_hosts: s3-staging.enistere.com:host-gateway` sur `api` (API → MinIO via Traefik local, sans Cloudflare). Réseau interne `staging-internal` + réseau externe `web` (Traefik existant). PostgreSQL et console MinIO (9001) non exposés.
+- **CC10** (`cores/cloud/staging/`) : premier déploiement réel du stack complet sur serveur staging Enistere avec HTTPS automatique. Supercède le schéma CC6 (ports hôte exposés).
+  - **`docker-compose.cc10.yml`** : Compose reverse proxy compatible Traefik — 4 services (`postgres:16`, `minio/minio`, `api-nestjs`, `web-nextjs`). Aucun port hôte publié. Labels Traefik sur `minio` (`s3-staging.enistere.com` → port 9000) et `web` (`staging.enistere.com` → port 3000). `extra_hosts: s3-staging.enistere.com:host-gateway` sur `api` (API → MinIO via reverse proxy local, sans sortie CDN). Réseau interne `staging-internal` + réseau externe `web`. PostgreSQL et console MinIO (9001) non exposés.
   - **`.env.staging.example`** : mis à jour CC10 — `S3_ENDPOINT=https://s3-staging.enistere.com` (HTTPS via Traefik), `APP_ENV=production` (cookies `__Host-` + Secure), `CORS_ORIGINS`/`WEB_ALLOWED_ORIGINS` HTTPS, Argon2 params renforcés (`memoryCost=65536`, `timeCost=3`). Ports hôte supprimés.
   - **`CC10_STAGING_DEPLOYMENT_REPORT.md`** : rapport de déploiement (sans secrets) — architecture réseau, labels Traefik, étapes d'exécution, état des conteneurs, décisions techniques.
   - **Seed RBAC** : 12 permissions structurelles (`files.*`, `users.read`, `roles.*`, `permissions.*`, `audit.read`) + rôles `administrator` (toutes permissions) / `user`. Script JS pur (`seed.js`) monté en volume dans le conteneur (pas de `ts-node` en prod ; `@node-rs/argon2` disponible). Idempotent.
   - **Utilisateur test** : compte staging `administrator` créé pour validation, identifiant et mot de passe non documentés ; rotation/suppression requise après smoke.
-  - **Validation bout-en-bout** : auth BFF CSRF → login **200**, `/me` **200**, `/authorization` **200** (12 permissions) ; upload PNG → MinIO **VALIDATED 200** ; URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement **200** (Cloudflare → Traefik → MinIO). **Validation complète.**
+  - **Validation bout-en-bout** : auth BFF CSRF → login **200**, `/me` **200**, `/authorization` **200** (12 permissions) ; upload PNG → MinIO **VALIDATED 200** ; URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement **200** (DNS/CDN → reverse proxy → MinIO). **Validation complète.**
   - **Aucun secret dans le dépôt.** `.env.staging` sur le serveur : `chmod 600`, hors dépôt.
 
 ### UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton)

@@ -1,17 +1,17 @@
 # Rapport — Staging HTTPS réel (Cloud Core 10)
 
-> **Déploiement staging réel sur serveur distant** (`37.27.31.5`) avec Docker Compose, images GHCR
-> immuables (`sha-5bf4c0f`), HTTPS via Traefik v3.0 + Let's Encrypt, DNS Cloudflare.
+> **Déploiement staging réel sur serveur Enistere** avec Docker Compose, images GHCR
+> immuables (`sha-5bf4c0f`), HTTPS via reverse proxy compatible Traefik + Let's Encrypt, DNS/CDN.
 > **Aucun secret dans ce document.** Exécuté le **2026-07-07 → 2026-07-10**.
 
 ## 1. Environnement
 
 | Paramètre | Valeur |
 |---|---|
-| Type | **Serveur distant réel** — Hetzner Cloud (`37.27.31.5`) |
+| Type | **Serveur staging Enistere** |
 | OS | Linux (Debian/Ubuntu), Docker installé |
-| Reverse proxy | **Traefik v3.0** préinstallé, écoute ports 80 / 443, réseau Docker `web` existant |
-| TLS | Let's Encrypt HTTP-01, resolver `le`, via Cloudflare proxy (orange-cloud actif) |
+| Reverse proxy | Compatible Traefik, écoute ports 80 / 443, réseau Docker `web` provisionné |
+| TLS | Let's Encrypt HTTP-01, resolver `le`, via DNS/CDN |
 | Images | `ghcr.io/mike-zks/enistere-os-foundation/{api-nestjs,web-nextjs}:sha-5bf4c0f` |
 | `latest` | **non utilisé** — tag immuable `sha-5bf4c0f` uniquement |
 | Dossier serveur | `/home/deploy/enistere-staging/` (hors dépôt — utilisateur `deploy`) |
@@ -24,11 +24,11 @@
 ```
 Internet
   ↓ HTTPS (443)
-Cloudflare (orange-cloud)
+DNS/CDN
   ↓ HTTP/HTTPS
-37.27.31.5
+Serveur staging Enistere
   ↓ ports 80/443
-Traefik v3.0 (réseau Docker "web")
+Reverse proxy Traefik-compatible (réseau Docker "web")
   ├─ staging.enistere.com  → web-nextjs:3000
   └─ s3-staging.enistere.com → minio:9000
 
@@ -41,7 +41,7 @@ Réseau interne (staging-internal) — non publié :
 **`extra_hosts: s3-staging.enistere.com:host-gateway`** : l'API résout `s3-staging.enistere.com`
 vers `172.17.0.1` (gateway Docker) → Traefik local → MinIO. Les URLs pré-signées S3 générées
 par l'API (`https://s3-staging.enistere.com/...`) sont navigables par le navigateur via
-Cloudflare → Traefik → MinIO. Aucun passage par Cloudflare depuis le conteneur API.
+DNS/CDN → reverse proxy → MinIO. Aucun passage par le CDN depuis le conteneur API.
 
 ## 3. Labels Traefik (docker-compose.cc10.yml)
 
@@ -69,9 +69,9 @@ traefik.http.services.enistere-staging.loadbalancer.server.port=3000
 
 | # | Étape | Résultat |
 |---|---|---|
-| §1 | Vérification DNS (`staging.enistere.com`, `s3-staging.enistere.com`) | ✅ Cloudflare proxy actif (IPs Cloudflare), Let's Encrypt HTTP-01 fonctionnel |
-| §2 | SSH `deploy@37.27.31.5` | ✅ Accessible, utilisateur `deploy` (non-root) |
-| §3 | Traefik v3.0 existant, ports 80/443 ouverts, réseau `web` présent | ✅ Confirmé (conteneurs et routes existants sur le serveur) |
+| §1 | Vérification DNS (`staging.enistere.com`, `s3-staging.enistere.com`) | ✅ DNS/CDN actif, Let's Encrypt HTTP-01 fonctionnel |
+| §2 | SSH utilisateur `deploy` | ✅ Accessible, utilisateur non-root |
+| §3 | Reverse proxy compatible Traefik, ports 80/443 ouverts, réseau `web` provisionné | ✅ Confirmé pour le périmètre staging Enistere |
 | §4 | Répertoire `/home/deploy/enistere-staging/` | ✅ Créé (pas de sudo nécessaire) |
 | §5 | `docker-compose.yml` déposé (copie de `docker-compose.cc10.yml`) | ✅ |
 | §6 | `.env.staging` généré (secrets `openssl rand`, `chmod 600`) | ✅ Hors dépôt, non loggué |
@@ -91,7 +91,7 @@ traefik.http.services.enistere-staging.loadbalancer.server.port=3000
 | §20 | `GET /api/auth/authorization` (RBAC) | ✅ **200** — `roles:["administrator"]`, 12 permissions confirmées |
 | §21 | `POST /api/files/upload` — upload PNG 1×1 | ✅ **200** — fichier `VALIDATED`, `id:21fdf3a3-...`, MinIO stocke dans `production/image/2026/07/` |
 | §22 | `POST /api/files/:id/download-url` — URL pré-signée | ✅ **200** — `https://s3-staging.enistere.com/enistere-staging-files/...` (TTL 300s, HMAC-SHA256) |
-| §23 | Téléchargement via URL pré-signée | ✅ **200** — 67 octets reçus (PNG identique à l'original) — Cloudflare → Traefik → MinIO |
+| §23 | Téléchargement via URL pré-signée | ✅ **200** — 67 octets reçus (PNG identique à l'original) — DNS/CDN → reverse proxy → MinIO |
 
 > **Note §15 (App Router redirect) :** Comportement attendu. Next.js App Router retourne HTTP 200
 > avec RSC `NEXT_REDIRECT` + `<meta http-equiv=refresh>` (navigation SPA) au lieu d'un 302 HTTP.
@@ -119,7 +119,7 @@ enistere-staging-web-1       ghcr.io/mike-zks/enistere-os-foundation/web-nextjs:
 | RBAC : `GET /authorization` | ✅ 200 — `administrator`, 12 permissions |
 | Upload : `POST /api/files/upload` (PNG, FormData) | ✅ 200 — `VALIDATED`, stocké dans MinIO (`production/image/...`) |
 | URL signée : `POST /api/files/:id/download-url` | ✅ 200 — `https://s3-staging.enistere.com/...` (TTL 300s) |
-| Téléchargement via URL signée | ✅ 200 — 67 octets (PNG original) via Cloudflare → Traefik → MinIO |
+| Téléchargement via URL signée | ✅ 200 — 67 octets (PNG original) via DNS/CDN → reverse proxy → MinIO |
 
 ## 7. Fichiers repo ajoutés / modifiés (CC10)
 
@@ -141,13 +141,13 @@ enistere-staging-web-1       ghcr.io/mike-zks/enistere-os-foundation/web-nextjs:
 
 ## 9. Points d'attention et décisions
 
-**Cloudflare orange-cloud + Let's Encrypt HTTP-01** : La validation HTTP-01 fonctionne car
-Cloudflare proxyfie les requêtes HTTP (port 80) vers le serveur. Les certificats sont émis
-pour `staging.enistere.com` et `s3-staging.enistere.com` sans configuration DNS-01.
+**DNS/CDN + Let's Encrypt HTTP-01** : La validation HTTP-01 fonctionne car les requêtes HTTP
+(port 80) atteignent le reverse proxy du staging. Les certificats sont émis pour
+`staging.enistere.com` et `s3-staging.enistere.com` sans configuration DNS-01.
 
 **`extra_hosts` vs réseau interne** : L'API est sur `staging-internal` uniquement (pas sur `web`).
 Elle ne peut pas résoudre `s3-staging.enistere.com` via DNS public sans `extra_hosts`. La solution
-`host-gateway` (→ `172.17.0.1`) permet à l'API d'atteindre Traefik en local (port 443) pour
+`host-gateway` permet à l'API d'atteindre le reverse proxy en local (port 443) pour
 génerer et valider des URLs pré-signées compatibles navigateur.
 
 **Supercession CC6 → CC10** : Le `docker-compose.cc10.yml` remplace le schéma avec ports hôte

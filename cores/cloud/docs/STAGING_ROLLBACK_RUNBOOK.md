@@ -66,9 +66,9 @@ cat backup-staging-<date>.sql | docker compose -f docker-compose.staging.example
 
 ### Contexte CC10/CC11
 
-CC10 a déployé sur `37.27.31.5` avec Traefik v3 + Let's Encrypt. Le runbook original
+CC10 a déployé le staging Enistere avec HTTPS via reverse proxy. Le runbook original
 utilisait des ports hôtes ; les commandes CC10/CC11 utilisent le compose `docker-compose.yml`
-(pas `docker-compose.staging.example.yml`) et le réseau interne Traefik (aucun port hôte
+(pas `docker-compose.staging.example.yml`) et le réseau proxy interne (aucun port hôte
 pour api/web).
 
 ### Tag de rollback validé
@@ -81,7 +81,7 @@ pour api/web).
 > ⚠️ **Ne pas revenir à des tags antérieurs à `sha-d1e6242`** (post-CC8) — moteur Prisma
 > OpenSSL incompatible, les images antérieures ne démarrent pas.
 
-### Procédure CC10/CC11 (serveur `37.27.31.5`)
+### Procédure CC10/CC11 (serveur staging Enistere)
 
 ```bash
 cd /home/deploy/enistere-staging

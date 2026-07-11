@@ -123,24 +123,24 @@ et un fichier de test (ex. `proof-seed-user.ts`), à **supprimer** ensuite. Ne j
 
 ---
 
-## Annexe CC10 — Déploiement HTTPS réel avec Traefik v3 (2026-07-11)
+## Annexe CC10 — Déploiement HTTPS réel avec reverse proxy compatible Traefik (2026-07-11)
 
-> CC10 remplace la configuration ports-hôtes du runbook original par Traefik v3.0 + Let's Encrypt.
+> CC10 remplace la configuration ports-hôtes du runbook original par reverse proxy compatible Traefik + Let's Encrypt.
 > Voir `docker-compose.cc10.yml` et `.env.staging.example` (CC10).
 
 ### Architecture CC10
 
 ```
-Internet → Cloudflare → 37.27.31.5:443 → Traefik v3 → réseau staging-internal
-                                          ↓
+Internet → DNS/CDN → staging.enistere.com:443 → reverse proxy → réseau staging-internal
+                                                   ↓
   staging.enistere.com   → web (Next.js)  → api (NestJS, réseau interne uniquement)
   s3-staging.enistere.com → minio (port 9000)
 ```
 
-- **Aucun port hôte** pour api/web/postgres/minio — tout passe par Traefik via le réseau `web` (external).
+- **Aucun port hôte** pour api/web/postgres/minio — tout passe par le reverse proxy via le réseau `web` (external).
 - **`extra_hosts: s3-staging.enistere.com:host-gateway`** sur l'API : le conteneur api résout
-  `s3-staging.enistere.com` vers `172.17.0.1` (gateway Docker) → Traefik local → MinIO, sans passer
-  par Cloudflare.
+  `s3-staging.enistere.com` vers la gateway Docker → reverse proxy local → MinIO, sans passer
+  par le CDN.
 - **`APP_ENV=production`** requis : active les cookies `__Host-` / `Secure` sur HTTPS.
 - **Labels Traefik** (extraits du compose CC10) :
   ```yaml
