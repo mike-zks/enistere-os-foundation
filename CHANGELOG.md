@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### UI Kit VALIDE_V1 — Promotion officielle du statut
+
+- **Promotion** : UI Kit `IMPLEMENTATION_AVANCEE` → **`VALIDE_V1`** (2026-07-11).
+- **Critères §12.4 (roadmap) 4/4** : tokens définis ✅ + 19 primitives Web utilisables ✅ + composants documentés ✅ + cohérence visuelle mobile/web prouvée par RN35 ✅.
+- **Critères §59 (spec) 9/9** : tous couverts, incl. compatibilité Mobile Core (RN35) + compatibilité Web Core Next.js (VALIDE_V1) + aucune identité projet imposée.
+- **Consommation prouvée** : Web Core VALIDE_V1 consomme Alert/Card/FormField/Dialog/Select/Toast/Badge/Divider/Skeleton/LoadingState/EmptyState/ErrorState/SuccessState. Mobile Core STARTER_UI_KIT_ALIGNED : tokens verbatim + ThemeProvider + Screen/Text/Button + LoadingView/EmptyView/ErrorView.
+- **Réserves non bloquantes documentées** (`UI_KIT_V1_READINESS_REVIEW.md` §10) : Storybook différé (spec §43), composants avancés V2/VF (19/35 liste §22 complète), composants RN dans Mobile Core (ADR-010 intentionnel), Tailwind/Radix/shadcn hors package (ADR-009 intentionnel), icônes absentes (ADR futur), contrastes jsdom.
+- Rapport : `docs/project-status/UI_KIT_V1_READINESS_REVIEW.md` §8.
+- Aucun composant ajouté, aucun token modifié.
+- Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
+
 ### Mobile RN35 — Alignement UI Kit / états UI mobile
 
 - **`cores/mobile-react-native/src/theme/tokens.ts`** : couleurs hex, typographie et radius alignés **verbatim** sur `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0). Mapping : `background.default/muted/elevated`, `foreground.default/muted/inverse`, `border.default`, `action.primary`, `status.danger/success` pour light+dark. Typographie : `heading` 30/36/700 · `title` 20/30/600 · `body` 16/24/400 · `caption` 12/18/400 (lineHeight = ratio × fontSize). Radius : `sm:4` · `md:8` · `lg:12` · `pill:9999`. Spacing inchangé (déjà aligné).

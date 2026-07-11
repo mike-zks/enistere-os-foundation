@@ -5,6 +5,16 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **UI Kit VALIDE_V1 review — RÉALISÉ** (2026-07-11).
+> Revue officielle de promotion du UI Kit de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
+> Critères §12.4 **4/4** confirmés (tokens ✅ + 19 primitives Web ✅ + docs ✅ + cohérence visuelle mobile/web ✅ RN35).
+> Critères §59 **9/9** confirmés. Consommation prouvée : Web Core VALIDE_V1 + Mobile Core STARTER_UI_KIT_ALIGNED.
+> Réserves non bloquantes documentées : Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core (ADR-010 intentionnel).
+> Rapport mis à jour : `docs/project-status/UI_KIT_V1_READINESS_REVIEW.md` §8/§10/§11.
+> Vérifications : `typecheck` ✅, `lint` ✅, `test 181/181` ✅, `build` ✅, `tokens:check` ✅, `audit` 0 vuln ✅, `git diff --check` ✅.
+>
+> **Prochaine action** : à décider. Candidats : Mobile Core RN31 (iOS smoke — macOS requis) ; Quality Core V1 (industrialisation maintenant que UI Kit et Web Core sont VALIDE_V1).
+
 > ✅ **Mobile RN35 — Alignement UI Kit / états UI mobile : RÉALISÉ** (2026-07-11).
 > Ferme le gap bloquant identifié par la revue V1 UI Kit : cohérence mobile/web prouvée par les valeurs.
 > `src/theme/tokens.ts` : couleurs hex, typographie et radius alignés verbatim sur

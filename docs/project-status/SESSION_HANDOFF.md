@@ -26,13 +26,12 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique, **`GET /files` liste paginée Files 5**) — **386 tests unitaires** + 101 e2e + **7 e2e Files 5** + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
-- **Avancé** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
+- **VALIDE_V1** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
   Badge, Divider, Skeleton — UI Kit 5 + **LoadingState, EmptyState, ErrorState, SuccessState** — UI Kit 6) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
   (**181 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
-  compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
-  Statut : **IMPLEMENTATION_AVANCEE** (depuis `IMPLEMENTATION_PARTIELLE`, revue V1 2026-07-11) ; **consommé par le Web Core VALIDE_V1**.
-  Gap bloquant VALIDE_V1 **fermé par RN35** (2026-07-11) : cohérence mobile/web prouvée par tokens verbatim + 13 tests + ThemeProvider + composants maison. Scores finaux : **§12.4 4/4 + §59 9/9**. Prêt pour VALIDE_V1 review.
+  compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel — intentionnel).
+  Statut : **VALIDE_V1** (promotion 2026-07-11 depuis `IMPLEMENTATION_AVANCEE`) ; **consommé par le Web Core VALIDE_V1** ; cohérence mobile/web prouvée par RN35 (tokens verbatim + 13 tests). §12.4 4/4 + §59 9/9. Réserves non bloquantes : Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core (ADR-010).
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
   en-têtes sécurité + pas de `X-Powered-By`. **Intègre l'API publique (Health)** : factory serveur par
@@ -301,7 +300,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 4. Cores techniquement implémentés
 
-`cores/api-nestjs/` (avancé), `cores/ui-kit/` (**IMPLEMENTATION_AVANCEE** — tokens + 19 primitives Web + états UI, React 19 ; **gap V1 fermé par RN35 : §12.4 4/4, §59 9/9** ; prêt pour VALIDE_V1 review) et
+`cores/api-nestjs/` (avancé), `cores/ui-kit/` (**VALIDE_V1** — tokens + 19 primitives Web + états UI, React 19 ; §12.4 4/4 + §59 9/9 ; cohérence mobile/web prouvée RN35) et
 `cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + Files + RHF+Zod ; **VALIDE_V1** 14/14 critères §56).
 
 ## 5. Cores documentaires
@@ -340,7 +339,10 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Mobile RN35 — Alignement UI Kit / états UI mobile** (`cores/mobile-react-native/`) (2026-07-11) :
+**UI Kit VALIDE_V1 review** (`docs/project-status/`) (2026-07-11) :
+promotion officielle du UI Kit de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`. §12.4 **4/4** (tokens ✅ + 19 primitives Web ✅ + docs ✅ + cohérence visuelle mobile/web ✅ RN35) ; §59 **9/9** ; consommation prouvée Web Core VALIDE_V1 + Mobile Core STARTER_UI_KIT_ALIGNED. Réserves non bloquantes documentées (Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core ADR-010). Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
+
+**Étape précédente — Mobile RN35 — Alignement UI Kit / états UI mobile** (`cores/mobile-react-native/`) (2026-07-11) :
 ferme le gap bloquant UI Kit V1 Readiness Review. `src/theme/tokens.ts` : couleurs hex, typographie et
 radius alignés **verbatim** sur `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0) —
 mapping `background.default/muted/elevated`, `foreground.default/muted/inverse`, `border.default`,
@@ -350,7 +352,6 @@ radius, typography, a11y, couleurs light/dark, resolveTheme). `tsconfig.test.jso
 `src/theme/tokens.ts`. `ARCHITECTURE.md` §40 : documentation complète de l'alignement.
 Scores UI Kit après RN35 : **§12.4 4/4** + **§59 9/9**. Mobile Core statut : **`STARTER_UI_KIT_ALIGNED`**.
 Vérifications : `typecheck` ✓, `lint` ✓, `test 367/367` ✓, `expo-doctor 19/19` ✓, `expo export -p ios` ✓, `npm audit` 0 vuln ✓, `git diff --check` ✓.
-**Prochaine action** : UI Kit VALIDE_V1 review — périmètre web+mobile prouvé.
 
 **Étape précédente — UI Kit V1 Readiness Review** (`docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`) :
 revue officielle du UI Kit après UI Kit 6 et Web Core UI 2. Score initial : **3/4 critères §12.4 + 8/9 critères §59.**
