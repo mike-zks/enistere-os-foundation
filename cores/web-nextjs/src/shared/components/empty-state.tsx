@@ -1,5 +1,5 @@
+import { EmptyState as UiKitEmptyState } from "@enistere/ui-kit";
 import type { ReactElement, ReactNode } from "react";
-import { Text } from "@enistere/ui-kit";
 
 export interface EmptyStateProps {
   readonly title: string;
@@ -11,21 +11,16 @@ export interface EmptyStateProps {
 }
 
 /**
- * État **vide** générique (aucune erreur). Informationnel : pas de `role` live (ce n'est ni une alerte
- * ni un statut). Aucun texte métier par défaut — `title`/`description` fournis par le consommateur.
+ * État **vide** générique — délègue à `EmptyState` du UI Kit 6.
+ * Informationnel : pas de `role` live (ce n'est ni une alerte ni un statut).
  */
 export function EmptyState({ title, description, action, inline = false }: EmptyStateProps): ReactElement {
   return (
-    <div className={inline ? "state state--empty state--inline" : "state state--empty"}>
-      <Text as="p" variant="title">
-        {title}
-      </Text>
-      {description !== undefined ? (
-        <Text as="p" variant="body" tone="muted">
-          {description}
-        </Text>
-      ) : null}
-      {action !== undefined ? <div className="state__actions">{action}</div> : null}
-    </div>
+    <UiKitEmptyState
+      title={title}
+      description={description}
+      action={action}
+      className={inline ? "state state--empty state--inline" : "state state--empty"}
+    />
   );
 }

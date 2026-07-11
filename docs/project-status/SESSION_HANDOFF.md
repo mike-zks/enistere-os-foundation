@@ -340,15 +340,17 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**UI Kit 6 — State primitives / états UI standards** (`cores/ui-kit/`) :
-4 nouvelles primitives d'état UI. **15 → 19 primitives**. **146 → 181 tests** (+35, 0 régression). Livrables :
-`loading-state/` (`<div role="status">` centré + Spinner décoratif + `message?`),
-`empty-state/` (`<div>` centré + `title` obligatoire + `description?` + `action?` slot),
-`error-state/` (`<div role="alert">` assertif + `title` + `message?` + `action?` + glyphe ✕ CSS `::before`),
-`success-state/` (`<div role="status">` poli + `title` + `message?` + `action?` + glyphe ✓ CSS `::before`).
-`test/components-css.test.ts` et `test/consumers/react.consumer.tsx` mis à jour.
-`tokens:generate` régénéré (`styles.css` up-to-date). `typecheck`/`lint`/`test 181/181`/`build`/`tokens:check`/`audit`/`diff --check` verts.
-**Prochaine action : à décider — intégration états UI Kit 6 dans le Web Core ou nouvelle mission.**
+**Web Core UI 2 — Intégration des state primitives UI Kit 6** (`cores/web-nextjs/src/shared/components/`) :
+`LoadingState`, `EmptyState`, `ErrorState` réécrits comme wrappers minces vers UI Kit 6. Props conservées
+(rétrocompatibles). `role="status"`/`role="alert"` assurés par les primitives UI Kit. `requestId` composé
+dans `message`, `onReset` passé comme `<Button>` dans `action`. **0 régression** (450/450).
+États spécialisés conservés sans changement : `UnauthorizedState` (401), `ForbiddenState` (403),
+`ServiceUnavailableState`, `NotFoundState` (sémantique HTTP, Alert-based).
+`typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts. Aucune nouvelle dépendance.
+**Prochaine action : à décider.**
+
+**Étape précédente — UI Kit 6 — State primitives** (`cores/ui-kit/`) :
+4 nouvelles primitives (`LoadingState`, `EmptyState`, `ErrorState`, `SuccessState`). **15 → 19 primitives**. **146 → 181 tests**.
 
 **Étape précédente — Cloud Core CC11 — Durcissement opérationnel staging** (`cores/cloud/`) :
 socle opérationnel du staging CC10 vérifié sur 5 axes (health HTTPS ×3, backup PG + restore, backup MinIO + restore, rollback + roll-forward, rotation smoke). Scripts + runbook + rapport versionnés. Aucun secret dans le dépôt.
