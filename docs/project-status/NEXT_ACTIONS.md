@@ -5,6 +5,15 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Governance 2 — alignement des statuts Quality Core après QC5 : RÉALISÉ** (2026-07-11).
+> Sweep documentaire ciblé après le merge de Quality Core 5 : `FOUNDATION_CURRENT_STATE.md` ne liste plus
+> `quality-core` comme dossier vide ; `SESSION_HANDOFF.md` référence maintenant Quality Core 5
+> (`RELEASE_PROCESS_RUNBOOK.md`, templates GitHub, checklists, `quality-gates.mjs`) ; la synthèse courante
+> ADR-014 est alignée sur `PARTIELLEMENT_IMPLEMENTE` (registry GHCR, sans déploiement automatique).
+> Aucun workflow, runtime, dépendance, tag ou release GitHub modifié.
+>
+> **Prochaine action** : **activer la protection de branche `main`** (action humaine — GitHub Settings → Branches, selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : **API Core VALIDE_V1 review**. RN31 reste bloqué sans macOS/Xcode.
+
 > ✅ **Quality Core 5 — release process runbook : RÉALISÉ** (2026-07-11).
 > `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` créé. 5 définitions (merge / promotion / release Foundation / staging / production). 5 types : `foundation-v1-baseline`, `core-v1-validation`, `quality-v2-increment`, `staging-candidate`, `hotfix`. Prérequis généraux (état `main`, CI, qualité locale, documentation, sécurité, Cloud). Procédure en 8 étapes. Format notes de release. Convention de tagging futur (`foundation-vX.Y.Z`, `core-web-vX.Y.Z`, `quality-v2.N`, etc.). Aucun tag créé, aucune release créée, aucun workflow modifié.
 > `docs/checklists/RELEASE_READINESS_CHECKLIST.md` : section Foundation Release (Partie 5) ajoutée.

@@ -29,7 +29,7 @@ pas une application ni une bibliothèque complète).
 | Cores documentaires | **`quality-core`** — **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11) : `CORE_SPECIFICATION.md`, `README.md`, `QUALITY_GATES_MATRIX.md` (matrice 8 cores × 11 gates), `BRANCH_PROTECTION_RUNBOOK.md` (10 noms de checks exacts), **`RELEASE_PROCESS_RUNBOOK.md`** (5 types de release, 8 étapes, format notes, convention tagging). **Templates GitHub** (QC4) : `.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/` (bug/feature/security). Checklists : `docs/checklists/` (3). Scripts : `scripts/quality-gates.mjs` (7 scopes) + `scripts/quality-gates.test.mjs` (**36/36 tests**). **Protection branche `main` : documentée, non appliquée** (action humaine requise). Aucun workflow modifié, aucune dépendance, aucun changement runtime. _(aucun autre core documentaire ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
-| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` au merge RN 3 `574cdcf` ; flux PR actif |
+| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après Quality Core 5 (`15f34ea`, PR #84) ; flux PR actif |
 
 ## 2. Principes de vérité
 
@@ -64,7 +64,8 @@ enistere-os-foundation/
     web-nextjs/        VALIDE_V1 (Next 16 + React 19 ; UI Kit + API publique + TanStack Query + BFF Auth + BFF Files + layouts public/protected + RHF+Zod UploadForm ; 14/14 critères §56 ; 450 tests + 15 E2E)
     cloud/             IMPLEMENTATION_PARTIELLE (spec + README + docs/ + CI runtime API + E2E navigateur + registry GHCR : api-runtime-ci.yml, web-e2e-ci.yml, registry-ci.yml + Dockerfiles + CC10 staging HTTPS réel)
     mobile-react-native/  STARTER_UI_KIT_ALIGNED (Expo SDK 55 + Expo Router ; primitives RN 1→25 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29/RN34B ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 sign-in RHF+Zod ; RN33 thème ; RN34 patch Expo SDK ; RN35 tokens alignés UI Kit + LoadingView/EmptyView/ErrorView + 13 tests ; typecheck/lint/test 367/367/expo-doctor 19/19/export iOS/audit verts)
-    ai-core/ api-spring/ docs-core/ mobile-flutter/ quality-core/ web-angular/   → vides
+    quality-core/      SPECIFICATION_DOCUMENTAIRE (gates, checklists, runbooks, templates, release process)
+    ai-core/ api-spring/ docs-core/ mobile-flutter/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
     api-client-fetch/  @enistere/api-client-fetch (0.1.0, privé)
@@ -86,7 +87,7 @@ enistere-os-foundation/
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `mobile-flutter` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
-| `quality-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
+| `quality-core` | oui | oui | **oui** (gouvernance documentaire : gates, checklists, runbooks, templates, release process ; 36 tests script) | **SPECIFICATION_DOCUMENTAIRE** |
 | `web-angular` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 
 **API Core NestJS** — modules présents : `config`, `database` (Prisma/PostgreSQL), `health`,
@@ -380,10 +381,11 @@ API & E2E — **sans déploiement, Docker, registry, secret ni infra réelle**. 
 durcissement CI & gouvernance de branche** (documentaire) a **figé les 7 checks** à rendre bloquants sur `main`
 (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` + `api-runtime` + `web-e2e`) et **tranché les
 politiques** : artefacts = aucun upload (Option A), couverture = exécutée non publiée, pinning = `@v4` (SHA
-futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. ADR-013 reste **partiel** (niveaux 1–3
-+ **protection de branche documentée non appliquée**), ADR-014 **non implémenté**. **Prochaine action (humaine)** :
-**appliquer** la protection de branche `main` (`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`) ; **prochaine mission** :
-**Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4). Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
+ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection de branche documentée non appliquée**) et
+ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
+**Prochaine action humaine** : appliquer la protection de branche `main` selon `BRANCH_PROTECTION_RUNBOOK.md`.
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
 

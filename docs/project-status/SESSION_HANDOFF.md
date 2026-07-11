@@ -263,19 +263,19 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 3 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (procédure activation protection `main` — 10 noms de checks exacts, 8 requis immédiats, 2 recommandés phase 2, options recommandées, checklist post-activation) + 3 checklists + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 5 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (10 noms de checks exacts) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes ; convention de tags future) + 3 checklists + templates GitHub PR/Issues + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
   Axios/Zustand) ; niveau 2 `api-runtime-ci.yml` (runtime API + e2e) ; niveau 3 `web-e2e-ci.yml` (E2E
   navigateur Playwright) ; niveau 4 partiel `registry-ci.yml` (**build + push images GHCR**). **Protection de
-  branche `main` ACTIVE** (flux PR). **Conteneurisation** : Dockerfiles API/Web (non-root) + **compose staging
+  branche `main` : documentée, non appliquée dans le repository par cette mission** (activation humaine selon `BRANCH_PROTECTION_RUNBOOK.md`). **Conteneurisation** : Dockerfiles API/Web (non-root) + **compose staging
   exemple** (CC6). **Absents** : **déploiement réel** (staging exécuté/production), environnements protégés,
   monitoring, scan/signature d'image, couverture publiée. **CC8** : un **5ᵉ workflow-job `api-smoke`** (dans
   `registry-ci.yml`) **exécute l'image API** et vérifie le moteur Prisma → **gate le push GHCR** (ferme l'angle
   mort « image jamais exécutée »). Image **Web** + image **API (corrigée, moteur 3.0.x)** bootent toutes deux.
-- **Git** : `main` sur `origin` (SSH ; **repo public** ; **branche `main` protégée → flux PR**). Commits récents
-  (via PR) : `fix(api): make docker runtime prisma engine compatible (#7)` (`d1e6242` — CC8 image API corrigée + `api-smoke`),
+- **Git** : `main` aligné sur `origin/main` après Quality Core 5 (`15f34ea`, PR #84). Flux PR actif. Commits historiques
+  (via PR) incluent : `fix(api): make docker runtime prisma engine compatible (#7)` (`d1e6242` — CC8 image API corrigée + `api-smoke`),
   `docs(cloud): prepare staging dry run (#6)` (`5118283` — CC7 dry-run),
   `docs(cloud): finalize staging integration (#5)` (`7b07e5e` — CC6B finalisé),
   `Merge PR #4 … cloud-core-6-staging` (`b001ce8` — CC6 staging intégré),
@@ -306,7 +306,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores documentaires
 
-**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 2, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists `docs/checklists/` + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Aucun workflow modifié. Aucune dépendance.
+**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Aucun workflow modifié par Quality Core. Aucune dépendance. Aucun tag ni release GitHub créé.
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
@@ -1169,8 +1169,8 @@ dans l'image) ; non-régression niveau 1 verte (307) + `npm audit` 0 vuln. **Wor
 inchangés.** Docs : `REGISTRY_POLICY.md` (→ partiel), **`GHCR_REGISTRY_GUIDE.md`** (nouveau), `.github/workflows/
 README.md`, baseline, `cores/cloud/README.md`. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 partiel
 (niveaux 1–4 partiel) ; Cloud Core reste `IMPLEMENTATION_PARTIELLE`. `cores/*/src`/`packages`/`docs/adr`/
-`strategy` **non modifiés** (hors `next.config.ts`, config build testée). **Repo désormais public** + **protection
-de branche `main` ACTIVE** (la PR a été exigée). Commit `ci(cloud): add ghcr registry workflow` (`cf7873c`)
+`strategy` **non modifiés** (hors `next.config.ts`, config build testée). **Repo public** + **flux PR observé**
+(la PR a été exigée ; protection formelle de branche ensuite documentée par Quality Core 3). Commit `ci(cloud): add ghcr registry workflow` (`cf7873c`)
 **mergé via PR #1** (squash → `b41a953`), puis **Cloud Core 5B** (vérification) **mergé via PR #2** (merge commit
 → `b41a953..bfd33dc` sur `main`). **Cloud Core 5B : VALIDÉ — observation réelle effectuée** (repo **public** →
 API GitHub Actions lisible + `docker manifest inspect` anonyme ; `gh` non installé mais non nécessaire) :

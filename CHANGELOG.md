@@ -6,6 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Governance 2 — Alignement des statuts Quality Core après QC5
+
+- `FOUNDATION_CURRENT_STATE.md` : correction des vues synthétiques qui listaient encore `quality-core` comme dossier vide ; le core est désormais cohérentement indiqué `SPECIFICATION_DOCUMENTAIRE` avec QC5.
+- `SESSION_HANDOFF.md` : alignement des paragraphes de reprise sur Quality Core 5 (`RELEASE_PROCESS_RUNBOOK.md`, templates, checklists, `quality-gates.mjs`) et retrait d'une affirmation contradictoire de protection de branche active.
+- Correction de la synthèse courante ADR-014 : registry GHCR = `PARTIELLEMENT_IMPLEMENTE`, sans déploiement automatique.
+- Aucun workflow, runtime, dépendance, tag ou release GitHub modifié.
+
 ### Quality Core 5 — Release process runbook
 
 - **`cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`** (nouveau) : processus de release gouverné pour Enistere OS Foundation.
