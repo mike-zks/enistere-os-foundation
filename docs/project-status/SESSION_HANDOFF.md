@@ -75,27 +75,17 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public/Health +
   authentifié/BFF Auth login/refresh/logout/me/authorization)** dans le Web Core ; types Auth dérivés via
   `SchemaOf<>` (`UserProfileResponseDto`, `AuthorizationSummaryResponseDto`) — preuve API réelle.
-- **Cloud Core** : **`IMPLEMENTATION_PARTIELLE`** — spec + README + `docs/` (CC1 cadrage : baseline, environnements,
-  checklist protection de branche, politique CI 4 niveaux, secrets/registry, plans) **+ CC2 : CI runtime API**
-  `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit + e2e, openapi:check) **+ CC3 : CI E2E
-  navigateur** `web-e2e-ci.yml` + `cores/web-nextjs/e2e/` (Playwright/Chromium ; stack réelle API+PG+MinIO+Web ;
-  parcours **Health/Auth/Files** ; **14 tests E2E** dont 5 nouveaux Web Core Files 5 pour `/protected/files` + **2 nouveaux Web Core Files 8** upload+suppression) **+ CC5 : registry GHCR** `registry-ci.yml` + **Dockerfiles** API/Web
-  (multi-stage, non-root, Web **standalone**) — build PR sans push, **push images GHCR sur `main`** (tags
-  immuables, labels OCI, `GITHUB_TOKEN`, **sans déploiement/secret/PAT/`.env`**) — **VALIDÉ** (Registry CI verte
-  sur `main`, **images GHCR publiques** `api-nestjs`/`web-nextjs` tags `main-`/`sha-`, aucun `latest`) **+ CC6 :
-  staging manuel** `cores/cloud/staging/` (compose+`.env` **exemples** + runbooks déploiement/rollback) **+ CC7 :
-  dry-run staging contrôlé** (`STAGING_DRY_RUN_REPORT.md`) — **dry-run local réel** ayant révélé que l'image API
-  ne démarrait pas (moteur Prisma OpenSSL 1.1.x vs runtime bookworm 3.0.x) **+ CC8 : image API CORRIGÉE**
-  (`binaryTargets debian-openssl-3.0.x` au schéma + `openssl` au stage build → moteur 3.0.x) **re-validée**
-  (migrations **depuis l'image** offline, API/Web **`healthy`**, `/health/live`+`/health/ready`+`/`=200) **+ angle
-  mort CI fermé** (job **`api-smoke`** dans `registry-ci.yml` → gate du push GHCR) → **déploiement staging =
-  `DRY_RUN_API_IMAGE_FIXED`** ; **migrations Option A** (depuis l'image) **+ CC9 : exécution staging contrôlée
-  LOCALE** (`STAGING_EXECUTION_REPORT.md`) — stack réelle (images corrigées `sha-d1e6242`) en **Type D local** :
-  health 200, endpoint MinIO **Option A joignable** ; ⚠️ **URL signée bout-en-bout + Auth/Files non validés**
-  (pas d'utilisateur ; pas de serveur réel/HTTPS) → **`EXECUTION_LOCALE_CONTROLEE`**. **Quatre workflows CI**
-  (niveaux 1–4 partiel) **+ cadrage + dry-run + fix image + exécution locale staging**. **Restent** : **serveur
-  staging RÉEL** (HTTPS/DNS/pare-feu — **CC10**), **URL signée + Auth/Files en réel**, environnements protégés,
-  monitoring, rollback **automatisé**, scan/signature d'image, `api-smoke` à rendre **requis**.
+- **Cloud Core** : **`IMPLEMENTATION_PARTIELLE`** — spec + README + `docs/` (CC1 cadrage) **+ CC2 CI runtime API**
+  `api-runtime-ci.yml` **+ CC3 CI E2E navigateur** `web-e2e-ci.yml` + **CC5 registry GHCR** `registry-ci.yml` +
+  Dockerfiles (multi-stage, non-root) **+ CC6 staging manuel** + **CC7 dry-run** + **CC8 image API corrigée**
+  (`debian-openssl-3.0.x`, `api-smoke` gate CI) **+ CC9 exécution locale** (`sha-d1e6242`, health 200) **+
+  CC10 STAGING RÉEL HTTPS VALIDÉ** (`CC10_STAGING_DEPLOYMENT_REPORT.md`, `docker-compose.cc10.yml`) :
+  Traefik v3.0 + Let's Encrypt HTTP-01, images `sha-5bf4c0f`, `37.27.31.5` — **4 conteneurs `healthy`** ;
+  `staging.enistere.com` **200 HTTPS** ; `s3-staging.enistere.com` **200 HTTPS** ; seed RBAC 12 permissions
+  + rôles ; utilisateur test `administrator` non documenté ; **auth BFF 200** (CSRF → login → `/me` → `/authorization`) ;
+  **upload PNG → MinIO VALIDATED 200** ; **URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement
+  200** (Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.** **Restent** :
+  environnements protégés, monitoring, rollback automatisé, scan/signature image, `api-smoke` requis.
 - **Socle mobile Expo doctor green + smoke Android validé** : `mobile-react-native` → **`STARTER_EXPO_DOCTOR_GREEN`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;

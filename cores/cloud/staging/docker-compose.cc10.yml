@@ -1,0 +1,128 @@
+# Cloud Core 10 — STAGING RÉEL (Traefik v3 + Let's Encrypt).
+# Remplace docker-compose.staging.example.yml pour les déploiements avec reverse-proxy existant.
+# Traefik (réseau "web") gère TLS + routing ; les services ne publient PAS de ports hôte.
+# Lancer : docker compose --env-file .env.staging -f docker-compose.cc10.yml up -d
+# Migrations SÉPARÉES : docker compose --env-file .env.staging -f docker-compose.cc10.yml run --rm api npx prisma migrate deploy
+
+name: enistere-staging
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [staging-internal]
+    # PostgreSQL NON exposé (réseau interne uniquement).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - miniodata:/data
+    networks: [staging-internal, web]
+    # Pas de ports hôte — Traefik route s3-staging.enistere.com → port 9000.
+    # Console MinIO (9001) NON exposée.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.enistere-minio.rule=Host(`s3-staging.enistere.com`)"
+      - "traefik.http.routers.enistere-minio.entrypoints=websecure"
+      - "traefik.http.routers.enistere-minio.tls.certresolver=le"
+      - "traefik.http.services.enistere-minio.loadbalancer.server.port=9000"
+
+  api:
+    image: ${GHCR_API_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: "3000"
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL}
+      REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL}
+      REFRESH_TOKEN_HASH_SECRET: ${REFRESH_TOKEN_HASH_SECRET}
+      ARGON2_MEMORY_COST: ${ARGON2_MEMORY_COST}
+      ARGON2_TIME_COST: ${ARGON2_TIME_COST}
+      ARGON2_PARALLELISM: ${ARGON2_PARALLELISM}
+      FILE_MAX_SIZE_BYTES: ${FILE_MAX_SIZE_BYTES}
+      FILE_ORIGINAL_NAME_MAX_LENGTH: ${FILE_ORIGINAL_NAME_MAX_LENGTH}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_REGION: ${S3_REGION}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE}
+      FILES_SIGNED_READ_URL_TTL_SECONDS: ${FILES_SIGNED_READ_URL_TTL_SECONDS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_PRETTY: ${LOG_PRETTY}
+      SERVICE_NAME: ${SERVICE_NAME}
+    networks: [staging-internal]
+    # extra_hosts : contourne Cloudflare pour S3_ENDPOINT → Traefik en local (via docker0 gateway).
+    # L'API atteint MinIO via Traefik sur l'interface hôte sans sortir sur internet.
+    extra_hosts:
+      - "s3-staging.enistere.com:host-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health/ready',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  web:
+    image: ${GHCR_WEB_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      APP_ENV: ${APP_ENV}
+      API_INTERNAL_URL: ${API_INTERNAL_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      WEB_ALLOWED_ORIGINS: ${WEB_ALLOWED_ORIGINS}
+    networks: [staging-internal, web]
+    # Pas de ports hôte — Traefik route staging.enistere.com → port 3000.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.enistere-staging.rule=Host(`staging.enistere.com`)"
+      - "traefik.http.routers.enistere-staging.entrypoints=websecure"
+      - "traefik.http.routers.enistere-staging.tls.certresolver=le"
+      - "traefik.http.services.enistere-staging.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+networks:
+  staging-internal:
+    driver: bridge
+  web:
+    external: true   # réseau Traefik existant
+
+volumes:
+  pgdata:
+  miniodata:
