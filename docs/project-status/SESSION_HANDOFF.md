@@ -263,13 +263,13 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 5 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (10 noms de checks exacts) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes ; convention de tags future) + 3 checklists + templates GitHub PR/Issues + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
+- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Governance 3 / Quality Core 5 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 10 checks documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes ; convention de tags future) + 3 checklists + templates GitHub PR/Issues + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; les 2 checks `images` restent recommandés phase 2. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
   Axios/Zustand) ; niveau 2 `api-runtime-ci.yml` (runtime API + e2e) ; niveau 3 `web-e2e-ci.yml` (E2E
-  navigateur Playwright) ; niveau 4 partiel `registry-ci.yml` (**build + push images GHCR**). **Protection de
-  branche `main` : documentée, non appliquée dans le repository par cette mission** (activation humaine selon `BRANCH_PROTECTION_RUNBOOK.md`). **Conteneurisation** : Dockerfiles API/Web (non-root) + **compose staging
+  navigateur Playwright) ; niveau 4 partiel `registry-ci.yml` (**build + push images GHCR**). **Protection
+  `main` active via GitHub Rulesets** (`protect-main`, enforcement `active`, PR obligatoire, 8 checks requis). **Conteneurisation** : Dockerfiles API/Web (non-root) + **compose staging
   exemple** (CC6). **Absents** : **déploiement réel** (staging exécuté/production), environnements protégés,
   monitoring, scan/signature d'image, couverture publiée. **CC8** : un **5ᵉ workflow-job `api-smoke`** (dans
   `registry-ci.yml`) **exécute l'image API** et vérifie le moteur Prisma → **gate le push GHCR** (ferme l'angle
@@ -306,7 +306,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores documentaires
 
-**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Aucun workflow modifié par Quality Core. Aucune dépendance. Aucun tag ni release GitHub créé.
+**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Governance 3 / Quality Core 5, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Protection `main` active via ruleset `protect-main`. Aucun workflow modifié par Quality Core. Aucune dépendance. Aucun tag ni release GitHub créé.
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
@@ -336,7 +336,7 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 (types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
 ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
 `ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
-restent branch protection (**documentée — 10 checks — non appliquée**, humain — runbook `BRANCH_PROTECTION_RUNBOOK.md`), couverture, release, déploiement,
+protection `main` active via ruleset `protect-main` (8 checks requis) ; restent couverture, release, déploiement,
 environnements. **ADR-014 (registry)** : **`PARTIELLEMENT_IMPLEMENTE`** (CC5 — build + push GHCR sur `main`,
 Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
@@ -349,7 +349,7 @@ processus de release gouverné. **5 définitions** : merge (technique), promotio
 modernisation des templates GitHub (PR : Quality Gates / hors périmètre / sécurité / gouvernance ; bug / feature / security : core, roadmap, impact, canal privé). `config.yml` Security Advisories. Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
 
 **Étape précédente — Quality Core 3 — runbook de protection de branche et checks requis** (`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`) (2026-07-11) :
-procédure complète d'activation manuelle de la protection de branche `main`. **10 checks requis documentés avec noms exacts** : L1 (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`), L2 (`api-runtime`), L3 (`web-e2e`), L4 (`api-smoke`, `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)`, `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)`). Classification : 8 requis immédiatement, 2 recommandés phase 2, 3 non requis. Statut : **documenté, non appliqué** (action humaine — GitHub Settings → Branches). Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
+procédure complète d'activation manuelle de la protection de branche `main`. **10 checks documentés avec noms exacts** : L1 (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`), L2 (`api-runtime`), L3 (`web-e2e`), L4 (`api-smoke`, `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)`, `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)`). Statut courant après Governance 3 : **activé via GitHub Rulesets** (`protect-main`) avec 8 checks requis ; les deux checks `images` restent recommandés phase 2. Vérifications QC3 : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
 
 **Étape précédente — Quality Core 2 — script local de sélection des gates qualité** (`cores/quality-core/scripts/`) (2026-07-11) :
 `scripts/quality-gates.mjs` (Node 24, sans dépendance) — `list` / `plan <scope>` / `run <scope>`. 7 scopes : `docs`, `packages`, `ui-kit`, `web`, `root-audit`, `mobile-static`, `all-safe`. Arrêt au premier échec, code de sortie propagé. Gates exclus par design : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e. `scripts/quality-gates.test.mjs` : **36/36 tests node:test** (plans vérifiés sans exécution). Vérifications : `list` ✓, `plan all-safe` ✓, `plan mobile-static` ✓, tests 36/36 ✓, `git diff --check` ✓, `npm audit` 0 vuln ✓.
@@ -1203,7 +1203,7 @@ modifiés). Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ; ADR-013 **partiel*
 branche **documentée non appliquée**) ; ADR-014 **`NON_IMPLEMENTE`**. `cores/*/src`/`packages`/`docs/adr`/
 `strategy` **non modifiés**. Commit `docs(cloud): harden ci governance`. **Prochaine action (humaine)** :
 appliquer la protection de branche `main` ; **prochaine mission** : **Cloud Core 5 — Registry GHCR sans
-déploiement**.
+déploiement**. **Note actuelle** : depuis Governance 3, la protection `main` est active via GitHub Rulesets.
 
 **Étape précédente — Cloud Core 3 — CI E2E navigateur (niveau 3)** (`.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/`) :
 implémente le **niveau 3** — un workflow démarrant une **stack réelle et éphémère** (PostgreSQL `services:` +

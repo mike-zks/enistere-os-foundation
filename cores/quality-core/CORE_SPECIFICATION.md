@@ -13,7 +13,13 @@ Cette spécification est documentaire. Elle ne crée pas de workflow GitHub, pas
 d'exécution destructrice, pas de dépendance, pas de configuration de package, pas de code
 applicatif et pas d'infrastructure réelle.
 
-Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11).
+Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Governance 3, 2026-07-11).
+
+> **Governance 3** constate l'activation réelle de la protection de `main` via GitHub
+> Rulesets : ruleset `protect-main`, enforcement `active`, Pull Request obligatoire,
+> suppression/non-fast-forward interdits, conversations résolues obligatoires, 8 status
+> checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`,
+> `api-runtime`, `web-e2e`, `api-smoke`). Les jobs `images` restent recommandés phase 2.
 
 > **Quality Core 5** ajoute `RELEASE_PROCESS_RUNBOOK.md` : processus de release gouverné —
 > 5 définitions (merge / promotion / release Foundation / staging / production), 5 types de release,
@@ -26,8 +32,8 @@ Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11).
 > Aucun changement runtime.
 
 > **Quality Core 3** ajoute `BRANCH_PROTECTION_RUNBOOK.md` : procédure d'activation manuelle
-> de la protection de branche `main`, 10 noms de checks exacts (L1–L4). Statut : documenté,
-> non appliqué.
+> de la protection de branche `main`, 10 noms de checks exacts (L1–L4). Statut historique :
+> documenté ; statut courant : appliqué via GitHub Rulesets (Governance 3).
 
 > **Quality Core 2** ajoute `scripts/quality-gates.mjs` (Node 24, sans dépendance) :
 > sélection et exécution locale des gates qualité sûrs. Aucun workflow GitHub modifié.

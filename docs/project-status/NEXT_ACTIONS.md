@@ -5,6 +5,16 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Governance 3 — protection `main` vérifiée active via GitHub Rulesets : RÉALISÉ** (2026-07-11).
+> Preuve GitHub : `protect-main` (`ruleset_id=17522775`), target `branch`, enforcement `active`, conditions
+> `~DEFAULT_BRANCH`. Règles : suppression interdite, non-fast-forward interdit, Pull Request obligatoire,
+> conversations résolues obligatoires, status checks stricts. Checks requis actifs : `api-contracts`,
+> `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`.
+> Les deux checks `images (...)` ne sont pas requis actuellement ; ils restent recommandés phase 2.
+>
+> **Prochaine action** : **API Core VALIDE_V1 review**. RN31 reste bloqué sans macOS/Xcode. Alternative gouvernance :
+> décider si les deux checks `images` doivent devenir requis dans le ruleset.
+
 > ✅ **Governance 2 — alignement des statuts Quality Core après QC5 : RÉALISÉ** (2026-07-11).
 > Sweep documentaire ciblé après le merge de Quality Core 5 : `FOUNDATION_CURRENT_STATE.md` ne liste plus
 > `quality-core` comme dossier vide ; `SESSION_HANDOFF.md` référence maintenant Quality Core 5
@@ -12,14 +22,14 @@
 > ADR-014 est alignée sur `PARTIELLEMENT_IMPLEMENTE` (registry GHCR, sans déploiement automatique).
 > Aucun workflow, runtime, dépendance, tag ou release GitHub modifié.
 >
-> **Prochaine action** : **activer la protection de branche `main`** (action humaine — GitHub Settings → Branches, selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : **API Core VALIDE_V1 review**. RN31 reste bloqué sans macOS/Xcode.
+> **Historique** : cette prochaine action était l'activation de la protection de branche ; Governance 3 confirme qu'elle est active via GitHub Rulesets.
 
 > ✅ **Quality Core 5 — release process runbook : RÉALISÉ** (2026-07-11).
 > `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` créé. 5 définitions (merge / promotion / release Foundation / staging / production). 5 types : `foundation-v1-baseline`, `core-v1-validation`, `quality-v2-increment`, `staging-candidate`, `hotfix`. Prérequis généraux (état `main`, CI, qualité locale, documentation, sécurité, Cloud). Procédure en 8 étapes. Format notes de release. Convention de tagging futur (`foundation-vX.Y.Z`, `core-web-vX.Y.Z`, `quality-v2.N`, etc.). Aucun tag créé, aucune release créée, aucun workflow modifié.
 > `docs/checklists/RELEASE_READINESS_CHECKLIST.md` : section Foundation Release (Partie 5) ajoutée.
 > Vérifications : `git diff --check` ✅, `npm audit` 0 vuln ✅, `plan docs` ✅, `test 36/36` ✅.
 >
-> **Prochaine action** : **activer la protection de branche `main`** (action humaine — GitHub Settings → Branches, selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : Mobile Core RN31 (iOS smoke — macOS requis) ou API Core VALIDE_V1 review.
+> **Historique** : cette prochaine action était l'activation de la protection de branche ; Governance 3 confirme qu'elle est active via GitHub Rulesets.
 
 > ✅ **Quality Core 4 — alignement templates PR / Issues avec Quality Core : RÉALISÉ** (2026-07-11).
 > `.github/PULL_REQUEST_TEMPLATE.md` modernisé : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance.
@@ -28,15 +38,15 @@
 > Vérifications : `git diff --check` ✅, `npm audit` 0 vuln ✅, `plan docs` ✅, `test 36/36` ✅.
 > Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime.
 >
-> **Prochaine action** : **activer la protection de branche `main`** (action humaine — GitHub Settings → Branches, selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : Mobile Core RN31 (iOS smoke — macOS requis).
+> **Historique** : cette prochaine action était l'activation de la protection de branche ; Governance 3 confirme qu'elle est active via GitHub Rulesets.
 
 > ✅ **Quality Core 3 — runbook de protection de branche et checks requis : RÉALISÉ** (2026-07-11).
 > `BRANCH_PROTECTION_RUNBOOK.md` créé dans `cores/quality-core/`. Procédure manuelle complète :
 > branche cible `main`, 10 noms de checks exacts (8 requis immédiats : `api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit`/`api-runtime`/`web-e2e`/`api-smoke` ; 2 recommandés phase 2 : `images (api-nestjs, …)` / `images (web-nextjs, …)`), options recommandées, checklist post-activation. `.github/workflows/README.md` mis à jour.
-> **Protection branche `main` : documentée, non appliquée** — action humaine requise.
+> **Protection branche `main` : activée depuis Governance 3 via GitHub Rulesets** (`protect-main`, 8 checks requis).
 > Vérifications : `git diff --check` ✅, `npm audit` 0 vuln ✅, `plan docs` ✅, `test 36/36` ✅.
 >
-> **Prochaine action** : **activer la protection de branche `main`** (action humaine — 5 min dans GitHub Settings → Branches, selon `BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : Mobile Core RN31 (iOS smoke — macOS requis).
+> **Historique** : cette prochaine action était l'activation de la protection de branche ; Governance 3 confirme qu'elle est active via GitHub Rulesets.
 
 > ✅ **Quality Core 2 — script local de sélection des gates qualité : RÉALISÉ** (2026-07-11).
 > `scripts/quality-gates.mjs` ajouté dans `cores/quality-core/scripts/`. Node 24, sans dépendance.

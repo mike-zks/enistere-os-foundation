@@ -118,21 +118,21 @@
 
 ## 3. Résumé des checks requis sur `main` (branch protection — ADR-013, CC4 / Quality Core 3)
 
-> **Statut courant : documenté, non appliqué.**
-> Procédure d'activation : `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`
+> **Statut courant : activé via GitHub Rulesets** (`protect-main`, enforcement `active`, 2026-07-11).
+> Preuve : `gh api repos/mike-zks/enistere-os-foundation/rulesets/17522775`.
 
-| # | Nom exact du check | Workflow | Phase |
+| # | Nom exact du check | Workflow | Statut ruleset |
 |---|---|---|---|
-| 1 | `api-contracts` | `ci.yml` | requis immédiat |
-| 2 | `api-client-fetch` | `ci.yml` | requis immédiat |
-| 3 | `ui-kit` | `ci.yml` | requis immédiat |
-| 4 | `web-nextjs` | `ci.yml` | requis immédiat |
-| 5 | `audit` | `ci.yml` | requis immédiat |
-| 6 | `api-runtime` | `api-runtime-ci.yml` | requis immédiat |
-| 7 | `web-e2e` | `web-e2e-ci.yml` | requis immédiat |
-| 8 | `api-smoke` | `registry-ci.yml` | requis immédiat |
-| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
-| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
+| 1 | `api-contracts` | `ci.yml` | requis |
+| 2 | `api-client-fetch` | `ci.yml` | requis |
+| 3 | `ui-kit` | `ci.yml` | requis |
+| 4 | `web-nextjs` | `ci.yml` | requis |
+| 5 | `audit` | `ci.yml` | requis |
+| 6 | `api-runtime` | `api-runtime-ci.yml` | requis |
+| 7 | `web-e2e` | `web-e2e-ci.yml` | requis |
+| 8 | `api-smoke` | `registry-ci.yml` | requis |
+| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
+| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
 
 > Les noms de checks correspondent au **`name:` du job** dans le YAML (jamais au `name:` du workflow).
 > Renommer un job casse l'exigence. Le runbook `BRANCH_PROTECTION_RUNBOOK.md` contient la procédure

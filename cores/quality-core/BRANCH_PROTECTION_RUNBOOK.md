@@ -1,13 +1,13 @@
 # BRANCH_PROTECTION_RUNBOOK.md — Procédure d'activation de la protection de branche `main`
 
-> **Statut courant : documenté, non appliqué.**
-> La protection de branche est documentée (Cloud Core 4, ADR-013) mais non activée :
-> son application est une action humaine requise dans l'interface GitHub.
+> **Statut courant : ACTIVÉ via GitHub Rulesets** (Governance 3, 2026-07-11).
+> Ruleset repository `protect-main` actif sur la branche par défaut (`~DEFAULT_BRANCH`).
+> Vérification : `gh api repos/mike-zks/enistere-os-foundation/rulesets/17522775`.
 >
 > Ce runbook décrit la procédure exacte, les noms de checks exacts, les options recommandées
 > et la checklist de vérification post-activation.
 >
-> Dernière mise à jour : 2026-07-11 (Quality Core 3).
+> Dernière mise à jour : 2026-07-11 (Governance 3).
 
 ---
 
@@ -248,12 +248,17 @@ Si un check apparaît avec un nom inattendu :
 
 ### 6.4 Documenter l'activation
 
-Si la protection est activée, mettre à jour :
+Activation réalisée via GitHub Rulesets :
 
-- `docs/project-status/IMPLEMENTATION_MATRIX.md` — ligne ADR-013 : "protection de branche appliquée" avec date
-- `docs/project-status/FOUNDATION_CURRENT_STATE.md` — ligne CI/CD
-- `CHANGELOG.md` — entrée dans `[Unreleased]`
-- Ce runbook — remplacer "documenté, non appliqué" par "ACTIVÉ (date)" dans l'en-tête
+- Ruleset : `protect-main`
+- Target : `branch`
+- Conditions : branche par défaut (`~DEFAULT_BRANCH`)
+- Enforcement : `active`
+- Règles : suppression interdite, non-fast-forward interdit, Pull Request obligatoire,
+  conversations résolues obligatoires, status checks requis en mode strict.
+- Checks requis actifs : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`,
+  `audit`, `api-runtime`, `web-e2e`, `api-smoke`.
+- Checks images : non requis dans le ruleset actuel, restent recommandés phase 2.
 
 ### 6.5 Supprimer la branche de test
 
@@ -286,14 +291,14 @@ La protection de branche **ne requiert aucun nouveau secret** car :
 | CI Niveau 2 (`api-runtime-ci.yml`) | ✅ IMPLANTÉ |
 | CI Niveau 3 (`web-e2e-ci.yml`) | ✅ IMPLANTÉ |
 | CI Niveau 4 partiel (`registry-ci.yml`) | ✅ IMPLANTÉ (sans déploiement) |
-| Protection de branche `main` | ⏳ **DOCUMENTÉ, NON APPLIQUÉ** — action humaine requise |
+| Protection de branche `main` | ✅ **ACTIVÉE** — GitHub Ruleset `protect-main`, enforcement `active`, 8 checks requis |
 | Couverture publiée | ❌ Non commencé |
 | Release / versioning | ❌ Non commencé |
 | Déploiement par environnement | ❌ Non commencé |
 
-> La protection de branche est **la prochaine étape concrète et sans risque** d'ADR-013.
-> Elle ne nécessite aucun code, aucune dépendance, aucun secret, aucun budget.
-> C'est une action de 5 minutes dans l'interface GitHub.
+> La protection de branche est désormais appliquée via GitHub Rulesets.
+> Les prochaines évolutions possibles sont : rendre les deux checks `images` requis,
+> ajouter des approbations obligatoires, ou documenter une procédure de hotfix.
 
 ---
 

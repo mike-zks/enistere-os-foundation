@@ -1,6 +1,9 @@
 # Quality Core
 
-**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 5, 2026-07-11)
+**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Governance 3, 2026-07-11)
+
+Protection `main` : **active via GitHub Rulesets** (`protect-main`, enforcement `active`) avec
+8 status checks requis. Voir `BRANCH_PROTECTION_RUNBOOK.md`.
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
@@ -11,7 +14,7 @@ monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les d�
 |---|---|
 | `CORE_SPECIFICATION.md` | Spécification complète : objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut |
 | `QUALITY_GATES_MATRIX.md` | Matrice gates × cores : commandes, environnements, CI existante, fréquence |
-| `BRANCH_PROTECTION_RUNBOOK.md` | **Procédure d'activation manuelle** de la protection de branche `main` — noms exacts des 10 checks, options recommandées, checklist post-activation |
+| `BRANCH_PROTECTION_RUNBOOK.md` | **État et procédure de protection de branche `main`** — ruleset actif, 8 checks requis, checks `images` recommandés phase 2, procédure de vérification |
 | `RELEASE_PROCESS_RUNBOOK.md` | **Processus de release gouverné** — 5 types de release, prérequis généraux, procédure 8 étapes, format notes, convention de tagging futur |
 | `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
 | `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
