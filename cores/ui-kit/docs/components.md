@@ -1,6 +1,6 @@
 # Primitives Web du UI Kit (V2)
 
-> Documentation légère des **15 primitives** (6 initiales + Alert/Card/FormField, Web UI 1 + Dialog/Select/Toast, UI Kit 4 + Badge/Divider/Skeleton, UI Kit 5). React
+> Documentation légère des **19 primitives** (6 initiales + Alert/Card/FormField, Web UI 1 + Dialog/Select/Toast, UI Kit 4 + Badge/Divider/Skeleton, UI Kit 5 + LoadingState/EmptyState/ErrorState/SuccessState, UI Kit 6). React
 > (peerDependency `>=18`) + `import '@enistere/ui-kit/styles.css'`. Toutes : `className`, attributs HTML
 > natifs, accessibles, pilotées par les tokens, **sans logique métier ni connaissance HTTP/Auth**.
 
@@ -115,3 +115,39 @@
 - **Animation** : `@keyframes enistere-skeleton-pulse` (opacité 100→40→100 %) activée uniquement si `prefers-reduced-motion: no-preference` (animation désactivée pour les utilisateurs ayant coché « réduire les animations »).
 - **Do** : combiner avec un `Spinner` ou un `role="status"` parent pour annoncer l'état de chargement aux lecteurs d'écran.
 - **Don't** : ne pas utiliser `aria-label` sur le Skeleton (il est toujours `aria-hidden`) ; ne pas lui fournir de contenu textuel.
+
+## LoadingState
+
+- **Rôle** : état de chargement centré avec indicateur visuel. Élément `<div role="status">`.
+- **Props** : `message?` (ReactNode — texte affiché sous le spinner), `size?` (`sm`|`md`|`lg`, défaut `md`), + attributs `div` natifs, `forwardRef`. `role` surchargeable.
+- **Exemple** : `<LoadingState message="Chargement des données…" />`
+- **Accessibilité** : `role="status"` (live region polie) ; le Spinner interne est décoratif (`aria-hidden`) pour éviter une double annonce. Combiner avec des écrans de chargement ou des suspenses.
+- **Do** : fournir un `message` significatif quand le contexte l'exige ; utiliser `decorative` Spinner séparé si le message est fourni dans le DOM.
+- **Don't** : ne pas afficher de détails techniques dans `message` ; ne pas surcharger `role="alert"` sauf si l'état de chargement devient urgent.
+
+## EmptyState
+
+- **Rôle** : état vide informatif. Élément `<div>` (pas de rôle ARIA imposé — contenu informatif non urgent).
+- **Props** : `title` (ReactNode, **obligatoire**), `description?` (ReactNode), `action?` (ReactNode — slot pour un bouton/lien), + attributs `div` natifs (sauf `title`), `forwardRef`.
+- **Exemple** : `<EmptyState title="Aucun résultat" description="Essayez un autre filtre." action={<Button>Créer</Button>} />`
+- **Accessibilité** : pas de rôle live implicite (l'état vide n'interrompt pas l'expérience) ; le `title` est obligatoire pour rester descriptif. `action` est un slot libre — le consommateur y place un `Button` ou un lien natif.
+- **Do** : un titre court et clair ; une description optionnelle orientée utilisateur.
+- **Don't** : ne pas omettre le `title` ; ne pas y intégrer de logique de rechargement (déléguer via `action`).
+
+## ErrorState
+
+- **Rôle** : état d'erreur générique. Élément `<div role="alert">` (assertif par défaut).
+- **Props** : `title` (ReactNode, **obligatoire**), `message?` (ReactNode), `action?` (ReactNode — slot retry), `role?` (`alert`|`status`, défaut `alert`), + attributs `div` natifs (sauf `title`), `forwardRef`.
+- **Exemple** : `<ErrorState title="Une erreur est survenue" message="Veuillez réessayer." action={<Button>Réessayer</Button>} />`
+- **Accessibilité** : `role="alert"` annonce l'erreur immédiatement aux lecteurs d'écran ; l'icône ✕ est décorative (CSS `::before`). Surcharger en `status` si l'erreur est passive (ex. après navigation).
+- **Do** : messages d'erreur génériques et orientés utilisateur ; slot `action` pour les actions de récupération.
+- **Don't** : ne jamais afficher de détails internes (stack traces, codes SQL, tokens) dans `message`.
+
+## SuccessState
+
+- **Rôle** : confirmation de succès. Élément `<div role="status">` (poli, non intrusif).
+- **Props** : `title` (ReactNode, **obligatoire**), `message?` (ReactNode), `action?` (ReactNode — slot de continuation), `role?` (`status`|`alert`, défaut `status`), + attributs `div` natifs (sauf `title`), `forwardRef`.
+- **Exemple** : `<SuccessState title="Enregistré" message="Vos modifications ont été sauvegardées." action={<Button>Continuer</Button>} />`
+- **Accessibilité** : `role="status"` (live region polie) — annonce le succès sans interrompre l'utilisateur ; l'icône ✓ est décorative (CSS `::before`).
+- **Do** : un message court et positif ; utiliser `action` pour proposer une suite logique.
+- **Don't** : ne pas surcharger en `alert` sauf si le succès nécessite une attention immédiate.

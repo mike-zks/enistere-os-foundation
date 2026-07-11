@@ -1,0 +1,30 @@
+/* EmptyState — état vide neutre. Pas de rôle ARIA imposé (contenu informatif non urgent). */
+.enistere-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-8) var(--enistere-spacing-4);
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-muted);
+  text-align: center;
+}
+
+.enistere-empty-state__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-foreground-default);
+  line-height: var(--enistere-line-height-tight);
+}
+
+.enistere-empty-state__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  line-height: var(--enistere-line-height-normal);
+}
+
+.enistere-empty-state__action {
+  margin-top: var(--enistere-spacing-1);
+}

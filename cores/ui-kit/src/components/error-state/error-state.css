@@ -1,0 +1,40 @@
+/* ErrorState — état d'erreur. role="alert" par défaut (assertif). Glyphe via ::before, jamais couleur seule. */
+.enistere-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-8) var(--enistere-spacing-4);
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-muted);
+  text-align: center;
+}
+
+.enistere-error-state__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-status-danger);
+  line-height: var(--enistere-line-height-tight);
+}
+
+.enistere-error-state__title::before {
+  display: block;
+  margin-bottom: var(--enistere-spacing-2);
+  font-size: var(--enistere-font-size-xl);
+  font-weight: var(--enistere-font-weight-normal);
+  line-height: 1;
+  color: var(--enistere-color-status-danger);
+  content: "\2715"; /* ✕ */
+}
+
+.enistere-error-state__message {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  line-height: var(--enistere-line-height-normal);
+}
+
+.enistere-error-state__action {
+  margin-top: var(--enistere-spacing-1);
+}

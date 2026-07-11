@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### UI Kit 6 — State primitives / états UI standards
+
+- **UI Kit 6** (`cores/ui-kit/src/components/`) : ajout de 4 primitives d'état UI. **15 → 19 primitives**. **146 → 181 tests** (+35). Aucune nouvelle dépendance, aucun Radix/shadcn/Tailwind. Toutes les CSS consomment uniquement `var(--enistere-*)`, classes préfixées `enistere-`. Toutes respectent `forwardRef`, `className` natif, attributs HTML natifs, accessibilité jest-axe. Générateur `styles.css` mis à jour (`tokens:generate`).
+  - **LoadingState** (`loading-state.types.ts` / `loading-state.tsx` / `loading-state.css`) : `<div role="status">` centré. Props : `message?` (ReactNode sous le Spinner), `size?` (SpinnerSize, défaut `md`). Spinner interne en mode décoratif (`aria-hidden`) pour éviter la double annonce. 7 tests : rôle status, présence spinner, message, absence message, className passthrough, forwardRef, a11y.
+  - **EmptyState** (`empty-state.types.ts` / `empty-state.tsx` / `empty-state.css`) : `<div>` centré, pas de rôle ARIA imposé. Props : `title` (ReactNode, **obligatoire**), `description?`, `action?` (slot ReactNode). Omit `title` de HTMLAttributes. 8 tests : titre, description, absence description, slot action, absence action, className passthrough, forwardRef, a11y.
+  - **ErrorState** (`error-state.types.ts` / `error-state.tsx` / `error-state.css`) : `<div role="alert">` (assertif par défaut, surchargeable). Props : `title` (ReactNode, **obligatoire**), `message?`, `action?` (slot retry), `role?` (`alert`|`status`). Glyphe ✕ décoratif via CSS `::before`. Messages génériques uniquement — jamais de détails sensibles. 10 tests : rôle alert, titre, message, absence message, slot action, absence action, rôle surchargé, className passthrough, forwardRef, a11y.
+  - **SuccessState** (`success-state.types.ts` / `success-state.tsx` / `success-state.css`) : `<div role="status">` (poli, non intrusif). Props : `title` (ReactNode, **obligatoire**), `message?`, `action?`, `role?` (`status`|`alert`). Glyphe ✓ décoratif via CSS `::before`. 10 tests : rôle status, titre, message, absence message, slot action, absence action, rôle surchargé, className passthrough, forwardRef, a11y.
+  - **Infrastructure test** : `test/components-css.test.ts` — loading-state/empty-state/error-state/success-state ajoutés à la liste de vérification. `test/consumers/react.consumer.tsx` — 4 composants + 4 types importés et utilisés.
+  - **Vérifications** : `typecheck` ✓, `lint` ✓, `test` 181/181 ✓, `build` ✓, `tokens:check` ✓ (up-to-date), `audit` 0 vuln ✓, `git diff --check` ✓. Branch `ui-kit-6-state-primitives`.
+
 ### Cloud Core 11 — Durcissement opérationnel staging
 
 - **CC11** (`cores/cloud/`) : socle opérationnel du staging CC10 vérifié et documenté. **Aucun secret dans le dépôt.**
