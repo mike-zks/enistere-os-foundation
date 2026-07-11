@@ -263,7 +263,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 2 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists + **`scripts/quality-gates.mjs`** (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>` ; 7 scopes ; arrêt au premier échec ; code de sortie propagé) + **`scripts/quality-gates.test.mjs`** (**36/36 tests node:test**). Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 3 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (procédure activation protection `main` — 10 noms de checks exacts, 8 requis immédiats, 2 recommandés phase 2, options recommandées, checklist post-activation) + 3 checklists + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 - **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -336,13 +336,16 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 (types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
 ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
 `ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
-restent branch protection (**documentée — 7+1 checks — non appliquée**, humain), couverture, release, déploiement,
+restent branch protection (**documentée — 10 checks — non appliquée**, humain — runbook `BRANCH_PROTECTION_RUNBOOK.md`), couverture, release, déploiement,
 environnements. **ADR-014 (registry)** : **`PARTIELLEMENT_IMPLEMENTE`** (CC5 — build + push GHCR sur `main`,
 Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISIONS_REGISTER.md).
 
 ## 8. Dernière étape terminée
 
-**Quality Core 2 — script local de sélection des gates qualité** (`cores/quality-core/scripts/`) (2026-07-11) :
+**Quality Core 3 — runbook de protection de branche et checks requis** (`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`) (2026-07-11) :
+procédure complète d'activation manuelle de la protection de branche `main`. **10 checks requis documentés avec noms exacts** : L1 (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`), L2 (`api-runtime`), L3 (`web-e2e`), L4 (`api-smoke`, `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)`, `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)`). Classification : 8 requis immédiatement, 2 recommandés phase 2 (images matrix), 3 non requis (staging/smoke). Statut : **documenté, non appliqué** (action humaine — GitHub Settings → Branches). Fichiers mis à jour : `.github/workflows/README.md`, `QUALITY_GATES_MATRIX.md` §3, `RELEASE_READINESS_CHECKLIST.md`, `docs/project-status/*`. Aucun workflow GitHub modifié. Aucun secret. Aucune nouvelle dépendance. Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, `node --test cores/quality-core/scripts/quality-gates.test.mjs` 36/36 ✓.
+
+**Étape précédente — Quality Core 2 — script local de sélection des gates qualité** (`cores/quality-core/scripts/`) (2026-07-11) :
 `scripts/quality-gates.mjs` (Node 24, sans dépendance) — `list` / `plan <scope>` / `run <scope>`. 7 scopes : `docs`, `packages`, `ui-kit`, `web`, `root-audit`, `mobile-static`, `all-safe`. Arrêt au premier échec, code de sortie propagé. Gates exclus par design : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e. `scripts/quality-gates.test.mjs` : **36/36 tests node:test** (plans vérifiés sans exécution). Vérifications : `list` ✓, `plan all-safe` ✓, `plan mobile-static` ✓, tests 36/36 ✓, `git diff --check` ✓, `npm audit` 0 vuln ✓.
 
 **Étape précédente — Quality Core 1 — cadrage opérationnel des gates qualité V2** (`cores/quality-core/`, `docs/checklists/`) (2026-07-11) :

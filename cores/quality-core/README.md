@@ -1,6 +1,6 @@
 # Quality Core
 
-**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 2, 2026-07-11)
+**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 3, 2026-07-11)
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
@@ -11,6 +11,7 @@ monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les d�
 |---|---|
 | `CORE_SPECIFICATION.md` | Spécification complète : objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut |
 | `QUALITY_GATES_MATRIX.md` | Matrice gates × cores : commandes, environnements, CI existante, fréquence |
+| `BRANCH_PROTECTION_RUNBOOK.md` | **Procédure d'activation manuelle** de la protection de branche `main` — noms exacts des 10 checks, options recommandées, checklist post-activation |
 | `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
 | `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |

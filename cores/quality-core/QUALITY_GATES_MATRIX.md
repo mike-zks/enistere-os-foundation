@@ -116,21 +116,27 @@
 | backup MinIO + restore | `./backup-minio.sh` + test objet | VPS staging, SSH | 🔒 staging (runbook CC11) | avant release |
 | rollback / roll-forward | images sha- immutables, docker-compose.cc10.yml | VPS staging, SSH | 🔒 staging (runbook CC11) | avant release |
 
-## 3. Résumé des checks requis sur `main` (branch protection — ADR-013, CC4)
+## 3. Résumé des checks requis sur `main` (branch protection — ADR-013, CC4 / Quality Core 3)
 
-| # | Check | Workflow | Job | Statut |
-|---|---|---|---|---|
-| 1 | api-contracts | `ci.yml` | `ci` | documenté, non appliqué (action humaine) |
-| 2 | api-client-fetch | `ci.yml` | `ci` | documenté, non appliqué |
-| 3 | ui-kit | `ci.yml` | `ci` | documenté, non appliqué |
-| 4 | web-nextjs | `ci.yml` | `ci` | documenté, non appliqué |
-| 5 | audit | `ci.yml` | `ci` | documenté, non appliqué |
-| 6 | api-runtime | `api-runtime-ci.yml` | `api-runtime` | documenté, non appliqué |
-| 7 | web-e2e | `web-e2e-ci.yml` | `web-e2e` | documenté, non appliqué |
-| 8 | images (recommandé) | `registry-ci.yml` | `build-and-push` | documenté, non appliqué |
+> **Statut courant : documenté, non appliqué.**
+> Procédure d'activation : `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`
 
-> La protection de branche est documentée (CC4) mais non activée (action humaine requise).
-> L'activation est une prochaine étape pour ADR-013 (CI/CD V1).
+| # | Nom exact du check | Workflow | Phase |
+|---|---|---|---|
+| 1 | `api-contracts` | `ci.yml` | requis immédiat |
+| 2 | `api-client-fetch` | `ci.yml` | requis immédiat |
+| 3 | `ui-kit` | `ci.yml` | requis immédiat |
+| 4 | `web-nextjs` | `ci.yml` | requis immédiat |
+| 5 | `audit` | `ci.yml` | requis immédiat |
+| 6 | `api-runtime` | `api-runtime-ci.yml` | requis immédiat |
+| 7 | `web-e2e` | `web-e2e-ci.yml` | requis immédiat |
+| 8 | `api-smoke` | `registry-ci.yml` | requis immédiat |
+| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
+| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
+
+> Les noms de checks correspondent au **`name:` du job** dans le YAML (jamais au `name:` du workflow).
+> Renommer un job casse l'exigence. Le runbook `BRANCH_PROTECTION_RUNBOOK.md` contient la procédure
+> complète, les options recommandées et la checklist de vérification post-activation.
 
 ## 4. Matrice des preuves actuelles
 

@@ -5,6 +5,14 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Quality Core 3 — runbook de protection de branche et checks requis : RÉALISÉ** (2026-07-11).
+> `BRANCH_PROTECTION_RUNBOOK.md` créé dans `cores/quality-core/`. Procédure manuelle complète :
+> branche cible `main`, 10 noms de checks exacts (8 requis immédiats : `api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit`/`api-runtime`/`web-e2e`/`api-smoke` ; 2 recommandés phase 2 : `images (api-nestjs, …)` / `images (web-nextjs, …)`), options recommandées, checklist post-activation. `.github/workflows/README.md` mis à jour.
+> **Protection branche `main` : documentée, non appliquée** — action humaine requise.
+> Vérifications : `git diff --check` ✅, `npm audit` 0 vuln ✅, `plan docs` ✅, `test 36/36` ✅.
+>
+> **Prochaine action** : **activer la protection de branche `main`** (action humaine — 5 min dans GitHub Settings → Branches, selon `BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : Mobile Core RN31 (iOS smoke — macOS requis).
+
 > ✅ **Quality Core 2 — script local de sélection des gates qualité : RÉALISÉ** (2026-07-11).
 > `scripts/quality-gates.mjs` ajouté dans `cores/quality-core/scripts/`. Node 24, sans dépendance.
 > Commandes : `list` / `plan <scope>` / `run <scope>`. 7 scopes : `docs`, `packages`, `ui-kit`, `web`, `root-audit`, `mobile-static`, `all-safe`.
