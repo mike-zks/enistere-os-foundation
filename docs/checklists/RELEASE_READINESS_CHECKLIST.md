@@ -1,7 +1,8 @@
 # RELEASE_READINESS_CHECKLIST.md — Checklist avant release / promotion de statut
 
-> Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`.
-> Dernière mise à jour : 2026-07-11 (Quality Core 1).
+> Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`,
+> `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`.
+> Dernière mise à jour : 2026-07-11 (Quality Core 3).
 
 ## Quand utiliser cette checklist
 
@@ -31,6 +32,12 @@
 ### Audit
 
 - [ ] `npm audit` root — 0 vulnérabilité
+
+### Protection de branche `main`
+
+- [ ] Vérifier que la protection de branche est activée (Settings → Branches dans GitHub)
+- [ ] Si non activée : appliquer selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`
+- [ ] Si activée : noter la date dans `IMPLEMENTATION_MATRIX.md` ligne ADR-013
 
 ---
 

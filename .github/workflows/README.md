@@ -174,21 +174,30 @@ Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La p
   [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md). **Reste** : déploiement par environnement
   protégé + rollback (futur).
 
-### Checks requis pour la protection de `main` (Cloud Core 4)
+### Checks requis pour la protection de `main` (Cloud Core 4 / Quality Core 3)
 
-Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). **7 checks** à rendre
+Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). Checks à rendre
 **bloquants** sur `main` (application **manuelle**, action humaine —
-[`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`](../../cores/cloud/docs/GITHUB_BRANCH_PROTECTION_CHECKLIST.md)) :
+procédure détaillée : [`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`](../../cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md)) :
 
-| Workflow | Checks (= `name:` des jobs) |
-|---|---|
-| `ci.yml` | `api-contracts` · `api-client-fetch` · `ui-kit` · `web-nextjs` · `audit` |
-| `api-runtime-ci.yml` | `api-runtime` |
-| `web-e2e-ci.yml` | `web-e2e` |
-| `registry-ci.yml` | `images` *(8ᵉ, recommandé — build des images en PR ; ralentit un peu la PR)* |
+**Statut courant : documenté, non appliqué.**
 
-> **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour. Les
-> noms actuels sont **stables** ; Cloud Core 4 ne renomme **aucun** job. **Statut : protection non appliquée.**
+| # | Check (nom exact) | Workflow | Requis dès maintenant |
+|---|---|---|---|
+| 1 | `api-contracts` | `ci.yml` | ✅ oui |
+| 2 | `api-client-fetch` | `ci.yml` | ✅ oui |
+| 3 | `ui-kit` | `ci.yml` | ✅ oui |
+| 4 | `web-nextjs` | `ci.yml` | ✅ oui |
+| 5 | `audit` | `ci.yml` | ✅ oui |
+| 6 | `api-runtime` | `api-runtime-ci.yml` | ✅ oui |
+| 7 | `web-e2e` | `web-e2e-ci.yml` | ✅ oui |
+| 8 | `api-smoke` | `registry-ci.yml` | ✅ oui |
+| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
+| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
+
+> **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour.
+> Les noms actuels sont **stables**. Voir le runbook pour la procédure complète, les options
+> recommandées et la checklist de vérification post-activation.
 
 ### Politiques de durcissement (Cloud Core 4)
 

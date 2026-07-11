@@ -6,6 +6,20 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core 3 — Runbook de protection de branche et checks requis
+
+- **`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`** (nouveau) : procédure complète d'activation manuelle de la protection de branche `main` — prérequis, noms exacts des 10 checks, classification, procédure GitHub UI pas-à-pas, vérification post-activation, pourquoi aucun secret n'est nécessaire.
+- **10 checks documentés avec noms exacts** : L1 (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`), L2 (`api-runtime`), L3 (`web-e2e`), L4 (`api-smoke`, `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)`, `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)`).
+- **Classification** : 8 requis immédiatement (activer dès maintenant), 2 recommandés phase 2 (images matrix — noms générés par GitHub), 3 non requis en CI (staging CC11, smoke:android, smoke:ios — device/émulateur requis).
+- **Statut** : **documenté, non appliqué** — l'activation est une action humaine dans GitHub Settings → Branches. Ne pas déclarer la protection active avant preuve.
+- **`.github/workflows/README.md`** mis à jour : table complète des 10 checks avec nom exact, workflow, phase, référence au runbook.
+- **`cores/quality-core/QUALITY_GATES_MATRIX.md`** §3 mis à jour : 10 checks avec noms exacts, classification, référence au runbook.
+- **`docs/checklists/RELEASE_READINESS_CHECKLIST.md`** mis à jour : section "Protection de branche `main`" ajoutée en Partie 1.
+- **`cores/quality-core/README.md`** mis à jour : statut Quality Core 3, `BRANCH_PROTECTION_RUNBOOK.md` dans la table des matières.
+- **`docs/project-status/*`** mis à jour : FOUNDATION_CURRENT_STATE.md, IMPLEMENTATION_MATRIX.md, NEXT_ACTIONS.md, SESSION_HANDOFF.md.
+- Aucun workflow GitHub modifié. Aucun secret créé. Aucune nouvelle dépendance. Aucun changement runtime.
+- Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, `node --test cores/quality-core/scripts/quality-gates.test.mjs` 36/36 ✓.
+
 ### Quality Core 2 — Script local de sélection des gates qualité
 
 - **`cores/quality-core/scripts/quality-gates.mjs`** (nouveau) : script Node 24, sans dépendance externe. Commandes : `list`, `plan <scope>`, `run <scope>`. 7 scopes : `docs` / `packages` / `ui-kit` / `web` / `root-audit` / `mobile-static` / `all-safe`.
