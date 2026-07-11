@@ -1,6 +1,6 @@
-# Cloud Core 10 — STAGING RÉEL (Traefik v3 + Let's Encrypt).
-# Remplace docker-compose.staging.example.yml pour les déploiements avec reverse-proxy existant.
-# Traefik (réseau "web") gère TLS + routing ; les services ne publient PAS de ports hôte.
+# Cloud Core 10 — STAGING RÉEL (reverse proxy compatible Traefik + Let's Encrypt).
+# Remplace docker-compose.staging.example.yml pour les déploiements avec reverse proxy provisionné.
+# Le réseau "web" gère TLS + routing ; les services ne publient PAS de ports hôte.
 # Lancer : docker compose --env-file .env.staging -f docker-compose.cc10.yml up -d
 # Migrations SÉPARÉES : docker compose --env-file .env.staging -f docker-compose.cc10.yml run --rm api npx prisma migrate deploy
 
@@ -78,8 +78,8 @@ services:
       LOG_PRETTY: ${LOG_PRETTY}
       SERVICE_NAME: ${SERVICE_NAME}
     networks: [staging-internal]
-    # extra_hosts : contourne Cloudflare pour S3_ENDPOINT → Traefik en local (via docker0 gateway).
-    # L'API atteint MinIO via Traefik sur l'interface hôte sans sortir sur internet.
+    # extra_hosts : évite une sortie CDN pour S3_ENDPOINT → reverse proxy local (via docker0 gateway).
+    # L'API atteint MinIO via le reverse proxy sur l'interface hôte sans sortir sur internet.
     extra_hosts:
       - "s3-staging.enistere.com:host-gateway"
     healthcheck:
@@ -121,7 +121,7 @@ networks:
   staging-internal:
     driver: bridge
   web:
-    external: true   # réseau Traefik existant
+    external: true   # réseau reverse proxy provisionné
 
 volumes:
   pgdata:
