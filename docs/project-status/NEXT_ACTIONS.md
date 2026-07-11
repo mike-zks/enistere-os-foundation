@@ -5,6 +5,15 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Quality Core 4 — alignement templates PR / Issues avec Quality Core : RÉALISÉ** (2026-07-11).
+> `.github/PULL_REQUEST_TEMPLATE.md` modernisé : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance.
+> `.github/ISSUE_TEMPLATE/` mis à jour : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères d'acceptation), `security_issue.md` (canal privé si sensible, classification, scopes sensibles). `config.yml` ajouté (Security Advisories).
+> `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour.
+> Vérifications : `git diff --check` ✅, `npm audit` 0 vuln ✅, `plan docs` ✅, `test 36/36` ✅.
+> Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime.
+>
+> **Prochaine action** : **activer la protection de branche `main`** (action humaine — GitHub Settings → Branches, selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : Mobile Core RN31 (iOS smoke — macOS requis).
+
 > ✅ **Quality Core 3 — runbook de protection de branche et checks requis : RÉALISÉ** (2026-07-11).
 > `BRANCH_PROTECTION_RUNBOOK.md` créé dans `cores/quality-core/`. Procédure manuelle complète :
 > branche cible `main`, 10 noms de checks exacts (8 requis immédiats : `api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit`/`api-runtime`/`web-e2e`/`api-smoke` ; 2 recommandés phase 2 : `images (api-nestjs, …)` / `images (web-nextjs, …)`), options recommandées, checklist post-activation. `.github/workflows/README.md` mis à jour.
