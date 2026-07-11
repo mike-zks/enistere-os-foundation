@@ -62,23 +62,24 @@ npx playwright test                                          # 15 tests E2E (sta
 
 ### cores/mobile-react-native
 ```bash
-npm run typecheck --workspace=mobile-react-native
-npm run lint --workspace=mobile-react-native
-npm test --workspace=mobile-react-native                     # 367 tests (node --test)
+cd cores/mobile-react-native
+npm run typecheck
+npm run lint
+npm test                                                     # 367 tests (node --test)
 npx expo export -p ios                                       # bundle iOS (sans device)
-npx expo-doctor                                              # 19/19 checks
+npm run doctor                                               # 19/19 checks
 npm run smoke:android                                        # smoke emulator Android
 npm run smoke:ios                                            # smoke iOS (bloqué Linux)
 ```
 
 ### cores/api-nestjs
 ```bash
-npm run typecheck --workspace=api-nestjs
-npm run lint --workspace=api-nestjs
-npm run test --workspace=api-nestjs                          # 386 tests unitaires
-npm run test:e2e --workspace=api-nestjs                      # 101 tests e2e (PG+MinIO requis)
-npm run openapi:check --workspace=api-nestjs                 # drift OpenAPI
-npm run build --workspace=api-nestjs
+cd cores/api-nestjs
+npm run lint
+npm test                                                     # 386 tests unitaires
+npm run test:e2e                                             # 101 tests e2e (PG+MinIO requis)
+npm run openapi:check                                        # drift OpenAPI
+npm run build                                                # compilation TypeScript / Nest
 ```
 
 ### cores/cloud (gates finaux staging — non locaux)

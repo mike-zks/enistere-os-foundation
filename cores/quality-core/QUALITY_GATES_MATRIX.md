@@ -20,7 +20,7 @@
 | **ui-kit** | ✅ L1 | ✅ local | ✅ L1 (181) | ✅ L1 | ✅ L1 | — | — | — | — | ✅ local | — |
 | **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (450) | ✅ L1 | ✅ L1 | ✅ L3 (15) | — | — | — | — | — |
 | **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
-| **api-nestjs** | ✅ L2 | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
+| **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
 | **cloud** | — | — | — | — | — | — | 🔒 staging | ✅ L4 | — | — | — |
 
 ## 2. Détail par core / package
@@ -75,13 +75,13 @@
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
-| typecheck | `npm run typecheck --workspace=mobile-react-native` | Node 24 | local (pas de CI mobile) | chaque PR mobile |
-| lint | `npm run lint --workspace=mobile-react-native` | Node 24 | local | chaque PR mobile |
-| tests (367, node --test) | `npm test --workspace=mobile-react-native` | Node 24, node:test | local | chaque PR mobile |
-| expo export iOS | `npx expo export -p ios` | Node 24, Metro | local | chaque PR mobile |
-| expo-doctor (19/19) | `npx expo-doctor` | Node 24 | local | chaque PR mobile |
-| smoke Android | `npm run smoke:android` | Node 24, emulator-5554 Android | local | PR shell / runtime |
-| smoke iOS | `npm run smoke:ios` | macOS + Xcode + simulateur | ⚠️ bloqué Linux | PR shell sur macOS |
+| typecheck | `cd cores/mobile-react-native && npm run typecheck` | Node 24 | local (pas de CI mobile) | chaque PR mobile |
+| lint | `cd cores/mobile-react-native && npm run lint` | Node 24 | local | chaque PR mobile |
+| tests (367, node --test) | `cd cores/mobile-react-native && npm test` | Node 24, node:test | local | chaque PR mobile |
+| expo export iOS | `cd cores/mobile-react-native && npx expo export -p ios` | Node 24, Metro | local | chaque PR mobile |
+| expo-doctor (19/19) | `cd cores/mobile-react-native && npm run doctor` | Node 24 | local | chaque PR mobile |
+| smoke Android | `cd cores/mobile-react-native && npm run smoke:android` | Node 24, emulator-5554 Android | local | PR shell / runtime |
+| smoke iOS | `cd cores/mobile-react-native && npm run smoke:ios` | macOS + Xcode + simulateur | ⚠️ bloqué Linux | PR shell sur macOS |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
 > **Note smoke iOS** : `npm run smoke:ios` est bloqué en environnement Linux (`detectedPlatform: linux`).
@@ -89,14 +89,16 @@
 
 ### 2.7 cores/api-nestjs
 
+> L'API Core est un projet npm autonome et n'expose pas de script `typecheck` dédié.
+> Le gate de compilation TypeScript est `npm run build` (Nest build).
+
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
-| typecheck | `npm run typecheck --workspace=api-nestjs` | Node 24 | **L2** | chaque PR API |
-| lint | `npm run lint --workspace=api-nestjs` | Node 24 | **L2** | chaque PR API |
-| tests unitaires (386) | `npm run test --workspace=api-nestjs` | Node 24 | **L2** | chaque PR API |
-| tests e2e (101) | `npm run test:e2e --workspace=api-nestjs` | Node 24, PostgreSQL + MinIO | **L2** | chaque PR API |
-| openapi drift | `npm run openapi:check --workspace=api-nestjs` | Node 24 | **L2** | chaque PR API |
-| build | `npm run build --workspace=api-nestjs` | Node 24 | **L2** | chaque PR API |
+| lint | `cd cores/api-nestjs && npm run lint` | Node 24 | **L2** | chaque PR API |
+| tests unitaires (386) | `cd cores/api-nestjs && npm test` | Node 24 | **L2** | chaque PR API |
+| tests e2e (101) | `cd cores/api-nestjs && npm run test:e2e` | Node 24, PostgreSQL + MinIO | **L2** | chaque PR API |
+| openapi drift | `cd cores/api-nestjs && npm run openapi:check` | Node 24 | **L2** | chaque PR API |
+| build | `cd cores/api-nestjs && npm run build` | Node 24 | **L2** | chaque PR API |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
 ### 2.8 cores/cloud

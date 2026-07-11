@@ -83,26 +83,25 @@ Audit root recommandé mais non bloquant.
 
 ### mobile-react-native (Mobile Core)
 
-- [ ] `npm run typecheck --workspace=mobile-react-native`
-- [ ] `npm run lint --workspace=mobile-react-native`
-- [ ] `npm test --workspace=mobile-react-native` — 367/367 verts (ou nouveau total)
-- [ ] `npx expo export -p ios` — bundle iOS sans erreur
-- [ ] `npx expo-doctor` — 19/19 checks (ou nouveau total)
+- [ ] `cd cores/mobile-react-native && npm run typecheck`
+- [ ] `cd cores/mobile-react-native && npm run lint`
+- [ ] `cd cores/mobile-react-native && npm test` — 367/367 verts (ou nouveau total)
+- [ ] `cd cores/mobile-react-native && npx expo export -p ios` — bundle iOS sans erreur
+- [ ] `cd cores/mobile-react-native && npm run doctor` — 19/19 checks (ou nouveau total)
 - [ ] `npm audit` root — 0 vuln
 - [ ] `git diff --check`
-- [ ] `npm run smoke:android` recommandé (nécessite emulator Android `emulator-5554`)
-- [ ] `npm run smoke:ios` si macOS disponible (bloqué Linux — RN31 en attente macOS/Xcode)
+- [ ] `cd cores/mobile-react-native && npm run smoke:android` recommandé (nécessite emulator Android `emulator-5554`)
+- [ ] `cd cores/mobile-react-native && npm run smoke:ios` si macOS disponible (bloqué Linux — RN31 en attente macOS/Xcode)
 
 ---
 
 ### api-nestjs (API Core)
 
-- [ ] `npm run typecheck --workspace=api-nestjs`
-- [ ] `npm run lint --workspace=api-nestjs`
-- [ ] `npm run test --workspace=api-nestjs` — 386/386 verts (ou nouveau total)
-- [ ] `npm run test:e2e --workspace=api-nestjs` — 101/101 verts (nécessite PostgreSQL + MinIO)
-- [ ] `npm run openapi:check --workspace=api-nestjs` — pas de drift
-- [ ] `npm run build --workspace=api-nestjs`
+- [ ] `cd cores/api-nestjs && npm run lint`
+- [ ] `cd cores/api-nestjs && npm test` — 386/386 verts (ou nouveau total)
+- [ ] `cd cores/api-nestjs && npm run test:e2e` — 101/101 verts (nécessite PostgreSQL + MinIO)
+- [ ] `cd cores/api-nestjs && npm run openapi:check` — pas de drift
+- [ ] `cd cores/api-nestjs && npm run build` — compilation TypeScript / Nest
 - [ ] `npm audit` root — 0 vuln
 - [ ] `git diff --check`
 
