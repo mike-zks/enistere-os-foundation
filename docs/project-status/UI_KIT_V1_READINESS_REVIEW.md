@@ -1,7 +1,7 @@
 # UI_KIT_V1_READINESS_REVIEW.md — Revue de stabilité V1 du UI Kit
 
-> **Date** : 2026-07-11
-> **Branche** : `ui-kit-v1-readiness-review`
+> **Date initiale** : 2026-07-11 (`ui-kit-v1-readiness-review`) — statut initial : `IMPLEMENTATION_AVANCEE`
+> **Mise à jour VALIDE_V1** : 2026-07-11 (`ui-kit-valide-v1-review`) — promotion après fermeture des gaps par RN35
 > **Scope** : revue officielle — aucun composant ajouté, aucun token modifié.
 
 ---
@@ -10,7 +10,7 @@
 
 | Critère | Résultat |
 |---|---|
-| Statut proposé | **`IMPLEMENTATION_AVANCEE`** (depuis `IMPLEMENTATION_PARTIELLE`) |
+| **Statut** | **`VALIDE_V1`** ✅ (depuis `IMPLEMENTATION_AVANCEE`, promotion 2026-07-11) |
 | Critères roadmap §12.4 satisfaits | **4/4** ✅ — cohérence visuelle mobile/web prouvée par RN35 |
 | Critères CORE_SPECIFICATION §59 satisfaits | **9/9** ✅ — compatibilité RN prouvée par RN35 |
 | Tests UI Kit | **181/181** — 0 régression |
@@ -21,7 +21,7 @@
 | ADR-010 (stack RN) | ✅ prouvé (RN35) — tokens alignés, ThemeProvider + composants maison opérationnels |
 | Consommé par un core | ✅ Web Core **VALIDE_V1** (états UI, Dialog, Alert, Card, FormField…) |
 | Gaps bloquants VALIDE_V1 | **0** ✅ — fermés par RN35 (2026-07-11) |
-| Prochaine mission | UI Kit peut prétendre à `VALIDE_V1` — périmètre web+mobile prouvé |
+| Réserves non bloquantes | 8 items documentés §10 (Storybook, composants avancés, ADR-009 partiel, etc.) |
 
 ---
 
@@ -220,85 +220,109 @@ La spec §22 liste 35 composants obligatoires. Le UI Kit actuel en couvre **16/3
 
 ---
 
-## 8. Statut proposé et justification
+## 8. Statut et justification
 
-### Statut proposé : `IMPLEMENTATION_AVANCEE`
+### ~~Statut initial (2026-07-11)~~ : `IMPLEMENTATION_AVANCEE`
 
-**Justification :**
+> Justification initiale : socle Web complet et prouvé, mais dimension mobile non encore close
+> (composants RN absents du package, cohérence visuelle non prouvée par valeurs). RN35 a depuis
+> fermé ces deux points.
 
-Le UI Kit a dépassé `IMPLEMENTATION_PARTIELLE` car :
-1. Les **tokens** sont complets, validés, versionnés et exportables (ADR-008 ✅).
-2. **19 primitives Web** — accessibles, testées (181 tests), documentées, pilotées par tokens, sans dépendance lourde.
-3. Les **4 états UI standards** (LoadingState/EmptyState/ErrorState/SuccessState) sont présents (roadmap §12.2 ✅).
-4. Le UI Kit est **réellement consommé et prouvé** dans le Web Core VALIDE_V1.
-5. Toutes les **qualifications techniques** sont vertes (typecheck, lint, build, tokens:check, audit, diff --check).
+---
 
-Il ne peut pas prétendre à `VALIDE_V1` car :
-1. Les **composants React Native de base** (roadmap §12.3 — "composants React Native de base") sont absents.
-2. La **cohérence visuelle mobile/web** reste à l'intention des tokens (ADR-010 partiel) et non à la preuve.
+### Statut actuel (2026-07-11, promotion VALIDE_V1) : `VALIDE_V1`
 
-`IMPLEMENTATION_AVANCEE` traduit précisément cette position : le socle Web de la V1 est complet et prouvé, mais la dimension mobile — explicitement attendue par la roadmap §12 — reste à construire dans le Mobile Core.
+**Justification de la promotion :**
 
-### Comparaison avec les autres statuts envisagés
+La promotion repose sur les **critères de validation §12.4** (et non sur la liste des livrables §12.3).
+La distinction est essentielle : §12.3 décrit des **livrables indicatifs** rédigés avant les ADR ;
+§12.4 définit les **critères d'acceptation** officiels. VALIDE_V1 est jugé sur §12.4.
 
-| Statut | Raison de rejet |
+**§12.4 — 4/4 critères satisfaits :**
+1. **Tokens définis** : 5 catégories primitives + sémantique + thèmes light/dark + validation + export JSON/TS/CSS (ADR-008 ✅).
+2. **Composants principaux utilisables** : 19 primitives Web React, `forwardRef`, a11y, CSS var, sans dépendance lourde.
+3. **Composants documentés** : `docs/components.md` (19 sections) + README §18.
+4. **Cohérence visuelle minimale entre mobile et web** : RN35 (2026-07-11) — tokens hex verbatim identiques (10 slots light, 10 slots dark), typographie convertie dp, radius alignés, 13 tests d'alignement `node --test` ✅.
+
+**§59 — 9/9 critères satisfaits :**
+1. Tokens initiaux définis ✅ — 2. Composants obligatoires prioritaires spécifiés ✅ — 3. États UI standards définis ✅ — 4. Accessibilité minimale documentée ✅ — 5. Guidelines UX/UI de base ✅ — 6. Compatibilité Mobile Core React Native ✅ (RN35) — 7. Compatibilité Web Core Next.js ✅ (VALIDE_V1) — 8. Aucune identité projet imposée ✅ — 9. Documentation minimale ✅.
+
+**Consommation réelle prouvée :**
+- Web Core VALIDE_V1 consomme : Alert, Card, FormField, Dialog, Select, Toast, Badge, Divider, Skeleton, LoadingState, EmptyState, ErrorState, SuccessState.
+- Mobile Core STARTER_UI_KIT_ALIGNED : tokens verbatim alignés + ThemeProvider + Screen/Text/Button + LoadingView/EmptyView/ErrorView.
+
+**Qualifications techniques (2026-07-11) :**
+- typecheck 0 erreur ✅ — lint 0 warning ✅ — 181/181 tests ✅ — build propre ✅ — tokens:check up-to-date ✅ — npm audit 0 vuln ✅ — git diff --check ✅.
+
+### Sur le livrable §12.3 manquant ("composants React Native de base")
+
+La roadmap §12.3 liste "composants React Native de base" comme livrable. Ils sont absents du **package**
+`@enistere/ui-kit`. Cela est **délibéré** : ADR-010 (validé postérieurement à la rédaction de la roadmap)
+a tranché que les composants RN vivent dans le **Mobile Core** (ThemeProvider + composants maison), pas
+dans le package UI Kit. La roadmap §12.3 date d'avant les ADR et doit être lue comme indicative. Ce
+manquant n'est **pas un critère §12.4** et ne bloque pas VALIDE_V1.
+
+### Comparaison des statuts
+
+| Statut | Décision |
 |---|---|
-| `VALIDE_V1` | Gap bloquant : composants RN de base absents (roadmap §12.3) |
-| `STARTER_UI_READY` | Terme trop informel ; non défini dans la légende officielle des statuts |
-| `IMPLEMENTATION_PARTIELLE` | Sous-évalue l'état réel : 19 primitives Web + états UI + consommation prouvée |
+| `VALIDE_V1` | **RETENU** — §12.4 4/4 + §59 9/9 + 0 gap bloquant + preuves consommation web+mobile |
+| `IMPLEMENTATION_AVANCEE` | Dépassé — était en attente de la preuve mobile/web, fournie par RN35 |
+| `IMPLEMENTATION_PARTIELLE` | Sous-évalue — 19 primitives Web + états UI + consommation prouvée |
 
 ---
 
-## 9. Prochaine mission unique : **Mobile RN35**
+## 9. ~~Prochaine mission : Mobile RN35~~ — RÉALISÉ (2026-07-11)
 
-### Objectif
-
-Aligner le starter Mobile React Native avec les états UI / UI Kit en consommant les tokens Enistere
-dans le ThemeProvider mobile existant et en ajoutant des primitives d'état (loading/empty/error) au
-starter.
-
-### Pourquoi Mobile RN35 plutôt que UI Kit 7 ou Quality Core 1
-
-**UI Kit 7** serait justifié si un gap V1 bloquant requérait un nouveau composant **dans le package Web**.
-Ce n'est pas le cas : le gap bloquant (RN) appartient au Mobile Core, pas au UI Kit.
-
-**Quality Core 1** serait justifié si le socle était « suffisamment stable » pour industrialiser.
-Or le Mobile Core n'a pas encore fermé sa V1 (pas de ThemeProvider basé sur les tokens, pas d'états UI
-standardisés) — il serait prématuré de passer en industrialisation.
-
-**Mobile RN35** est la prochaine étape naturelle car :
-- Il ferme le seul gap bloquant V1 du UI Kit (cohérence mobile/web).
-- Il utilise les tokens UI Kit déjà disponibles (pas de nouveau composant UI Kit).
-- Il aligne le starter Mobile avec les conventions de feedback UI (LoadingState/EmptyState/ErrorState)
-  déjà présentes en Web.
-- Après RN35, le UI Kit peut prétendre à `VALIDE_V1` : la preuve mobile/web sera établie.
-
-### Périmètre RN35 (indicatif)
-
-```
-- Consommer les tokens numériques et couleurs du UI Kit dans le ThemeProvider mobile existant
-- Ajouter des primitives d'état (LoadingView, EmptyView, ErrorView) dans le starter mobile
-  basées sur les tokens (pas de copie du code Web — React Native != React DOM)
-- Documenter la cohérence web/mobile (même intentions, implémentation platform-native)
-- Aucun nouveau composant UI Kit, aucune nouvelle dépendance
-```
+> RN35 a été réalisé avant cette revue VALIDE_V1. Il a fermé le dernier gap bloquant.
+> Voir `cores/mobile-react-native/ARCHITECTURE.md §40` et le rapport de mission associé.
 
 ---
 
-## 10. Vérifications effectuées
+## 10. Réserves non bloquantes
 
+Ces éléments sont **documentés**, **non bloquants pour VALIDE_V1** et reportés à V2/VF.
+
+| Réserve | Raison du report | Impact |
+|---|---|---|
+| **Storybook / documentation visuelle** | Spec §43 : "pourra être ajoutée plus tard" ; choix par ADR futur | Non-bloquant V1 |
+| **Composants avancés restants** (19/35 absents de la liste §22 complète) | Liste §22 = périmètre V2/VF ; roadmap §12.2 (V1) = 13 catégories, toutes présentes | Non-bloquant V1 |
+| **Composants RN absents du package** | ADR-010 : composants maison dans Mobile Core ; package reste CSS/Web-only | Intentionnel (ADR) |
+| **ADR-009 partiel** (Tailwind/Radix/shadcn hors package) | ADR-009 cible le Web Core, pas le package ; UI Kit = CSS-only intentionnel | Intentionnel (ADR) |
+| **Icônes absentes** | Spec §15 : "le choix exact de librairie doit être validé" | Non-bloquant V1 |
+| **Contrastes calculés non vérifiés** | `jsdom` ne calcule pas les contrastes réels ; `jest-axe` couvre la structure | Non-bloquant (mesure externe) |
+| **`ARCHITECTURE.md` absent** | Contenu couvert par README §§3–11 ; non exigé V1 | Mineur |
+| **ESLint complet (monorepo)** | README §18 : "aligné plus tard au niveau monorepo" | Non-bloquant V1 |
+
+---
+
+## 11. Vérifications effectuées
+
+**Revue initiale (2026-07-11) :**
 ```
 npm run typecheck --workspace=@enistere/ui-kit  ✅ 0 erreur
 npm run lint --workspace=@enistere/ui-kit        ✅ 0 warning
 npm test --workspace=@enistere/ui-kit            ✅ 181/181 pass
 npm run build --workspace=@enistere/ui-kit       ✅ build propre
 npm run tokens:check --workspace=@enistere/ui-kit ✅ up-to-date
-npm audit (workspace ui-kit)                     ✅ 0 vulnérabilité
+npm audit                                        ✅ 0 vulnérabilité
 git diff --check                                 ✅ propre
 ```
 
-Fichiers lus : `strategy/04_ROADMAP_GLOBAL.md` §12, `cores/ui-kit/CORE_SPECIFICATION.md` §§22/33/34/59,
-`cores/ui-kit/README.md`, `cores/ui-kit/docs/components.md`, `docs/adr/ADR-008/009/010`,
-`docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`,
-`docs/project-status/NEXT_ACTIONS.md`, `docs/project-status/SESSION_HANDOFF.md`.
+**Revue VALIDE_V1 (2026-07-11) :**
+```
+npm run typecheck --workspace=@enistere/ui-kit  ✅ 0 erreur
+npm run lint --workspace=@enistere/ui-kit        ✅ 0 warning
+npm test --workspace=@enistere/ui-kit            ✅ 181/181 pass
+npm run build --workspace=@enistere/ui-kit       ✅ build propre
+npm run tokens:check --workspace=@enistere/ui-kit ✅ up-to-date
+npm audit                                        ✅ 0 vulnérabilité
+git diff --check                                 ✅ propre
+```
+
+Fichiers lus : `strategy/04_ROADMAP_GLOBAL.md` §12, `cores/ui-kit/CORE_SPECIFICATION.md` §§59/60,
+`cores/mobile-react-native/ARCHITECTURE.md` §40, `cores/web-nextjs/CORE_SPECIFICATION.md` §56,
+`docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`,
+`docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/NEXT_ACTIONS.md`,
+`docs/project-status/SESSION_HANDOFF.md`.
 Note : `cores/ui-kit/ARCHITECTURE.md` absent du repository (non bloquant — contenu couvert par README).
