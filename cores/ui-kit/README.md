@@ -1,7 +1,7 @@
 # @enistere/ui-kit
 
 > **Statut : IMPLEMENTATION_PARTIELLE.** Design tokens Enistere (ADR-008, source de vérité) **+
-> 15 primitives Web accessibles** (React) — UI Kit V2/4/5. **Privé / non publié** (`0.1.1`). **Pas de
+> 19 primitives Web accessibles** (React) — UI Kit V2/4/5/6. **Privé / non publié** (`0.1.1`). **Pas de
 > bibliothèque complète**, **pas de Tailwind/Radix/shadcn/NativeWind dans le package** (ADR-009/010 :
 > ces stacks vivent dans les cores clients ; le UI Kit reste piloté par les tokens).
 
@@ -24,6 +24,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '
 import { Select } from '@enistere/ui-kit';
 import { Toast, ToastRegion } from '@enistere/ui-kit';
 import { Badge, Divider, Skeleton } from '@enistere/ui-kit';
+import { LoadingState, EmptyState, ErrorState, SuccessState } from '@enistere/ui-kit';
 import '@enistere/ui-kit/styles.css'; // tokens + styles des primitives (une seule feuille)
 ```
 
@@ -33,9 +34,9 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
 <html data-theme="dark"> … </html>
 ```
 
-## Primitives Web (V2 + Web UI 1 + UI Kit 4 + UI Kit 5)
+## Primitives Web (V2 + Web UI 1 + UI Kit 4 + UI Kit 5 + UI Kit 6)
 
-**Quinze** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
+**Dix-neuf** primitives accessibles, **pilotées par les tokens** (variables `--enistere-*`), sans valeur magique :
 
 - **Button** — `variant` (primary/secondary/outline/ghost/danger), `size` (sm/md/lg), `loading`,
   `loadingText`. `type="button"` par défaut, désactivé réel en `loading` (donc pas d'`onClick`),
@@ -75,6 +76,14 @@ Le thème sombre s'active via un ancêtre `data-theme="dark"` (le package n'impo
 - **Skeleton** — placeholder de chargement `<div>`. `variant` (text/block/circle). Toujours
   `aria-hidden="true"` (l'état de chargement est annoncé par un `role="status"` parent). Animation
   `pulse` CSS uniquement si `prefers-reduced-motion: no-preference`.
+- **LoadingState** — état de chargement centré. `message?` (texte sous le Spinner interne, décoratif).
+  `role="status"` par défaut. Compatible `Spinner`/`Skeleton` en usage avancé.
+- **EmptyState** — état vide. `title` (obligatoire), `description?`, `action?` (slot render prop libre).
+  Pas de rôle ARIA imposé (contenu informatif non urgent).
+- **ErrorState** — état d'erreur générique. `title`, `message?`, `action?` (slot retry). `role="alert"`
+  par défaut (assertif). Messages génériques uniquement — jamais de détails sensibles.
+- **SuccessState** — confirmation de succès. `title`, `message?`, `action?`. `role="status"` (poli,
+  non intrusif). Icône ✓ décorative (CSS `::before`).
 
 ```tsx
 <Button variant="primary" size="md" loading loadingText="Envoi…">Envoyer</Button>
@@ -219,7 +228,7 @@ nouvelle valeur cohérente.
 
 ## 18. Limites actuelles
 
-UI Kit 5 = tokens + **15 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**146 tests**, un seul runner, **0 vulnérabilité**).
+UI Kit 6 = tokens + **19 primitives Web** (Button/Input/Label/Text/Spinner/VisuallyHidden/Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton + LoadingState/EmptyState/ErrorState/SuccessState). Pas de bibliothèque complète, pas de Storybook, pas d'icônes, pas de docs visuelles. `danger` n'a pas (encore) de teinte hover/pressed dédiée dans les tokens. Breakpoints orientés Web. ESLint complet aligné plus tard au niveau monorepo (lint léger zéro-dépendance). Accessibilité : `jest-axe` couvre toutes les primitives ; les **contrastes** réels (calculés) restent à vérifier (non calculables sous jsdom). Tests composants : `node:test` + `global-jsdom` + Testing Library (**181 tests**, un seul runner, **0 vulnérabilité**).
 
 ## 19. Non implémenté (volontaire)
 

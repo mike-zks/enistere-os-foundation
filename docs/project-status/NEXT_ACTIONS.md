@@ -5,6 +5,20 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **UI Kit 6 — State primitives / états UI standards : RÉALISÉ** (2026-07-11).
+> 4 nouvelles primitives. **15 → 19 primitives**. **146 → 181 tests** (+35, 0 régression). Aucune nouvelle
+> dépendance. CSS : uniquement `var(--enistere-*)`, classes préfixées `enistere-`, aucun hex.
+> **LoadingState** : `<div role="status">` centré, Spinner interne décoratif, `message?`, `size?`.
+> **EmptyState** : `<div>` centré (pas de rôle ARIA imposé), `title` obligatoire, `description?`, `action?` slot.
+> **ErrorState** : `<div role="alert">` (assertif), `title`, `message?`, `action?`, glyphe ✕ décoratif CSS `::before`.
+> **SuccessState** : `<div role="status">` (poli), `title`, `message?`, `action?`, glyphe ✓ décoratif CSS `::before`.
+> `test/components-css.test.ts` et `test/consumers/react.consumer.tsx` mis à jour. `tokens:generate` régénéré,
+> `tokens:check` up-to-date. Docs : `docs/components.md`, `README.md`, project-status, `CHANGELOG.md` mis à jour.
+> `typecheck`/`lint`/`test 181/181`/`build`/`tokens:check`/`audit`/`diff --check` verts.
+>
+> **Prochaine action UNIQUE** : **à décider** — intégration des états UI Kit 6 dans le Web Core (remplacement des
+> composants LoadingState/EmptyState/ErrorState/SuccessState maison), ou nouvelle mission CLI/composant.
+
 > ✅ **Cloud Core CC11 — Durcissement opérationnel staging : RÉALISÉ** (2026-07-11).
 > Socle opérationnel du staging CC10 vérifié sur 5 axes :
 > **Health** : `staging.enistere.com` + `s3-staging.enistere.com` + `s3/health/live` = **200 HTTPS** ; API interne `health/ready` = **200** (DB up) ; TLS Let's Encrypt **`Verify return code: 0`**.

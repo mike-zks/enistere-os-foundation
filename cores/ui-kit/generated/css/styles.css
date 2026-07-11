@@ -544,6 +544,80 @@
   white-space: nowrap;
 }
 
+/* src/components/empty-state/empty-state.css */
+/* EmptyState — état vide neutre. Pas de rôle ARIA imposé (contenu informatif non urgent). */
+.enistere-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-8) var(--enistere-spacing-4);
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-muted);
+  text-align: center;
+}
+
+.enistere-empty-state__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-foreground-default);
+  line-height: var(--enistere-line-height-tight);
+}
+
+.enistere-empty-state__description {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  line-height: var(--enistere-line-height-normal);
+}
+
+.enistere-empty-state__action {
+  margin-top: var(--enistere-spacing-1);
+}
+
+/* src/components/error-state/error-state.css */
+/* ErrorState — état d'erreur. role="alert" par défaut (assertif). Glyphe via ::before, jamais couleur seule. */
+.enistere-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-8) var(--enistere-spacing-4);
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-muted);
+  text-align: center;
+}
+
+.enistere-error-state__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-status-danger);
+  line-height: var(--enistere-line-height-tight);
+}
+
+.enistere-error-state__title::before {
+  display: block;
+  margin-bottom: var(--enistere-spacing-2);
+  font-size: var(--enistere-font-size-xl);
+  font-weight: var(--enistere-font-weight-normal);
+  line-height: 1;
+  color: var(--enistere-color-status-danger);
+  content: "\2715"; /* ✕ */
+}
+
+.enistere-error-state__message {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  line-height: var(--enistere-line-height-normal);
+}
+
+.enistere-error-state__action {
+  margin-top: var(--enistere-spacing-1);
+}
+
 /* src/components/form-field/form-field.css */
 /* FormField — composition label/champ/aide/erreur pilotée par tokens. Light/dark via variables. */
 .enistere-form-field {
@@ -627,6 +701,26 @@
 }
 .enistere-label__required {
   color: var(--enistere-color-status-danger);
+}
+
+/* src/components/loading-state/loading-state.css */
+/* LoadingState — état de chargement. role="status" sur l'élément racine ; Spinner en mode décoratif. */
+.enistere-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-6) var(--enistere-spacing-4);
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-muted);
+  text-align: center;
+}
+
+.enistere-loading-state__message {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  line-height: var(--enistere-line-height-normal);
 }
 
 /* src/components/select/select.css */
@@ -802,6 +896,48 @@
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
   }
+}
+
+/* src/components/success-state/success-state.css */
+/* SuccessState — état de succès. role="status" par défaut (poli, non intrusif). Glyphe via ::before. */
+.enistere-success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--enistere-spacing-3);
+  padding: var(--enistere-spacing-8) var(--enistere-spacing-4);
+  font-family: var(--enistere-font-family-sans);
+  color: var(--enistere-color-foreground-muted);
+  text-align: center;
+}
+
+.enistere-success-state__title {
+  margin: 0;
+  font-size: var(--enistere-font-size-md);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-status-success);
+  line-height: var(--enistere-line-height-tight);
+}
+
+.enistere-success-state__title::before {
+  display: block;
+  margin-bottom: var(--enistere-spacing-2);
+  font-size: var(--enistere-font-size-xl);
+  font-weight: var(--enistere-font-weight-normal);
+  line-height: 1;
+  color: var(--enistere-color-status-success);
+  content: "\2713"; /* ✓ */
+}
+
+.enistere-success-state__message {
+  margin: 0;
+  font-size: var(--enistere-font-size-sm);
+  line-height: var(--enistere-line-height-normal);
+}
+
+.enistere-success-state__action {
+  margin-top: var(--enistere-spacing-1);
 }
 
 /* src/components/text/text.css */

@@ -16,11 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
   Divider,
+  EmptyState,
+  ErrorState,
   Input,
   Label,
+  LoadingState,
   Select,
   Skeleton,
   Spinner,
+  SuccessState,
   Text,
   Toast,
   ToastRegion,
@@ -28,8 +32,12 @@ import {
   type BadgeVariant,
   type ButtonProps,
   type DividerOrientation,
+  type EmptyStateProps,
+  type ErrorStateProps,
+  type LoadingStateProps,
   type SelectSize,
   type SkeletonVariant,
+  type SuccessStateProps,
   type TextElement,
   type ToastRegionPosition,
   type ToastVariant,
@@ -48,6 +56,10 @@ export function DemoForm() {
   const [open, setOpen] = useState(false);
   const toastVariant: ToastVariant = 'success';
   const toastPos: ToastRegionPosition = 'bottom-right';
+  const loadingProps: LoadingStateProps = { message: 'Chargement…' };
+  const emptyProps: EmptyStateProps = { title: 'Aucun résultat' };
+  const errorProps: ErrorStateProps = { title: 'Erreur' };
+  const successProps: SuccessStateProps = { title: 'Succès' };
 
   return (
     <section>
@@ -95,6 +107,11 @@ export function DemoForm() {
           Opération réussie.
         </Toast>
       </ToastRegion>
+
+      <LoadingState {...loadingProps} />
+      <EmptyState {...emptyProps} description="Essayez un autre filtre." action={<button>Créer</button>} />
+      <ErrorState {...errorProps} message="Veuillez réessayer." action={<button>Réessayer</button>} />
+      <SuccessState {...successProps} message="Enregistré." action={<button>Continuer</button>} />
     </section>
   );
 }

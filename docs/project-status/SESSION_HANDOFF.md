@@ -26,10 +26,10 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO, logging Pino, OpenAPI canonique, **`GET /files` liste paginée Files 5**) — **386 tests unitaires** + 101 e2e + **7 e2e Files 5** + revues. Statut :
   **IMPLEMENTATION_AVANCEE**.
-- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 15 primitives Web React**
+- **En cours** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
-  **Badge, Divider, Skeleton** — UI Kit 5) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
-  (**146 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
+  Badge, Divider, Skeleton — UI Kit 5 + **LoadingState, EmptyState, ErrorState, SuccessState** — UI Kit 6) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
+  (**181 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
   compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
   Statut : **IMPLEMENTATION_PARTIELLE** ; **consommé par le Web Core**.
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
@@ -340,18 +340,18 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Cloud Core CC11 — Durcissement opérationnel staging** (`cores/cloud/`) :
-socle opérationnel du staging CC10 vérifié et documenté sur 5 axes. Livrables :
-`cores/cloud/staging/scripts/backup-postgres.sh` (pg_dump gzip horodaté `chmod 600`, credentials depuis `.env`) ;
-`cores/cloud/staging/scripts/backup-minio.sh` (`minio/mc mirror`, réseau interne, credentials depuis `.env`) ;
-`cores/cloud/staging/scripts/rotate-smoke-account.sh` (`crypto.randomBytes(32)` argon2id, valeur non conservée) ;
-`cores/cloud/docs/CC11_OPERATIONAL_RUNBOOK.md` (health/backup/restore/rollback/rotation/checklist) ;
-`cores/cloud/docs/CC11_STAGING_OPERATIONAL_REPORT.md` (preuves exécutées : health ×3 200 HTTPS + TLS OK,
-backup PG 4.7 Ko + restore validé tous comptages, backup MinIO 1 fichier 67 B + restore test PASSED,
-rollback `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy, rotation smoke) ;
-`cores/cloud/docs/STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md` mis à jour (annexes CC10/CC11).
-**Aucun secret dans le dépôt. Staging CC10 reste HTTPS et fonctionnel.**
-**Prochaine action : à décider hors Cloud réel immédiat. RN31 reste bloqué par précondition externe macOS/Xcode ; les prochains tests de déploiement Cloud réel doivent être regroupés comme gate final, sauf décision explicite.**
+**UI Kit 6 — State primitives / états UI standards** (`cores/ui-kit/`) :
+4 nouvelles primitives d'état UI. **15 → 19 primitives**. **146 → 181 tests** (+35, 0 régression). Livrables :
+`loading-state/` (`<div role="status">` centré + Spinner décoratif + `message?`),
+`empty-state/` (`<div>` centré + `title` obligatoire + `description?` + `action?` slot),
+`error-state/` (`<div role="alert">` assertif + `title` + `message?` + `action?` + glyphe ✕ CSS `::before`),
+`success-state/` (`<div role="status">` poli + `title` + `message?` + `action?` + glyphe ✓ CSS `::before`).
+`test/components-css.test.ts` et `test/consumers/react.consumer.tsx` mis à jour.
+`tokens:generate` régénéré (`styles.css` up-to-date). `typecheck`/`lint`/`test 181/181`/`build`/`tokens:check`/`audit`/`diff --check` verts.
+**Prochaine action : à décider — intégration états UI Kit 6 dans le Web Core ou nouvelle mission.**
+
+**Étape précédente — Cloud Core CC11 — Durcissement opérationnel staging** (`cores/cloud/`) :
+socle opérationnel du staging CC10 vérifié sur 5 axes (health HTTPS ×3, backup PG + restore, backup MinIO + restore, rollback + roll-forward, rotation smoke). Scripts + runbook + rapport versionnés. Aucun secret dans le dépôt.
 
 **Étape précédente — Cloud Core CC10 — Staging réel HTTPS** (`cores/cloud/`) :
 `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, serveur staging Enistere. CI PR #73 verte.
