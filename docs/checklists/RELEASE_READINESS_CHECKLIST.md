@@ -39,9 +39,10 @@
 
 ### Protection de branche `main`
 
-- [ ] Vérifier que la protection de branche est activée (Settings → Branches dans GitHub)
+- [ ] Vérifier que la protection de branche est active via GitHub Rulesets (`protect-main`, enforcement `active`)
+- [ ] Vérifier que les 8 checks requis sont présents : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`
 - [ ] Si non activée : appliquer selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`
-- [ ] Si activée : noter la date dans `IMPLEMENTATION_MATRIX.md` ligne ADR-013
+- [ ] Si les checks `images` deviennent obligatoires : documenter la décision dans `IMPLEMENTATION_MATRIX.md` et `QUALITY_GATES_MATRIX.md`
 
 ---
 

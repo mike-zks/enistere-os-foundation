@@ -26,7 +26,7 @@ pas une application ni une bibliothèque complète).
 | Packages officiels | `@enistere/api-contracts` (**12 tests**), `@enistere/api-client-fetch` (**30 tests**) (validés **localement**, non publiés ; **instanciés (public + authentifié/BFF)** dans le Web Core — preuve API réelle ; **`FilesApi.list()` ajouté (Files 5)**, `files_list` dans schema.ts) |
 | Cloud Core | **`cores/cloud`** — **IMPLEMENTATION_PARTIELLE** (CC1 cadrage + **CC2 CI runtime API** + **CC3 CI E2E navigateur** + **CC10 staging réel HTTPS** + **CC11 durcissement opérationnel**) : `api-runtime-ci.yml` (PostgreSQL+MinIO jetables, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle API+PG+MinIO+Web + **Playwright/Chromium** : Health/Auth/Files) + cadrage (baseline, politiques, checklist branch protection) + **`docker-compose.cc10.yml` (reverse proxy compatible Traefik + Let's Encrypt ; `sha-5bf4c0f` ; 4 conteneurs `healthy` ; `staging.enistere.com` + `s3-staging.enistere.com` accessibles HTTPS ; auth BFF 200, upload MinIO VALIDATED, URL signée + téléchargement 200 — **bout-en-bout validé**)** + **CC11 (socle opérationnel vérifié) : health HTTPS 200 ×3 + TLS Let's Encrypt OK ; backup PostgreSQL 4.7 Ko gzip + restore validé (comptages lignes) ; backup MinIO + restore test objet PASSED ; rollback `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy ; rotation compte smoke argon2id (valeur non conservée) ; scripts + runbook + rapport versionnés** |
 | Core mobile (socle) | **`mobile-react-native`** — **STARTER_UI_KIT_ALIGNED** : socle Expo SDK 55 / Expo Router RN 1→34 + **RN35 alignement UI Kit** (2026-07-11). Primitives RN 1→25, Settings RN26, shell RN27, smoke Android RN28/RN29, préflight iOS RN30 bloqué Linux, RN31 en attente macOS/Xcode, RN32 formulaire sign-in, RN33 thème, RN34 patch Expo SDK. **RN35** : tokens hex/typographie/radius alignés verbatim UI Kit (`cores/ui-kit/generated/typescript/tokens.ts` tokensVersion 0.1.0) ; aliases `LoadingView`/`EmptyView`/`ErrorView` ; 13 tests token-alignment + 367/367 `node --test` total ; `ARCHITECTURE.md` §40 documentant l'alignement. Preuves : typecheck + lint + **test 367/367** `node --test` + expo-doctor **19/19** + `expo export -p ios` + `npm audit` 0 vuln + `git diff --check` verts. `npm run smoke:android` **passed** (`emulator-5554` / Pixel_6a, 2026-07-08). `npm run smoke:ios` blocked (Linux). Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, nouvelle dépendance, retry branché ni changement Auth/Query. |
-| Cores documentaires | **`quality-core`** — **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11) : `CORE_SPECIFICATION.md`, `README.md`, `QUALITY_GATES_MATRIX.md` (matrice 8 cores × 11 gates), `BRANCH_PROTECTION_RUNBOOK.md` (10 noms de checks exacts), **`RELEASE_PROCESS_RUNBOOK.md`** (5 types de release, 8 étapes, format notes, convention tagging). **Templates GitHub** (QC4) : `.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/` (bug/feature/security). Checklists : `docs/checklists/` (3). Scripts : `scripts/quality-gates.mjs` (7 scopes) + `scripts/quality-gates.test.mjs` (**36/36 tests**). **Protection branche `main` : documentée, non appliquée** (action humaine requise). Aucun workflow modifié, aucune dépendance, aucun changement runtime. _(aucun autre core documentaire ; `mobile-react-native` est passé au starter ci-dessus)_ |
+| Cores documentaires | **`quality-core`** — **SPECIFICATION_DOCUMENTAIRE** (Governance 3, 2026-07-11) : `CORE_SPECIFICATION.md`, `README.md`, `QUALITY_GATES_MATRIX.md`, `BRANCH_PROTECTION_RUNBOOK.md`, **`RELEASE_PROCESS_RUNBOOK.md`**, templates GitHub PR/Issues, 3 checklists, `scripts/quality-gates.mjs` + tests (**36/36**). **Protection `main` active via GitHub Rulesets** (`protect-main`, enforcement `active`, 8 checks requis). Aucun workflow modifié, aucune dépendance, aucun changement runtime. _(aucun autre core documentaire ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
 | **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après Quality Core 5 (`15f34ea`, PR #84) ; flux PR actif |
@@ -190,7 +190,7 @@ Node 24, `npm ci`, `permissions: contents:read`, `concurrency`) impose l'ordre d
 api-client-fetch → ui-kit → web-nextjs → audit** : `generate:check`, typecheck/lint/build/test, `pack:check`
 UI Kit, **build Web indépendant de l'API**, `npm audit` (0 vuln) et **gardes Axios/Zustand absents**
 (ADR-011/012). **Aucun secret, aucun Docker, aucune base/stockage, aucun déploiement, aucun registry.**
-**Restent** (au-delà de la CI minimale `ci.yml`) : protection de branche, couverture publiée, release/versioning,
+**Restent** (au-delà de la CI minimale `ci.yml`) : couverture publiée, release/versioning,
 déploiement, environnements protégés. **ADR-014 (registry/GHCR) → `PARTIELLEMENT_IMPLEMENTE`** (Cloud Core 5,
 ci-dessous : build + push images). Détail : `.github/workflows/README.md`.
 Le **Cloud Core 1** (cadrage) gouverne cette CI ; le **Cloud Core 2** ajoute le **niveau 2**
@@ -204,7 +204,8 @@ non-root, Web **standalone**) : build des images + **push GHCR sur `main`** (tag
 **pas de `latest`**, labels OCI, auth `GITHUB_TOKEN`, **aucun secret/PAT/`.env`**) — **sans déploiement**.
 **Politique CI à 4 niveaux** : 1–3 présents, **4 partiel** (registry ; déploiement futur). Le **Cloud Core 4** a figé les
 **7 checks** à rendre bloquants sur `main` (= `name:` des jobs) et tranché les politiques artefacts/couverture/
-pinning ; la protection de branche `main` reste une **action humaine manuelle**. Enfin le **Cloud Core 5** a
+pinning ; **la protection `main` est désormais active via GitHub Rulesets** (`protect-main`, Governance 3).
+Enfin le **Cloud Core 5** a
 livré la **registry GHCR** (niveau 4 partiel) : `registry-ci.yml` + Dockerfiles API/Web (multi-stage, non-root,
 Web standalone) → build + **push images sur `main`** (tags immuables, labels OCI, `GITHUB_TOKEN`, **sans
 déploiement/secret/PAT**) — `docker build` API+Web **validé localement**, ADR-014 → `PARTIELLEMENT_IMPLEMENTE`.
@@ -288,7 +289,7 @@ Puis **RN 30 — smoke runtime iOS / parity device BLOQUÉ PROPREMENT**
 (`mobile-react-native` → **STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT** ; `npm run smoke:ios`, rapport JSON
 `blocked`, hôte Linux sans `xcrun`, procédure macOS/device documentée, aucune preuve iOS artificielle).
 **CC11 RÉALISÉ** (2026-07-11) — socle opérationnel : health HTTPS ×3 + TLS, backup PG 4.7 Ko + restore validé, backup MinIO + restore test objet, rollback `sha-484f98d` + roll-forward `sha-5bf4c0f`, rotation compte smoke. Scripts versionnés + runbook + rapport. **Prochaine action** : à décider hors Cloud réel immédiat ; RN31 reste bloqué par précondition externe macOS/Xcode, et les prochains tests de déploiement Cloud réel doivent être regroupés comme gate final.
-**Actions humaines** : protection de branche `main` (7 checks + `images` requis) + rendre `api-smoke` requis.
+**Actions humaines restantes** : décider si les deux checks `images` doivent devenir requis phase 2.
 > **Governance 1 (2026-07-09)** : revue de cohérence CI/gouvernance après Files 7. Checks CI vérifiés alignés avec la documentation (noms de jobs = checks documentés exactement). Corrections : `README.md` workflows (ADR-014 `NON_IMPLEMENTE` → `PARTIELLEMENT_IMPLEMENTE` + niveaux 1–3+4 partiel) ; `SESSION_HANDOFF.md` §5 (statut mobile `RETRY_READY` → `STARTER_EXPO_DOCTOR_GREEN`). Aucun workflow modifié.
 > **V1 Gap 1 (2026-07-10)** : route group `(public)/` ajouté — layout public Server Component (header nav + footer), landing page statique à `/` (SEO `robots:index:true`, `openGraph`, h1 "Enistère OS Foundation"), page technique de statut déplacée à `/status`, `robots.ts`, `sitemap.ts`. **Critère §56 #11 fermé** (SEO baseline). **Critère #3 avancé** (layout public présent, dashboard layout = V1 Gap 2). **Readiness V1 : 12/14.** `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts.
 > **V1 Gap 2 (2026-07-10)** : `DashboardShell` Server Component ajouté (`src/features/dashboard/dashboard-shell.tsx`) — header de navigation protégé (Accueil/Fichiers/Envoyer un fichier). Intégré dans `(protected)/layout.tsx` uniquement sur le chemin authentifié. Liens `<a>` natifs (compatibilité `tsconfig.test.json`). Test E2E ajouté (nav dashboard — 14 → 15 tests). **Critère §56 #3 fermé** (layouts standards : public ✓ + dashboard/protégé ✓). **Readiness V1 : 13/14.** Seul #9 (RHF+Zod) reste. `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts.
@@ -309,8 +310,9 @@ détaillée du API Core.
    dérive si le contrat évolue sans régénération (mitigé par `generate:check`, non automatisé).
 3. **Spécifications sans starter** — `cloud` peut être lu à tort comme implémenté (PARTIEL/PAUSE). `mobile-react-native` dispose d'un socle vérifié et rejouable localement (**STARTER_EXPO_DOCTOR_GREEN** : primitives RN 1→25 + Settings RN26 + runtime RN27 + smoke Android RN28/RN29/RN34B + préflight iOS RN30 bloqué Linux + formulaire RN32 + thème RN33 + Expo doctor RN34) ≠ implémentation complète (V1 partielle : écran/picker d'upload, push distant réel + token device, adaptateurs natifs réels, catalogues métier i18n + routes concrètes, SDK analytics/crash réels, application exhaustive des props a11y, offline sync réelle, remote-config réel, biométrie réelle, store préférences natif, UI consentement, backend d'observabilité — différés).
 4. **CI minimale en place** (`.github/workflows/ci.yml`) — non-régression du monorepo automatisée (ordre de
-   build imposé, `npm ci`, audit, gardes deps). Risque résiduel : **pas de protection de branche**, pas d'E2E
-   navigateur, pas de CI runtime API ; reproductibilité hors-CI (clone local) à documenter.
+   build imposé, `npm ci`, audit, gardes deps). Protection `main` active via GitHub Rulesets (8 checks requis).
+   Risque résiduel : pas de couverture publiée ni de release/versioning formalisé ; reproductibilité hors-CI
+   (clone local) à documenter.
 5. **Strategy Phase 0 partiellement datée** — contexte historique à ne pas confondre avec l'état réel.
 6. **Image runtime API — défaut Prisma engine CORRIGÉ (Cloud Core 8)** : le query engine de `.prisma/client`
    était compilé pour **OpenSSL 1.1.x** vs runtime **bookworm 3.0.x** (crash-loop). Corrigé via `binaryTargets`
@@ -382,9 +384,9 @@ durcissement CI & gouvernance de branche** (documentaire) a **figé les 7 checks
 (`api-contracts`/`api-client-fetch`/`ui-kit`/`web-nextjs`/`audit` + `api-runtime` + `web-e2e`) et **tranché les
 politiques** : artefacts = aucun upload (Option A), couverture = exécutée non publiée, pinning = `@v4` (SHA
 futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
-ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection de branche documentée non appliquée**) et
+ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection `main` active via GitHub Rulesets**) et
 ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
-**Prochaine action humaine** : appliquer la protection de branche `main` selon `BRANCH_PROTECTION_RUNBOOK.md`.
+**Prochaine action humaine** : décider si les deux checks `images` doivent devenir requis phase 2.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

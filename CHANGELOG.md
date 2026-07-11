@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Governance 3 — Protection `main` vérifiée active via GitHub Rulesets
+
+- Protection `main` vérifiée côté GitHub via Rulesets : `protect-main` (`ruleset_id=17522775`), target `branch`, enforcement `active`, condition `~DEFAULT_BRANCH`.
+- Règles actives documentées : suppression interdite, non-fast-forward interdit, Pull Request obligatoire, conversations résolues obligatoires, status checks stricts.
+- Checks requis actifs : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`.
+- Les deux checks `images (...)` restent recommandés phase 2 et ne sont pas requis actuellement.
+- Docs alignées : Quality Core, workflows README, project-status, ADR-013. Aucun workflow, runtime, dépendance, tag ou release GitHub modifié.
+
 ### Governance 2 — Alignement des statuts Quality Core après QC5
 
 - `FOUNDATION_CURRENT_STATE.md` : correction des vues synthétiques qui listaient encore `quality-core` comme dossier vide ; le core est désormais cohérentement indiqué `SPECIFICATION_DOCUMENTAIRE` avec QC5.

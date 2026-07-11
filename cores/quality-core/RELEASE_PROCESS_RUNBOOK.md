@@ -352,12 +352,13 @@ Une phrase décrivant l'essentiel de la release.
 
 ### Limites connues
 
-- Protection de branche `main` : documentée, non appliquée (action humaine requise)
+- Protection de branche `main` : active via GitHub Rulesets (`protect-main`, 8 checks requis)
 - Mobile RN31 : iOS smoke bloqué macOS/Xcode
 
 ### Prochaine action
 
-Activer la protection de branche `main` selon `BRANCH_PROTECTION_RUNBOOK.md`.
+Prochaine action : API Core VALIDE_V1 review, ou décider si les deux checks `images`
+doivent devenir requis dans le ruleset `protect-main`.
 ```
 
 ---

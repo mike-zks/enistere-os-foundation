@@ -176,13 +176,12 @@ Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La p
 
 ### Checks requis pour la protection de `main` (Cloud Core 4 / Quality Core 3)
 
-Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). Checks à rendre
-**bloquants** sur `main` (application **manuelle**, action humaine —
-procédure détaillée : [`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`](../../cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md)) :
+Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). Protection `main`
+appliquée via GitHub Rulesets (`protect-main`, enforcement `active`) :
 
-**Statut courant : documenté, non appliqué.**
+**Statut courant : actif via ruleset.** Preuve : `gh api repos/mike-zks/enistere-os-foundation/rulesets/17522775`.
 
-| # | Check (nom exact) | Workflow | Requis dès maintenant |
+| # | Check (nom exact) | Workflow | Statut ruleset |
 |---|---|---|---|
 | 1 | `api-contracts` | `ci.yml` | ✅ oui |
 | 2 | `api-client-fetch` | `ci.yml` | ✅ oui |
@@ -192,8 +191,8 @@ procédure détaillée : [`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`](../
 | 6 | `api-runtime` | `api-runtime-ci.yml` | ✅ oui |
 | 7 | `web-e2e` | `web-e2e-ci.yml` | ✅ oui |
 | 8 | `api-smoke` | `registry-ci.yml` | ✅ oui |
-| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
-| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2 |
+| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
+| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
 
 > **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour.
 > Les noms actuels sont **stables**. Voir le runbook pour la procédure complète, les options
@@ -208,6 +207,6 @@ procédure détaillée : [`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`](../
 - **Lint workflows** : `actionlint` **futur** (non installé) ; validation actuelle = parse YAML + simulations.
 
 **Aucun déploiement** dans ces workflows (Cloud Core 4 n'ajoutait pas le registre). ADR-013 reste
-**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 + niveau 4 partiel [`registry-ci.yml`] ; manque
-protection de branche appliquée — action humaine) ; ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** (registry
+**`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 + niveau 4 partiel [`registry-ci.yml`] + ruleset
+`protect-main` actif ; restent couverture/release/déploiement/environnements) ; ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** (registry
 GHCR — `registry-ci.yml`, Cloud Core 5).
