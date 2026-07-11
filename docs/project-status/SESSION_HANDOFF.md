@@ -82,7 +82,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   CC10 STAGING RÉEL HTTPS VALIDÉ** (`CC10_STAGING_DEPLOYMENT_REPORT.md`, `docker-compose.cc10.yml`) :
   Traefik v3.0 + Let's Encrypt HTTP-01, images `sha-5bf4c0f`, `37.27.31.5` — **4 conteneurs `healthy`** ;
   `staging.enistere.com` **200 HTTPS** ; `s3-staging.enistere.com` **200 HTTPS** ; seed RBAC 12 permissions
-  + rôles ; utilisateur test `administrator` ; **auth BFF 200** (CSRF → login → `/me` → `/authorization`) ;
+  + rôles ; utilisateur test `administrator` non documenté ; **auth BFF 200** (CSRF → login → `/me` → `/authorization`) ;
   **upload PNG → MinIO VALIDATED 200** ; **URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement
   200** (Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.** **Restent** :
   environnements protégés, monitoring, rollback automatisé, scan/signature image, `api-smoke` requis.

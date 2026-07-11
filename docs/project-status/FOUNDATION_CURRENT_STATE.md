@@ -77,7 +77,7 @@ enistere-os-foundation/
 |---|---|---|---|---|
 | `api-nestjs` | oui | oui | **oui** | **IMPLEMENTATION_AVANCEE** |
 | `ui-kit` | oui | oui | **oui** (tokens + primitives Web, React 19) | **IMPLEMENTATION_PARTIELLE** |
-| `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs + **CC10 staging HTTPS réel** : Traefik + Let's Encrypt + `docker-compose.cc10.yml` + 4 conteneurs `healthy` sur `37.27.31.5` ; seed + e2e en cours) | **IMPLEMENTATION_PARTIELLE** |
+| `cloud` | oui | oui | **partiel** (CI runtime API + cadrage docs + **CC10 staging HTTPS réel** : Traefik + Let's Encrypt + `docker-compose.cc10.yml` + 4 conteneurs `healthy` sur `37.27.31.5` ; auth/upload/URL signée/téléchargement validés) | **IMPLEMENTATION_PARTIELLE** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + BFF Files + layouts public/protégé + RHF+Zod ; 14/14 critères §56 ; 450 tests + 15 E2E) | **VALIDE_V1** |
 | `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→25 ; Settings protégé RN26 ; durcissement runtime RN27 ; smoke visuel Android Emulator RN28 ; smoke runtime local RN29 ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; **formulaire sign-in RN32**, **préférence thème RN33**, **doctor Expo green RN34**, **smoke Android RN34B passé**) | **STARTER_EXPO_DOCTOR_GREEN** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
@@ -284,7 +284,7 @@ reverse`, pilotage par labels UI Android, rapport JSON `passed` sur `emulator-55
 Puis **RN 30 — smoke runtime iOS / parity device BLOQUÉ PROPREMENT**
 (`mobile-react-native` → **STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT** ; `npm run smoke:ios`, rapport JSON
 `blocked`, hôte Linux sans `xcrun`, procédure macOS/device documentée, aucune preuve iOS artificielle).
-**Prochaine action** : **Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel** (précondition externe — Linux sans `xcrun`) ; à défaut, décision de pilotage entre **UI Kit 5** (primitives complémentaires) et **Cloud Core CC10** (staging serveur réel, si infrastructure disponible).
+**Prochaine action** : **Cloud Core 11 — durcissement opérationnel du staging** (monitoring/backup/restore/rollback/checklist post-déploiement) ; **Mobile Core React Native 31** reste bloqué par précondition externe macOS/Xcode.
 **Actions humaines** : protection de branche `main` (7 checks + `images` requis) + rendre `api-smoke` requis.
 > **Governance 1 (2026-07-09)** : revue de cohérence CI/gouvernance après Files 7. Checks CI vérifiés alignés avec la documentation (noms de jobs = checks documentés exactement). Corrections : `README.md` workflows (ADR-014 `NON_IMPLEMENTE` → `PARTIELLEMENT_IMPLEMENTE` + niveaux 1–3+4 partiel) ; `SESSION_HANDOFF.md` §5 (statut mobile `RETRY_READY` → `STARTER_EXPO_DOCTOR_GREEN`). Aucun workflow modifié.
 > **V1 Gap 1 (2026-07-10)** : route group `(public)/` ajouté — layout public Server Component (header nav + footer), landing page statique à `/` (SEO `robots:index:true`, `openGraph`, h1 "Enistère OS Foundation"), page technique de statut déplacée à `/status`, `robots.ts`, `sitemap.ts`. **Critère §56 #11 fermé** (SEO baseline). **Critère #3 avancé** (layout public présent, dashboard layout = V1 Gap 2). **Readiness V1 : 12/14.** `typecheck`/`lint`/`test 446/446`/`build`/`audit`/`diff --check` verts.

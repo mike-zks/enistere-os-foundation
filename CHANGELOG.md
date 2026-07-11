@@ -13,7 +13,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
   - **`.env.staging.example`** : mis à jour CC10 — `S3_ENDPOINT=https://s3-staging.enistere.com` (HTTPS via Traefik), `APP_ENV=production` (cookies `__Host-` + Secure), `CORS_ORIGINS`/`WEB_ALLOWED_ORIGINS` HTTPS, Argon2 params renforcés (`memoryCost=65536`, `timeCost=3`). Ports hôte supprimés.
   - **`CC10_STAGING_DEPLOYMENT_REPORT.md`** : rapport de déploiement (sans secrets) — architecture réseau, labels Traefik, étapes d'exécution, état des conteneurs, décisions techniques.
   - **Seed RBAC** : 12 permissions structurelles (`files.*`, `users.read`, `roles.*`, `permissions.*`, `audit.read`) + rôles `administrator` (toutes permissions) / `user`. Script JS pur (`seed.js`) monté en volume dans le conteneur (pas de `ts-node` en prod ; `@node-rs/argon2` disponible). Idempotent.
-  - **Utilisateur test** : `admin@enistere-staging.local` / `Staging2026!`, argon2id, rôle `administrator`.
+  - **Utilisateur test** : compte staging `administrator` créé pour validation, identifiant et mot de passe non documentés ; rotation/suppression requise après smoke.
   - **Validation bout-en-bout** : auth BFF CSRF → login **200**, `/me` **200**, `/authorization` **200** (12 permissions) ; upload PNG → MinIO **VALIDATED 200** ; URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement **200** (Cloudflare → Traefik → MinIO). **Validation complète.**
   - **Aucun secret dans le dépôt.** `.env.staging` sur le serveur : `chmod 600`, hors dépôt.
 

@@ -85,7 +85,7 @@ traefik.http.services.enistere-staging.loadbalancer.server.port=3000
 | §14 | `GET https://s3-staging.enistere.com/minio/health/live` | ✅ **200** (TLS valide) |
 | §15 | `GET https://staging.enistere.com/protected` (anonyme) | ✅ **200** (App Router streaming redirect → `/login?returnTo=%2Fprotected`) |
 | §16 | Seed RBAC structurel (12 permissions + rôles `administrator`/`user`) | ✅ Via `docker compose run --rm -v seed.js:/app/seed.js api node /app/seed.js` (JS pur — `ts-node` absent en prod) |
-| §17 | Création utilisateur test `admin@enistere-staging.local` + rôle `administrator` | ✅ Upsert idempotent dans le seed (argon2id, params env) |
+| §17 | Création utilisateur test + rôle `administrator` | ✅ Upsert idempotent dans le seed (argon2id, params env) ; identifiant et mot de passe non documentés |
 | §18 | `GET /api/auth/csrf` → `POST /api/auth/login` (BFF) | ✅ **200** — `authenticated:true`, cookies `__Host-` posés |
 | §19 | `GET /api/auth/me` (session) | ✅ **200** — profil retourné (email, id, status ACTIVE) |
 | §20 | `GET /api/auth/authorization` (RBAC) | ✅ **200** — `roles:["administrator"]`, 12 permissions confirmées |
@@ -132,6 +132,7 @@ enistere-staging-web-1       ghcr.io/mike-zks/enistere-os-foundation/web-nextjs:
 ## 8. Sécurité
 
 - Aucun secret dans le dépôt ou dans ce rapport.
+- Identifiant et mot de passe du compte test staging non documentés ; rotation/suppression recommandée après smoke.
 - PostgreSQL inaccessible depuis Internet (réseau interne uniquement).
 - MinIO console (port 9001) non exposée via Traefik (seul le port 9000 — API S3 — est routé).
 - `APP_ENV=production` → cookies `__Host-` + `Secure` (HTTPS imposé).
