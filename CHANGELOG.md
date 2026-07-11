@@ -6,6 +6,18 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core 2 — Script local de sélection des gates qualité
+
+- **`cores/quality-core/scripts/quality-gates.mjs`** (nouveau) : script Node 24, sans dépendance externe. Commandes : `list`, `plan <scope>`, `run <scope>`. 7 scopes : `docs` / `packages` / `ui-kit` / `web` / `root-audit` / `mobile-static` / `all-safe`.
+- Mode `plan` : affiche les commandes dans l'ordre, working directory réel, gates exclus — sans exécuter.
+- Mode `run` : exécute séquentiellement, arrêt au premier échec, code de sortie propagé, résumé court.
+- Gates **systématiquement exclus** de tous les scopes : Cloud / staging (runbook CC11), smoke:android / smoke:ios (device/émulateur requis), E2E Playwright (stack réelle), api-nestjs e2e (PG+MinIO requis).
+- Scope `all-safe` = packages + ui-kit + web + root-audit (17 étapes) — entrypoint recommandé pré-PR.
+- **`cores/quality-core/scripts/quality-gates.test.mjs`** (nouveau) : **36/36 tests node:test** — vérifient la construction des plans (scopes inconnus, composition all-safe, exclusions, structure des steps) sans exécuter de commande réelle.
+- Documentation mise à jour : `README.md` (section script), `QUALITY_GATES_MATRIX.md` (§5 + en-tête), `PR_QUALITY_CHECKLIST.md` (usage optionnel), `CORE_SPECIFICATION.md` (note Quality Core 2).
+- Aucun workflow GitHub modifié. Aucune dépendance ajoutée. Aucun changement runtime.
+- Vérifications : `node cores/quality-core/scripts/quality-gates.mjs list` ✓, `plan all-safe` ✓, `plan mobile-static` ✓, tests 36/36 ✓, `git diff --check` ✓, `npm audit` 0 vuln ✓.
+
 ### Quality Core 1 — Cadrage opérationnel des gates qualité V2
 
 - **Démarrage** : `cores/quality-core` passe de `DOSSIER_SEULEMENT` à **`SPECIFICATION_DOCUMENTAIRE`** (2026-07-11).

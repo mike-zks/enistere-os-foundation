@@ -8,6 +8,8 @@
 
 ## 1. Cores et packages
 
+> **Mise à jour Quality Core 2 (2026-07-11)** : `scripts/quality-gates.mjs` ajouté (Node 24, sans dépendance) — `list` / `plan <scope>` / `run <scope>` ; 7 scopes (`docs`/`packages`/`ui-kit`/`web`/`root-audit`/`mobile-static`/`all-safe`) ; arrêt au premier échec, code de sortie propagé. Tests : `scripts/quality-gates.test.mjs` (**36/36 tests node:test**, vérification des plans sans exécution). Statut : **SPECIFICATION_DOCUMENTAIRE** (inchangé). Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+>
 > **Mise à jour Quality Core 1 (2026-07-11)** : Quality Core passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` créés dans `cores/quality-core/`. Checklists PR/release/revue créées dans `docs/checklists/`. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour UI Kit VALIDE_V1 review (2026-07-11)** : Le UI Kit passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`** après revue officielle (rapport `UI_KIT_V1_READINESS_REVIEW.md` §8). Critères §12.4 **4/4** + §59 **9/9**. Justification : tokens ADR-008 ✅, 19 primitives Web testées et documentées, consommation Web Core VALIDE_V1 prouvée, cohérence mobile/web prouvée par RN35 (tokens verbatim + 13 tests). Réserves non bloquantes documentées (§10) : Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core (ADR-010 intentionnel). Vérifications : typecheck ✅ lint ✅ 181/181 ✅ build ✅ tokens:check ✅ audit 0 vuln ✅ diff --check ✅.
@@ -29,7 +31,7 @@
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-034 |
-| Quality Core | ✓ | ✓ | — | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists (Quality Core 1, 2026-07-11) | — (V1 documentaire déclaré) |
+| Quality Core | ✓ | ✓ | — | — | ✓ (36 tests node:test) | — | — | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists + `scripts/quality-gates.mjs` + 36 tests (Quality Core 2, 2026-07-11) | — (V1 documentaire déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 
 ## 2. Infrastructure transverse

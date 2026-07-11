@@ -1,14 +1,16 @@
 # PR_QUALITY_CHECKLIST.md — Checklist qualité par type de PR
 
 > Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`.
-> Dernière mise à jour : 2026-07-11 (Quality Core 1).
+> Dernière mise à jour : 2026-07-11 (Quality Core 2).
+> Script optionnel : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>` pour voir les gates d'un scope sans les exécuter.
 
 ## Comment utiliser cette checklist
 
 1. Identifier le type de la PR dans la table ci-dessous.
-2. Exécuter les gates minimaux **avant d'ouvrir la PR**.
-3. Exécuter les gates recommandés si le type de PR le justifie.
-4. Cocher les cases dans la description de la PR ou dans la revue.
+2. Optionnel : visualiser le plan avant d'exécuter — `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`.
+3. Exécuter les gates minimaux **avant d'ouvrir la PR** (manuellement ou via `run <scope>`).
+4. Exécuter les gates recommandés si le type de PR le justifie.
+5. Cocher les cases dans la description de la PR ou dans la revue.
 
 ---
 
