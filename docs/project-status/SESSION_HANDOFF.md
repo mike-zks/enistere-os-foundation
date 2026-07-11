@@ -84,8 +84,14 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   `staging.enistere.com` **200 HTTPS** ; `s3-staging.enistere.com` **200 HTTPS** ; seed RBAC 12 permissions
   + rôles ; utilisateur test `administrator` non documenté ; **auth BFF 200** (CSRF → login → `/me` → `/authorization`) ;
   **upload PNG → MinIO VALIDATED 200** ; **URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement
-  200** (Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.** **Restent** :
-  environnements protégés, monitoring, rollback automatisé, scan/signature image, `api-smoke` requis.
+  200** (Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.**
+  **+ CC11 SOCLE OPÉRATIONNEL VÉRIFIÉ** (`CC11_STAGING_OPERATIONAL_REPORT.md`, `CC11_OPERATIONAL_RUNBOOK.md`) :
+  health HTTPS ×3 + TLS Let's Encrypt `Verify return code: 0` ; backup PG `staging-pg-*.sql.gz` **4.7 Ko** + restore
+  validé (tous comptages) ; backup MinIO 1 fichier 67 B + restore test objet PASSED + nettoyé ; rollback
+  `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy ; rotation smoke `admin@enistere-staging.local`
+  argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
+  **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
+  scan/signature image, `api-smoke` requis.
 - **Socle mobile Expo doctor green + smoke Android validé** : `mobile-react-native` → **`STARTER_EXPO_DOCTOR_GREEN`** — **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
@@ -334,7 +340,23 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Web Core Files 7 — Admin BFF quarantaine/restauration** (`cores/web-nextjs/`) :
+**Cloud Core CC11 — Durcissement opérationnel staging** (`cores/cloud/`) :
+socle opérationnel du staging CC10 (`37.27.31.5`) vérifié et documenté sur 5 axes. Livrables :
+`cores/cloud/staging/scripts/backup-postgres.sh` (pg_dump gzip horodaté `chmod 600`, credentials depuis `.env`) ;
+`cores/cloud/staging/scripts/backup-minio.sh` (`minio/mc mirror`, réseau interne, credentials depuis `.env`) ;
+`cores/cloud/staging/scripts/rotate-smoke-account.sh` (`crypto.randomBytes(32)` argon2id, valeur non conservée) ;
+`cores/cloud/docs/CC11_OPERATIONAL_RUNBOOK.md` (health/backup/restore/rollback/rotation/checklist) ;
+`cores/cloud/docs/CC11_STAGING_OPERATIONAL_REPORT.md` (preuves exécutées : health ×3 200 HTTPS + TLS OK,
+backup PG 4.7 Ko + restore validé tous comptages, backup MinIO 1 fichier 67 B + restore test PASSED,
+rollback `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy, rotation smoke) ;
+`cores/cloud/docs/STAGING_DEPLOYMENT_RUNBOOK.md` + `STAGING_ROLLBACK_RUNBOOK.md` mis à jour (annexes CC10/CC11).
+**Aucun secret dans le dépôt. Staging CC10 reste HTTPS et fonctionnel.**
+**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode — précondition externe, hôte Linux sans `xcrun`).**
+
+**Étape précédente — Cloud Core CC10 — Staging réel HTTPS** (`cores/cloud/`) :
+`docker-compose.cc10.yml`, Traefik v3.0 + Let's Encrypt HTTP-01, `sha-5bf4c0f`, `37.27.31.5`. CI PR #73 verte.
+
+**Étape précédente — Web Core Files 7 — Admin BFF quarantaine/restauration** (`cores/web-nextjs/`) :
 ajoute les BFF handlers et primitives UI minimales pour consommer les capacités admin Files déjà présentes côté
 API, sans nouveau comportement API et sans proxy générique. Livrables : `handleQuarantineFile` /
 `handleRestoreFile` (ordre `assertPost` → UUID → CSRF+Origin → client `writable` → 409 explicite
@@ -342,10 +364,7 @@ API, sans nouveau comportement API et sans proxy générique. Livrables : `handl
 navigateur `quarantineFile` / `restoreFile` (same-origin, `credentials:include`, CSRF, jamais Bearer),
 hooks `useQuarantineFile` / `useRestoreFile` (mutation sans `mutationKey`, anti-double-soumission, invalidation
 `fileKeys.all`), `AdminFileActions` (rendu conditionnel par permissions `files.quarantine` / `files.restore`)
-et page séparée `/protected/files/[id]/admin`. **+53 tests, Web 393 → 446**. CI PR #64 verte :
-`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`,
-images API/Web.
-**Prochaine action : Mobile Core React Native 31 (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou Web Core — CI minimale / réserve transverse ADR-013.**
+et page séparée `/protected/files/[id]/admin`. **+53 tests, Web 393 → 446**. CI PR #64 verte.
 
 **Étape précédente — API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
 ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant.

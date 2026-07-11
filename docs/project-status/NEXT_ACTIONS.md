@@ -5,6 +5,17 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Cloud Core CC11 — Durcissement opérationnel staging : RÉALISÉ** (2026-07-11).
+> Socle opérationnel du staging CC10 (`37.27.31.5`) vérifié sur 5 axes :
+> **Health** : `staging.enistere.com` + `s3-staging.enistere.com` + `s3/health/live` = **200 HTTPS** ; API interne `health/ready` = **200** (DB up) ; TLS Let's Encrypt **`Verify return code: 0`**.
+> **Backup PostgreSQL** : `backup-postgres.sh` → `staging-pg-*.sql.gz` **4.7 Ko** horodaté `chmod 600` ; restore test `enistere_staging_restore` → comptages exacts (Permission 12, Role 2, User 1, RolePermission 12, UserRole 1) ; DB temporaire supprimée.
+> **Backup MinIO** : `backup-minio.sh` → **1 fichier 67 B** (`minio/mc mirror`) ; restore test objet dans `restore-test/` → **succès** ; nettoyé.
+> **Rollback image** : `sha-484f98d` déployé **`healthy`** (web 200 + status 200) ; roll-forward `sha-5bf4c0f` **`healthy`** (web 200 + status 200).
+> **Rotation smoke** : `rotate-smoke-account.sh` → `admin@enistere-staging.local` argon2id regénéré — **valeur non conservée**.
+> Livrables versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`, `CC11_OPERATIONAL_RUNBOOK.md`, `CC11_STAGING_OPERATIONAL_REPORT.md`. **Aucun secret dans le dépôt.**
+>
+> **Prochaine action UNIQUE** : **Mobile Core React Native 31** — iOS smoke sur macOS/Xcode. **RN31 reste bloqué** tant qu'aucun hôte macOS/Xcode n'est disponible.
+
 > ✅ **Cloud Core CC10 — Staging réel HTTPS : RÉALISÉ** (2026-07-11).
 > `docker-compose.cc10.yml` : Traefik v3.0 + Let's Encrypt HTTP-01, images `sha-5bf4c0f`, serveur `37.27.31.5`.
 > 4 conteneurs `healthy`. `staging.enistere.com` = **200 HTTPS** (Let's Encrypt valide via Cloudflare).
@@ -14,9 +25,7 @@
 > Upload PNG → MinIO **VALIDATED 200**. URL pré-signée `https://s3-staging.enistere.com/...` → téléchargement
 > **200** (67 octets, Cloudflare → Traefik → MinIO). **Bout-en-bout validé. Aucun secret dans le dépôt.**
 >
-> **Prochaine action UNIQUE** : **Cloud Core 11** — durcissement opérationnel du staging réel : monitoring
-> health externe, backup/restore PostgreSQL+MinIO, rollback image documenté/testé, rotation/suppression du
-> compte smoke, checklist post-déploiement. **RN31 reste bloqué** tant qu'aucun hôte macOS/Xcode n'est disponible.
+> **Prochaine action UNIQUE** : **Cloud Core 11** — réalisé (voir ci-dessus).
 
 > ✅ **UI Kit 5 — Primitives data/feedback légères (Badge / Divider / Skeleton) : RÉALISÉ** (2026-07-10).
 > 3 nouvelles primitives. **12 → 15 primitives**. **121 → 146 tests** (+25, 0 régression). Aucune nouvelle

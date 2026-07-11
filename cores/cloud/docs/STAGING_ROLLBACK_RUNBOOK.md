@@ -59,3 +59,58 @@ cat backup-staging-<date>.sql | docker compose -f docker-compose.staging.example
 - Pas de bascule blue/green ni canary (futur, si besoin réel).
 - MinIO : les objets supprimés ne sont pas restaurés par un rollback d'image (gérer la rétention/backup objet
   séparément si nécessaire).
+
+---
+
+## Annexe CC11 — Rollback validé en staging réel HTTPS (2026-07-11)
+
+### Contexte CC10/CC11
+
+CC10 a déployé sur `37.27.31.5` avec Traefik v3 + Let's Encrypt. Le runbook original
+utilisait des ports hôtes ; les commandes CC10/CC11 utilisent le compose `docker-compose.yml`
+(pas `docker-compose.staging.example.yml`) et le réseau interne Traefik (aucun port hôte
+pour api/web).
+
+### Tag de rollback validé
+
+| Tag | Commit | Validé |
+|-----|--------|--------|
+| `sha-5bf4c0f` | CC10 — déploiement HTTPS réel | ✅ current |
+| `sha-484f98d` | fix(mobile): verify starter visual smoke | ✅ rollback testé CC11 |
+
+> ⚠️ **Ne pas revenir à des tags antérieurs à `sha-d1e6242`** (post-CC8) — moteur Prisma
+> OpenSSL incompatible, les images antérieures ne démarrent pas.
+
+### Procédure CC10/CC11 (serveur `37.27.31.5`)
+
+```bash
+cd /home/deploy/enistere-staging
+
+# 1. Backup préventif
+bash <repo>/cores/cloud/staging/scripts/backup-postgres.sh \
+  /home/deploy/enistere-staging/.env.staging /home/deploy/backups
+
+# 2. Sauvegarder env courant
+cp .env.staging .env.staging.backup
+
+# 3. Modifier les tags (GHCR_API_IMAGE et GHCR_WEB_IMAGE)
+sed -i "s/sha-<COURANT>/sha-<ROLLBACK>/g" .env.staging
+grep "GHCR_" .env.staging
+
+# 4. Redéployer
+docker compose --env-file .env.staging -f docker-compose.yml pull api web
+docker compose --env-file .env.staging -f docker-compose.yml up -d api web
+
+# 5. Vérifier via Traefik (HTTPS, pas de port hôte)
+sleep 15
+curl -sf https://staging.enistere.com/ -o /dev/null -w "web: %{http_code}\n"
+curl -sf https://staging.enistere.com/status -o /dev/null -w "status: %{http_code}\n"
+docker compose --env-file .env.staging -f docker-compose.yml ps
+```
+
+### Backup/restore CC11
+
+Utiliser les scripts versionnés :
+- `cores/cloud/staging/scripts/backup-postgres.sh` — backup pg_dump gzip horodaté
+- Restore test : voir `CC11_OPERATIONAL_RUNBOOK.md` §3
+- Backup MinIO : `cores/cloud/staging/scripts/backup-minio.sh`
