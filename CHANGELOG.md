@@ -6,14 +6,25 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile RN35 — Alignement UI Kit / états UI mobile
+
+- **`cores/mobile-react-native/src/theme/tokens.ts`** : couleurs hex, typographie et radius alignés **verbatim** sur `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0). Mapping : `background.default/muted/elevated`, `foreground.default/muted/inverse`, `border.default`, `action.primary`, `status.danger/success` pour light+dark. Typographie : `heading` 30/36/700 · `title` 20/30/600 · `body` 16/24/400 · `caption` 12/18/400 (lineHeight = ratio × fontSize). Radius : `sm:4` · `md:8` · `lg:12` · `pill:9999`. Spacing inchangé (déjà aligné).
+- **`cores/mobile-react-native/src/states/index.ts`** : aliases `LoadingView`/`EmptyView`/`ErrorView` (identiques aux `*State` existants, même référence).
+- **`cores/mobile-react-native/test/theme-token-alignment.test.ts`** (nouveau) : 13 tests `node --test` vérifiant l'alignement verbatim des tokens. Total mobile : **367/367 tests**.
+- **`cores/mobile-react-native/tsconfig.test.json`** : inclut `src/theme/tokens.ts` (pur TypeScript, agnostique).
+- **`cores/mobile-react-native/ARCHITECTURE.md`** §40 : documentation complète de l'alignement — tableau de mapping, conversion lineHeight, décision `primaryText` dark, impact UI Kit V1.
+- **Impact UI Kit V1** : gap bloquant fermé. Scores finaux : `§12.4 4/4` + `§59 9/9`. Mobile Core statut : **`STARTER_UI_KIT_ALIGNED`**.
+- Aucune dépendance ajoutée. Aucun changement API/Web/Cloud/UI Kit package. Aucun changement AuthEngine/withAuthRetry/QueryClient/mutations.
+- Vérifications : `typecheck` ✓, `lint` ✓, `test 367/367` ✓, `expo-doctor 19/19` ✓, `expo export -p ios` ✓, `npm audit` 0 vuln ✓, `git diff --check` ✓.
+
 ### UI Kit V1 Readiness Review — Revue de stabilité V1
 
 - **Revue officielle** (2026-07-11) du UI Kit après UI Kit 6 et Web Core UI 2. Aucun composant ajouté, aucun token modifié.
-- **Score roadmap §12.4** : 3/4 (gap : cohérence visuelle mobile/web partielle). **Score spec §59** : 8/9 (gap : composants RN de base non implémentés).
+- **Score initial roadmap §12.4** : 3/4. **Score initial spec §59** : 8/9. **Scores finaux après RN35 : §12.4 4/4 + §59 9/9.**
 - **Décision** : statut `IMPLEMENTATION_PARTIELLE` → **`IMPLEMENTATION_AVANCEE`** — justifié par 19 primitives Web, 181 tests, tokens ADR-008 complets, états UI standards (LoadingState/EmptyState/ErrorState/SuccessState), consommation prouvée par Web Core VALIDE_V1.
-- **Gap bloquant VALIDE_V1** : composants React Native de base absents (différés ADR-010, à construire dans le Mobile Core).
+- **Gap bloquant VALIDE_V1** : composants React Native de base — **fermé par RN35** (2026-07-11).
 - **Gaps non-bloquants** : Tailwind/Radix/shadcn absents (intentionnel ADR-009), Storybook absent (différé spec §43), contrastes calculés non vérifiés (jsdom), icônes absentes (ADR futur).
-- **Prochaine mission unique** : **Mobile RN35** — aligner le starter mobile avec les états UI / UI Kit.
+- **Prochaine mission** : UI Kit VALIDE_V1 review — périmètre web+mobile prouvé.
 - Rapport : `docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`.
 - Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
 

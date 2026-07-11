@@ -32,7 +32,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   (**181 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
   compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel).
   Statut : **IMPLEMENTATION_AVANCEE** (depuis `IMPLEMENTATION_PARTIELLE`, revue V1 2026-07-11) ; **consommé par le Web Core VALIDE_V1**.
-  Gap bloquant VALIDE_V1 : composants React Native de base (différés ADR-010, à construire dans le Mobile Core via RN35).
+  Gap bloquant VALIDE_V1 **fermé par RN35** (2026-07-11) : cohérence mobile/web prouvée par tokens verbatim + 13 tests + ThemeProvider + composants maison. Scores finaux : **§12.4 4/4 + §59 9/9**. Prêt pour VALIDE_V1 review.
 - **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
   en-têtes sécurité + pas de `X-Powered-By`. **Intègre l'API publique (Health)** : factory serveur par
@@ -93,7 +93,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
   **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
   scan/signature image, `api-smoke` requis.
-- **Socle mobile Expo doctor green + smoke Android validé** : `mobile-react-native` → **`STARTER_EXPO_DOCTOR_GREEN`** — **Expo SDK 55** / Expo Router. RN 1
+- **Socle mobile UI Kit aligned** : `mobile-react-native` → **`STARTER_UI_KIT_ALIGNED`** — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -301,7 +301,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 4. Cores techniquement implémentés
 
-`cores/api-nestjs/` (avancé), `cores/ui-kit/` (**IMPLEMENTATION_AVANCEE** — tokens + 19 primitives Web + états UI, React 19 ; gap V1 : composants RN) et
+`cores/api-nestjs/` (avancé), `cores/ui-kit/` (**IMPLEMENTATION_AVANCEE** — tokens + 19 primitives Web + états UI, React 19 ; **gap V1 fermé par RN35 : §12.4 4/4, §59 9/9** ; prêt pour VALIDE_V1 review) et
 `cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + Files + RHF+Zod ; **VALIDE_V1** 14/14 critères §56).
 
 ## 5. Cores documentaires
@@ -309,7 +309,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-**`STARTER_EXPO_DOCTOR_GREEN`**, Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 ; expo-doctor **19/19** ; **355 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator**).
+**`STARTER_UI_KIT_ALIGNED`**, Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 + **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35** ; expo-doctor **19/19** ; **367 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator + tokens UI Kit alignés**).
 
 ## 6. Packages
 
@@ -340,14 +340,21 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**UI Kit V1 Readiness Review** (`docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`) :
-revue officielle du UI Kit après UI Kit 6 et Web Core UI 2. Lecture complète roadmap §12 + CORE_SPECIFICATION §59
-+ ADR-008/009/010 + docs project-status. **Score : 3/4 critères §12.4 + 8/9 critères §59.**
-Décision : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`** (19 primitives Web, 181 tests, tokens complets,
-états UI, consommé par Web Core VALIDE_V1). Gap bloquant VALIDE_V1 : composants React Native de base (différés ADR-010).
-Gaps non-bloquants : Tailwind/Radix/shadcn (intentionnel ADR-009), Storybook (différé §43), contrastes calculés (jsdom),
-icônes (à trancher par ADR). Toutes les vérifications passées.
-**Prochaine action UNIQUE : Mobile RN35** — aligner le starter mobile avec les états UI / UI Kit.
+**Mobile RN35 — Alignement UI Kit / états UI mobile** (`cores/mobile-react-native/`) (2026-07-11) :
+ferme le gap bloquant UI Kit V1 Readiness Review. `src/theme/tokens.ts` : couleurs hex, typographie et
+radius alignés **verbatim** sur `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0) —
+mapping `background.default/muted/elevated`, `foreground.default/muted/inverse`, `border.default`,
+`action.primary`, `status.danger/success` pour light+dark. `src/states/index.ts` : aliases
+`LoadingView`/`EmptyView`/`ErrorView`. `test/theme-token-alignment.test.ts` : **13 tests** (spacing,
+radius, typography, a11y, couleurs light/dark, resolveTheme). `tsconfig.test.json` : inclut
+`src/theme/tokens.ts`. `ARCHITECTURE.md` §40 : documentation complète de l'alignement.
+Scores UI Kit après RN35 : **§12.4 4/4** + **§59 9/9**. Mobile Core statut : **`STARTER_UI_KIT_ALIGNED`**.
+Vérifications : `typecheck` ✓, `lint` ✓, `test 367/367` ✓, `expo-doctor 19/19` ✓, `expo export -p ios` ✓, `npm audit` 0 vuln ✓, `git diff --check` ✓.
+**Prochaine action** : UI Kit VALIDE_V1 review — périmètre web+mobile prouvé.
+
+**Étape précédente — UI Kit V1 Readiness Review** (`docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`) :
+revue officielle du UI Kit après UI Kit 6 et Web Core UI 2. Score initial : **3/4 critères §12.4 + 8/9 critères §59.**
+Décision : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`**. Gap bloquant fermé par RN35 ; scores finaux **4/4 + 9/9**.
 
 **Étape précédente — Web Core UI 2** (`cores/web-nextjs/src/shared/components/`) :
 `LoadingState`, `EmptyState`, `ErrorState` réécrits comme wrappers minces vers UI Kit 6.
