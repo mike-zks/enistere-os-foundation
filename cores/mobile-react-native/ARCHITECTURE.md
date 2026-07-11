@@ -1584,3 +1584,105 @@ mobile passe donc à **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**.
   et RN29 (smoke local reproductible). RN30 ne remplace pas un E2E mobile
   complet ; Detox, Maestro, Appium, Playwright mobile, XCTest custom ou autre
   framework restent différés sous décision explicite de dépendance/ADR.
+
+## 40. Alignement UI Kit / états UI mobiles (RN 35)
+
+RN 35 ferme le gap bloquant identifié par la revue de stabilité V1 du UI Kit
+(`docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`) : les valeurs de couleur,
+typographie et radius du bridge tokens mobile étaient des placeholders neutres
+sans relation explicite avec les tokens générés du UI Kit. Le Mobile Core dispose
+désormais de primitives d'état RN fondées sur les tokens Enistere réels, ce qui
+prouve la cohérence mobile/web pour le UI Kit.
+
+### Token alignment (ADR-008 / ADR-010)
+
+`src/theme/tokens.ts` est mis à jour pour utiliser les valeurs **verbatim** de
+`cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0) :
+
+**Couleurs — mapping sémantique UI Kit → `ThemeColors` mobile :**
+
+| Slot mobile     | Clé UI Kit (light)          | Clé UI Kit (dark)           |
+|-----------------|-----------------------------|-----------------------------|
+| `background`    | `background.default`        | `background.default`        |
+| `surface`       | `background.muted`          | `background.muted`          |
+| `surfaceElevated`| `background.elevated`      | `background.elevated`       |
+| `border`        | `border.default`            | `border.default`            |
+| `text`          | `foreground.default`        | `foreground.default`        |
+| `textMuted`     | `foreground.muted`          | `foreground.muted`          |
+| `primary`       | `action.primary`            | `action.primary`            |
+| `primaryText`   | `foreground.inverse`        | `#FFFFFF` (¹)               |
+| `danger`        | `status.danger`             | `status.danger`             |
+| `success`       | `status.success`            | `status.success`            |
+
+(¹) En dark theme, `foreground.inverse` UI Kit (`#0F172A`) est conçu pour du
+texte sur surface inversée (carte claire dans une UI sombre). Pour du texte ON
+un bouton `primary` (`#3B82F6`, bleu-400), le blanc (`#FFFFFF`) offre un
+meilleur contraste et une meilleure cohérence visuelle.
+
+**Typographie —** `fontSize` et `fontWeight` issus de `semanticTypography` ;
+`lineHeight` converti en dp absolu (`ratio × fontSize`) pour React Native :
+
+| Variant    | fontSize | fontWeight | lineHeight (ratio → dp) |
+|------------|----------|------------|-------------------------|
+| `heading`  | 30       | 700        | 36 (30 × 1.2)           |
+| `title`    | 20       | 600        | 30 (20 × 1.5)           |
+| `body`     | 16       | 400        | 24 (16 × 1.5)           |
+| `caption`  | 12       | 400        | 18 (12 × 1.5)           |
+
+**Radius —** `sm: 4`, `md: 8`, `lg: 12` (vs UI Kit `radius.sm/md/lg`),
+`pill: 9999` (vs UI Kit `radius.full: 9999`).
+
+**Spacing —** inchangé : `xs/sm/md/lg/xl/xxl` → `4/8/16/24/32/48` dp,
+parfaitement aligné sur `primitives.spacing[1/2/4/6/8/12]`.
+
+Le `ThemeProvider` et tous les composants (`Screen`, `Text`, `Button`) restent
+**inchangés** : ils consomment les tokens via `useTheme()` et bénéficient
+automatiquement de l'alignement. Quand le workspace sera unifié (Metro monorepo),
+les littéraux seront remplacés par des imports directs
+`@enistere/ui-kit/tokens` — l'API ne changera pas.
+
+### Primitives d'état — aliases *View (spec §26)
+
+`src/states/index.ts` exporte désormais des **aliases `*View`** sur les
+primitives existantes :
+
+- `LoadingView` = `LoadingState` (alias, même référence)
+- `EmptyView` = `EmptyState` (alias, même référence)
+- `ErrorView` = `ErrorState` (alias, même référence)
+
+Les composants existants (`LoadingState`, `EmptyState`, `ErrorState`,
+`OfflineState`, `UnauthorizedState`, `MessageState`) restent inchangés.
+Tous consomment `useTheme()` et n'ont aucune palette locale codée en dur
+(ADR-010 §19).
+
+### Tests (node --test agnostique)
+
+`test/theme-token-alignment.test.ts` (13 cas) vérifie :
+
+- Spacing : 6 valeurs alignées sur l'échelle UI Kit
+- Radius : 4 valeurs (`sm/md/lg/pill`)
+- Typography : fontSize/fontWeight/lineHeight pour les 4 variantes
+- a11y : `minTouchTarget = 44dp` (WCAG 2.5.5)
+- Couleurs light/dark : 10 hex verbatim par thème
+- `resolveTheme` : retourne les bonnes instances light/dark
+- Partage des tokens non-couleur entre les deux thèmes
+
+`tsconfig.test.json` est mis à jour pour inclure `src/theme/tokens.ts` (pur
+TypeScript, pas de JSX) dans le build `node --test`. Les composants d'état
+(`.tsx`) et leurs aliases restent couverts par `tsc --noEmit` (typecheck complet).
+
+### Frontières
+
+- Aucune dépendance ajoutée.
+- Aucun changement API/Web/Cloud/UI Kit package.
+- Aucun endpoint métier, adaptateur natif réel, AuthEngine, `withAuthRetry`,
+  QueryClient ni mutations.
+- Aucune copie de composants React DOM du UI Kit.
+- Aucune nouvelle persistance.
+
+### Impact UI Kit V1
+
+RN 35 ferme le gap bloquant `§59.9` de la revue V1 : la cohérence mobile/web
+est désormais **prouvée par les valeurs** (tokens identiques) et par les tests
+(assertions hex verbatim). Le `UI_KIT_V1_READINESS_REVIEW.md` est mis à jour en
+conséquence.

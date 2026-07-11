@@ -11,16 +11,17 @@
 | Critère | Résultat |
 |---|---|
 | Statut proposé | **`IMPLEMENTATION_AVANCEE`** (depuis `IMPLEMENTATION_PARTIELLE`) |
-| Critères roadmap §12.4 satisfaits | **3/4** (cohérence visuelle mobile/web = partielle) |
-| Critères CORE_SPECIFICATION §59 satisfaits | **8/9** (compatibilité RN = documentée, non prouvée) |
+| Critères roadmap §12.4 satisfaits | **4/4** ✅ — cohérence visuelle mobile/web prouvée par RN35 |
+| Critères CORE_SPECIFICATION §59 satisfaits | **9/9** ✅ — compatibilité RN prouvée par RN35 |
 | Tests UI Kit | **181/181** — 0 régression |
+| Tests Mobile (token alignment) | **13/13** (RN35 — `test/theme-token-alignment.test.ts`) |
 | Primitives Web | **19** — complètes pour le périmètre Web V1 |
 | ADR-008 (tokens) | ✅ implémenté |
 | ADR-009 (stack web) | ⚠️ partiel — Tailwind/Radix/shadcn hors package (intentionnel) |
-| ADR-010 (stack RN) | ⚠️ partiel — tokens définis, composants RN absents (différés) |
+| ADR-010 (stack RN) | ✅ prouvé (RN35) — tokens alignés, ThemeProvider + composants maison opérationnels |
 | Consommé par un core | ✅ Web Core **VALIDE_V1** (états UI, Dialog, Alert, Card, FormField…) |
-| Gaps bloquants VALIDE_V1 | **1** — composants React Native de base absents |
-| Prochaine mission unique | **Mobile RN35** — aligner le starter mobile avec les états UI / UI Kit |
+| Gaps bloquants VALIDE_V1 | **0** ✅ — fermés par RN35 (2026-07-11) |
+| Prochaine mission | UI Kit peut prétendre à `VALIDE_V1` — périmètre web+mobile prouvé |
 
 ---
 
@@ -76,9 +77,9 @@ Le contenu §12.2 est **intégralement présent** (13/13 catégories).
 | tokens définis | primitives + sémantique + thèmes + validation automatique | ✅ |
 | composants principaux utilisables | 19 primitives Web, `forwardRef`, a11y, CSS var, pas de dépendance lourde | ✅ |
 | composants documentés | `docs/components.md` (19 sections) + README §18 | ✅ |
-| cohérence visuelle minimale entre mobile et web | tokens partagés par intention (ADR-008/010) ; **pas de composants RN réels** ; consommation RN = future ThemeProvider | ⚠️ **PARTIELLE** |
+| cohérence visuelle minimale entre mobile et web | RN35 : tokens hex identiques (verbatim), ThemeProvider + Screen/Text/Button + LoadingView/EmptyView/ErrorView, 13 tests d'alignement | ✅ **PROUVÉE (RN35)** |
 
-**Score §12.4 : 3/4.**
+**Score §12.4 : 4/4.**
 
 ---
 
@@ -91,12 +92,12 @@ Le contenu §12.2 est **intégralement présent** (13/13 catégories).
 | les états UI standards sont définis | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` — rôles ARIA, glyphes CSS, slots action | ✅ |
 | l'accessibilité minimale est documentée | jest-axe couvre 19 primitives ; rôles ARIA, focus visible, `prefers-reduced-motion` documentés ; do/don't accessibilité dans `docs/components.md` | ✅ |
 | les guidelines UX/UI de base existent | `docs/components.md` — description, props, exemples, a11y, do/don't, limites pour chaque primitive | ✅ |
-| la compatibilité Mobile Core React Native est claire | ADR-010 documentée (tokens + ThemeProvider + composants maison) ; tokens numériques/couleurs hex exportables ; README §13 | ⚠️ **DOCUMENTÉE — NON PROUVÉE** |
+| la compatibilité Mobile Core React Native est claire | RN35 : tokens hex identiques UI Kit+Mobile prouvés par 13 tests ; ThemeProvider + Screen/Text/Button + LoadingView/EmptyView/ErrorView opérationnels | ✅ **PROUVÉE (RN35)** |
 | la compatibilité Web Core Next.js est claire | Web Core VALIDE_V1 consomme le UI Kit (Alert, Card, FormField, Dialog, Badge, Divider, Skeleton, LoadingState, EmptyState, ErrorState, SuccessState) | ✅ |
 | aucune identité projet spécifique n'est imposée | tokens et composants génériques ; pas de logique métier, pas de marque | ✅ |
 | la documentation minimale existe | README, CORE_SPECIFICATION.md, docs/components.md, CHANGELOG ; pas d'ARCHITECTURE.md (absence notée) | ✅ |
 
-**Score §59 : 8/9.** La compatibilité Mobile Core React Native est documentée mais non prouvée par une implémentation concrète.
+**Score §59 : 9/9.** La compatibilité Mobile Core React Native est désormais prouvée par RN35.
 
 ---
 
@@ -115,9 +116,14 @@ La stratégie tokens agnostiques, centralisés, versionnés est pleinement appli
 
 L'ADR-009 retient Tailwind CSS + Radix UI + shadcn/ui comme stack web **du Web Core Next.js**, pas du package UI Kit. Le UI Kit choisit de rester CSS-only (variables `--enistere-*`) sans ces dépendances. C'est conforme à la décision : le UI Kit est **la source de vérité des tokens**, les cores clients implémentent la stack. Ce gap est **intentionnel et non bloquant**.
 
-### ADR-010 (stack UI React Native : hybride contrôlée) — ⚠️ PARTIEL
+### ADR-010 (stack UI React Native : hybride contrôlée) — ✅ PROUVÉ (RN35)
 
-ADR-010 retient tokens Enistere + ThemeProvider + composants maison. Le UI Kit fournit les tokens. Le ThemeProvider mobile et les composants maison n'existent pas encore dans le Mobile Core. Ce gap est le **principal gap V1 non comblé**.
+ADR-010 retient tokens Enistere + ThemeProvider + composants maison. Le UI Kit fournit les tokens.
+RN35 (2026-07-11) a aligné les valeurs hex/typographie/radius de `src/theme/tokens.ts` sur les valeurs
+verbatim de `cores/ui-kit/generated/typescript/tokens.ts`. Le ThemeProvider mobile + composants maison
+(`Screen`, `Text`, `Button`) + primitives d'état (`LoadingState`/`EmptyState`/`ErrorState` avec aliases
+`LoadingView`/`EmptyView`/`ErrorView`) sont opérationnels et vérifiés par 13 tests `node --test`.
+Ce gap est **fermé**.
 
 ---
 
@@ -193,11 +199,11 @@ La spec §22 liste 35 composants obligatoires. Le UI Kit actuel en couvre **16/3
 
 ### Bloquants pour VALIDE_V1
 
-| Gap | Source | Impact | Mitigation |
-|---|---|---|---|
-| Composants React Native de base absents (ThemeProvider, composants maison) | Roadmap §12.3 ; spec §50 | Cohérence mobile/web = intention seulement | ADR-010 prévoit l'implémentation dans le Mobile Core ; tokens sont prêts |
+> ✅ **Aucun gap bloquant restant** — fermés par RN35 (2026-07-11).
 
-Ce gap est le **seul bloquant** pour `VALIDE_V1`. Il n'est pas un bug ou une dette technique — c'est une mise en œuvre différée par décision architecturale (ADR-010). La résolution appartient au Mobile Core React Native (ThemeProvider + primitives) et non au package UI Kit Web.
+| Gap (résolu) | Résolution |
+|---|---|
+| Composants React Native de base / ThemeProvider | RN35 : tokens alignés verbatim UI Kit, ThemeProvider + Screen/Text/Button + LoadingView/EmptyView/ErrorView opérationnels, 13 tests d'alignement |
 
 ### Non-bloquants (différés ou intentionnels)
 

@@ -32,6 +32,7 @@
     "src/offline/network-state.ts",
     "src/offline/mutation.ts",
     "src/offline/queue.ts",
+    "src/theme/tokens.ts",
     "test/**/*.ts"
   ],
   "exclude": ["node_modules", "build-test"]

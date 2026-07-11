@@ -1,5 +1,5 @@
 /**
- * Theme tokens — minimal PLACEHOLDER bridge to the future `@enistere/ui-kit`.
+ * Theme tokens — aligned bridge to `@enistere/ui-kit` generated tokens.
  *
  * Governance:
  * - ADR-008 makes `@enistere/ui-kit` the SOURCE OF TRUTH for design tokens. It
@@ -8,11 +8,18 @@
  * - ADR-010 mandates "tokens Enistere + ThemeProvider + composants maison
  *   contrôlés" for React Native (NativeWind/UI libraries NOT introduced here).
  *
- * The mission explicitly allows a "bridge minimal" instead of a hard dependency
- * on the UI Kit. This file therefore mirrors the UI Kit token SHAPE with neutral
- * PLACEHOLDER values (NOT a brand identity). When the mobile UI Kit surface
- * ships, replace these literals with imports from `@enistere/ui-kit/tokens` —
- * the `ThemeProvider` and consuming components stay intact.
+ * RN35 — explicit alignment: color values are now taken verbatim from
+ * `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0):
+ *   light: background.default/muted/elevated, foreground.default/muted/inverse,
+ *          border.default, action.primary, status.danger/success
+ *   dark:  same slots from the dark semantic theme
+ * Spacing, radius and typography scale (fontSize, fontWeight, lineHeight ratio)
+ * are derived from the same generated file; lineHeight is converted to absolute
+ * dp for React Native (ratio × fontSize, rounded to integer).
+ *
+ * When the workspace is unified (Metro monorepo), replace these literals with
+ * direct imports from `@enistere/ui-kit/tokens` — the ThemeProvider and all
+ * consuming components stay intact.
  */
 
 /** Numeric spacing scale in density-independent pixels (dp). */
@@ -25,20 +32,25 @@ export const spacing = {
   xxl: 48,
 } as const;
 
-/** Corner radius scale (dp). */
+/** Corner radius scale (dp) — aligned to UI Kit primitives.radius. */
 export const radius = {
   sm: 4,
   md: 8,
-  lg: 16,
-  pill: 999,
+  lg: 12,
+  pill: 9999,
 } as const;
 
-/** Typography styles (RN-compatible: numeric sizes, string weights). */
+/**
+ * Typography styles (RN-compatible: numeric sizes, string weights).
+ * Aligned to UI Kit semanticTypography; lineHeight = ratio × fontSize (dp).
+ * heading: 30 × 1.2 = 36 · title: 20 × 1.5 = 30 · body: 16 × 1.5 = 24 ·
+ * caption: 12 × 1.5 = 18
+ */
 export const typography = {
-  heading: { fontSize: 24, lineHeight: 32, fontWeight: '700' },
-  title: { fontSize: 18, lineHeight: 24, fontWeight: '600' },
-  body: { fontSize: 16, lineHeight: 22, fontWeight: '400' },
-  caption: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
+  heading: { fontSize: 30, lineHeight: 36, fontWeight: '700' },
+  title: { fontSize: 20, lineHeight: 30, fontWeight: '600' },
+  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
+  caption: { fontSize: 12, lineHeight: 18, fontWeight: '400' },
 } as const;
 
 /** Minimum touch target (dp) — accessibility floor per ADR-010 §16/§19. */
@@ -60,30 +72,32 @@ export interface ThemeColors {
   readonly success: string;
 }
 
+// Light — verbatim from UI Kit generated/typescript/tokens.ts lightTheme
 const lightColors: ThemeColors = {
-  background: '#FFFFFF',
-  surface: '#F5F5F7',
-  surfaceElevated: '#FFFFFF',
-  border: '#E2E2E8',
-  text: '#1A1A22',
-  textMuted: '#6B6B78',
-  primary: '#2F6BD6',
-  primaryText: '#FFFFFF',
-  danger: '#C8242A',
-  success: '#1F7A38',
+  background: '#FFFFFF',       // background.default
+  surface: '#F8FAFC',          // background.muted
+  surfaceElevated: '#FFFFFF',  // background.elevated
+  border: '#E2E8F0',           // border.default
+  text: '#0F172A',             // foreground.default
+  textMuted: '#64748B',        // foreground.muted
+  primary: '#2563EB',          // action.primary
+  primaryText: '#FFFFFF',      // foreground.inverse
+  danger: '#DC2626',           // status.danger
+  success: '#16A34A',          // status.success
 };
 
+// Dark — verbatim from UI Kit generated/typescript/tokens.ts darkTheme
 const darkColors: ThemeColors = {
-  background: '#0B0B0F',
-  surface: '#16161D',
-  surfaceElevated: '#1F1F29',
-  border: '#2A2A36',
-  text: '#F5F5F7',
-  textMuted: '#9A9AA8',
-  primary: '#5B8DEF',
-  primaryText: '#FFFFFF',
-  danger: '#E5484D',
-  success: '#46A758',
+  background: '#020617',       // background.default
+  surface: '#0F172A',          // background.muted
+  surfaceElevated: '#1E293B',  // background.elevated
+  border: '#334155',           // border.default
+  text: '#F8FAFC',             // foreground.default
+  textMuted: '#94A3B8',        // foreground.muted
+  primary: '#3B82F6',          // action.primary
+  primaryText: '#FFFFFF',      // white on blue primary (light inverse) — better contrast than dark foreground.inverse on blue-400
+  danger: '#EF4444',           // status.danger
+  success: '#22C55E',          // status.success
 };
 
 export type ColorScheme = 'light' | 'dark';

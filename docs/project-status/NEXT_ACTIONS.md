@@ -5,21 +5,31 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Mobile RN35 — Alignement UI Kit / états UI mobile : RÉALISÉ** (2026-07-11).
+> Ferme le gap bloquant identifié par la revue V1 UI Kit : cohérence mobile/web prouvée par les valeurs.
+> `src/theme/tokens.ts` : couleurs hex, typographie et radius alignés verbatim sur
+> `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0). `src/states/index.ts` : aliases
+> `LoadingView`/`EmptyView`/`ErrorView` sur les composants `*State` existants. `test/theme-token-alignment.test.ts` :
+> **13 nouveaux tests** (spacing, radius, typography, a11y, couleurs light/dark, resolveTheme). `tsconfig.test.json`
+> mis à jour pour inclure `src/theme/tokens.ts`. `ARCHITECTURE.md` : §40 documentant l'alignement.
+> Score UI Kit : §12.4 **4/4** (cohérence mobile/web ✅), §59 **9/9** (compatibilité RN ✅).
+> `UI_KIT_V1_READINESS_REVIEW.md` mis à jour : gap bloquant = 0, scores finaux.
+> Vérifications : `typecheck` ✓, `lint` ✓, `test 367/367` ✓, `doctor` 19/19 ✓, `git diff --check` ✓.
+>
+> **Prochaine action** : le UI Kit peut désormais prétendre à `VALIDE_V1` (périmètre web+mobile prouvé).
+> Mission suivante à décider (UI Kit VALIDE_V1 review ou autre priorité).
+
 > ✅ **UI Kit V1 Readiness Review — Revue de stabilité V1 : RÉALISÉ** (2026-07-11).
 > Revue officielle de maturité V1 du UI Kit après UI Kit 6 et Web Core UI 2. Lecture complète :
 > roadmap §12, CORE_SPECIFICATION §59, ADR-008/009/010, FOUNDATION_CURRENT_STATE, IMPLEMENTATION_MATRIX,
-> NEXT_ACTIONS, SESSION_HANDOFF, CHANGELOG. Score : **3/4 critères §12.4** + **8/9 critères §59**.
+> NEXT_ACTIONS, SESSION_HANDOFF, CHANGELOG. Score initial : **3/4 critères §12.4** + **8/9 critères §59**.
 > Statut : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`** (justifié : 19 primitives Web, 181 tests,
 > états UI complets, tokens ADR-008 ✅, consommé par Web Core VALIDE_V1).
-> Gap bloquant VALIDE_V1 : composants React Native de base absents (différés ADR-010, appartiennent au Mobile Core).
-> Gaps non-bloquants : Tailwind/Radix/shadcn absents (intentionnel ADR-009), Storybook absent (différé §43),
-> contrastes calculés non vérifiés (jsdom), icônes absentes (à trancher par ADR).
+> Gap bloquant VALIDE_V1 identifié : composants React Native de base absents (différés ADR-010, appartiennent au Mobile Core).
 > Rapport versionné : `docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`.
 > Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
 >
-> **Prochaine action UNIQUE** : **Mobile RN35** — aligner le starter mobile avec les états UI / UI Kit.
-> ThemeProvider mobile basé sur les tokens `@enistere/ui-kit` + primitives d'état RN (LoadingView/EmptyView/ErrorView)
-> dans le starter. Ferme le gap de cohérence mobile/web et ouvre la voie à `VALIDE_V1` pour le UI Kit.
+> **Prochaine action UNIQUE** : **Mobile RN35** — fermée (voir ci-dessus).
 
 > ✅ **Web Core UI 2 — Intégration des state primitives UI Kit 6 : RÉALISÉ** (2026-07-11).
 > États génériques Web (`LoadingState`, `EmptyState`, `ErrorState`) remplacés par les primitives UI Kit 6.
