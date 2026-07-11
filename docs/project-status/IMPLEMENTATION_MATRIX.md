@@ -8,6 +8,8 @@
 
 ## 1. Cores et packages
 
+> **Mise à jour Quality Core 1 (2026-07-11)** : Quality Core passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` créés dans `cores/quality-core/`. Checklists PR/release/revue créées dans `docs/checklists/`. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+>
 > **Mise à jour UI Kit VALIDE_V1 review (2026-07-11)** : Le UI Kit passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`** après revue officielle (rapport `UI_KIT_V1_READINESS_REVIEW.md` §8). Critères §12.4 **4/4** + §59 **9/9**. Justification : tokens ADR-008 ✅, 19 primitives Web testées et documentées, consommation Web Core VALIDE_V1 prouvée, cohérence mobile/web prouvée par RN35 (tokens verbatim + 13 tests). Réserves non bloquantes documentées (§10) : Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core (ADR-010 intentionnel). Vérifications : typecheck ✅ lint ✅ 181/181 ✅ build ✅ tokens:check ✅ audit 0 vuln ✅ diff --check ✅.
 >
 > **Mise à jour Mobile RN35 (2026-07-11)** : Mobile Core React Native passe à **`STARTER_UI_KIT_ALIGNED`**. Tokens hex/typographie/radius alignés verbatim UI Kit. Aliases `LoadingView`/`EmptyView`/`ErrorView`. 13 tests token-alignment + 367/367 total. Gap bloquant UI Kit V1 fermé : §12.4 **4/4**, §59 **9/9**.
@@ -27,7 +29,7 @@
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-034 |
-| Quality Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
+| Quality Core | ✓ | ✓ | — | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + 3 checklists (Quality Core 1, 2026-07-11) | — (V1 documentaire déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 
 ## 2. Infrastructure transverse
