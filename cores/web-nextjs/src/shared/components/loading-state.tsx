@@ -1,5 +1,5 @@
+import { LoadingState as UiKitLoadingState } from "@enistere/ui-kit";
 import type { ReactElement } from "react";
-import { Spinner, Text } from "@enistere/ui-kit";
 
 export interface LoadingStateProps {
   /** Libellé annoncé aux technologies d'assistance et affiché. */
@@ -9,19 +9,14 @@ export interface LoadingStateProps {
 }
 
 /**
- * État de chargement générique (sûr en Server Component). Le conteneur porte `role="status"` ;
- * le spinner est décoratif (pas d'annonce en double). Pas de skeleton complexe.
+ * État de chargement générique — délègue à `LoadingState` du UI Kit 6.
+ * Le conteneur porte `role="status"` ; le spinner interne est décoratif.
  */
 export function LoadingState({ label = "Chargement…", inline = false }: LoadingStateProps): ReactElement {
   return (
-    <div
+    <UiKitLoadingState
+      message={label}
       className={inline ? "state state--loading state--inline" : "state state--loading"}
-      role="status"
-    >
-      <Spinner size="lg" decorative />
-      <Text as="p" variant="body" tone="muted">
-        {label}
-      </Text>
-    </div>
+    />
   );
 }

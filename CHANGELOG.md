@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core UI 2 — Intégration des state primitives UI Kit 6
+
+- **Web Core UI 2** (`cores/web-nextjs/src/shared/components/`) : remplacement des états génériques Web par les primitives UI Kit 6. **0 régression** (450/450 tests). Aucune nouvelle dépendance, aucun changement BFF/Auth/Files/Cloud/Mobile.
+  - **`loading-state.tsx`** — délègue à `LoadingState` UI Kit 6 (`message=label`, `className` pour inline). Prop `label?` et `inline?` conservées (rétrocompatible).
+  - **`empty-state.tsx`** — délègue à `EmptyState` UI Kit 6 (`title`, `description?`, `action?`, `className` pour inline). Prop `inline?` conservée.
+  - **`error-state.tsx`** — délègue à `ErrorState` UI Kit 6 (`title`, `message=description+requestId`, `action=<Button onClick=onReset>`). `role="alert"` assuré par la primitive. Props conservées : `title?`, `description?`, `requestId?`, `onReset?`, `inline?`.
+  - **Conservés sans changement** : `UnauthorizedState` (401), `ForbiddenState` (403), `ServiceUnavailableState` (5xx), `NotFoundState` (404) — sémantique HTTP spécifique, Alert-based structure maintenue.
+  - **`globals.css`** — commentaires mis à jour ; `.state .enistere-alert` reste valide pour états spécialisés.
+  - **Vérifications** : `typecheck` ✓, `lint` ✓, `test` 450/450 ✓, `build` ✓, `audit` 0 vuln ✓, `git diff --check` ✓. Branch `web-core-ui-2-state-primitives`.
+
 ### UI Kit 6 — State primitives / états UI standards
 
 - **UI Kit 6** (`cores/ui-kit/src/components/`) : ajout de 4 primitives d'état UI. **15 → 19 primitives**. **146 → 181 tests** (+35). Aucune nouvelle dépendance, aucun Radix/shadcn/Tailwind. Toutes les CSS consomment uniquement `var(--enistere-*)`, classes préfixées `enistere-`. Toutes respectent `forwardRef`, `className` natif, attributs HTML natifs, accessibilité jest-axe. Générateur `styles.css` mis à jour (`tokens:generate`).

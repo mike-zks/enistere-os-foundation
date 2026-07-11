@@ -5,6 +5,17 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Web Core UI 2 — Intégration des state primitives UI Kit 6 : RÉALISÉ** (2026-07-11).
+> États génériques Web (`LoadingState`, `EmptyState`, `ErrorState`) remplacés par les primitives UI Kit 6.
+> Props conservées (rétrocompatible) : `label`/`inline` (Loading), `title`/`description`/`action`/`inline` (Empty),
+> `title`/`description`/`requestId`/`onReset`/`inline` (Error). `role="alert"` et `role="status"` assurés par UI Kit.
+> États spécialisés Web conservés : `UnauthorizedState` (401), `ForbiddenState` (403), `ServiceUnavailableState`,
+> `NotFoundState` — sémantique HTTP spécifique maintenue, Alert-based structure inchangée.
+> **0 régression** (450/450 tests). Aucune nouvelle dépendance, aucun changement BFF/Auth/Files/Cloud/Mobile.
+> `typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts.
+>
+> **Prochaine action UNIQUE** : à décider.
+
 > ✅ **UI Kit 6 — State primitives / états UI standards : RÉALISÉ** (2026-07-11).
 > 4 nouvelles primitives. **15 → 19 primitives**. **146 → 181 tests** (+35, 0 régression). Aucune nouvelle
 > dépendance. CSS : uniquement `var(--enistere-*)`, classes préfixées `enistere-`, aucun hex.

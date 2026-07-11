@@ -54,13 +54,13 @@ interne assaini, navigation `replace`/`refresh`). **Sans middleware, sans Server
   `refresh()`**. **`returnTo` strictement interne** (`sanitizeReturnTo` — anti open-redirect). La redirection
   anonyme du layout protégé pointe vers **`/login?returnTo=/protected`**. Détail :
   [`docs/login-flow.md`](docs/login-flow.md).
-- **États UI & composants structurels (Web UI 1)** : primitives **UI Kit** ajoutées (`Alert`, `Card`,
-  `FormField`) **+** compositions Web `src/shared/components/` (`LoadingState`, `EmptyState`, `ErrorState`,
-  **`UnauthorizedState` (401) ≠ `ForbiddenState` (403)**, `ServiceUnavailableState`, `PageHeader`).
-  Génériques, accessibles (tokens, light/dark, `jest-axe`), **sans donnée sensible** (`requestId`/retry
-  optionnels). Intégrés : `PageHeader` + galerie sur l'accueil, `EmptyState` dans Health, `ErrorState`/
-  `NotFoundState`/`LoadingState` aux frontières, `ServiceUnavailableState` (le layout protégé y délègue).
-  Détail : [`docs/ui-states.md`](docs/ui-states.md).
+- **États UI & composants structurels (Web UI 1 + Web Core UI 2)** : primitives **UI Kit** (`Alert`, `Card`,
+  `FormField`) **+** états génériques délégués **UI Kit 6** (`LoadingState`, `EmptyState`, `ErrorState`) **+**
+  états spécialisés Web `src/shared/components/` (**`UnauthorizedState` (401) ≠ `ForbiddenState` (403)**,
+  `ServiceUnavailableState`, `NotFoundState`, `PageHeader`). Génériques, accessibles (tokens, light/dark,
+  `jest-axe`), **sans donnée sensible** (`requestId`/retry optionnels). Intégrés : `PageHeader` + galerie sur
+  l'accueil, `EmptyState` dans Health, `ErrorState`/`NotFoundState`/`LoadingState` aux frontières,
+  `ServiceUnavailableState` (le layout protégé y délègue). Détail : [`docs/ui-states.md`](docs/ui-states.md).
 - **Files — métadonnées & téléchargement sécurisé (Files 1, lecture seule)** : BFF ciblé `GET /api/files/:id`
   (métadonnées publiques, read-only) + `POST /api/files/:id/download-url` (URL signée, **CSRF + Origin/Referer**)
   ; client BFF navigateur same-origin ; `fileKeys` + `useFileMetadata` (désactivée si UUID invalide) +
@@ -255,8 +255,9 @@ Auth → défaut, anti open-redirect), validation login (e-mail/mot de passe, tr
 client BFF login (CSRF, header, body, same-origin, statuts 401/403/429/503/réseau/JSON invalide, **aucune fuite
 de mot de passe**), `useLogin` (succès/erreur, **purge authKeys / Health conservé**, **double-soumission
 empêchée**, aucun credential en cache), `LoginForm` (labels/autoComplete/validation/loading/erreurs/`jest-axe` ×4).
-**États UI (Web UI 1)** : `EmptyState`/`UnauthorizedState`/`ForbiddenState`/`ServiceUnavailableState`/
-`PageHeader` (rôles, distinction 401≠403≠indisponible, requestId/retry, aucune donnée sensible, `jest-axe`),
+**États UI (Web UI 1 + Web Core UI 2)** : `LoadingState`/`EmptyState`/`ErrorState` délèguent à UI Kit 6 ;
+`UnauthorizedState`/`ForbiddenState`/`ServiceUnavailableState`/`NotFoundState`/`PageHeader` spécialisés Web
+(rôles, distinction 401≠403≠indisponible, requestId/retry, aucune donnée sensible, `jest-axe`),
 galerie `StatesShowcase` (sans `h1`). **Files (Files 1)** : handlers BFF (UUID 400 sans appel API,
 401/403/404/409/503 distincts, CSRF/Origin pour download-url, no-store, requestId, **aucun champ interne**),
 client BFF (same-origin, aucun Authorization, URL absente des erreurs), `useFileMetadata` (désactivée si UUID
