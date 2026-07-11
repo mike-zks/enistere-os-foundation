@@ -1,0 +1,7 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Vulnerabilité sensible (confidentiel)
+    url: https://github.com/mike-zks/enistere-os-foundation/security/advisories/new
+    about: >
+      Pour les vulnérabilités sensibles (secret exposé, élévation de privilège,
+      données personnelles) — signalement confidentiel via GitHub Security Advisories.

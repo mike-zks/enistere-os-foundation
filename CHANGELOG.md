@@ -6,6 +6,18 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core 4 — Alignement templates PR / Issues avec Quality Core
+
+- **`.github/PULL_REQUEST_TEMPLATE.md`** (mis à jour) : section **Quality Gates** (scope applicable parmi `docs`/`packages`/`ui-kit`/`web`/`mobile-static`/`root-audit`/`all-safe`/runtime, commandes exécutées et résultats, gates non exécutés + raison). Section **Hors périmètre confirmé** (workflows intacts, secrets absents). Section **Sécurité** renforcée (PII, tokens, URL signées, CSRF). Section **Statut / gouvernance** (si `docs/project-status/` modifié ou promotion de statut). Référence vers `docs/checklists/PR_QUALITY_CHECKLIST.md` et le script `quality-gates.mjs`.
+- **`.github/ISSUE_TEMPLATE/bug_report.md`** (mis à jour) : champs environnement (core, branche, OS, versions), étapes de reproduction, logs avec avertissement anti-secret, impact sécurité (3 options), gate qualité susceptible de détecter le bug (6 options + "aucun gate ne couvre ce cas").
+- **`.github/ISSUE_TEMPLATE/feature_request.md`** (mis à jour) : core ciblé + statut actuel + statut attendu, lien roadmap/ADR/CORE_SPECIFICATION, section hors périmètre explicite, critères d'acceptation.
+- **`.github/ISSUE_TEMPLATE/security_issue.md`** (mis à jour) : avertissement "aucun secret dans cette issue", redirection canal privé (Security Advisories) si sensible. Classification impact (Faible/Moyen/Élevé/Critique). Scopes sensibles documentés : auth/JWT/refresh tokens, CSRF/Origin, URL signées MinIO, PII, secrets/clés, accès staging/SSH, RBAC, dépendances npm, templates/CI.
+- **`.github/ISSUE_TEMPLATE/config.yml`** (nouveau) : `blank_issues_enabled: true`, lien Security Advisories pour signalement confidentiel.
+- **`cores/quality-core/CORE_SPECIFICATION.md`** mis à jour : statut QC4, addendum QC3+QC4, §3.2 "hors périmètre V2" mis à jour (templates livrés QC4).
+- **`cores/quality-core/README.md`** mis à jour : statut QC4, templates ajoutés dans la table des matières, section "État attendu VF" mise à jour.
+- Aucun workflow GitHub modifié. Aucun secret créé. Aucune nouvelle dépendance. Aucun changement runtime.
+- Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, `node --test cores/quality-core/scripts/quality-gates.test.mjs` 36/36 ✓.
+
 ### Quality Core 3 — Runbook de protection de branche et checks requis
 
 - **`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`** (nouveau) : procédure complète d'activation manuelle de la protection de branche `main` — prérequis, noms exacts des 10 checks, classification, procédure GitHub UI pas-à-pas, vérification post-activation, pourquoi aucun secret n'est nécessaire.

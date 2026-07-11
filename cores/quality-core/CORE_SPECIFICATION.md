@@ -13,7 +13,16 @@ Cette spécification est documentaire. Elle ne crée pas de workflow GitHub, pas
 d'exécution destructrice, pas de dépendance, pas de configuration de package, pas de code
 applicatif et pas d'infrastructure réelle.
 
-Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 2, 2026-07-11).
+Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 4, 2026-07-11).
+
+> **Quality Core 4** modernise les templates GitHub (`.github/PULL_REQUEST_TEMPLATE.md`,
+> `.github/ISSUE_TEMPLATE/`) pour les aligner avec les gates qualité, les statuts de core,
+> la sécurité et les checklists. Aucun workflow GitHub modifié. Aucune dépendance ajoutée.
+> Aucun changement runtime.
+
+> **Quality Core 3** ajoute `BRANCH_PROTECTION_RUNBOOK.md` : procédure d'activation manuelle
+> de la protection de branche `main`, 10 noms de checks exacts (L1–L4). Statut : documenté,
+> non appliqué.
 
 > **Quality Core 2** ajoute `scripts/quality-gates.mjs` (Node 24, sans dépendance) :
 > sélection et exécution locale des gates qualité sûrs. Aucun workflow GitHub modifié.
@@ -54,7 +63,7 @@ Le Quality Core ne doit pas :
 ### 3.2 Hors périmètre V2 (différé VF ou V3)
 
 - Nouveaux workflows GitHub Actions.
-- Templates PR et templates d'issue GitHub.
+- ~~Templates PR et templates d'issue GitHub.~~ → **livré en Quality Core 4** (`.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/`).
 - Scripts de génération de changelog ou d'automatisation de release.
 - Publication de métriques de couverture.
 - Tableaux de bord qualité temps réel.

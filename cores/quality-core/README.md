@@ -1,6 +1,6 @@
 # Quality Core
 
-**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 3, 2026-07-11)
+**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 4, 2026-07-11)
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
@@ -17,6 +17,11 @@ monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les d�
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
 | `../../docs/checklists/RELEASE_READINESS_CHECKLIST.md` | Checklist avant release / promotion de statut |
 | `../../docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md` | Checklist revue de statut d'un core |
+| `../../.github/PULL_REQUEST_TEMPLATE.md` | **Template PR** aligné Quality Core 4 — gates, scope, hors périmètre, sécurité, gouvernance |
+| `../../.github/ISSUE_TEMPLATE/bug_report.md` | **Template bug** — environnement, reproduction, impact sécurité, gate concerné |
+| `../../.github/ISSUE_TEMPLATE/feature_request.md` | **Template feature** — core ciblé, roadmap, hors périmètre, critères d'acceptation |
+| `../../.github/ISSUE_TEMPLATE/security_issue.md` | **Template sécurité** — canal privé si sensible, classification, scopes sensibles |
+| `../../.github/ISSUE_TEMPLATE/config.yml` | Config Issue Template — lien Security Advisories |
 
 ## Script quality-gates (Quality Core 2)
 
@@ -161,7 +166,7 @@ docker build -t enistere/web-nextjs .                        # image Web
 
 ## État attendu pour Quality Core V2 / VF
 
-Quality Core VF (roadmap §22) ajoutera : workflows, templates PR/issue, scripts génération
-changelog, publication couverture, prompts IA standardisés. Ces éléments sont différés.
+Quality Core VF (roadmap §22) ajoutera : workflows, scripts génération changelog,
+publication couverture, prompts IA standardisés. Ces éléments sont différés.
 
-Actuellement, seules la spécification, la matrice des gates et les checklists sont livrées.
+Les templates PR/issue ont été livrés en **Quality Core 4** (2026-07-11).
