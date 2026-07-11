@@ -1,14 +1,18 @@
 # RELEASE_READINESS_CHECKLIST.md — Checklist avant release / promotion de statut
 
 > Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`,
-> `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`.
-> Dernière mise à jour : 2026-07-11 (Quality Core 3).
+> `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`,
+> `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`.
+> Dernière mise à jour : 2026-07-11 (Quality Core 5).
 
 ## Quand utiliser cette checklist
 
 - Avant de promouvoir un core à un nouveau statut (ex. `IMPLEMENTATION_AVANCEE` → `VALIDE_V1`).
 - Avant une release de package (`@enistere/ui-kit`, `@enistere/api-contracts`, etc.).
 - Avant un déploiement staging majeur (Cloud Core).
+- Avant une release Foundation (`foundation-v1-baseline`, `core-v1-validation`, etc.).
+
+> **Rappel** : un merge ≠ une release. Voir `RELEASE_PROCESS_RUNBOOK.md` §1 pour les définitions.
 
 ---
 
@@ -121,10 +125,50 @@
 
 ---
 
+---
+
+## Partie 5 — Release Foundation
+
+> Utiliser pour une release de type `foundation-v1-baseline`, `core-v1-validation`, `quality-v2-increment`,
+> `staging-candidate` ou `hotfix`. Voir `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` §3 pour les critères.
+
+### Prérequis Foundation Release
+
+- [ ] `main` propre : `git log origin/main..HEAD` vide (aligné avec `origin/main`)
+- [ ] Toutes les PRs critiques fusionnées ou explicitement exclues (justification documentée)
+- [ ] Type de release identifié : `foundation-v1-baseline` / `core-v1-validation` / `quality-v2-increment` / `staging-candidate` / `hotfix`
+- [ ] Scope défini : cores inclus + exclusions justifiées
+
+### Gates Foundation Release
+
+- [ ] `node cores/quality-core/scripts/quality-gates.mjs run all-safe` — 17/17 ✓ (selon scope)
+- [ ] CI L1 verte sur `main` (`api-contracts` / `api-client-fetch` / `ui-kit` / `web-nextjs` / `audit`)
+- [ ] CI L2 verte (`api-runtime`) — si API Core inclus
+- [ ] CI L3 verte (`web-e2e`) — si Web Core inclus
+- [ ] CI L4 verte (`api-smoke` / `images`) — si runtime images inclus
+
+### Documentation Foundation Release
+
+- [ ] `CHANGELOG.md` à jour (section `[Unreleased]` avec tous les changements)
+- [ ] `FOUNDATION_CURRENT_STATE.md` cohérent avec les preuves
+- [ ] `IMPLEMENTATION_MATRIX.md` cohérent — aucun statut non prouvé
+- [ ] Notes de release rédigées selon format `RELEASE_PROCESS_RUNBOOK.md` §6
+- [ ] Gates non exécutés documentés avec raison
+- [ ] Aucun secret, token, URL signée dans les notes ou le diff
+
+### Tag et billet (action humaine — après merge)
+
+- [ ] Tag Git créé selon convention `RELEASE_PROCESS_RUNBOOK.md` §7 (après merge `main` uniquement)
+- [ ] Billet GitHub Release créé avec les notes de release
+- [ ] SHA GHCR correspondant documenté si images incluses
+
+---
+
 ## Rappels
 
 - Un dossier vide ≠ un core implémenté.
 - Un ADR ≠ du code.
 - Une spécification ≠ un starter.
+- **Un merge ≠ une release** — voir `RELEASE_PROCESS_RUNBOOK.md` §2.
 - Une promotion de statut requiert **toujours** un rapport de revue versionné.
 - Les tests Cloud staging ne sont pas reproductibles localement — ils ne bloquent pas les PRs docs.

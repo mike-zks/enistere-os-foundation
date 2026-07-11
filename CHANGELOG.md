@@ -6,6 +6,27 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core 5 — Release process runbook
+
+- **`cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`** (nouveau) : processus de release gouverné pour Enistere OS Foundation.
+- **§1 — Clarification des 5 concepts** : merge sur `main` (acte technique), promotion de statut (gouvernance documentaire), release Foundation (gouvernance globale), staging validation (déploiement), production (hors périmètre V1). Tableau comparatif : nature / déclencheur / preuve requise / produit.
+- **§2 — Règle fondamentale** : une release Foundation est un acte de gouvernance, pas un simple merge.
+- **§3 — 5 types de release** avec critères et gates attendus :
+  - `foundation-v1-baseline` — tous cores V1 + CI L1–L4 + protection de branche activée
+  - `core-v1-validation` — validation individuelle d'un core, rapport de revue requis
+  - `quality-v2-increment` — incrément documentaire Quality Core (docs-only gates)
+  - `staging-candidate` — SHA GHCR immuable + rapport CC11 versionné
+  - `hotfix` — correction urgente, CI complète obligatoire (pas de raccourci)
+- **§4 — Prérequis généraux** (4 catégories) : état `main` (aligné `origin/main`, aucune PR bloquante), CI (L1–L4 selon scope), qualité locale (`npm audit` 0 vuln, `git diff --check`, `quality-gates run`), documentation (`CHANGELOG.md` / `FOUNDATION_CURRENT_STATE.md` / `IMPLEMENTATION_MATRIX.md`), sécurité (aucun secret/token/URL signée), Cloud (tests réels exclus sauf `staging-candidate`).
+- **§5 — Procédure en 8 étapes** : type/scope → commits depuis dernière release → relire project-status → sélectionner gates → documenter exclusions → rédiger notes → PR release → tag + billet GitHub post-merge (action humaine).
+- **§6 — Format recommandé des notes de release** : résumé / cores impactés / changements fonctionnels / sécurité-gouvernance / migrations-breaking changes / gates exécutés (tableau) / gates non exécutés (tableau) / limites connues / prochaine action.
+- **§7 — Convention de tagging futur** (convention proposée, non appliquée) : `foundation-vX.Y.Z`, `core-web-vX.Y.Z`, `core-ui-kit-vX.Y.Z`, `core-api-vX.Y.Z`, `core-mobile-vX.Y.Z`, `quality-v2.N`, `staging-YYYYMMDD-sha`, `hotfix-vX.Y.Z-NNN`. Règles SemVer + règles de tagging (uniquement sur commits `main`, tags annotés, immuables).
+- **§8 — Relation avec les gates Quality Core** : tableau type de release × scope quality-gates × CI requise × staging requis.
+- **`docs/checklists/RELEASE_READINESS_CHECKLIST.md`** : **Partie 5 — Release Foundation** ajoutée (prérequis, gates, documentation, tag + billet post-merge). Référence au runbook ajoutée dans l'en-tête.
+- `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour (statut QC5, addendum, table des matières).
+- Aucun workflow GitHub modifié. Aucun tag créé. Aucune release GitHub créée. Aucune dépendance. Aucun changement runtime.
+- Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, `node --test cores/quality-core/scripts/quality-gates.test.mjs` 36/36 ✓.
+
 ### Quality Core 4 — Alignement templates PR / Issues avec Quality Core
 
 - **`.github/PULL_REQUEST_TEMPLATE.md`** (mis à jour) : section **Quality Gates** (scope applicable parmi `docs`/`packages`/`ui-kit`/`web`/`mobile-static`/`root-audit`/`all-safe`/runtime, commandes exécutées et résultats, gates non exécutés + raison). Section **Hors périmètre confirmé** (workflows intacts, secrets absents). Section **Sécurité** renforcée (PII, tokens, URL signées, CSRF). Section **Statut / gouvernance** (si `docs/project-status/` modifié ou promotion de statut). Référence vers `docs/checklists/PR_QUALITY_CHECKLIST.md` et le script `quality-gates.mjs`.

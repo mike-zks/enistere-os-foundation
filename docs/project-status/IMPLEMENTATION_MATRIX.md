@@ -8,6 +8,8 @@
 
 ## 1. Cores et packages
 
+> **Mise à jour Quality Core 5 (2026-07-11)** : `RELEASE_PROCESS_RUNBOOK.md` créé dans `cores/quality-core/`. Processus de release gouverné : 5 définitions (merge / promotion / release Foundation / staging / production), 5 types de release (`foundation-v1-baseline` / `core-v1-validation` / `quality-v2-increment` / `staging-candidate` / `hotfix`), prérequis généraux (4 catégories), procédure en 8 étapes, format notes de release, convention de tagging futur (sans tag créé). `docs/checklists/RELEASE_READINESS_CHECKLIST.md` mis à jour : section Foundation Release (Partie 5). Aucun workflow modifié, aucune release créée, aucune dépendance, aucun changement runtime.
+>
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Quality Core 3 (2026-07-11)** : `BRANCH_PROTECTION_RUNBOOK.md` ajouté dans `cores/quality-core/`. Procédure d'activation manuelle de la protection de branche `main` : 10 noms de checks exacts (8 requis immédiats + 2 recommandés phase 2), options recommandées (PR obligatoire, checks requis, branches à jour, admins inclus différé), checklist post-activation. `.github/workflows/README.md` mis à jour avec le tableau complet. **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
@@ -35,7 +37,7 @@
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-034 |
-| Quality Core | ✓ | ✓ | — | — | ✓ (36 tests node:test) | — | — | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + 3 checklists + `scripts/quality-gates.mjs` + 36 tests + **templates GitHub PR/bug/feature/security** (Quality Core 4, 2026-07-11) | — (V1 documentaire déclaré) |
+| Quality Core | ✓ | ✓ | — | — | ✓ (36 tests node:test) | — | — | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + **`RELEASE_PROCESS_RUNBOOK.md`** + 3 checklists + `scripts/quality-gates.mjs` + 36 tests + templates GitHub PR/bug/feature/security (Quality Core 5, 2026-07-11) | — (V1 documentaire déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 
 ## 2. Infrastructure transverse
