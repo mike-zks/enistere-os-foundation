@@ -6,6 +6,18 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core 1 — Cadrage opérationnel des gates qualité V2
+
+- **Démarrage** : `cores/quality-core` passe de `DOSSIER_SEULEMENT` à **`SPECIFICATION_DOCUMENTAIRE`** (2026-07-11).
+- **`cores/quality-core/CORE_SPECIFICATION.md`** : objectif, périmètre V2, hors périmètre (différé VF), relation ADR-013/014 et roadmap §13/§22, 4 niveaux qualité (local / L1 / L2–L3 / L4), règle tests Cloud = gates finaux, gouvernance promotion statut (7 étapes).
+- **`cores/quality-core/README.md`** : statut, commandes existantes par core (root / api-contracts / api-client-fetch / ui-kit / web-nextjs / mobile-react-native / api-nestjs / cloud), guide choix gates par type de PR (7 types), responsabilités (auteur PR / reviewer / mainteneur / CI).
+- **`cores/quality-core/QUALITY_GATES_MATRIX.md`** : matrice synthétique 8 cores × 11 gates (typecheck / lint / test / build / audit / e2e / smoke / images / doctor / tokens / openapi) + détail par core (commande, environnement, CI existante, fréquence) + résumé 7+1 checks branch protection + matrice preuves actuelles.
+- **`docs/checklists/PR_QUALITY_CHECKLIST.md`** : checklist par type de PR (docs-only / quality-core / UI Kit / api-contracts / api-client-fetch / web-nextjs / mobile-react-native / api-nestjs / cloud / multi-core).
+- **`docs/checklists/RELEASE_READINESS_CHECKLIST.md`** : checklist avant release ou promotion de statut (documentation / git / audit / critères par core cible / release package / déploiement staging CC11).
+- **`docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md`** : checklist revue de statut (8 étapes : contexte obligatoire → critères spéc → gates → gaps → décision → rapport → project-status → PR).
+- **Périmètre** : docs et governance uniquement. Aucun workflow GitHub modifié. Aucune dépendance ajoutée. Aucun changement runtime (API / Web / Mobile / UI Kit / Cloud).
+- Vérifications : `git diff --check` ✓, `npm audit` root 0 vuln ✓.
+
 ### UI Kit VALIDE_V1 — Promotion officielle du statut
 
 - **Promotion** : UI Kit `IMPLEMENTATION_AVANCEE` → **`VALIDE_V1`** (2026-07-11).

@@ -263,7 +263,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `quality-core`, `web-angular`.
+- **SPECIFICATION_DOCUMENTAIRE** : **Quality Core** (`cores/quality-core/`) — Quality Core 1 (2026-07-11) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md`. Checklists : `docs/checklists/PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+- **Vides** : `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
   Axios/Zustand) ; niveau 2 `api-runtime-ci.yml` (runtime API + e2e) ; niveau 3 `web-e2e-ci.yml` (E2E
@@ -305,6 +306,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores documentaires
 
+**`quality-core`** : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 1, 2026-07-11) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + checklists `docs/checklists/`. Core de gouvernance qualité : matrice gates × 8 cores, guide PR, règle tests Cloud, gouvernance promotion statut. Aucun workflow modifié. Aucune dépendance.
+
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
@@ -339,7 +342,10 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**UI Kit VALIDE_V1 review** (`docs/project-status/`) (2026-07-11) :
+**Quality Core 1 — cadrage opérationnel des gates qualité V2** (`cores/quality-core/`, `docs/checklists/`) (2026-07-11) :
+démarrage du Quality Core comme core de gouvernance qualité. Statut : **`SPECIFICATION_DOCUMENTAIRE`**. Fichiers créés : `CORE_SPECIFICATION.md` (objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut), `README.md` (commandes existantes par core, guide PR, responsabilités), `QUALITY_GATES_MATRIX.md` (8 cores × 11 types de gate : typecheck/lint/test/build/audit/e2e/smoke/images/doctor/tokens/openapi). Checklists : `PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`. Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime. Vérifications : `git diff --check` ✓, `npm audit` root 0 vuln ✓.
+
+**Étape précédente — UI Kit VALIDE_V1 review** (`docs/project-status/`) (2026-07-11) :
 promotion officielle du UI Kit de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`. §12.4 **4/4** (tokens ✅ + 19 primitives Web ✅ + docs ✅ + cohérence visuelle mobile/web ✅ RN35) ; §59 **9/9** ; consommation prouvée Web Core VALIDE_V1 + Mobile Core STARTER_UI_KIT_ALIGNED. Réserves non bloquantes documentées (Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core ADR-010). Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
 
 **Étape précédente — Mobile RN35 — Alignement UI Kit / états UI mobile** (`cores/mobile-react-native/`) (2026-07-11) :

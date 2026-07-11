@@ -5,6 +5,14 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Quality Core 1 — cadrage opérationnel des gates qualité V2 : RÉALISÉ** (2026-07-11).
+> Démarrage de `cores/quality-core` comme core de gouvernance qualité. Statut : **`SPECIFICATION_DOCUMENTAIRE`**.
+> Fichiers créés : `CORE_SPECIFICATION.md` (objectif, périmètre V2, 4 niveaux, règle tests Cloud, gouvernance statut), `README.md` (commandes, guide PR, responsabilités), `QUALITY_GATES_MATRIX.md` (8 cores × 11 types de gate).
+> Checklists créées : `docs/checklists/PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`.
+> Vérifications : `git diff --check` ✅, `npm audit` root 0 vuln ✅. Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime.
+>
+> **Prochaine action** : à décider. Candidats : Mobile Core RN31 (iOS smoke — macOS requis) ; API Core VALIDE_V1 review ; Quality Core V2 (workflows, templates, scripts).
+
 > ✅ **UI Kit VALIDE_V1 review — RÉALISÉ** (2026-07-11).
 > Revue officielle de promotion du UI Kit de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
 > Critères §12.4 **4/4** confirmés (tokens ✅ + 19 primitives Web ✅ + docs ✅ + cohérence visuelle mobile/web ✅ RN35).
