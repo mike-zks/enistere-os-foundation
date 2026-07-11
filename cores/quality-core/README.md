@@ -1,6 +1,6 @@
 # Quality Core
 
-**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 4, 2026-07-11)
+**Statut** : `SPECIFICATION_DOCUMENTAIRE` (Quality Core 5, 2026-07-11)
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
@@ -12,6 +12,7 @@ monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les d�
 | `CORE_SPECIFICATION.md` | Spécification complète : objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut |
 | `QUALITY_GATES_MATRIX.md` | Matrice gates × cores : commandes, environnements, CI existante, fréquence |
 | `BRANCH_PROTECTION_RUNBOOK.md` | **Procédure d'activation manuelle** de la protection de branche `main` — noms exacts des 10 checks, options recommandées, checklist post-activation |
+| `RELEASE_PROCESS_RUNBOOK.md` | **Processus de release gouverné** — 5 types de release, prérequis généraux, procédure 8 étapes, format notes, convention de tagging futur |
 | `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
 | `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
@@ -170,3 +171,4 @@ Quality Core VF (roadmap §22) ajoutera : workflows, scripts génération change
 publication couverture, prompts IA standardisés. Ces éléments sont différés.
 
 Les templates PR/issue ont été livrés en **Quality Core 4** (2026-07-11).
+Le processus de release a été documenté en **Quality Core 5** (2026-07-11).

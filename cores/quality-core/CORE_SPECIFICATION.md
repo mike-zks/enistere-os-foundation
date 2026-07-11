@@ -13,7 +13,12 @@ Cette spécification est documentaire. Elle ne crée pas de workflow GitHub, pas
 d'exécution destructrice, pas de dépendance, pas de configuration de package, pas de code
 applicatif et pas d'infrastructure réelle.
 
-Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 4, 2026-07-11).
+Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Quality Core 5, 2026-07-11).
+
+> **Quality Core 5** ajoute `RELEASE_PROCESS_RUNBOOK.md` : processus de release gouverné —
+> 5 définitions (merge / promotion / release Foundation / staging / production), 5 types de release,
+> prérequis généraux, procédure en 8 étapes, format des notes, convention de tagging futur.
+> Aucun workflow modifié. Aucune release créée. Aucune dépendance. Aucun changement runtime.
 
 > **Quality Core 4** modernise les templates GitHub (`.github/PULL_REQUEST_TEMPLATE.md`,
 > `.github/ISSUE_TEMPLATE/`) pour les aligner avec les gates qualité, les statuts de core,

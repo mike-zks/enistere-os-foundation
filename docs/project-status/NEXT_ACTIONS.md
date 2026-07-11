@@ -5,6 +5,13 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Quality Core 5 — release process runbook : RÉALISÉ** (2026-07-11).
+> `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` créé. 5 définitions (merge / promotion / release Foundation / staging / production). 5 types : `foundation-v1-baseline`, `core-v1-validation`, `quality-v2-increment`, `staging-candidate`, `hotfix`. Prérequis généraux (état `main`, CI, qualité locale, documentation, sécurité, Cloud). Procédure en 8 étapes. Format notes de release. Convention de tagging futur (`foundation-vX.Y.Z`, `core-web-vX.Y.Z`, `quality-v2.N`, etc.). Aucun tag créé, aucune release créée, aucun workflow modifié.
+> `docs/checklists/RELEASE_READINESS_CHECKLIST.md` : section Foundation Release (Partie 5) ajoutée.
+> Vérifications : `git diff --check` ✅, `npm audit` 0 vuln ✅, `plan docs` ✅, `test 36/36` ✅.
+>
+> **Prochaine action** : **activer la protection de branche `main`** (action humaine — GitHub Settings → Branches, selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`). Alternativement : Mobile Core RN31 (iOS smoke — macOS requis) ou API Core VALIDE_V1 review.
+
 > ✅ **Quality Core 4 — alignement templates PR / Issues avec Quality Core : RÉALISÉ** (2026-07-11).
 > `.github/PULL_REQUEST_TEMPLATE.md` modernisé : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance.
 > `.github/ISSUE_TEMPLATE/` mis à jour : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères d'acceptation), `security_issue.md` (canal privé si sensible, classification, scopes sensibles). `config.yml` ajouté (Security Advisories).
