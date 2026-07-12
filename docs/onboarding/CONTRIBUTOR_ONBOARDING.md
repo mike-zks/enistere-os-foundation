@@ -1,6 +1,6 @@
 # Contributor Onboarding
 
-> Docs Core 3.
+> Docs Core 5.
 > Derniere mise a jour : 2026-07-12.
 
 Ce guide aide un contributeur ou un agent IA a demarrer une mission dans Enistere OS Foundation sans
@@ -23,13 +23,89 @@ Le code, les tests et les fichiers de statut courant priment.
 6. Le `CORE_SPECIFICATION.md` du core concerne
 7. Les ADR applicables dans [`../adr/`](../adr/)
 
+Guides transverses utiles :
+
+- [`../guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](../guides/DOCUMENTATION_MAINTENANCE_GUIDE.md)
+- [`../guides/CORE_STATUS_REVIEW_GUIDE.md`](../guides/CORE_STATUS_REVIEW_GUIDE.md)
+
 Pour une mission IA, lire aussi :
 
 - [`../../cores/quality-core/AI_PROMPT_GOVERNANCE.md`](../../cores/quality-core/AI_PROMPT_GOVERNANCE.md)
 - [`../../prompts/README.md`](../../prompts/README.md)
 - [`../../prompts/global/mission-brief-template.md`](../../prompts/global/mission-brief-template.md)
 
-## 3. Demarrer une mission
+## 3. Parcours par role
+
+### Pilote / architecte
+
+Objectif : choisir la prochaine mission et proteger la coherence globale.
+
+Lire :
+
+1. `NEXT_ACTIONS.md` ;
+2. `IMPLEMENTATION_MATRIX.md` ;
+3. `strategy/04_ROADMAP_GLOBAL.md` ;
+4. `CORE_SPECIFICATION.md` du core vise ;
+5. ADR applicables ;
+6. derniers rapports du core.
+
+Livrable attendu : une mission precise avec objectif, contexte obligatoire, perimetre autorise, interdits,
+gates et critere de succes.
+
+### Agent executeur
+
+Objectif : livrer la mission dans le perimetre.
+
+Lire :
+
+1. la mission fournie ;
+2. les fichiers de statut cites par la mission ;
+3. le core spec et les ADR cites ;
+4. la matrice Quality Core pour les gates.
+
+Livrable attendu : code ou documentation implementes, tests/gates executes, rapport final factuel.
+
+### Reviewer technique
+
+Objectif : verifier les risques, regressions et ecarts.
+
+Lire :
+
+1. diff de la PR ;
+2. tests ajoutes ou modifies ;
+3. `CORE_SPECIFICATION.md` ;
+4. ADR applicables ;
+5. `PR_QUALITY_CHECKLIST.md`.
+
+Livrable attendu : findings classes par severite, puis questions ouvertes et resume court.
+
+### Reviewer securite
+
+Objectif : verifier secrets, tokens, PII, permissions, CSRF, logs et dependances.
+
+Lire :
+
+1. `strategy/07_SECURITY.md` ;
+2. ADR securite applicables ;
+3. fichiers qui manipulent auth, fichiers, logs, secrets ou infra ;
+4. resultats `npm audit` et checks CI.
+
+Livrable attendu : validation ou blocage explicite, avec preuves.
+
+### Mainteneur release / statut
+
+Objectif : decider une promotion ou une release sans confondre merge et publication.
+
+Lire :
+
+1. [`../../cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`](../../cores/quality-core/RELEASE_PROCESS_RUNBOOK.md)
+2. [`../guides/CORE_STATUS_REVIEW_GUIDE.md`](../guides/CORE_STATUS_REVIEW_GUIDE.md)
+3. [`../checklists/RELEASE_READINESS_CHECKLIST.md`](../checklists/RELEASE_READINESS_CHECKLIST.md)
+4. rapport de readiness du core concerne.
+
+Livrable attendu : decision de statut/release, notes, tag ou prochaine action.
+
+## 4. Demarrer une mission
 
 Avant d'editer :
 
@@ -48,7 +124,7 @@ Commande utile :
 git status --short --branch
 ```
 
-## 4. Pendant une mission
+## 5. Pendant une mission
 
 - Modifier un seul core ou domaine a la fois.
 - Eviter les refactors opportunistes.
@@ -57,7 +133,7 @@ git status --short --branch
 - Garder les rapports historiques comme historiques.
 - Mettre a jour `docs/project-status/` si le statut, les preuves ou la prochaine action changent.
 
-## 5. Finir une mission
+## 6. Finir une mission
 
 Pour une mission documentaire Docs/Quality :
 
@@ -75,7 +151,7 @@ Pour une mission runtime, utiliser la matrice :
 - [`../../cores/quality-core/QUALITY_GATES_MATRIX.md`](../../cores/quality-core/QUALITY_GATES_MATRIX.md)
 - [`../checklists/PR_QUALITY_CHECKLIST.md`](../checklists/PR_QUALITY_CHECKLIST.md)
 
-## 6. Rapport final attendu
+## 7. Rapport final attendu
 
 Un rapport final doit mentionner :
 
@@ -88,7 +164,7 @@ Un rapport final doit mentionner :
 - limites connues ;
 - prochaine mission recommandee.
 
-## 7. Responsabilites
+## 8. Responsabilites
 
 | Role | Responsabilite |
 |---|---|
@@ -97,7 +173,7 @@ Un rapport final doit mentionner :
 | Reviewer | Cherche les bugs, incoherences, risques, manques de tests et ecarts de gouvernance |
 | Mainteneur humain | Arbitre les decisions ouvertes, valide les releases, secrets, acces externes et promotions critiques |
 
-## 8. Si une information semble contradictoire
+## 9. Si une information semble contradictoire
 
 1. Preferer le code et les tests.
 2. Verifier `FOUNDATION_CURRENT_STATE.md` et `IMPLEMENTATION_MATRIX.md`.

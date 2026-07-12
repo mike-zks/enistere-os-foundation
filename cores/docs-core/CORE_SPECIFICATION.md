@@ -1,6 +1,6 @@
 # Docs Core — Core Specification
 
-> Statut : **IMPLEMENTATION_PARTIELLE**.
+> Statut : **IMPLEMENTATION_AVANCEE**.
 > Derniere mise a jour : 2026-07-12.
 
 ## 1. Objectif
@@ -32,10 +32,9 @@ La V2 attend notamment :
 - des prompts IA classes ;
 - des checklists qualite.
 
-Docs Core 1→4 livre le cadrage initial, l'index central, l'onboarding minimal, le glossaire initial et
-un controle local des liens internes. La revue V2 confirme le statut `IMPLEMENTATION_PARTIELLE` : les guides
-principaux et l'onboarding complet restent requis avant `IMPLEMENTATION_AVANCEE`. Docs Core ne livre pas
-encore de site documentaire, de RAG, de moteur de recherche ou de generation automatique.
+Docs Core 1→5 livre le cadrage initial, l'index central, l'onboarding, le glossaire initial, les guides
+principaux et un controle local des liens internes. Docs Core ne livre pas encore de site documentaire, de RAG,
+de moteur de recherche ou de generation automatique.
 
 ## 3. Perimetre V2 initial
 
@@ -46,6 +45,7 @@ Inclus :
 - cartographie des documents de pilotage ;
 - liens vers ADR, project-status, runbooks, prompts et Quality Core ;
 - onboarding et glossaire initiaux ;
+- guides principaux ;
 - controle local des liens Markdown internes ;
 - statut explicite dans les fichiers de pilotage.
 

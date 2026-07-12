@@ -38,8 +38,14 @@
 > l'ensemble Quality+Docs, mais le seuil `IMPLEMENTATION_AVANCEE` du Docs Core attend les guides principaux
 > et un onboarding complet.
 >
-> **Prochaine action** : Docs Core 5 — guides principaux et onboarding complet, sans runtime, workflow,
-> dependance, RAG ou site documentaire.
+> ✅ **Docs Core 5 — guides principaux et onboarding complet : RÉALISÉ** (2026-07-12).
+> Livrables : `docs/guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`,
+> `docs/guides/CORE_STATUS_REVIEW_GUIDE.md`, onboarding par role, rapport
+> `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`.
+> Decision : Docs Core passe de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`**.
+>
+> **Prochaine action** : Docs Core 6 — decider si le link check devient un gate CI obligatoire ou reste un
+> gate local documente. Aucun runtime, dependance, RAG ou site documentaire.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
