@@ -29,7 +29,8 @@ pas une application ni une bibliothèque complète).
 | Cores documentaires | **`quality-core`** — **SPECIFICATION_DOCUMENTAIRE** (Governance 3, 2026-07-11) : `CORE_SPECIFICATION.md`, `README.md`, `QUALITY_GATES_MATRIX.md`, `BRANCH_PROTECTION_RUNBOOK.md`, **`RELEASE_PROCESS_RUNBOOK.md`**, templates GitHub PR/Issues, 3 checklists, `scripts/quality-gates.mjs` + tests (**36/36**). **Protection `main` active via GitHub Rulesets** (`protect-main`, enforcement `active`, 8 checks requis). Aucun workflow modifié, aucune dépendance, aucun changement runtime. _(aucun autre core documentaire ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
-| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après Governance 3 (`0038318`, PR #86) ; protection `main` active via Rulesets ; flux PR actif |
+| Foundation baseline | **`READY_FOR_RELEASE_DECISION`** — revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` (2026-07-12) : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire, CI L1-L4 verte sur `main`, ruleset `protect-main` actif ; **aucun tag ni release GitHub créé** |
+| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après API Core VALIDE_V1 (`84dd5e7`, PR #87) ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
 
@@ -386,9 +387,9 @@ politiques** : artefacts = aucun upload (Option A), couverture = exécutée non 
 futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
 ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection `main` active via GitHub Rulesets**) et
 ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
-**Prochaine action** : **Foundation V1 Baseline Readiness Review** — vérifier si API Core VALIDE_V1,
-Web Core VALIDE_V1, UI Kit VALIDE_V1, Quality Core documentaire et CI/ruleset actif permettent de déclarer
-une baseline Foundation V1 gouvernée, sans tag/release automatique.
+**Prochaine action** : **Foundation V1 Release Notes 1** — préparer les notes de release
+`foundation-v1-baseline` selon le runbook, **sans tag ni release GitHub automatique**. La baseline est
+désormais `READY_FOR_RELEASE_DECISION` via `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

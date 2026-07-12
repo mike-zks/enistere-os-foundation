@@ -357,8 +357,9 @@ Une phrase décrivant l'essentiel de la release.
 
 ### Prochaine action
 
-Prochaine action : API Core VALIDE_V1 review, ou décider si les deux checks `images`
-doivent devenir requis dans le ruleset `protect-main`.
+Prochaine action : préparer les notes de release `foundation-v1-baseline` si la revue
+`FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` conclut `READY_FOR_RELEASE_DECISION`. Le tag reste une
+décision humaine explicite.
 ```
 
 ---
