@@ -29,11 +29,11 @@ couvre pas encore tous les livrables V2 du roadmap §13.
 | Les tests peuvent être lancés | ✅ | `quality-gates.mjs`, scopes `docs/packages/ui-kit/web/mobile-static/all-safe` |
 | Les scripts fonctionnent | ✅ | `quality-gates.test.mjs`, `plan docs`, `list` |
 | Les releases sont documentées | ✅ | `RELEASE_PROCESS_RUNBOOK.md`, `FOUNDATION_V1_RELEASE_NOTES.md`, release `foundation-v1.0.0` |
-| Les prompts IA sont versionnés | ⚠️ | dossiers `prompts/` présents, mais pas encore standardisés par Quality Core |
+| Les prompts IA sont versionnés | ✅ | Quality Core 7 : `AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`, `mission-brief-template.md` |
 | La documentation est structurée | ✅ | README, matrice, runbooks, checklists, project-status |
 | Les checklists qualité existent | ✅ | PR, release readiness, core status review |
 
-Score : **6/7 satisfaits**, **1/7 partiel**.
+Score après Quality Core 7 : **7/7 satisfaits** sur le périmètre V2 documentaire/opérationnel courant.
 
 ## Gaps Non Bloquants
 
@@ -42,7 +42,7 @@ Score : **6/7 satisfaits**, **1/7 partiel**.
 | Pas de nouveaux workflows GitHub gérés par Quality Core | Non | Hors périmètre explicitement défini ; workflows existants restent sources d'exécution |
 | Pas de changelog automatique/semi-automatique | Non | Roadmap V2 restant ; process manuel gouverné fonctionne |
 | Pas de publication de couverture | Non | Différé VF/V2 avancée |
-| Pas de prompts IA standardisés | Non pour partiel ; bloquant pour V2 complet | Roadmap §13.4 partiel |
+| Prompts IA avancés/RAG non livrés | Non | Versionnement et format standard livrés ; automatisation avancée différée |
 | Les checks `images` ne sont pas requis dans `protect-main` | Non | Documentés comme recommandés phase 2 ; `api-smoke` requis |
 
 ## Vérifications Exécutées
@@ -67,11 +67,11 @@ Justification :
 - le processus de release a été utilisé pour `foundation-v1.0.0`.
 
 Le passage à `IMPLEMENTATION_AVANCEE` ou `VALIDE_V1` exigera au minimum un cadrage ou une livraison des
-gaps V2 restants : prompts IA standardisés, automatisation release/changelog, métriques/couverture, ou
-durcissement des checks requis.
+gaps V2 restants : automatisation release/changelog, métriques/couverture, ou durcissement des checks
+requis.
 
 ## Prochaine Action Recommandée
 
-Quality Core 7 — prompts IA standardisés et catalogue de missions gouvernées : organiser les prompts
-existants par rôle/type de mission, définir leur format minimal, lier chaque mission aux docs obligatoires
-(`strategy`, `CORE_SPECIFICATION`, ADR, project-status), sans automatisation intrusive ni nouveau runtime.
+Docs Core 1 — documentation centrale navigable : créer le cadrage initial du Docs Core et un index
+central des docs (`strategy`, ADR, `project-status`, runbooks, prompts, quality gates), sans runtime ni
+génération automatique.

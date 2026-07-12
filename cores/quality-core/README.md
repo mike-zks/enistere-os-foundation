@@ -16,8 +16,11 @@ monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les d�
 | `QUALITY_GATES_MATRIX.md` | Matrice gates × cores : commandes, environnements, CI existante, fréquence |
 | `BRANCH_PROTECTION_RUNBOOK.md` | **État et procédure de protection de branche `main`** — ruleset actif, 8 checks requis, checks `images` recommandés phase 2, procédure de vérification |
 | `RELEASE_PROCESS_RUNBOOK.md` | **Processus de release gouverné** — 5 types de release, prérequis généraux, procédure 8 étapes, format notes, convention de tagging futur |
+| `AI_PROMPT_GOVERNANCE.md` | **Gouvernance des prompts IA** — responsabilités, lectures obligatoires, format minimal, sécurité, rapport attendu |
 | `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
 | `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
+| `../../prompts/README.md` | Catalogue gouverné des prompts IA versionnés |
+| `../../prompts/global/mission-brief-template.md` | Template de mission Claude/Codex/Gemini gouvernée |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
 | `../../docs/checklists/RELEASE_READINESS_CHECKLIST.md` | Checklist avant release / promotion de statut |
 | `../../docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md` | Checklist revue de statut d'un core |
@@ -170,8 +173,9 @@ docker build -t enistere/web-nextjs .                        # image Web
 
 ## État attendu pour Quality Core V2 / VF
 
-Quality Core VF (roadmap §22) ajoutera : workflows, scripts génération changelog,
-publication couverture, prompts IA standardisés. Ces éléments sont différés.
+Quality Core VF (roadmap §22) ajoutera : workflows avancés, scripts génération changelog,
+publication couverture, prompts IA automatisés/RAG. Ces éléments sont différés.
 
 Les templates PR/issue ont été livrés en **Quality Core 4** (2026-07-11).
 Le processus de release a été documenté en **Quality Core 5** (2026-07-11).
+La gouvernance des prompts IA et le catalogue ont été livrés en **Quality Core 7** (2026-07-12).

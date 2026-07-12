@@ -12,9 +12,11 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 - `Quality Core` promu de **`SPECIFICATION_DOCUMENTAIRE`** à **`IMPLEMENTATION_PARTIELLE`**.
 - Justification : matrice des gates, script `quality-gates`, checklists, templates GitHub, ruleset actif,
   processus de release et usage réel lors de la publication `foundation-v1.0.0`.
-- Critères roadmap §13.4 : **6/7 satisfaits**, **1/7 partiel** (prompts IA standardisés).
+- Critères roadmap §13.4 : **7/7 satisfaits** sur le périmètre V2 documentaire/opérationnel courant.
 - Aucun workflow, runtime, dépendance, tag ou déploiement modifié.
-- Prochaine action : **Quality Core 7 — prompts IA standardisés et catalogue de missions gouvernées**.
+- Quality Core 7 livré : `cores/quality-core/AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`,
+  `prompts/global/mission-brief-template.md`.
+- Prochaine action : **Docs Core 1 — documentation centrale navigable**.
 
 ### Foundation V1 Release Decision
 
