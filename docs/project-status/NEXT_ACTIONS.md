@@ -23,8 +23,12 @@
 > Rapport : `docs/project-status/DOCS_CORE_NAVIGATION_AUDIT.md`.
 > Corrections : README racine synthétique, ADR-008 aligné UI Kit V1/RN35, compteurs UI Kit/Web mis à jour.
 >
-> **Prochaine action** : Docs Core 3 — onboarding contributeur minimal et glossaire initial (sans runtime,
-> sans génération automatique, sans RAG).
+> ✅ **Docs Core 3 — onboarding contributeur minimal et glossaire initial : RÉALISÉ** (2026-07-12).
+> Livrables : `docs/onboarding/CONTRIBUTOR_ONBOARDING.md`, `docs/glossary/GLOSSARY.md`.
+> Aucun runtime, workflow, dépendance, génération automatique ou RAG.
+>
+> **Prochaine action** : Docs Core 4 — revue de liens documentaires ciblée (script ou checklist de contrôle
+> des liens internes, sans site docs ni RAG) ou retour à une priorité runtime décidée par pilotage.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

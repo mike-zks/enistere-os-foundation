@@ -50,6 +50,10 @@
 > `DOCS_CORE_NAVIGATION_AUDIT.md`. Corrections ciblées du README racine, de `DECISIONS_REGISTER.md`
 > (ADR-008) et des compteurs UI Kit/Web dans `FOUNDATION_CURRENT_STATE.md`.
 >
+> **Mise à jour Docs Core 3 (2026-07-12)** : onboarding contributeur minimal et glossaire initial :
+> `docs/onboarding/CONTRIBUTOR_ONBOARDING.md`, `docs/glossary/GLOSSARY.md`. Aucun runtime,
+> workflow, dépendance, génération automatique ou RAG.
+>
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Quality Core 3 (2026-07-11)** : `BRANCH_PROTECTION_RUNBOOK.md` ajouté dans `cores/quality-core/`. Procédure d'activation manuelle de la protection de branche `main` : 10 noms de checks exacts (8 requis immédiats + 2 recommandés phase 2), options recommandées (PR obligatoire, checks requis, branches à jour, admins inclus différé), checklist post-activation. `.github/workflows/README.md` mis à jour avec le tableau complet. **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
@@ -75,7 +79,7 @@
 | UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 19 primitives Web : Button/Input/Label/Text/Spinner/VisuallyHidden + Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton + LoadingState/EmptyState/ErrorState/SuccessState)** | **✓ (181, a11y/jest-axe, React 19)** | **✓ (UI Kit VALIDE_V1 review 2026-07-11 : §12.4 4/4 + §59 9/9 ; rapport `UI_KIT_V1_READINESS_REVIEW.md` §8 ; réserves non bloquantes §10)** | **VALIDE_V1** | typecheck ✅ lint ✅ **181/181** ✅ build ✅ tokens:check ✅ audit 0 vuln ✅ diff --check ✅ + **réellement consommé Web Core VALIDE_V1** + **cohérence mobile/web prouvée RN35** | — (V1 déclaré) |
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
-| Docs Core | ✓ | ✓ | — | — | — | — | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`) | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `README.md` + `docs/README.md` index central + audit navigation | Docs Core 3 — onboarding contributeur minimal et glossaire initial |
+| Docs Core | ✓ | ✓ | — | — | — | — | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`) | **SPECIFICATION_DOCUMENTAIRE** | `CORE_SPECIFICATION.md` + `README.md` + `docs/README.md` index central + audit navigation + onboarding + glossaire | Docs Core 4 — revue de liens documentaires ciblée |
 | Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-034 |
 | Quality Core | ✓ | ✓ | — | — | ✓ (36 tests node:test + release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md`) | ✓ | **IMPLEMENTATION_PARTIELLE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée | — |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
