@@ -20,6 +20,8 @@ runbooks, les checklists qualite et les prompts IA.
 | Lire le dernier controle de liens | [`project-status/DOCS_CORE_LINK_CHECK_REPORT.md`](project-status/DOCS_CORE_LINK_CHECK_REPORT.md) |
 | Lire la revue readiness Docs Core V2 | [`project-status/DOCS_CORE_V2_READINESS_REVIEW.md`](project-status/DOCS_CORE_V2_READINESS_REVIEW.md) |
 | Demarrer comme contributeur ou agent | [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) |
+| Maintenir la documentation | [`guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](guides/DOCUMENTATION_MAINTENANCE_GUIDE.md) |
+| Conduire une revue de statut | [`guides/CORE_STATUS_REVIEW_GUIDE.md`](guides/CORE_STATUS_REVIEW_GUIDE.md) |
 | Comprendre les termes et statuts | [`glossary/GLOSSARY.md`](glossary/GLOSSARY.md) |
 | Comprendre les decisions d'architecture | [`adr/`](adr/) |
 | Choisir les gates qualite | [`../cores/quality-core/QUALITY_GATES_MATRIX.md`](../cores/quality-core/QUALITY_GATES_MATRIX.md) |
@@ -92,8 +94,12 @@ Checklists transverses :
 
 ## Onboarding et glossaire
 
-- [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) — parcours minimal pour
+- [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) — parcours par role pour
   demarrer une mission sans contexte conversationnel.
+- [`guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](guides/DOCUMENTATION_MAINTENANCE_GUIDE.md) — maintenance
+  documentaire, sources de verite, gates et anti-patterns.
+- [`guides/CORE_STATUS_REVIEW_GUIDE.md`](guides/CORE_STATUS_REVIEW_GUIDE.md) — methode pour promouvoir ou
+  maintenir le statut d'un core.
 - [`glossary/GLOSSARY.md`](glossary/GLOSSARY.md) — definitions des statuts, gates, cores et termes de securite.
 
 ## Prompts IA

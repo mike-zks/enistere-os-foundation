@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core 5 — Guides principaux et onboarding complet
+
+- Nouveaux guides : `docs/guides/DOCUMENTATION_MAINTENANCE_GUIDE.md` et
+  `docs/guides/CORE_STATUS_REVIEW_GUIDE.md`.
+- `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` enrichi avec parcours par role : pilote/architecte, agent
+  executeur, reviewer technique, reviewer securite, mainteneur release/statut.
+- Nouveau rapport : `docs/project-status/DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`.
+- Docs Core promu de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`**.
+- Aucun runtime applicatif, workflow, dependance, site docs, generation automatique ou RAG ajoute.
+- Prochaine action : **Docs Core 6 — decision CI/docs gate integration**.
+
 ### Docs Core V2 Readiness Review
 
 - Nouveau rapport : `docs/project-status/DOCS_CORE_V2_READINESS_REVIEW.md`.
