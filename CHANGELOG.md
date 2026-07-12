@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Foundation V1 Baseline Readiness Review
+
+- Nouveau rapport : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
+- Verdict : **`READY_FOR_RELEASE_DECISION`** pour le périmètre `foundation-v1-baseline`.
+- Preuves assemblées : API Core `VALIDE_V1`, Web Core `VALIDE_V1`, UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire, ruleset `protect-main` actif.
+- Gates : `all-safe` local validé avec `NODE_ENV=test` jusqu'au gate audit, audit root relancé hors sandbox à 0 vulnérabilité ; CI `main` post-PR #87 verte (`CI`, `API Runtime CI`, `Web E2E CI`, `Registry CI`).
+- Aucun tag, aucune GitHub Release, aucun déploiement et aucun test Cloud réel déclenché par cette revue.
+- Prochaine action : préparer les notes de release `foundation-v1-baseline` sans créer le tag automatiquement.
+
 ### API Core VALIDE_V1 review
 
 - `API Core NestJS` promu de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1` après revue de readiness V1.

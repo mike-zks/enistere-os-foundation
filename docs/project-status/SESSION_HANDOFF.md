@@ -27,13 +27,15 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   S3/MinIO dont `GET /files` paginé, logging Pino, OpenAPI canonique) — **386 tests unitaires**
   + e2e CI runtime + rapports permanents. Promotion réalisée le 2026-07-12 :
   `API_CORE_V1_READINESS_REVIEW.md`.
+- **Foundation baseline** : **READY_FOR_RELEASE_DECISION** (2026-07-12) — rapport
+  `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`. Aucun tag ni release GitHub créé.
 - **VALIDE_V1** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
   Badge, Divider, Skeleton — UI Kit 5 + **LoadingState, EmptyState, ErrorState, SuccessState** — UI Kit 6) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
   (**181 tests**, jest-axe). CSS via `@enistere/ui-kit/styles.css`. `Dialog` est marqué `'use client'` pour la
   compatibilité Next Server Components. **Tailwind/Radix/shadcn absents** (ADR-009 partiel — intentionnel).
   Statut : **VALIDE_V1** (promotion 2026-07-11 depuis `IMPLEMENTATION_AVANCEE`) ; **consommé par le Web Core VALIDE_V1** ; cohérence mobile/web prouvée par RN35 (tokens verbatim + 13 tests). §12.4 4/4 + §59 9/9. Réserves non bloquantes : Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core (ADR-010).
-- **Partiel** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
+- **VALIDE_V1** : **Web Core** (`@enistere/web-nextjs`, 0.1.0, privé) — **Next 16 App Router + React 19**,
   TypeScript strict, Server Components par défaut, UI Kit consommé, thème clair via `data-theme`,
   en-têtes sécurité + pas de `X-Powered-By`. **Intègre l'API publique (Health)** : factory serveur par
   requête + client public navigateur (sans session, `enableRefresh:false`), **TanStack Query** (retry
@@ -1485,10 +1487,9 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : **Foundation V1 Baseline Readiness Review**. Objectif : vérifier si API Core
-VALIDE_V1 + Web Core VALIDE_V1 + UI Kit VALIDE_V1 + Quality Core documentaire + CI/ruleset actif permettent
-de déclarer une baseline Foundation V1 gouvernée. Ne pas créer de tag/release automatiquement ; suivre
-`cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`. RN31 reste bloqué sans macOS/Xcode. Détail :
+**Action unique suivante** : **Foundation V1 Release Notes 1**. Objectif : préparer les notes de release
+`foundation-v1-baseline` selon `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` §6, sans créer de tag ni
+de GitHub Release. La création du tag `foundation-v1.0.0` reste une décision humaine explicite. Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer

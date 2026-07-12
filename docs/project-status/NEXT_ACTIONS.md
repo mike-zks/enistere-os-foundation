@@ -5,6 +5,18 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Foundation V1 Baseline Readiness Review : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
+> Verdict : **`READY_FOR_RELEASE_DECISION`** — le périmètre `foundation-v1-baseline` est prêt pour
+> décision humaine de release, sans tag ni release GitHub créés.
+> Preuves : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire,
+> ruleset `protect-main` actif, CI `main` L1-L4 verte après PR #87, `all-safe` local validé avec
+> `NODE_ENV=test` plus audit root 0 vuln hors sandbox.
+>
+> **Prochaine action** : **Foundation V1 Release Notes 1** — préparer les notes de release
+> `foundation-v1-baseline` selon `RELEASE_PROCESS_RUNBOOK.md` §6, sans créer de tag ni de GitHub Release.
+> Le tag `foundation-v1.0.0` reste une décision humaine explicite après validation des notes.
+
 > ✅ **API Core VALIDE_V1 review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/API_CORE_V1_READINESS_REVIEW.md`.
 > Décision : `API Core NestJS` passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
@@ -12,11 +24,7 @@
 > Vérifications : `lint` ✅, `build` ✅, `test 386/386` ✅, `openapi:check` ✅, `npm audit` 0 vuln ✅.
 > Les e2e complets restent couverts par la CI `api-runtime` (PostgreSQL + MinIO jetables).
 >
-> **Prochaine action** : **Foundation V1 Baseline Readiness Review**.
-> Objectif : décider si la combinaison API Core VALIDE_V1 + Web Core VALIDE_V1 + UI Kit VALIDE_V1
-> + Quality Core documentaire + CI/ruleset actif permet de déclarer une baseline Foundation V1
-> gouvernée. Ne pas créer de tag/release automatiquement ; appliquer le
-> `RELEASE_PROCESS_RUNBOOK.md`. RN31 reste bloqué sans macOS/Xcode.
+> **Historique** : cette prochaine action était Foundation V1 Baseline Readiness Review ; elle est réalisée le 2026-07-12.
 
 > ✅ **Governance 3 — protection `main` vérifiée active via GitHub Rulesets : RÉALISÉ** (2026-07-11).
 > Preuve GitHub : `protect-main` (`ruleset_id=17522775`), target `branch`, enforcement `active`, conditions
