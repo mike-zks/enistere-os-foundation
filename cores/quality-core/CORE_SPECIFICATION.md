@@ -22,6 +22,11 @@ Statut courant : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Rev
 > reste differe : automatisation changelog/release, couverture publiee, dashboards qualite et
 > CI qualite avancee restent hors perimetre courant ou VF.
 
+> **Quality Core release helper** ajoute `scripts/release-helper.mjs` : helper local sans dependance
+> qui liste les types de release gouvernes et genere un brouillon Markdown de notes de release depuis
+> une plage de commits Git. Il ecrit uniquement sur stdout et ne cree aucun tag, aucune GitHub Release,
+> aucun commit, aucun workflow et aucun fichier.
+
 > **Quality Core V2 Readiness Review** promeut le core de `SPECIFICATION_DOCUMENTAIRE` à
 > `IMPLEMENTATION_PARTIELLE` : matrice, script `quality-gates`, checklists, templates, ruleset
 > actif, processus de release et usage réel lors de la publication `foundation-v1.0.0`. Les gaps
@@ -94,7 +99,8 @@ Le Quality Core ne doit pas :
 
 - Nouveaux workflows GitHub Actions.
 - ~~Templates PR et templates d'issue GitHub.~~ → **livré en Quality Core 4** (`.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/`).
-- Scripts de génération de changelog ou d'automatisation de release.
+- Automatisation complète de changelog/release (écriture de `CHANGELOG.md`, tag, GitHub Release). Un
+  helper local de brouillon stdout est livré par `scripts/release-helper.mjs`.
 - Publication de métriques de couverture.
 - Tableaux de bord qualité temps réel.
 - Intégration de linters ou outils de qualité supplémentaires.

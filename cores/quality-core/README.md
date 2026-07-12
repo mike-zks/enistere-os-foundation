@@ -23,6 +23,8 @@ ruleset actif et release Foundation appliquee. Les automatisations avancees rest
 | `AI_PROMPT_GOVERNANCE.md` | **Gouvernance des prompts IA** — responsabilités, lectures obligatoires, format minimal, sécurité, rapport attendu |
 | `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
 | `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
+| `scripts/release-helper.mjs` | Helper local de préparation release — liste les types gouvernés et génère un brouillon Markdown sur stdout |
+| `scripts/release-helper.test.mjs` | Tests unitaires du helper release — validation parsing, types, redaction et brouillon |
 | `../../prompts/README.md` | Catalogue gouverné des prompts IA versionnés |
 | `../../prompts/global/mission-brief-template.md` | Template de mission Claude/Codex/Gemini gouvernée |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
@@ -183,3 +185,16 @@ publication couverture, prompts IA automatisés/RAG. Ces éléments sont différ
 Les templates PR/issue ont été livrés en **Quality Core 4** (2026-07-11).
 Le processus de release a été documenté en **Quality Core 5** (2026-07-11).
 La gouvernance des prompts IA et le catalogue ont été livrés en **Quality Core 7** (2026-07-12).
+Le helper local de brouillon release a été livré en **Quality Core release helper** (2026-07-12).
+
+## Helper release
+
+Le helper release prépare un brouillon Markdown pour revue humaine. Il n'écrit aucun fichier, ne crée
+aucun tag et ne publie aucune GitHub Release.
+
+```bash
+node cores/quality-core/scripts/release-helper.mjs types
+node cores/quality-core/scripts/release-helper.mjs draft --type quality-v2-increment --version quality-v2.8 --since foundation-v1.0.0 --scope "Quality Core"
+```
+
+La sortie doit être relue et complétée par un mainteneur avant toute release.

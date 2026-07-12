@@ -31,10 +31,11 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   commit `2981f2c`, GitHub Release publiée.
 - **Release notes** : **FOUNDATION_V1_RELEASED** — `FOUNDATION_V1_RELEASE_NOTES.md` publié.
 - **Quality Core** : **IMPLEMENTATION_AVANCEE** (2026-07-12) — `QUALITY_CORE_V2_READINESS_REVIEW.md` +
-  `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md`.
+  `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md`.
   Le core dépasse la seule spécification : gates, script, checklists, templates, ruleset actif,
   release process, prompts IA standardisés, usage réel lors de `foundation-v1.0.0` et integration du gate
-  documentaire via Docs Core. Les automatisations avancees restent differees.
+  documentaire via Docs Core. `release-helper.mjs` prépare des brouillons Markdown stdout-only sans tag ni
+  GitHub Release. Les automatisations avancees restent differees.
 - **Cloud Core** : **VALIDE_V1** (2026-07-12) — `CLOUD_CORE_V1_READINESS_REVIEW.md` +
   `CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`. CC10/CC11 prouvent un staging HTTPS reel operationnalise
   (health, auth/files, backups/restores, rollback/roll-forward, rotation smoke, runbooks). CC12 reporte Redis
@@ -1506,9 +1507,8 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : retour pilotage global — candidat naturel : Quality Core automation ciblee
-(changelog/release semi-automation ou coverage reporting), ou cadrage d'un core V3. Mobile RN31 reste
-conditionne a macOS/Xcode ou device iOS reel.
+**Action unique suivante** : Quality Core coverage/reporting baseline — premiere synthese locale de couverture
+ou de statut tests, sans workflow obligatoire ni artefact publie.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
