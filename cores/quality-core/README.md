@@ -1,12 +1,16 @@
 # Quality Core
 
-**Statut** : `IMPLEMENTATION_PARTIELLE` (Quality Core V2 Readiness Review, 2026-07-12)
+**Statut** : `IMPLEMENTATION_AVANCEE` (Quality Core Advanced Readiness Review, 2026-07-12)
 
 Protection `main` : **active via GitHub Rulesets** (`protect-main`, enforcement `active`) avec
 8 status checks requis. Voir `BRANCH_PROTECTION_RUNBOOK.md`.
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente et outille les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
+
+La revue `docs/project-status/QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` constate que le core est
+desormais exploitable comme reference avancee : gates locaux, checklists, templates, prompts gouvernes,
+ruleset actif et release Foundation appliquee. Les automatisations avancees restent differees.
 
 ## Contenu de ce core
 

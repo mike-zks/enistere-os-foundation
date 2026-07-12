@@ -13,7 +13,14 @@ Ce core reste non-runtime. Il ne crée pas de workflow GitHub, pas de script d'e
 pas de dépendance, pas de configuration de package, pas de code applicatif et pas d'infrastructure
 réelle.
 
-Statut courant : **IMPLEMENTATION_PARTIELLE** (Quality Core V2 Readiness Review, 2026-07-12).
+Statut courant : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Review, 2026-07-12).
+
+> **Quality Core Advanced Readiness Review** promeut le core de `IMPLEMENTATION_PARTIELLE` a
+> `IMPLEMENTATION_AVANCEE` : les criteres roadmap §13.4 sont couverts, la protection `main` est
+> active, la release `foundation-v1.0.0` a utilise le processus gouverne, les prompts IA sont
+> versionnes et les gates documentaires sont integres au scope `quality-gates docs`. `VALIDE_V1`
+> reste differe : automatisation changelog/release, couverture publiee, dashboards qualite et
+> CI qualite avancee restent hors perimetre courant ou VF.
 
 > **Quality Core V2 Readiness Review** promeut le core de `SPECIFICATION_DOCUMENTAIRE` à
 > `IMPLEMENTATION_PARTIELLE` : matrice, script `quality-gates`, checklists, templates, ruleset
