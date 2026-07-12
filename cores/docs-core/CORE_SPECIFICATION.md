@@ -33,8 +33,9 @@ La V2 attend notamment :
 - des checklists qualite.
 
 Docs Core 1→4 livre le cadrage initial, l'index central, l'onboarding minimal, le glossaire initial et
-un controle local des liens internes. Il ne livre pas encore de site documentaire, de RAG, de moteur de
-recherche ou de generation automatique.
+un controle local des liens internes. La revue V2 confirme le statut `IMPLEMENTATION_PARTIELLE` : les guides
+principaux et l'onboarding complet restent requis avant `IMPLEMENTATION_AVANCEE`. Docs Core ne livre pas
+encore de site documentaire, de RAG, de moteur de recherche ou de generation automatique.
 
 ## 3. Perimetre V2 initial
 

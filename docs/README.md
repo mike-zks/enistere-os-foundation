@@ -18,6 +18,7 @@ runbooks, les checklists qualite et les prompts IA.
 | Connaitre la prochaine action autorisee | [`project-status/NEXT_ACTIONS.md`](project-status/NEXT_ACTIONS.md) |
 | Lire le dernier audit documentaire | [`project-status/DOCS_CORE_NAVIGATION_AUDIT.md`](project-status/DOCS_CORE_NAVIGATION_AUDIT.md) |
 | Lire le dernier controle de liens | [`project-status/DOCS_CORE_LINK_CHECK_REPORT.md`](project-status/DOCS_CORE_LINK_CHECK_REPORT.md) |
+| Lire la revue readiness Docs Core V2 | [`project-status/DOCS_CORE_V2_READINESS_REVIEW.md`](project-status/DOCS_CORE_V2_READINESS_REVIEW.md) |
 | Demarrer comme contributeur ou agent | [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) |
 | Comprendre les termes et statuts | [`glossary/GLOSSARY.md`](glossary/GLOSSARY.md) |
 | Comprendre les decisions d'architecture | [`adr/`](adr/) |
