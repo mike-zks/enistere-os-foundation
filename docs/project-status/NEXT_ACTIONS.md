@@ -15,8 +15,12 @@
 > Livrables : `cores/quality-core/AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`,
 > `prompts/global/mission-brief-template.md`.
 >
-> **Prochaine action** : Docs Core 1 — documentation centrale navigable (index des docs, ADR, runbooks,
-> project-status, prompts, quality gates), sans runtime ni génération automatique.
+> ✅ **Docs Core 1 — documentation centrale navigable : RÉALISÉ** (2026-07-12).
+> Livrables : `cores/docs-core/CORE_SPECIFICATION.md`, `cores/docs-core/README.md`, `docs/README.md`.
+> Statut : **`SPECIFICATION_DOCUMENTAIRE`**. Aucun runtime, workflow, dépendance, RAG ou site docs.
+>
+> **Prochaine action** : Docs Core 2 — audit documentaire et dette de navigation/liens (identifier les
+> pages stales, liens cassés ou doublons, corriger uniquement les incohérences documentaires ciblées).
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

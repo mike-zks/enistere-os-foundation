@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core 1 — Documentation centrale navigable
+
+- Démarrage de `cores/docs-core` : statut **`SPECIFICATION_DOCUMENTAIRE`**.
+- Nouveaux fichiers : `cores/docs-core/CORE_SPECIFICATION.md`, `cores/docs-core/README.md`,
+  `docs/README.md`.
+- `docs/README.md` devient l'index central : project-status, ADR, strategy, cores actifs,
+  runbooks/checklists, prompts IA et Quality Core.
+- Aucun runtime, workflow, dépendance, génération automatique, RAG ou site documentaire ajouté.
+- Prochaine action : **Docs Core 2 — audit documentaire et dette de navigation/liens**.
+
 ### Quality Core V2 Readiness Review
 
 - Nouveau rapport : `docs/project-status/QUALITY_CORE_V2_READINESS_REVIEW.md`.
@@ -16,7 +26,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 - Aucun workflow, runtime, dépendance, tag ou déploiement modifié.
 - Quality Core 7 livré : `cores/quality-core/AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`,
   `prompts/global/mission-brief-template.md`.
-- Prochaine action : **Docs Core 1 — documentation centrale navigable**.
+- Historique : la prochaine action recommandée était **Docs Core 1**, désormais réalisée ci-dessus.
 
 ### Foundation V1 Release Decision
 
