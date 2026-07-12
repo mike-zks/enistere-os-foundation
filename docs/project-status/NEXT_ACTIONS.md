@@ -11,7 +11,12 @@
 > Justification : matrice, script `quality-gates`, checklists, templates, ruleset actif, release process
 > et usage réel lors de `foundation-v1.0.0`.
 >
-> **Prochaine action** : Quality Core 7 — prompts IA standardisés et catalogue de missions gouvernées.
+> ✅ **Quality Core 7 — prompts IA standardisés : RÉALISÉ** (2026-07-12).
+> Livrables : `cores/quality-core/AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`,
+> `prompts/global/mission-brief-template.md`.
+>
+> **Prochaine action** : Docs Core 1 — documentation centrale navigable (index des docs, ADR, runbooks,
+> project-status, prompts, quality gates), sans runtime ni génération automatique.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

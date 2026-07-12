@@ -33,8 +33,13 @@
 >
 > **Mise à jour Quality Core V2 Readiness Review (2026-07-12)** : Quality Core passe de
 > **`SPECIFICATION_DOCUMENTAIRE`** à **`IMPLEMENTATION_PARTIELLE`**. Rapport :
-> `QUALITY_CORE_V2_READINESS_REVIEW.md`. Critères roadmap §13.4 : 6/7 satisfaits, 1/7 partiel
-> (prompts IA standardisés). Le processus de release a été utilisé en réel pour `foundation-v1.0.0`.
+> `QUALITY_CORE_V2_READINESS_REVIEW.md`. Critères roadmap §13.4 : 7/7 satisfaits après Quality Core 7
+> sur le périmètre V2 documentaire/opérationnel courant. Le processus de release a été utilisé en réel
+> pour `foundation-v1.0.0`.
+>
+> **Mise à jour Quality Core 7 (2026-07-12)** : prompts IA standardisés et catalogués :
+> `AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`, `prompts/global/mission-brief-template.md`.
+> Aucun runtime, workflow ou dépendance ajouté.
 >
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
@@ -63,7 +68,7 @@
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-034 |
-| Quality Core | ✓ | ✓ | — | — | ✓ (36 tests node:test + release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md`) | ✓ | **IMPLEMENTATION_PARTIELLE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + 3 checklists + `scripts/quality-gates.mjs` + templates GitHub + release `foundation-v1.0.0` gouvernée | Quality Core 7 — prompts IA standardisés |
+| Quality Core | ✓ | ✓ | — | — | ✓ (36 tests node:test + release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md`) | ✓ | **IMPLEMENTATION_PARTIELLE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée | Docs Core 1 — documentation centrale navigable |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 
 ### 1.1 Foundation baseline

@@ -423,4 +423,4 @@ dans les notes de release (`sha-X correspond à release foundation-vY.Z`).
 - Le déploiement production (hors périmètre V1)
 - Les environnements protégés GitHub (futur ADR)
 - La génération automatique du changelog (roadmap §13.2 — différé)
-- Les prompts IA versionnés (ADR-022 — différé)
+- Les prompts IA automatisés/RAG (ADR-022 — différé)

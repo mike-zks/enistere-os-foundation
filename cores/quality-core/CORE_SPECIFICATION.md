@@ -21,6 +21,11 @@ Statut courant : **IMPLEMENTATION_PARTIELLE** (Quality Core V2 Readiness Review,
 > restants (prompts IA standardisés, changelog/release automation, couverture publiée, checks
 > avancés) empêchent une promotion plus haute.
 
+> **Quality Core 7** standardise les prompts IA : `AI_PROMPT_GOVERNANCE.md`,
+> `prompts/README.md` et `prompts/global/mission-brief-template.md`. Le gap roadmap §13.4
+> "prompts IA versionnés" passe de partiel à cadré/opérationnel. Aucun runtime, workflow ou
+> dépendance n'est ajouté.
+
 > **Governance 3** constate l'activation réelle de la protection de `main` via GitHub
 > Rulesets : ruleset `protect-main`, enforcement `active`, Pull Request obligatoire,
 > suppression/non-fast-forward interdits, conversations résolues obligatoires, 8 status
@@ -76,6 +81,7 @@ Le Quality Core ne doit pas :
 - Référence aux workflows CI existants et à leur niveau de couverture.
 - Cadrage de la progression de statut des cores (qui peut promouvoir, quand, avec quelles preuves).
 - Préparation des ADR qualité futurs (ADR-019 à ADR-022 référencent quality-core).
+- Gouvernance des prompts IA et catalogue de missions.
 
 ### 3.2 Hors périmètre V2 (différé VF ou V3)
 
@@ -86,7 +92,7 @@ Le Quality Core ne doit pas :
 - Tableaux de bord qualité temps réel.
 - Intégration de linters ou outils de qualité supplémentaires.
 - Tests de performance, tests de charge, tests d'accessibilité automatisés.
-- Prompts IA standardisés (ADR-022, différé).
+- Prompts IA avancés automatisés ou intégrés à un RAG (ADR-022, différé).
 
 ## 4. Relation avec les ADR et la roadmap
 
