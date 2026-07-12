@@ -20,6 +20,7 @@ runbooks, les checklists qualite et les prompts IA.
 | Lire le dernier controle de liens | [`project-status/DOCS_CORE_LINK_CHECK_REPORT.md`](project-status/DOCS_CORE_LINK_CHECK_REPORT.md) |
 | Lire la revue readiness Docs Core V2 | [`project-status/DOCS_CORE_V2_READINESS_REVIEW.md`](project-status/DOCS_CORE_V2_READINESS_REVIEW.md) |
 | Lire la decision gate docs/CI | [`project-status/DOCS_CORE_CI_GATE_DECISION.md`](project-status/DOCS_CORE_CI_GATE_DECISION.md) |
+| Lire la revue Docs Core V1 | [`project-status/DOCS_CORE_V1_READINESS_REVIEW.md`](project-status/DOCS_CORE_V1_READINESS_REVIEW.md) |
 | Demarrer comme contributeur ou agent | [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) |
 | Maintenir la documentation | [`guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](guides/DOCUMENTATION_MAINTENANCE_GUIDE.md) |
 | Conduire une revue de statut | [`guides/CORE_STATUS_REVIEW_GUIDE.md`](guides/CORE_STATUS_REVIEW_GUIDE.md) |
