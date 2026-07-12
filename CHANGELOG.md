@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Cloud Core V1 Readiness Review
+
+- Nouveau rapport : `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`.
+- Cloud Core promu de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`**.
+- Justification : CC10 staging HTTPS reel + CC11 socle operationnel (backups/restores, rollback, rotation smoke)
+  + CI runtime/E2E/registry deja en place.
+- `VALIDE_V1` differe : decision Redis/Compose V1 restante.
+- `cores/cloud/README.md` aligne l'etat courant post-CC10/CC11.
+- Aucun acces serveur reel, workflow, dependance, secret ou runtime applicatif ajoute.
+- Prochaine action : **Cloud Core 12 — decision Redis/Compose V1**.
+
 ### Docs Core V1 Readiness Review
 
 - Nouveau rapport : `docs/project-status/DOCS_CORE_V1_READINESS_REVIEW.md`.
