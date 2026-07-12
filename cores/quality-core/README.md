@@ -25,6 +25,8 @@ ruleset actif et release Foundation appliquee. Les automatisations avancees rest
 | `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
 | `scripts/release-helper.mjs` | Helper local de préparation release — liste les types gouvernés et génère un brouillon Markdown sur stdout |
 | `scripts/release-helper.test.mjs` | Tests unitaires du helper release — validation parsing, types, redaction et brouillon |
+| `scripts/quality-report.mjs` | Helper local de synthèse tests/couverture — sortie Markdown stdout, sans lancer les tests |
+| `scripts/quality-report.test.mjs` | Tests unitaires du helper reporting — validation scopes, coverage disponible et sortie Markdown |
 | `../../prompts/README.md` | Catalogue gouverné des prompts IA versionnés |
 | `../../prompts/global/mission-brief-template.md` | Template de mission Claude/Codex/Gemini gouvernée |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
@@ -186,6 +188,7 @@ Les templates PR/issue ont été livrés en **Quality Core 4** (2026-07-11).
 Le processus de release a été documenté en **Quality Core 5** (2026-07-11).
 La gouvernance des prompts IA et le catalogue ont été livrés en **Quality Core 7** (2026-07-12).
 Le helper local de brouillon release a été livré en **Quality Core release helper** (2026-07-12).
+Le baseline local tests/couverture a été livré en **Quality Core coverage/reporting baseline** (2026-07-12).
 
 ## Helper release
 
@@ -198,3 +201,16 @@ node cores/quality-core/scripts/release-helper.mjs draft --type quality-v2-incre
 ```
 
 La sortie doit être relue et complétée par un mainteneur avant toute release.
+
+## Helper reporting
+
+Le helper reporting produit une synthèse locale des gates de tests et de la disponibilité d'une commande
+coverage par scope. Il ne lance pas les tests et ne publie aucun artefact.
+
+```bash
+node cores/quality-core/scripts/quality-report.mjs list
+node cores/quality-core/scripts/quality-report.mjs markdown
+```
+
+Le rapport ne calcule pas de pourcentage global : Web et API disposent d'une commande coverage locale,
+mais les autres scopes n'ont pas encore une sortie homogène.

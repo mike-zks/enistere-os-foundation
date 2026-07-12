@@ -27,6 +27,11 @@ Statut courant : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Rev
 > une plage de commits Git. Il ecrit uniquement sur stdout et ne cree aucun tag, aucune GitHub Release,
 > aucun commit, aucun workflow et aucun fichier.
 
+> **Quality Core coverage/reporting baseline** ajoute `scripts/quality-report.mjs` : helper local
+> stdout-only qui synthétise les gates de tests et la disponibilité des commandes de couverture par
+> scope. Il ne lance aucun test, ne publie aucun artefact et ne calcule pas de pourcentage global
+> tant que les outils restent hétérogènes.
+
 > **Quality Core V2 Readiness Review** promeut le core de `SPECIFICATION_DOCUMENTAIRE` à
 > `IMPLEMENTATION_PARTIELLE` : matrice, script `quality-gates`, checklists, templates, ruleset
 > actif, processus de release et usage réel lors de la publication `foundation-v1.0.0`. Les gaps
@@ -101,7 +106,8 @@ Le Quality Core ne doit pas :
 - ~~Templates PR et templates d'issue GitHub.~~ → **livré en Quality Core 4** (`.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/`).
 - Automatisation complète de changelog/release (écriture de `CHANGELOG.md`, tag, GitHub Release). Un
   helper local de brouillon stdout est livré par `scripts/release-helper.mjs`.
-- Publication de métriques de couverture.
+- Publication de métriques de couverture. Un baseline local stdout-only existe via
+  `scripts/quality-report.mjs`, sans publication ni seuil obligatoire.
 - Tableaux de bord qualité temps réel.
 - Intégration de linters ou outils de qualité supplémentaires.
 - Tests de performance, tests de charge, tests d'accessibilité automatisés.

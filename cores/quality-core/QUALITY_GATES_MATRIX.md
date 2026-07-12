@@ -1,10 +1,12 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-12 (Docs Core 6).
+> Dernière mise à jour : 2026-07-12 (Quality Core coverage/reporting baseline).
 >
 > **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
 > Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `all-safe`
+>
+> **Synthèse tests/couverture locale** : `node cores/quality-core/scripts/quality-report.mjs markdown`
 >
 > Légende CI : **L1** = `ci.yml` (non-régression monorepo) ; **L2** = `api-runtime-ci.yml`
 > (runtime API : PG+MinIO) ; **L3** = `web-e2e-ci.yml` (E2E navigateur Playwright) ;
@@ -179,3 +181,29 @@ node cores/quality-core/scripts/quality-gates.mjs run ui-kit
 | `all-safe` | 17 (packages + ui-kit + web + root-audit) | mobile, api-nestjs e2e, E2E, Cloud |
 
 Tests unitaires : `node --test cores/quality-core/scripts/quality-gates.test.mjs` — 36/36.
+
+## 6. Baseline tests / coverage locale (Quality Core reporting)
+
+Le script `cores/quality-core/scripts/quality-report.mjs` expose une synthèse informative des gates de
+tests et de la disponibilité d'une commande coverage locale. Il ne lance aucun test, ne publie aucun
+artefact et ne remplace pas la CI.
+
+```bash
+node cores/quality-core/scripts/quality-report.mjs list
+node cores/quality-core/scripts/quality-report.mjs markdown
+```
+
+État baseline :
+
+| Indicateur | Valeur |
+|---|---:|
+| Scopes suivis | 8 |
+| Coverage disponible localement | 2 |
+| Coverage absente ou non standardisée | 6 |
+
+Coverage locale disponible :
+
+- `@enistere/web-nextjs` — `npm run test:coverage --workspace=@enistere/web-nextjs` ;
+- `cores/api-nestjs` — `cd cores/api-nestjs && npm run test:cov`.
+
+Aucun pourcentage global n'est calculé : les outils et périmètres de tests ne sont pas homogènes.

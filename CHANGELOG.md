@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core coverage/reporting baseline
+
+- Nouveaux scripts : `cores/quality-core/scripts/quality-report.mjs` et
+  `cores/quality-core/scripts/quality-report.test.mjs`.
+- Le helper produit une synthèse Markdown stdout-only des gates tests et de la disponibilité coverage locale.
+- Baseline : 8 scopes suivis ; coverage locale disponible pour Web et API ; aucun pourcentage global calculé.
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md`.
+- Aucun workflow, dépendance, artefact publié, seuil obligatoire, appel réseau ou test Cloud ajouté.
+- Prochaine action : Quality Core CI-required checks alignment.
+
 ### Quality Core release helper
 
 - Nouveaux scripts : `cores/quality-core/scripts/release-helper.mjs` et
