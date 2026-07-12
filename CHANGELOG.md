@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core VALIDE_V1 review
+
+- `API Core NestJS` promu de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1` après revue de readiness V1.
+- Nouveau rapport : `docs/project-status/API_CORE_V1_READINESS_REVIEW.md`.
+- Critères couverts : roadmap §8.4 et `cores/api-nestjs/CORE_SPECIFICATION.md` §41.
+- Vérifications locales : `npm run lint`, `npm run build`, `npm run test` (**386/386**), `openapi:check` à jour, `npm audit` 0 vulnérabilité.
+- Réserves documentées comme non bloquantes : register public dérivé, Redis/queues/mail/notifications/antivirus/média/observabilité avancée V2/V3, e2e complets couverts par CI runtime.
+- `CORE_SPECIFICATION.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md` et `SESSION_HANDOFF.md` alignés.
+
 ### Governance 3 — Protection `main` vérifiée active via GitHub Rulesets
 
 - Protection `main` vérifiée côté GitHub via Rulesets : `protect-main` (`ruleset_id=17522775`), target `branch`, enforcement `active`, condition `~DEFAULT_BRANCH`.

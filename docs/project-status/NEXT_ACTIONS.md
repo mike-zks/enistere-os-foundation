@@ -1,9 +1,22 @@
 # NEXT_ACTIONS.md — Prochaines actions autorisées
 
-> Vérifié depuis le repository (2026-07-10). Ordre cohérent avec l'état réel, les dépendances, les ADR
+> Vérifié depuis le repository (2026-07-12). Ordre cohérent avec l'état réel, les dépendances, les ADR
 > validés et les packages déjà disponibles. **Une seule action à la fois.**
 
 ## 1. Prochaine action UNIQUE
+
+> ✅ **API Core VALIDE_V1 review : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/API_CORE_V1_READINESS_REVIEW.md`.
+> Décision : `API Core NestJS` passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+> Critères vérifiés : roadmap §8.4 + `CORE_SPECIFICATION.md` §41.
+> Vérifications : `lint` ✅, `build` ✅, `test 386/386` ✅, `openapi:check` ✅, `npm audit` 0 vuln ✅.
+> Les e2e complets restent couverts par la CI `api-runtime` (PostgreSQL + MinIO jetables).
+>
+> **Prochaine action** : **Foundation V1 Baseline Readiness Review**.
+> Objectif : décider si la combinaison API Core VALIDE_V1 + Web Core VALIDE_V1 + UI Kit VALIDE_V1
+> + Quality Core documentaire + CI/ruleset actif permet de déclarer une baseline Foundation V1
+> gouvernée. Ne pas créer de tag/release automatiquement ; appliquer le
+> `RELEASE_PROCESS_RUNBOOK.md`. RN31 reste bloqué sans macOS/Xcode.
 
 > ✅ **Governance 3 — protection `main` vérifiée active via GitHub Rulesets : RÉALISÉ** (2026-07-11).
 > Preuve GitHub : `protect-main` (`ruleset_id=17522775`), target `branch`, enforcement `active`, conditions
@@ -12,8 +25,7 @@
 > `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`.
 > Les deux checks `images (...)` ne sont pas requis actuellement ; ils restent recommandés phase 2.
 >
-> **Prochaine action** : **API Core VALIDE_V1 review**. RN31 reste bloqué sans macOS/Xcode. Alternative gouvernance :
-> décider si les deux checks `images` doivent devenir requis dans le ruleset.
+> **Historique** : cette prochaine action était API Core VALIDE_V1 review ; elle est réalisée le 2026-07-12.
 
 > ✅ **Governance 2 — alignement des statuts Quality Core après QC5 : RÉALISÉ** (2026-07-11).
 > Sweep documentaire ciblé après le merge de Quality Core 5 : `FOUNDATION_CURRENT_STATE.md` ne liste plus
@@ -56,7 +68,7 @@
 > Vérifications : `node cores/quality-core/scripts/quality-gates.mjs list` ✅, `plan all-safe` ✅, `plan mobile-static` ✅, tests 36/36 ✅, `git diff --check` ✅, `npm audit` 0 vuln ✅.
 > Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime.
 >
-> **Prochaine action** : à décider. Candidats : Mobile Core RN31 (iOS smoke — macOS requis) ; API Core VALIDE_V1 review ; Quality Core V3 (runner CI local, intégration pre-commit).
+> **Historique** : cette prochaine action a été remplacée par API Core VALIDE_V1 review, réalisée le 2026-07-12.
 
 > ✅ **Quality Core 1 — cadrage opérationnel des gates qualité V2 : RÉALISÉ** (2026-07-11).
 > Démarrage de `cores/quality-core` comme core de gouvernance qualité. Statut : **`SPECIFICATION_DOCUMENTAIRE`**.
@@ -64,7 +76,7 @@
 > Checklists créées : `docs/checklists/PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`.
 > Vérifications : `git diff --check` ✅, `npm audit` root 0 vuln ✅. Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime.
 >
-> **Prochaine action** : à décider. Candidats : Mobile Core RN31 (iOS smoke — macOS requis) ; API Core VALIDE_V1 review ; Quality Core V2 (workflows, templates, scripts).
+> **Historique** : cette prochaine action a été remplacée par la chaîne Quality Core puis API Core VALIDE_V1 review, réalisées.
 
 > ✅ **UI Kit VALIDE_V1 review — RÉALISÉ** (2026-07-11).
 > Revue officielle de promotion du UI Kit de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.

@@ -6,7 +6,10 @@ Le **API Core NestJS** définit le socle backend TypeScript de référence pour 
 
 Il doit fournir une base modulaire, sécurisée, testable et extensible pour construire des APIs modernes sans réinventer à chaque projet l'authentification, les utilisateurs, les rôles, les permissions, la validation, les erreurs, les logs, l'audit, les uploads, le cache, les notifications, la documentation OpenAPI et les health checks.
 
-Cette spécification est documentaire. Elle ne crée pas encore de starter NestJS, de code applicatif, de dépendance, de `package.json`, de `src/` ou de Docker Compose.
+Cette spécification est le référentiel documentaire du core. Depuis la revue
+`API_CORE_V1_READINESS_REVIEW.md` du 2026-07-12, l'implémentation `cores/api-nestjs`
+est déclarée **VALIDE_V1** ; les sections ci-dessous restent les exigences et garde-fous du core,
+pas une preuve automatique de nouveaux modules.
 
 ## 2. Rôle du core
 

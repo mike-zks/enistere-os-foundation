@@ -1,6 +1,6 @@
 # IMPLEMENTATION_MATRIX.md — Matrice d'implémentation officielle
 
-> Vérifiée depuis le repository (2026-07-10). Légende des statuts officiels : `ABSENT`,
+> Vérifiée depuis le repository (2026-07-12). Légende des statuts officiels : `ABSENT`,
 > `DOSSIER_SEULEMENT`, `SPECIFICATION_DOCUMENTAIRE`, `ADR_EN_COURS`, `PREUVE_TECHNIQUE`,
 > `STARTER_INITIALISE`, `CADRAGE_OPERATIONNEL` (cadrage gouverné — docs de politique/exécution, **sans** infra
 > réelle ni starter), `IMPLEMENTATION_PARTIELLE`, `IMPLEMENTATION_AVANCEE`, `VALIDE_V1`, `SUSPENDU`,
@@ -15,6 +15,12 @@
 > Pull Request obligatoire, conversations résolues obligatoires, status checks stricts requis :
 > `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`.
 > Les deux jobs `images` restent recommandés phase 2, non requis actuellement.
+>
+> **Mise à jour API Core VALIDE_V1 review (2026-07-12)** : le API Core NestJS passe de
+> **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Critères roadmap §8.4 et
+> `CORE_SPECIFICATION.md` §41 satisfaits. Vérifications locales : lint, build, test **386/386**,
+> `openapi:check` à jour, audit 0 vulnérabilité. Les e2e complets restent couverts par la CI
+> `api-runtime` avec PostgreSQL + MinIO jetables.
 >
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
@@ -32,7 +38,7 @@
 
 | Élément | Dossier | Spéc. | ADR | Starter | Code | Tests | Revue | Statut officiel | Dernière preuve | Prochaine condition |
 |---|---|---|---|---|---|---|---|---|---|---|
-| API Core NestJS | ✓ | ✓ | ✓ (002,003,004,006,007,016,039,040…) | ✓ | ✓ | ✓ (**386 u** + 101 e2e + **7 e2e Files 5**) | ✓ (3 rapports) | **IMPLEMENTATION_AVANCEE** | tests verts + live 16/16 (local) | commit Git ; CI/CD (ADR-013) |
+| API Core NestJS | ✓ | ✓ | ✓ (002,003,004,006,007,016,039,040…) | ✓ | ✓ | ✓ (**386 u** + e2e CI runtime) | ✓ (`API_CORE_V1_READINESS_REVIEW.md` + rapports permanents) | **VALIDE_V1** | lint/build/test 386/386/openapi:check/audit 0 vuln + CI runtime | — (V1 déclaré) |
 | `@enistere/api-contracts` | ✓ | n/a | ✓ (016) | ✓ | ✓ | ✓ (12) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | build + generate:check | publication (non requise V1) |
 | `@enistere/api-client-fetch` | ✓ | n/a | ✓ (011,012,016) | ✓ | ✓ | ✓ (30 + live 16/16) | ✓ (proof) | **IMPLEMENTATION_AVANCEE** (local) | live 16/16 ; **instancié (public + authentifié/BFF Auth + façade Files lecture) dans le Web Core** | publication (non requise V1) |
 | Cloud Core | ✓ | ✓ | ✓ (013,014,007…) | — | **cadrage (CC1) + CI runtime API (CC2) + CI E2E navigateur (CC3) + staging HTTPS réel (CC10) + durcissement opérationnel (CC11)** : `api-runtime-ci.yml` (PG+MinIO, migrations, unit+e2e, openapi:check) **+ `web-e2e-ci.yml`** (stack réelle + Playwright/Chromium : Health/Auth/Files) **+ `docker-compose.cc10.yml`** (reverse proxy compatible Traefik + Let's Encrypt, `sha-5bf4c0f`) **+ CC11** : `backup-postgres.sh` + `backup-minio.sh` + `rotate-smoke-account.sh` + `CC11_OPERATIONAL_RUNBOOK.md` + `CC11_STAGING_OPERATIONAL_REPORT.md` | **e2e API + E2E navigateur en CI** (niveaux 2–3) | — | **IMPLEMENTATION_PARTIELLE** | **quatre workflows CI** niveaux 1–4 partiel (`ci`/`api-runtime`/`web-e2e`/**`registry`** — Registry CI verte sur `main`, **images GHCR publiques**) **+ gouvernance CC4 + staging CC6 + dry-run CC7 + image API corrigée CC8 + exécution staging LOCALE CC9** (`EXECUTION_LOCALE_CONTROLEE` : images corrigées `sha-d1e6242`) **+ CC10 STAGING RÉEL HTTPS** : `docker-compose.cc10.yml`, Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy` ; `staging.enistere.com` + `s3-staging.enistere.com` HTTPS accessibles ; auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** ; **+ CC11 SOCLE OPÉRATIONNEL VÉRIFIÉ** : health HTTPS ×3 + TLS OK ; backup PG 4.7 Ko + restore validé (tous comptages) ; backup MinIO + restore test objet PASSED ; rollback `sha-484f98d` healthy + roll-forward `sha-5bf4c0f` healthy ; rotation smoke argon2id non conservée ; runbook + rapport versionnés | **à décider ; RN31 bloqué macOS/Xcode ; tests Cloud réels restants en gate final** |
