@@ -36,6 +36,10 @@ Statut courant : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Rev
 > 8 checks sont requis, les deux jobs `images (...)` sont verts et matures pour une promotion, mais restent
 > non appliqués comme checks requis sans validation humaine/admin explicite.
 
+> **Quality Core coverage standardization decision** corrige le baseline coverage : UI Kit dispose déjà
+> d'une commande `test:coverage`, donc les scopes API/Web/UI Kit sont reconnus comme coverage disponible.
+> Les autres scopes restent informatifs : aucune nouvelle commande, aucun seuil et aucun workflow ne sont ajoutés.
+
 > **Quality Core V2 Readiness Review** promeut le core de `SPECIFICATION_DOCUMENTAIRE` à
 > `IMPLEMENTATION_PARTIELLE` : matrice, script `quality-gates`, checklists, templates, ruleset
 > actif, processus de release et usage réel lors de la publication `foundation-v1.0.0`. Les gaps

@@ -26,11 +26,12 @@ publie aucun artefact, ne modifie aucun workflow et ne calcule pas de pourcentag
 | Indicateur | Valeur |
 |---|---:|
 | Scopes suivis | 8 |
-| Coverage disponible localement | 2 |
-| Coverage absente ou non standardisée | 6 |
+| Coverage disponible localement | 3 |
+| Coverage absente ou non standardisée | 5 |
 
 Scopes avec coverage locale disponible :
 
+- `@enistere/ui-kit` : `npm run test:coverage --workspace=@enistere/ui-kit` ;
 - `@enistere/web-nextjs` : `npm run test:coverage --workspace=@enistere/web-nextjs` ;
 - `cores/api-nestjs` : `cd cores/api-nestjs && npm run test:cov`.
 
@@ -38,7 +39,6 @@ Scopes sans coverage standardisée :
 
 - `@enistere/api-contracts` ;
 - `@enistere/api-client-fetch` ;
-- `@enistere/ui-kit` ;
 - `cores/mobile-react-native` ;
 - `cores/quality-core` ;
 - `cores/docs-core`.
@@ -79,5 +79,5 @@ tests mobiles locaux, scripts documentaires). Un pourcentage global serait tromp
 
 ## Prochaine action recommandée
 
-Quality Core CI-required checks alignment : vérifier si les deux jobs `images (...)` doivent rester
-recommandés ou devenir requis dans le ruleset `protect-main`, sans modifier le ruleset sans validation humaine.
+Quality Core coverage standardization decision : décider si les scopes sans coverage standardisée doivent
+recevoir une commande coverage locale ou si le baseline reste informatif.

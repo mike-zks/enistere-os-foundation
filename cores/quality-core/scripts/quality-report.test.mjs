@@ -32,8 +32,10 @@ describe('scriptExists', () => {
   it('détecte les scripts package.json existants', () => {
     const web = QUALITY_SCOPES.find((scope) => scope.id === 'web-nextjs');
     const api = QUALITY_SCOPES.find((scope) => scope.id === 'api-nestjs');
+    const uiKit = QUALITY_SCOPES.find((scope) => scope.id === 'ui-kit');
     assert.equal(scriptExists(web, 'test:coverage'), true);
     assert.equal(scriptExists(api, 'test:cov'), true);
+    assert.equal(scriptExists(uiKit, 'test:coverage'), true);
   });
 
   it('retourne false pour les scopes sans package.json', () => {
@@ -43,13 +45,16 @@ describe('scriptExists', () => {
 });
 
 describe('getCoverageStatus', () => {
-  it('marque web-nextjs et api-nestjs comme coverage disponible', () => {
+  it('marque ui-kit, web-nextjs et api-nestjs comme coverage disponible', () => {
+    assert.equal(getCoverageStatus(QUALITY_SCOPES.find((scope) => scope.id === 'ui-kit')), 'disponible');
     assert.equal(getCoverageStatus(QUALITY_SCOPES.find((scope) => scope.id === 'web-nextjs')), 'disponible');
     assert.equal(getCoverageStatus(QUALITY_SCOPES.find((scope) => scope.id === 'api-nestjs')), 'disponible');
   });
 
   it('marque les autres scopes comme coverage absente', () => {
-    const withoutCoverage = QUALITY_SCOPES.filter((scope) => !['web-nextjs', 'api-nestjs'].includes(scope.id));
+    const withoutCoverage = QUALITY_SCOPES.filter(
+      (scope) => !['ui-kit', 'web-nextjs', 'api-nestjs'].includes(scope.id),
+    );
     for (const scope of withoutCoverage) {
       assert.equal(getCoverageStatus(scope), 'absente', scope.id);
     }
@@ -77,7 +82,7 @@ describe('buildMarkdownReport', () => {
     const report = buildMarkdownReport({ date: '2026-07-12' });
     assert.match(report, /# Quality Report — Tests \/ Coverage Baseline \(2026-07-12\)/);
     assert.match(report, /Scopes suivis : 8/);
-    assert.match(report, /Coverage disponible localement : 2/);
+    assert.match(report, /Coverage disponible localement : 3/);
     assert.match(report, /Pourcentage global non calculé/);
     assert.match(report, /\| Scope \| Tests attendus \| Gate test \| Coverage \| Commande coverage \| CI \|/);
   });

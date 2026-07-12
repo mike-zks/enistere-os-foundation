@@ -46,9 +46,9 @@ export const QUALITY_SCOPES = Object.freeze([
     packageJson: 'cores/ui-kit/package.json',
     testCommand: 'npm test --workspace=@enistere/ui-kit',
     expectedTests: '181',
-    coverageCommand: null,
+    coverageCommand: 'npm run test:coverage --workspace=@enistere/ui-kit',
     ciLevel: 'L1',
-    notes: 'Tests a11y/jest-axe ; pas de commande coverage standardisee.',
+    notes: 'Coverage disponible via node --test --experimental-test-coverage ; non publiee.',
   }),
   Object.freeze({
     id: 'web-nextjs',
@@ -118,7 +118,7 @@ export function getCoverageStatus(scope) {
   if (!scope.coverageCommand) {
     return 'absente';
   }
-  if (scope.id === 'web-nextjs') {
+  if (scope.id === 'web-nextjs' || scope.id === 'ui-kit') {
     return scriptExists(scope, 'test:coverage') ? 'disponible' : 'déclarée mais script absent';
   }
   if (scope.id === 'api-nestjs') {

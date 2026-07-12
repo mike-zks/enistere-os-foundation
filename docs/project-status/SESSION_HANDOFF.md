@@ -1518,6 +1518,16 @@ peuvent devenir requis si action humaine/admin, mais aucun ruleset n'est modifi�
 
 **Action unique suivante** : Quality Core coverage standardization decision — décider si les scopes sans
 coverage standardisée doivent recevoir une commande coverage locale ou si le baseline reste informatif.
+
+**✅ Quality Core coverage standardization decision : RÉALISÉ** (2026-07-12) :
+rapport `docs/project-status/QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md`. Correction du baseline :
+`@enistere/ui-kit` expose déjà `test:coverage`; `quality-report.mjs` reconnaît maintenant UI Kit/Web/API
+comme scopes avec coverage locale disponible (**3/8**). Décision :
+**STANDARDISATION_PARTIELLE_EXISTANTE, PAS_DE_NOUVELLE_COMMANDE** — aucun workflow, dépendance, seuil,
+artefact ou dashboard ajouté.
+
+**Action unique suivante** : Quality Core V1 Readiness Review — vérifier si Quality Core peut passer de
+`IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 

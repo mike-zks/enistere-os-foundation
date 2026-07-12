@@ -118,6 +118,14 @@
 > **Prochaine action** : Quality Core coverage standardization decision — décider si les scopes sans coverage
 > standardisée doivent recevoir une commande coverage locale ou si le baseline reste informatif.
 
+> ✅ **Quality Core coverage standardization decision : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md`.
+> Decision : **STANDARDISATION_PARTIELLE_EXISTANTE, PAS_DE_NOUVELLE_COMMANDE**. UI Kit/Web/API ont une
+> coverage locale reconnue ; les autres scopes restent informatifs pour éviter un signal artificiel.
+>
+> **Prochaine action** : Quality Core V1 Readiness Review — vérifier si Quality Core peut passer de
+> `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
