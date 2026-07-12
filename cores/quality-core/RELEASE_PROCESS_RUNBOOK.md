@@ -214,6 +214,10 @@ Conséquences :
 
 ## 5. Procédure de préparation
 
+> Helper local disponible : `node cores/quality-core/scripts/release-helper.mjs draft ...`.
+> Il génère un brouillon Markdown sur stdout uniquement. Il ne remplace pas la revue humaine et ne crée
+> aucun tag ni GitHub Release.
+
 ### Étape 1 — Choisir le type et le scope de la release
 
 Identifier parmi les 5 types (§3) lequel correspond à la situation.

@@ -90,6 +90,16 @@
 > (changelog/release semi-automation ou coverage reporting) ; ou cadrage d'un core V3. Mobile RN31 reste
 > conditionne a macOS/Xcode ou device iOS reel.
 
+> ✅ **Quality Core release helper : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/QUALITY_CORE_RELEASE_HELPER_REPORT.md`.
+> Livrables : `cores/quality-core/scripts/release-helper.mjs` +
+> `cores/quality-core/scripts/release-helper.test.mjs`.
+> Fonction : lister les types de release gouvernes et generer un brouillon Markdown sur stdout depuis
+> une plage de commits Git. Aucun tag, GitHub Release, workflow, dependance ou fichier genere.
+>
+> **Prochaine action** : Quality Core coverage/reporting baseline — premiere synthese locale de couverture
+> ou de statut tests, sans workflow obligatoire ni artefact publie.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.

@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core release helper
+
+- Nouveaux scripts : `cores/quality-core/scripts/release-helper.mjs` et
+  `cores/quality-core/scripts/release-helper.test.mjs`.
+- Le helper liste les types de release gouvernés et génère un brouillon Markdown de notes de release depuis
+  une plage de commits Git.
+- Sécurité/gouvernance : sortie stdout uniquement, aucune écriture de fichier, aucun tag, aucune GitHub Release,
+  aucun appel réseau, aucune dépendance, aucun workflow modifié.
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_RELEASE_HELPER_REPORT.md`.
+- Prochaine action : Quality Core coverage/reporting baseline.
+
 ### Quality Core Advanced Readiness Review
 
 - Nouveau rapport : `docs/project-status/QUALITY_CORE_ADVANCED_READINESS_REVIEW.md`.
