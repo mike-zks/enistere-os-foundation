@@ -1,7 +1,7 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-12 (Quality Core coverage/reporting baseline).
+> Dernière mise à jour : 2026-07-12 (Quality Core CI-required checks alignment).
 >
 > **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
 > Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `all-safe`
@@ -133,12 +133,13 @@
 | 6 | `api-runtime` | `api-runtime-ci.yml` | requis |
 | 7 | `web-e2e` | `web-e2e-ci.yml` | requis |
 | 8 | `api-smoke` | `registry-ci.yml` | requis |
-| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
-| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
+| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
+| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
 
 > Les noms de checks correspondent au **`name:` du job** dans le YAML (jamais au `name:` du workflow).
 > Renommer un job casse l'exigence. Le runbook `BRANCH_PROTECTION_RUNBOOK.md` contient la procédure
 > complète, les options recommandées et la checklist de vérification post-activation.
+> Rapport de décision : `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`.
 
 ## 4. Matrice des preuves actuelles
 

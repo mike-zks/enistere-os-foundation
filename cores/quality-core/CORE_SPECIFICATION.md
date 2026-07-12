@@ -32,6 +32,10 @@ Statut courant : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Rev
 > scope. Il ne lance aucun test, ne publie aucun artefact et ne calcule pas de pourcentage global
 > tant que les outils restent hétérogènes.
 
+> **Quality Core CI-required checks alignment** vérifie le ruleset `protect-main` réel et Registry CI :
+> 8 checks sont requis, les deux jobs `images (...)` sont verts et matures pour une promotion, mais restent
+> non appliqués comme checks requis sans validation humaine/admin explicite.
+
 > **Quality Core V2 Readiness Review** promeut le core de `SPECIFICATION_DOCUMENTAIRE` à
 > `IMPLEMENTATION_PARTIELLE` : matrice, script `quality-gates`, checklists, templates, ruleset
 > actif, processus de release et usage réel lors de la publication `foundation-v1.0.0`. Les gaps

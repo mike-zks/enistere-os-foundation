@@ -1509,8 +1509,15 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : Quality Core CI-required checks alignment — verifier si les deux jobs `images (...)`
-doivent rester recommandes ou devenir requis dans `protect-main`, sans modifier le ruleset sans validation humaine.
+**✅ Quality Core CI-required checks alignment : RÉALISÉ** (2026-07-12) :
+rapport `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`. Vérification du ruleset réel
+`protect-main` : 8 checks requis (`api-client-fetch`, `api-contracts`, `api-runtime`, `ui-kit`, `web-e2e`,
+`web-nextjs`, `audit`, `api-smoke`). Vérification Registry CI PR #106 : `api-smoke` + les deux jobs
+`images (...)` verts. Décision : **PROMOTION_RECOMMANDÉE, NON_APPLIQUÉE** — les deux jobs `images (...)`
+peuvent devenir requis si action humaine/admin, mais aucun ruleset n'est modifié par Quality Core.
+
+**Action unique suivante** : Quality Core coverage standardization decision — décider si les scopes sans
+coverage standardisée doivent recevoir une commande coverage locale ou si le baseline reste informatif.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 

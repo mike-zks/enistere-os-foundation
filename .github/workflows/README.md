@@ -191,8 +191,8 @@ appliquée via GitHub Rulesets (`protect-main`, enforcement `active`) :
 | 6 | `api-runtime` | `api-runtime-ci.yml` | ✅ oui |
 | 7 | `web-e2e` | `web-e2e-ci.yml` | ✅ oui |
 | 8 | `api-smoke` | `registry-ci.yml` | ✅ oui |
-| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
-| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | recommandé phase 2, non requis actuellement |
+| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
+| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
 
 > **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour.
 > Les noms actuels sont **stables**. Voir le runbook pour la procédure complète, les options
