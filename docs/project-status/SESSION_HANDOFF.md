@@ -30,9 +30,11 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Foundation baseline** : **FOUNDATION_V1_RELEASED** (2026-07-12) — tag `foundation-v1.0.0`,
   commit `2981f2c`, GitHub Release publiée.
 - **Release notes** : **FOUNDATION_V1_RELEASED** — `FOUNDATION_V1_RELEASE_NOTES.md` publié.
-- **Quality Core** : **IMPLEMENTATION_PARTIELLE** (2026-07-12) — `QUALITY_CORE_V2_READINESS_REVIEW.md`.
+- **Quality Core** : **IMPLEMENTATION_AVANCEE** (2026-07-12) — `QUALITY_CORE_V2_READINESS_REVIEW.md` +
+  `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md`.
   Le core dépasse la seule spécification : gates, script, checklists, templates, ruleset actif,
-  release process, prompts IA standardisés et usage réel lors de `foundation-v1.0.0`.
+  release process, prompts IA standardisés, usage réel lors de `foundation-v1.0.0` et integration du gate
+  documentaire via Docs Core. Les automatisations avancees restent differees.
 - **Cloud Core** : **VALIDE_V1** (2026-07-12) — `CLOUD_CORE_V1_READINESS_REVIEW.md` +
   `CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`. CC10/CC11 prouvent un staging HTTPS reel operationnalise
   (health, auth/files, backups/restores, rollback/roll-forward, rotation smoke, runbooks). CC12 reporte Redis
@@ -283,7 +285,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **IMPLEMENTATION_PARTIELLE** : **Quality Core** (`cores/quality-core/`) — Quality Core V2 Readiness Review + QC7 (2026-07-12) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 10 checks documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes) + **`AI_PROMPT_GOVERNANCE.md`** + 3 checklists + templates GitHub PR/Issues + prompts catalogués + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). Processus utilisé pour publier `foundation-v1.0.0`. **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; les 2 checks `images` restent recommandés phase 2. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
+- **IMPLEMENTATION_AVANCEE** : **Quality Core** (`cores/quality-core/`) — Quality Core V2 Readiness Review + Advanced Readiness Review + QC7 (2026-07-12) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 10 checks documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes) + **`AI_PROMPT_GOVERNANCE.md`** + 3 checklists + templates GitHub PR/Issues + prompts catalogués + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). Processus utilisé pour publier `foundation-v1.0.0` ; Docs Core consomme le scope `quality-gates docs`. **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; les 2 checks `images` restent recommandés phase 2. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
 - **Vides** : `ai-core`, `api-spring`, `mobile-flutter`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -327,7 +329,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores de gouvernance / documentaires
 
-**`quality-core`** : **IMPLEMENTATION_PARTIELLE** (Quality Core V2 Readiness Review + QC7, 2026-07-12) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + prompts catalogués + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Processus utilisé pour publier `foundation-v1.0.0`. Protection `main` active via ruleset `protect-main`. Aucun workflow modifié par Quality Core. Aucune dépendance.
+**`quality-core`** : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Review, 2026-07-12) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + prompts catalogués + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Processus utilisé pour publier `foundation-v1.0.0`. Protection `main` active via ruleset `protect-main`. Docs Core consomme le scope `quality-gates docs`. Aucun workflow modifié par Quality Core. Aucune dépendance.
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
@@ -1504,7 +1506,9 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : retour pilotage global — candidat naturel : Quality Core `IMPLEMENTATION_AVANCEE` review.
+**Action unique suivante** : retour pilotage global — candidat naturel : Quality Core automation ciblee
+(changelog/release semi-automation ou coverage reporting), ou cadrage d'un core V3. Mobile RN31 reste
+conditionne a macOS/Xcode ou device iOS reel.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 

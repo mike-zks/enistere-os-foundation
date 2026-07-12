@@ -80,6 +80,16 @@
 > **Prochaine action** : retour pilotage global. Candidats non bloques : Quality Core `IMPLEMENTATION_AVANCEE`
 > review ; ou autre core V2/V3 apres cadrage explicite. Mobile RN31 reste conditionne a macOS/Xcode ou device iOS.
 
+> ✅ **Quality Core Advanced Readiness Review : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/QUALITY_CORE_ADVANCED_READINESS_REVIEW.md`.
+> Decision : Quality Core passe de **`IMPLEMENTATION_PARTIELLE`** a **`IMPLEMENTATION_AVANCEE`**.
+> Justification : criteres roadmap §13.4 7/7, gates locaux, checklists, templates, prompts, ruleset actif,
+> release `foundation-v1.0.0` appliquee et Docs Core connecte au scope `quality-gates docs`.
+>
+> **Prochaine action** : retour pilotage global. Candidats non bloques : Quality Core automation ciblee
+> (changelog/release semi-automation ou coverage reporting) ; ou cadrage d'un core V3. Mobile RN31 reste
+> conditionne a macOS/Xcode ou device iOS reel.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.

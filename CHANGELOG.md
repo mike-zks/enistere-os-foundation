@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core Advanced Readiness Review
+
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_ADVANCED_READINESS_REVIEW.md`.
+- Quality Core promu de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`**.
+- Justification : critères roadmap §13.4 **7/7**, gates locaux, checklists, templates, prompts IA, ruleset actif,
+  release `foundation-v1.0.0` appliquée et Docs Core connecté au scope `quality-gates docs`.
+- `VALIDE_V1` non déclaré : changelog/release automation, couverture publiée, dashboards qualité et CI qualité
+  avancée restent différés.
+- Aucun workflow, runtime, dépendance, tag, secret, accès serveur ou déploiement modifié.
+
 ### Cloud Core 12 — Decision Redis / Compose V1
 
 - Nouveau rapport : `docs/project-status/CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`.
