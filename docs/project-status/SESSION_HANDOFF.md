@@ -33,6 +33,10 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Quality Core** : **IMPLEMENTATION_PARTIELLE** (2026-07-12) — `QUALITY_CORE_V2_READINESS_REVIEW.md`.
   Le core dépasse la seule spécification : gates, script, checklists, templates, ruleset actif,
   release process, prompts IA standardisés et usage réel lors de `foundation-v1.0.0`.
+- **Cloud Core** : **IMPLEMENTATION_AVANCEE** (2026-07-12) — `CLOUD_CORE_V1_READINESS_REVIEW.md`.
+  CC10/CC11 prouvent un staging HTTPS reel operationnalise (health, auth/files, backups/restores,
+  rollback/roll-forward, rotation smoke, runbooks). `VALIDE_V1` reste differe jusqu'a decision
+  Redis/Compose V1 ; les tests serveur reels restent des gates finaux, pas des checks de chaque mission.
 - **Docs Core** : **VALIDE_V1** (2026-07-12) — `cores/docs-core/CORE_SPECIFICATION.md`,
   `cores/docs-core/README.md`, `docs/README.md` index central, `DOCS_CORE_NAVIGATION_AUDIT.md`,
   `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` avec parcours par role, `docs/glossary/GLOSSARY.md`,
@@ -1499,7 +1503,7 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : retour pilotage global — choisir le prochain core prioritaire selon prerequis.
+**Action unique suivante** : Cloud Core 12 — decision Redis/Compose V1.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 

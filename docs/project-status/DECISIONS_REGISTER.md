@@ -365,6 +365,25 @@
   seule)** : **Cloud Core en PAUSE contrôlée** ; **retour aux priorités V1** → **prochaine action unique : Mobile
   Core React Native 1 — starter foundation**. Statuts **inchangés** (aucun gonflé). Commit `docs(project): review
   roadmap alignment after cloud core`.
+- **Cloud Core 10 — staging HTTPS reel (2026-07-11)** : reprise explicite de Cloud une fois le serveur staging
+  disponible. `docker-compose.cc10.yml` livre un deploiement staging avec reverse proxy compatible Traefik,
+  Let's Encrypt, images GHCR immuables `sha-5bf4c0f`, PostgreSQL non expose, MinIO API routee via
+  `s3-staging.enistere.com`, Web via `staging.enistere.com`, secrets hors depot. Validation bout-en-bout :
+  CSRF/login BFF, `/me`, `/authorization`, upload PNG MinIO, URL signee HTTPS navigateur et telechargement 200.
+  **Aucun secret dans le rapport**. Statut Cloud alors maintenu `IMPLEMENTATION_PARTIELLE` : staging reel prouve,
+  mais pas encore revue V1 ni decision Redis/Compose.
+- **Cloud Core 11 — durcissement operationnel staging (2026-07-11)** : scripts versionnes
+  `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`, runbook operationnel et rapport CC11.
+  Preuves executees : health HTTPS + TLS OK, backup PostgreSQL + restore valide, backup MinIO + restore test,
+  rollback `sha-484f98d` healthy puis roll-forward `sha-5bf4c0f`, rotation smoke argon2id sans valeur conservee.
+  Decision de gouvernance : les tests Cloud reels restants deviennent des **gates finaux**, pas des checks a
+  relancer a chaque mission.
+- **Cloud Core V1 Readiness Review (2026-07-12)** : rapport
+  `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`. Decision : Cloud Core passe de
+  **`IMPLEMENTATION_PARTIELLE`** a **`IMPLEMENTATION_AVANCEE`**. Justification : CI runtime/E2E/registry,
+  staging HTTPS reel CC10, backups/restores/rollback CC11, runbooks et absence de secret dans Git. `VALIDE_V1`
+  est differe : Redis reste un item V1 historique non livre et la structure Compose V1 generique doit etre
+  tranchee. Prochaine action : **Cloud Core 12 — decision Redis/Compose V1**.
 - **ADR-016 (reste)** — **publication** des packages (toujours non publiés/privés) ; **intégration cores FAITE**
   (Web + **Mobile RN 4** : `@enistere/api-client-fetch` consommé) ; adaptateurs Angular/Dart futurs.
 

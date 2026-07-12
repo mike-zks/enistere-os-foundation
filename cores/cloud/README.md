@@ -6,15 +6,25 @@ progressive et documentaire**, sans imposer prématurément une implémentation.
 
 ## Statut
 
-**`IMPLEMENTATION_PARTIELLE`** — au cadrage opérationnel (Cloud Core 1) s'ajoutent **deux workflows Cloud
-runtime réels** : la **CI runtime de l'API NestJS** (`api-runtime-ci.yml`, niveau 2 — migrations + unit +
-**e2e** contre PostgreSQL + MinIO jetables, OpenAPI check, build, audit), **la CI E2E navigateur**
-(`web-e2e-ci.yml`, niveau 3 — stack réelle API + PostgreSQL + MinIO + Web + **Playwright/Chromium** ; parcours
-Health/Auth/Files) **et la CI registry GHCR** (`registry-ci.yml`, niveau 4 partiel — build + push d'images
-API/Web sur `main`, **sans déploiement**). **Restent non implémentés** : déploiement, environnements protégés
-(staging/production), monitoring, backups, rollback, `docker-compose` de prod/Traefik, secrets applicatifs,
-scan/signature d'image. **Aucune infrastructure de déploiement** ; les workflows sont **sans secret applicatif**
-(le registry utilise le `GITHUB_TOKEN` automatique, sans déployer).
+**`IMPLEMENTATION_AVANCEE`** — Cloud Core couvre maintenant le cadrage operationnel, la CI runtime, l'E2E
+navigateur, la registry GHCR et un **staging HTTPS reel operationnalise**.
+
+Preuves principales :
+
+- **CI runtime API** (`api-runtime-ci.yml`, niveau 2) : migrations + unit/e2e contre PostgreSQL + MinIO jetables,
+  OpenAPI check, build, audit.
+- **CI E2E navigateur** (`web-e2e-ci.yml`, niveau 3) : stack reelle API + PostgreSQL + MinIO + Web +
+  Playwright/Chromium ; parcours Health/Auth/Files.
+- **CI registry GHCR** (`registry-ci.yml`, niveau 4 partiel) : build + push d'images API/Web sur `main`, tags
+  immuables, `api-smoke`, sans deploiement automatique.
+- **CC10 staging HTTPS reel** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik, Let's Encrypt,
+  PostgreSQL non expose, MinIO API routee HTTPS, auth BFF + upload + URL signee + telechargement valides.
+- **CC11 socle operationnel** : backups PostgreSQL/MinIO, restores verifies, rollback/roll-forward image,
+  rotation du compte smoke, runbook operationnel.
+
+Cloud Core n'est pas encore `VALIDE_V1` : Redis reste un item historique de la roadmap Cloud V1 alors que l'API
+Core le reporte en V2, et la structure compose V1 generique (`base/local/prod` ou equivalent) reste a trancher.
+La revue courante est `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`.
 
 ## Ce qui est cadré (Cloud Core 1)
 
@@ -83,11 +93,11 @@ runtime → étape source séparée), **PostgreSQL non exposé**, **MinIO API jo
 
 ## Ce qui n'est PAS implémenté
 
-`docker-compose` de **production** · Traefik/DNS/TLS réels · **déploiement réel** (staging exécuté / production) ·
-GitHub Environments réels · workflow deploy automatique · monitoring (Prometheus/Grafana/Loki) · backups/restore
-automatisés · OSRM/PostGIS · rollback automatique · scan/signature d'image · semver/release · couverture publiée ·
-**upload/suppression Files côté Web** · secrets applicatifs. Les workflows restent **non déployants, sans secret
-applicatif** (le registry pousse des images via `GITHUB_TOKEN`, sans déployer).
+Production · GitHub Environments reels · workflow deploy automatique · monitoring/alerting
+(Prometheus/Grafana/Loki) · backups automatises par cron/runner · rollback automatique · scan/signature d'image ·
+OSRM/PostGIS · Redis staging · compose V1 generique `base/local/prod` tranche · secrets applicatifs dans un
+gestionnaire dedie. Les workflows CI restent **non deployants** ; les tests staging reels sont des **gates finaux**
+gouvernes par runbook, pas des checks systematiques de chaque PR.
 
 ## État CI/CD (ADR)
 
@@ -107,9 +117,7 @@ Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécut�
 
 ## Prochaine étape
 
-**Prochaine mission Codex** : **Cloud Core 9 — exécution staging réelle contrôlée sur serveur** : appliquer les
-runbooks sur un **serveur staging identifié** avec l'**image GHCR API reconstruite après le merge CC8** (secrets
-hors dépôt, `S3_ENDPOINT` **public** Option A), vérifier health + parcours réels (dont **téléchargement
-navigateur** via URL signée). Le défaut image API (CC7) est **corrigé et re-validé** (CC8 ; cf.
-[`docs/STAGING_DRY_RUN_REPORT.md`](docs/STAGING_DRY_RUN_REPORT.md) §8). Voir
-[`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).
+**Prochaine mission Codex** : **Cloud Core 12 — decision Redis/Compose V1**. Objectif : trancher explicitement
+Redis (livraison minimale non publique ou report V2 en coherence API Core) et aligner la structure Compose V1
+(`base/local/staging` ou CC10 comme compose serveur officiel), sans relancer le serveur reel sauf gate final
+explicite. Voir [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).

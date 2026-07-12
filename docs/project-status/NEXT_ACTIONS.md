@@ -60,6 +60,17 @@
 > **Prochaine action** : retour pilotage global — choisir le prochain core prioritaire selon prerequis
 > disponibles. Candidats : Mobile RN31 si macOS/Xcode ou device iOS reel disponible ; Cloud durcissement
 > final si une release/staging le requiert ; sinon cadrer explicitement le prochain core V2/V3.
+>
+> ✅ **Cloud Core V1 Readiness Review : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`.
+> Decision : Cloud Core passe de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`**.
+> `VALIDE_V1` est differe : Redis/Compose V1 doivent etre tranches sans relancer les tests serveur reels hors
+> gate final.
+>
+> **Prochaine action UNIQUE** : **Cloud Core 12 — decision Redis/Compose V1**.
+> Objectif : trancher Redis (livraison minimale non publique ou report V2 coherent API Core) et aligner la
+> structure Compose V1 (`base/local/staging` ou CC10 comme compose serveur officiel), sans acces serveur reel
+> sauf decision explicite de gate final.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
