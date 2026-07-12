@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core V2 Readiness Review
+
+- Nouveau rapport : `docs/project-status/DOCS_CORE_V2_READINESS_REVIEW.md`.
+- Decision : Docs Core reste **`IMPLEMENTATION_PARTIELLE`**.
+- Lecture : les criteres V2 globaux sont couverts par l'ensemble Quality Core + Docs Core, mais les criteres
+  internes `IMPLEMENTATION_AVANCEE` du Docs Core ne sont pas encore tous satisfaits.
+- Gaps bloquants documentes : guides principaux absents, onboarding encore minimal.
+- Aucun runtime applicatif, workflow, dependance, site docs, generation automatique ou RAG ajoute.
+- Prochaine action : **Docs Core 5 — guides principaux et onboarding complet**.
+
 ### Docs Core 4 — Revue de liens documentaires ciblée
 
 - Nouveau script : `cores/docs-core/scripts/check-doc-links.mjs` (Node pur, sans dépendance).

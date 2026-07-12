@@ -4,6 +4,10 @@ Docs Core est le core de documentation centrale d'Enistere OS Foundation.
 
 Statut : **IMPLEMENTATION_PARTIELLE**.
 
+Decision de revue : `DOCS_CORE_V2_READINESS_REVIEW.md` maintient ce statut. Le core couvre le seuil
+`IMPLEMENTATION_PARTIELLE`; le passage a `IMPLEMENTATION_AVANCEE` attend les guides principaux et un
+onboarding plus complet.
+
 ## Livrables actuels
 
 | Fichier | Role |
@@ -13,6 +17,7 @@ Statut : **IMPLEMENTATION_PARTIELLE**.
 | `../../docs/onboarding/CONTRIBUTOR_ONBOARDING.md` | Onboarding minimal contributeur/agent |
 | `../../docs/glossary/GLOSSARY.md` | Glossaire initial des statuts, gates, cores et termes de securite |
 | `scripts/check-doc-links.mjs` | Controle local des liens Markdown internes |
+| `../../docs/project-status/DOCS_CORE_V2_READINESS_REVIEW.md` | Revue de readiness V2 et decision de statut |
 
 ## Responsabilite
 
