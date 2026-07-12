@@ -19,8 +19,12 @@
 > Livrables : `cores/docs-core/CORE_SPECIFICATION.md`, `cores/docs-core/README.md`, `docs/README.md`.
 > Statut : **`SPECIFICATION_DOCUMENTAIRE`**. Aucun runtime, workflow, dépendance, RAG ou site docs.
 >
-> **Prochaine action** : Docs Core 2 — audit documentaire et dette de navigation/liens (identifier les
-> pages stales, liens cassés ou doublons, corriger uniquement les incohérences documentaires ciblées).
+> ✅ **Docs Core 2 — audit documentaire et dette de navigation/liens : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/DOCS_CORE_NAVIGATION_AUDIT.md`.
+> Corrections : README racine synthétique, ADR-008 aligné UI Kit V1/RN35, compteurs UI Kit/Web mis à jour.
+>
+> **Prochaine action** : Docs Core 3 — onboarding contributeur minimal et glossaire initial (sans runtime,
+> sans génération automatique, sans RAG).
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
