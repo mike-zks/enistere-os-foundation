@@ -32,9 +32,9 @@ La V2 attend notamment :
 - des prompts IA classes ;
 - des checklists qualite.
 
-Docs Core 1→5 livre le cadrage initial, l'index central, l'onboarding, le glossaire initial, les guides
-principaux et un controle local des liens internes. Docs Core ne livre pas encore de site documentaire, de RAG,
-de moteur de recherche ou de generation automatique.
+Docs Core 1→6 livre le cadrage initial, l'index central, l'onboarding, le glossaire initial, les guides
+principaux et un controle local des liens internes integre au scope Quality Core `docs`. Docs Core ne livre
+pas encore de site documentaire, de RAG, de moteur de recherche ou de generation automatique.
 
 ## 3. Perimetre V2 initial
 
@@ -46,7 +46,7 @@ Inclus :
 - liens vers ADR, project-status, runbooks, prompts et Quality Core ;
 - onboarding et glossaire initiaux ;
 - guides principaux ;
-- controle local des liens Markdown internes ;
+- controle local des liens Markdown internes via `quality-gates run docs` ;
 - statut explicite dans les fichiers de pilotage.
 
 Exclus :
@@ -103,10 +103,8 @@ exemple : `cores/cloud/docs/`, `cores/quality-core/`.
 
 Docs Core utilise les gates docs/quality :
 
-- `git diff --check` ;
-- `node cores/docs-core/scripts/check-doc-links.mjs` ;
+- `node cores/quality-core/scripts/quality-gates.mjs run docs` ;
 - `node --test cores/docs-core/scripts/check-doc-links.test.mjs` si Docs Core est touche ;
-- `node cores/quality-core/scripts/quality-gates.mjs plan docs` ;
 - `node --test cores/quality-core/scripts/quality-gates.test.mjs` si Quality Core est touche ;
 - `npm audit` racine avant PR.
 

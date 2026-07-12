@@ -56,17 +56,24 @@ describe('buildPlan — scope inconnu', () => {
 // ---------------------------------------------------------------------------
 
 describe('buildPlan — docs', () => {
-  it('a exactement 1 étape : git diff --check', () => {
+  it('a exactement 2 étapes : git diff --check + link check', () => {
     const plan = buildPlan('docs');
     assert.ok(plan !== null);
-    assert.strictEqual(plan.steps.length, 1);
+    assert.strictEqual(plan.steps.length, 2);
     assert.strictEqual(plan.steps[0].cmd, 'git');
     assert.deepStrictEqual(plan.steps[0].args, ['diff', '--check']);
     assert.strictEqual(plan.steps[0].cwd, REPO_ROOT);
+    assert.strictEqual(plan.steps[1].cmd, 'node');
+    assert.deepStrictEqual(plan.steps[1].args, ['cores/docs-core/scripts/check-doc-links.mjs']);
+    assert.strictEqual(plan.steps[1].cwd, REPO_ROOT);
   });
 
   it("n'a aucun gate exclu documenté", () => {
     assert.deepStrictEqual(buildPlan('docs').excluded, []);
+  });
+
+  it('documente le controle de liens dans sa description', () => {
+    assert.match(buildPlan('docs').description, /liens Markdown internes/);
   });
 });
 

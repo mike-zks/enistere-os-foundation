@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core 6 — Decision CI/docs gate integration
+
+- Nouveau rapport : `docs/project-status/DOCS_CORE_CI_GATE_DECISION.md`.
+- Decision : le link check Docs Core ne devient pas un check CI obligatoire separe pour le moment.
+- Le scope local `docs` de `cores/quality-core/scripts/quality-gates.mjs` execute maintenant
+  `git diff --check` puis `node cores/docs-core/scripts/check-doc-links.mjs`.
+- Tests `quality-gates.test.mjs` mis a jour.
+- Aucun workflow GitHub, ruleset, runtime applicatif, dependance, site docs, generation automatique ou RAG ajoute.
+- Prochaine action : **Docs Core V1 Readiness Review**.
+
 ### Docs Core 5 — Guides principaux et onboarding complet
 
 - Nouveaux guides : `docs/guides/DOCUMENTATION_MAINTENANCE_GUIDE.md` et

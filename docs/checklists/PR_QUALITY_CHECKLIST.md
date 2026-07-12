@@ -1,7 +1,7 @@
 # PR_QUALITY_CHECKLIST.md — Checklist qualité par type de PR
 
 > Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`.
-> Dernière mise à jour : 2026-07-11 (Quality Core 2).
+> Dernière mise à jour : 2026-07-12 (Docs Core 6).
 > Script optionnel : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>` pour voir les gates d'un scope sans les exécuter.
 
 ## Comment utiliser cette checklist
@@ -18,7 +18,7 @@
 
 ### docs-only (project-status, ADR, checklists, stratégie)
 
-- [ ] `git diff --check` — pas de whitespace errors
+- [ ] `node cores/quality-core/scripts/quality-gates.mjs run docs` — whitespace + liens internes
 - [ ] Liens internes cohérents (fichiers référencés existent)
 - [ ] Statuts dans `IMPLEMENTATION_MATRIX.md` cohérents avec les preuves documentées
 - [ ] `SESSION_HANDOFF.md` mis à jour si l'état courant change

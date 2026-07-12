@@ -49,7 +49,7 @@ node cores/quality-core/scripts/quality-gates.mjs run <scope>
 
 | Scope | Description |
 |---|---|
-| `docs` | `git diff --check` uniquement — PR docs-only |
+| `docs` | `git diff --check` + Docs Core link check — PR docs-only |
 | `root-audit` | `npm audit` à la racine — 0 vuln requis |
 | `packages` | api-contracts + api-client-fetch : typecheck, build, generate:check, test |
 | `ui-kit` | typecheck, lint, test (181), build, tokens:check |
@@ -151,7 +151,7 @@ docker build -t enistere/web-nextjs .                        # image Web
 
 | Type de PR | Gates minimaux | Gates recommandés |
 |---|---|---|
-| docs-only (project-status, ADR, checklists) | `git diff --check` | `npm audit` root |
+| docs-only (project-status, ADR, checklists) | `node cores/quality-core/scripts/quality-gates.mjs run docs` | `npm audit` root |
 | quality-core-only | `git diff --check` + `npm audit` | — |
 | UI Kit | typecheck + lint + test + build + tokens:check | audit + pack:check |
 | api-contracts | typecheck + build + generate:check + test | audit |

@@ -1,7 +1,7 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-11 (Quality Core 2).
+> Dernière mise à jour : 2026-07-12 (Docs Core 6).
 >
 > **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
 > Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `all-safe`
@@ -170,7 +170,7 @@ node cores/quality-core/scripts/quality-gates.mjs run ui-kit
 
 | Scope | Étapes | Gates exclus |
 |---|---|---|
-| `docs` | 1 (git diff --check) | — |
+| `docs` | 2 (`git diff --check` + Docs Core link check) | — |
 | `root-audit` | 1 (npm audit) | — |
 | `packages` | 7 (api-contracts + api-client-fetch) | — |
 | `ui-kit` | 5 | — |

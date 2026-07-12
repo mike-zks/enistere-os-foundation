@@ -93,8 +93,7 @@ Si le statut change ou si une revue officielle est ajoutee :
 Pour une revue documentaire :
 
 ```bash
-git diff --check
-node cores/docs-core/scripts/check-doc-links.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
 node cores/quality-core/scripts/quality-gates.mjs plan docs
 npm audit
 ```

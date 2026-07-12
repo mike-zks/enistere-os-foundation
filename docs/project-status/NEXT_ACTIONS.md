@@ -44,8 +44,14 @@
 > `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`.
 > Decision : Docs Core passe de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`**.
 >
-> **Prochaine action** : Docs Core 6 — decider si le link check devient un gate CI obligatoire ou reste un
-> gate local documente. Aucun runtime, dependance, RAG ou site documentaire.
+> ✅ **Docs Core 6 — decision CI/docs gate integration : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/DOCS_CORE_CI_GATE_DECISION.md`.
+> Decision : pas de nouveau check CI obligatoire ; link check integre au scope local
+> `node cores/quality-core/scripts/quality-gates.mjs run docs`.
+> Aucun workflow GitHub, ruleset, runtime, dependance, RAG ou site documentaire.
+>
+> **Prochaine action** : Docs Core V1 Readiness Review — verifier si Docs Core peut passer de
+> `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
