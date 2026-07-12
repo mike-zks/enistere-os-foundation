@@ -384,6 +384,12 @@
   staging HTTPS reel CC10, backups/restores/rollback CC11, runbooks et absence de secret dans Git. `VALIDE_V1`
   est differe : Redis reste un item V1 historique non livre et la structure Compose V1 generique doit etre
   tranchee. Prochaine action : **Cloud Core 12 — decision Redis/Compose V1**.
+- **Cloud Core 12 — decision Redis/Compose V1 (2026-07-12)** : rapport
+  `docs/project-status/CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`. Decisions : Redis est reporte post-V1/V2 en
+  coherence avec API Core (`API_CORE_V1_NEXT_ROADMAP.md` P2) ; `docker-compose.cc10.yml` devient le compose
+  serveur/staging V1 officiel ; `docker-compose.staging.example.yml` reste un exemple historique/manual.
+  Cloud Core passe de **`IMPLEMENTATION_AVANCEE`** a **`VALIDE_V1`** sur preuves CC10/CC11. Aucun acces serveur
+  reel, secret, workflow ou dependance ajoute.
 - **ADR-016 (reste)** — **publication** des packages (toujours non publiés/privés) ; **intégration cores FAITE**
   (Web + **Mobile RN 4** : `@enistere/api-client-fetch` consommé) ; adaptateurs Angular/Dart futurs.
 

@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Cloud Core 12 — Decision Redis / Compose V1
+
+- Nouveau rapport : `docs/project-status/CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`.
+- Cloud Core promu de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+- Decision : Redis est reporte post-V1/V2 en coherence avec API Core ; `docker-compose.cc10.yml` devient le
+  compose serveur/staging V1 officiel.
+- `cores/cloud/CORE_SPECIFICATION.md`, `README.md`, `staging/README.md` et
+  `CLOUD_CORE_V1_EXECUTION_BASELINE.md` alignes.
+- Aucun acces serveur reel, workflow, dependance, secret ou runtime applicatif ajoute.
+- Prochaine action : retour pilotage global.
+
 ### Cloud Core V1 Readiness Review
 
 - Nouveau rapport : `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`.

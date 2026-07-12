@@ -4,6 +4,10 @@
 > gouverné** : environnements, protection de branche, politique CI/CD progressive, secrets, registry,
 > runtime API et E2E. **Aucun déploiement, Docker, registry, secret ni workflow runtime n'est créé ici.**
 > Source de vérité : le repository réel + `cores/cloud/CORE_SPECIFICATION.md`. Date : 2026-06-10.
+>
+> **Note 2026-07-12 :** ce document est une baseline historique Cloud Core 1. L'etat courant est
+> `VALIDE_V1` après CC12 ; voir `../README.md` et
+> `../../../docs/project-status/CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`.
 
 ## 1. Objectif
 
@@ -127,22 +131,21 @@ déploiement par environnement protégé, rollback, scan/signature d'image, semv
 
 ## 11. Politique déploiement
 
-**Staging** : cadré manuellement (Cloud Core 6), **dry-run contrôlé exécuté (Cloud Core 7)** puis **image API
-corrigée & re-validée (Cloud Core 8, 2026-06-11)** — statut **`DRY_RUN_API_IMAGE_FIXED`**. Compose + `.env`
-**exemples** + runbooks (`cores/cloud/staging/`, `STAGING_DEPLOYMENT_RUNBOOK.md`, `STAGING_ROLLBACK_RUNBOOK.md`)
-pour déployer **à la main** les images GHCR immuables — **aucune exécution réelle**, aucun secret, aucune
-automatisation, aucun `latest`. CC7 (`STAGING_DRY_RUN_REPORT.md`) avait révélé un **défaut bloquant** : l'image
-API ne démarrait pas (query engine Prisma OpenSSL **1.1.x** vs runtime **bookworm 3.0.x** → crash-loop).
-**CC8 a corrigé** : `binaryTargets=["native","debian-openssl-3.0.x"]` (schéma) + `openssl` au stage build →
-moteur **3.0.x** dans `.prisma/client`. **Re-validé** (image + moteur 3.0.x) : migrations **depuis l'image**
-(offline), API **`healthy`** `/health/live` & `/health/ready` **200**, Web **200**, stack complète **healthy**.
-**Angle mort CI fermé** : `registry-ci.yml` job **`api-smoke`** (lance l'image, vérifie le chargement du moteur)
-gate le push. **Stratégie migrations** tranchée = **Option A (depuis l'image)**. **Décision MinIO/URL signée**
-(Option A : `S3_ENDPOINT` = adresse publique du serveur, jamais `minio:9000`). ⚠️ L'**image GHCR corrigée** sera
-**reconstruite/publiée par la registry CI au merge CC8** (tags antérieurs cassés). Cible : staging exécuté réel
-(serveur + secrets hors dépôt + endpoint MinIO public) → scripté → CI/CD avec environnements GitHub protégés +
-approbation + **rollback** (§15). **Rollback d'image** simple mais conditionné à une image **qui boote** ;
-**rollback DB non garanti** (migrations additives).
+**Staging V1** : `cores/cloud/staging/docker-compose.cc10.yml` est le compose serveur/staging V1 officiel
+(decision CC12). Il remplace le compose exemple CC6 pour la validation V1 : reverse proxy compatible Traefik,
+Let's Encrypt, aucun port applicatif hote, PostgreSQL interne, MinIO API routee HTTPS, images GHCR immuables.
+
+Historique :
+
+- CC6 : cadrage staging manuel ;
+- CC7 : dry-run local, defaut image API detecte ;
+- CC8 : correction moteur Prisma OpenSSL 3.0.x et `api-smoke` registry ;
+- CC9 : execution locale controlee ;
+- CC10 : staging HTTPS reel valide ;
+- CC11 : health, backup/restore, rollback/roll-forward et rotation smoke verifies.
+
+Redis est reporte post-V1/V2 : aucun service Redis n'est requis pour le staging V1. Les tests serveur reels
+restent des gates finaux gouvernes par runbook, pas des checks systematiques de chaque PR.
 
 ## 12. Politique runtime API (implémentée — niveau 2)
 
@@ -166,20 +169,19 @@ Aujourd'hui : **logs structurés** (Pino, ADR-040) + **`X-Request-Id`** propagé
 (V3/VF) : OpenTelemetry possible, Prometheus/Grafana/Loki/Alertmanager, dashboards **protégés**, rétention
 définie. **Aucun monitoring réel** maintenant.
 
-## 15. Politique rollback (future)
+## 15. Politique rollback
 
-**Non implémenté.** Principe futur : revenir à un **tag/image précédent** (registry immuable), migrations DB
-**prudentes** (compatibilité ascendante, pas de destructive sans plan), feature flags possibles. Tout
-déploiement futur devra documenter sa procédure de rollback.
+Rollback d'image **verifie en CC11** : retour a un tag/image precedent, health Web/API, puis roll-forward vers
+l'image nominale. Le rollback DB reste une operation separee : les migrations doivent rester prudentes et tout
+changement destructif exige un plan de restore.
 
 ## 16. Limites V1
 
-Niveaux 1–3 présents. **Restent** : protection de branche **non appliquée** (action humaine manuelle) ; pas
-de couverture publiée ; pas de registry/déploiement/monitoring/backups ; environnements `preview`/`staging`/
-`production` **théoriques**. La reproductibilité hors-CI (clone local) reste à documenter (ordre `npm run
-build` racine). **Aucun statut n'est augmenté artificiellement** (Cloud Core `IMPLEMENTATION_PARTIELLE` : trois
-workflows CI réels — non-régression, runtime API, E2E navigateur —, mais ni registry, ni déploiement, ni
-environnements protégés, ni monitoring, ni rollback).
+Niveaux 1–3 présents, registry GHCR presente, staging HTTPS reel valide, backups/restores et rollback verifies.
+**Restent hors V1** : production, workflow deploy automatique, environnements GitHub reels, monitoring/alerting,
+Redis standardise, OSRM/PostGIS, scan/signature d'image, compose generique `base/local/prod`. La reproductibilité
+hors-CI (clone local) reste à documenter (ordre `npm run build` racine). **Statut courant** : Cloud Core
+`VALIDE_V1` après CC12.
 
 ## 17. Étapes suivantes
 
