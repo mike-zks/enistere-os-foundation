@@ -2,7 +2,7 @@
 
 Docs Core est le core de documentation centrale d'Enistere OS Foundation.
 
-Statut : **SPECIFICATION_DOCUMENTAIRE**.
+Statut : **IMPLEMENTATION_PARTIELLE**.
 
 ## Livrables actuels
 
@@ -12,6 +12,7 @@ Statut : **SPECIFICATION_DOCUMENTAIRE**.
 | `../../docs/README.md` | Index central de la documentation Foundation |
 | `../../docs/onboarding/CONTRIBUTOR_ONBOARDING.md` | Onboarding minimal contributeur/agent |
 | `../../docs/glossary/GLOSSARY.md` | Glossaire initial des statuts, gates, cores et termes de securite |
+| `scripts/check-doc-links.mjs` | Controle local des liens Markdown internes |
 
 ## Responsabilite
 
@@ -47,12 +48,14 @@ Pour une mission Docs Core documentaire :
 
 ```bash
 git diff --check
+node cores/docs-core/scripts/check-doc-links.mjs
 node cores/quality-core/scripts/quality-gates.mjs plan docs
 npm audit
 ```
 
-Si Quality Core est modifie :
+Si Docs Core ou Quality Core est modifie :
 
 ```bash
+node --test cores/docs-core/scripts/check-doc-links.test.mjs
 node --test cores/quality-core/scripts/quality-gates.test.mjs
 ```

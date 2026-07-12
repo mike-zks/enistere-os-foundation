@@ -1,6 +1,6 @@
 # Docs Core — Core Specification
 
-> Statut : **SPECIFICATION_DOCUMENTAIRE**.
+> Statut : **IMPLEMENTATION_PARTIELLE**.
 > Derniere mise a jour : 2026-07-12.
 
 ## 1. Objectif
@@ -32,8 +32,9 @@ La V2 attend notamment :
 - des prompts IA classes ;
 - des checklists qualite.
 
-Docs Core 1 livre le cadrage initial et l'index central. Il ne livre pas encore de site documentaire,
-de RAG, de moteur de recherche, de generation automatique ou d'onboarding interactif.
+Docs Core 1→4 livre le cadrage initial, l'index central, l'onboarding minimal, le glossaire initial et
+un controle local des liens internes. Il ne livre pas encore de site documentaire, de RAG, de moteur de
+recherche ou de generation automatique.
 
 ## 3. Perimetre V2 initial
 
@@ -43,6 +44,8 @@ Inclus :
 - conventions de lecture et d'entretien ;
 - cartographie des documents de pilotage ;
 - liens vers ADR, project-status, runbooks, prompts et Quality Core ;
+- onboarding et glossaire initiaux ;
+- controle local des liens Markdown internes ;
 - statut explicite dans les fichiers de pilotage.
 
 Exclus :
@@ -97,9 +100,11 @@ exemple : `cores/cloud/docs/`, `cores/quality-core/`.
 
 ## 7. Gates applicables
 
-Docs Core 1 utilise les gates docs/quality :
+Docs Core utilise les gates docs/quality :
 
 - `git diff --check` ;
+- `node cores/docs-core/scripts/check-doc-links.mjs` ;
+- `node --test cores/docs-core/scripts/check-doc-links.test.mjs` si Docs Core est touche ;
 - `node cores/quality-core/scripts/quality-gates.mjs plan docs` ;
 - `node --test cores/quality-core/scripts/quality-gates.test.mjs` si Quality Core est touche ;
 - `npm audit` racine avant PR.

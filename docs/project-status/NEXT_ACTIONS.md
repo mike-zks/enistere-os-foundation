@@ -27,8 +27,13 @@
 > Livrables : `docs/onboarding/CONTRIBUTOR_ONBOARDING.md`, `docs/glossary/GLOSSARY.md`.
 > Aucun runtime, workflow, dépendance, génération automatique ou RAG.
 >
-> **Prochaine action** : Docs Core 4 — revue de liens documentaires ciblée (script ou checklist de contrôle
-> des liens internes, sans site docs ni RAG) ou retour à une priorité runtime décidée par pilotage.
+> ✅ **Docs Core 4 — revue de liens documentaires ciblée : RÉALISÉ** (2026-07-12).
+> Livrables : `cores/docs-core/scripts/check-doc-links.mjs`,
+> `cores/docs-core/scripts/check-doc-links.test.mjs`, `DOCS_CORE_LINK_CHECK_REPORT.md`.
+> Décision : **`SPECIFICATION_DOCUMENTAIRE` → `IMPLEMENTATION_PARTIELLE`**.
+>
+> **Prochaine action** : Docs Core V2 Readiness Review — vérifier les critères roadmap §13.4 appliqués au
+> Docs Core et décider si le core reste `IMPLEMENTATION_PARTIELLE` ou peut passer à `IMPLEMENTATION_AVANCEE`.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core 4 — Revue de liens documentaires ciblée
+
+- Nouveau script : `cores/docs-core/scripts/check-doc-links.mjs` (Node pur, sans dépendance).
+- Nouveaux tests : `cores/docs-core/scripts/check-doc-links.test.mjs`.
+- Nouveau rapport : `docs/project-status/DOCS_CORE_LINK_CHECK_REPORT.md`.
+- Résultat local : `Docs Core link check passed (53 files)`.
+- Docs Core promu de **`SPECIFICATION_DOCUMENTAIRE`** à **`IMPLEMENTATION_PARTIELLE`**.
+- Aucun runtime applicatif, workflow, dépendance, site docs, génération automatique ou RAG ajouté.
+- Prochaine action : **Docs Core V2 Readiness Review**.
+
 ### Docs Core 3 — Onboarding contributeur minimal et glossaire initial
 
 - Nouveaux fichiers : `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` et `docs/glossary/GLOSSARY.md`.

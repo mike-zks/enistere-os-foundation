@@ -27,6 +27,7 @@ Ce glossaire definit les termes utilises dans les statuts, rapports, missions et
 | Release | Publication gouvernee d'un etat de la Foundation, avec notes et tag si applicable. |
 | Promotion de statut | Changement documente du statut d'un core apres revue et preuves. |
 | Gate | Verification locale ou CI requise avant merge/release. |
+| Link check | Controle local des liens Markdown internes de la documentation centrale. |
 | Hors perimetre | Ce qu'une mission ne doit pas modifier, meme si c'est proche du sujet. |
 | Preuve | Test, build, rapport runtime, CI ou fichier concret qui soutient une affirmation. |
 
