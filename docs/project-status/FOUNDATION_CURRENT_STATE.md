@@ -30,7 +30,8 @@ pas une application ni une bibliothèque complète).
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
 | Foundation baseline | **`READY_FOR_RELEASE_DECISION`** — revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` (2026-07-12) : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire, CI L1-L4 verte sur `main`, ruleset `protect-main` actif ; **aucun tag ni release GitHub créé** |
-| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après API Core VALIDE_V1 (`84dd5e7`, PR #87) ; protection `main` active via Rulesets ; flux PR actif |
+| Release notes | **`DRAFT_READY_FOR_HUMAN_RELEASE_DECISION`** — `FOUNDATION_V1_RELEASE_NOTES.md` préparé pour `foundation-v1-baseline` ; tag proposé `foundation-v1.0.0` **non créé** |
+| **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après Foundation V1 Baseline Readiness Review (`5d35401`, PR #88) ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
 
@@ -387,9 +388,9 @@ politiques** : artefacts = aucun upload (Option A), couverture = exécutée non 
 futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
 ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection `main` active via GitHub Rulesets**) et
 ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
-**Prochaine action** : **Foundation V1 Release Notes 1** — préparer les notes de release
-`foundation-v1-baseline` selon le runbook, **sans tag ni release GitHub automatique**. La baseline est
-désormais `READY_FOR_RELEASE_DECISION` via `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
+**Prochaine action** : décision humaine — créer ou non le tag proposé `foundation-v1.0.0` et le billet
+GitHub Release associé à `FOUNDATION_V1_RELEASE_NOTES.md`. Ne pas automatiser cette étape sans validation
+explicite du mainteneur.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour
