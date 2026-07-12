@@ -5,13 +5,21 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Quality Core V2 Readiness Review : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/QUALITY_CORE_V2_READINESS_REVIEW.md`.
+> Décision : **`SPECIFICATION_DOCUMENTAIRE` → `IMPLEMENTATION_PARTIELLE`**.
+> Justification : matrice, script `quality-gates`, checklists, templates, ruleset actif, release process
+> et usage réel lors de `foundation-v1.0.0`.
+>
+> **Prochaine action** : Quality Core 7 — prompts IA standardisés et catalogue de missions gouvernées.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
 > GitHub Release : <https://github.com/mike-zks/enistere-os-foundation/releases/tag/foundation-v1.0.0>.
 >
-> **Prochaine action** : arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon
-> incrément Quality/Cloud/Web cadré).
+> **Historique** : cette prochaine action était l'arbitrage post-release ; Quality Core V2 Readiness Review
+> est réalisée le 2026-07-12.
 
 > ✅ **Foundation V1 Baseline Readiness Review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
