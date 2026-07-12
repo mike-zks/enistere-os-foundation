@@ -5,15 +5,21 @@
 Le **Quality Core** est le core de gouvernance qualité d'Enistere OS Foundation.
 
 Son rôle est de formaliser les exigences de qualité qui s'appliquent à tous les cores, packages et
-workflows du monorepo. Il ne remplace pas les CI existantes et n'ajoute aucune automatisation
-nouvelle en V2. Il documente ce qui existe déjà, le rend explicite et le rend utilisable comme
-référence de décision.
+workflows du monorepo. Il ne remplace pas les CI existantes. Il documente ce qui existe déjà, fournit
+des scripts sûrs de sélection de gates locaux et rend le processus utilisable comme référence de
+décision.
 
-Cette spécification est documentaire. Elle ne crée pas de workflow GitHub, pas de script
-d'exécution destructrice, pas de dépendance, pas de configuration de package, pas de code
-applicatif et pas d'infrastructure réelle.
+Ce core reste non-runtime. Il ne crée pas de workflow GitHub, pas de script d'exécution destructrice,
+pas de dépendance, pas de configuration de package, pas de code applicatif et pas d'infrastructure
+réelle.
 
-Statut courant : **SPECIFICATION_DOCUMENTAIRE** (Governance 3, 2026-07-11).
+Statut courant : **IMPLEMENTATION_PARTIELLE** (Quality Core V2 Readiness Review, 2026-07-12).
+
+> **Quality Core V2 Readiness Review** promeut le core de `SPECIFICATION_DOCUMENTAIRE` à
+> `IMPLEMENTATION_PARTIELLE` : matrice, script `quality-gates`, checklists, templates, ruleset
+> actif, processus de release et usage réel lors de la publication `foundation-v1.0.0`. Les gaps
+> restants (prompts IA standardisés, changelog/release automation, couverture publiée, checks
+> avancés) empêchent une promotion plus haute.
 
 > **Governance 3** constate l'activation réelle de la protection de `main` via GitHub
 > Rulesets : ruleset `protect-main`, enforcement `active`, Pull Request obligatoire,

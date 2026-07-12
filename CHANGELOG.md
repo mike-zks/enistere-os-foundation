@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core V2 Readiness Review
+
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_V2_READINESS_REVIEW.md`.
+- `Quality Core` promu de **`SPECIFICATION_DOCUMENTAIRE`** à **`IMPLEMENTATION_PARTIELLE`**.
+- Justification : matrice des gates, script `quality-gates`, checklists, templates GitHub, ruleset actif,
+  processus de release et usage réel lors de la publication `foundation-v1.0.0`.
+- Critères roadmap §13.4 : **6/7 satisfaits**, **1/7 partiel** (prompts IA standardisés).
+- Aucun workflow, runtime, dépendance, tag ou déploiement modifié.
+- Prochaine action : **Quality Core 7 — prompts IA standardisés et catalogue de missions gouvernées**.
+
 ### Foundation V1 Release Decision
 
 - Notes de release préparatoires ajoutées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
