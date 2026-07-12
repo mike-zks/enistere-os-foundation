@@ -5,18 +5,18 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Foundation V1 Release Decision : VALIDÉE** (2026-07-12).
-> Notes préparées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
-> Statut : **`FOUNDATION_V1_RELEASE_APPROVED`**. Tag cible : `foundation-v1.0.0`.
+> ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
+> Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
+> Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
+> GitHub Release : <https://github.com/mike-zks/enistere-os-foundation/releases/tag/foundation-v1.0.0>.
 >
-> **Prochaine action** : créer le tag annoté `foundation-v1.0.0` et le billet GitHub Release associé,
-> puis arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon incrément
-> Quality/Cloud/Web cadré).
+> **Prochaine action** : arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon
+> incrément Quality/Cloud/Web cadré).
 
 > ✅ **Foundation V1 Baseline Readiness Review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
-> Verdict : **`READY_FOR_RELEASE_DECISION`** — le périmètre `foundation-v1-baseline` est prêt pour
-> décision humaine de release, sans tag ni release GitHub créés.
+> Verdict historique : **`READY_FOR_RELEASE_DECISION`** — le périmètre `foundation-v1-baseline` était
+> prêt pour décision humaine de release avant publication.
 > Preuves : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire,
 > ruleset `protect-main` actif, CI `main` L1-L4 verte après PR #88, `all-safe` local validé avec
 > `NODE_ENV=test` plus audit root 0 vuln hors sandbox.
