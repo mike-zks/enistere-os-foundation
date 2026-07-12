@@ -1,7 +1,9 @@
 # docs/project-status/ — Checkpoint documentaire officiel
 
 > **Source de vérité de pilotage** d'Enistere OS Foundation. Reflète l'**état réel du repository**
-> (vérifié fichier par fichier), pas l'historique de conversation. Dernière mise à jour : 2026-06-12.
+> (vérifié fichier par fichier), pas l'historique de conversation. Dernière mise à jour : 2026-07-12.
+>
+> Index documentaire central : [`../README.md`](../README.md).
 
 ## Rôle de chaque fichier
 
