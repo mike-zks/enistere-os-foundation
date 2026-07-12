@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core coverage standardization decision
+
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md`.
+- Correction du baseline coverage : `@enistere/ui-kit` expose déjà `test:coverage` et est désormais reconnu.
+- Synthèse `quality-report.mjs` : coverage locale disponible pour UI Kit, Web et API (**3/8** scopes).
+- Décision : **STANDARDISATION_PARTIELLE_EXISTANTE, PAS_DE_NOUVELLE_COMMANDE**.
+- Aucun workflow, dépendance, seuil coverage, artefact publié, dashboard ou runtime modifié.
+- Prochaine action : Quality Core V1 Readiness Review.
+
 ### Quality Core CI-required checks alignment
 
 - Nouveau rapport : `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`.

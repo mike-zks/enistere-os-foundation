@@ -29,6 +29,7 @@ ruleset actif et release Foundation appliquee. Les automatisations avancees rest
 | `scripts/quality-report.mjs` | Helper local de synthèse tests/couverture — sortie Markdown stdout, sans lancer les tests |
 | `scripts/quality-report.test.mjs` | Tests unitaires du helper reporting — validation scopes, coverage disponible et sortie Markdown |
 | `../../docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` | Décision CI-required checks : `images (...)` recommandés pour promotion humaine, ruleset non modifié |
+| `../../docs/project-status/QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` | Décision coverage : API/Web/UI Kit reconnus, pas de nouvelle commande artificielle |
 | `../../prompts/README.md` | Catalogue gouverné des prompts IA versionnés |
 | `../../prompts/global/mission-brief-template.md` | Template de mission Claude/Codex/Gemini gouvernée |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |

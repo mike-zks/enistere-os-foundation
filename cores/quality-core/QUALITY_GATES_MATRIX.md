@@ -1,7 +1,7 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-12 (Quality Core CI-required checks alignment).
+> Dernière mise à jour : 2026-07-12 (Quality Core coverage standardization decision).
 >
 > **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
 > Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `all-safe`
@@ -22,7 +22,7 @@
 | **root** | — | — | — | — | ✅ L1 | — | — | — | — | — | — |
 | **api-contracts** | ✅ L1 | — | ✅ L1 (12) | ✅ L1 | — | — | — | — | — | — | ✅ L1 |
 | **api-client-fetch** | ✅ L1 | — | ✅ L1 (30) | ✅ L1 | — | — | — | — | — | — | — |
-| **ui-kit** | ✅ L1 | ✅ local | ✅ L1 (181) | ✅ L1 | ✅ L1 | — | — | — | — | ✅ local | — |
+| **ui-kit** | ✅ L1 | ✅ local | ✅ L1 (181) + coverage local | ✅ L1 | ✅ L1 | — | — | — | — | ✅ local | — |
 | **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (450) | ✅ L1 | ✅ L1 | ✅ L3 (15) | — | — | — | — | — |
 | **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
 | **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
@@ -62,6 +62,7 @@
 | typecheck | `npm run typecheck --workspace=@enistere/ui-kit` | Node 24 | **L1** | chaque PR |
 | lint | `npm run lint --workspace=@enistere/ui-kit` | Node 24 | local + recommandé CI | chaque PR |
 | tests (181, jest-axe) | `npm test --workspace=@enistere/ui-kit` | Node 24, jsdom | **L1** | chaque PR |
+| coverage local | `npm run test:coverage --workspace=@enistere/ui-kit` | Node 24, jsdom | local | revue qualité |
 | build | `npm run build --workspace=@enistere/ui-kit` | Node 24 | **L1** | chaque PR |
 | tokens drift | `npm run tokens:check --workspace=@enistere/ui-kit` | Node 24 | local (recommandé) | PR tokens |
 | pack check | `npm run pack:check --workspace=@enistere/ui-kit` | Node 24 | local | avant release |
@@ -199,11 +200,12 @@ node cores/quality-core/scripts/quality-report.mjs markdown
 | Indicateur | Valeur |
 |---|---:|
 | Scopes suivis | 8 |
-| Coverage disponible localement | 2 |
-| Coverage absente ou non standardisée | 6 |
+| Coverage disponible localement | 3 |
+| Coverage absente ou non standardisée | 5 |
 
 Coverage locale disponible :
 
+- `@enistere/ui-kit` — `npm run test:coverage --workspace=@enistere/ui-kit` ;
 - `@enistere/web-nextjs` — `npm run test:coverage --workspace=@enistere/web-nextjs` ;
 - `cores/api-nestjs` — `cd cores/api-nestjs && npm run test:cov`.
 
