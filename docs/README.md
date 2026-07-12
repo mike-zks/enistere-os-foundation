@@ -17,6 +17,8 @@ runbooks, les checklists qualite et les prompts IA.
 | Voir les statuts par core/package | [`project-status/IMPLEMENTATION_MATRIX.md`](project-status/IMPLEMENTATION_MATRIX.md) |
 | Connaitre la prochaine action autorisee | [`project-status/NEXT_ACTIONS.md`](project-status/NEXT_ACTIONS.md) |
 | Lire le dernier audit documentaire | [`project-status/DOCS_CORE_NAVIGATION_AUDIT.md`](project-status/DOCS_CORE_NAVIGATION_AUDIT.md) |
+| Demarrer comme contributeur ou agent | [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) |
+| Comprendre les termes et statuts | [`glossary/GLOSSARY.md`](glossary/GLOSSARY.md) |
 | Comprendre les decisions d'architecture | [`adr/`](adr/) |
 | Choisir les gates qualite | [`../cores/quality-core/QUALITY_GATES_MATRIX.md`](../cores/quality-core/QUALITY_GATES_MATRIX.md) |
 | Preparer une PR | [`checklists/PR_QUALITY_CHECKLIST.md`](checklists/PR_QUALITY_CHECKLIST.md) |
@@ -85,6 +87,12 @@ Checklists transverses :
 - [`checklists/PR_QUALITY_CHECKLIST.md`](checklists/PR_QUALITY_CHECKLIST.md) ;
 - [`checklists/RELEASE_READINESS_CHECKLIST.md`](checklists/RELEASE_READINESS_CHECKLIST.md) ;
 - [`checklists/CORE_STATUS_REVIEW_CHECKLIST.md`](checklists/CORE_STATUS_REVIEW_CHECKLIST.md).
+
+## Onboarding et glossaire
+
+- [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) — parcours minimal pour
+  demarrer une mission sans contexte conversationnel.
+- [`glossary/GLOSSARY.md`](glossary/GLOSSARY.md) — definitions des statuts, gates, cores et termes de securite.
 
 ## Prompts IA
 

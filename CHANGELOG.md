@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core 3 — Onboarding contributeur minimal et glossaire initial
+
+- Nouveaux fichiers : `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` et `docs/glossary/GLOSSARY.md`.
+- `docs/README.md` et `cores/docs-core/README.md` relient désormais l'onboarding et le glossaire.
+- Le guide d'onboarding formalise la lecture obligatoire, le démarrage de mission, les gates et le rapport final.
+- Le glossaire couvre les statuts de core, gates, concepts de livraison, sécurité, CI et documents de pilotage.
+- Aucun runtime, workflow, dépendance, génération automatique, site docs ou RAG ajouté.
+- Prochaine action : **Docs Core 4 — revue de liens documentaires ciblée** ou retour à une priorité runtime décidée par pilotage.
+
 ### Docs Core 2 — Audit documentaire et dette de navigation/liens
 
 - Nouveau rapport : `docs/project-status/DOCS_CORE_NAVIGATION_AUDIT.md`.

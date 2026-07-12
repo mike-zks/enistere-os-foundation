@@ -10,6 +10,8 @@ Statut : **SPECIFICATION_DOCUMENTAIRE**.
 |---|---|
 | `CORE_SPECIFICATION.md` | Cadrage du core, perimetre, exclusions, regles et criteres d'avancement |
 | `../../docs/README.md` | Index central de la documentation Foundation |
+| `../../docs/onboarding/CONTRIBUTOR_ONBOARDING.md` | Onboarding minimal contributeur/agent |
+| `../../docs/glossary/GLOSSARY.md` | Glossaire initial des statuts, gates, cores et termes de securite |
 
 ## Responsabilite
 
@@ -24,10 +26,11 @@ Docs Core organise la navigation documentaire. Il ne remplace pas :
 ## Lecture recommandee
 
 1. `../../docs/README.md`
-2. `../../docs/project-status/README.md`
-3. `../../docs/project-status/SESSION_HANDOFF.md`
-4. `../../docs/project-status/NEXT_ACTIONS.md`
-5. `../../cores/quality-core/README.md`
+2. `../../docs/onboarding/CONTRIBUTOR_ONBOARDING.md`
+3. `../../docs/project-status/README.md`
+4. `../../docs/project-status/SESSION_HANDOFF.md`
+5. `../../docs/project-status/NEXT_ACTIONS.md`
+6. `../../cores/quality-core/README.md`
 
 ## Hors perimetre actuel
 
