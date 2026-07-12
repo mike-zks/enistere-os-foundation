@@ -5,17 +5,23 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Foundation V1 Release Notes 1 : RÉALISÉ** (2026-07-12).
+> Notes préparées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
+> Statut : **`DRAFT_READY_FOR_HUMAN_RELEASE_DECISION`**. Aucun tag, aucune GitHub Release et aucun
+> déploiement créés.
+>
+> **Prochaine action** : décision humaine — créer ou non le tag proposé `foundation-v1.0.0` et le billet
+> GitHub Release associé. Ne pas automatiser cette étape sans validation explicite du mainteneur.
+
 > ✅ **Foundation V1 Baseline Readiness Review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
 > Verdict : **`READY_FOR_RELEASE_DECISION`** — le périmètre `foundation-v1-baseline` est prêt pour
 > décision humaine de release, sans tag ni release GitHub créés.
 > Preuves : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire,
-> ruleset `protect-main` actif, CI `main` L1-L4 verte après PR #87, `all-safe` local validé avec
+> ruleset `protect-main` actif, CI `main` L1-L4 verte après PR #88, `all-safe` local validé avec
 > `NODE_ENV=test` plus audit root 0 vuln hors sandbox.
 >
-> **Prochaine action** : **Foundation V1 Release Notes 1** — préparer les notes de release
-> `foundation-v1-baseline` selon `RELEASE_PROCESS_RUNBOOK.md` §6, sans créer de tag ni de GitHub Release.
-> Le tag `foundation-v1.0.0` reste une décision humaine explicite après validation des notes.
+> **Historique** : cette prochaine action était Foundation V1 Release Notes 1 ; elle est réalisée le 2026-07-12.
 
 > ✅ **API Core VALIDE_V1 review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/API_CORE_V1_READINESS_REVIEW.md`.

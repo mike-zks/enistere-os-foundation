@@ -28,6 +28,10 @@
 > `all-safe` local validé (`NODE_ENV=test`) + audit root 0 vuln, CI L1-L4 verte sur `main`, ruleset
 > `protect-main` actif.
 >
+> **Mise à jour Foundation V1 Release Notes 1 (2026-07-12)** : notes de release préparatoires créées dans
+> `FOUNDATION_V1_RELEASE_NOTES.md`. Statut **`DRAFT_READY_FOR_HUMAN_RELEASE_DECISION`**. Tag proposé
+> `foundation-v1.0.0` non créé.
+>
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Quality Core 3 (2026-07-11)** : `BRANCH_PROTECTION_RUNBOOK.md` ajouté dans `cores/quality-core/`. Procédure d'activation manuelle de la protection de branche `main` : 10 noms de checks exacts (8 requis immédiats + 2 recommandés phase 2), options recommandées (PR obligatoire, checks requis, branches à jour, admins inclus différé), checklist post-activation. `.github/workflows/README.md` mis à jour avec le tableau complet. **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
@@ -62,7 +66,8 @@
 
 | Élément | Statut | Dernière preuve | Prochaine condition |
 |---|---|---|---|
-| Foundation V1 baseline | **READY_FOR_RELEASE_DECISION** | `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit `VALIDE_V1` ; ruleset actif ; CI verte sur `84dd5e7` ; `all-safe` + audit root 0 vuln | préparer notes de release ; tag seulement sur décision humaine explicite |
+| Foundation V1 baseline | **READY_FOR_RELEASE_DECISION** | `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit `VALIDE_V1` ; ruleset actif ; CI verte sur `5d35401` ; `all-safe` + audit root 0 vuln | notes de release préparées ; tag seulement sur décision humaine explicite |
+| Foundation V1 release notes | **DRAFT_READY_FOR_HUMAN_RELEASE_DECISION** | `FOUNDATION_V1_RELEASE_NOTES.md` | décision humaine : créer ou non `foundation-v1.0.0` |
 
 ## 2. Infrastructure transverse
 
