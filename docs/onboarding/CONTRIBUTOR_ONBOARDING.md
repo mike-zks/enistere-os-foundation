@@ -63,6 +63,8 @@ Pour une mission documentaire Docs/Quality :
 
 ```bash
 git diff --check
+node cores/docs-core/scripts/check-doc-links.mjs
+node --test cores/docs-core/scripts/check-doc-links.test.mjs
 node cores/quality-core/scripts/quality-gates.mjs plan docs
 node --test cores/quality-core/scripts/quality-gates.test.mjs
 npm audit
