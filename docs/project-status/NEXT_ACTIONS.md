@@ -110,6 +110,14 @@
 > **Prochaine action** : Quality Core CI-required checks alignment — verifier si les deux jobs `images (...)`
 > doivent rester recommandes ou devenir requis dans `protect-main`, sans modifier le ruleset sans validation humaine.
 
+> ✅ **Quality Core CI-required checks alignment : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`.
+> Decision : **PROMOTION_RECOMMANDÉE, NON_APPLIQUÉE**. Le ruleset `protect-main` garde 8 checks requis ;
+> les deux jobs `images (...)` sont mûrs pour devenir requis mais nécessitent une action humaine/admin.
+>
+> **Prochaine action** : Quality Core coverage standardization decision — décider si les scopes sans coverage
+> standardisée doivent recevoir une commande coverage locale ou si le baseline reste informatif.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.

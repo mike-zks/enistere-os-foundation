@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core CI-required checks alignment
+
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`.
+- Vérification du ruleset GitHub `protect-main` : 8 checks requis actifs, `images (...)` non requis.
+- Vérification Registry CI PR #106 : `api-smoke` + les deux jobs `images (...)` verts.
+- Décision : **PROMOTION_RECOMMANDÉE, NON_APPLIQUÉE** — les deux jobs `images (...)` sont candidats mûrs
+  pour devenir requis, mais le ruleset n'est pas modifié sans action humaine explicite.
+- Aucun workflow, ruleset, dépendance, runtime, secret ou accès serveur modifié.
+- Prochaine action : Quality Core coverage standardization decision.
+
 ### Quality Core coverage/reporting baseline
 
 - Nouveaux scripts : `cores/quality-core/scripts/quality-report.mjs` et

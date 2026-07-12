@@ -7,7 +7,7 @@
 > Ce runbook décrit la procédure exacte, les noms de checks exacts, les options recommandées
 > et la checklist de vérification post-activation.
 >
-> Dernière mise à jour : 2026-07-11 (Governance 3).
+> Dernière mise à jour : 2026-07-12 (Quality Core CI-required checks alignment).
 
 ---
 
@@ -100,16 +100,17 @@ Ces checks sont légers, déjà verts en CI, et couvrent la non-régression core
 
 **Total recommandé** : 8 checks. Durée totale parallèle maximale : ~5 min (L3 = bottleneck).
 
-### 4.2 Checks recommandés mais coûteux (optionnels en première phase)
+### 4.2 Checks recommandés pour promotion humaine (non appliqués automatiquement)
 
 | Check | Workflow | Durée typique | Justification d'exclusion temporaire |
 |---|---|---|---|
-| `images (api-nestjs, ...)` | L4 | ~4 min | Build image = Docker layer cache — ralentit PR sans apport critique si `api-smoke` est requis |
-| `images (web-nextjs, ...)` | L4 | ~4 min | Idem ; image Web build = déjà couvert par `web-nextjs` typecheck/lint/test/build |
+| `images (api-nestjs, ...)` | L4 | variable | Build image API ; partiellement redondant avec `api-smoke`, mais protège la matrice image |
+| `images (web-nextjs, ...)` | L4 | variable | Build image Web ; ferme l'angle mort Dockerfile Web cassé malgré `web-nextjs` vert |
 
-> **Recommandation** : ajouter les deux checks `images (…)` dès que le workflow `registry-ci.yml`
-> est stable et que les PRs sont fréquentes. Ils garantissent que les images restent
-> constructibles à chaque PR, pas seulement au push sur `main`.
+> **Décision 2026-07-12** : promotion recommandée, non appliquée. Registry CI PR #106 a produit
+> `api-smoke` et les deux checks `images (...)` verts. Les deux checks peuvent devenir requis si une
+> action humaine/admin accepte le coût et la fragilité des noms matrix. Rapport :
+> `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`.
 
 ### 4.3 Non requis — gates finaux staging / mobile device (hors CI)
 

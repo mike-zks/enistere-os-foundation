@@ -3,7 +3,8 @@
 **Statut** : `IMPLEMENTATION_AVANCEE` (Quality Core Advanced Readiness Review, 2026-07-12)
 
 Protection `main` : **active via GitHub Rulesets** (`protect-main`, enforcement `active`) avec
-8 status checks requis. Voir `BRANCH_PROTECTION_RUNBOOK.md`.
+8 status checks requis. Les deux checks `images (...)` sont **recommandés pour promotion humaine**
+mais non appliqués automatiquement. Voir `BRANCH_PROTECTION_RUNBOOK.md`.
 
 Core de gouvernance qualité d'Enistere OS Foundation. Documente et outille les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
@@ -27,6 +28,7 @@ ruleset actif et release Foundation appliquee. Les automatisations avancees rest
 | `scripts/release-helper.test.mjs` | Tests unitaires du helper release — validation parsing, types, redaction et brouillon |
 | `scripts/quality-report.mjs` | Helper local de synthèse tests/couverture — sortie Markdown stdout, sans lancer les tests |
 | `scripts/quality-report.test.mjs` | Tests unitaires du helper reporting — validation scopes, coverage disponible et sortie Markdown |
+| `../../docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` | Décision CI-required checks : `images (...)` recommandés pour promotion humaine, ruleset non modifié |
 | `../../prompts/README.md` | Catalogue gouverné des prompts IA versionnés |
 | `../../prompts/global/mission-brief-template.md` | Template de mission Claude/Codex/Gemini gouvernée |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |
