@@ -100,6 +100,16 @@
 > **Prochaine action** : Quality Core coverage/reporting baseline — premiere synthese locale de couverture
 > ou de statut tests, sans workflow obligatoire ni artefact publie.
 
+> ✅ **Quality Core coverage/reporting baseline : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md`.
+> Livrables : `cores/quality-core/scripts/quality-report.mjs` +
+> `cores/quality-core/scripts/quality-report.test.mjs`.
+> Fonction : synthese stdout-only des gates tests et de la disponibilite coverage locale. Coverage locale
+> disponible pour Web et API ; aucun pourcentage global calcule.
+>
+> **Prochaine action** : Quality Core CI-required checks alignment — verifier si les deux jobs `images (...)`
+> doivent rester recommandes ou devenir requis dans `protect-main`, sans modifier le ruleset sans validation humaine.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.

@@ -100,6 +100,11 @@
 > helper stdout-only pour brouillon de notes de release depuis les commits Git. Aucun tag, GitHub Release,
 > workflow, dependance, runtime ou ecriture de fichier.
 >
+> **Mise a jour Quality Core coverage/reporting baseline (2026-07-12)** : rapport
+> `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md`. Ajout de `scripts/quality-report.mjs` et tests :
+> synthese stdout-only des gates de tests et de la disponibilite coverage locale. Coverage locale disponible
+> pour Web et API ; aucun pourcentage global calcule.
+>
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Quality Core 3 (2026-07-11)** : `BRANCH_PROTECTION_RUNBOOK.md` ajouté dans `cores/quality-core/`. Procédure d'activation manuelle de la protection de branche `main` : 10 noms de checks exacts (8 requis immédiats + 2 recommandés phase 2), options recommandées (PR obligatoire, checks requis, branches à jour, admins inclus différé), checklist post-activation. `.github/workflows/README.md` mis à jour avec le tableau complet. **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
@@ -127,7 +132,7 @@
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
 | Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-034 |
-| Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md`) | ✓ | **IMPLEMENTATION_AVANCEE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs | coverage reporting |
+| Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md`) | ✓ | **IMPLEMENTATION_AVANCEE** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs | CI-required checks alignment |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 
 ### 1.1 Foundation baseline
