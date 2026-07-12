@@ -9,10 +9,11 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 ### Foundation V1 Release Decision
 
 - Notes de release préparatoires ajoutées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
-- Statut : **`FOUNDATION_V1_RELEASE_APPROVED`** pour `foundation-v1-baseline`.
-- Tag cible : `foundation-v1.0.0`.
+- Statut : **`FOUNDATION_V1_RELEASED`** pour `foundation-v1-baseline`.
+- Tag publié : `foundation-v1.0.0` (`2981f2c`).
+- GitHub Release publiée : <https://github.com/mike-zks/enistere-os-foundation/releases/tag/foundation-v1.0.0>.
 - Aucun déploiement, aucun workflow et aucun changement runtime.
-- Prochaine action : création du tag annoté et du billet GitHub Release sur le commit `main` correspondant.
+- Prochaine action : arbitrer la mission suivante.
 
 ### Foundation V1 Baseline Readiness Review
 
@@ -20,8 +21,8 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 - Verdict : **`READY_FOR_RELEASE_DECISION`** pour le périmètre `foundation-v1-baseline`.
 - Preuves assemblées : API Core `VALIDE_V1`, Web Core `VALIDE_V1`, UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire, ruleset `protect-main` actif.
 - Gates : `all-safe` local validé avec `NODE_ENV=test` jusqu'au gate audit, audit root relancé hors sandbox à 0 vulnérabilité ; CI `main` post-PR #87 verte (`CI`, `API Runtime CI`, `Web E2E CI`, `Registry CI`).
-- Aucun tag, aucune GitHub Release, aucun déploiement et aucun test Cloud réel déclenché par cette revue.
-- Prochaine action : préparer les notes de release `foundation-v1-baseline` sans créer le tag automatiquement.
+- Historique : cette revue n'avait déclenché aucun tag, aucune GitHub Release, aucun déploiement et
+  aucun test Cloud réel ; elle a ensuite été suivie par la publication `foundation-v1.0.0`.
 
 ### API Core VALIDE_V1 review
 

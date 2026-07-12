@@ -23,14 +23,13 @@
 > `api-runtime` avec PostgreSQL + MinIO jetables.
 >
 > **Mise à jour Foundation V1 Baseline Readiness Review (2026-07-12)** : baseline
-> `foundation-v1-baseline` déclarée **`READY_FOR_RELEASE_DECISION`**. Aucun tag ni release GitHub créé.
+> `foundation-v1-baseline` déclarée **`READY_FOR_RELEASE_DECISION`** avant publication.
 > Preuves : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire,
 > `all-safe` local validé (`NODE_ENV=test`) + audit root 0 vuln, CI L1-L4 verte sur `main`, ruleset
 > `protect-main` actif.
 >
-> **Mise à jour Foundation V1 Release Decision (2026-07-12)** : notes de release finalisées dans
-> `FOUNDATION_V1_RELEASE_NOTES.md`. Statut **`FOUNDATION_V1_RELEASE_APPROVED`**. Tag cible :
-> `foundation-v1.0.0`.
+> **Mise à jour Foundation V1 Release Publication (2026-07-12)** : release `foundation-v1-baseline`
+> publiée. Tag annoté **`foundation-v1.0.0`**, commit `2981f2c`, billet GitHub Release publié.
 >
 > **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
@@ -66,8 +65,8 @@
 
 | Élément | Statut | Dernière preuve | Prochaine condition |
 |---|---|---|---|
-| Foundation V1 baseline | **READY_FOR_RELEASE_DECISION** | `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit `VALIDE_V1` ; ruleset actif ; CI verte sur `5d35401` ; `all-safe` + audit root 0 vuln | notes de release préparées ; tag seulement sur décision humaine explicite |
-| Foundation V1 release notes | **FOUNDATION_V1_RELEASE_APPROVED** | `FOUNDATION_V1_RELEASE_NOTES.md` | créer tag annoté + billet GitHub Release `foundation-v1.0.0` |
+| Foundation V1 baseline | **FOUNDATION_V1_RELEASED** | `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; `FOUNDATION_V1_RELEASE_NOTES.md` ; tag `foundation-v1.0.0` ; GitHub Release publiée | — |
+| Foundation V1 release notes | **FOUNDATION_V1_RELEASED** | `FOUNDATION_V1_RELEASE_NOTES.md` ; release <https://github.com/mike-zks/enistere-os-foundation/releases/tag/foundation-v1.0.0> | — |
 
 ## 2. Infrastructure transverse
 

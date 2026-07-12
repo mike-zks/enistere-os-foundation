@@ -1,10 +1,12 @@
 # FOUNDATION_V1_RELEASE_NOTES.md — Notes de release Foundation V1
 
 > Type : `foundation-v1-baseline`
-> Statut : **FOUNDATION_V1_RELEASE_APPROVED**
+> Statut : **FOUNDATION_V1_RELEASED**
 > Date de préparation : 2026-07-12
+> Date de publication : 2026-07-12
 > Tag : `foundation-v1.0.0`
-> GitHub Release : `foundation-v1.0.0`
+> Commit taggé : `2981f2c`
+> GitHub Release : <https://github.com/mike-zks/enistere-os-foundation/releases/tag/foundation-v1.0.0>
 
 ## Résumé
 
@@ -14,8 +16,7 @@ consommés, Quality Core fournit les gates/runbooks/checklists, et la branche `m
 un ruleset actif avec CI L1-L4 verte.
 
 Cette note acte la release `foundation-v1-baseline` après décision humaine explicite. Le tag annoté
-`foundation-v1.0.0` et le billet GitHub Release associé doivent pointer sur le commit `main` qui
-contient ces notes.
+`foundation-v1.0.0` et le billet GitHub Release associé ont été publiés sur le commit `2981f2c`.
 
 ## Cores Impactés
 
@@ -71,7 +72,7 @@ contient ces notes.
 | `git diff --check` | 0 erreur |
 | `node --test cores/quality-core/scripts/quality-gates.test.mjs` | PASS |
 | `node cores/quality-core/scripts/quality-gates.mjs plan docs` | PASS |
-| CI `main` après PR #88 | PASS — CI, API Runtime CI, Web E2E CI, Registry CI |
+| CI `main` après PR #90 | PASS — CI, API Runtime CI, Web E2E CI, Registry CI |
 
 Note : le gate `npm audit` du run local `all-safe` a échoué uniquement sur DNS sandbox
 (`EAI_AGAIN`). Il a été relancé hors sandbox réseau et a retourné `found 0 vulnerabilities`.
@@ -96,15 +97,6 @@ Note : le gate `npm audit` du run local `all-safe` a échoué uniquement sur DNS
 
 ## Prochaine Action
 
-**Créer le tag annoté `foundation-v1.0.0` et le billet GitHub Release associé sur le commit `main`
-contenant ces notes.**
-
-Commandes opérateur :
-
-```bash
-git tag -a foundation-v1.0.0 -m "Foundation V1 baseline"
-git push origin foundation-v1.0.0
-```
-
-Après publication, la prochaine mission gouvernée est à arbitrer : Mobile RN31 si un environnement
-macOS/Xcode est disponible, ou un incrément Quality/Cloud/Web explicitement cadré.
+La release Foundation V1 baseline est publiée. La prochaine mission gouvernée est à arbitrer :
+Mobile RN31 si un environnement macOS/Xcode est disponible, ou un incrément Quality/Cloud/Web
+explicitement cadré.
