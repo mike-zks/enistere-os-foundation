@@ -29,8 +29,8 @@ pas une application ni une bibliothèque complète).
 | Cores documentaires | **`quality-core`** — **SPECIFICATION_DOCUMENTAIRE** (Governance 3, 2026-07-11) : `CORE_SPECIFICATION.md`, `README.md`, `QUALITY_GATES_MATRIX.md`, `BRANCH_PROTECTION_RUNBOOK.md`, **`RELEASE_PROCESS_RUNBOOK.md`**, templates GitHub PR/Issues, 3 checklists, `scripts/quality-gates.mjs` + tests (**36/36**). **Protection `main` active via GitHub Rulesets** (`protect-main`, enforcement `active`, 8 checks requis). Aucun workflow modifié, aucune dépendance, aucun changement runtime. _(aucun autre core documentaire ; `mobile-react-native` est passé au starter ci-dessus)_ |
 | Cores vides | `ai-core`, `api-spring`, `docs-core`, `mobile-flutter`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
-| Foundation baseline | **`READY_FOR_RELEASE_DECISION`** — revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` (2026-07-12) : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire, CI L1-L4 verte sur `main`, ruleset `protect-main` actif ; **aucun tag ni release GitHub créé** |
-| Release notes | **`DRAFT_READY_FOR_HUMAN_RELEASE_DECISION`** — `FOUNDATION_V1_RELEASE_NOTES.md` préparé pour `foundation-v1-baseline` ; tag proposé `foundation-v1.0.0` **non créé** |
+| Foundation baseline | **`READY_FOR_RELEASE_DECISION`** — revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` (2026-07-12) : API/Web/UI Kit `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, Quality Core documentaire, CI L1-L4 verte sur `main`, ruleset `protect-main` actif |
+| Release notes | **`FOUNDATION_V1_RELEASE_APPROVED`** — `FOUNDATION_V1_RELEASE_NOTES.md` finalisé pour `foundation-v1-baseline` ; tag cible `foundation-v1.0.0` |
 | **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après Foundation V1 Baseline Readiness Review (`5d35401`, PR #88) ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
@@ -388,9 +388,9 @@ politiques** : artefacts = aucun upload (Option A), couverture = exécutée non 
 futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
 ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection `main` active via GitHub Rulesets**) et
 ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
-**Prochaine action** : décision humaine — créer ou non le tag proposé `foundation-v1.0.0` et le billet
-GitHub Release associé à `FOUNDATION_V1_RELEASE_NOTES.md`. Ne pas automatiser cette étape sans validation
-explicite du mainteneur.
+**Prochaine action** : créer le tag annoté `foundation-v1.0.0` et le billet GitHub Release associé,
+puis arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon incrément
+Quality/Cloud/Web cadré).
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

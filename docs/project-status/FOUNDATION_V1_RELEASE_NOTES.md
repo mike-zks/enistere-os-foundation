@@ -1,10 +1,10 @@
-# FOUNDATION_V1_RELEASE_NOTES.md — Notes de release préparatoires
+# FOUNDATION_V1_RELEASE_NOTES.md — Notes de release Foundation V1
 
 > Type : `foundation-v1-baseline`
-> Statut : **DRAFT_READY_FOR_HUMAN_RELEASE_DECISION**
+> Statut : **FOUNDATION_V1_RELEASE_APPROVED**
 > Date de préparation : 2026-07-12
-> Tag proposé : `foundation-v1.0.0` (**non créé**)
-> GitHub Release : **non créée**
+> Tag : `foundation-v1.0.0`
+> GitHub Release : `foundation-v1.0.0`
 
 ## Résumé
 
@@ -13,8 +13,9 @@ NestJS, Web Core Next.js et UI Kit sont `VALIDE_V1`, les packages API officiels 
 consommés, Quality Core fournit les gates/runbooks/checklists, et la branche `main` est protégée par
 un ruleset actif avec CI L1-L4 verte.
 
-Cette note prépare la release `foundation-v1-baseline`. Elle ne crée pas le tag et ne publie aucune
-GitHub Release.
+Cette note acte la release `foundation-v1-baseline` après décision humaine explicite. Le tag annoté
+`foundation-v1.0.0` et le billet GitHub Release associé doivent pointer sur le commit `main` qui
+contient ces notes.
 
 ## Cores Impactés
 
@@ -46,7 +47,7 @@ GitHub Release.
 
 - Aucun secret, token, URL signée ou credential ajouté aux notes.
 - Aucune production déclarée.
-- Aucune publication npm ou GitHub Release automatique.
+- Aucune publication npm automatique.
 - Aucun déploiement déclenché.
 - Ruleset `protect-main` actif : suppression et non-fast-forward interdits, PR obligatoire,
   conversations résolues, checks requis stricts.
@@ -59,7 +60,7 @@ GitHub Release.
 - Aucune migration applicative requise par cette note de release.
 - Aucun changement runtime introduit par la préparation des notes.
 - Aucun changement de workflow CI.
-- Aucun tag créé.
+- Tag release : `foundation-v1.0.0`.
 
 ## Gates Exécutés
 
@@ -95,13 +96,15 @@ Note : le gate `npm audit` du run local `all-safe` a échoué uniquement sur DNS
 
 ## Prochaine Action
 
-**Décision humaine : créer ou non le tag `foundation-v1.0.0` et la GitHub Release associée.**
+**Créer le tag annoté `foundation-v1.0.0` et le billet GitHub Release associé sur le commit `main`
+contenant ces notes.**
 
-Si validé par le mainteneur après merge de cette note :
+Commandes opérateur :
 
 ```bash
 git tag -a foundation-v1.0.0 -m "Foundation V1 baseline"
 git push origin foundation-v1.0.0
 ```
 
-Le billet GitHub Release doit reprendre ces notes et référencer le commit `main` correspondant.
+Après publication, la prochaine mission gouvernée est à arbitrer : Mobile RN31 si un environnement
+macOS/Xcode est disponible, ou un incrément Quality/Cloud/Web explicitement cadré.

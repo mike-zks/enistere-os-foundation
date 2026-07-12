@@ -6,13 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
-### Foundation V1 Release Notes 1
+### Foundation V1 Release Decision
 
 - Notes de release préparatoires ajoutées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
-- Statut : **`DRAFT_READY_FOR_HUMAN_RELEASE_DECISION`** pour `foundation-v1-baseline`.
-- Tag proposé : `foundation-v1.0.0`, **non créé**.
-- Aucune GitHub Release, aucun déploiement, aucun workflow et aucun changement runtime.
-- Prochaine action : décision humaine explicite pour créer ou non le tag et le billet GitHub Release.
+- Statut : **`FOUNDATION_V1_RELEASE_APPROVED`** pour `foundation-v1-baseline`.
+- Tag cible : `foundation-v1.0.0`.
+- Aucun déploiement, aucun workflow et aucun changement runtime.
+- Prochaine action : création du tag annoté et du billet GitHub Release sur le commit `main` correspondant.
 
 ### Foundation V1 Baseline Readiness Review
 

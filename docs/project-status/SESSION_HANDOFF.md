@@ -29,8 +29,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   `API_CORE_V1_READINESS_REVIEW.md`.
 - **Foundation baseline** : **READY_FOR_RELEASE_DECISION** (2026-07-12) — rapport
   `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`. Aucun tag ni release GitHub créé.
-- **Release notes** : **DRAFT_READY_FOR_HUMAN_RELEASE_DECISION** — `FOUNDATION_V1_RELEASE_NOTES.md`
-  préparé ; tag proposé `foundation-v1.0.0` non créé.
+- **Release notes** : **FOUNDATION_V1_RELEASE_APPROVED** — `FOUNDATION_V1_RELEASE_NOTES.md`
+  finalisé ; tag cible `foundation-v1.0.0`.
 - **VALIDE_V1** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
   Badge, Divider, Skeleton — UI Kit 5 + **LoadingState, EmptyState, ErrorState, SuccessState** — UI Kit 6) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
@@ -1489,8 +1489,9 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : décision humaine — créer ou non le tag proposé `foundation-v1.0.0` et le
-billet GitHub Release associé. Ne pas automatiser cette étape sans validation explicite du mainteneur.
+**Action unique suivante** : créer le tag annoté `foundation-v1.0.0` et le billet GitHub Release associé,
+puis arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon incrément
+Quality/Cloud/Web cadré).
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 

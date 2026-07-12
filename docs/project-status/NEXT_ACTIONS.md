@@ -5,13 +5,13 @@
 
 ## 1. Prochaine action UNIQUE
 
-> ✅ **Foundation V1 Release Notes 1 : RÉALISÉ** (2026-07-12).
+> ✅ **Foundation V1 Release Decision : VALIDÉE** (2026-07-12).
 > Notes préparées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
-> Statut : **`DRAFT_READY_FOR_HUMAN_RELEASE_DECISION`**. Aucun tag, aucune GitHub Release et aucun
-> déploiement créés.
+> Statut : **`FOUNDATION_V1_RELEASE_APPROVED`**. Tag cible : `foundation-v1.0.0`.
 >
-> **Prochaine action** : décision humaine — créer ou non le tag proposé `foundation-v1.0.0` et le billet
-> GitHub Release associé. Ne pas automatiser cette étape sans validation explicite du mainteneur.
+> **Prochaine action** : créer le tag annoté `foundation-v1.0.0` et le billet GitHub Release associé,
+> puis arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon incrément
+> Quality/Cloud/Web cadré).
 
 > ✅ **Foundation V1 Baseline Readiness Review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`.
