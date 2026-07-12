@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core 2 — Audit documentaire et dette de navigation/liens
+
+- Nouveau rapport : `docs/project-status/DOCS_CORE_NAVIGATION_AUDIT.md`.
+- `README.md` racine simplifié pour éviter la duplication d'un état projet long et daté ; il renvoie
+  maintenant clairement vers `docs/README.md` et `docs/project-status/`.
+- `DECISIONS_REGISTER.md` : ADR-008 aligné sur UI Kit `VALIDE_V1` / RN35 (19 primitives, 181 tests,
+  cohérence mobile/web).
+- `FOUNDATION_CURRENT_STATE.md` : compteurs UI Kit/Web corrigés dans la section tests.
+- Aucun runtime, workflow, dépendance, RAG, site docs ou génération automatique ajouté.
+- Prochaine action : **Docs Core 3 — onboarding contributeur minimal et glossaire initial**.
+
 ### Docs Core 1 — Documentation centrale navigable
 
 - Démarrage de `cores/docs-core` : statut **`SPECIFICATION_DOCUMENTAIRE`**.

@@ -16,6 +16,7 @@ runbooks, les checklists qualite et les prompts IA.
 | Connaitre l'etat courant du projet | [`project-status/FOUNDATION_CURRENT_STATE.md`](project-status/FOUNDATION_CURRENT_STATE.md) |
 | Voir les statuts par core/package | [`project-status/IMPLEMENTATION_MATRIX.md`](project-status/IMPLEMENTATION_MATRIX.md) |
 | Connaitre la prochaine action autorisee | [`project-status/NEXT_ACTIONS.md`](project-status/NEXT_ACTIONS.md) |
+| Lire le dernier audit documentaire | [`project-status/DOCS_CORE_NAVIGATION_AUDIT.md`](project-status/DOCS_CORE_NAVIGATION_AUDIT.md) |
 | Comprendre les decisions d'architecture | [`adr/`](adr/) |
 | Choisir les gates qualite | [`../cores/quality-core/QUALITY_GATES_MATRIX.md`](../cores/quality-core/QUALITY_GATES_MATRIX.md) |
 | Preparer une PR | [`checklists/PR_QUALITY_CHECKLIST.md`](checklists/PR_QUALITY_CHECKLIST.md) |
