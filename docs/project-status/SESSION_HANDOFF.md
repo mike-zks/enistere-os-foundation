@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-11.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-12.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -23,9 +23,10 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 3. État réel (résumé)
 
-- **Implémenté** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
-  S3/MinIO, logging Pino, OpenAPI canonique, **`GET /files` liste paginée Files 5**) — **386 tests unitaires** + 101 e2e + **7 e2e Files 5** + revues. Statut :
-  **IMPLEMENTATION_AVANCEE**.
+- **VALIDE_V1** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
+  S3/MinIO dont `GET /files` paginé, logging Pino, OpenAPI canonique) — **386 tests unitaires**
+  + e2e CI runtime + rapports permanents. Promotion réalisée le 2026-07-12 :
+  `API_CORE_V1_READINESS_REVIEW.md`.
 - **VALIDE_V1** : **UI Kit** (`@enistere/ui-kit`, **0.1.1**, privé) — design tokens **+ 19 primitives Web React**
   (Button, Input, Label, Text, Spinner, VisuallyHidden + Alert, Card, FormField + Dialog, Select, Toast — UI Kit 4 +
   Badge, Divider, Skeleton — UI Kit 5 + **LoadingState, EmptyState, ErrorState, SuccessState** — UI Kit 6) pilotées par tokens, accessibles. React = peerDependency `>=18` ; **aligné et testé sous React 19**
@@ -274,7 +275,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   monitoring, scan/signature d'image, couverture publiée. **CC8** : un **5ᵉ workflow-job `api-smoke`** (dans
   `registry-ci.yml`) **exécute l'image API** et vérifie le moteur Prisma → **gate le push GHCR** (ferme l'angle
   mort « image jamais exécutée »). Image **Web** + image **API (corrigée, moteur 3.0.x)** bootent toutes deux.
-- **Git** : `main` aligné sur `origin/main` après Quality Core 5 (`15f34ea`, PR #84). Flux PR actif. Commits historiques
+- **Git** : `main` aligné sur `origin/main` après Governance 3 (`0038318`, PR #86). Protection `main`
+  active via GitHub Rulesets. Flux PR actif. Commits historiques
   (via PR) incluent : `fix(api): make docker runtime prisma engine compatible (#7)` (`d1e6242` — CC8 image API corrigée + `api-smoke`),
   `docs(cloud): prepare staging dry run (#6)` (`5118283` — CC7 dry-run),
   `docs(cloud): finalize staging integration (#5)` (`7b07e5e` — CC6B finalisé),
@@ -1483,7 +1485,11 @@ Cloud Core reste **PAUSE_CONTROLEE**, staging **EXECUTION_LOCALE_CONTROLEE** ; a
 
 **✅ Web Core Files 3 (suppression) : RÉALISÉ** (`web-nextjs` → **357 tests**, 2026-07-09). BFF ciblé `DELETE /api/files/:id` — `assertDelete` (405), UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→`NOT_DELETABLE`, anti-énumération 404. Client BFF `deleteFile` (same-origin, aucun Bearer). Mutation `useDeleteFile` (anti-double-soumission, `removeQueries` après succès). Dialog confirmation UI Kit 4 + prop `onDeleteSuccess` + `FileDetailsWithNav` (navigation Next.js isolée, exclue du tsconfig.test.json). Fix `createMockFetch` (status 204/304 → `null` body). typecheck/lint/test **357/357**/build/audit verts. Branche `feature/web-files-3-delete`.
 
-**Action unique suivante** : à décider par décision humaine. Candidats : **Mobile Core React Native 31** (iOS smoke sur macOS/Xcode dès qu'un hôte est disponible) ou **Web Core Files admin** (liste, quarantaine/restauration). **Ne pas créer de production ni d'automatisation de déploiement.** Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+**Action unique suivante** : **Foundation V1 Baseline Readiness Review**. Objectif : vérifier si API Core
+VALIDE_V1 + Web Core VALIDE_V1 + UI Kit VALIDE_V1 + Quality Core documentaire + CI/ruleset actif permettent
+de déclarer une baseline Foundation V1 gouvernée. Ne pas créer de tag/release automatiquement ; suivre
+`cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`. RN31 reste bloqué sans macOS/Xcode. Détail :
+[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 
