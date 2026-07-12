@@ -20,6 +20,7 @@ Decision de revue : `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md` ferme les gaps princ
 | `scripts/check-doc-links.mjs` | Controle local des liens Markdown internes |
 | `../../docs/project-status/DOCS_CORE_V2_READINESS_REVIEW.md` | Revue de readiness V2 et decision de statut |
 | `../../docs/project-status/DOCS_CORE_GUIDES_ONBOARDING_REPORT.md` | Rapport Docs Core 5 et promotion `IMPLEMENTATION_AVANCEE` |
+| `../../docs/project-status/DOCS_CORE_CI_GATE_DECISION.md` | Decision Docs Core 6 : link check integre au gate local `docs`, pas de workflow CI ajoute |
 
 ## Responsabilite
 
@@ -54,8 +55,7 @@ Docs Core organise la navigation documentaire. Il ne remplace pas :
 Pour une mission Docs Core documentaire :
 
 ```bash
-git diff --check
-node cores/docs-core/scripts/check-doc-links.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
 node cores/quality-core/scripts/quality-gates.mjs plan docs
 npm audit
 ```

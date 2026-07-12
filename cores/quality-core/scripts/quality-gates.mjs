@@ -68,6 +68,7 @@ function mobTest() {
 const SCOPE_GATES = {
   docs: [
     step('git diff --check', 'git', ['diff', '--check']),
+    step('docs: internal link check', 'node', ['cores/docs-core/scripts/check-doc-links.mjs']),
   ],
 
   'root-audit': [
@@ -123,7 +124,7 @@ SCOPE_GATES['all-safe'] = [
 
 export const SCOPE_DESCRIPTIONS = {
   docs:
-    'Vérifie les espaces blancs git (git diff --check). Docs-only.',
+    'Vérifie les espaces blancs git et les liens Markdown internes Docs Core. Docs-only.',
   'root-audit':
     'npm audit à la racine du monorepo (0 vuln requis, CI L1).',
   packages:
