@@ -1,6 +1,6 @@
 # Docs Core — Core Specification
 
-> Statut : **IMPLEMENTATION_AVANCEE**.
+> Statut : **VALIDE_V1**.
 > Derniere mise a jour : 2026-07-12.
 
 ## 1. Objectif
@@ -33,8 +33,9 @@ La V2 attend notamment :
 - des checklists qualite.
 
 Docs Core 1→6 livre le cadrage initial, l'index central, l'onboarding, le glossaire initial, les guides
-principaux et un controle local des liens internes integre au scope Quality Core `docs`. Docs Core ne livre
-pas encore de site documentaire, de RAG, de moteur de recherche ou de generation automatique.
+principaux et un controle local des liens internes integre au scope Quality Core `docs`. La revue V1 declare
+ce perimetre **VALIDE_V1**. Docs Core ne livre pas de site documentaire, de RAG, de moteur de recherche ou de
+generation automatique.
 
 ## 3. Perimetre V2 initial
 

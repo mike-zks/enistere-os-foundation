@@ -2,10 +2,10 @@
 
 Docs Core est le core de documentation centrale d'Enistere OS Foundation.
 
-Statut : **IMPLEMENTATION_AVANCEE**.
+Statut : **VALIDE_V1**.
 
 Decision de revue : `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md` ferme les gaps principaux identifies par
-`DOCS_CORE_V2_READINESS_REVIEW.md` et promeut Docs Core a `IMPLEMENTATION_AVANCEE`.
+`DOCS_CORE_V2_READINESS_REVIEW.md`, puis `DOCS_CORE_V1_READINESS_REVIEW.md` declare Docs Core `VALIDE_V1`.
 
 ## Livrables actuels
 
@@ -21,6 +21,7 @@ Decision de revue : `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md` ferme les gaps princ
 | `../../docs/project-status/DOCS_CORE_V2_READINESS_REVIEW.md` | Revue de readiness V2 et decision de statut |
 | `../../docs/project-status/DOCS_CORE_GUIDES_ONBOARDING_REPORT.md` | Rapport Docs Core 5 et promotion `IMPLEMENTATION_AVANCEE` |
 | `../../docs/project-status/DOCS_CORE_CI_GATE_DECISION.md` | Decision Docs Core 6 : link check integre au gate local `docs`, pas de workflow CI ajoute |
+| `../../docs/project-status/DOCS_CORE_V1_READINESS_REVIEW.md` | Revue V1 et promotion `VALIDE_V1` |
 
 ## Responsabilite
 

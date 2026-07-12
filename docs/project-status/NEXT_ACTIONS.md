@@ -52,6 +52,14 @@
 >
 > **Prochaine action** : Docs Core V1 Readiness Review — verifier si Docs Core peut passer de
 > `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
+>
+> ✅ **Docs Core V1 Readiness Review : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/DOCS_CORE_V1_READINESS_REVIEW.md`.
+> Decision : Docs Core passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+>
+> **Prochaine action** : retour pilotage global — choisir le prochain core prioritaire selon prerequis
+> disponibles. Candidats : Mobile RN31 si macOS/Xcode ou device iOS reel disponible ; Cloud durcissement
+> final si une release/staging le requiert ; sinon cadrer explicitement le prochain core V2/V3.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

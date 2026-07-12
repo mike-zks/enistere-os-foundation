@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Docs Core V1 Readiness Review
+
+- Nouveau rapport : `docs/project-status/DOCS_CORE_V1_READINESS_REVIEW.md`.
+- Docs Core promu de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+- Critères validés : documentation centrale stable, chemins de lecture des cores actifs, distinction
+  courant/historique, gates documentaires reproductibles via Quality Core.
+- Aucun runtime applicatif, workflow, ruleset, dependance, site docs, generation automatique ou RAG ajoute.
+- Prochaine action : retour pilotage global.
+
 ### Docs Core 6 — Decision CI/docs gate integration
 
 - Nouveau rapport : `docs/project-status/DOCS_CORE_CI_GATE_DECISION.md`.
