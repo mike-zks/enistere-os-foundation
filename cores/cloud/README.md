@@ -6,8 +6,8 @@ progressive et documentaire**, sans imposer prématurément une implémentation.
 
 ## Statut
 
-**`IMPLEMENTATION_AVANCEE`** — Cloud Core couvre maintenant le cadrage operationnel, la CI runtime, l'E2E
-navigateur, la registry GHCR et un **staging HTTPS reel operationnalise**.
+**`VALIDE_V1`** — Cloud Core couvre le cadrage operationnel, la CI runtime, l'E2E navigateur, la registry GHCR et
+un **staging HTTPS reel operationnalise**.
 
 Preuves principales :
 
@@ -22,9 +22,8 @@ Preuves principales :
 - **CC11 socle operationnel** : backups PostgreSQL/MinIO, restores verifies, rollback/roll-forward image,
   rotation du compte smoke, runbook operationnel.
 
-Cloud Core n'est pas encore `VALIDE_V1` : Redis reste un item historique de la roadmap Cloud V1 alors que l'API
-Core le reporte en V2, et la structure compose V1 generique (`base/local/prod` ou equivalent) reste a trancher.
-La revue courante est `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`.
+Decision CC12 : Redis est reporte post-V1/V2, et `staging/docker-compose.cc10.yml` est le compose
+serveur/staging V1 officiel. Rapport : `docs/project-status/CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`.
 
 ## Ce qui est cadré (Cloud Core 1)
 
@@ -95,9 +94,9 @@ runtime → étape source séparée), **PostgreSQL non exposé**, **MinIO API jo
 
 Production · GitHub Environments reels · workflow deploy automatique · monitoring/alerting
 (Prometheus/Grafana/Loki) · backups automatises par cron/runner · rollback automatique · scan/signature d'image ·
-OSRM/PostGIS · Redis staging · compose V1 generique `base/local/prod` tranche · secrets applicatifs dans un
-gestionnaire dedie. Les workflows CI restent **non deployants** ; les tests staging reels sont des **gates finaux**
-gouvernes par runbook, pas des checks systematiques de chaque PR.
+OSRM/PostGIS · Redis standardise · compose generique `base/local/prod` · secrets applicatifs dans un gestionnaire
+dedie. Les workflows CI restent **non deployants** ; les tests staging reels sont des **gates finaux** gouvernes
+par runbook, pas des checks systematiques de chaque PR.
 
 ## État CI/CD (ADR)
 
@@ -117,7 +116,6 @@ Décisions : **artefacts** = aucun upload (Option A) ; **couverture** = exécut�
 
 ## Prochaine étape
 
-**Prochaine mission Codex** : **Cloud Core 12 — decision Redis/Compose V1**. Objectif : trancher explicitement
-Redis (livraison minimale non publique ou report V2 en coherence API Core) et aligner la structure Compose V1
-(`base/local/staging` ou CC10 comme compose serveur officiel), sans relancer le serveur reel sauf gate final
-explicite. Voir [`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).
+**Prochaine mission Codex** : retour pilotage global. Redis standardise, monitoring, environnements proteges et
+compose generique `base/local/prod` appartiennent au durcissement V2/VF sauf cadrage explicite. Voir
+[`docs/project-status/NEXT_ACTIONS.md`](../../docs/project-status/NEXT_ACTIONS.md).

@@ -359,7 +359,13 @@ Règles :
 
 ## 21. Stratégie Redis
 
-Redis doit être prévu pour :
+Redis est une capacité **post-V1 / V2** pour le socle Cloud standard.
+
+Decision CC12 (2026-07-12) : Redis n'est pas requis pour declarer Cloud Core V1 valide. API Core V1 est
+`VALIDE_V1` sans Redis et classe Redis distribue en P2 post-V1. Redis sera livre quand un besoin concret de
+cache distribue, throttling multi-instance, session partagee ou queue le justifiera.
+
+Redis doit alors être prévu pour :
 
 - cache ;
 - rate limiting ;
@@ -824,7 +830,7 @@ Le Cloud Core doit prévoir :
 - Définir Docker et Docker Compose.
 - Prévoir Traefik.
 - Prévoir PostgreSQL.
-- Prévoir Redis.
+- Reporter Redis post-V1 / V2 sauf besoin projet explicite.
 - Prévoir MinIO.
 - Définir réseaux Docker et volumes.
 - Définir variables d'environnement.
@@ -865,11 +871,11 @@ La V1 sera acceptable si :
 - la structure cloud cible est documentée ;
 - Docker et Docker Compose sont cadrés ;
 - Traefik est cadré comme reverse proxy ;
-- PostgreSQL, Redis et MinIO sont prévus ;
+- PostgreSQL et MinIO sont prévus ; Redis est explicitement reporté post-V1 / V2 ;
 - les réseaux Docker et volumes persistants sont documentés ;
 - les variables d'environnement sont listées et sans secrets réels ;
 - les ports publics sont limités ;
-- PostgreSQL et Redis sont non publics ;
+- PostgreSQL est non public ; Redis devra etre non public lorsqu'il sera livré ;
 - l'utilisateur applicatif PostgreSQL n'est pas superuser ;
 - les dashboards prévus sont protégés ou désactivés ;
 - les health checks sont définis ;
@@ -938,7 +944,8 @@ La version finale sera acceptable si :
 - [ ] Les services optionnels sont séparés.
 - [ ] Docker et Docker Compose sont cadrés.
 - [ ] Traefik est cadré.
-- [ ] PostgreSQL, Redis et MinIO sont non publics.
+- [ ] PostgreSQL et MinIO sont non publics ou protégés par reverse proxy contrôlé.
+- [ ] Redis est reporté ou livré comme service interne non public.
 - [ ] L'utilisateur applicatif PostgreSQL n'est pas superuser.
 - [ ] OSRM est interne par défaut.
 - [ ] La préparation et la mise à jour des données OSRM sont cadrées.

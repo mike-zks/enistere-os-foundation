@@ -71,6 +71,14 @@
 > Objectif : trancher Redis (livraison minimale non publique ou report V2 coherent API Core) et aligner la
 > structure Compose V1 (`base/local/staging` ou CC10 comme compose serveur officiel), sans acces serveur reel
 > sauf decision explicite de gate final.
+>
+> ✅ **Cloud Core 12 — decision Redis/Compose V1 : RÉALISÉ** (2026-07-12).
+> Rapport : `docs/project-status/CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`.
+> Decisions : Redis reporte post-V1/V2 ; `docker-compose.cc10.yml` devient le compose serveur/staging V1
+> officiel ; Cloud Core passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+>
+> **Prochaine action** : retour pilotage global. Candidats non bloques : Quality Core `IMPLEMENTATION_AVANCEE`
+> review ; ou autre core V2/V3 apres cadrage explicite. Mobile RN31 reste conditionne a macOS/Xcode ou device iOS.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
