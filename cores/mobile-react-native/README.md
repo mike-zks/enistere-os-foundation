@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`STARTER_EXPO_DOCTOR_GREEN`** (V1 — RN 34 ; expo-doctor 19/19, préférence thème câblée, smoke iOS bloqué localement par absence macOS/Xcode)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review, 2026-07-13 ; RN35 aligné UI Kit, Android smoke validé, iOS smoke bloqué localement par absence macOS/Xcode)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -332,14 +332,15 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 - `typecheck` : ✅ (TypeScript strict, `tsc --noEmit`) — contre les **types réels** du contrat.
 - `lint` : ✅ (`expo lint` / eslint-config-expo, 0 finding).
-- `test` : ✅ **355 cas `node --test`** (aucun helper pur ajouté dans RN 33–34).
+- `test` : ✅ **367 cas `node --test`** (incluant les 13 tests d'alignement tokens RN35).
 - `doctor` : ✅ **expo-doctor 19/19** — alignement patch RN 34 : `expo` 55.0.26→55.0.27, `expo-linking` 55.0.15→55.0.16, `expo-secure-store` 55.0.14→55.0.15. Drift pré-existant depuis RN 30, corrigé.
 - **runtime / bundle Expo** : ✅ `expo export -p ios` réussit. ✅ Smoke manuel Android RN 28 via Expo Go documenté dans [`MOBILE_RN28_VISUAL_SMOKE_REPORT.md`](../../docs/project-status/MOBILE_RN28_VISUAL_SMOKE_REPORT.md). ✅ Smoke local reproductible RN 29 via `npm run smoke:android` sur Android Emulator `emulator-5554` : rapport JSON `passed` dans `/tmp/enistere-mobile-rn29-smoke-report.json` et synthèse [`MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md`](../../docs/project-status/MOBILE_RN29_RUNTIME_SMOKE_AUTOMATION.md). ⚠️ Smoke runtime iOS bloqué localement : hôte `Linux greenovate`, `xcrun` absent ; `npm run smoke:ios` produit un rapport JSON avec `status: blocked`. ✅ Smoke Android RN34 : `npm run smoke:android` **passed** sur `emulator-5554` (Pixel_6a) — loginCount=1, refreshCount=1, 2026-07-08 ; rapport JSON dans `/tmp/enistere-mobile-rn29-smoke-report.json`. Export web non applicable sans `react-native-web` (dépendance volontairement non ajoutée).
 
 ## Prochaine mission recommandée
 
-**Mobile Core React Native 31 — exécution iOS smoke sur macOS/device réel**
-: rejouer le parcours RN28/RN29 sur iOS Simulator ou device physique dès qu'un
-environnement macOS/Xcode est disponible, sans ajouter de dépendance ni logique
-métier. Candidat alternatif : **RN 35** (persistance `themePreference` via
-`PreferenceService` RN 20 MMKV/AsyncStorage) ou **UI Kit 4** (Dialog/Select/Toast).
+**Mobile Core RN36 — upload runtime starter proof**
+: ajouter une surface protégée générique de diagnostic upload qui réutilise
+`useUploadMutation`, RHF/Zod, les états `*View` et le client officiel, puis
+prouver le parcours sur Android smoke sans endpoint métier, sans SDK picker natif
+non décidé et sans toucher Auth/Query. RN31 reste en attente d'un environnement
+macOS/Xcode ou device iOS réel.

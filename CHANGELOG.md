@@ -6,6 +6,18 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core V1 Readiness Review
+
+- Nouveau rapport : `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`.
+- Mobile Core React Native promu de **`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**.
+- Justification : socle Expo SDK 55 / Expo Router utilisable, auth/session durcie, API client officiel,
+  Query/Zustand/RHF/Zod, upload primitives, logger/redaction, Settings shell, smoke Android, expo-doctor
+  19/19 et alignement UI Kit RN35.
+- `VALIDE_V1` non déclaré : upload runtime mobile non prouvé, smoke iOS bloqué par absence macOS/Xcode,
+  persistance non sensible native encore en seam.
+- Aucun code runtime, workflow, dépendance, accès serveur, secret, SDK natif ou test Cloud ajouté.
+- Prochaine action : Mobile Core RN36 — upload runtime starter proof.
+
 ### Quality Core V1 Readiness Review
 
 - Nouveau rapport : `docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md`.
