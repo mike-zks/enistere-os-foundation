@@ -402,6 +402,10 @@ analytics…). **Aucun fichier ADR correspondant n'existe** → `NON_APPLICABLE_
 rédaction. Bloquants futurs notables : **ADR-034** (Flutter UI) avant `mobile-flutter`, **ADR-035**
 (Angular UI) avant `web-angular`.
 
+> **Note V3 Entry Decision (2026-07-13)** : `V3_ENTRY_DECISION.md` ouvre la séquence V3 par
+> `mobile-flutter`, mais **uniquement** via ADR-034. ADR-034 reste **à rédiger** ; aucun starter
+> Flutter, aucune dépendance et aucun runtime ne sont lancés par cette décision.
+
 ## 4. Règle de lecture
 
 Un ADR **Validé** documente une **décision**, pas une **implémentation**. Vérifier toujours la colonne

@@ -170,6 +170,15 @@
 > **Prochaine action** : retour pilotage post-V1. Candidats prioritaires : incréments V2/VF Mobile
 > (adaptateurs natifs opt-in, tests mobile plus complets) ou démarrage d'un prochain core selon roadmap.
 
+> ✅ **V3 Entry Decision : RÉALISÉ** (2026-07-13).
+> Rapport : `docs/project-status/V3_ENTRY_DECISION.md`.
+> Décision : ouvrir la séquence V3 par **Mobile Core Flutter**, mais uniquement par la décision
+> structurante **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter Flutter,
+> aucune dépendance, aucun changement runtime.
+>
+> **Prochaine action UNIQUE** : **V3 ADR 034 — Flutter UI stack decision**.
+> Objectif : rédiger et valider ADR-034 avant toute spécification ou implémentation du Mobile Core Flutter.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
