@@ -85,12 +85,25 @@ iOS artificiel ne doit être revendiqué. Ce blocage est environnemental, mais u
 mobile déclarée doit idéalement disposer d'une preuve iOS macOS/device ou d'une décision
 formelle qui l'accepte comme réserve non bloquante.
 
-### B3 — Store natif non sensible non branché
+### B3 — Store natif non sensible ✅ réserve formellement acceptée (RN37)
 
-RN20 définit le contrat `PreferenceStore` et un placeholder mémoire. La roadmap cite
-MMKV storage dans le socle V1 ; l'état actuel est intentionnellement sûr, mais pas une
-persistance native réelle. Un choix MMKV/AsyncStorage doit rester gouverné par ADR-015
-et par une mission dédiée.
+RN37 (`MOBILE_RN37_PREFERENCE_STORE_DECISION.md`, 2026-07-13) tranche le gap B3 :
+le store de préférences natif (MMKV/AsyncStorage) est **formellement délégué aux projets dérivés**,
+conformément à ADR-015 §15/§16 et au pattern seam+placeholder de tous les autres modules Foundation
+(permissions, notifications, biométrie, analytics, crash, i18n, network, feature flags, etc.).
+
+**Ce que RN20 livre pour Foundation V1** :
+- contrat `PreferenceStore` (seam async pluggable MMKV ou AsyncStorage) ;
+- gardes complets `createPreferenceService` (clé/valeur sensible → drop, lecture assainie, best-effort) ;
+- tests `preferences-model` + `preferences-service` (100% agnostiques, inclus dans les 367 tests) ;
+- placeholder mémoire défensif (`createPlaceholderPreferenceStore`) ;
+- documentation câblage MMKV/AsyncStorage dans ARCHITECTURE.md §29.
+
+**Pourquoi MMKV n'est pas ajouté à la Foundation** : module JSI natif → brise Expo Go + pipeline smoke.
+**Pourquoi AsyncStorage n'est pas ajouté** : ferait un choix arbitraire entre deux options valides selon ADR-015.
+**Référence** : `docs/project-status/MOBILE_RN37_PREFERENCE_STORE_DECISION.md`.
+
+B3 ne bloque plus `VALIDE_V1`.
 
 ## 6. Réserves non bloquantes
 
@@ -105,9 +118,10 @@ et par une mission dédiée.
 
 Le Mobile Core React Native passe à **`IMPLEMENTATION_AVANCEE`**.
 
-`VALIDE_V1` reste différé jusqu'à fermeture ou acceptation formelle des réserves B1/B2/B3.
-La prochaine mission doit viser le gap le plus actionnable sans prérequis externe :
-**B1, upload runtime mobile générique**.
+`VALIDE_V1` reste différé. B1 fermé (RN36). B3 formellement accepté comme réserve non bloquante (RN37).
+**B2 (iOS smoke)** est la seule réserve active. La prochaine mission :
+- **RN31** si macOS/Xcode ou device iOS disponible (ferme B2) ;
+- **Mobile Core V1 final readiness decision** si B2 est accepté comme réserve environnementale documentée.
 
 ## 8. Prochaine mission recommandée
 

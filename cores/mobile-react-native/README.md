@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review, 2026-07-13 ; RN35 aligné UI Kit, Android smoke validé, iOS smoke bloqué localement par absence macOS/Xcode)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review, 2026-07-13 ; RN36 gap B1 fermé ; RN37 gap B3 fermé réserve formellement acceptée ; seule réserve active : B2 iOS smoke Linux)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 

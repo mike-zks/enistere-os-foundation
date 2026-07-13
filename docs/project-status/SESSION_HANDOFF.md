@@ -117,7 +117,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
   **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
   scan/signature image, `api-smoke` requis.
-- **Mobile Core IMPLEMENTATION_AVANCEE** : `mobile-react-native` → **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review 2026-07-13 ; §9.4 **8/8** satisfaits après RN36) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
+- **Mobile Core IMPLEMENTATION_AVANCEE** : `mobile-react-native` → **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review 2026-07-13 ; §9.4 **8/8** satisfaits ; B1 ✅ RN36 ; B3 ✅ RN37 réserve formellement acceptée ; B2 seule réserve active — iOS smoke Linux) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -1547,8 +1547,16 @@ rapport `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`. Mobile Core Re
 étendu : création fixture `adb shell sh -c`, mock `POST /files` (201), navigate → submit → `waitForNode('Upload complete')`.
 Critères §9.4 : **8/8** satisfaits. B1 fermé. B2 (iOS smoke) différé macOS/Xcode. B3 (PreferenceStore seam).
 `VALIDE_V1` reste différé : B2 non résolu, B3 seam non matérialisé.
-Détail :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+
+**✅ Mobile Core RN37 — PreferenceStore native strategy decision (B3) : RÉALISÉ** (2026-07-13) :
+rapport `MOBILE_RN37_PREFERENCE_STORE_DECISION.md`. Analyse 4 options (seam, AsyncStorage, MMKV, délégation).
+Décision : **store natif délégué aux projets dérivés — réserve formellement acceptée**.
+MMKV rejeté (JSI → brise Expo Go + smoke). AsyncStorage rejeté (choix arbitraire entre deux options valides
+per ADR-015). Seam `PreferenceStore` + `createPreferenceService` + gardes + placeholder + 367 tests agnostiques
+= livrable « storage service » Foundation V1 (§9.3 roadmap). Pattern identique aux 10 autres seams Foundation.
+**B3 fermé.** `VALIDE_V1` différé uniquement par **B2 — iOS smoke** (Linux/macOS).
+Prochaine action : RN31 si macOS/Xcode disponible, ou Mobile Core V1 final readiness decision.
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

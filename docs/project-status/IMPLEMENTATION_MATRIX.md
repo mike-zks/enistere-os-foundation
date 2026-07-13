@@ -36,6 +36,15 @@
 > upload runtime mobile non prouvé, smoke iOS bloqué par absence macOS/Xcode, store natif non sensible encore
 > en seam MMKV/AsyncStorage.
 >
+> **Mise à jour Mobile Core RN37 (2026-07-13)** : rapport `MOBILE_RN37_PREFERENCE_STORE_DECISION.md`.
+> Décision PreferenceStore native strategy : **store natif délégué aux projets dérivés — réserve formellement acceptée**.
+> Analyse des 4 options (seam/placeholder, AsyncStorage, MMKV, délégation) selon ADR-015 §15/§16 / compatibilité
+> Expo Go / impact dépendance / sécurité / smoke / valeur Foundation. MMKV rejeté (JSI → brise Expo Go + smoke).
+> AsyncStorage rejeté (choix arbitraire entre deux options valides). Option D retenue : seam `PreferenceStore` +
+> `createPreferenceService` + gardes + placeholder + tests agnostiques = « storage service » §9.3. Pattern identique
+> à tous les seams Foundation. ADR-015 délègue explicitement aux projets. **B3 fermé réserve acceptée.**
+> `VALIDE_V1` différé uniquement par **B2 — parité iOS** (Linux). Aucune dépendance, aucun changement runtime.
+>
 > **Mise à jour Mobile Core RN36 (2026-07-13)** : rapport `MOBILE_CORE_V1_READINESS_REVIEW.md` §B1
 > mis à jour. `app/(app)/upload.tsx` ajouté (écran protégé générique, RHF+Zod, `useUploadMutation` via
 > client officiel, `LoadingState`/`MessageState`/`ErrorState`, ADR-007/015 : aucun URI/token/payload serveur en
