@@ -1,8 +1,8 @@
 # MOBILE_CORE_V1_READINESS_REVIEW.md — Mobile Core React Native V1 Readiness Review
 
 > Date : 2026-07-13  
-> Décision : **`STARTER_UI_KIT_ALIGNED` → `IMPLEMENTATION_AVANCEE`**  
-> Verdict : **socle mobile V1 avancé, pas encore `VALIDE_V1`**.
+> Décision initiale : **`STARTER_UI_KIT_ALIGNED` → `IMPLEMENTATION_AVANCEE`**
+> Décision finale : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`** via `MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`.
 
 ## 1. Contexte lu
 
@@ -23,15 +23,16 @@ deep-linking, analytics/crash/consentement, app environment, clipboard, retry,
 telemetry coordinator, Settings shell, smoke Android et alignement UI Kit RN35 sont
 présents et documentés.
 
-La promotion en **`IMPLEMENTATION_AVANCEE`** est justifiée. Depuis RN36 et RN37,
+La promotion en **`IMPLEMENTATION_AVANCEE`** était justifiée. Depuis RN36 et RN37,
 les gaps B1 et B3 sont fermés : l'upload runtime mobile est prouvé sur Android smoke,
 et le store natif de préférences est formellement délégué aux projets dérivés selon
-ADR-015. La promotion en **`VALIDE_V1`** reste différée uniquement par B2 :
+ADR-015. La décision finale du 2026-07-13 accepte B2 comme réserve environnementale
+documentée et promeut le core à **`VALIDE_V1`** :
 
 - smoke iOS non exécuté, bloqué par absence macOS/Xcode/device iOS.
 
-Cette réserve ne remet pas en cause l'architecture. Elle empêche seulement de déclarer
-la V1 mobile pleinement validée sans preuve iOS ou décision formelle d'acceptation.
+Cette réserve ne remet pas en cause l'architecture et ne revendique aucun succès iOS
+artificiel.
 
 ## 3. Critères roadmap §9.4
 
@@ -67,7 +68,7 @@ Résultat : **8/8 satisfaits** (B1 fermé par RN36).
 | Testing setup | ✅ node --test + doctor + export + smoke Android |
 | Persistance non sensible type MMKV/AsyncStorage | ⚠️ seam + placeholder, pas de store natif réel |
 
-## 5. Réserves bloquantes pour `VALIDE_V1`
+## 5. Réserves initialement bloquantes pour `VALIDE_V1`
 
 ### B1 — Upload runtime mobile ✅ fermé (RN36)
 
@@ -77,12 +78,16 @@ RN36 ajoute `app/(app)/upload.tsx` (écran protégé générique, formulaire RHF
 fixture `enistere-smoke.txt` via `adb shell`, vérification `Upload complete` et
 `uploadCount >= 1`). Aucune URL signée, token ni payload serveur en log, cache ou store.
 
-### B2 — Parité iOS non exécutée
+### B2 — Parité iOS non exécutée ✅ réserve environnementale acceptée
 
 RN30/RN31 documentent proprement le blocage : hôte Linux, `xcrun` absent. Aucun succès
 iOS artificiel ne doit être revendiqué. Ce blocage est environnemental, mais une V1
 mobile déclarée doit idéalement disposer d'une preuve iOS macOS/device ou d'une décision
 formelle qui l'accepte comme réserve non bloquante.
+
+La décision finale `MOBILE_CORE_V1_FINAL_READINESS_DECISION.md` accepte B2 comme réserve
+environnementale non bloquante. RN31 reste à exécuter dès qu'un environnement Apple réel
+est disponible.
 
 ### B3 — Store natif non sensible ✅ réserve formellement acceptée (RN37)
 
@@ -115,23 +120,15 @@ B3 ne bloque plus `VALIDE_V1`.
 
 ## 7. Décision
 
-Le Mobile Core React Native passe à **`IMPLEMENTATION_AVANCEE`**.
+Le Mobile Core React Native est promu à **`VALIDE_V1`** par
+`MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`.
 
-`VALIDE_V1` reste différé. B1 fermé (RN36). B3 formellement accepté comme réserve non bloquante (RN37).
-**B2 (iOS smoke)** est la seule réserve active. La prochaine mission :
-- **RN31** si macOS/Xcode ou device iOS disponible (ferme B2) ;
-- **Mobile Core V1 final readiness decision** si B2 est accepté comme réserve environnementale documentée.
+Le statut garde une réserve explicite : aucun smoke iOS réel n'a été exécuté. B2 est
+acceptée comme réserve environnementale non bloquante, sans preuve iOS artificielle.
 
 ## 8. Prochaine mission recommandée
 
-**Mobile Core B2 — iOS smoke / final readiness decision**.
+**Post-V1 Mobile Core**.
 
-Deux chemins sont possibles :
-
-- **RN31** si macOS/Xcode ou un device iOS réel est disponible : exécuter le smoke
-  iOS et fermer B2 avec une preuve runtime.
-- **Mobile Core V1 final readiness decision** si l'environnement iOS reste indisponible :
-  accepter formellement B2 comme réserve environnementale documentée, sur la base du
-  préflight `smoke:ios` existant et des preuves Android/Expo déjà disponibles.
-
-Ne pas déclarer `VALIDE_V1` sans traiter explicitement B2.
+RN31 reste souhaitable dès qu'un environnement macOS/Xcode ou device iOS réel est disponible.
+Sans environnement Apple, continuer vers les incréments V2/VF ou les intégrations de projets dérivés.

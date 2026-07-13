@@ -117,7 +117,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
   **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
   scan/signature image, `api-smoke` requis.
-- **Mobile Core IMPLEMENTATION_AVANCEE** : `mobile-react-native` → **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review 2026-07-13 ; §9.4 **8/8** satisfaits ; B1 ✅ RN36 ; B3 ✅ RN37 réserve formellement acceptée ; B2 seule réserve active — iOS smoke Linux) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
+- **Mobile Core VALIDE_V1** : `mobile-react-native` → **`VALIDE_V1`** (Mobile Core V1 final readiness decision 2026-07-13 ; §9.4 **8/8** satisfaits ; B1 ✅ RN36 ; B3 ✅ RN37 réserve formellement acceptée ; B2 iOS acceptée comme réserve environnementale, sans preuve iOS artificielle) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -337,7 +337,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-**`IMPLEMENTATION_AVANCEE`** (§9.4 **8/8** après RN36), Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 + **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35** + **écran upload diagnostics + smoke POST /files RN36** ; expo-doctor **19/19** ; **367 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator + tokens UI Kit alignés**).
+**`VALIDE_V1`** (§9.4 **8/8** après RN36/RN37 + final readiness decision), Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 + **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35** + **écran upload diagnostics + smoke POST /files RN36** + **PreferenceStore native strategy decision RN37** ; expo-doctor **19/19** ; **367 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; B2 iOS acceptée comme réserve environnementale, sans preuve iOS artificielle ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator + tokens UI Kit alignés**).
 
 ## 6. Packages
 
@@ -1540,7 +1540,8 @@ non bloquantes : coverage publiée, dashboards qualité, workflows avancés, ADR
 rapport `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`. Mobile Core React Native passe de
 **`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. À la date du review initial, critères
 roadmap §9.4 : **7/8 satisfaits** (B1 upload runtime non prouvé). Après RN36/RN37, critères §9.4 :
-**8/8 satisfaits** ; B1 fermé ; B3 fermé comme réserve formellement acceptée ; B2 iOS reste la seule réserve active.
+**8/8 satisfaits** ; B1 fermé ; B3 fermé comme réserve formellement acceptée ; B2 iOS restait la seule réserve
+active avant la décision finale V1.
 
 **✅ Mobile Core RN36 — upload runtime starter proof : RÉALISÉ** (2026-07-13) :
 écran protégé générique `app/(app)/upload.tsx` + `ROUTES.upload` + lien depuis Home. `useUploadMutation`
@@ -1555,9 +1556,16 @@ Décision : **store natif délégué aux projets dérivés — réserve formelle
 MMKV rejeté (JSI → brise Expo Go + smoke). AsyncStorage rejeté (choix arbitraire entre deux options valides
 per ADR-015). Seam `PreferenceStore` + `createPreferenceService` + gardes + placeholder + 367 tests agnostiques
 = livrable « storage service » Foundation V1 (§9.3 roadmap). Pattern identique aux 10 autres seams Foundation.
-**B3 fermé.** `VALIDE_V1` différé uniquement par **B2 — iOS smoke** (Linux/macOS).
-Prochaine action : RN31 si macOS/Xcode disponible, ou Mobile Core V1 final readiness decision.
+**B3 fermé.** Avant décision finale V1, `VALIDE_V1` était différé uniquement par **B2 — iOS smoke**
+(Linux/macOS). Prochaine action alors : RN31 si macOS/Xcode disponible, ou Mobile Core V1 final readiness decision.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+
+**✅ Mobile Core V1 final readiness decision : RÉALISÉ** (2026-07-13) :
+rapport `MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`. Décision : Mobile Core React Native passe de
+**`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. B2 iOS est acceptée comme réserve environnementale
+non bloquante : `smoke:ios` reste `blocked` sur Linux, aucun smoke iOS réel n'est revendiqué, aucun
+succès artificiel n'est créé. RN31 reste à exécuter dès qu'un environnement macOS/Xcode ou device iOS réel
+est disponible.
 
 ## 10. Règles à ne pas violer
 
