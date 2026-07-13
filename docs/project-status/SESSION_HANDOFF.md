@@ -1538,15 +1538,16 @@ non bloquantes : coverage publiée, dashboards qualité, workflows avancés, ADR
 
 **✅ Mobile Core V1 Readiness Review : RÉALISÉ** (2026-07-13) :
 rapport `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`. Mobile Core React Native passe de
-**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits**
-à la date du review (B1 upload runtime non prouvé).
+**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. À la date du review initial, critères
+roadmap §9.4 : **7/8 satisfaits** (B1 upload runtime non prouvé). Après RN36/RN37, critères §9.4 :
+**8/8 satisfaits** ; B1 fermé ; B3 fermé comme réserve formellement acceptée ; B2 iOS reste la seule réserve active.
 
 **✅ Mobile Core RN36 — upload runtime starter proof : RÉALISÉ** (2026-07-13) :
 écran protégé générique `app/(app)/upload.tsx` + `ROUTES.upload` + lien depuis Home. `useUploadMutation`
 / RHF+Zod / LoadingState/MessageState/ErrorState / fixture smoke hardcodée (no picker). Smoke Android
 étendu : création fixture `adb shell sh -c`, mock `POST /files` (201), navigate → submit → `waitForNode('Upload complete')`.
-Critères §9.4 : **8/8** satisfaits. B1 fermé. B2 (iOS smoke) différé macOS/Xcode. B3 (PreferenceStore seam).
-`VALIDE_V1` reste différé : B2 non résolu, B3 seam non matérialisé.
+Critères §9.4 : **8/8** satisfaits. B1 fermé. À la date RN36, `VALIDE_V1` restait différé par
+B2 (iOS smoke) et B3 (PreferenceStore seam). RN37 a ensuite fermé B3 comme réserve formellement acceptée.
 
 **✅ Mobile Core RN37 — PreferenceStore native strategy decision (B3) : RÉALISÉ** (2026-07-13) :
 rapport `MOBILE_RN37_PREFERENCE_STORE_DECISION.md`. Analyse 4 options (seam, AsyncStorage, MMKV, délégation).

@@ -23,16 +23,15 @@ deep-linking, analytics/crash/consentement, app environment, clipboard, retry,
 telemetry coordinator, Settings shell, smoke Android et alignement UI Kit RN35 sont
 présents et documentés.
 
-La promotion en **`IMPLEMENTATION_AVANCEE`** est justifiée. La promotion en
-**`VALIDE_V1`** reste prématurée, car trois preuves ou livrables V1 restent ouverts :
+La promotion en **`IMPLEMENTATION_AVANCEE`** est justifiée. Depuis RN36 et RN37,
+les gaps B1 et B3 sont fermés : l'upload runtime mobile est prouvé sur Android smoke,
+et le store natif de préférences est formellement délégué aux projets dérivés selon
+ADR-015. La promotion en **`VALIDE_V1`** reste différée uniquement par B2 :
 
-- upload runtime mobile non prouvé sur device/simulateur avec le client réel ;
-- smoke iOS non exécuté, bloqué par absence macOS/Xcode/device iOS ;
-- persistance non sensible réelle volontairement non branchée (`PreferenceStore` est
-  un seam MMKV/AsyncStorage + placeholder).
+- smoke iOS non exécuté, bloqué par absence macOS/Xcode/device iOS.
 
-Ces réserves ne remettent pas en cause l'architecture. Elles empêchent seulement de
-déclarer la V1 mobile pleinement validée.
+Cette réserve ne remet pas en cause l'architecture. Elle empêche seulement de déclarer
+la V1 mobile pleinement validée sans preuve iOS ou décision formelle d'acceptation.
 
 ## 3. Critères roadmap §9.4
 
@@ -125,16 +124,14 @@ Le Mobile Core React Native passe à **`IMPLEMENTATION_AVANCEE`**.
 
 ## 8. Prochaine mission recommandée
 
-**Mobile Core RN36 — upload runtime starter proof**.
+**Mobile Core B2 — iOS smoke / final readiness decision**.
 
-Objectif : ajouter une surface mobile protégée et générique de diagnostic upload qui
-réutilise `useUploadMutation`, les primitives RHF/Zod, les états `*View` et le client
-officiel, puis prouver le parcours sur Android smoke sans endpoint métier nouveau.
+Deux chemins sont possibles :
 
-Frontières :
+- **RN31** si macOS/Xcode ou un device iOS réel est disponible : exécuter le smoke
+  iOS et fermer B2 avec une preuve runtime.
+- **Mobile Core V1 final readiness decision** si l'environnement iOS reste indisponible :
+  accepter formellement B2 comme réserve environnementale documentée, sur la base du
+  préflight `smoke:ios` existant et des preuves Android/Expo déjà disponibles.
 
-- ne pas toucher AuthEngine, `withAuthRetry`, `authedRequest` ou QueryClient ;
-- ne pas ajouter de SDK picker natif sans décision explicite ;
-- ne pas stocker fichier, URL signée, token ou payload serveur ;
-- ne pas déclarer `VALIDE_V1` tant que la preuve iOS ou la décision de réserve iOS n'est
-  pas tranchée.
+Ne pas déclarer `VALIDE_V1` sans traiter explicitement B2.
