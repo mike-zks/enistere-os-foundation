@@ -31,6 +31,7 @@ restent `ai-core`, `api-spring`, `mobile-flutter` et `web-angular`.
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
 | Foundation baseline | **`FOUNDATION_V1_RELEASED`** — release `foundation-v1.0.0` publiée le 2026-07-12 ; revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit/Quality Core `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, CI L1-L4 verte sur `main`, ruleset `protect-main` actif |
 | Release notes | **`FOUNDATION_V1_RELEASED`** — `FOUNDATION_V1_RELEASE_NOTES.md` publié pour `foundation-v1-baseline` ; tag `foundation-v1.0.0` ; GitHub Release publiée |
+| V3 | **Cadrage ouvert** — `V3_ENTRY_DECISION.md` : prochaine action unique = ADR-034 Flutter UI stack decision ; aucun starter V3 généré |
 | **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après publication Foundation V1 et suivi post-release ; tag `foundation-v1.0.0` publié sur `2981f2c` ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
@@ -64,7 +65,7 @@ enistere-os-foundation/
     mobile-react-native/  VALIDE_V1 (Expo SDK 55 + Expo Router ; primitives RN 1→25 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29/RN34B ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 sign-in RHF+Zod ; RN33 thème ; RN34 patch Expo SDK ; RN35 tokens alignés UI Kit + LoadingView/EmptyView/ErrorView + 13 tests ; RN36 upload diagnostics screen + smoke POST /files ; RN37 PreferenceStore decision ; Mobile V1 final readiness 2026-07-13 ; §9.4 8/8 ; B2 iOS réserve environnementale acceptée ; typecheck/lint/test 367/367/expo-doctor 19/19/export iOS verts)
     quality-core/      VALIDE_V1 (gates, checklists, runbooks, templates, prompts, release process utilisé, helper release/reporting)
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
-    ai-core/ api-spring/ mobile-flutter/ web-angular/   → vides
+    ai-core/ api-spring/ mobile-flutter/ web-angular/   → vides (V3 cadrée ; prochaine décision ADR-034 avant Mobile Flutter)
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
     api-client-fetch/  @enistere/api-client-fetch (0.1.0, privé)

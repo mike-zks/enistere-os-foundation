@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### V3 Entry Decision
+
+- Nouveau rapport : `docs/project-status/V3_ENTRY_DECISION.md`.
+- Décision : ouvrir la séquence V3 par **Mobile Core Flutter**, mais uniquement via
+  **ADR-034 — Flutter UI : Material 3 vs composants maison**.
+- Aucun starter Flutter, aucune dépendance, aucun runtime et aucun core V1 modifié.
+- Prochaine action unique : rédiger et valider ADR-034 avant toute spécification ou implémentation Flutter.
+
 ### Mobile Core V1 final readiness decision
 
 - Nouveau rapport : `docs/project-status/MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`.

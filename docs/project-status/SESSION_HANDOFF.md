@@ -1567,6 +1567,12 @@ non bloquante : `smoke:ios` reste `blocked` sur Linux, aucun smoke iOS réel n'e
 succès artificiel n'est créé. RN31 reste à exécuter dès qu'un environnement macOS/Xcode ou device iOS réel
 est disponible.
 
+**✅ V3 Entry Decision : RÉALISÉ** (2026-07-13) :
+rapport `V3_ENTRY_DECISION.md`. Décision : ouvrir V3 par **Mobile Core Flutter**, mais uniquement par
+**ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter Flutter, aucune dépendance,
+aucun runtime. Prochaine action unique : rédiger et valider ADR-034 avant toute spec ou implémentation
+Mobile Flutter.
+
 ## 10. Règles à ne pas violer
 
 - Vérifier le repository ; ne jamais se fier au seul rapport précédent.
