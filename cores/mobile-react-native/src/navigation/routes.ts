@@ -15,6 +15,8 @@ export const ROUTES = {
   home: '/home',
   /** Generic protected settings / foundation diagnostics screen. */
   settings: '/settings',
+  /** Generic upload diagnostics screen (RN36 — proves useUploadMutation runtime path). */
+  upload: '/upload',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

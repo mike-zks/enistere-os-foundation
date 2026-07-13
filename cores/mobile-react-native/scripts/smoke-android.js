@@ -27,6 +27,7 @@ const state = {
   mock: {
     loginCount: 0,
     refreshCount: 0,
+    uploadCount: 0,
   },
   blockers: [],
   warnings: [],
@@ -160,6 +161,27 @@ function startMockAuthServer() {
         record('mock-request', { method, url });
         result.writeHead(200, { 'content-type': 'application/json' });
         result.end(response);
+        return;
+      }
+      if (method === 'POST' && url === '/files') {
+        state.mock.uploadCount += 1;
+        record('mock-request', { method, url });
+        result.writeHead(201, { 'content-type': 'application/json' });
+        result.end(
+          JSON.stringify({
+            success: true,
+            data: {
+              id: 'smoke-diagnostic-id',
+              category: 'DOCUMENT',
+              createdAt: new Date().toISOString(),
+              extension: 'txt',
+              mimeType: 'text/plain',
+              originalName: 'smoke-file',
+              size: '25',
+            },
+            timestamp: new Date().toISOString(),
+          }),
+        );
         return;
       }
       record('mock-request-unhandled', { method, url });
@@ -414,7 +436,7 @@ async function cleanup() {
 
 async function main() {
   record('smoke-start', {
-    goal: 'starter-public-protected-settings',
+    goal: 'starter-public-protected-settings-upload',
     reportPath: REPORT_PATH,
     mode: 'semi-automated',
   });
@@ -433,6 +455,24 @@ async function main() {
 
   await run('adb', ['reverse', `tcp:${AUTH_PORT}`, `tcp:${AUTH_PORT}`]);
   record('adb-reverse-ready', { port: AUTH_PORT });
+
+  // Create the upload smoke fixture on device before Expo starts.
+  // The file is a plain-text placeholder; the real upload validation is server-side.
+  try {
+    await run('adb', [
+      'shell',
+      'sh',
+      '-c',
+      'echo -n "enistere-smoke-diagnostic" > /sdcard/Download/enistere-smoke.txt',
+    ]);
+    record('fixture-created', { path: '/sdcard/Download/enistere-smoke.txt' });
+  } catch (error) {
+    state.warnings.push({
+      message: 'Could not create upload fixture file; upload step may fail.',
+      detail: String(error.message),
+    });
+    record('fixture-warn', { message: 'Upload fixture creation failed.' });
+  }
 
   startExpo();
   await waitForExpoReady();
@@ -475,6 +515,16 @@ async function main() {
 
     await run('adb', ['shell', 'input', 'keyevent', '4']);
     await waitForNode('Open settings');
+
+    // RN36 — upload diagnostics flow
+    await tapLabel('Upload diagnostics');
+    await waitForNode('Upload diagnostics');
+    await tapLabel('Submit diagnostic upload');
+    await waitForMockCount('uploadCount', 1);
+    await waitForNode('Upload complete');
+    await run('adb', ['shell', 'input', 'keyevent', '4']);
+    await waitForNode('Open settings');
+
     await tapLabel('Refresh session');
     await waitForMockCount('refreshCount', 1);
     await waitForNode('Open settings');
@@ -485,6 +535,7 @@ async function main() {
     record('smoke-pass', {
       loginCount: state.mock.loginCount,
       refreshCount: state.mock.refreshCount,
+      uploadCount: state.mock.uploadCount,
       note: 'Semi-automated smoke passed through visible UI labels.',
     });
   } catch (error) {

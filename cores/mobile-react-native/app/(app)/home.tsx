@@ -40,6 +40,11 @@ export default function HomeScreen(): React.JSX.Element {
             variant="secondary"
             onPress={() => router.push(ROUTES.settings)}
           />
+          <Button
+            title="Upload diagnostics"
+            variant="secondary"
+            onPress={() => router.push(ROUTES.upload)}
+          />
           <Button title="Sign out" variant="secondary" onPress={() => void signOut()} />
         </View>
       </Screen>

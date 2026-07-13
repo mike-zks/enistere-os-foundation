@@ -117,7 +117,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
   **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
   scan/signature image, `api-smoke` requis.
-- **Socle mobile UI Kit aligned** : `mobile-react-native` → **`STARTER_UI_KIT_ALIGNED`** — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
+- **Mobile Core IMPLEMENTATION_AVANCEE** : `mobile-react-native` → **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review 2026-07-13 ; §9.4 **8/8** satisfaits après RN36) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -337,7 +337,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
 `mobile-react-native`** ont leur spéc **et** un starter (`mobile-react-native` →
-**`STARTER_UI_KIT_ALIGNED`**, Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 + **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35** ; expo-doctor **19/19** ; **367 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator + tokens UI Kit alignés**).
+**`IMPLEMENTATION_AVANCEE`** (§9.4 **8/8** après RN36), Expo SDK 55 (RN 1→25 primitives + Settings RN26 + shell durci RN27 + smoke Android RN28/RN29 + iOS RN30 bloqué Linux + RN31 en attente macOS + formulaire sign-in RN32 + thème RN33 + patches SDK RN34 + **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35** + **écran upload diagnostics + smoke POST /files RN36** ; expo-doctor **19/19** ; **367 tests** + bundle Metro + smoke Android `emulator-5554` **passed** ; auth/session + forms/validation + offline préparatoire + **client officiel `@enistere/api-client-fetch` intégré + server-state + état local Zustand + purge logout + primitives upload multipart + logger/redaction + permissions runtime + notifications locales + i18n/localisation + deep-linking/routing + analytics/télémétrie + accessibilité a11y + app lifecycle + connectivité réseau + feature flags/config + gate biométrique local + crash/error-reporting + préférences non sensibles + consentement télémétrie + métadonnées app non identifiantes + presse-papiers sécurisé + retry/backoff + telemetry coordinator + tokens UI Kit alignés**).
 
 ## 6. Packages
 
@@ -1538,15 +1538,15 @@ non bloquantes : coverage publiée, dashboards qualité, workflows avancés, ADR
 
 **✅ Mobile Core V1 Readiness Review : RÉALISÉ** (2026-07-13) :
 rapport `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`. Mobile Core React Native passe de
-**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits**.
-`VALIDE_V1` reste différé : upload runtime mobile non prouvé, smoke iOS bloqué par absence macOS/Xcode,
-store natif non sensible encore en seam MMKV/AsyncStorage.
+**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits**
+à la date du review (B1 upload runtime non prouvé).
 
-**Action unique suivante** : Mobile Core RN36 — upload runtime starter proof. Ajouter une surface protégée
-générique de diagnostic upload réutilisant `useUploadMutation`, RHF/Zod, les états `*View` et le client
-officiel, puis prouver le parcours sur Android smoke sans endpoint métier, sans SDK picker natif non décidé,
-sans stockage fichier/URL/token et sans toucher AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient.
-Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
+**✅ Mobile Core RN36 — upload runtime starter proof : RÉALISÉ** (2026-07-13) :
+écran protégé générique `app/(app)/upload.tsx` + `ROUTES.upload` + lien depuis Home. `useUploadMutation`
+/ RHF+Zod / LoadingState/MessageState/ErrorState / fixture smoke hardcodée (no picker). Smoke Android
+étendu : création fixture `adb shell sh -c`, mock `POST /files` (201), navigate → submit → `waitForNode('Upload complete')`.
+Critères §9.4 : **8/8** satisfaits. B1 fermé. B2 (iOS smoke) différé macOS/Xcode. B3 (PreferenceStore seam).
+`VALIDE_V1` reste différé : B2 non résolu, B3 seam non matérialisé.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 

@@ -6,6 +6,25 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core RN36 — Upload runtime starter proof
+
+- Nouveau fichier : `cores/mobile-react-native/app/(app)/upload.tsx` — écran protégé générique
+  `Upload diagnostics` : formulaire RHF + Zod (catégorie parmi les 7 catégories API supportées),
+  fichier fixture smoke `enistere-smoke.txt` (descripteur `MobileFile` sans picker natif), appel
+  `useUploadMutation` via le client officiel, états `LoadingState` / `MessageState` / `ErrorState`.
+- Aucune URL signée, token, payload serveur ou URI device en log, cache ou store (ADR-007/015) ;
+  seule la catégorie choisie par l'utilisateur est affichée en succès.
+- Mise à jour `ROUTES.upload` + lien "Upload diagnostics" depuis `app/(app)/home.tsx`.
+- Smoke Android étendu (`scripts/smoke-android.js`) : handler `POST /files` mock (201 + fake DTO,
+  `uploadCount`), création de la fixture via `adb shell`, navigation Upload diagnostics →
+  `Submit diagnostic upload` → `Upload complete` → retour Home, vérification `uploadCount >= 1`.
+- Gap B1 fermé : `MOBILE_CORE_V1_READINESS_REVIEW.md` §B1 et critères §9.4 mis à jour (**8/8 satisfaits**).
+- `VALIDE_V1` différé : parité iOS non exécutée (B2, macOS/Xcode requis), store natif non sensible
+  encore en seam (B3).
+- Vérifications : typecheck ✅, lint ✅, test 367/367 ✅, expo-doctor 19/19 ✅, export iOS ✅,
+  `git diff --check` ✅, `quality-gates run docs` 2/2 ✅.
+- Aucun endpoint métier, dépendance, SDK picker natif, workflow ou accès Cloud ajouté.
+
 ### Mobile Core V1 Readiness Review
 
 - Nouveau rapport : `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`.
