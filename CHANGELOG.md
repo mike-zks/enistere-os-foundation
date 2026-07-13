@@ -6,6 +6,19 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core V1 final readiness decision
+
+- Nouveau rapport : `docs/project-status/MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`.
+- Mobile Core React Native promu de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+- Décision : B2 iOS est acceptée comme réserve environnementale non bloquante.
+  - `smoke:ios` reste `blocked` sur Linux.
+  - Aucun smoke iOS réel n'est revendiqué.
+  - Aucun succès iOS artificiel n'est créé.
+  - RN31 reste à exécuter dès qu'un environnement macOS/Xcode ou device iOS réel est disponible.
+- Justification : critères V1 applicables satisfaits, roadmap §9.4 **8/8**, B1 fermé RN36, B3 fermé RN37,
+  preuves Android/Expo/gates documentées.
+- Aucun code runtime, dépendance, workflow, secret, accès serveur ou test Cloud ajouté.
+
 ### Mobile Core RN37 — PreferenceStore native strategy decision (B3 fermé)
 
 - Nouveau rapport : `docs/project-status/MOBILE_RN37_PREFERENCE_STORE_DECISION.md`.
@@ -18,7 +31,9 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
     seams Foundation (permissions, notifications, biometrics, i18n, analytics, crash, network, lifecycle,
     feature flags, clipboard). ADR-015 délègue explicitement aux projets dérivés.
 - Gap B3 **fermé comme réserve formellement acceptée non-bloquante pour `VALIDE_V1`**.
-- Après RN37 : `VALIDE_V1` différé uniquement par B2 (iOS smoke, Linux/macOS).
+- Après RN37 et avant la décision finale V1 : `VALIDE_V1` était différé uniquement par B2
+  (iOS smoke, Linux/macOS). Cette réserve est ensuite acceptée par
+  `MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`.
 - Mises à jour : `MOBILE_CORE_V1_READINESS_REVIEW.md` §B3, `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`,
   `IMPLEMENTATION_MATRIX.md`, `SESSION_HANDOFF.md`, `DECISIONS_REGISTER.md`, `cores/mobile-react-native/README.md`,
   `cores/mobile-react-native/ARCHITECTURE.md` §29.
@@ -38,8 +53,8 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
   `uploadCount`), création de la fixture via `adb shell`, navigation Upload diagnostics →
   `Submit diagnostic upload` → `Upload complete` → retour Home, vérification `uploadCount >= 1`.
 - Gap B1 fermé : `MOBILE_CORE_V1_READINESS_REVIEW.md` §B1 et critères §9.4 mis à jour (**8/8 satisfaits**).
-- `VALIDE_V1` différé : parité iOS non exécutée (B2, macOS/Xcode requis), store natif non sensible
-  encore en seam (B3).
+- À la date RN36, `VALIDE_V1` restait différé par B2 et B3. B3 est ensuite fermé par RN37,
+  puis B2 acceptée comme réserve environnementale par la décision finale V1.
 - Vérifications : typecheck ✅, lint ✅, test 367/367 ✅, expo-doctor 19/19 ✅, export iOS ✅,
   `git diff --check` ✅, `quality-gates run docs` 2/2 ✅.
 - Aucun endpoint métier, dépendance, SDK picker natif, workflow ou accès Cloud ajouté.

@@ -136,8 +136,8 @@
 > Décision : Mobile Core React Native passe de **`STARTER_UI_KIT_ALIGNED`** à
 > **`IMPLEMENTATION_AVANCEE`**. Après RN36/RN37, critères roadmap §9.4 : **8/8 satisfaits** ;
 > B1 upload runtime fermé, B3 PreferenceStore fermé comme réserve formellement acceptée.
-> `VALIDE_V1` reste différé uniquement par **B2 — smoke iOS** (macOS/Xcode ou device iOS requis,
-> ou décision formelle d'acceptation de réserve environnementale).
+> À cette étape, `VALIDE_V1` restait différé uniquement par **B2 — smoke iOS**
+> (macOS/Xcode ou device iOS requis, ou décision formelle d'acceptation de réserve environnementale).
 >
 > ✅ **Mobile Core RN36 — upload runtime starter proof : RÉALISÉ** (2026-07-13).
 > Livrables : `app/(app)/upload.tsx` (écran protégé RHF+Zod, `useUploadMutation` via client officiel,
@@ -159,10 +159,16 @@
 > ADR-015 §15/§16 délèguent **explicitement** le choix du store natif aux projets dérivés.
 > Gap B3 **fermé comme réserve formellement acceptée non-bloquante**.
 >
-> **Prochaine action** : Mobile Core B2 (iOS smoke). Candidats :
-> - **Mobile Core RN31** si macOS/Xcode ou device iOS réel disponible (ferme B2 → ouvre VALIDE_V1) ;
-> - **Mobile Core V1 final readiness decision** si B2 est accepté comme réserve environnementale (le script
->   iOS existe, blocage Linux documenté RN30/RN31 → déclarer VALIDE_V1 avec réserve B2 formalisée).
+> ✅ **Mobile Core V1 final readiness decision : RÉALISÉ** (2026-07-13).
+> Rapport : `docs/project-status/MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`.
+> Décision : Mobile Core React Native passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+> B2 iOS est acceptée comme réserve environnementale non bloquante : le script `smoke:ios` existe,
+> RN30/RN31 documentent le blocage Linux/macOS, aucun smoke iOS réel n'est revendiqué et aucun succès
+> artificiel n'est créé. RN31 reste à exécuter dès qu'un environnement macOS/Xcode ou device iOS réel
+> est disponible.
+>
+> **Prochaine action** : retour pilotage post-V1. Candidats prioritaires : incréments V2/VF Mobile
+> (adaptateurs natifs opt-in, tests mobile plus complets) ou démarrage d'un prochain core selon roadmap.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review, 2026-07-13 ; RN36 gap B1 fermé ; RN37 gap B3 fermé réserve formellement acceptée ; seule réserve active : B2 iOS smoke Linux)
+> Statut : **`VALIDE_V1`** (Mobile Core V1 final readiness decision, 2026-07-13 ; critères V1 applicables satisfaits ; B2 iOS smoke accepté comme réserve environnementale documentée, sans preuve iOS artificielle)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -340,7 +340,7 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 ## Prochaine mission recommandée
 
-**Mobile Core B2 — iOS smoke / final readiness decision**
-: exécuter RN31 sur macOS/Xcode ou device iOS réel si l'environnement est disponible.
-Sinon, produire une décision finale de readiness V1 qui accepte explicitement B2 comme
-réserve environnementale documentée. Ne pas déclarer `VALIDE_V1` sans traiter B2.
+**Post-V1 Mobile Core**
+: exécuter RN31 dès qu'un environnement macOS/Xcode ou device iOS réel est disponible.
+Sans environnement Apple, prioriser les incréments V2/VF à forte valeur : adaptateurs
+natifs opt-in, tests mobile plus complets ou intégration projet dérivé.
