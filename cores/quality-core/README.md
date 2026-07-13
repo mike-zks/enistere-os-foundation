@@ -1,6 +1,6 @@
 # Quality Core
 
-**Statut** : `IMPLEMENTATION_AVANCEE` (Quality Core Advanced Readiness Review, 2026-07-12)
+**Statut** : `VALIDE_V1` (Quality Core V1 Readiness Review, 2026-07-13)
 
 Protection `main` : **active via GitHub Rulesets** (`protect-main`, enforcement `active`) avec
 8 status checks requis. Les deux checks `images (...)` sont **recommandés pour promotion humaine**
@@ -9,9 +9,9 @@ mais non appliqués automatiquement. Voir `BRANCH_PROTECTION_RUNBOOK.md`.
 Core de gouvernance qualité d'Enistere OS Foundation. Documente et outille les gates qualité réels du
 monorepo. Ne modifie pas les workflows GitHub, pas les cores runtime, pas les dépendances.
 
-La revue `docs/project-status/QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` constate que le core est
-desormais exploitable comme reference avancee : gates locaux, checklists, templates, prompts gouvernes,
-ruleset actif et release Foundation appliquee. Les automatisations avancees restent differees.
+La revue `docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md` constate que le core est stable comme
+socle de gouvernance qualite : gates locaux, checklists, templates, prompts gouvernes, ruleset actif,
+release Foundation appliquee, reporting coverage local et decisions residuelles explicites.
 
 ## Contenu de ce core
 
@@ -30,6 +30,7 @@ ruleset actif et release Foundation appliquee. Les automatisations avancees rest
 | `scripts/quality-report.test.mjs` | Tests unitaires du helper reporting — validation scopes, coverage disponible et sortie Markdown |
 | `../../docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` | Décision CI-required checks : `images (...)` recommandés pour promotion humaine, ruleset non modifié |
 | `../../docs/project-status/QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` | Décision coverage : API/Web/UI Kit reconnus, pas de nouvelle commande artificielle |
+| `../../docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md` | Revue de promotion Quality Core `VALIDE_V1` |
 | `../../prompts/README.md` | Catalogue gouverné des prompts IA versionnés |
 | `../../prompts/global/mission-brief-template.md` | Template de mission Claude/Codex/Gemini gouvernée |
 | `../../docs/checklists/PR_QUALITY_CHECKLIST.md` | Checklist qualité par type de PR |

@@ -30,14 +30,14 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 - **Foundation baseline** : **FOUNDATION_V1_RELEASED** (2026-07-12) — tag `foundation-v1.0.0`,
   commit `2981f2c`, GitHub Release publiée.
 - **Release notes** : **FOUNDATION_V1_RELEASED** — `FOUNDATION_V1_RELEASE_NOTES.md` publié.
-- **Quality Core** : **IMPLEMENTATION_AVANCEE** (2026-07-12) — `QUALITY_CORE_V2_READINESS_REVIEW.md` +
+- **Quality Core** : **VALIDE_V1** (2026-07-13) — `QUALITY_CORE_V2_READINESS_REVIEW.md` +
   `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` +
-  `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md`.
+  `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`.
   Le core dépasse la seule spécification : gates, script, checklists, templates, ruleset actif,
   release process, prompts IA standardisés, usage réel lors de `foundation-v1.0.0` et integration du gate
   documentaire via Docs Core. `release-helper.mjs` prépare des brouillons Markdown stdout-only sans tag ni
   GitHub Release. `quality-report.mjs` synthétise les gates tests/couverture stdout-only sans lancer les tests.
-  Les automatisations avancees restent differees.
+  Les automatisations avancees restent differees vers V2/VF.
 - **Cloud Core** : **VALIDE_V1** (2026-07-12) — `CLOUD_CORE_V1_READINESS_REVIEW.md` +
   `CLOUD_CORE_12_REDIS_COMPOSE_DECISION.md`. CC10/CC11 prouvent un staging HTTPS reel operationnalise
   (health, auth/files, backups/restores, rollback/roll-forward, rotation smoke, runbooks). CC12 reporte Redis
@@ -332,7 +332,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
 
 ## 5. Cores de gouvernance / documentaires
 
-**`quality-core`** : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Review, 2026-07-12) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + prompts catalogués + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test). Processus utilisé pour publier `foundation-v1.0.0`. Protection `main` active via ruleset `protect-main`. Docs Core consomme le scope `quality-gates docs`. Aucun workflow modifié par Quality Core. Aucune dépendance.
+**`quality-core`** : **VALIDE_V1** (Quality Core V1 Readiness Review, 2026-07-13) — `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists `docs/checklists/` + templates GitHub PR/Issues + prompts catalogués + `scripts/quality-gates.mjs` (Node 24, sans dépendance : `list` / `plan <scope>` / `run <scope>`, 7 scopes, arrêt premier échec) + `scripts/quality-gates.test.mjs` (36/36 tests node:test) + `scripts/release-helper.mjs` + `scripts/quality-report.mjs`. Processus utilisé pour publier `foundation-v1.0.0`. Protection `main` active via ruleset `protect-main`. Docs Core consomme le scope `quality-gates docs`. Aucun workflow modifié par Quality Core. Aucune dépendance.
 
 **`cloud`** : spéc + README + `docs/` de **cadrage opérationnel** (Cloud Core 1) — **pas** de starter/infra réelle
 au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `web-nextjs` **et
@@ -1528,6 +1528,16 @@ artefact ou dashboard ajouté.
 
 **Action unique suivante** : Quality Core V1 Readiness Review — vérifier si Quality Core peut passer de
 `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
+
+**✅ Quality Core V1 Readiness Review : RÉALISÉ** (2026-07-13) :
+rapport `docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md`. Quality Core passe de
+**`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Justification : critères roadmap §13.4 7/7, scripts
+`quality-gates`/`release-helper`/`quality-report` testés, release process appliqué, prompts versionnés,
+ruleset `protect-main` actif, reporting coverage local et décisions résiduelles tranchées. Réserves
+non bloquantes : coverage publiée, dashboards qualité, workflows avancés, ADR-019→022.
+
+**Action unique suivante** : retour pilotage global — choisir le prochain core prioritaire selon les prérequis
+disponibles. Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
