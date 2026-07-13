@@ -131,8 +131,18 @@
 > Decision : Quality Core passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Les critères roadmap
 > §13.4 sont couverts ; les réserves restantes relèvent de V2/VF avancée.
 >
-> **Prochaine action** : retour pilotage global — choisir le prochain core prioritaire selon les prérequis
-> disponibles. Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
+> ✅ **Mobile Core V1 Readiness Review : RÉALISÉ** (2026-07-13).
+> Rapport : `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`.
+> Décision : Mobile Core React Native passe de **`STARTER_UI_KIT_ALIGNED`** à
+> **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits** ; `VALIDE_V1`
+> différé par l'upload runtime mobile non prouvé, le smoke iOS bloqué par absence macOS/Xcode,
+> et le store natif non sensible encore en seam.
+>
+> **Prochaine action UNIQUE** : **Mobile Core RN36 — upload runtime starter proof**.
+> Objectif : ajouter une surface protégée générique de diagnostic upload qui réutilise `useUploadMutation`,
+> RHF/Zod, les états `*View` et le client officiel, puis prouver le parcours sur Android smoke sans endpoint
+> métier, sans SDK picker natif non décidé, sans stockage de fichier/URL/token et sans toucher Auth/Query.
+> Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

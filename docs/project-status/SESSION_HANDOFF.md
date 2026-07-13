@@ -1536,8 +1536,17 @@ rapport `docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md`. Quality Core 
 ruleset `protect-main` actif, reporting coverage local et décisions résiduelles tranchées. Réserves
 non bloquantes : coverage publiée, dashboards qualité, workflows avancés, ADR-019→022.
 
-**Action unique suivante** : retour pilotage global — choisir le prochain core prioritaire selon les prérequis
-disponibles. Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
+**✅ Mobile Core V1 Readiness Review : RÉALISÉ** (2026-07-13) :
+rapport `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`. Mobile Core React Native passe de
+**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits**.
+`VALIDE_V1` reste différé : upload runtime mobile non prouvé, smoke iOS bloqué par absence macOS/Xcode,
+store natif non sensible encore en seam MMKV/AsyncStorage.
+
+**Action unique suivante** : Mobile Core RN36 — upload runtime starter proof. Ajouter une surface protégée
+générique de diagnostic upload réutilisant `useUploadMutation`, RHF/Zod, les états `*View` et le client
+officiel, puis prouver le parcours sur Android smoke sans endpoint métier, sans SDK picker natif non décidé,
+sans stockage fichier/URL/token et sans toucher AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient.
+Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
 Détail :
 [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
