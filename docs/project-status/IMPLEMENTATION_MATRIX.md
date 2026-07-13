@@ -36,6 +36,13 @@
 > upload runtime mobile non prouvé, smoke iOS bloqué par absence macOS/Xcode, store natif non sensible encore
 > en seam MMKV/AsyncStorage.
 >
+> **Mise à jour Mobile Core RN36 (2026-07-13)** : rapport `MOBILE_CORE_V1_READINESS_REVIEW.md` §B1
+> mis à jour. `app/(app)/upload.tsx` ajouté (écran protégé générique, RHF+Zod, `useUploadMutation` via
+> client officiel, `LoadingState`/`MessageState`/`ErrorState`, ADR-007/015 : aucun URI/token/payload serveur en
+> log/cache/store). Smoke Android étendu : `POST /files` mock + fixture `enistere-smoke.txt` + vérification
+> `Upload complete` + `uploadCount >= 1`. Critères §9.4 : **8/8 satisfaits** (B1 fermé). `VALIDE_V1` différé :
+> parité iOS non exécutée (B2), store natif non sensible encore en seam (B3).
+>
 > **Mise à jour API Core VALIDE_V1 review (2026-07-12)** : le API Core NestJS passe de
 > **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Critères roadmap §8.4 et
 > `CORE_SPECIFICATION.md` §41 satisfaits. Vérifications locales : lint, build, test **386/386**,

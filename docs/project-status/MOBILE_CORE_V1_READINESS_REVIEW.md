@@ -43,11 +43,11 @@ déclarer la V1 mobile pleinement validée.
 | Auth flow prêt | ✅ satisfait | AuthEngine, SecureStore, sign-in RN32, refresh/logout, 401 bridge RN4B |
 | Token correctement stocké | ✅ satisfait | access token mémoire, refresh token SecureStore, purge logout/cache |
 | API calls prêts | ✅ satisfait | `@enistere/api-client-fetch` intégré, `authedRequest`, Query layer |
-| Upload via fetch fonctionne | ⚠️ partiel | primitives `useUploadMutation` et FormData prêtes ; pas de runtime mobile upload prouvé |
+| Upload via fetch fonctionne | ✅ satisfait | `useUploadMutation` primitives + écran `app/(app)/upload.tsx` RN36 ; smoke Android étendu (`POST /files` mock, fixture `enistere-smoke.txt`, `Upload complete` vérifié) |
 | UI base components existent | ✅ satisfait | `Screen`, `Text`, `Button`, Settings shell, tokens UI Kit RN35 |
 | Loading/error/empty states existent | ✅ satisfait | `LoadingState`, `ErrorState`, `EmptyState`, aliases `*View` RN35 |
 
-Résultat : **7/8 satisfaits**, **1/8 partiel**.
+Résultat : **8/8 satisfaits** (B1 fermé par RN36).
 
 ## 4. Modules obligatoires §9
 
@@ -56,7 +56,7 @@ Résultat : **7/8 satisfaits**, **1/8 partiel**.
 | App structure Expo / Expo Router / protected routes | ✅ |
 | Auth flow / token management / Secure storage | ✅ |
 | API client officiel | ✅ |
-| Upload client fetch + FormData | ⚠️ primitives prêtes, runtime non prouvé |
+| Upload client fetch + FormData | ✅ primitives prêtes + runtime prouvé Android (RN36) |
 | Query client / server state | ✅ |
 | State management local | ✅ |
 | Theme system / UI components minimal | ✅ |
@@ -70,13 +70,13 @@ Résultat : **7/8 satisfaits**, **1/8 partiel**.
 
 ## 5. Réserves bloquantes pour `VALIDE_V1`
 
-### B1 — Upload runtime mobile non prouvé
+### B1 — Upload runtime mobile ✅ fermé (RN36)
 
-RN7 fournit les primitives sûres : `MobileFile`, `useUploadMutation`,
-`apiClient.files.upload`, redaction et absence de cache durable. Il manque une preuve
-runtime mobile gouvernée : écran ou shell de diagnostic générique, soumission d'un
-fichier sur Android, et vérification que le parcours utilise le client officiel sans
-fuite de token, URL signée ou contenu.
+RN36 ajoute `app/(app)/upload.tsx` (écran protégé générique, formulaire RHF + Zod,
+`useUploadMutation` via le client officiel, états `LoadingState`/`MessageState`/`ErrorState`),
+`ROUTES.upload`, le lien depuis Home et étend le smoke Android (`POST /files` mock,
+fixture `enistere-smoke.txt` via `adb shell`, vérification `Upload complete` et
+`uploadCount >= 1`). Aucune URL signée, token ni payload serveur en log, cache ou store.
 
 ### B2 — Parité iOS non exécutée
 

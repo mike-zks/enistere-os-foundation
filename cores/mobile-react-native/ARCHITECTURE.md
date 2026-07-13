@@ -380,7 +380,9 @@ logout** pour purger le cache TanStack Query de manière déterministe.
 ## 16. Upload sécurisé multipart (RN 7)
 
 RN 7 prépare les **primitives d'upload** au-dessus du client officiel et de la
-couche server-state, **sans endpoint métier, sans écran, sans logique applicative**.
+couche server-state, **sans endpoint métier, sans logique applicative**.
+**RN36** ajoute l'écran générique de diagnostic upload (`app/(app)/upload.tsx`) qui prouve le chemin
+runtime `useUploadMutation` sur Android smoke (fixture hardcodée — aucun picker natif).
 
 - **Descripteur de fichier RN (`src/upload/file.ts`, agnostique)** : `MobileFile`
   = `{ uri, name, type }` — défini ici (pas importé) pour rester **pur/testable** ;
@@ -411,8 +413,10 @@ couche server-state, **sans endpoint métier, sans écran, sans logique applicat
 - **Tests** (`node --test`) : `upload-file` (`isMobileFile`, `describeFileForLog`
   **sans fuite d'`uri`**, `isAllowedFileType`) + `query-errors` 413/415. Le hook
   (React/TanStack/ESM) est **typecheck** seulement, hors build Node.
-- **Différés** : écran/picker d'upload, progression, multi-upload, suppression/
-  quarantaine/restauration (présents dans le package, **non câblés**).
+- **Écran diagnostics** : `app/(app)/upload.tsx` (RN36) — RHF+Zod (sélection catégorie), fixture hardcodée,
+  affiche `upload.variables?.category` en succès (**jamais** de champ serveur — ADR-007/015).
+- **Différés** : picker natif, progression, multi-upload, suppression/quarantaine/restauration
+  (présents dans le package, **non câblés**).
 
 ## 17. Logger / observabilité client (RN 8)
 
