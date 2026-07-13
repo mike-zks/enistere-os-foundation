@@ -1135,9 +1135,14 @@ persisté ici.
   défense-en-profondeur, **store défaillant best-effort sans throw**, **listener
   isolé**, **logs `{operation,count}` sans clé/valeur**, tolérance input invalide).
   Module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
-- **Différés** : adaptateur réel MMKV/AsyncStorage (sous **ADR-015 §15/§16** — choix
-  par projet, **RN 20 ne décide aucun stockage natif réel**), chiffrement local,
-  hook `usePreference` optionnel, migration/versioning de schéma de préférences.
+- **Décision RN37** : l'adaptateur natif (MMKV/AsyncStorage) est **délégué aux projets dérivés**
+  (réserve Foundation V1 formellement acceptée — `MOBILE_RN37_PREFERENCE_STORE_DECISION.md`).
+  MMKV rejeté pour la Foundation (JSI natif → brise Expo Go). AsyncStorage rejeté (choix arbitraire).
+  Pattern identique aux 10 autres seams Foundation. ADR-015 §15/§16 délèguent explicitement aux projets.
+  **Câblage projet MMKV** : `createPreferenceService({ store: mmkvAdapter })` (voir rapport §6).
+  **Câblage projet AsyncStorage** : `createPreferenceService({ store: asyncStorageAdapter })` (voir §6).
+- **Différés (projets dérivés)** : chiffrement local, hook `usePreference` optionnel,
+  migration/versioning de schéma de préférences.
 
 ## 30. Consentement télémétrie / privacy gate — primitives génériques (RN 21)
 

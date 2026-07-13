@@ -117,7 +117,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   argon2id non conservée. Scripts versionnés : `backup-postgres.sh`, `backup-minio.sh`, `rotate-smoke-account.sh`.
   **Aucun secret dans le dépôt.** **Restent** : environnements protégés, monitoring continu, rollback automatisé,
   scan/signature image, `api-smoke` requis.
-- **Mobile Core IMPLEMENTATION_AVANCEE** : `mobile-react-native` → **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review 2026-07-13 ; §9.4 **8/8** satisfaits après RN36) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
+- **Mobile Core IMPLEMENTATION_AVANCEE** : `mobile-react-native` → **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review 2026-07-13 ; §9.4 **8/8** satisfaits ; B1 ✅ RN36 ; B3 ✅ RN37 réserve formellement acceptée ; B2 seule réserve active — iOS smoke Linux) — **RN35** (tokens alignés verbatim UI Kit) ; **Expo SDK 55** / Expo Router. RN 1
   (starter, PR #11) + **RN 2 auth/session** (**AuthEngine** agnostique abonné par `AuthProvider` via
   `useSyncExternalStore` ; états `loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired` ;
   **SessionStore** SecureStore + validation, access token **en mémoire** ADR-015 ; refresh coalescé ; `401`→refresh→
@@ -1538,17 +1538,26 @@ non bloquantes : coverage publiée, dashboards qualité, workflows avancés, ADR
 
 **✅ Mobile Core V1 Readiness Review : RÉALISÉ** (2026-07-13) :
 rapport `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`. Mobile Core React Native passe de
-**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits**
-à la date du review (B1 upload runtime non prouvé).
+**`STARTER_UI_KIT_ALIGNED`** à **`IMPLEMENTATION_AVANCEE`**. À la date du review initial, critères
+roadmap §9.4 : **7/8 satisfaits** (B1 upload runtime non prouvé). Après RN36/RN37, critères §9.4 :
+**8/8 satisfaits** ; B1 fermé ; B3 fermé comme réserve formellement acceptée ; B2 iOS reste la seule réserve active.
 
 **✅ Mobile Core RN36 — upload runtime starter proof : RÉALISÉ** (2026-07-13) :
 écran protégé générique `app/(app)/upload.tsx` + `ROUTES.upload` + lien depuis Home. `useUploadMutation`
 / RHF+Zod / LoadingState/MessageState/ErrorState / fixture smoke hardcodée (no picker). Smoke Android
 étendu : création fixture `adb shell sh -c`, mock `POST /files` (201), navigate → submit → `waitForNode('Upload complete')`.
-Critères §9.4 : **8/8** satisfaits. B1 fermé. B2 (iOS smoke) différé macOS/Xcode. B3 (PreferenceStore seam).
-`VALIDE_V1` reste différé : B2 non résolu, B3 seam non matérialisé.
-Détail :
-[`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
+Critères §9.4 : **8/8** satisfaits. B1 fermé. À la date RN36, `VALIDE_V1` restait différé par
+B2 (iOS smoke) et B3 (PreferenceStore seam). RN37 a ensuite fermé B3 comme réserve formellement acceptée.
+
+**✅ Mobile Core RN37 — PreferenceStore native strategy decision (B3) : RÉALISÉ** (2026-07-13) :
+rapport `MOBILE_RN37_PREFERENCE_STORE_DECISION.md`. Analyse 4 options (seam, AsyncStorage, MMKV, délégation).
+Décision : **store natif délégué aux projets dérivés — réserve formellement acceptée**.
+MMKV rejeté (JSI → brise Expo Go + smoke). AsyncStorage rejeté (choix arbitraire entre deux options valides
+per ADR-015). Seam `PreferenceStore` + `createPreferenceService` + gardes + placeholder + 367 tests agnostiques
+= livrable « storage service » Foundation V1 (§9.3 roadmap). Pattern identique aux 10 autres seams Foundation.
+**B3 fermé.** `VALIDE_V1` différé uniquement par **B2 — iOS smoke** (Linux/macOS).
+Prochaine action : RN31 si macOS/Xcode disponible, ou Mobile Core V1 final readiness decision.
+Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 10. Règles à ne pas violer
 

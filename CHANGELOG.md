@@ -6,6 +6,25 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core RN37 — PreferenceStore native strategy decision (B3 fermé)
+
+- Nouveau rapport : `docs/project-status/MOBILE_RN37_PREFERENCE_STORE_DECISION.md`.
+- Analyse formelle des 4 options : seam+placeholder, AsyncStorage, MMKV, délégation aux projets dérivés.
+- **Décision : Option D — store natif (MMKV/AsyncStorage) délégué aux projets dérivés.**
+  - MMKV rejeté : module JSI natif → brise Expo Go + pipeline smoke.
+  - AsyncStorage rejeté : choix arbitraire entre deux options valides selon ADR-015 §15/§16.
+  - Seam `PreferenceStore` + `createPreferenceService` + gardes + placeholder + 367 tests agnostiques
+    constituent le « storage service » de Foundation V1 (§9.3 roadmap). Pattern identique aux 10 autres
+    seams Foundation (permissions, notifications, biometrics, i18n, analytics, crash, network, lifecycle,
+    feature flags, clipboard). ADR-015 délègue explicitement aux projets dérivés.
+- Gap B3 **fermé comme réserve formellement acceptée non-bloquante pour `VALIDE_V1`**.
+- Après RN37 : `VALIDE_V1` différé uniquement par B2 (iOS smoke, Linux/macOS).
+- Mises à jour : `MOBILE_CORE_V1_READINESS_REVIEW.md` §B3, `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `IMPLEMENTATION_MATRIX.md`, `SESSION_HANDOFF.md`, `DECISIONS_REGISTER.md`, `cores/mobile-react-native/README.md`,
+  `cores/mobile-react-native/ARCHITECTURE.md` §29.
+- Aucune dépendance, aucun changement runtime, aucun workflow modifié.
+- Vérifications : `quality-gates docs` ✅, `git diff --check` ✅.
+
 ### Mobile Core RN36 — Upload runtime starter proof
 
 - Nouveau fichier : `cores/mobile-react-native/app/(app)/upload.tsx` — écran protégé générique

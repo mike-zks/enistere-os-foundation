@@ -134,22 +134,35 @@
 > ✅ **Mobile Core V1 Readiness Review : RÉALISÉ** (2026-07-13).
 > Rapport : `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md`.
 > Décision : Mobile Core React Native passe de **`STARTER_UI_KIT_ALIGNED`** à
-> **`IMPLEMENTATION_AVANCEE`**. Critères roadmap §9.4 : **7/8 satisfaits** ; `VALIDE_V1`
-> différé par l'upload runtime mobile non prouvé, le smoke iOS bloqué par absence macOS/Xcode,
-> et le store natif non sensible encore en seam.
+> **`IMPLEMENTATION_AVANCEE`**. Après RN36/RN37, critères roadmap §9.4 : **8/8 satisfaits** ;
+> B1 upload runtime fermé, B3 PreferenceStore fermé comme réserve formellement acceptée.
+> `VALIDE_V1` reste différé uniquement par **B2 — smoke iOS** (macOS/Xcode ou device iOS requis,
+> ou décision formelle d'acceptation de réserve environnementale).
 >
 > ✅ **Mobile Core RN36 — upload runtime starter proof : RÉALISÉ** (2026-07-13).
 > Livrables : `app/(app)/upload.tsx` (écran protégé RHF+Zod, `useUploadMutation` via client officiel,
 > `LoadingState`/`MessageState`/`ErrorState`) + `ROUTES.upload` + lien Home + smoke Android étendu
 > (`POST /files` mock, fixture `enistere-smoke.txt` via `adb shell`, vérification `Upload complete` +
-> `uploadCount >= 1`). Gap B1 fermé. Critères §9.4 : **8/8 satisfaits**. `VALIDE_V1` différé :
-> parité iOS non exécutée (B2, macOS/Xcode requis), store natif non sensible encore en seam (B3).
+> `uploadCount >= 1`). Gap B1 fermé. Critères §9.4 : **8/8 satisfaits**. À la date RN36,
+> `VALIDE_V1` restait différé par B2 et B3 ; RN37 a ensuite fermé B3 comme réserve formellement acceptée.
 > Vérifications : typecheck ✅, lint ✅, test 367/367 ✅, expo-doctor 19/19 ✅, export iOS ✅,
 > `git diff --check` ✅, `quality-gates docs` 2/2 ✅.
 >
-> **Prochaine action** : à décider. Candidats non bloqués : Mobile RN31 si macOS/Xcode ou device iOS
-> réel disponible (B2) ; décision PreferenceStore natif (B3, MMKV vs AsyncStorage via ADR) ; ou autre
-> cadrage explicite. Mobile Core `VALIDE_V1` attend au minimum B2 ou acceptation formelle des réserves.
+> ✅ **Mobile Core RN37 — PreferenceStore native strategy decision (B3) : RÉALISÉ** (2026-07-13).
+> Rapport : `docs/project-status/MOBILE_RN37_PREFERENCE_STORE_DECISION.md`.
+> Décision : **store natif (MMKV/AsyncStorage) délégué aux projets dérivés — réserve formellement acceptée**.
+> MMKV rejeté (JSI natif → brise Expo Go + smoke). AsyncStorage rejeté (choix arbitraire entre deux options
+> valides selon ADR-015). Option D retenue : seam `PreferenceStore` + `createPreferenceService` + gardes +
+> placeholder + 367 tests agnostiques constituent le « storage service » Foundation V1 (§9.3 roadmap).
+> Pattern identique aux 10 autres seams+placeholders de la Foundation (permissions, notifications,
+> biometrics, i18n, analytics, crash, network, lifecycle, feature flags, clipboard).
+> ADR-015 §15/§16 délèguent **explicitement** le choix du store natif aux projets dérivés.
+> Gap B3 **fermé comme réserve formellement acceptée non-bloquante**.
+>
+> **Prochaine action** : Mobile Core B2 (iOS smoke). Candidats :
+> - **Mobile Core RN31** si macOS/Xcode ou device iOS réel disponible (ferme B2 → ouvre VALIDE_V1) ;
+> - **Mobile Core V1 final readiness decision** si B2 est accepté comme réserve environnementale (le script
+>   iOS existe, blocage Linux documenté RN30/RN31 → déclarer VALIDE_V1 avec réserve B2 formalisée).
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

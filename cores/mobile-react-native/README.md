@@ -1,6 +1,6 @@
 # Mobile Core React Native — Usable Starter Shell
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review, 2026-07-13 ; RN35 aligné UI Kit, Android smoke validé, iOS smoke bloqué localement par absence macOS/Xcode)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Mobile Core V1 Readiness Review, 2026-07-13 ; RN36 gap B1 fermé ; RN37 gap B3 fermé réserve formellement acceptée ; seule réserve active : B2 iOS smoke Linux)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
@@ -340,9 +340,7 @@ du spec (§37/§53) et `docs/project-status/NEXT_ACTIONS.md`.
 
 ## Prochaine mission recommandée
 
-**Mobile Core RN36 — upload runtime starter proof**
-: ajouter une surface protégée générique de diagnostic upload qui réutilise
-`useUploadMutation`, RHF/Zod, les états `*View` et le client officiel, puis
-prouver le parcours sur Android smoke sans endpoint métier, sans SDK picker natif
-non décidé et sans toucher Auth/Query. RN31 reste en attente d'un environnement
-macOS/Xcode ou device iOS réel.
+**Mobile Core B2 — iOS smoke / final readiness decision**
+: exécuter RN31 sur macOS/Xcode ou device iOS réel si l'environnement est disponible.
+Sinon, produire une décision finale de readiness V1 qui accepte explicitement B2 comme
+réserve environnementale documentée. Ne pas déclarer `VALIDE_V1` sans traiter B2.
