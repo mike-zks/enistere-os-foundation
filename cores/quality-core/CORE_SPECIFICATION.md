@@ -13,14 +13,17 @@ Ce core reste non-runtime. Il ne crée pas de workflow GitHub, pas de script d'e
 pas de dépendance, pas de configuration de package, pas de code applicatif et pas d'infrastructure
 réelle.
 
-Statut courant : **IMPLEMENTATION_AVANCEE** (Quality Core Advanced Readiness Review, 2026-07-12).
+Statut courant : **VALIDE_V1** (Quality Core V1 Readiness Review, 2026-07-13).
+
+> **Quality Core V1 Readiness Review** promeut le core de `IMPLEMENTATION_AVANCEE` à
+> `VALIDE_V1` : critères roadmap §13.4 couverts, gates locaux testés, release process appliqué,
+> prompts IA versionnés, reporting quality local disponible et décisions résiduelles tranchées. Les capacités
+> VF (dashboards, coverage publiée, performance/security checks avancés, RAG IA) restent différées.
 
 > **Quality Core Advanced Readiness Review** promeut le core de `IMPLEMENTATION_PARTIELLE` a
 > `IMPLEMENTATION_AVANCEE` : les criteres roadmap §13.4 sont couverts, la protection `main` est
 > active, la release `foundation-v1.0.0` a utilise le processus gouverne, les prompts IA sont
-> versionnes et les gates documentaires sont integres au scope `quality-gates docs`. `VALIDE_V1`
-> reste differe : automatisation changelog/release, couverture publiee, dashboards qualite et
-> CI qualite avancee restent hors perimetre courant ou VF.
+> versionnes et les gates documentaires sont integres au scope `quality-gates docs`.
 
 > **Quality Core release helper** ajoute `scripts/release-helper.mjs` : helper local sans dependance
 > qui liste les types de release gouvernes et genere un brouillon Markdown de notes de release depuis

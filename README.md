@@ -70,6 +70,5 @@ Voir l'état détaillé et vérifié dans [`docs/project-status/`](docs/project-
 Synthèse courante :
 
 - Foundation V1 publiée : `foundation-v1.0.0`.
-- `api-nestjs`, `web-nextjs`, `ui-kit`, `cloud` et `docs-core` : `VALIDE_V1`.
-- `quality-core` : `IMPLEMENTATION_AVANCEE`.
+- `api-nestjs`, `web-nextjs`, `ui-kit`, `cloud`, `docs-core` et `quality-core` : `VALIDE_V1`.
 - `mobile-react-native` : starter Expo/RN avancé, aligné UI Kit, avec smoke Android validé et iOS bloqué par environnement macOS/Xcode absent.

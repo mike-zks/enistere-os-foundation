@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Core V1 Readiness Review
+
+- Nouveau rapport : `docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md`.
+- Quality Core promu de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+- Justification : critères roadmap §13.4 **7/7**, gates locaux testés, release process appliqué,
+  prompts IA versionnés, ruleset `protect-main` actif, reporting coverage local et décisions résiduelles tranchées.
+- Réserves non bloquantes : coverage publiée, dashboards qualité, workflows avancés et ADR-019→022 restent V2/VF.
+- Aucun workflow, ruleset, dépendance, runtime, secret, accès serveur, tag ou release modifié.
+- Prochaine action : retour pilotage global.
+
 ### Quality Core coverage standardization decision
 
 - Nouveau rapport : `docs/project-status/QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md`.

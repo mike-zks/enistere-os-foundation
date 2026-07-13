@@ -126,6 +126,14 @@
 > **Prochaine action** : Quality Core V1 Readiness Review — vérifier si Quality Core peut passer de
 > `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`.
 
+> ✅ **Quality Core V1 Readiness Review : RÉALISÉ** (2026-07-13).
+> Rapport : `docs/project-status/QUALITY_CORE_V1_READINESS_REVIEW.md`.
+> Decision : Quality Core passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Les critères roadmap
+> §13.4 sont couverts ; les réserves restantes relèvent de V2/VF avancée.
+>
+> **Prochaine action** : retour pilotage global — choisir le prochain core prioritaire selon les prérequis
+> disponibles. Mobile RN31 reste conditionné à macOS/Xcode ou device iOS réel.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
