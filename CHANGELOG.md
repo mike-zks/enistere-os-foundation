@@ -6,6 +6,28 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 3 — Auth shell + routing guards
+
+- Auth primitives : `AuthStatus` (loading/authenticated/unauthenticated/expired), `AuthState` (status +
+  userId opaque — access token intentionnellement absent de l'état), `SessionEnvelope`.
+- `SessionStore` seam (interface abstraite) + `InMemorySessionStore` placeholder. Aucun stockage natif réel
+  à ce stade — `flutter_secure_storage` délégué à Flutter 4/5 avec le refresh token réel.
+- `AuthController` (`Notifier<AuthState>`) : `_accessToken` en mémoire privée uniquement, `signIn` /
+  `signOut` placeholders sans backend réel, `_initialize()` fail-safe.
+- `routerProvider` GoRouter : bridge `ValueNotifier<AuthState>` → `refreshListenable`, guards
+  (loading → `/`, authenticated → `/home`, unauthenticated/expired → `/sign-in`).
+  Le provider GoRouter n'est PAS recréé lors des changements d'état auth (ref.listen uniquement).
+- Écrans : `SplashScreen` (CircularProgressIndicator), `SignInScreen` (bouton placeholder sans backend),
+  `HomeScreen` mis à jour (`ConsumerWidget` + bouton sign-out).
+- Tests : `flutter test` 38/38 ✅ — unit auth controller (9), session store (4), router guard widget (5),
+  theme (16), app widget (4) · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅ ·
+  quality-gates docs 2/2 ✅.
+- Mobile Core Flutter : **`STARTER_INITIALISE`** → **`AUTH_SHELL_READY`**.
+- Mises à jour : `cores/mobile-flutter/README.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`.
+- Interdits respectés : aucun backend réel ; aucun appel réseau ; aucun token persistant ; aucun
+  changement Mobile RN / Web / API / UI Kit / Cloud ; aucun workflow CI.
+
 ### Mobile Core Flutter 2 — Starter minimal Flutter gouverné
 
 - Livrables : `cores/mobile-flutter/pubspec.yaml`, `analysis_options.yaml`, `lib/main.dart`,

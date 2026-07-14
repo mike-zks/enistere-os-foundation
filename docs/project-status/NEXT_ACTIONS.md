@@ -201,9 +201,21 @@
 > Statut `mobile-flutter` : **`SPECIFICATION_DOCUMENTAIRE`** → **`STARTER_INITIALISE`**.
 > Aucune logique métier, aucun endpoint réel, aucun SDK analytics/crash.
 >
-> **Prochaine action** : **Mobile Core Flutter 3 — Auth + navigation**.
-> Objectif : `AuthController` Riverpod + go_router guards (public/protégé) + `flutter_secure_storage`
-> + écran login minimal. Aucun backend réel, aucun endpoint métier.
+> ✅ **Mobile Core Flutter 3 — Auth shell + routing guards : RÉALISÉ** (2026-07-14).
+> Livrables : `lib/src/core/auth/` (`AuthStatus`, `AuthState`, `SessionEnvelope`, `SessionStore` seam +
+> `InMemorySessionStore` placeholder, `AuthController` Riverpod `Notifier`),
+> `lib/src/core/navigation/router.dart` (`routerProvider` GoRouter + `ValueNotifier` bridge + redirect guards),
+> `lib/src/features/splash/splash_screen.dart`, `lib/src/features/auth/sign_in_screen.dart`,
+> `lib/src/features/home/home_screen.dart` mis à jour (sign-out).
+> Invariant sécurité : access token en mémoire uniquement (`AuthController._accessToken`), jamais dans
+> `AuthState`, jamais dans les logs, jamais dans les préférences.
+> Tests : `flutter test` 38/38 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅.
+> Statut `mobile-flutter` : **`STARTER_INITIALISE`** → **`AUTH_SHELL_READY`**.
+> Aucun backend réel, aucun appel réseau, aucun stockage persistant réel.
+>
+> **Prochaine action** : **Mobile Core Flutter 4 — Client Dio + providers**.
+> Objectif : `DioClient` + intercepteurs (Auth/Logging) + `Freezed` modèles + health provider.
+> Aucun endpoint métier.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

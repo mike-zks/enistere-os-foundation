@@ -289,7 +289,7 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **IMPLEMENTATION_AVANCEE** : **Quality Core** (`cores/quality-core/`) — Quality Core V2 Readiness Review + Advanced Readiness Review + QC7 (2026-07-12) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 10 checks documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes) + **`AI_PROMPT_GOVERNANCE.md`** + 3 checklists + templates GitHub PR/Issues + prompts catalogués + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). Processus utilisé pour publier `foundation-v1.0.0` ; Docs Core consomme le scope `quality-gates docs`. **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; les 2 checks `images` restent recommandés phase 2. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
-- **`STARTER_INITIALISE`** : `mobile-flutter` (Flutter 2, 2026-07-14 — starter `pubspec.yaml` + `lib/` + ThemeData ADR-034 + tests 20/20).
+- **`AUTH_SHELL_READY`** : `mobile-flutter` (Flutter 3, 2026-07-14 — `AuthController` + `SessionStore` seam + GoRouter guards + 38 tests).
 - **Vides** : `ai-core`, `api-spring`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
@@ -1593,7 +1593,17 @@ Statut `mobile-flutter` : **`SPECIFICATION_DOCUMENTAIRE`**. Aucun code Dart, `pu
 `lib/src/app/router.dart` (GoRouter), `lib/src/features/home/home_screen.dart`.
 Tests : `flutter test` 20/20 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅.
 Statut `mobile-flutter` : **`STARTER_INITIALISE`**.
-Prochaine action : **Mobile Core Flutter 3 — Auth + navigation**.
+
+**✅ Mobile Core Flutter 3 — Auth shell + routing guards : RÉALISÉ** (2026-07-14) :
+`lib/src/core/auth/` : `AuthStatus` (loading/authenticated/unauthenticated/expired), `AuthState`
+(status + userId, JAMAIS de token), `SessionEnvelope`, `SessionStore` seam + `InMemorySessionStore`,
+`AuthController` (Notifier<AuthState>, `_accessToken` privé en mémoire uniquement).
+`lib/src/core/navigation/router.dart` : `routerProvider` GoRouter + `ValueNotifier<AuthState>` bridge +
+redirect guards (loading → splash, authenticated → home, unauthenticated → sign-in).
+`SplashScreen`, `SignInScreen` (placeholder sans backend), `HomeScreen` (sign-out).
+Tests : `flutter test` 38/38 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 ✅.
+Statut `mobile-flutter` : **`AUTH_SHELL_READY`**.
+Prochaine action : **Mobile Core Flutter 4 — Client Dio + providers**.
 
 ## 10. Règles à ne pas violer
 
