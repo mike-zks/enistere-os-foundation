@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, 2026-07-14)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, Flutter 10 B4 fermé, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -39,7 +39,7 @@ cores/mobile-flutter/
 ├── scripts/
 │   └── smoke.sh                            ← Flutter 6 (smoke runner : headless / --android / --ios)
 ├── integration_test/
-│   └── smoke_test.dart                     ← Flutter 6 + Flutter 8 (7 tests device — 5 originaux + 2 SecureStorage B2, B3 passant)
+│   └── smoke_test.dart                     ← Flutter 6 + Flutter 8 (7 tests device — 5 originaux + 2 SecureStorage B2, B3+B4 passants)
 ├── lib/
 │   ├── main.dart                           ← Flutter 2 (ProviderScope + EnistereApp)
 │   ├── app.dart                            ← Flutter 3 (routerProvider watch)
@@ -64,6 +64,11 @@ cores/mobile-flutter/
 │       │   │   └── api_config.dart        ← Flutter 4 (ApiConfig : baseUrl, timeouts, commonHeaders)
 │       │   ├── navigation/
 │       │   │   └── router.dart            ← Flutter 3 (routerProvider GoRouter + guards)
+│       │   ├── states/
+│       │   │   ├── loading_state.dart     ← Flutter 10 (LoadingState — indicateur + message + Semantics label)
+│       │   │   ├── empty_state.dart       ← Flutter 10 (EmptyState — title + description + action OutlinedButton)
+│       │   │   ├── error_state.dart       ← Flutter 10 (ErrorState — title + message + action + Semantics liveRegion + colorDanger)
+│       │   │   └── success_state.dart     ← Flutter 10 (SuccessState — title + message + action + Semantics liveRegion + colorSuccess)
 │       │   └── upload/
 │       │       ├── app_file.dart          ← Flutter 5 (AppFile + SafeFileDescriptor + describeFileForLog)
 │       │       ├── file_category.dart     ← Flutter 5 (FileCategory enum + apiValue)
@@ -102,10 +107,11 @@ cores/mobile-flutter/
         ├── router_guard_test.dart         ← Flutter 3 (5 tests guards)
         ├── splash_screen_test.dart        ← Flutter 6 (4 tests)
         ├── sign_in_screen_test.dart       ← Flutter 6 (5 tests)
-        └── home_screen_test.dart          ← Flutter 6 (7 tests)
+        ├── home_screen_test.dart          ← Flutter 6 (7 tests)
+        └── states_test.dart               ← Flutter 10 (39 tests — LoadingState/EmptyState/ErrorState/SuccessState)
 ```
 
-La prochaine mission est **Flutter 10 — UI states** (`LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere).
+La prochaine mission est **Flutter 11 — Login form** (`SignInScreen` email + password + validation + erreur accessible — ferme B5/C9).
 
 ## Stack technique
 
@@ -145,6 +151,6 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 7 | Platform dirs + smoke Android | Dossiers `android/` + smoke `emulator-5554` 5/5 ✅ — B1 FERMÉ |
 | Flutter 8 | SecureStorage seam + adapter | `flutter_secure_storage` + `SecureSessionStore` + `restoreSession()` ✅ — B2 FERMÉ |
 | Flutter 9 | RefreshInterceptor | 401 → `refresh()` coalescent → 1 retry → purge ✅ — B3 FERMÉ |
-| Flutter 10 | UI states | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere |
+| Flutter 10 | UI states | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere ✅ — B4 FERMÉ |
 | Flutter 11 | Login form | `SignInScreen` email + password + validation + erreur accessible |
 | Flutter V1 final | V1 Final Readiness | `VALIDE_V1` quand Flutter 7→11 réalisés |

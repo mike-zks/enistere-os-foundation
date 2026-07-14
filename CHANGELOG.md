@@ -6,6 +6,24 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 10 — UI states Foundation (B4)
+
+- `LoadingState` : `CircularProgressIndicator` couleur primaire `ColorScheme` ; message optionnel ; `Semantics(label:)` accessible.
+- `EmptyState` : `title` obligatoire, `description?`, action `OutlinedButton` (garde `actionLabel + onAction` requis).
+- `ErrorState` : `title` obligatoire, `message?`, action `FilledButton` ; `Semantics(liveRegion: true)` ; couleur titre depuis `EnistereThemeExtension.colorDanger`.
+- `SuccessState` : `title` obligatoire, `message?`, action `FilledButton` ; `Semantics(liveRegion: true)` ; couleur titre depuis `EnistereThemeExtension.colorSuccess`.
+- Tous les widgets lisent les espacements depuis `EnistereThemeExtension` (spacing, padding) — tokens Enistere ADR-034.
+- `test/widget/states_test.dart` : 39 tests widget (LoadingState 9 + EmptyState 10 + ErrorState 10 + SuccessState 10).
+  - Groupes par widget : rendu title/message/action · callback · guard action sans actionLabel · semantics · couleur extension · light/dark sans throw · overflow texte long.
+- Smoke `emulator-5554` (Pixel 6a, Android API 33, x86_64) : **7/7 passés en 10s** ✅ (aucune régression).
+- **B4 FERMÉ.** C7 : ❌ → ✅. Score §29 : 7/11 → 8/11. B5 (login form) restant.
+- 213/213 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 213/213 ✅ ·
+  `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Rapport : `docs/project-status/MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md`.
+- Statuts mis à jour : `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter 9 — RefreshInterceptor + refreshSession coalescent
 
 - `AuthApi` abstract interface + `PlaceholderAuthApi` — seam testable sans backend réel (Foundation V1).
