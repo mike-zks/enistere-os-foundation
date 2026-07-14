@@ -6,6 +6,35 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 4 — Client Dio + providers
+
+- Dépendance : `dio: ^5.10.0` (Dart SDK >=2.18.0 <4.0.0, compatible Dart 3.12.2). Aucun Freezed /
+  build_runner / code generation requis pour cette mission.
+- `ApiConfig` : `baseUrl`, `connectTimeoutMs` (10 000 ms), `receiveTimeoutMs` (30 000 ms),
+  `sendTimeoutMs` (30 000 ms), `commonHeaders` immuable. Aucun token, aucun secret.
+- `AppApiError` — `sealed class implements Exception` (Dart 3 natif, exhaustivité switch compile-time) :
+  `NetworkError`, `TimeoutError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`,
+  `ValidationError` (errors map), `TooLargeError`, `UnsupportedTypeError`, `RateLimitedError`,
+  `ServerError`, `UnknownApiError`. Aucun Freezed.
+- `createDioClient(config, tokenReader, correlationIdReader?, logger?)` — intercepteurs dans l'ordre :
+  `_AuthInterceptor` (injecte `Authorization: Bearer $token` dynamiquement via `tokenReader()` à chaque
+  requête — token jamais stocké dans la config ; injecte `X-Request-Id` si `correlationIdReader` fourni) →
+  `LoggingInterceptor` (log method + path uniquement — JAMAIS body / Authorization / query params / token
+  / URL signée) → `ErrorInterceptor` (`DioException` → `AppApiError` encapsulé dans `error`).
+- `mapDioError(DioException) → AppApiError` — fonction top-level testable indépendamment.
+- `apiConfigProvider` Riverpod + `dioClientProvider` Riverpod : `tokenReader` = fermeture sur
+  `AuthController.accessToken` (lecture dynamique). 401 surfacé sans refresh automatique.
+- Tests `flutter test` 86/86 ✅ : `app_api_error_test.dart` (12), `error_interceptor_test.dart` (19),
+  `logging_interceptor_test.dart` (6), `dio_client_test.dart` (11), auth controller (9), session store
+  (4), router guards (5), theme (16), app widget (4) · `flutter analyze` 0 issues ✅ ·
+  `dart format` 0 changements ✅ · quality-gates docs 2/2 ✅.
+- Mobile Core Flutter : **`AUTH_SHELL_READY`** → **`DIO_CLIENT_READY`**.
+- Mises à jour : `cores/mobile-flutter/README.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`.
+- Interdits respectés : aucun backend réel ; aucun endpoint métier ; aucun OpenAPI generator /
+  retrofit.dart ; aucun refresh 401 complet ; aucun token dans les logs / exceptions / state / providers
+  persistés ; aucun changement Mobile RN / Web / API / UI Kit / Cloud / workflows CI.
+
 ### Mobile Core Flutter 3 — Auth shell + routing guards
 
 - Auth primitives : `AuthStatus` (loading/authenticated/unauthenticated/expired), `AuthState` (status +

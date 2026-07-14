@@ -12,7 +12,7 @@
 
 Le repository combine la **Phase 0 (stratégie + ADR + spécifications)** et des **implémentations
 techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quality Core et
-Mobile Core React Native sont **VALIDE_V1**. Le **Mobile Core Flutter** est **`AUTH_SHELL_READY`** (Flutter 3, 2026-07-14). Les cores vides restent `ai-core`, `api-spring` et `web-angular`.
+Mobile Core React Native sont **VALIDE_V1**. Le **Mobile Core Flutter** est **`DIO_CLIENT_READY`** (Flutter 4, 2026-07-14). Les cores vides restent `ai-core`, `api-spring` et `web-angular`.
 
 | Catégorie | État |
 |---|---|
@@ -26,12 +26,12 @@ Mobile Core React Native sont **VALIDE_V1**. Le **Mobile Core Flutter** est **`A
 | Core mobile (socle) | **`mobile-react-native`** — **VALIDE_V1** (Mobile Core V1 final readiness decision, 2026-07-13) : socle Expo SDK 55 / Expo Router RN 1→37. Primitives RN 1→25, Settings RN26, shell RN27, smoke Android RN28/RN29/RN34B, préflight iOS RN30 bloqué Linux, RN31 en attente macOS/Xcode, RN32 formulaire sign-in RHF/Zod, RN33 thème, RN34 patch Expo SDK, RN35 alignement UI Kit, **RN36 upload diagnostics screen (gap B1 fermé)**, **RN37 décision PreferenceStore natif (gap B3 fermé — réserve formellement acceptée : seam `PreferenceStore` + `createPreferenceService` + placeholder + 367 tests agnostiques ; store natif délégué aux projets dérivés per ADR-015)**. Preuves : typecheck + lint + **test 367/367** `node --test` + expo-doctor **19/19** + `expo export -p ios` + `git diff --check` verts. `npm run smoke:android` **passed**. `npm run smoke:ios` blocked (Linux). B2 iOS est acceptée comme réserve environnementale documentée, sans preuve iOS artificielle. Critères §9.4 **8/8 satisfaits**. |
 | Quality Core | **`quality-core`** — **VALIDE_V1** (Quality Core V1 Readiness Review, 2026-07-13) : `CORE_SPECIFICATION.md`, `README.md`, `QUALITY_GATES_MATRIX.md`, `BRANCH_PROTECTION_RUNBOOK.md`, **`RELEASE_PROCESS_RUNBOOK.md`**, **`AI_PROMPT_GOVERNANCE.md`**, templates GitHub PR/Issues, 3 checklists, `scripts/quality-gates.mjs` + tests, `scripts/release-helper.mjs` + tests, `scripts/quality-report.mjs` + tests ; prompts catalogués ; processus utilisé pour publier `foundation-v1.0.0` ; gates documentaires consommes par Docs Core ; coverage locale reconnue pour UI Kit/Web/API (3/8 scopes). **Protection `main` active via GitHub Rulesets** (`protect-main`, enforcement `active`, 8 checks requis). Les deux jobs `images (...)` sont recommandés pour promotion humaine, non appliqués automatiquement. Aucun workflow modifié, aucune dépendance, aucun changement runtime. |
 | Docs Core | **`docs-core`** — **VALIDE_V1** (Docs Core V1 Readiness Review, 2026-07-12) : `CORE_SPECIFICATION.md`, `README.md`, index central `docs/README.md` (strategy, ADR, project-status, runbooks, prompts, quality gates) + audit `DOCS_CORE_NAVIGATION_AUDIT.md` + onboarding par role `CONTRIBUTOR_ONBOARDING.md` + glossaire `GLOSSARY.md` + guides `DOCUMENTATION_MAINTENANCE_GUIDE.md` / `CORE_STATUS_REVIEW_GUIDE.md` + script `check-doc-links.mjs` testé + scope `quality-gates docs` integrant le link check + rapports `DOCS_CORE_V2_READINESS_REVIEW.md` / `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md` / `DOCS_CORE_CI_GATE_DECISION.md` / `DOCS_CORE_V1_READINESS_REVIEW.md`. Aucun runtime applicatif, workflow, dépendance, RAG, génération ou site documentaire. |
-| Mobile Core Flutter | **`mobile-flutter`** — **`AUTH_SHELL_READY`** (Mobile Core Flutter 3, 2026-07-14) : `AuthController` Riverpod + `SessionStore` seam + `routerProvider` GoRouter guards + `SignInScreen`/`SplashScreen`/`HomeScreen`. Access token mémoire uniquement. Tests 38/38. |
+| Mobile Core Flutter | **`mobile-flutter`** — **`DIO_CLIENT_READY`** (Mobile Core Flutter 4, 2026-07-14) : `ApiConfig` + `AppApiError` sealed (11 sous-types, Dart 3 natif) + `createDioClient` (`_AuthInterceptor` → `LoggingInterceptor` → `ErrorInterceptor`) + `dioClientProvider` Riverpod. `dio: ^5.10.0`. Token injecté dynamiquement, jamais stocké. 401 sans refresh. Logs : method+path uniquement. Tests 86/86. |
 | Cores vides | `ai-core`, `api-spring`, `web-angular` |
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
 | Foundation baseline | **`FOUNDATION_V1_RELEASED`** — release `foundation-v1.0.0` publiée le 2026-07-12 ; revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit/Quality Core `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, CI L1-L4 verte sur `main`, ruleset `protect-main` actif |
 | Release notes | **`FOUNDATION_V1_RELEASED`** — `FOUNDATION_V1_RELEASE_NOTES.md` publié pour `foundation-v1-baseline` ; tag `foundation-v1.0.0` ; GitHub Release publiée |
-| V3 | **En cours** — ADR-034 validé ; Flutter 1 spec ✅ ; Flutter 2 starter ✅ ; Flutter 3 auth shell ✅ (`AUTH_SHELL_READY`) ; prochaine : Flutter 4 Dio |
+| V3 | **En cours** — ADR-034 validé ; Flutter 1 spec ✅ ; Flutter 2 starter ✅ ; Flutter 3 auth shell ✅ ; Flutter 4 Dio client ✅ (`DIO_CLIENT_READY`) ; prochaine : Flutter 5 upload multipart |
 | **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après publication Foundation V1 et suivi post-release ; tag `foundation-v1.0.0` publié sur `2981f2c` ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
@@ -65,7 +65,7 @@ enistere-os-foundation/
     mobile-react-native/  VALIDE_V1 (Expo SDK 55 + Expo Router ; primitives RN 1→25 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29/RN34B ; préflight iOS RN30 bloqué Linux ; RN31 en attente macOS ; RN32 sign-in RHF+Zod ; RN33 thème ; RN34 patch Expo SDK ; RN35 tokens alignés UI Kit + LoadingView/EmptyView/ErrorView + 13 tests ; RN36 upload diagnostics screen + smoke POST /files ; RN37 PreferenceStore decision ; Mobile V1 final readiness 2026-07-13 ; §9.4 8/8 ; B2 iOS réserve environnementale acceptée ; typecheck/lint/test 367/367/expo-doctor 19/19/export iOS verts)
     quality-core/      VALIDE_V1 (gates, checklists, runbooks, templates, prompts, release process utilisé, helper release/reporting)
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
-    mobile-flutter/      AUTH_SHELL_READY (Flutter 3 — AuthController + guards + 38 tests)
+    mobile-flutter/      DIO_CLIENT_READY (Flutter 4 — ApiConfig + AppApiError + Dio client + providers + 86 tests)
     ai-core/ api-spring/ web-angular/   → vides (V3 cadrée ; Flutter 3 livré)
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -87,7 +87,7 @@ enistere-os-foundation/
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 | `docs-core` | oui | oui | **oui** (script link check + guides) | **VALIDE_V1** |
-| `mobile-flutter` | oui | oui | oui (starter + auth shell) | **AUTH_SHELL_READY** (Flutter 3, 2026-07-14 — `AuthController` + `SessionStore` seam + GoRouter guards + 38 tests) |
+| `mobile-flutter` | oui | oui | oui (starter + auth shell + Dio client) | **DIO_CLIENT_READY** (Flutter 4, 2026-07-14 — `ApiConfig` + `AppApiError` sealed + `createDioClient` + `dioClientProvider` + 86 tests) |
 | `quality-core` | oui | oui | **oui** (gouvernance qualité : gates, checklists, runbooks, templates, prompts, release process utilisé ; scripts `quality-gates` + `release-helper` + `quality-report` testés) | **VALIDE_V1** |
 | `web-angular` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
 
