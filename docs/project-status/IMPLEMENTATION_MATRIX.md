@@ -48,6 +48,17 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 6 (2026-07-14)** : tests widget/intégration + smoke livrés —
+> `test/widget/splash_screen_test.dart` (4 tests : SplashScreen render, CircularProgressIndicator, centré, app en loading avec `_BlockingSessionStore`),
+> `test/widget/sign_in_screen_test.dart` (5 tests : heading, bouton, touch target ≥ 44 dp, navigation, couleur primaire),
+> `test/widget/home_screen_test.dart` (7 tests : heading, AppBar, logout icon, userId, ADR-034, ThemeExtension, logout → SignInScreen),
+> `integration_test/smoke_test.dart` (5 tests device — architecture library sans platform dirs, procédure pour projets dérivés),
+> `scripts/smoke.sh` (smoke runner : headless / --android / --ios),
+> `docs/project-status/MOBILE_FLUTTER6_SMOKE_REPORT.md` (136/136 tests headless, blocage Android architectural documenté, iOS bloqué Linux).
+> `integration_test: sdk: flutter` ajouté en dev_dependency.
+> `flutter test` 136/136 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅.
+> Mobile Core Flutter : **`UPLOAD_READY`** → **`TEST_WIDGET_PASSED`**.
+>
 > **Mise à jour Mobile Core Flutter 5 (2026-07-14)** : upload multipart primitives livrés —
 > `lib/src/core/upload/app_file.dart` (`AppFile`, `SafeFileDescriptor`, `describeFileForLog`, `isValidAppFile`, `isAllowedUploadContentType`),
 > `lib/src/core/upload/file_category.dart` (`FileCategory` + `.apiValue`),
@@ -214,7 +225,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (120 tests : theme + unit/auth + widget + unit/api + unit/upload) | — | **UPLOAD_READY** | Flutter 5 : `AppFile` + `SafeFileDescriptor` + `describeFileForLog` (jamais path/nom brut) + `FileCategory` (9 valeurs) + `UploadedFileMetadata` + `DioUploadService` (`FormData` + injectable `MultipartFileFactory`, boundary Dio auto, jamais Content-Type forcé) ; erreurs 413/415/401/réseau via `AppApiError` ; `http_parser: ^4.0.0` | **Flutter 6 — Tests + smoke** |
+| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (136 tests : theme + unit/auth + widget × 3 + unit/api + unit/upload + intégration × 5) | — | **TEST_WIDGET_PASSED** | Flutter 6 : 136/136 tests headless (`flutter test`) ; widget tests splash/sign-in/home ; `integration_test/smoke_test.dart` (5 tests device — procédure projets dérivés) ; `scripts/smoke.sh` ; rapport `MOBILE_FLUTTER6_SMOKE_REPORT.md` ; Android intégration bloqué (architecture library sans platform dirs) ; iOS bloqué Linux | **Flutter V1 Readiness Review** |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 

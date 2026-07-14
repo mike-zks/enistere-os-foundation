@@ -6,6 +6,45 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 6 — Tests + smoke
+
+- Dépendance dev : `integration_test: sdk: flutter` ajouté.
+- Tests widget (`test/widget/`) — Flutter 6 :
+  - `splash_screen_test.dart` (4 tests) : render sans erreur, `CircularProgressIndicator` présent,
+    centré dans le Scaffold, `SplashScreen` affiché pendant le chargement auth via `_BlockingSessionStore`
+    (`Completer` non résolu — maintient l'app en état loading, `pump()` sans `pumpAndSettle()`).
+  - `sign_in_screen_test.dart` (5 tests) : heading "Enistere", bouton "Se connecter", hauteur ≥ 44 dp
+    (`minTouchTarget` ADR-034), tap → navigation hors `SignInScreen`, couleur primaire
+    = `EnistereTokens.lightPrimary` (0xFF2563EB).
+  - `home_screen_test.dart` (7 tests) : heading "Mobile Core Flutter", AppBar titre "Enistere",
+    icône logout, `userId` de session affiché, texte ADR-034, `EnistereThemeExtension` accessible
+    (spacingMd/minTouchTarget), bouton logout → `SignInScreen`.
+  - Pattern commun : `InMemorySessionStore` + `sessionStoreProvider.overrideWithValue` (Riverpod).
+  - Import critique : `sessionStoreProvider` est dans `auth_controller.dart`, pas `session_store.dart`.
+- Tests d'intégration (`integration_test/smoke_test.dart`) — 5 tests device :
+  startup sans crash, unauthenticated → `SignInScreen`, sign-in → `HomeScreen`, logout → `SignInScreen`,
+  session restaurée → `HomeScreen` avec userId.
+  RÉSERVE ARCHITECTURALE : `mobile-flutter` est un package library sans dossiers `android/`/`ios/`/`linux/`.
+  `flutter test integration_test/ -d <device>` requiert un projet Flutter complet avec platform dirs.
+  L'Android emulator `emulator-5554` (API 33) est disponible sur cet hôte mais bloqué architecturalement.
+  Procédure pour projets dérivés : `flutter test integration_test/smoke_test.dart -d emulator-5554`.
+- `scripts/smoke.sh` : smoke runner exécutable.
+  `bash scripts/smoke.sh` — tests headless uniquement (`flutter test`).
+  `bash scripts/smoke.sh --android` — + intégration Android (device requis).
+  `bash scripts/smoke.sh --ios` — + intégration iOS (macOS + Xcode requis).
+  Auto-détection `emulator-5554` ou premier device Android attaché.
+- `docs/project-status/MOBILE_FLUTTER6_SMOKE_REPORT.md` : rapport versionné —
+  statut `TEST_WIDGET_PASSED`, 136/136 tests headless (14 suites), 18 chemins critiques,
+  6 gates qualité verts, 3 réserves documentées (R1 intégration, R2 iOS, R3 upload UI).
+- Tests `flutter test` 136/136 ✅ (+16 tests widget Flutter 6) ·
+  `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅.
+- Mobile Core Flutter : **`UPLOAD_READY`** → **`TEST_WIDGET_PASSED`**.
+- Mises à jour : `cores/mobile-flutter/README.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`.
+- Interdits respectés : aucun endpoint réel obligatoire ; aucun backend requis ; aucun nouveau module
+  fonctionnel ; aucun picker natif ; aucun stockage natif réel ; aucun succès iOS artificiel ;
+  aucun changement RN/Web/API/UI Kit/Cloud/root/workflows.
+
 ### Mobile Core Flutter 5 — Upload multipart primitives
 
 - Dépendance : `http_parser: ^4.0.0` (déjà transitive via Dio 5.10.0 ; ajout en dépendance directe pour
