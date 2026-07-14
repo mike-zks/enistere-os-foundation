@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, 2026-07-14)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -39,7 +39,7 @@ cores/mobile-flutter/
 ├── scripts/
 │   └── smoke.sh                            ← Flutter 6 (smoke runner : headless / --android / --ios)
 ├── integration_test/
-│   └── smoke_test.dart                     ← Flutter 6 + Flutter 8 (7 tests device — 5 originaux + 2 SecureStorage B2)
+│   └── smoke_test.dart                     ← Flutter 6 + Flutter 8 (7 tests device — 5 originaux + 2 SecureStorage B2, B3 passant)
 ├── lib/
 │   ├── main.dart                           ← Flutter 2 (ProviderScope + EnistereApp)
 │   ├── app.dart                            ← Flutter 3 (routerProvider watch)
@@ -49,15 +49,17 @@ cores/mobile-flutter/
 │       │   │   ├── app_api_error.dart     ← Flutter 4 (sealed class, 11 sous-types, Dart 3 natif)
 │       │   │   ├── error_interceptor.dart ← Flutter 4 (mapDioError + ErrorInterceptor)
 │       │   │   ├── logging_interceptor.dart ← Flutter 4 (method+path seulement, jamais body/token)
-│       │   │   ├── dio_client.dart        ← Flutter 4 (createDioClient + _AuthInterceptor)
-│       │   │   └── dio_provider.dart      ← Flutter 4 (apiConfigProvider + dioClientProvider)
+│       │   │   ├── dio_client.dart        ← Flutter 4+9 (createDioClient + _AuthInterceptor + TokenRefresher)
+│       │   │   ├── dio_provider.dart      ← Flutter 4+9 (apiConfigProvider + dioClientProvider + refresher)
+│       │   │   └── refresh_interceptor.dart ← Flutter 9 (RefreshInterceptor — 401→refresh coalescent→retry→purge)
 │       │   ├── auth/
 │       │   │   ├── auth_status.dart       ← Flutter 3 (enum loading/authenticated/unauthenticated/expired)
 │       │   │   ├── auth_state.dart        ← Flutter 3 (status + userId, jamais de token)
+│       │   │   ├── auth_api.dart          ← Flutter 9 (AuthApi seam + PlaceholderAuthApi)
 │       │   │   ├── session_envelope.dart  ← Flutter 8 (userId + refreshToken? ; fromJson/toJson ; toString sans refreshToken)
 │       │   │   ├── session_store.dart     ← Flutter 3 (seam + InMemorySessionStore placeholder)
 │       │   │   ├── secure_session_store.dart ← Flutter 8 (SecureStorageAdapter + FlutterSecureStorageAdapter + SecureSessionStore)
-│       │   │   └── auth_controller.dart   ← Flutter 8 (restoreSession() public ; token mémoire — jamais persisté)
+│       │   │   └── auth_controller.dart   ← Flutter 8+9 (restoreSession() + refreshSession() coalescent ; token mémoire — jamais persisté)
 │       │   ├── config/
 │       │   │   └── api_config.dart        ← Flutter 4 (ApiConfig : baseUrl, timeouts, commonHeaders)
 │       │   ├── navigation/
@@ -86,9 +88,10 @@ cores/mobile-flutter/
     │   │   ├── app_api_error_test.dart    ← Flutter 4 (12 tests)
     │   │   ├── error_interceptor_test.dart ← Flutter 4 (19 tests)
     │   │   ├── logging_interceptor_test.dart ← Flutter 4 (6 tests)
-    │   │   └── dio_client_test.dart       ← Flutter 4 (11 tests)
+    │   │   ├── dio_client_test.dart       ← Flutter 4 (11 tests)
+    │   │   └── refresh_interceptor_test.dart ← Flutter 9 (9 tests — _CaptureAdapter)
     │   ├── auth/
-    │   │   ├── auth_controller_test.dart  ← Flutter 3 (9 tests)
+    │   │   ├── auth_controller_test.dart  ← Flutter 3+9 (14 tests — 9 existants + 5 refreshSession)
     │   │   ├── session_store_test.dart    ← Flutter 3 (4 tests)
     │   │   └── secure_session_store_test.dart ← Flutter 8 (23 tests — FakeSecureStorageAdapter)
     │   └── upload/
@@ -102,7 +105,7 @@ cores/mobile-flutter/
         └── home_screen_test.dart          ← Flutter 6 (7 tests)
 ```
 
-La prochaine mission est **Flutter 9 — RefreshInterceptor** (ferme B3 — 401 → refresh coalescent → retry).
+La prochaine mission est **Flutter 10 — UI states** (`LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere).
 
 ## Stack technique
 
@@ -141,7 +144,7 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter V1 | Readiness review | `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — `IMPLEMENTATION_AVANCEE`, 5 bloquants ✅ |
 | Flutter 7 | Platform dirs + smoke Android | Dossiers `android/` + smoke `emulator-5554` 5/5 ✅ — B1 FERMÉ |
 | Flutter 8 | SecureStorage seam + adapter | `flutter_secure_storage` + `SecureSessionStore` + `restoreSession()` ✅ — B2 FERMÉ |
-| Flutter 9 | RefreshInterceptor | 401 → `refresh()` coalescent → 1 retry → purge |
+| Flutter 9 | RefreshInterceptor | 401 → `refresh()` coalescent → 1 retry → purge ✅ — B3 FERMÉ |
 | Flutter 10 | UI states | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere |
 | Flutter 11 | Login form | `SignInScreen` email + password + validation + erreur accessible |
 | Flutter V1 final | V1 Final Readiness | `VALIDE_V1` quand Flutter 7→11 réalisés |

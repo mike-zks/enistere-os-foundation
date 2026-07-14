@@ -265,9 +265,21 @@
 > `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 > **B2 FERMÉ.** C3 : restore ✅ (refresh B3). C4 : ❌ → ✅ PARTIAL. B3→B5 restent ouverts.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter 9 — RefreshInterceptor**.
-> Objectif : 401 → `refresh()` coalescent → 1 retry → purge si refresh échoue. Câbler le `refreshToken`
-> depuis `SecureSessionStore`. Aucun UI state. Aucun login form. Aucun backend réel.
+> ✅ **Mobile Core Flutter 9 — RefreshInterceptor 401 coalescent (B3) : RÉALISÉ** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md`.
+> Livrables : `AuthApi` seam + `PlaceholderAuthApi` ; `RefreshInterceptor` (401 → `refreshSession()` → retry
+> unique → purge si échec, guard `_refreshed` anti-boucle, 403/5xx pass-through) ; `AuthController.refreshSession()`
+> coalescent (`_refreshFuture ??=`) + `_purgeSession()` ; `authApiProvider` injectable ; `TokenRefresher` typedef ;
+> `createDioClient(refresher:)` optionnel ; `dioClientProvider` câblé.
+> Découverte clé : Dio 5.x traite les erreurs en ordre d'enregistrement (catchError chaîné, PAS inversé) —
+> `RefreshInterceptor` enregistré AVANT `ErrorInterceptor`. 14 tests unitaires ; smoke `emulator-5554` 7/7 ✅ inchangés ;
+> 174/174 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 ✅ · `dart format` 0 ✅ ·
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> **B3 FERMÉ.** C3 : refresh 401 ❌ → ✅. C4 : ✅ PARTIAL → ✅. Score §29 : 5/11 → 7/11.
+>
+> **Prochaine action UNIQUE** : **Mobile Core Flutter 10 — UI states**.
+> Objectif : fermer B4 — implémenter `LoadingState`, `EmptyState`, `ErrorState`, `SuccessState`
+> (widgets Foundation obligatoires §9.8/§24, tokens Enistere ADR-034). Aucun backend réel. Aucun changement RN/Web.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

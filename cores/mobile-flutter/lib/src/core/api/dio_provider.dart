@@ -15,5 +15,6 @@ final dioClientProvider = Provider<Dio>((ref) {
   return createDioClient(
     config: config,
     tokenReader: () => controller.accessToken,
+    refresher: controller.refreshSession,
   );
 });

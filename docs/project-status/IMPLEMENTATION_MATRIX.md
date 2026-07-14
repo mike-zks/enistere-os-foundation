@@ -48,6 +48,17 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 9 — RefreshInterceptor 401 coalescent (2026-07-14)** : rapport
+> `MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md`. **B3 FERMÉ** — `AuthApi` seam + `PlaceholderAuthApi` (Foundation V1) ;
+> `RefreshInterceptor` (401 → `refreshSession()` → retry unique, guard `_refreshed` anti-boucle, 403/5xx pass-through) ;
+> `AuthController.refreshSession()` coalescent (`_refreshFuture ??= _doRefresh().whenComplete(...)`) + `_purgeSession()` ;
+> `authApiProvider` injectable ; `TokenRefresher` typedef ; `createDioClient(refresher:)` optionnel ;
+> `dioClientProvider` câblé. Découverte clé : Dio 5.x → ordre d'enregistrement FORWARD (pas inversé) —
+> `RefreshInterceptor` enregistré AVANT `ErrorInterceptor`. 14 tests unitaires headless + smoke `emulator-5554` 7/7 ✅.
+> 174/174 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 ✅ · `dart format` 0 ✅ ·
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> C3 : refresh 401 ❌ → ✅. C4 : ✅ PARTIAL → ✅. Score §29 : 5/11 → 7/11. B4→B5 restent ouverts.
+>
 > **Mise à jour Mobile Core Flutter 8 — SecureStorage seam + adapter (2026-07-14)** : rapport
 > `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md`. **B2 FERMÉ** — `flutter_secure_storage: ^10.3.1` ajouté ;
 > `SecureStorageAdapter` seam (testable sans platform channels) + `FlutterSecureStorageAdapter` (Keychain/Keystore) +
