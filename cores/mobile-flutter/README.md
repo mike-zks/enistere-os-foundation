@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, Flutter 10 B4 fermé, Flutter 11 B5 fermé — tous les bloquants B1→B5 clos, score §29 9/11)
+> Statut : **`VALIDE_V1`** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux acceptée comme réserve environnementale non bloquante — identique à RN)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 

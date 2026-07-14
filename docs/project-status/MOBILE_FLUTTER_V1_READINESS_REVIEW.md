@@ -36,6 +36,12 @@ critère est satisfait ou non.
 
 **Score §29 : 9/11 satisfaits, 2/11 partiels (C1 Android ✅/iOS bloqué, C11 Android ✅/iOS bloqué), 0/11 non satisfait.**
 
+> **Mise à jour Flutter V1 Final Readiness Decision (2026-07-14)** : décision formelle prise dans
+> `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. Mobile Core Flutter promu **`VALIDE_V1`**.
+> R1 (iOS Linux) acceptée comme réserve environnementale non bloquante — identique à RN B2.
+> Zéro bloquant restant. 9/11 §29 pleinement satisfaits + 2/11 PARTIAL (C1, C11 — même contrainte iOS).
+> Aucun succès iOS artificiel. Aucun code Flutter modifié dans cette décision.
+
 > **Mise à jour Flutter 7 (2026-07-14)** : B1 fermé — dossiers `android/` générés + smoke `emulator-5554` passé
 > (5/5 tests en 9s). C1 et C11 passent de ❌ à ✅ PARTIAL (Android réel ✅, iOS R1 maintenu).
 >
