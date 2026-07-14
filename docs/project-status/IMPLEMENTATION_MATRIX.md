@@ -48,6 +48,12 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 2 (2026-07-14)** : starter minimal livré — `pubspec.yaml` (flutter_riverpod 3.3.2,
+> go_router 17.3.0, flutter_lints 6.0.0, mocktail 1.0.5), `lib/main.dart`, `lib/app.dart` (`MaterialApp.router`
+> + `ProviderScope`), `lib/src/theme/` (`EnistereTokens`, `EnistereThemeExtension`, `EnistereTheme` ADR-034),
+> `lib/src/app/router.dart`, `lib/src/features/home/home_screen.dart`. Tests 20/20. Analyse 0 issue.
+> Mobile Core Flutter : **`SPECIFICATION_DOCUMENTAIRE`** → **`STARTER_INITIALISE`**.
+>
 > **Mise à jour Mobile Core Flutter 1 (2026-07-14)** : `cores/mobile-flutter/CORE_SPECIFICATION.md` + `README.md` créés.
 > Mobile Core Flutter passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. Stack cible :
 > go_router, Riverpod (`AsyncNotifierProvider`/`NotifierProvider`), Dio (intercepteurs Auth/Refresh/Error/Logging),
@@ -192,7 +198,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ (vide) | — | ADR-034 (Validé) | — | — | — | — | **DOSSIER_SEULEMENT** | `ADR-034-flutter-ui-material3-vs-custom.md` validé : Material 3 contrôlé par tokens Enistere | **Mobile Core Flutter 1 — Core specification** |
+| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | — | — | — | **STARTER_INITIALISE** | Flutter 2 : `pubspec.yaml` + ThemeData ADR-034 + tests 20/20 (Flutter 3.44.6/Dart 3.12.2) | **Flutter 3 — Auth + navigation** |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 

@@ -6,6 +6,25 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 2 — Starter minimal Flutter gouverné
+
+- Livrables : `cores/mobile-flutter/pubspec.yaml`, `analysis_options.yaml`, `lib/main.dart`,
+  `lib/app.dart`, `lib/src/theme/` (`EnistereTokens`, `EnistereThemeExtension`, `EnistereTheme`),
+  `lib/src/app/router.dart`, `lib/src/features/home/home_screen.dart`, `test/theme/enistere_theme_test.dart`,
+  `test/widget/app_test.dart`.
+- Versions stables vérifiées pub.dev (Flutter 3.44.6 / Dart 3.12.2) : `flutter_riverpod 3.3.2`,
+  `go_router 17.3.0`, `flutter_lints 6.0.0`, `mocktail 1.0.5`.
+- ThemeData Material 3 contrôlé par tokens Enistere verbatim (ADR-034, ADR-008) : `ColorScheme` light/dark,
+  `TextTheme`, `ThemeExtension<EnistereThemeExtension>` (spacing xs–xxl, radius sm–pill, success, danger,
+  textMuted, border, surfaceElevated, minTouchTarget 44 dp).
+- Résultats qualité : `flutter test` 20/20 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅ ·
+  `git diff --check` ✅ · quality-gates docs 2/2 ✅.
+- Mobile Core Flutter : **`SPECIFICATION_DOCUMENTAIRE`** → **`STARTER_INITIALISE`**.
+- Mises à jour : `cores/mobile-flutter/README.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`.
+- Interdits respectés : aucun changement Mobile RN / Web / API / UI Kit / Cloud ; aucun SDK analytics/crash
+  réel ; aucun backend réel ; aucun endpoint métier.
+
 ### Mobile Core Flutter 1 — Core specification
 
 - Nouveaux fichiers : `cores/mobile-flutter/CORE_SPECIFICATION.md` (32 sections) + `cores/mobile-flutter/README.md`.

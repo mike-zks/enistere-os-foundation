@@ -192,9 +192,18 @@
 > + `cores/mobile-flutter/README.md`. Statut `mobile-flutter` : `DOSSIER_SEULEMENT` → **`SPECIFICATION_DOCUMENTAIRE`**.
 > Aucun code Dart, `pubspec.yaml`, dépendance ou workflow CI ajouté.
 >
-> **Prochaine action** : **Mobile Core Flutter 2 — Starter minimal Flutter**.
-> Objectif : créer `pubspec.yaml` + `lib/main.dart` + structure `lib/` + `MaterialApp.router` + `ThemeData`
-> Enistere (ADR-034) + analysis_options.yaml. Aucune logique métier, aucun endpoint réel.
+> ✅ **Mobile Core Flutter 2 — Starter minimal Flutter : RÉALISÉ** (2026-07-14).
+> Livrables : `cores/mobile-flutter/pubspec.yaml` (flutter_riverpod 3.3.2, go_router 17.3.0),
+> `analysis_options.yaml`, `lib/main.dart`, `lib/app.dart` (`MaterialApp.router` + `ProviderScope`),
+> `lib/src/theme/` (`EnistereTokens`, `EnistereThemeExtension`, `EnistereTheme`),
+> `lib/src/app/router.dart` (GoRouter), `lib/src/features/home/home_screen.dart`.
+> Tests : 20/20 (`flutter test`). `flutter analyze` — 0 issues. `dart format` — 0 changements.
+> Statut `mobile-flutter` : **`SPECIFICATION_DOCUMENTAIRE`** → **`STARTER_INITIALISE`**.
+> Aucune logique métier, aucun endpoint réel, aucun SDK analytics/crash.
+>
+> **Prochaine action** : **Mobile Core Flutter 3 — Auth + navigation**.
+> Objectif : `AuthController` Riverpod + go_router guards (public/protégé) + `flutter_secure_storage`
+> + écran login minimal. Aucun backend réel, aucun endpoint métier.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
