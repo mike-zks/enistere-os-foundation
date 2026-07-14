@@ -6,6 +6,28 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter V1 Readiness Review
+
+- Rapport `docs/project-status/MOBILE_FLUTTER_V1_READINESS_REVIEW.md` produit.
+- Verdict : **`TEST_WIDGET_PASSED` → `IMPLEMENTATION_AVANCEE`** — 5/11 critères §29 satisfaits.
+- Critères satisfaits (§29) : navigation go_router (C2), upload multipart Dio (C6), thème Material 3
+  Enistere (C8), tests unitaires et widget (C10), appels API Dio (C5).
+- Bloquants V1 non satisfaits :
+  - B1 : Android runtime — library sans dossiers `android/` (architectural) ; iOS Linux (environnemental).
+  - B2 : `flutter_secure_storage` absent — `InMemorySessionStore` placeholder uniquement.
+  - B3 : `RefreshInterceptor` absent — 401 surfacé sans refresh coalescent.
+  - B4 : UI states absents — `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` non implémentés.
+  - B5 : Login form absent — `SignInScreen` bouton mock uniquement, pas de champs email/password.
+- Réserves acceptées : R1 iOS Linux (identique RN B2), R2 pas de backend réel, R3 Freezed/build_runner
+  délibérément absent, R4 logger redaction, R5 PreferenceStore seam.
+- Comparaison RN VALIDE_V1 : RN avait tous ses modules (SecureStore, RefreshInterceptor, UI states,
+  login form) + smoke Android réel. Flutter a 5 modules manquants réels.
+- Chemin vers VALIDE_V1 : Flutter 7 (platform dirs) → Flutter 8 (SecureStorage) →
+  Flutter 9 (RefreshInterceptor) → Flutter 10 (UI states) → Flutter 11 (login form) → Flutter V1 final.
+- `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Status mis à jour : `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`,
+  `FOUNDATION_CURRENT_STATE.md`, `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter 6 — Tests + smoke
 
 - Dépendance dev : `integration_test: sdk: flutter` ajouté.

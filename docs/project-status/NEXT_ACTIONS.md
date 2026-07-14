@@ -236,6 +236,21 @@
 >
 > **Prochaine action** : **Mobile Core Flutter V1 Readiness Review** — vérifier si Mobile Core Flutter peut passer de `TEST_WIDGET_PASSED` à `VALIDE_V1` selon les critères de la spécification.
 
+> ✅ **Mobile Core Flutter V1 Readiness Review : RÉALISÉ** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER_V1_READINESS_REVIEW.md`.
+> Décision : Mobile Core Flutter passe de **`TEST_WIDGET_PASSED`** à **`IMPLEMENTATION_AVANCEE`**.
+> Score §29 : 5/11 satisfaits (navigation ✅, upload ✅, thème ✅, tests ✅, API Dio ✅).
+> 5 bloquants : B1 Android runtime (library sans `android/`), B2 `flutter_secure_storage` absent,
+> B3 `RefreshInterceptor` absent, B4 UI states (`LoadingState`/`EmptyState`/`ErrorState`/`SuccessState`),
+> B5 login form (`SignInScreen` bouton mock). Réserves acceptées : R1 iOS Linux, R2 pas de backend réel,
+> R3 Freezed délibérément absent, R4 logger redaction, R5 PreferenceStore seam.
+> `VALIDE_V1` différé : B2→B5 sont des modules manquants réels, pas des contraintes environnementales.
+>
+> **Prochaine action UNIQUE** : **Mobile Core Flutter 7 — platform dirs + smoke Android**.
+> Objectif : ajouter les dossiers `android/` au package library Flutter, vérifier que
+> `flutter test integration_test/ -d emulator-5554` s'exécute. Ferme B1 (C1/C11 §29).
+> Aucun module métier, aucune dépendance Dart/pub, aucun workflow CI.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.

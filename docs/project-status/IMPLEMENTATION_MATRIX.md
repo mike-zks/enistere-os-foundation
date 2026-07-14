@@ -48,6 +48,17 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter V1 Readiness Review (2026-07-14)** : rapport
+> `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`. Mobile Core Flutter passe de **`TEST_WIDGET_PASSED`** à
+> **`IMPLEMENTATION_AVANCEE`**. Score §29 : 5/11 satisfaits, 1/11 partiel, 5/11 non satisfaits.
+> Bloquants V1 : B1 Android runtime (library sans `android/`), B2 `flutter_secure_storage` absent,
+> B3 `RefreshInterceptor` absent, B4 états UI absents (`LoadingState`/`EmptyState`/`ErrorState`/`SuccessState`),
+> B5 login form absent (`SignInScreen` bouton mock uniquement). Réserves acceptées : R1 iOS Linux
+> (identique RN B2), R2 pas de backend réel, R3 Freezed/build_runner délibérément absent.
+> Chemin vers VALIDE_V1 : Flutter 7 (platform dirs + smoke Android) → Flutter 8 (SecureStorage) →
+> Flutter 9 (RefreshInterceptor) → Flutter 10 (UI states) → Flutter 11 (login form) → Flutter V1 final.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+>
 > **Mise à jour Mobile Core Flutter 6 (2026-07-14)** : tests widget/intégration + smoke livrés —
 > `test/widget/splash_screen_test.dart` (4 tests : SplashScreen render, CircularProgressIndicator, centré, app en loading avec `_BlockingSessionStore`),
 > `test/widget/sign_in_screen_test.dart` (5 tests : heading, bouton, touch target ≥ 44 dp, navigation, couleur primaire),
@@ -225,7 +236,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (136 tests : theme + unit/auth + widget × 3 + unit/api + unit/upload + intégration × 5) | — | **TEST_WIDGET_PASSED** | Flutter 6 : 136/136 tests headless (`flutter test`) ; widget tests splash/sign-in/home ; `integration_test/smoke_test.dart` (5 tests device — procédure projets dérivés) ; `scripts/smoke.sh` ; rapport `MOBILE_FLUTTER6_SMOKE_REPORT.md` ; Android intégration bloqué (architecture library sans platform dirs) ; iOS bloqué Linux | **Flutter V1 Readiness Review** |
+| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (136 tests : theme + unit/auth + widget × 3 + unit/api + unit/upload + intégration × 5) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 5/11 §29, 5 bloquants B1→B5, réserves R1→R5) | **IMPLEMENTATION_AVANCEE** | Flutter V1 Readiness Review (2026-07-14) : B1 Android (no platform dirs), B2 SecureStorage, B3 RefreshInterceptor, B4 UI states, B5 login form ; §29 5/11 satisfaits ; `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` | **Flutter 7** — platform dirs + smoke Android (ferme B1) |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 

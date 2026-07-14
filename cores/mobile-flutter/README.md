@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`TEST_WIDGET_PASSED`** (Mobile Core Flutter 6, 2026-07-14)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -100,7 +100,7 @@ cores/mobile-flutter/
         └── home_screen_test.dart          ← Flutter 6 (7 tests)
 ```
 
-La prochaine mission est **Flutter V1 Readiness Review**.
+La prochaine mission est **Flutter 7 — platform dirs + smoke Android** (ferme B1 — Android runtime).
 
 ## Stack technique
 
@@ -136,4 +136,10 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 4 | Client Dio + providers | `ApiConfig` + `AppApiError` sealed + `createDioClient` + `dioClientProvider` ✅ |
 | Flutter 5 | Upload multipart | `UploadService` + `AppFile` descriptor ✅ |
 | Flutter 6 | Tests + smoke | `flutter_test` 136/136 + `integration_test/` + `scripts/smoke.sh` ✅ |
-| Flutter V1 | Readiness review | Rapport V1 Readiness |
+| Flutter V1 | Readiness review | `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — `IMPLEMENTATION_AVANCEE`, 5 bloquants ✅ |
+| Flutter 7 | Platform dirs + smoke Android | Dossiers `android/` + `flutter test integration_test/ -d emulator-5554` |
+| Flutter 8 | SecureStorage seam + adapter | `flutter_secure_storage` + `SecureStorageSessionStore` + `restoreSession()` |
+| Flutter 9 | RefreshInterceptor | 401 → `refresh()` coalescent → 1 retry → purge |
+| Flutter 10 | UI states | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere |
+| Flutter 11 | Login form | `SignInScreen` email + password + validation + erreur accessible |
+| Flutter V1 final | V1 Final Readiness | `VALIDE_V1` quand Flutter 7→11 réalisés |
