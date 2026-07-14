@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`UPLOAD_READY`** (Mobile Core Flutter 5, 2026-07-14)
+> Statut : **`TEST_WIDGET_PASSED`** (Mobile Core Flutter 6, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -32,10 +32,14 @@ Il ne contient aucune logique métier ni aucun code runtime.
 
 ```txt
 cores/mobile-flutter/
-├── pubspec.yaml                            ← Flutter 5 (+ http_parser 4.0.0)
+├── pubspec.yaml                            ← Flutter 6 (+ integration_test: sdk: flutter)
 ├── analysis_options.yaml                   ← Flutter 2
 ├── CORE_SPECIFICATION.md                   ← Flutter 1
 ├── README.md                               ← Flutter 1
+├── scripts/
+│   └── smoke.sh                            ← Flutter 6 (smoke runner : headless / --android / --ios)
+├── integration_test/
+│   └── smoke_test.dart                     ← Flutter 6 (5 tests device — procédure projets dérivés)
 ├── lib/
 │   ├── main.dart                           ← Flutter 2 (ProviderScope + EnistereApp)
 │   ├── app.dart                            ← Flutter 3 (routerProvider watch)
@@ -89,11 +93,14 @@ cores/mobile-flutter/
     │       ├── app_file_test.dart         ← Flutter 5 (21 tests)
     │       └── upload_service_test.dart   ← Flutter 5 (14 tests)
     └── widget/
-        ├── app_test.dart                  ← Flutter 3 (4 tests mis à jour)
-        └── router_guard_test.dart         ← Flutter 3 (5 tests guards)
+        ├── app_test.dart                  ← Flutter 3 (4 tests)
+        ├── router_guard_test.dart         ← Flutter 3 (5 tests guards)
+        ├── splash_screen_test.dart        ← Flutter 6 (4 tests)
+        ├── sign_in_screen_test.dart       ← Flutter 6 (5 tests)
+        └── home_screen_test.dart          ← Flutter 6 (7 tests)
 ```
 
-La prochaine mission est **Flutter 6 — Tests + smoke** (flutter_test intégration iOS + Android).
+La prochaine mission est **Flutter V1 Readiness Review**.
 
 ## Stack technique
 
@@ -128,5 +135,5 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 3 | Auth shell + guards | `AuthController` + `SessionStore` seam + GoRouter guards ✅ |
 | Flutter 4 | Client Dio + providers | `ApiConfig` + `AppApiError` sealed + `createDioClient` + `dioClientProvider` ✅ |
 | Flutter 5 | Upload multipart | `UploadService` + `AppFile` descriptor ✅ |
-| Flutter 6 | Tests + smoke | `flutter_test` + intégration iOS + Android |
+| Flutter 6 | Tests + smoke | `flutter_test` 136/136 + `integration_test/` + `scripts/smoke.sh` ✅ |
 | Flutter V1 | Readiness review | Rapport V1 Readiness |

@@ -224,8 +224,17 @@
 > ✅ **Mobile Core Flutter 5 — Upload multipart primitives : RÉALISÉ** (2026-07-14).
 > `http_parser: ^4.0.0` ajouté. `AppFile` descriptor pur (`path`/`name`/`mimeType`/`sizeBytes?`) + `SafeFileDescriptor` + `describeFileForLog` (mimeType+extension sanitisée uniquement, jamais path/nom brut) + `isValidAppFile` + `isAllowedUploadContentType` (exact, group wildcard `image/*`, `*/*`). `FileCategory` enum (9 valeurs) + `.apiValue`. `UploadedFileMetadata` DTO (id+category uniquement, jamais URL signée/bucket/device path). `DioUploadService` implements `UploadService` : `FormData` + `MultipartFile` injectable — jamais `Content-Type: multipart/form-data` forcé manuellement ; Dio pose le boundary. Erreurs mappées via `AppApiError` : 413→`TooLargeError`, 415→`UnsupportedTypeError`, 401→`UnauthorizedError`, réseau→`NetworkError`. Aucun retry automatique. 120/120 tests ✅ · analyze 0 ✅ · format 0 ✅ · quality-gates docs ✅.
 > Statut `mobile-flutter` : **`DIO_CLIENT_READY`** → **`UPLOAD_READY`**.
+
+> ✅ **Mobile Core Flutter 6 — Tests + smoke : RÉALISÉ** (2026-07-14).
+> `integration_test: sdk: flutter` ajouté en dev_dependency.
+> Tests widget ajoutés : `test/widget/splash_screen_test.dart` (4 tests — render, CircularProgressIndicator, centré, app en loading via `_BlockingSessionStore`), `test/widget/sign_in_screen_test.dart` (5 tests — heading, bouton, touch target ≥ 44 dp, navigation, couleur primaire), `test/widget/home_screen_test.dart` (7 tests — heading, AppBar, logout icon, userId, ADR-034 text, ThemeExtension accessible, logout → SignInScreen).
+> `integration_test/smoke_test.dart` (5 tests device — startup, unauthenticated, sign-in, logout, session restore) : architecture library sans dossiers platform, procédure pour projets dérivés, Android emulator disponible mais bloqué architecturalement.
+> `scripts/smoke.sh` : smoke runner documenté (headless / --android / --ios).
+> `docs/project-status/MOBILE_FLUTTER6_SMOKE_REPORT.md` : rapport versionné — 136/136 tests headless, 18 chemins critiques, blocage Android architectural (R1), iOS bloqué Linux (R2), 3 réserves documentées.
+> `flutter test` 136/136 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅.
+> Statut `mobile-flutter` : **`UPLOAD_READY`** → **`TEST_WIDGET_PASSED`**.
 >
-> **Prochaine action** : **Mobile Core Flutter 6 — Tests + smoke** (flutter_test intégration iOS + Android).
+> **Prochaine action** : **Mobile Core Flutter V1 Readiness Review** — vérifier si Mobile Core Flutter peut passer de `TEST_WIDGET_PASSED` à `VALIDE_V1` selon les critères de la spécification.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
