@@ -285,10 +285,20 @@
 > `liveRegion` (ErrorState/SuccessState) ; 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ (aucune
 > régression) ; 213/213 tests headless.
 > **B4 FERMÉ.** C7 : ❌ → ✅. Score §29 : 7/11 → 8/11. Bloquant restant : B5 (login form).
+
+> ✅ **Mobile Core Flutter 11 — Sign-in form validation (B5) : RÉALISÉ** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md`.
+> Livrables : `lib/src/features/auth/sign_in_screen.dart` converti de `ConsumerWidget` à
+> `ConsumerStatefulWidget` + `Form` (`GlobalKey<FormState>`) + `TextFormField` email (`Key('emailField')`,
+> `keyboardType: emailAddress`, `TextInputAction.next`, validation requis + format `@`) + `TextFormField`
+> password (`Key('passwordField')`, `obscureText: true`, `TextInputAction.done`, validation requis) +
+> erreur auth générique `Semantics(liveRegion: true)` ; 10 tests widget headless ; `router_guard_test.dart`
+> adapté ; smoke `emulator-5554` 7/7 ✅ ; 218/218 tests headless.
+> **B5 FERMÉ.** C9 : ❌ → ✅. Score §29 : 8/11 → 9/11. Tous les bloquants B1→B5 fermés.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter 11 — Login form**.
-> Objectif : fermer B5 — `SignInScreen` avec champs email + password + validation + erreur accessible
-> (ferme C9 §29). Aucun backend réel. Aucun changement RN/Web/Auth/Refresh.
+> **Prochaine action UNIQUE** : **Mobile Core Flutter V1 Final Readiness Decision**.
+> Objectif : déclarer formellement `VALIDE_V1` — tous les bloquants B1→B5 sont fermés, score §29 9/11
+> (C1/C11 PARTIAL pour iOS, réserve R1 environnementale acceptée comme RN). Aucun nouveau code.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

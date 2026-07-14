@@ -44,6 +44,14 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
       expect(find.byType(SignInScreen), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'user@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('passwordField')),
+        'password',
+      );
       await tester.tap(find.text('Se connecter'));
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
