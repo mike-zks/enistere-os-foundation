@@ -48,6 +48,14 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 1 (2026-07-14)** : `cores/mobile-flutter/CORE_SPECIFICATION.md` + `README.md` créés.
+> Mobile Core Flutter passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. Stack cible :
+> go_router, Riverpod (`AsyncNotifierProvider`/`NotifierProvider`), Dio (intercepteurs Auth/Refresh/Error/Logging),
+> Freezed + Json Serializable, flutter_secure_storage, Material 3 + tokens Enistere (ADR-034). 32 sections :
+> modules obligatoires V1, auth, tokens, stockage, upload multipart, logger/redaction, préférences seam, i18n,
+> a11y, tests, missions ordonnées Flutter 1→V1, décisions pendantes (client API Dart, Hive vs SharedPreferences,
+> formulaires). Aucun code Dart, `pubspec.yaml`, dépendance ou workflow.
+>
 > **Mise à jour ADR-034 (2026-07-14)** : `ADR-034-flutter-ui-material3-vs-custom.md` validé.
 > Décision : **Material 3 contrôlé par tokens Enistere + composants maison ciblés** pour le futur
 > Mobile Core Flutter. Aucun starter Flutter, aucune dépendance, aucun runtime.

@@ -6,6 +6,23 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 1 — Core specification
+
+- Nouveaux fichiers : `cores/mobile-flutter/CORE_SPECIFICATION.md` (32 sections) + `cores/mobile-flutter/README.md`.
+- Mobile Core Flutter passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**.
+- Spec cible : go_router, Riverpod (`AsyncNotifierProvider`/`NotifierProvider`), Dio + intercepteurs
+  (Auth/Refresh/Error/Logging), Freezed + Json Serializable, flutter_secure_storage, préférences seam
+  (Hive/SharedPreferences), thème Material 3 Enistere (ADR-034 `ThemeData` + `ThemeExtension`), états UI
+  (`LoadingState`/`EmptyState`/`ErrorState`/`SuccessState`), logger/redaction Dart, accessibilité Flutter
+  (Semantics, tailles tactiles, WCAG AA), i18n (flutter_localizations + ARB), testing (flutter_test/mocktail).
+- Cohérence avec Mobile Core React Native V1 : même intentions tokens/sécurité/états UI/a11y, implémentations distinctes.
+- Missions ordonnées : Flutter 1 (spec ✅) → Flutter 2 (starter) → Flutter 3 (auth) → Flutter 4 (Dio) →
+  Flutter 5 (upload) → Flutter 6 (tests) → Flutter V1 (readiness).
+- Décisions pendantes documentées : client API Dart, Hive vs SharedPreferences, librairie formulaires.
+- Aucun code Dart, `pubspec.yaml`, dépendance ou workflow CI ajouté.
+- Mises à jour : `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`,
+  `DECISIONS_REGISTER.md`, `SESSION_HANDOFF.md`.
+
 ### V3 ADR-034 — Flutter UI stack decision
 
 - Nouvel ADR : `docs/adr/ADR-034-flutter-ui-material3-vs-custom.md`.
