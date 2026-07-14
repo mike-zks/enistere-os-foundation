@@ -48,6 +48,10 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour ADR-034 (2026-07-14)** : `ADR-034-flutter-ui-material3-vs-custom.md` validé.
+> Décision : **Material 3 contrôlé par tokens Enistere + composants maison ciblés** pour le futur
+> Mobile Core Flutter. Aucun starter Flutter, aucune dépendance, aucun runtime.
+>
 > **Mise à jour Mobile Core RN37 (2026-07-13)** : rapport `MOBILE_RN37_PREFERENCE_STORE_DECISION.md`.
 > Décision PreferenceStore native strategy : **store natif délégué aux projets dérivés — réserve formellement acceptée**.
 > Analyse des 4 options (seam/placeholder, AsyncStorage, MMKV, délégation) selon ADR-015 §15/§16 / compatibilité
@@ -180,7 +184,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ (vide) | — | ADR-034 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | `V3_ENTRY_DECISION.md` : premier core V3 retenu pour cadrage | **ADR-034 Flutter UI stack decision** |
+| Mobile Core Flutter | ✓ (vide) | — | ADR-034 (Validé) | — | — | — | — | **DOSSIER_SEULEMENT** | `ADR-034-flutter-ui-material3-vs-custom.md` validé : Material 3 contrôlé par tokens Enistere | **Mobile Core Flutter 1 — Core specification** |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 
@@ -252,4 +256,4 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |
 | `OPENAPI_CLIENT_PROOF.md` réfère un code retiré | MINEURE |
 | `tools/` et `examples/` vides | MINEURE |
-| ADR-017→038 cités au backlog mais non rédigés | HISTORIQUE (attendu) |
+| ADR-017→033 et ADR-035→038 cités au backlog mais non rédigés | HISTORIQUE (attendu) |

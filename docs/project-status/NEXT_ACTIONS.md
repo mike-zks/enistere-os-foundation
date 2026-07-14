@@ -179,6 +179,15 @@
 > **Prochaine action UNIQUE** : **V3 ADR 034 — Flutter UI stack decision**.
 > Objectif : rédiger et valider ADR-034 avant toute spécification ou implémentation du Mobile Core Flutter.
 
+> ✅ **V3 ADR 034 — Flutter UI stack decision : RÉALISÉ** (2026-07-14).
+> ADR : `docs/adr/ADR-034-flutter-ui-material3-vs-custom.md`.
+> Décision : **Material 3 contrôlé par tokens Enistere + composants maison ciblés**.
+> Material 3 est le moteur Flutter, pas l'identité visuelle autonome. Aucun starter Flutter, aucune dépendance,
+> aucun runtime.
+>
+> **Prochaine action UNIQUE** : **Mobile Core Flutter 1 — Core specification**.
+> Objectif : créer `cores/mobile-flutter/CORE_SPECIFICATION.md` et `README.md`, sans starter Flutter ni dépendance.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
@@ -899,7 +908,7 @@ deux cores. À arbitrer par décision humaine.
 | Middleware Auth « autoritaire » (Web) | **rejeté (checkpoint)** — un middleware ne valide pas un token / ne connaît pas la révocation ; UX léger (présence de cookie) seulement |
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
-| Mobile Core Flutter | spécification absente + **ADR-034 non rédigé** |
+| Mobile Core Flutter | spécification absente ; **ADR-034 validé** |
 | Web Core Angular | spécification absente + **ADR-035 non rédigé** |
 | AI / Docs / Quality Cores | spécifications absentes |
 | API Core Spring Boot | spécification absente |
