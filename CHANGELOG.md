@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### V3 ADR-034 — Flutter UI stack decision
+
+- Nouvel ADR : `docs/adr/ADR-034-flutter-ui-material3-vs-custom.md`.
+- Décision : futur Mobile Core Flutter = **Material 3 contrôlé par tokens Enistere + composants maison ciblés**.
+- Material 3 est retenu comme moteur Flutter, pas comme identité visuelle autonome.
+- `ADR_BACKLOG.md`, `DECISIONS_REGISTER.md`, `NEXT_ACTIONS.md`, `IMPLEMENTATION_MATRIX.md`,
+  `FOUNDATION_CURRENT_STATE.md` et `SESSION_HANDOFF.md` mis à jour.
+- Aucun starter Flutter, aucune dépendance, aucun workflow, aucun runtime.
+- Prochaine action unique : **Mobile Core Flutter 1 — Core specification**.
+
 ### V3 Entry Decision
 
 - Nouveau rapport : `docs/project-status/V3_ENTRY_DECISION.md`.

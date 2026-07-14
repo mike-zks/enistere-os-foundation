@@ -348,7 +348,7 @@ au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `we
 
 ## 7. ADR clés
 
-18 ADR **Validés** (001–016, 039, 040). Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
+19 ADR **Validés** (001–016, 034, 039, 040). Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
 **consommé en lecture côté Web** — métadonnées publiques + URL signée + téléchargement direct, **sans** upload),
 039 (Argon2id), 040 (logging API). Partiels : **040** (logging **mobile** : logger client générique RN 8 + **redaction centrale** — tokens/URL signées/chemins device/PII — sans transport/persistance), 001 (monorepo), 003, **013** (CI minimale), **004** (session : adapter serveur Web + **état de session
 navigateur** `useSession`/`useAuthorization`, read-only sans refresh silencieux), **005** (cookies web +
@@ -359,8 +359,8 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 **012** (TanStack Query intégré Web : server state Health, Auth **et Files** — cache disjoint, purge au logout,
 **URL signée hors cache** via mutation), **013** (**CI minimale** GitHub Actions — non-régression monorepo ;
 **partiel**), 016
-(types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015. **008/009/010 partiels** (UI Kit).
-ADR-017→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
+(types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015, **034** (Flutter UI décidée, mobile-flutter non commencé). **008/009/010 partiels** (UI Kit).
+ADR-017→033 et ADR-035→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
 `ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
 protection `main` active via ruleset `protect-main` (8 checks requis) ; restent couverture, release, déploiement,
 environnements. **ADR-014 (registry)** : **`PARTIELLEMENT_IMPLEMENTE`** (CC5 — build + push GHCR sur `main`,
@@ -1572,6 +1572,12 @@ rapport `V3_ENTRY_DECISION.md`. Décision : ouvrir V3 par **Mobile Core Flutter*
 **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter Flutter, aucune dépendance,
 aucun runtime. Prochaine action unique : rédiger et valider ADR-034 avant toute spec ou implémentation
 Mobile Flutter.
+
+**✅ V3 ADR-034 — Flutter UI stack decision : RÉALISÉ** (2026-07-14) :
+ADR `docs/adr/ADR-034-flutter-ui-material3-vs-custom.md`. Décision : futur Mobile Core Flutter =
+**Material 3 contrôlé par tokens Enistere + composants maison ciblés**. Material 3 est le moteur
+Flutter, pas l'identité visuelle autonome. Aucun starter Flutter, aucune dépendance, aucun runtime.
+Prochaine action unique : **Mobile Core Flutter 1 — Core specification**.
 
 ## 10. Règles à ne pas violer
 

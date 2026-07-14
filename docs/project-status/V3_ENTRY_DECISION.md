@@ -25,11 +25,11 @@ La V1 prioritaire est validée :
 - Docs Core : `VALIDE_V1`.
 - Quality Core : `VALIDE_V1`.
 
-Les cores V3 restent vides :
+Les cores V3 restent vides au moment de cette décision d'entrée V3 :
 
 | Core | Statut | Blocage actuel |
 |---|---|---|
-| Mobile Core Flutter | `DOSSIER_SEULEMENT` | spécification absente + ADR-034 non rédigé |
+| Mobile Core Flutter | `DOSSIER_SEULEMENT` | spécification absente + ADR-034 non rédigé à cette date |
 | API Core Spring Boot | `DOSSIER_SEULEMENT` | spécification absente |
 | Web Core Angular | `DOSSIER_SEULEMENT` | spécification absente + ADR-035 non rédigé |
 
