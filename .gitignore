@@ -25,6 +25,7 @@ temp/
 
 # Dependances et builds futurs
 node_modules/
+.dart_tool/
 dist/
 build/
 coverage/
@@ -38,4 +39,3 @@ coverage/
 
 # État runtime de l'outillage agent (jamais versionné)
 .claude/
-
