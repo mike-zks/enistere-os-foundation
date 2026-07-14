@@ -30,11 +30,11 @@ critère est satisfait ou non.
 | C6 | L'upload multipart fonctionne via Dio | Flutter 5 — `DioUploadService`, `FormData`, `MultipartFileFactory` injectable, boundary auto Dio | 35 tests upload (413/415/401/réseau, boundary auto, describeFileForLog PII-safe) ✅ | ✅ |
 | C7 | Les états UI loading/empty/error/success existent et respectent les tokens Enistere | Flutter 10 — `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` dans `lib/src/core/states/` | `LoadingState` : `CircularProgressIndicator` couleur primaire + message optionnel + Semantics label ; `EmptyState` : title + description + action `OutlinedButton` ; `ErrorState` : title + message + action + Semantics `liveRegion` + couleur `colorDanger` ; `SuccessState` : title + message + action + Semantics `liveRegion` + couleur `colorSuccess` ; tokens depuis `EnistereThemeExtension` ; 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ | ✅ |
 | C8 | Le thème Material 3 Enistere est appliqué (ThemeData depuis tokens) | Flutter 2 — `EnistereTokens`, `EnistereThemeExtension`, `EnistereTheme` (ADR-034) | 16 tests thème ; `ThemeExtension` accessible en widget test ; couleur primaire 0xFF2563EB ✅ | ✅ |
-| C9 | Les formulaires de base fonctionnent (login) | Flutter 3 — `SignInScreen` avec un bouton mock | `SignInScreen` = bouton unique `Se connecter` → mock `signIn()` ; **pas de champs email/password, pas de validation** | ❌ |
+| C9 | Les formulaires de base fonctionnent (login) | Flutter 11 — `SignInScreen` formulaire complet | `SignInScreen` = `ConsumerStatefulWidget` + `Form` + `TextFormField` email (`Key('emailField')`, validation requis + format `@`) + `TextFormField` password (`Key('passwordField')`, `obscureText: true`, validation requis) + bouton `Se connecter` (désactivé en loading) + erreur auth générique `Semantics(liveRegion: true)` ; 10 tests widget headless ; smoke `emulator-5554` 7/7 ✅ | ✅ |
 | C10 | Les tests unitaires et widget couvrent auth, tokens, upload et navigation | Flutter 6 — 136/136 tests headless | auth (13) + navigation (9) + upload (35) + API (48) + thème (16) + widget splash/sign-in/home (16) + app (4) ✅ | ✅ |
 | C11 | L'app tourne localement sur simulateur iOS et émulateur Android | Flutter 6 + Flutter 7 | Android : ✅ `emulator-5554` (Pixel 6a API 33) — 5/5 tests passés en 9s ; iOS : environmental block (Linux, R1 accepté) ❌ | ✅ PARTIAL |
 
-**Score §29 : 8/11 satisfaits, 2/11 partiels (C1 Android ✅/iOS bloqué, C11 Android ✅/iOS bloqué), 1/11 non satisfait (C9).**
+**Score §29 : 9/11 satisfaits, 2/11 partiels (C1 Android ✅/iOS bloqué, C11 Android ✅/iOS bloqué), 0/11 non satisfait.**
 
 > **Mise à jour Flutter 7 (2026-07-14)** : B1 fermé — dossiers `android/` générés + smoke `emulator-5554` passé
 > (5/5 tests en 9s). C1 et C11 passent de ❌ à ✅ PARTIAL (Android réel ✅, iOS R1 maintenu).
@@ -56,6 +56,15 @@ critère est satisfait ou non.
 > `colorTextMuted`, primaire `ColorScheme`) ; Semantics `label` (LoadingState) + `liveRegion` (ErrorState, SuccessState) ;
 > 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ (aucune régression) ; 213/213 tests headless.
 > C7 : ❌ → ✅.
+>
+> **Mise à jour Flutter 11 (2026-07-14)** : B5 fermé — `SignInScreen` converti de `ConsumerWidget` à
+> `ConsumerStatefulWidget` + `Form` (`GlobalKey<FormState>`) + `TextFormField` email (`Key('emailField')`,
+> `keyboardType: emailAddress`, `TextInputAction.next`, validation : requis + format `@`) + `TextFormField`
+> password (`Key('passwordField')`, `obscureText: true`, `TextInputAction.done`, validation : requis) +
+> erreur auth générique `Semantics(liveRegion: true)` + bouton `FilledButton` désactivé pendant loading.
+> `ThrowingAuthController` stub pour test d'échec. `router_guard_test.dart` adapté (enterText email+password
+> avant tap). 10 tests widget headless `sign_in_screen_test.dart` ; smoke `emulator-5554` 7/7 ✅ ; 218/218
+> tests headless. C9 : ❌ → ✅.
 
 ---
 
@@ -69,7 +78,7 @@ critère est satisfait ou non.
 | ~~B2~~ | ~~`flutter_secure_storage` absent — pas de refresh token persisté, pas de `restoreSession()`~~ | C3, C4 | ✅ **FERMÉ** — Flutter 8 : `flutter_secure_storage` 10.3.1 + `SecureSessionStore` + `FlutterSecureStorageAdapter` + `restoreSession()` public ; smoke `emulator-5554` 7/7 passés | Flutter 8 ✅ |
 | ~~B3~~ | ~~`RefreshInterceptor` absent — 401 surfacé sans refresh + retry coalescent~~ | C3 | ✅ **FERMÉ** — Flutter 9 : `AuthApi` seam + `RefreshInterceptor` (401 → `refreshSession()` coalescent → retry → purge) + `authApiProvider` ; 14 tests unitaires headless ; smoke `emulator-5554` 7/7 ✅ | Flutter 9 ✅ |
 | ~~B4~~ | ~~Widgets UI state absents — `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState`~~ | C7 | ✅ **FERMÉ** — Flutter 10 : `lib/src/core/states/` : `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` ; tokens Enistere ; 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ | Flutter 10 ✅ |
-| B5 | Login form absent — `SignInScreen` n'a pas de champs email/password ni validation | C9 | Module manquant | Flutter 11 (login form) |
+| ~~B5~~ | ~~Login form absent — `SignInScreen` n'a pas de champs email/password ni validation~~ | C9 | ✅ **FERMÉ** — Flutter 11 : `ConsumerStatefulWidget` + `Form` + champ email (requis + format) + champ password (`obscureText`) + erreur auth générique accessible (`Semantics liveRegion`) ; 10 tests widget headless ; smoke `emulator-5554` 7/7 ✅ | Flutter 11 ✅ |
 
 ### 3.2 Réserves acceptées (non-bloquantes V1)
 
@@ -133,7 +142,7 @@ Les conditions ci-dessous, toutes réalisées, débloquent `VALIDE_V1` :
 | ~~`flutter_secure_storage` seam + `SecureSessionStore` adapter + `restoreSession()`~~ | ~~Flutter 8~~ | B2 (C3, C4) | ✅ **FERMÉ** — `flutter_secure_storage: ^10.3.1` + `SecureSessionStore` + `FlutterSecureStorageAdapter` + `restoreSession()` public ; smoke `emulator-5554` 7/7 passés (2026-07-14) |
 | ~~`RefreshInterceptor` — 401 → `refresh()` coalescent → 1 retry → purge~~ | ~~Flutter 9~~ | B3 (C3) | ✅ **FERMÉ** — `RefreshInterceptor` + `refreshSession()` coalescent + retry unique + purge ; 14 tests unitaires headless (`refresh_interceptor_test.dart` + `auth_controller_test.dart`) ; smoke `emulator-5554` 7/7 ✅ (2026-07-14) |
 | ~~`LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` (widgets Foundation ADR-034)~~ | ~~Flutter 10~~ | B4 (C7) | ✅ **FERMÉ** — `lib/src/core/states/` ; 39 tests widget headless ; smoke `emulator-5554` 7/7 (2026-07-14) |
-| `SignInScreen` form — champs email + password + validation + erreur accessible | Flutter 11 | B5 (C9) | Widget test form validation |
+| ~~`SignInScreen` form — champs email + password + validation + erreur accessible~~ | ~~Flutter 11~~ | B5 (C9) | ✅ **FERMÉ** — `Form` + `TextFormField` email/password + validation + erreur auth `Semantics liveRegion` ; 10 tests widget headless ; smoke `emulator-5554` 7/7 ✅ (2026-07-14) |
 | (optionnel avant V1) iOS runtime si macOS/Xcode disponible | RN31 équivalent | R1 | `bash scripts/smoke.sh --ios` passé |
 
 **Estimation : Flutter 7→11 = 5 missions avant Flutter V1 final Readiness Review.**

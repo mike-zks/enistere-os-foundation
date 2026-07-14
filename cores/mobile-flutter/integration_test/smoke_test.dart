@@ -40,6 +40,14 @@ void main() {
     testWidgets('sign-in tap navigates to HomeScreen', (tester) async {
       await tester.pumpWidget(const ProviderScope(child: EnistereApp()));
       await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'user@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('passwordField')),
+        'password',
+      );
       await tester.tap(find.text('Se connecter'));
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
@@ -48,6 +56,14 @@ void main() {
     testWidgets('logout tap returns to SignInScreen', (tester) async {
       await tester.pumpWidget(const ProviderScope(child: EnistereApp()));
       await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'user@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('passwordField')),
+        'password',
+      );
       await tester.tap(find.text('Se connecter'));
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.logout));

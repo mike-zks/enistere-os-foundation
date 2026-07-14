@@ -6,6 +6,27 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 11 — Sign-in form validation (B5)
+
+- `SignInScreen` : refactorisé de `ConsumerWidget` → `ConsumerStatefulWidget` ; formulaire complet avec `GlobalKey<FormState>`.
+- Champ email : `TextFormField` `Key('emailField')`, validation `requis + format @`, `keyboardType: emailAddress`, `TextInputAction.next`.
+- Champ mot de passe : `TextFormField` `Key('passwordField')`, `obscureText: true`, `TextInputAction.done`, `FocusNode` pour navigation clavier.
+- Soumission : `_submit()` valide le formulaire avant appel `authController.signIn()` ; catch générique sans exposer les credentials ; `_loading` désactive le bouton durant l'appel.
+- Erreur auth : message générique `Semantics(liveRegion: true)` pour l'accessibilité ; aucun credential ni token dans les logs (ADR-015).
+- Layout : `SingleChildScrollView + ConstrainedBox(minHeight) + IntrinsicHeight` — centré, scrollable, sans overflow sur petits écrans.
+- `test/widget/sign_in_screen_test.dart` : 10 tests widget (`_fillAndSubmit()` helper + `ThrowingAuthController` stub).
+  - Tests : heading Enistere · champs présents · touch target 44px · email requis · format email @ · mot de passe requis · soumission valide navigue HomeScreen · échec signIn affiche erreur générique · obscureText true · couleur erreur colorDanger.
+- `test/widget/router_guard_test.dart` : test `signing in navigates from SignInScreen to HomeScreen` adapté — `enterText` email + password avant tap.
+- `integration_test/smoke_test.dart` : 2 tests adaptés — `sign-in tap navigates to HomeScreen` + `logout tap returns to SignInScreen` remplissent email + password avant tap.
+- Smoke `emulator-5554` (Pixel 6a, Android API 33, x86_64) : **7/7 passés** ✅ (aucune régression).
+- **B5 FERMÉ.** C9 : ❌ → ✅. Score §29 : 8/11 → 9/11.
+- 218/218 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 218/218 ✅ ·
+  `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Rapport : `docs/project-status/MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md`.
+- Statuts mis à jour : `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter 10 — UI states Foundation (B4)
 
 - `LoadingState` : `CircularProgressIndicator` couleur primaire `ColorScheme` ; message optionnel ; `Semantics(label:)` accessible.

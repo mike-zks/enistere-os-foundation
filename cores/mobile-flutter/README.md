@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, Flutter 10 B4 fermé, 2026-07-14)
+> Statut : **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, Flutter 10 B4 fermé, Flutter 11 B5 fermé — tous les bloquants B1→B5 clos, score §29 9/11)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -76,7 +76,7 @@ cores/mobile-flutter/
 │       │       └── upload_service.dart    ← Flutter 5 (UploadService + DioUploadService)
 │       ├── features/
 │       │   ├── auth/
-│       │   │   └── sign_in_screen.dart    ← Flutter 3 (placeholder, bouton connexion)
+│       │   │   └── sign_in_screen.dart    ← Flutter 11 (ConsumerStatefulWidget + Form + email + password + validation + erreur auth)
 │       │   ├── home/
 │       │   │   └── home_screen.dart       ← Flutter 3 (ConsumerWidget + sign-out)
 │       │   └── splash/
@@ -106,12 +106,12 @@ cores/mobile-flutter/
         ├── app_test.dart                  ← Flutter 3 (4 tests)
         ├── router_guard_test.dart         ← Flutter 3 (5 tests guards)
         ├── splash_screen_test.dart        ← Flutter 6 (4 tests)
-        ├── sign_in_screen_test.dart       ← Flutter 6 (5 tests)
+        ├── sign_in_screen_test.dart       ← Flutter 11 (10 tests — email/password, validation, navigation, obscureText, erreur auth)
         ├── home_screen_test.dart          ← Flutter 6 (7 tests)
         └── states_test.dart               ← Flutter 10 (39 tests — LoadingState/EmptyState/ErrorState/SuccessState)
 ```
 
-La prochaine mission est **Flutter 11 — Login form** (`SignInScreen` email + password + validation + erreur accessible — ferme B5/C9).
+La prochaine mission est **Flutter V1 final — V1 Final Readiness Decision** (`VALIDE_V1` quand toutes les conditions remplies).
 
 ## Stack technique
 
@@ -152,5 +152,5 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 8 | SecureStorage seam + adapter | `flutter_secure_storage` + `SecureSessionStore` + `restoreSession()` ✅ — B2 FERMÉ |
 | Flutter 9 | RefreshInterceptor | 401 → `refresh()` coalescent → 1 retry → purge ✅ — B3 FERMÉ |
 | Flutter 10 | UI states | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere ✅ — B4 FERMÉ |
-| Flutter 11 | Login form | `SignInScreen` email + password + validation + erreur accessible |
+| Flutter 11 | Login form | `SignInScreen` email + password + validation + erreur accessible ✅ — B5 FERMÉ |
 | Flutter V1 final | V1 Final Readiness | `VALIDE_V1` quand Flutter 7→11 réalisés |
