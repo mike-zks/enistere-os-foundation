@@ -26,6 +26,7 @@ temp/
 # Dependances et builds futurs
 node_modules/
 .dart_tool/
+.flutter-plugins-dependencies
 dist/
 build/
 coverage/
