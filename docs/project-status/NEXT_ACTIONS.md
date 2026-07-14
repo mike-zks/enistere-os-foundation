@@ -303,10 +303,27 @@
 > Score §29 : 9/11 pleinement satisfaits + 2/11 PARTIAL (C1, C11 — même contrainte iOS R1).
 > Zéro bloquant. 218/218 headless · smoke `emulator-5554` 7/7 ✅. Aucun succès iOS artificiel.
 >
-> **Prochaine action** : retour pilotage post-V1 Flutter. Candidats : incréments V2 Flutter
-> (Freezed + Json Serializable, logger redaction, PreferenceStore seam, CI Flutter, build release)
-> ou cadrage du prochain core V3 selon roadmap. iOS Flutter : exécuter `bash scripts/smoke.sh --ios`
-> uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
+>
+> ✅ **V3 Post Flutter Roadmap Decision : RÉALISÉE** (2026-07-14).
+> Rapport : `docs/project-status/V3_POST_FLUTTER_ROADMAP_DECISION.md`.
+> Décision : poursuivre V3 par **API Core Spring Boot 1 — Core specification**. Flutter V2 est reporté
+> car Mobile Flutter est déjà `VALIDE_V1`; Web Angular reste derrière ADR-035; AI Core reste hors séquence V3 §14.
+>
+> ✅ **API Core Spring Boot 1 — Core specification : RÉALISÉ** (2026-07-14).
+> Livrables : `cores/api-spring/CORE_SPECIFICATION.md` (42 sections : rôle, objectifs, périmètre,
+> architecture cible, structure cible, modules obligatoires V1, modules optionnels/futurs,
+> standards API/sécurité/qualité Java, auth JWT Spring Security 7.x, RBAC Method Security,
+> users/roles/permissions, validation Jakarta BV, erreurs `@ControllerAdvice` `ApiError`,
+> logs SLF4J/Logback structurés, audit logs, upload MinIO Java SDK, cache Redis, jobs Spring
+> `@Async`/Scheduler, OpenAPI springdoc, health Actuator, tests JUnit 5 + Testcontainers,
+> §30 critères V1, §40 décisions pendantes Maven/Gradle, §41 missions ordonnées, §42 cohérence NestJS)
+> + `cores/api-spring/README.md`.
+> Aucun starter, aucun code Java, aucune dépendance.
+> `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
+>
+> **Prochaine action** : **API Core Spring Boot 2 — Starter minimal** (build system + structure `src/`
+> + Spring Security 7.x + JWT + auth flow) — précéder par ADR Maven/Gradle si le choix build est requis avant.
+> iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

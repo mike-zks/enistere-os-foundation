@@ -6,6 +6,27 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 1 — Core specification
+
+- `cores/api-spring/CORE_SPECIFICATION.md` — 42 sections : résumé exécutif, rôle, objectifs, périmètre fonctionnel, architecture cible (feature-package, DTO séparés entités, controllers légers), structure cible `src/` indicative, modules obligatoires V1 (SecurityConfig, JwtTokenProvider, AuthModule, UsersModule, RolesModule, PermissionsModule, HealthModule, GlobalExceptionHandler, ValidationConfig, AuditModule, OpenApiConfig, CacheConfig, StorageModule), modules optionnels (Mail/Notifications/Scheduler/Realtime/Search/Admin/Webhook/Report).
+- Standards API (versioning `/api/v1/`, format `ApiError`, pagination `Page<T>`, codes HTTP) + standards sécurité (Spring Security, validation Jakarta Bean Validation, method security, audit logs, CORS strict, OWASP Dependency Check) + standards qualité Java (`strategy/08_STANDARDS.md §16`).
+- Auth JWT : access token court, refresh token persisté invalidable, rotation recommandée, `JwtAuthenticationFilter`, `@Public`, `@CurrentUser`.
+- §30 critères de validation V1 (15 critères). §40 décisions pendantes : Maven vs Gradle (ADR avant Spring Boot 2), queue broker, observabilité. §41 missions ordonnées Spring Boot 1→V1. §42 cohérence avec API Core NestJS.
+- `cores/api-spring/README.md` — statut, modules cibles, stack, décisions pendantes, missions.
+- Aucun starter, aucun `pom.xml`/`build.gradle`, aucun code Java, aucune dépendance.
+- `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
+- Statuts mis à jour : `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`.
+
+### V3 Post Flutter Roadmap Decision
+
+- Nouveau rapport : `docs/project-status/V3_POST_FLUTTER_ROADMAP_DECISION.md`.
+- Correction de cohérence : `Mobile Core Flutter` est aligné en `VALIDE_V1` dans `IMPLEMENTATION_MATRIX.md`
+  après `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`.
+- ADR-034 est aligné en `IMPLEMENTE` dans `DECISIONS_REGISTER.md` : Flutter V1 applique Material 3
+  contrôlé par tokens Enistere.
+- Prochaine action unique : **API Core Spring Boot 1 — Core specification** (`cores/api-spring/CORE_SPECIFICATION.md`
+  + `README.md`, sans starter ni dépendance Java).
+
 ### Mobile Core Flutter V1 Final Readiness Decision
 
 - Décision formelle : Mobile Core Flutter promu **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
