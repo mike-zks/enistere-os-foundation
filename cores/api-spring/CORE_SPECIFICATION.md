@@ -125,8 +125,8 @@ Principes transversaux :
 Technologies cibles (sans installation à ce stade) :
 
 ```txt
-Spring Boot 3.x (LTS)
-Spring Security 6.x
+Spring Boot 4.x (stable courante à vérifier via Spring Initializr au moment du starter)
+Spring Security 7.x
 Spring Data JPA
 Hibernate (provider JPA par défaut)
 PostgreSQL
@@ -150,7 +150,7 @@ Structure indicative (non créée dans cette mission) :
 cores/api-spring/
 ├── README.md
 ├── CORE_SPECIFICATION.md
-├── pom.xml ou build.gradle           ← à créer en Spring Boot 1
+├── pom.xml ou build.gradle           ← à créer en Spring Boot 2
 ├── src/
 │   ├── main/
 │   │   ├── java/com/enistere/core/
@@ -326,7 +326,7 @@ Les permissions ne doivent pas être codées en dur dans les contrôleurs — el
 
 Le `UsersModule` doit prévoir :
 
-- modèle `User` minimal : `id`, `email` (unique, index), `passwordHash` (bcrypt), `isActive`, `createdAt`, `updatedAt` ;
+- modèle `User` minimal : `id`, `email` (unique, index), `passwordHash` (Argon2id via `PasswordEncoder`, conforme ADR-039), `isActive`, `createdAt`, `updatedAt` ;
 - récupération du profil courant (`GET /auth/me`) ;
 - création utilisateur via auth flow (register ou admin) ;
 - statut actif/inactif — routes protégées refusent les utilisateurs inactifs ;

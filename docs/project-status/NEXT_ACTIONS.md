@@ -312,7 +312,7 @@
 > ✅ **API Core Spring Boot 1 — Core specification : RÉALISÉ** (2026-07-14).
 > Livrables : `cores/api-spring/CORE_SPECIFICATION.md` (42 sections : rôle, objectifs, périmètre,
 > architecture cible, structure cible, modules obligatoires V1, modules optionnels/futurs,
-> standards API/sécurité/qualité Java, auth JWT Spring Security 6, RBAC Method Security,
+> standards API/sécurité/qualité Java, auth JWT Spring Security 7.x, RBAC Method Security,
 > users/roles/permissions, validation Jakarta BV, erreurs `@ControllerAdvice` `ApiError`,
 > logs SLF4J/Logback structurés, audit logs, upload MinIO Java SDK, cache Redis, jobs Spring
 > `@Async`/Scheduler, OpenAPI springdoc, health Actuator, tests JUnit 5 + Testcontainers,
@@ -322,7 +322,7 @@
 > `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 >
 > **Prochaine action** : **API Core Spring Boot 2 — Starter minimal** (build system + structure `src/`
-> + Spring Security 6 + JWT + auth flow) — précéder par ADR Maven/Gradle si le choix build est requis avant.
+> + Spring Security 7.x + JWT + auth flow) — précéder par ADR Maven/Gradle si le choix build est requis avant.
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).

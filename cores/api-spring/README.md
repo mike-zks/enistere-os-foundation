@@ -2,7 +2,7 @@
 
 > Statut : **`SPECIFICATION_DOCUMENTAIRE`** (Spring Boot 1, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
-> Stack cible : Spring Boot 3.x + Spring Security 6.x + PostgreSQL + JPA/Hibernate + Flyway + Redis + MinIO + springdoc-openapi + JUnit 5 + Testcontainers
+> Stack cible : Spring Boot 4.x + Spring Security 7.x + PostgreSQL + JPA/Hibernate + Flyway + Redis + MinIO + springdoc-openapi + JUnit 5 + Testcontainers
 
 Socle backend **Java / Spring Boot** générique et réutilisable pour les futures applications Enistere orientées enterprise, finance, administration et systèmes d'information.
 
@@ -12,7 +12,7 @@ Ce core complète l'API Core NestJS (`VALIDE_V1`) en ciblant l'écosystème JVM 
 
 | Module | Stack | Notes |
 |---|---|---|
-| Auth JWT | Spring Security 6 + JWT | access token court, refresh token persisté, rotation, révocation, logout serveur |
+| Auth JWT | Spring Security 7.x + JWT | access token court, refresh token persisté, rotation, révocation, logout serveur |
 | RBAC | Spring Security Method Security | `@PreAuthorize`, `@Roles`, `@Permissions` |
 | Gestion utilisateurs | Spring Data JPA + PostgreSQL | profil courant, statut actif, association rôles, soft delete |
 | Validation | Jakarta Bean Validation | `@Valid`, `MethodValidationPostProcessor`, contraintes custom |
@@ -42,8 +42,8 @@ Aucun starter, aucun `pom.xml`, aucun code Java, aucune dépendance.
 
 | Composant | Choix retenu | Décision |
 |---|---|---|
-| Framework | Spring Boot 3.x (LTS) | Roadmap §16 |
-| Sécurité | Spring Security 6.x | Standard Spring Boot |
+| Framework | Spring Boot 4.x | Version stable courante à vérifier via Spring Initializr au moment du starter |
+| Sécurité | Spring Security 7.x | Standard Spring Boot aligné avec Spring Boot 4.x |
 | ORM | Spring Data JPA / Hibernate | Standard Spring Data |
 | Base de données | PostgreSQL | Cloud Core + API NestJS alignés |
 | Migrations | Flyway | Décision Spring Boot 2 |
