@@ -6,6 +6,42 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 5 — Upload multipart primitives
+
+- Dépendance : `http_parser: ^4.0.0` (déjà transitive via Dio 5.10.0 ; ajout en dépendance directe pour
+  `MediaType.parse` dans `MultipartFile.fromFile`).
+- `AppFile(path, name, mimeType, sizeBytes?)` — descripteur pur sans logique de validation métier.
+  SÉCURITÉ (ADR-007/015) : `path` est un chemin device, `name` peut être PII — ne jamais loguer ni stocker
+  bruts ; utiliser `describeFileForLog`.
+- `SafeFileDescriptor(mimeType, extension?)` — représentation safe pour logs/télémétrie.
+  `describeFileForLog(AppFile) → SafeFileDescriptor` : retourne mimeType + extension sanitisée
+  (alphanumérique, max 12 car, lowercase) — JAMAIS path, JAMAIS nom de fichier brut.
+- `isValidAppFile` — garde structurelle (path/name/mimeType non vides, mimeType contient `/`).
+  UX uniquement ; le backend reste l'autorité (ADR-007).
+- `isAllowedUploadContentType(file, allowedTypes)` — match exact (`image/jpeg`), groupe wildcard
+  (`image/*`), ou `*/*` ; liste vide = tout autorisé (pas de filtre). UX uniquement.
+- `FileCategory` enum (9 valeurs : image/document/avatar/media/video/audio/identityDocument/attachment/other)
+  + `FileCategoryExtension.apiValue` → `'IMAGE'` … `'IDENTITY_DOCUMENT'`.
+- `UploadedFileMetadata(id, category)` + `fromJson` — DTO minimal public server-assigned.
+  JAMAIS : URL signée, bucket, device path, token, champ interne.
+- `UploadService` (abstract interface) + `DioUploadService(dio, uploadPath='/files', multipartFileFactory?)`.
+  `MultipartFileFactory` injectable pour l'isolation des tests (tests utilisent `MultipartFile.fromBytes`,
+  pas de vrai filesystem). `FormData` construit frais à chaque appel (stream non rejouable). Content-Type
+  posé par Dio avec boundary UNIQUE automatique — JAMAIS forcé manuellement. Aucun retry automatique.
+- Mapping erreurs : `e.error is AppApiError` → rethrow ; sinon `mapDioError` (fallback sans ErrorInterceptor).
+  413→`TooLargeError`, 415→`UnsupportedTypeError`, 401→`UnauthorizedError`, réseau→`NetworkError`.
+- Tests `flutter test` 120/120 ✅ (+34 tests) : `app_file_test.dart` (21 : valid/invalid, sizeBytes optionnel,
+  describeFileForLog sans path/nom, extensions sûres, wildcards), `upload_service_test.dart` (14 : uploadPath
+  default, implements UploadService, POST /files, boundary auto Dio, category API string, subjectId
+  présent/absent, UploadedFileMetadata, 413/415/401/réseau → AppApiError, token/path jamais dans les logs).
+  · `flutter analyze` 0 issues ✅ · `dart format` 0 changements ✅ · quality-gates docs 2/2 ✅.
+- Mobile Core Flutter : **`DIO_CLIENT_READY`** → **`UPLOAD_READY`**.
+- Mises à jour : `cores/mobile-flutter/README.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`.
+- Interdits respectés : aucun file picker natif ; aucun endpoint métier couplé ; aucun backend réel requis ;
+  aucun upload direct S3/MinIO ; aucun stockage fichier / chemin device / URL signée / token / body dans
+  logs/providers persistés ; aucun changement RN/Web/API/UI Kit/Cloud/root/workflows ; aucun retry automatique.
+
 ### Mobile Core Flutter 4 — Client Dio + providers
 
 - Dépendance : `dio: ^5.10.0` (Dart SDK >=2.18.0 <4.0.0, compatible Dart 3.12.2). Aucun Freezed /

@@ -48,6 +48,14 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 5 (2026-07-14)** : upload multipart primitives livrés —
+> `lib/src/core/upload/app_file.dart` (`AppFile`, `SafeFileDescriptor`, `describeFileForLog`, `isValidAppFile`, `isAllowedUploadContentType`),
+> `lib/src/core/upload/file_category.dart` (`FileCategory` + `.apiValue`),
+> `lib/src/core/upload/upload_result.dart` (`UploadedFileMetadata.fromJson`),
+> `lib/src/core/upload/upload_service.dart` (`UploadService` interface + `DioUploadService`, `MultipartFileFactory` injectable).
+> `http_parser: ^4.0.0` ajouté. Tests 120/120 — unit/upload/app_file (21) + unit/upload/upload_service (14) + tests Flutter 1→4 inchangés.
+> Mobile Core Flutter : **`DIO_CLIENT_READY`** → **`UPLOAD_READY`**.
+>
 > **Mise à jour Mobile Core Flutter 3 (2026-07-14)** : auth shell + guards livrés —
 > `lib/src/core/auth/` (`AuthStatus`, `AuthState`, `SessionEnvelope`, `SessionStore` seam +
 > `InMemorySessionStore`), `AuthController` (`Notifier<AuthState>`, access token mémoire uniquement),
@@ -206,7 +214,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4) | ✓ (86 tests : theme + unit/auth + widget + unit/api) | — | **DIO_CLIENT_READY** | Flutter 4 : `ApiConfig` + `AppApiError` sealed (11 sous-types) + `createDioClient` (`_AuthInterceptor` → `LoggingInterceptor` → `ErrorInterceptor`) + `dioClientProvider` Riverpod ; `dio: ^5.10.0` ; token dynamique, jamais stocké ; 401 sans refresh | **Flutter 5 — Upload multipart** |
+| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (120 tests : theme + unit/auth + widget + unit/api + unit/upload) | — | **UPLOAD_READY** | Flutter 5 : `AppFile` + `SafeFileDescriptor` + `describeFileForLog` (jamais path/nom brut) + `FileCategory` (9 valeurs) + `UploadedFileMetadata` + `DioUploadService` (`FormData` + injectable `MultipartFileFactory`, boundary Dio auto, jamais Content-Type forcé) ; erreurs 413/415/401/réseau via `AppApiError` ; `http_parser: ^4.0.0` | **Flutter 6 — Tests + smoke** |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 

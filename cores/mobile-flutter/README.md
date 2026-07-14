@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`DIO_CLIENT_READY`** (Mobile Core Flutter 4, 2026-07-14)
+> Statut : **`UPLOAD_READY`** (Mobile Core Flutter 5, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -32,7 +32,7 @@ Il ne contient aucune logique métier ni aucun code runtime.
 
 ```txt
 cores/mobile-flutter/
-├── pubspec.yaml                            ← Flutter 4 (+ dio 5.10.0)
+├── pubspec.yaml                            ← Flutter 5 (+ http_parser 4.0.0)
 ├── analysis_options.yaml                   ← Flutter 2
 ├── CORE_SPECIFICATION.md                   ← Flutter 1
 ├── README.md                               ← Flutter 1
@@ -55,8 +55,13 @@ cores/mobile-flutter/
 │       │   │   └── auth_controller.dart   ← Flutter 3 (Notifier<AuthState>, token mémoire)
 │       │   ├── config/
 │       │   │   └── api_config.dart        ← Flutter 4 (ApiConfig : baseUrl, timeouts, commonHeaders)
-│       │   └── navigation/
-│       │       └── router.dart            ← Flutter 3 (routerProvider GoRouter + guards)
+│       │   ├── navigation/
+│       │   │   └── router.dart            ← Flutter 3 (routerProvider GoRouter + guards)
+│       │   └── upload/
+│       │       ├── app_file.dart          ← Flutter 5 (AppFile + SafeFileDescriptor + describeFileForLog)
+│       │       ├── file_category.dart     ← Flutter 5 (FileCategory enum + apiValue)
+│       │       ├── upload_result.dart     ← Flutter 5 (UploadedFileMetadata.fromJson)
+│       │       └── upload_service.dart    ← Flutter 5 (UploadService + DioUploadService)
 │       ├── features/
 │       │   ├── auth/
 │       │   │   └── sign_in_screen.dart    ← Flutter 3 (placeholder, bouton connexion)
@@ -77,15 +82,18 @@ cores/mobile-flutter/
     │   │   ├── error_interceptor_test.dart ← Flutter 4 (19 tests)
     │   │   ├── logging_interceptor_test.dart ← Flutter 4 (6 tests)
     │   │   └── dio_client_test.dart       ← Flutter 4 (11 tests)
-    │   └── auth/
-    │       ├── auth_controller_test.dart  ← Flutter 3 (9 tests)
-    │       └── session_store_test.dart    ← Flutter 3 (4 tests)
+    │   ├── auth/
+    │   │   ├── auth_controller_test.dart  ← Flutter 3 (9 tests)
+    │   │   └── session_store_test.dart    ← Flutter 3 (4 tests)
+    │   └── upload/
+    │       ├── app_file_test.dart         ← Flutter 5 (21 tests)
+    │       └── upload_service_test.dart   ← Flutter 5 (14 tests)
     └── widget/
         ├── app_test.dart                  ← Flutter 3 (4 tests mis à jour)
         └── router_guard_test.dart         ← Flutter 3 (5 tests guards)
 ```
 
-La prochaine mission est **Flutter 5 — Upload multipart** (`UploadService` + `AppFile` descriptor).
+La prochaine mission est **Flutter 6 — Tests + smoke** (flutter_test intégration iOS + Android).
 
 ## Stack technique
 
@@ -119,6 +127,6 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 2 | Starter minimal | `pubspec.yaml` + structure `lib/` + `ThemeData` Enistere ✅ |
 | Flutter 3 | Auth shell + guards | `AuthController` + `SessionStore` seam + GoRouter guards ✅ |
 | Flutter 4 | Client Dio + providers | `ApiConfig` + `AppApiError` sealed + `createDioClient` + `dioClientProvider` ✅ |
-| Flutter 5 | Upload multipart | `UploadService` + `AppFile` descriptor |
+| Flutter 5 | Upload multipart | `UploadService` + `AppFile` descriptor ✅ |
 | Flutter 6 | Tests + smoke | `flutter_test` + intégration iOS + Android |
 | Flutter V1 | Readiness review | Rapport V1 Readiness |
