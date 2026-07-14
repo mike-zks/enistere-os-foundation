@@ -48,6 +48,14 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter V1 Final Readiness Decision (2026-07-14)** : rapport
+> `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. Mobile Core Flutter promu de
+> **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Décision : R1 (iOS Linux) acceptée comme réserve
+> environnementale non bloquante — identique à RN B2. Score §29 : 9/11 pleinement satisfaits +
+> 2/11 PARTIAL (C1, C11 — même contrainte iOS, Android prouvé réel). Zéro bloquant restant.
+> 218/218 tests headless · smoke `emulator-5554` 7/7 ✅. Aucun code Flutter modifié.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+>
 > **Mise à jour Mobile Core Flutter 11 — Sign-in form validation (2026-07-14)** : rapport
 > `MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md`. **B5 FERMÉ** — `SignInScreen` converti de `ConsumerWidget` à
 > `ConsumerStatefulWidget` + `Form` + `TextFormField` email (`Key('emailField')`, `keyboardType: emailAddress`,

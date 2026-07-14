@@ -6,6 +6,19 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter V1 Final Readiness Decision
+
+- Décision formelle : Mobile Core Flutter promu **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
+- R1 (iOS Linux) acceptée comme réserve environnementale non bloquante — identique à RN B2.
+- Score §29 : 9/11 pleinement satisfaits (C2–C10) + 2/11 PARTIAL (C1, C11 — même contrainte iOS Linux R1).
+- Zéro bloquant restant : B1 (Flutter 7), B2 (Flutter 8), B3 (Flutter 9), B4 (Flutter 10), B5 (Flutter 11) tous FERMÉS.
+- Vérifications : 218/218 tests headless ✅ · smoke `emulator-5554` 7/7 ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Aucun code Flutter modifié dans cette décision.
+- Rapport : `docs/project-status/MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`.
+- Statuts mis à jour : `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter 11 — Sign-in form validation (B5)
 
 - `SignInScreen` : refactorisé de `ConsumerWidget` → `ConsumerStatefulWidget` ; formulaire complet avec `GlobalKey<FormState>`.

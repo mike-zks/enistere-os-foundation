@@ -296,9 +296,17 @@
 > adapté ; smoke `emulator-5554` 7/7 ✅ ; 218/218 tests headless.
 > **B5 FERMÉ.** C9 : ❌ → ✅. Score §29 : 8/11 → 9/11. Tous les bloquants B1→B5 fermés.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter V1 Final Readiness Decision**.
-> Objectif : déclarer formellement `VALIDE_V1` — tous les bloquants B1→B5 sont fermés, score §29 9/11
-> (C1/C11 PARTIAL pour iOS, réserve R1 environnementale acceptée comme RN). Aucun nouveau code.
+> ✅ **Mobile Core Flutter V1 Final Readiness Decision : RÉALISÉE** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`.
+> Décision : Mobile Core Flutter promu de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+> R1 (iOS Linux) acceptée comme réserve environnementale non bloquante — identique à RN B2 (`MOBILE_CORE_V1_FINAL_READINESS_DECISION.md`).
+> Score §29 : 9/11 pleinement satisfaits + 2/11 PARTIAL (C1, C11 — même contrainte iOS R1).
+> Zéro bloquant. 218/218 headless · smoke `emulator-5554` 7/7 ✅. Aucun succès iOS artificiel.
+>
+> **Prochaine action** : retour pilotage post-V1 Flutter. Candidats : incréments V2 Flutter
+> (Freezed + Json Serializable, logger redaction, PreferenceStore seam, CI Flutter, build release)
+> ou cadrage du prochain core V3 selon roadmap. iOS Flutter : exécuter `bash scripts/smoke.sh --ios`
+> uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
