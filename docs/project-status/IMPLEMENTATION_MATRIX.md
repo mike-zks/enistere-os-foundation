@@ -48,6 +48,16 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 7 — platform dirs + smoke Android (2026-07-14)** : rapport
+> `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md`. **B1 FERMÉ** — dossiers `android/` générés via
+> `flutter create --platforms=android --org com.enistere .` ; smoke `emulator-5554` (Pixel 6a, API 33, x86_64) :
+> `assembleDebug` 512.2s ✅ · APK installé 924ms ✅ · **5/5 tests integration_test passés en 9s** ✅.
+> Tests : app démarre sans crash, utilisateur non authentifié → `SignInScreen`, sign-in → `HomeScreen`,
+> logout → `SignInScreen`, session restore → `HomeScreen`. 136 tests headless inchangés.
+> `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 136/136 ✅ · `dart format` 0 ✅ ·
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> C1 et C11 : ❌ → ✅ PARTIAL (Android réel, iOS R1 maintenu). B2→B5 restent ouverts.
+>
 > **Mise à jour Mobile Core Flutter V1 Readiness Review (2026-07-14)** : rapport
 > `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`. Mobile Core Flutter passe de **`TEST_WIDGET_PASSED`** à
 > **`IMPLEMENTATION_AVANCEE`**. Score §29 : 5/11 satisfaits, 1/11 partiel, 5/11 non satisfaits.
@@ -236,7 +246,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (136 tests : theme + unit/auth + widget × 3 + unit/api + unit/upload + intégration × 5) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 5/11 §29, 5 bloquants B1→B5, réserves R1→R5) | **IMPLEMENTATION_AVANCEE** | Flutter V1 Readiness Review (2026-07-14) : B1 Android (no platform dirs), B2 SecureStorage, B3 RefreshInterceptor, B4 UI states, B5 login form ; §29 5/11 satisfaits ; `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` | **Flutter 7** — platform dirs + smoke Android (ferme B1) |
+| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (136 tests : theme + unit/auth + widget × 3 + unit/api + unit/upload + intégration × 5) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 5/11 §29, 4 bloquants B2→B5, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 fermé) | **IMPLEMENTATION_AVANCEE** | Flutter 7 (2026-07-14) : B1 fermé — `android/` + smoke `emulator-5554` 5/5 passés ✅ ; B2 SecureStorage, B3 RefreshInterceptor, B4 UI states, B5 login form restent ouverts | **Flutter 8** — SecureStorage seam + adapter (ferme B2) |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 

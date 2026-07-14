@@ -6,6 +6,24 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 7 — Platform dirs + smoke Android
+
+- Dossiers `android/` générés via `flutter create --platforms=android --org com.enistere .`.
+- `MainActivity.kt` : `FlutterActivity()` uniquement, aucune logique métier.
+- `AndroidManifest.xml` : déclarations standard Flutter, aucune permission sensible.
+- `.gitignore` Flutter et `.metadata` tooling versionnés.
+- `test/widget_test.dart` (template counter-app incompatible) supprimé.
+- Smoke `emulator-5554` (Pixel 6a, Android API 33, x86_64) : `assembleDebug` 512.2s ✅ · APK 924ms ✅ ·
+  **5/5 tests `integration_test/smoke_test.dart` passés en 9s** ✅.
+- **B1 FERMÉ.** C1 et C11 §29 : ❌ → ✅ PARTIAL (Android réel, iOS R1 maintenu).
+- 136 tests headless inchangés. B2→B5 restent ouverts.
+- `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 136/136 ✅ ·
+  `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Rapport : `docs/project-status/MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md`.
+- Statuts mis à jour : `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter V1 Readiness Review
 
 - Rapport `docs/project-status/MOBILE_FLUTTER_V1_READINESS_REVIEW.md` produit.

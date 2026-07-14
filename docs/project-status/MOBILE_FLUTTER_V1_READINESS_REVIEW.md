@@ -22,7 +22,7 @@ critère est satisfait ou non.
 
 | # | Critère §29 | Livrable Flutter | Preuve | Verdict |
 |---|---|---|---|---|
-| C1 | L'app démarre avec Flutter sur iOS et Android | Flutter 6 — `integration_test/smoke_test.dart` + `scripts/smoke.sh` | Android : BLOQUÉ — library sans dossiers `android/` (architectural) ; iOS : BLOQUÉ — hôte Linux/Xcode (environnemental) ; `flutter test` 136/136 headless ✅ | ❌ |
+| C1 | L'app démarre avec Flutter sur iOS et Android | Flutter 6 — `integration_test/smoke_test.dart` + `scripts/smoke.sh` ; Flutter 7 — dossiers `android/` + smoke réel `emulator-5554` | Android : ✅ `emulator-5554` (Pixel 6a API 33) — 5/5 tests passés ; iOS : BLOQUÉ — hôte Linux/Xcode (environnemental, R1 accepté) | ✅ PARTIAL |
 | C2 | La navigation go_router fonctionne (public + protégé + guards) | Flutter 3 — `routerProvider` + redirect guards + `ValueNotifier` bridge | 5 router guard tests + 4 app widget tests verts ✅ | ✅ |
 | C3 | Le flow auth est prêt (login / logout / refresh / session restore) | Flutter 3 — `AuthController.signIn()` + `signOut()` ; Flutter 4 — `_AuthInterceptor` | login ✅ (mock) ; logout ✅ ; **refresh 401 ❌** (401 surfacé sans `RefreshInterceptor`) ; **session restore ❌** (pas de `restoreSession()` depuis SecureStorage) | ❌ PARTIAL |
 | C4 | Les tokens sont correctement stockés (access en mémoire, refresh SecureStorage) | Flutter 3 — `AuthController._accessToken` privé ; `InMemorySessionStore` placeholder | access token en mémoire ✅ ; **`flutter_secure_storage` absent ❌** — `InMemorySessionStore` uniquement, aucun stockage persistant du refresh token | ❌ |
@@ -32,9 +32,12 @@ critère est satisfait ou non.
 | C8 | Le thème Material 3 Enistere est appliqué (ThemeData depuis tokens) | Flutter 2 — `EnistereTokens`, `EnistereThemeExtension`, `EnistereTheme` (ADR-034) | 16 tests thème ; `ThemeExtension` accessible en widget test ; couleur primaire 0xFF2563EB ✅ | ✅ |
 | C9 | Les formulaires de base fonctionnent (login) | Flutter 3 — `SignInScreen` avec un bouton mock | `SignInScreen` = bouton unique `Se connecter` → mock `signIn()` ; **pas de champs email/password, pas de validation** | ❌ |
 | C10 | Les tests unitaires et widget couvrent auth, tokens, upload et navigation | Flutter 6 — 136/136 tests headless | auth (13) + navigation (9) + upload (35) + API (48) + thème (16) + widget splash/sign-in/home (16) + app (4) ✅ | ✅ |
-| C11 | L'app tourne localement sur simulateur iOS et émulateur Android | Flutter 6 | Android : architectural block (library sans `android/`) ❌ ; iOS : environmental block (Linux) ❌ | ❌ |
+| C11 | L'app tourne localement sur simulateur iOS et émulateur Android | Flutter 6 + Flutter 7 | Android : ✅ `emulator-5554` (Pixel 6a API 33) — 5/5 tests passés en 9s ; iOS : environmental block (Linux, R1 accepté) ❌ | ✅ PARTIAL |
 
-**Score §29 : 5/11 satisfaits, 1/11 partiel (C3), 5/11 non satisfaits.**
+**Score §29 : 5/11 satisfaits, 3/11 partiels (C1 Android ✅/iOS bloqué, C3 login/logout ✅/refresh/restore absents, C11 Android ✅/iOS bloqué), 3/11 non satisfaits.**
+
+> **Mise à jour Flutter 7 (2026-07-14)** : B1 fermé — dossiers `android/` générés + smoke `emulator-5554` passé
+> (5/5 tests en 9s). C1 et C11 passent de ❌ à ✅ PARTIAL (Android réel ✅, iOS R1 maintenu).
 
 ---
 
@@ -44,7 +47,7 @@ critère est satisfait ou non.
 
 | Ref | Gap | Critère §29 | Nature | Débloqué par |
 |---|---|---|---|---|
-| B1 | Android runtime — library sans dossiers `android/` | C1, C11 | Architectural — `flutter create --platforms=android .` résout | Flutter 7 (platform dirs + smoke Android) |
+| ~~B1~~ | ~~Android runtime — library sans dossiers `android/`~~ | C1, C11 | ✅ **FERMÉ** — Flutter 7 : `flutter create --platforms=android .` + smoke `emulator-5554` 5/5 passés | Flutter 7 ✅ |
 | B2 | `flutter_secure_storage` absent — pas de refresh token persisté, pas de `restoreSession()` | C3, C4 | Module manquant | Flutter 8 (SecureStorage seam + adapter) |
 | B3 | `RefreshInterceptor` absent — 401 surfacé sans refresh + retry coalescent | C3 | Module manquant | Flutter 9 (RefreshInterceptor) |
 | B4 | Widgets UI state absents — `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` | C7 | Module manquant | Flutter 10 (UI states) |
@@ -108,7 +111,7 @@ Les conditions ci-dessous, toutes réalisées, débloquent `VALIDE_V1` :
 
 | Condition | Mission | Critère fermé | Preuve attendue |
 |---|---|---|---|
-| Android emulator smoke — `integration_test/` exécuté sur `emulator-5554` | Flutter 7 | B1 (C1, C11) | `flutter test integration_test/ -d emulator-5554` passé |
+| ~~Android emulator smoke — `integration_test/` exécuté sur `emulator-5554`~~ | ~~Flutter 7~~ | B1 (C1, C11) | ✅ **FERMÉ** — `flutter test integration_test/smoke_test.dart -d emulator-5554` : 5/5 passés en 9s (2026-07-14) |
 | `flutter_secure_storage` seam + `SecureStorageSessionStore` adapter + `restoreSession()` | Flutter 8 | B2 (C3, C4) | `AuthController.restoreSession()` lit le refresh token depuis Keystore/Keychain |
 | `RefreshInterceptor` — 401 → `refresh()` coalescent → 1 retry → purge | Flutter 9 | B3 (C3) | Test : request 401 → refresh → retry → 200 |
 | `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` (widgets Foundation ADR-034) | Flutter 10 | B4 (C7) | Widgets testés avec tokens Enistere |
@@ -142,9 +145,10 @@ Invariants respectés Flutter 1→6 :
 
 | Document | Mise à jour |
 |---|---|
-| `docs/project-status/IMPLEMENTATION_MATRIX.md` | Flutter row : `TEST_WIDGET_PASSED` → `IMPLEMENTATION_AVANCEE` |
-| `docs/project-status/NEXT_ACTIONS.md` | Revue ajoutée, prochaine action : Flutter 7 — platform dirs + Android smoke |
-| `docs/project-status/SESSION_HANDOFF.md` | mobile-flutter mis à jour : `IMPLEMENTATION_AVANCEE` |
+| `docs/project-status/IMPLEMENTATION_MATRIX.md` | Flutter row : `TEST_WIDGET_PASSED` → `IMPLEMENTATION_AVANCEE` (V1 Review) ; Flutter 7 : B1 fermé |
+| `docs/project-status/NEXT_ACTIONS.md` | Revue ajoutée ; Flutter 7 complété ; prochaine action : Flutter 8 — SecureStorage |
+| `docs/project-status/SESSION_HANDOFF.md` | mobile-flutter mis à jour : `IMPLEMENTATION_AVANCEE`, B1 fermé Flutter 7 |
 | `docs/project-status/FOUNDATION_CURRENT_STATE.md` | mobile-flutter mis à jour |
-| `cores/mobile-flutter/README.md` | Statut mis à jour |
-| `CHANGELOG.md` | Section V1 Readiness Review ajoutée |
+| `cores/mobile-flutter/README.md` | Statut mis à jour ; Flutter 7 ✅ |
+| `CHANGELOG.md` | Sections V1 Readiness Review et Flutter 7 ajoutées |
+| `docs/project-status/MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` | Rapport smoke Flutter 7 — 5/5 passés |
