@@ -6,6 +6,27 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 8 — SecureStorage seam + adapter
+
+- `flutter_secure_storage: ^10.3.1` ajouté (Keychain iOS / EncryptedSharedPreferences+Keystore Android).
+- `SecureStorageAdapter` (abstract interface) — seam permettant les tests unitaires sans platform channels.
+- `FlutterSecureStorageAdapter` — adapter production wrappant `FlutterSecureStorage`.
+- `SecureSessionStore` implements `SessionStore` — stocke `SessionEnvelope` JSON ; purge défensive sur données corrompues.
+- `SessionEnvelope` enrichi : `factory fromJson` + `toJson` + `refreshToken?` ; `toString()` omet `refreshToken` (ADR-015).
+- `AuthController.restoreSession()` renommé public (§9.11 spec) — lit l'enveloppe depuis `SecureSessionStore` au démarrage.
+- Access token maintenu exclusivement en mémoire (`_accessToken`) — jamais dans `SessionEnvelope`, logs, état ou store persistant.
+- `test/unit/auth/secure_session_store_test.dart` : 23 tests unitaires via `FakeSecureStorageAdapter` (in-memory).
+  - Groupes : read/write/clear (6) · validation défensive (5) · garantie access token (4) · signOut (2) · sérialisation (6).
+- `integration_test/smoke_test.dart` : 2 nouveaux tests SecureStorage B2 sur device — round-trip Keystore réel + session restore.
+- Smoke `emulator-5554` (Pixel 6a, Android API 33, x86_64) : **7/7 tests passés en 10s** ✅.
+- **B2 FERMÉ.** C3 : restore ✅ / refresh B3. C4 : ❌ → ✅ PARTIAL. B3→B5 restent ouverts.
+- 160/160 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 160/160 ✅ ·
+  `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Rapport : `docs/project-status/MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md`.
+- Statuts mis à jour : `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter 7 — Platform dirs + smoke Android
 
 - Dossiers `android/` générés via `flutter create --platforms=android --org com.enistere .`.
