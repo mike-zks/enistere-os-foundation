@@ -246,10 +246,19 @@
 > R3 Freezed délibérément absent, R4 logger redaction, R5 PreferenceStore seam.
 > `VALIDE_V1` différé : B2→B5 sont des modules manquants réels, pas des contraintes environnementales.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter 7 — platform dirs + smoke Android**.
-> Objectif : ajouter les dossiers `android/` au package library Flutter, vérifier que
-> `flutter test integration_test/ -d emulator-5554` s'exécute. Ferme B1 (C1/C11 §29).
-> Aucun module métier, aucune dépendance Dart/pub, aucun workflow CI.
+> ✅ **Mobile Core Flutter 7 — platform dirs + smoke Android : RÉALISÉ** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md`.
+> Livrables : `cores/mobile-flutter/android/` (via `flutter create --platforms=android --org com.enistere .`),
+> `.gitignore` Flutter, `.metadata` Flutter tooling, rapport `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md`.
+> Smoke `emulator-5554` (Pixel 6a, API 33, x86_64) : `assembleDebug` 512.2s ✅ · APK 924ms ✅ · **5/5 passés en 9s**.
+> 136 tests headless inchangés. `flutter pub get` ✅ · `flutter analyze` 0 ✅ · `flutter test` 136/136 ✅ ·
+> `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> **B1 FERMÉ.** C1/C11 §29 : ❌ → ✅ PARTIAL (Android réel, iOS R1 maintenu). B2→B5 restent ouverts.
+>
+> **Prochaine action UNIQUE** : **Mobile Core Flutter 8 — SecureStorage seam + adapter**.
+> Objectif : implémenter `SecureStorageSessionStore` via `flutter_secure_storage`, câbler `restoreSession()`
+> dans `AuthController`, fermer B2 (C3/C4 §29). Aucun iOS platform dir. Aucun RefreshInterceptor.
+> Aucun UI state. Aucun login form.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
