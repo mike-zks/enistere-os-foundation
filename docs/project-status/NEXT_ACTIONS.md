@@ -321,8 +321,14 @@
 > Aucun starter, aucun code Java, aucune dépendance.
 > `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 >
-> **Prochaine action** : **API Core Spring Boot 2 — Starter minimal** (build system + structure `src/`
-> + Spring Security 7.x + JWT + auth flow) — précéder par ADR Maven/Gradle si le choix build est requis avant.
+> ✅ **API Core Spring Boot 2A — ADR build system Maven vs Gradle : RÉALISÉ** (2026-07-14).
+> Livrable : `docs/adr/ADR-041-build-system-api-spring-maven-vs-gradle.md`.
+> Décision : **Maven** comme build system principal V1 (`pom.xml`, Spring Boot Parent POM, `mvn verify`).
+> `ADR_BACKLOG.md`, `DECISIONS_REGISTER.md`, docs project-status mis à jour.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+>
+> **Prochaine action** : **API Core Spring Boot 2 — Starter minimal** (`pom.xml` Maven + structure `src/`
+> + Spring Security 7.x + JWT + auth flow).
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).

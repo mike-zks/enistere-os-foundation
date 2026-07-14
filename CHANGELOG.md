@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 2A — ADR build system Maven vs Gradle
+
+- Nouvel ADR : `docs/adr/ADR-041-build-system-api-spring-maven-vs-gradle.md`.
+- Décision : **Maven** comme build system principal pour API Core Spring Boot V1.
+- `pom.xml` avec Spring Boot Parent POM, `mvn verify` comme commande CI canonique, Maven Wrapper (`mvnw`) inclus.
+- Gradle autorisé uniquement par exception documentée dans un projet dérivé.
+- Déblocage : la mission Spring Boot 2 (starter minimal) peut créer `pom.xml` sans ambiguïté.
+- Contexte : `strategy/06_DEPENDENCY_STRATEGY.md §5.2` — préférer les standards de l'écosystème ; Spring Initializr default = Maven.
+- Aucun `pom.xml`, aucun code Java, aucune dépendance créés dans cette mission.
+- Statuts mis à jour : `ADR_BACKLOG.md`, `DECISIONS_REGISTER.md`, `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `SESSION_HANDOFF.md`.
+
 ### API Core Spring Boot 1 — Core specification
 
 - `cores/api-spring/CORE_SPECIFICATION.md` — 42 sections : résumé exécutif, rôle, objectifs, périmètre fonctionnel, architecture cible (feature-package, DTO séparés entités, controllers légers), structure cible `src/` indicative, modules obligatoires V1 (SecurityConfig, JwtTokenProvider, AuthModule, UsersModule, RolesModule, PermissionsModule, HealthModule, GlobalExceptionHandler, ValidationConfig, AuditModule, OpenApiConfig, CacheConfig, StorageModule), modules optionnels (Mail/Notifications/Scheduler/Realtime/Search/Admin/Webhook/Report).
