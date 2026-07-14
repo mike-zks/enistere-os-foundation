@@ -1616,7 +1616,17 @@ Prochaine action : **Mobile Core Flutter 4 — Client Dio + providers**.
 Tests (`test/unit/api/`) : 48 tests — `app_api_error_test.dart` (12 : exhaustivité switch, isA<Exception>), `error_interceptor_test.dart` (19 : mapping pur + ErrorInterceptor via Dio+mock adapter), `logging_interceptor_test.dart` (6 : logs method+path, jamais body/Authorization), `dio_client_test.dart` (11 : config, injection token, token dynamique, non-fuite logs, correlationId, 401 sans retry).
 Tests : `flutter test` 86/86 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅.
 Statut `mobile-flutter` : **`DIO_CLIENT_READY`**.
-Prochaine action : **Mobile Core Flutter 5 — Upload multipart** (`UploadService` + `AppFile` descriptor).
+
+**✅ Mobile Core Flutter 5 — Upload multipart primitives : RÉALISÉ** (2026-07-14) :
+`pubspec.yaml` : `http_parser: ^4.0.0` ajouté.
+`lib/src/core/upload/app_file.dart` : `AppFile(path, name, mimeType, sizeBytes?)` + `SafeFileDescriptor(mimeType, extension?)` + `describeFileForLog` (jamais path ni nom brut — ADR-015/ADR-007) + `isValidAppFile` + `isAllowedUploadContentType` (exact, `image/*`, `*/*`, liste vide = tout autorisé).
+`lib/src/core/upload/file_category.dart` : `enum FileCategory` (image/document/avatar/media/video/audio/identityDocument/attachment/other) + `FileCategoryExtension.apiValue` (→ `'IMAGE'` … `'IDENTITY_DOCUMENT'`).
+`lib/src/core/upload/upload_result.dart` : `UploadedFileMetadata(id, category)` + `fromJson`. Jamais URL signée, bucket, device path, token.
+`lib/src/core/upload/upload_service.dart` : `typedef MultipartFileFactory` injectable + `abstract interface class UploadService` + `DioUploadService(dio, uploadPath='/files', multipartFileFactory?)`. `FormData` construit frais à chaque appel. Content-Type posé par Dio avec boundary — jamais forcé manuellement. Erreurs : `e.error is AppApiError` → rethrow ; sinon `mapDioError`. Aucun retry automatique.
+Tests (`test/unit/upload/`) : `app_file_test.dart` (21 : valid/invalid, sizeBytes optionnel, describeFileForLog sans path/nom, extensions sûres, isAllowedUploadContentType) + `upload_service_test.dart` (14 : uploadPath default, implements UploadService, POST /files, boundary auto, category API string, subjectId présent/absent, UploadedFileMetadata retourné, 413/415/401/réseau → AppApiError, token/path jamais dans les logs).
+Tests : `flutter test` 120/120 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅.
+Statut `mobile-flutter` : **`UPLOAD_READY`**.
+Prochaine action : **Mobile Core Flutter 6 — Tests + smoke**.
 
 ## 10. Règles à ne pas violer
 

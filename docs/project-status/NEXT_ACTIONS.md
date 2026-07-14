@@ -220,9 +220,12 @@
 > ✅ **Mobile Core Flutter 4 — Client Dio + providers : RÉALISÉ** (2026-07-14).
 > `dio: ^5.10.0` ajouté. `ApiConfig` + `AppApiError` (sealed class Dart 3 native, 11 sous-types, aucun Freezed) + `createDioClient` (`_AuthInterceptor` → `LoggingInterceptor` → `ErrorInterceptor`) + `dioClientProvider` Riverpod. Token injecté dynamiquement via `tokenReader`, jamais stocké. 401 surfacé sans refresh automatique. LoggingInterceptor : jamais body/Authorization/token. 86/86 tests ✅ · analyze 0 ✅ · format 0 ✅ · quality-gates docs ✅.
 > Statut `mobile-flutter` : **`AUTH_SHELL_READY`** → **`DIO_CLIENT_READY`**.
+
+> ✅ **Mobile Core Flutter 5 — Upload multipart primitives : RÉALISÉ** (2026-07-14).
+> `http_parser: ^4.0.0` ajouté. `AppFile` descriptor pur (`path`/`name`/`mimeType`/`sizeBytes?`) + `SafeFileDescriptor` + `describeFileForLog` (mimeType+extension sanitisée uniquement, jamais path/nom brut) + `isValidAppFile` + `isAllowedUploadContentType` (exact, group wildcard `image/*`, `*/*`). `FileCategory` enum (9 valeurs) + `.apiValue`. `UploadedFileMetadata` DTO (id+category uniquement, jamais URL signée/bucket/device path). `DioUploadService` implements `UploadService` : `FormData` + `MultipartFile` injectable — jamais `Content-Type: multipart/form-data` forcé manuellement ; Dio pose le boundary. Erreurs mappées via `AppApiError` : 413→`TooLargeError`, 415→`UnsupportedTypeError`, 401→`UnauthorizedError`, réseau→`NetworkError`. Aucun retry automatique. 120/120 tests ✅ · analyze 0 ✅ · format 0 ✅ · quality-gates docs ✅.
+> Statut `mobile-flutter` : **`DIO_CLIENT_READY`** → **`UPLOAD_READY`**.
 >
-> **Prochaine action** : **Mobile Core Flutter 5 — Upload multipart** (`UploadService` + `AppFile` descriptor).
-> Aucun endpoint métier réel. Aucun SDK picker natif.
+> **Prochaine action** : **Mobile Core Flutter 6 — Tests + smoke** (flutter_test intégration iOS + Android).
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
