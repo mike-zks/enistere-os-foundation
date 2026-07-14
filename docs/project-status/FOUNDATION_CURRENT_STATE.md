@@ -15,7 +15,7 @@ techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quali
 Mobile Core React Native et Mobile Core Flutter sont **VALIDE_V1**. Mobile Flutter a été
 promu le 2026-07-14 par `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` : B1→B5 fermés,
 score §29 9/11 + 2 PARTIAL, R1 iOS Linux acceptée comme réserve environnementale sans
-succès iOS artificiel. Les cores vides restent `ai-core`, `api-spring` et `web-angular`.
+succès iOS artificiel. Les cores vides restent `ai-core` et `web-angular`. `api-spring` passe de `DOSSIER_SEULEMENT` à **`SPECIFICATION_DOCUMENTAIRE`** (Spring Boot 1, 2026-07-14 : `CORE_SPECIFICATION.md` 42 sections + `README.md` ; aucun starter, aucun code Java).
 
 | Catégorie | État |
 |---|---|
@@ -34,7 +34,7 @@ succès iOS artificiel. Les cores vides restent `ai-core`, `api-spring` et `web-
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
 | Foundation baseline | **`FOUNDATION_V1_RELEASED`** — release `foundation-v1.0.0` publiée le 2026-07-12 ; revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit/Quality Core `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, CI L1-L4 verte sur `main`, ruleset `protect-main` actif |
 | Release notes | **`FOUNDATION_V1_RELEASED`** — `FOUNDATION_V1_RELEASE_NOTES.md` publié pour `foundation-v1-baseline` ; tag `foundation-v1.0.0` ; GitHub Release publiée |
-| V3 | **Mobile Core Flutter VALIDE_V1** (2026-07-14) — Flutter 1→11 + V1 Final Readiness Decision. §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests headless · smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux réserve environnementale acceptée. Rapport : `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. |
+| V3 | **Mobile Core Flutter VALIDE_V1** (2026-07-14) — Flutter 1→11 + V1 Final Readiness Decision. §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests headless · smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux réserve environnementale acceptée. Rapport : `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. **API Core Spring Boot 1 SPECIFICATION_DOCUMENTAIRE** (2026-07-14) — `CORE_SPECIFICATION.md` 42 sections + `README.md` ; aucun starter Java. |
 | **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après publication Foundation V1 et suivi post-release ; tag `foundation-v1.0.0` publié sur `2981f2c` ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
@@ -69,7 +69,8 @@ enistere-os-foundation/
     mobile-flutter/       VALIDE_V1 (Flutter V1 Final Readiness Decision 2026-07-14 ; Flutter 1→11 ; §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests · smoke emulator-5554 7/7 ✅ ; R1 iOS Linux réserve environnementale acceptée — même que RN B2)
     quality-core/      VALIDE_V1 (gates, checklists, runbooks, templates, prompts, release process utilisé, helper release/reporting)
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
-    ai-core/ api-spring/ web-angular/   → vides (V3 cadrée ; Flutter 3 livré)
+    api-spring/           SPECIFICATION_DOCUMENTAIRE (Spring Boot 1, 2026-07-14 — CORE_SPECIFICATION.md 42 sections + README.md ; aucun starter, aucun code Java)
+    ai-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
     api-client-fetch/  @enistere/api-client-fetch (0.1.0, privé)
@@ -88,7 +89,7 @@ enistere-os-foundation/
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + BFF Files + layouts public/protégé + RHF+Zod ; 14/14 critères §56 ; 450 tests + 15 E2E) | **VALIDE_V1** |
 | `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→37 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29 ; iOS RN30 bloqué Linux ; RN31 en attente macOS ; sign-in RN32 ; thème RN33 ; doctor green RN34 ; **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35 ; upload diagnostics screen RN36 + smoke `POST /files` ; RN37 PreferenceStore decision ; 367/367 tests ; §9.4 8/8 ; B2 iOS réserve environnementale acceptée**) | **VALIDE_V1** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
-| `api-spring` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
+| `api-spring` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** (Spring Boot 1, 2026-07-14 — `CORE_SPECIFICATION.md` 42 sections : auth JWT Spring Security, RBAC, JPA/Flyway, Redis, MinIO, OpenAPI, JUnit+Testcontainers, §30 critères V1 ; `README.md` ; aucun starter, aucun code Java) |
 | `docs-core` | oui | oui | **oui** (script link check + guides) | **VALIDE_V1** |
 | `mobile-flutter` | oui | oui | oui (starter + auth shell + Dio client + upload + SecureStorage + RefreshInterceptor + UI states Flutter 10 + **formulaire sign-in Flutter 11** — 218/218 tests + smoke `emulator-5554` 7/7) | **VALIDE_V1** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux réserve environnementale acceptée — identique à RN B2 ; rapports `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` + Flutter 7→11 smoke reports + `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`) |
 | `quality-core` | oui | oui | **oui** (gouvernance qualité : gates, checklists, runbooks, templates, prompts, release process utilisé ; scripts `quality-gates` + `release-helper` + `quality-report` testés) | **VALIDE_V1** |

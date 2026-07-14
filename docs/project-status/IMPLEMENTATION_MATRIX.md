@@ -48,6 +48,18 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour API Core Spring Boot 1 — Core specification (2026-07-14)** :
+> `cores/api-spring/CORE_SPECIFICATION.md` (42 sections : résumé exécutif, rôle, objectifs,
+> périmètre, architecture cible, structure cible, modules obligatoires V1, modules optionnels,
+> standards API/sécurité/qualité Java, auth JWT Spring Security, RBAC Method Security,
+> users/roles/permissions, validation Jakarta BV, gestion erreurs `@ControllerAdvice`,
+> logs SLF4J/Logback, audit logs, upload MinIO, cache Redis, jobs Spring Async/Scheduler,
+> OpenAPI springdoc, health Actuator, tests JUnit 5 + Testcontainers, §30 critères V1,
+> §41 missions ordonnées, §42 cohérence NestJS, §40 décisions pendantes) +
+> `cores/api-spring/README.md`. Aucun starter, aucun code Java, aucune dépendance.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
+>
 > **Mise à jour Mobile Core Flutter V1 Final Readiness Decision (2026-07-14)** : rapport
 > `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. Mobile Core Flutter promu de
 > **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Décision : R1 (iOS Linux) acceptée comme réserve
