@@ -6,6 +6,30 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Mobile Core Flutter 9 — RefreshInterceptor + refreshSession coalescent
+
+- `AuthApi` abstract interface + `PlaceholderAuthApi` — seam testable sans backend réel (Foundation V1).
+- `authApiProvider` Riverpod — injectable, override en test.
+- `AuthController.refreshSession()` — lit le `refreshToken` depuis `SecureSessionStore`, coalescence des appels concurrents (`_refreshFuture ??= _doRefresh().whenComplete(...)`) ; met à jour `_accessToken` en mémoire ; purge (`_purgeSession`) sur refreshToken null ou échec.
+- `_AuthInterceptor` inchangé ; `restoreSession()` inchangé (lazy refresh — smoke tests existants sans refreshToken non impactés).
+- `typedef TokenRefresher = Future<String?> Function()` ajouté à `dio_client.dart`.
+- `createDioClient` : paramètre optionnel `refresher`; ordre intercepteurs : `[_AuthInterceptor, LoggingInterceptor, RefreshInterceptor, ErrorInterceptor]` — `RefreshInterceptor` AVANT `ErrorInterceptor` (Dio 5.x error chain FORWARD order).
+- `RefreshInterceptor extends Interceptor` — intercepts 401 uniquement ; délègue à `refresher()` ; tag anti-boucle `extra['_refreshed']` ; retry exactement 1 fois via `dio.fetch()` ; ne boucle jamais ; 403 non intercepté.
+- `try/catch` autour de `await refresher()` — garantit que `handler.next/resolve/reject` est toujours appelé (`async void` safety dans Dio 5.x).
+- `dioClientProvider` : passe `controller.refreshSession` comme `refresher`.
+- `test/unit/api/refresh_interceptor_test.dart` : 9 tests unitaires via `_CaptureAdapter` (adapter injectable).
+  - Groupes : succès 401→refresh→retry 200 (1) · coalescence (1) · refreshToken null→purge+401 (1) · refresh throw→purge+401 (1) · retry 401→pas de boucle (1) · 403→pas de refresh (1) · passthrough non-401 (1) · aucun token dans les logs (1) · sans refresher (1).
+- `test/unit/auth/auth_controller_test.dart` : 5 nouveaux tests `refreshSession()` (14 tests total).
+  - Groupes : refreshSession OK (1) · coalescence (1) · null refreshToken→purge+unauthenticated (1) · AuthApi throw→purge+unauthenticated (1) · purge vide les champs (1).
+- Smoke `emulator-5554` (Pixel 6a, Android API 33, x86_64) : **7/7 tests passés en 10s** ✅.
+- **B3 FERMÉ.** C3 : `❌ PARTIAL` → `✅`. C4 : `✅ PARTIAL` → `✅`. B4–B5 restent ouverts.
+- 174/174 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 174/174 ✅ ·
+  `dart format` 0 changements ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+- Rapport : `docs/project-status/MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md`.
+- Statuts mis à jour : `MOBILE_FLUTTER_V1_READINESS_REVIEW.md`, `IMPLEMENTATION_MATRIX.md`,
+  `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`,
+  `cores/mobile-flutter/README.md`.
+
 ### Mobile Core Flutter 8 — SecureStorage seam + adapter
 
 - `flutter_secure_storage: ^10.3.1` ajouté (Keychain iOS / EncryptedSharedPreferences+Keystore Android).
