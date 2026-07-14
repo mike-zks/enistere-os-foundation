@@ -11,8 +11,11 @@
 ## 1. Statut global
 
 Le repository combine la **Phase 0 (stratégie + ADR + spécifications)** et des **implémentations
-techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quality Core et
-Mobile Core React Native sont **VALIDE_V1**. Le **Mobile Core Flutter** est **`IMPLEMENTATION_AVANCEE`** (Flutter V1 Readiness Review, 2026-07-14 ; Flutter 7 B1 fermé, Flutter 8 B2 fermé, Flutter 9 B3 fermé, Flutter 10 B4 fermé, Flutter 11 B5 fermé — tous les bloquants B1→B5 clos, score §29 9/11). Les cores vides restent `ai-core`, `api-spring` et `web-angular`. Le Mobile Core Flutter passe de `IMPLEMENTATION_AVANCEE` à **`VALIDE_V1`** (Flutter V1 Final Readiness Decision, 2026-07-14 ; R1 iOS Linux acceptée comme réserve environnementale ; rapport `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`).
+techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quality Core,
+Mobile Core React Native et Mobile Core Flutter sont **VALIDE_V1**. Mobile Flutter a été
+promu le 2026-07-14 par `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` : B1→B5 fermés,
+score §29 9/11 + 2 PARTIAL, R1 iOS Linux acceptée comme réserve environnementale sans
+succès iOS artificiel. Les cores vides restent `ai-core`, `api-spring` et `web-angular`.
 
 | Catégorie | État |
 |---|---|
@@ -388,8 +391,7 @@ politiques** : artefacts = aucun upload (Option A), couverture = exécutée non 
 futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
 ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection `main` active via GitHub Rulesets**) et
 ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
-**Prochaine action** : arbitrer la prochaine mission (`Mobile RN31` si macOS/Xcode disponible, sinon
-incrément Quality/Cloud/Web cadré).
+**Prochaine action** : **API Core Spring Boot 1 — Core specification** (`cores/api-spring/CORE_SPECIFICATION.md` + `README.md`, sans starter ni dépendance Java), conformément à `V3_POST_FLUTTER_ROADMAP_DECISION.md`.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

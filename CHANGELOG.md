@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### V3 Post Flutter Roadmap Decision
+
+- Nouveau rapport : `docs/project-status/V3_POST_FLUTTER_ROADMAP_DECISION.md`.
+- Correction de cohérence : `Mobile Core Flutter` est aligné en `VALIDE_V1` dans `IMPLEMENTATION_MATRIX.md`
+  après `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`.
+- ADR-034 est aligné en `IMPLEMENTE_V1` dans `DECISIONS_REGISTER.md` : Flutter V1 applique Material 3
+  contrôlé par tokens Enistere.
+- Prochaine action unique : **API Core Spring Boot 1 — Core specification** (`cores/api-spring/CORE_SPECIFICATION.md`
+  + `README.md`, sans starter ni dépendance Java).
+
 ### Mobile Core Flutter V1 Final Readiness Decision
 
 - Décision formelle : Mobile Core Flutter promu **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
