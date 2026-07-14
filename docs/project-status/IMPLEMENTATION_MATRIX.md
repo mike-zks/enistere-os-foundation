@@ -60,6 +60,12 @@
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 > `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 >
+> **Mise à jour API Core Spring Boot 2A — ADR build system (2026-07-14)** :
+> `docs/adr/ADR-041-build-system-api-spring-maven-vs-gradle.md`. Décision : **Maven** comme build
+> system principal V1. `pom.xml` + Spring Boot Parent POM + `mvn verify` + Maven Wrapper (`mvnw`).
+> Gradle autorisé uniquement par exception documentée dans un projet dérivé.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+>
 > **Mise à jour Mobile Core Flutter V1 Final Readiness Decision (2026-07-14)** : rapport
 > `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. Mobile Core Flutter promu de
 > **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Décision : R1 (iOS Linux) acceptée comme réserve

@@ -168,6 +168,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/consentement/coûts ; RN 13 ne décide pas d'un SDK réel ; RN 21 = gate de consentement générique préparatoire (ne décide pas cet ADR). |
 | ADR-039 | Hachage mots de passe : Argon2id vs bcrypt | Haute | api-nestjs | Oui | Validé | Standard Argon2id ; requis avant Auth 2. |
 | ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Pino (moteur officiel) ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, Loki/Grafana côté Cloud Core ; AuditLog séparé. Recommandé avant release V1. |
+| ADR-041 | Build system API Spring Boot : Maven vs Gradle | Haute | api-spring | Non (V3) | Validé | **Maven** retenu : `pom.xml`, Spring Boot Parent POM, `mvn verify`, Maven Wrapper. Bloquant avant Spring Boot 2 (starter). Gradle autorisé par exception documentée dans un projet dérivé. |
 
 ## 8. Ordre recommandé de traitement
 
