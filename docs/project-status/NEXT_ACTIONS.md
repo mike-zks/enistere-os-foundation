@@ -185,8 +185,16 @@
 > Material 3 est le moteur Flutter, pas l'identité visuelle autonome. Aucun starter Flutter, aucune dépendance,
 > aucun runtime.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter 1 — Core specification**.
-> Objectif : créer `cores/mobile-flutter/CORE_SPECIFICATION.md` et `README.md`, sans starter Flutter ni dépendance.
+> ✅ **Mobile Core Flutter 1 — Core specification : RÉALISÉ** (2026-07-14).
+> Livrables : `cores/mobile-flutter/CORE_SPECIFICATION.md` (32 sections : objectifs, modules obligatoires V1,
+> stack go_router/Riverpod/Dio/Freezed, auth, tokens, stockage sécurisé, thème Material 3 Enistere ADR-034,
+> logger/redaction, préférences, accessibilité, i18n, tests, missions ordonnées Flutter 1→V1, décisions pendantes)
+> + `cores/mobile-flutter/README.md`. Statut `mobile-flutter` : `DOSSIER_SEULEMENT` → **`SPECIFICATION_DOCUMENTAIRE`**.
+> Aucun code Dart, `pubspec.yaml`, dépendance ou workflow CI ajouté.
+>
+> **Prochaine action** : **Mobile Core Flutter 2 — Starter minimal Flutter**.
+> Objectif : créer `pubspec.yaml` + `lib/main.dart` + structure `lib/` + `MaterialApp.router` + `ThemeData`
+> Enistere (ADR-034) + analysis_options.yaml. Aucune logique métier, aucun endpoint réel.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

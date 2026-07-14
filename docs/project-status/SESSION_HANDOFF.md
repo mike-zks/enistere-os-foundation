@@ -289,7 +289,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
 - **IMPLEMENTATION_AVANCEE** : **Quality Core** (`cores/quality-core/`) — Quality Core V2 Readiness Review + Advanced Readiness Review + QC7 (2026-07-12) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 10 checks documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** (merge ≠ release ≠ promotion de statut ; 5 types de release ; procédure 8 étapes) + **`AI_PROMPT_GOVERNANCE.md`** + 3 checklists + templates GitHub PR/Issues + prompts catalogués + **`scripts/quality-gates.mjs`** (7 scopes, 36 tests). Processus utilisé pour publier `foundation-v1.0.0` ; Docs Core consomme le scope `quality-gates docs`. **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; les 2 checks `images` restent recommandés phase 2. Aucun workflow modifié par Quality Core, aucune dépendance, aucun changement runtime.
-- **Vides** : `ai-core`, `api-spring`, `mobile-flutter`, `web-angular`.
+- **`SPECIFICATION_DOCUMENTAIRE`** : `mobile-flutter` (Flutter 1, 2026-07-14 — `CORE_SPECIFICATION.md` + `README.md`).
+- **Vides** : `ai-core`, `api-spring`, `web-angular`.
 - **CI** : **4 workflows GitHub Actions** (tous verts sur `main`) — niveau 1 `ci.yml` (non-régression monorepo :
   ordre `api-contracts → api-client-fetch → ui-kit → web-nextjs → audit`, `npm ci` Node 24, `npm audit`, gardes
   Axios/Zustand) ; niveau 2 `api-runtime-ci.yml` (runtime API + e2e) ; niveau 3 `web-e2e-ci.yml` (E2E
@@ -359,7 +360,7 @@ Origin/Referer — Web ; reste : autres mutations futures), **006** (RBAC : appl
 **012** (TanStack Query intégré Web : server state Health, Auth **et Files** — cache disjoint, purge au logout,
 **URL signée hors cache** via mutation), **013** (**CI minimale** GitHub Actions — non-régression monorepo ;
 **partiel**), 016
-(types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015, **034** (Flutter UI décidée, mobile-flutter non commencé). **008/009/010 partiels** (UI Kit).
+(types Auth via `SchemaOf<>`). **013 partiel** (CI minimale). Décidés non implémentés : 014, 015, **034** (Flutter UI décidée, mobile-flutter `SPECIFICATION_DOCUMENTAIRE` Flutter 1). **008/009/010 partiels** (UI Kit).
 ADR-017→033 et ADR-035→038 = backlog non rédigé. **ADR-013 (CI/CD)** : **PARTIELLEMENT_IMPLEMENTE** — **niveaux 1–3** :
 `ci.yml` (non-régression monorepo) + `api-runtime-ci.yml` (runtime API) + `web-e2e-ci.yml` (E2E navigateur) ;
 protection `main` active via ruleset `protect-main` (8 checks requis) ; restent couverture, release, déploiement,
@@ -1578,6 +1579,13 @@ ADR `docs/adr/ADR-034-flutter-ui-material3-vs-custom.md`. Décision : futur Mobi
 **Material 3 contrôlé par tokens Enistere + composants maison ciblés**. Material 3 est le moteur
 Flutter, pas l'identité visuelle autonome. Aucun starter Flutter, aucune dépendance, aucun runtime.
 Prochaine action unique : **Mobile Core Flutter 1 — Core specification**.
+
+**✅ Mobile Core Flutter 1 — Core specification : RÉALISÉ** (2026-07-14) :
+`cores/mobile-flutter/CORE_SPECIFICATION.md` (32 sections : modules obligatoires V1, go_router, Riverpod,
+Dio, Freezed, flutter_secure_storage, Material 3 + tokens Enistere ADR-034, logger/redaction, préférences seam,
+accessibilité, i18n, tests, missions ordonnées Flutter 1→V1, décisions pendantes) + `README.md`.
+Statut `mobile-flutter` : **`SPECIFICATION_DOCUMENTAIRE`**. Aucun code Dart, `pubspec.yaml`, dépendance ou CI.
+Prochaine action : **Mobile Core Flutter 2 — Starter minimal Flutter**.
 
 ## 10. Règles à ne pas violer
 
