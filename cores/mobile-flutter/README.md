@@ -39,7 +39,7 @@ cores/mobile-flutter/
 ├── scripts/
 │   └── smoke.sh                            ← Flutter 6 (smoke runner : headless / --android / --ios)
 ├── integration_test/
-│   └── smoke_test.dart                     ← Flutter 6 (5 tests device — procédure projets dérivés)
+│   └── smoke_test.dart                     ← Flutter 6 + Flutter 8 (7 tests device — 5 originaux + 2 SecureStorage B2)
 ├── lib/
 │   ├── main.dart                           ← Flutter 2 (ProviderScope + EnistereApp)
 │   ├── app.dart                            ← Flutter 3 (routerProvider watch)
@@ -54,9 +54,10 @@ cores/mobile-flutter/
 │       │   ├── auth/
 │       │   │   ├── auth_status.dart       ← Flutter 3 (enum loading/authenticated/unauthenticated/expired)
 │       │   │   ├── auth_state.dart        ← Flutter 3 (status + userId, jamais de token)
-│       │   │   ├── session_envelope.dart  ← Flutter 3 (userId opaque, pas de token)
+│       │   │   ├── session_envelope.dart  ← Flutter 8 (userId + refreshToken? ; fromJson/toJson ; toString sans refreshToken)
 │       │   │   ├── session_store.dart     ← Flutter 3 (seam + InMemorySessionStore placeholder)
-│       │   │   └── auth_controller.dart   ← Flutter 3 (Notifier<AuthState>, token mémoire)
+│       │   │   ├── secure_session_store.dart ← Flutter 8 (SecureStorageAdapter + FlutterSecureStorageAdapter + SecureSessionStore)
+│       │   │   └── auth_controller.dart   ← Flutter 8 (restoreSession() public ; token mémoire — jamais persisté)
 │       │   ├── config/
 │       │   │   └── api_config.dart        ← Flutter 4 (ApiConfig : baseUrl, timeouts, commonHeaders)
 │       │   ├── navigation/
@@ -88,7 +89,8 @@ cores/mobile-flutter/
     │   │   └── dio_client_test.dart       ← Flutter 4 (11 tests)
     │   ├── auth/
     │   │   ├── auth_controller_test.dart  ← Flutter 3 (9 tests)
-    │   │   └── session_store_test.dart    ← Flutter 3 (4 tests)
+    │   │   ├── session_store_test.dart    ← Flutter 3 (4 tests)
+    │   │   └── secure_session_store_test.dart ← Flutter 8 (23 tests — FakeSecureStorageAdapter)
     │   └── upload/
     │       ├── app_file_test.dart         ← Flutter 5 (21 tests)
     │       └── upload_service_test.dart   ← Flutter 5 (14 tests)
@@ -100,7 +102,7 @@ cores/mobile-flutter/
         └── home_screen_test.dart          ← Flutter 6 (7 tests)
 ```
 
-La prochaine mission est **Flutter 8 — SecureStorage seam + adapter** (ferme B2 — `flutter_secure_storage` absent).
+La prochaine mission est **Flutter 9 — RefreshInterceptor** (ferme B3 — 401 → refresh coalescent → retry).
 
 ## Stack technique
 
@@ -138,7 +140,7 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 6 | Tests + smoke | `flutter_test` 136/136 + `integration_test/` + `scripts/smoke.sh` ✅ |
 | Flutter V1 | Readiness review | `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — `IMPLEMENTATION_AVANCEE`, 5 bloquants ✅ |
 | Flutter 7 | Platform dirs + smoke Android | Dossiers `android/` + smoke `emulator-5554` 5/5 ✅ — B1 FERMÉ |
-| Flutter 8 | SecureStorage seam + adapter | `flutter_secure_storage` + `SecureStorageSessionStore` + `restoreSession()` |
+| Flutter 8 | SecureStorage seam + adapter | `flutter_secure_storage` + `SecureSessionStore` + `restoreSession()` ✅ — B2 FERMÉ |
 | Flutter 9 | RefreshInterceptor | 401 → `refresh()` coalescent → 1 retry → purge |
 | Flutter 10 | UI states | `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` + tokens Enistere |
 | Flutter 11 | Login form | `SignInScreen` email + password + validation + erreur accessible |

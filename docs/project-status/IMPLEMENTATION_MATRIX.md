@@ -48,6 +48,18 @@
 > **ADR-034 — Flutter UI : Material 3 vs composants maison**. Aucun starter V3, aucune dépendance,
 > aucun runtime modifié.
 >
+> **Mise à jour Mobile Core Flutter 8 — SecureStorage seam + adapter (2026-07-14)** : rapport
+> `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md`. **B2 FERMÉ** — `flutter_secure_storage: ^10.3.1` ajouté ;
+> `SecureStorageAdapter` seam (testable sans platform channels) + `FlutterSecureStorageAdapter` (Keychain/Keystore) +
+> `SecureSessionStore` (purge défensive sur données corrompues) ; `SessionEnvelope.fromJson`/`toJson`/`refreshToken?`
+> (toString omet refreshToken — ADR-015) ; `AuthController.restoreSession()` public (§9.11 spec) ;
+> access token reste `_accessToken` en mémoire — jamais persisté. 23 tests unitaires (`FakeSecureStorageAdapter` :
+> write/read/clear, validation défensive, garantie access token, signOut, sérialisation) ; 2 tests smoke SecureStorage device.
+> Smoke `emulator-5554` (Pixel 6a, API 33, x86_64) : **7/7 tests passés en 10s** ✅ (5 originaux + 2 SecureStorage B2).
+> 160/160 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 issues ✅ · `flutter test` 160/160 ✅ ·
+> `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> C3 : restore ✅ (refresh 401 ❌ — B3). C4 : ❌ → ✅ PARTIAL. B3→B5 restent ouverts.
+>
 > **Mise à jour Mobile Core Flutter 7 — platform dirs + smoke Android (2026-07-14)** : rapport
 > `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md`. **B1 FERMÉ** — dossiers `android/` générés via
 > `flutter create --platforms=android --org com.enistere .` ; smoke `emulator-5554` (Pixel 6a, API 33, x86_64) :
@@ -246,7 +258,7 @@
 | AI Core | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | API Core Spring Boot | ✓ (vide) | — | — | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
-| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5) | ✓ (136 tests : theme + unit/auth + widget × 3 + unit/api + unit/upload + intégration × 5) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 5/11 §29, 4 bloquants B2→B5, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 fermé) | **IMPLEMENTATION_AVANCEE** | Flutter 7 (2026-07-14) : B1 fermé — `android/` + smoke `emulator-5554` 5/5 passés ✅ ; B2 SecureStorage, B3 RefreshInterceptor, B4 UI states, B5 login form restent ouverts | **Flutter 8** — SecureStorage seam + adapter (ferme B2) |
+| Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5 + SecureStorage Flutter 8) | ✓ (160 tests : theme + unit/auth + unit/secure_session_store + widget × 3 + unit/api + unit/upload + intégration × 7) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 5/11 §29, 2 bloquants B3→B4→B5, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 fermé ; `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md` — B2 fermé) | **IMPLEMENTATION_AVANCEE** | Flutter 8 (2026-07-14) : B2 fermé — `flutter_secure_storage` 10.3.1 + `SecureSessionStore` + `restoreSession()` + smoke `emulator-5554` 7/7 ✅ ; B3 RefreshInterceptor, B4 UI states, B5 login form restent ouverts | **Flutter 9** — RefreshInterceptor (401 → refresh coalescent → retry) |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
 | Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
 

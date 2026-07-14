@@ -254,11 +254,20 @@
 > 136 tests headless inchangés. `flutter pub get` ✅ · `flutter analyze` 0 ✅ · `flutter test` 136/136 ✅ ·
 > `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 > **B1 FERMÉ.** C1/C11 §29 : ❌ → ✅ PARTIAL (Android réel, iOS R1 maintenu). B2→B5 restent ouverts.
+
+> ✅ **Mobile Core Flutter 8 — SecureStorage seam + adapter : RÉALISÉ** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md`.
+> Livrables : `flutter_secure_storage: ^10.3.1` ; `SecureStorageAdapter` seam + `FlutterSecureStorageAdapter` +
+> `SecureSessionStore` (purge défensive) ; `SessionEnvelope.fromJson`/`toJson`/`refreshToken?` (toString sans refreshToken) ;
+> `AuthController.restoreSession()` public (§9.11) ; `FakeSecureStorageAdapter` + 23 tests unitaires ; 2 tests smoke B2 device.
+> Smoke `emulator-5554` (Pixel 6a, API 33, x86_64) : **7/7 passés en 10s** (5 originaux + 2 SecureStorage B2).
+> 160/160 tests headless. `flutter pub get` ✅ · `flutter analyze` 0 ✅ · `flutter test` 160/160 ✅ ·
+> `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+> **B2 FERMÉ.** C3 : restore ✅ (refresh B3). C4 : ❌ → ✅ PARTIAL. B3→B5 restent ouverts.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter 8 — SecureStorage seam + adapter**.
-> Objectif : implémenter `SecureStorageSessionStore` via `flutter_secure_storage`, câbler `restoreSession()`
-> dans `AuthController`, fermer B2 (C3/C4 §29). Aucun iOS platform dir. Aucun RefreshInterceptor.
-> Aucun UI state. Aucun login form.
+> **Prochaine action UNIQUE** : **Mobile Core Flutter 9 — RefreshInterceptor**.
+> Objectif : 401 → `refresh()` coalescent → 1 retry → purge si refresh échoue. Câbler le `refreshToken`
+> depuis `SecureSessionStore`. Aucun UI state. Aucun login form. Aucun backend réel.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

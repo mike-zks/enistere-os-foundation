@@ -6,6 +6,7 @@ import 'session_envelope.dart';
 import 'session_store.dart';
 
 // Override in tests or derived projects to inject a real SessionStore adapter.
+// Production apps wire SecureSessionStore(FlutterSecureStorageAdapter()) here.
 final sessionStoreProvider = Provider<SessionStore>(
   (ref) => InMemorySessionStore(),
 );
@@ -19,15 +20,18 @@ class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() {
     _store = ref.read(sessionStoreProvider);
-    _initialize();
+    restoreSession();
     return const AuthState(status: AuthStatus.loading);
   }
 
-  Future<void> _initialize() async {
+  // Reads the persisted session envelope and restores auth state.
+  // B3 (RefreshInterceptor): will exchange refreshToken for a fresh access token.
+  // Defensive: corrupt / missing envelope → unauthenticated (SecureSessionStore purges).
+  Future<void> restoreSession() async {
     try {
       final envelope = await _store.read();
       if (envelope != null) {
-        // Future: exchange refresh token for access token via POST /auth/refresh.
+        // Placeholder until B3: no real token exchange yet.
         _accessToken = 'placeholder-access-token';
         state = AuthState(
           status: AuthStatus.authenticated,
@@ -37,15 +41,21 @@ class AuthController extends Notifier<AuthState> {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
     } catch (_) {
-      // Fail-soft: treat any store read error as unauthenticated.
+      // Fail-soft: any unexpected store error → unauthenticated.
       state = const AuthState(status: AuthStatus.unauthenticated);
     }
   }
 
   // Placeholder: no network call — future: POST /auth/login.
+  // Stores refreshToken in SessionEnvelope for persistence (B2).
+  // Access token stays in _accessToken (memory-only, never persisted).
   Future<void> signIn(String email, String password) async {
     _accessToken = 'placeholder-access-token';
-    const envelope = SessionEnvelope(userId: 'placeholder-user');
+    const envelope = SessionEnvelope(
+      userId: 'placeholder-user',
+      // Placeholder until B3: real refresh token comes from POST /auth/login response.
+      refreshToken: 'placeholder-refresh-token',
+    );
     await _store.write(envelope);
     state = const AuthState(
       status: AuthStatus.authenticated,
