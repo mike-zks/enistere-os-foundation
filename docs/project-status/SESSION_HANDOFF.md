@@ -1605,6 +1605,19 @@ Tests : `flutter test` 38/38 ✅ · `flutter analyze` 0 issues ✅ · `dart form
 Statut `mobile-flutter` : **`AUTH_SHELL_READY`**.
 Prochaine action : **Mobile Core Flutter 4 — Client Dio + providers**.
 
+**✅ Mobile Core Flutter 4 — Client Dio + providers : RÉALISÉ** (2026-07-14) :
+`pubspec.yaml` : `dio: ^5.10.0` ajouté.
+`lib/src/core/config/api_config.dart` : `ApiConfig` (baseUrl, connectTimeoutMs, receiveTimeoutMs, sendTimeoutMs, commonHeaders).
+`lib/src/core/api/app_api_error.dart` : `sealed class AppApiError implements Exception` + 11 sous-classes : `NetworkError`, `TimeoutError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ValidationError`, `TooLargeError`, `UnsupportedTypeError`, `RateLimitedError`, `ServerError`, `UnknownApiError`. Dart 3 sealed classes natives — aucun Freezed, aucun code gen.
+`lib/src/core/api/error_interceptor.dart` : `mapDioError(DioException) → AppApiError` (top-level, testable directement) + `ErrorInterceptor` (`DioException → AppApiError` encapsulé dans `error`). Exhaustivité switch compile-time garantie.
+`lib/src/core/api/logging_interceptor.dart` : `LoggingInterceptor(log?)` — log method + path UNIQUEMENT, jamais body/Authorization/query params/token/URL signée.
+`lib/src/core/api/dio_client.dart` : `typedef TokenReader`, `CorrelationIdReader`, `ApiLogger` + `createDioClient(config, tokenReader, correlationIdReader?, logger?)`. Intercepteurs : `_AuthInterceptor` (inject Bearer + X-Request-Id dynamiquement) → `LoggingInterceptor` → `ErrorInterceptor`. Token lu au moment de chaque requête, jamais stocké dans la config.
+`lib/src/core/api/dio_provider.dart` : `apiConfigProvider` (localhost:3000 dev) + `dioClientProvider` (`tokenReader` fermeture sur `AuthController.accessToken`). 401 surfacé sans refresh automatique.
+Tests (`test/unit/api/`) : 48 tests — `app_api_error_test.dart` (12 : exhaustivité switch, isA<Exception>), `error_interceptor_test.dart` (19 : mapping pur + ErrorInterceptor via Dio+mock adapter), `logging_interceptor_test.dart` (6 : logs method+path, jamais body/Authorization), `dio_client_test.dart` (11 : config, injection token, token dynamique, non-fuite logs, correlationId, 401 sans retry).
+Tests : `flutter test` 86/86 ✅ · `flutter analyze` 0 issues ✅ · `dart format` 0 ✅ · `quality-gates docs` 2/2 ✅.
+Statut `mobile-flutter` : **`DIO_CLIENT_READY`**.
+Prochaine action : **Mobile Core Flutter 5 — Upload multipart** (`UploadService` + `AppFile` descriptor).
+
 ## 10. Règles à ne pas violer
 
 - Vérifier le repository ; ne jamais se fier au seul rapport précédent.

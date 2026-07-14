@@ -1,6 +1,6 @@
 # Mobile Core Flutter
 
-> Statut : **`AUTH_SHELL_READY`** (Mobile Core Flutter 3, 2026-07-14)
+> Statut : **`DIO_CLIENT_READY`** (Mobile Core Flutter 4, 2026-07-14)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
@@ -32,7 +32,7 @@ Il ne contient aucune logique métier ni aucun code runtime.
 
 ```txt
 cores/mobile-flutter/
-├── pubspec.yaml                            ← Flutter 2 (flutter_riverpod 3.3.2, go_router 17.3.0)
+├── pubspec.yaml                            ← Flutter 4 (+ dio 5.10.0)
 ├── analysis_options.yaml                   ← Flutter 2
 ├── CORE_SPECIFICATION.md                   ← Flutter 1
 ├── README.md                               ← Flutter 1
@@ -41,12 +41,20 @@ cores/mobile-flutter/
 │   ├── app.dart                            ← Flutter 3 (routerProvider watch)
 │   └── src/
 │       ├── core/
+│       │   ├── api/
+│       │   │   ├── app_api_error.dart     ← Flutter 4 (sealed class, 11 sous-types, Dart 3 natif)
+│       │   │   ├── error_interceptor.dart ← Flutter 4 (mapDioError + ErrorInterceptor)
+│       │   │   ├── logging_interceptor.dart ← Flutter 4 (method+path seulement, jamais body/token)
+│       │   │   ├── dio_client.dart        ← Flutter 4 (createDioClient + _AuthInterceptor)
+│       │   │   └── dio_provider.dart      ← Flutter 4 (apiConfigProvider + dioClientProvider)
 │       │   ├── auth/
 │       │   │   ├── auth_status.dart       ← Flutter 3 (enum loading/authenticated/unauthenticated/expired)
 │       │   │   ├── auth_state.dart        ← Flutter 3 (status + userId, jamais de token)
 │       │   │   ├── session_envelope.dart  ← Flutter 3 (userId opaque, pas de token)
 │       │   │   ├── session_store.dart     ← Flutter 3 (seam + InMemorySessionStore placeholder)
 │       │   │   └── auth_controller.dart   ← Flutter 3 (Notifier<AuthState>, token mémoire)
+│       │   ├── config/
+│       │   │   └── api_config.dart        ← Flutter 4 (ApiConfig : baseUrl, timeouts, commonHeaders)
 │       │   └── navigation/
 │       │       └── router.dart            ← Flutter 3 (routerProvider GoRouter + guards)
 │       ├── features/
@@ -64,6 +72,11 @@ cores/mobile-flutter/
     ├── theme/
     │   └── enistere_theme_test.dart       ← Flutter 2 (16 tests)
     ├── unit/
+    │   ├── api/
+    │   │   ├── app_api_error_test.dart    ← Flutter 4 (12 tests)
+    │   │   ├── error_interceptor_test.dart ← Flutter 4 (19 tests)
+    │   │   ├── logging_interceptor_test.dart ← Flutter 4 (6 tests)
+    │   │   └── dio_client_test.dart       ← Flutter 4 (11 tests)
     │   └── auth/
     │       ├── auth_controller_test.dart  ← Flutter 3 (9 tests)
     │       └── session_store_test.dart    ← Flutter 3 (4 tests)
@@ -72,7 +85,7 @@ cores/mobile-flutter/
         └── router_guard_test.dart         ← Flutter 3 (5 tests guards)
 ```
 
-La prochaine mission est **Flutter 4 — Client Dio + providers** (`DioClient` + intercepteurs + Freezed modèles).
+La prochaine mission est **Flutter 5 — Upload multipart** (`UploadService` + `AppFile` descriptor).
 
 ## Stack technique
 
@@ -105,7 +118,7 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 | Flutter 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` ✅ |
 | Flutter 2 | Starter minimal | `pubspec.yaml` + structure `lib/` + `ThemeData` Enistere ✅ |
 | Flutter 3 | Auth shell + guards | `AuthController` + `SessionStore` seam + GoRouter guards ✅ |
-| Flutter 4 | Client Dio + providers | Intercepteurs + Freezed models + health/auth providers |
+| Flutter 4 | Client Dio + providers | `ApiConfig` + `AppApiError` sealed + `createDioClient` + `dioClientProvider` ✅ |
 | Flutter 5 | Upload multipart | `UploadService` + `AppFile` descriptor |
 | Flutter 6 | Tests + smoke | `flutter_test` + intégration iOS + Android |
 | Flutter V1 | Readiness review | Rapport V1 Readiness |

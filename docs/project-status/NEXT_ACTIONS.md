@@ -217,6 +217,13 @@
 > Objectif : `DioClient` + intercepteurs (Auth/Logging) + `Freezed` modèles + health provider.
 > Aucun endpoint métier.
 
+> ✅ **Mobile Core Flutter 4 — Client Dio + providers : RÉALISÉ** (2026-07-14).
+> `dio: ^5.10.0` ajouté. `ApiConfig` + `AppApiError` (sealed class Dart 3 native, 11 sous-types, aucun Freezed) + `createDioClient` (`_AuthInterceptor` → `LoggingInterceptor` → `ErrorInterceptor`) + `dioClientProvider` Riverpod. Token injecté dynamiquement via `tokenReader`, jamais stocké. 401 surfacé sans refresh automatique. LoggingInterceptor : jamais body/Authorization/token. 86/86 tests ✅ · analyze 0 ✅ · format 0 ✅ · quality-gates docs ✅.
+> Statut `mobile-flutter` : **`AUTH_SHELL_READY`** → **`DIO_CLIENT_READY`**.
+>
+> **Prochaine action** : **Mobile Core Flutter 5 — Upload multipart** (`UploadService` + `AppFile` descriptor).
+> Aucun endpoint métier réel. Aucun SDK picker natif.
+
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
 > Statut : **`FOUNDATION_V1_RELEASED`**. Tag : `foundation-v1.0.0`.
