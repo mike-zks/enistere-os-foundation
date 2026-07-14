@@ -28,13 +28,13 @@ critère est satisfait ou non.
 | C4 | Les tokens sont correctement stockés (access en mémoire, refresh SecureStorage) | Flutter 3 — `AuthController._accessToken` privé ; Flutter 8 — `flutter_secure_storage: ^10.3.1` + `SecureSessionStore(FlutterSecureStorageAdapter())` ; Flutter 9 — `refreshSession()` consomme le refreshToken depuis `SecureSessionStore` | access token en mémoire ✅ ; `flutter_secure_storage` ✅ — refresh token Keystore (Android) / Keychain (iOS) ✅ ; `refreshSession()` échange le refresh token contre un nouveau access token ✅ | ✅ |
 | C5 | Les appels API Dio fonctionnent (health, auth) | Flutter 4 — `createDioClient`, `_AuthInterceptor`, `LoggingInterceptor`, `ErrorInterceptor` | 86 tests unitaires client Dio ✅ ; `dioClientProvider` Riverpod ✅ ; aucun appel réseau réel testé (headless) | ✅ |
 | C6 | L'upload multipart fonctionne via Dio | Flutter 5 — `DioUploadService`, `FormData`, `MultipartFileFactory` injectable, boundary auto Dio | 35 tests upload (413/415/401/réseau, boundary auto, describeFileForLog PII-safe) ✅ | ✅ |
-| C7 | Les états UI loading/empty/error/success existent et respectent les tokens Enistere | — | **`LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` non implémentés** — seule `SplashScreen` avec `CircularProgressIndicator` existe ; §9.8/§24 CORE_SPECIFICATION qualifient ces widgets de « Widgets Foundation obligatoires » | ❌ |
+| C7 | Les états UI loading/empty/error/success existent et respectent les tokens Enistere | Flutter 10 — `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` dans `lib/src/core/states/` | `LoadingState` : `CircularProgressIndicator` couleur primaire + message optionnel + Semantics label ; `EmptyState` : title + description + action `OutlinedButton` ; `ErrorState` : title + message + action + Semantics `liveRegion` + couleur `colorDanger` ; `SuccessState` : title + message + action + Semantics `liveRegion` + couleur `colorSuccess` ; tokens depuis `EnistereThemeExtension` ; 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ | ✅ |
 | C8 | Le thème Material 3 Enistere est appliqué (ThemeData depuis tokens) | Flutter 2 — `EnistereTokens`, `EnistereThemeExtension`, `EnistereTheme` (ADR-034) | 16 tests thème ; `ThemeExtension` accessible en widget test ; couleur primaire 0xFF2563EB ✅ | ✅ |
 | C9 | Les formulaires de base fonctionnent (login) | Flutter 3 — `SignInScreen` avec un bouton mock | `SignInScreen` = bouton unique `Se connecter` → mock `signIn()` ; **pas de champs email/password, pas de validation** | ❌ |
 | C10 | Les tests unitaires et widget couvrent auth, tokens, upload et navigation | Flutter 6 — 136/136 tests headless | auth (13) + navigation (9) + upload (35) + API (48) + thème (16) + widget splash/sign-in/home (16) + app (4) ✅ | ✅ |
 | C11 | L'app tourne localement sur simulateur iOS et émulateur Android | Flutter 6 + Flutter 7 | Android : ✅ `emulator-5554` (Pixel 6a API 33) — 5/5 tests passés en 9s ; iOS : environmental block (Linux, R1 accepté) ❌ | ✅ PARTIAL |
 
-**Score §29 : 7/11 satisfaits, 2/11 partiels (C1 Android ✅/iOS bloqué, C11 Android ✅/iOS bloqué), 2/11 non satisfaits (C7, C9).**
+**Score §29 : 8/11 satisfaits, 2/11 partiels (C1 Android ✅/iOS bloqué, C11 Android ✅/iOS bloqué), 1/11 non satisfait (C9).**
 
 > **Mise à jour Flutter 7 (2026-07-14)** : B1 fermé — dossiers `android/` générés + smoke `emulator-5554` passé
 > (5/5 tests en 9s). C1 et C11 passent de ❌ à ✅ PARTIAL (Android réel ✅, iOS R1 maintenu).
@@ -50,6 +50,12 @@ critère est satisfait ou non.
 > 174/174 tests headless. C3 : refresh 401 ❌ → ✅. C4 : ✅ PARTIAL → ✅.
 > Découverte : Dio 5.x traite les erreurs en ordre d'enregistrement (catchError chaîné, PAS en sens inverse) —
 > `RefreshInterceptor` doit être enregistré AVANT `ErrorInterceptor`.
+>
+> **Mise à jour Flutter 10 (2026-07-14)** : B4 fermé — `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState`
+> dans `lib/src/core/states/` ; tokens depuis `EnistereThemeExtension` (espacements, couleurs `colorDanger`/`colorSuccess`/
+> `colorTextMuted`, primaire `ColorScheme`) ; Semantics `label` (LoadingState) + `liveRegion` (ErrorState, SuccessState) ;
+> 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ (aucune régression) ; 213/213 tests headless.
+> C7 : ❌ → ✅.
 
 ---
 
@@ -62,7 +68,7 @@ critère est satisfait ou non.
 | ~~B1~~ | ~~Android runtime — library sans dossiers `android/`~~ | C1, C11 | ✅ **FERMÉ** — Flutter 7 : `flutter create --platforms=android .` + smoke `emulator-5554` 5/5 passés | Flutter 7 ✅ |
 | ~~B2~~ | ~~`flutter_secure_storage` absent — pas de refresh token persisté, pas de `restoreSession()`~~ | C3, C4 | ✅ **FERMÉ** — Flutter 8 : `flutter_secure_storage` 10.3.1 + `SecureSessionStore` + `FlutterSecureStorageAdapter` + `restoreSession()` public ; smoke `emulator-5554` 7/7 passés | Flutter 8 ✅ |
 | ~~B3~~ | ~~`RefreshInterceptor` absent — 401 surfacé sans refresh + retry coalescent~~ | C3 | ✅ **FERMÉ** — Flutter 9 : `AuthApi` seam + `RefreshInterceptor` (401 → `refreshSession()` coalescent → retry → purge) + `authApiProvider` ; 14 tests unitaires headless ; smoke `emulator-5554` 7/7 ✅ | Flutter 9 ✅ |
-| B4 | Widgets UI state absents — `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` | C7 | Module manquant | Flutter 10 (UI states) |
+| ~~B4~~ | ~~Widgets UI state absents — `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState`~~ | C7 | ✅ **FERMÉ** — Flutter 10 : `lib/src/core/states/` : `LoadingState` / `EmptyState` / `ErrorState` / `SuccessState` ; tokens Enistere ; 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ | Flutter 10 ✅ |
 | B5 | Login form absent — `SignInScreen` n'a pas de champs email/password ni validation | C9 | Module manquant | Flutter 11 (login form) |
 
 ### 3.2 Réserves acceptées (non-bloquantes V1)
@@ -126,7 +132,7 @@ Les conditions ci-dessous, toutes réalisées, débloquent `VALIDE_V1` :
 | ~~Android emulator smoke — `integration_test/` exécuté sur `emulator-5554`~~ | ~~Flutter 7~~ | B1 (C1, C11) | ✅ **FERMÉ** — `flutter test integration_test/smoke_test.dart -d emulator-5554` : 5/5 passés en 9s (2026-07-14) |
 | ~~`flutter_secure_storage` seam + `SecureSessionStore` adapter + `restoreSession()`~~ | ~~Flutter 8~~ | B2 (C3, C4) | ✅ **FERMÉ** — `flutter_secure_storage: ^10.3.1` + `SecureSessionStore` + `FlutterSecureStorageAdapter` + `restoreSession()` public ; smoke `emulator-5554` 7/7 passés (2026-07-14) |
 | ~~`RefreshInterceptor` — 401 → `refresh()` coalescent → 1 retry → purge~~ | ~~Flutter 9~~ | B3 (C3) | ✅ **FERMÉ** — `RefreshInterceptor` + `refreshSession()` coalescent + retry unique + purge ; 14 tests unitaires headless (`refresh_interceptor_test.dart` + `auth_controller_test.dart`) ; smoke `emulator-5554` 7/7 ✅ (2026-07-14) |
-| `LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` (widgets Foundation ADR-034) | Flutter 10 | B4 (C7) | Widgets testés avec tokens Enistere |
+| ~~`LoadingState`/`EmptyState`/`ErrorState`/`SuccessState` (widgets Foundation ADR-034)~~ | ~~Flutter 10~~ | B4 (C7) | ✅ **FERMÉ** — `lib/src/core/states/` ; 39 tests widget headless ; smoke `emulator-5554` 7/7 (2026-07-14) |
 | `SignInScreen` form — champs email + password + validation + erreur accessible | Flutter 11 | B5 (C9) | Widget test form validation |
 | (optionnel avant V1) iOS runtime si macOS/Xcode disponible | RN31 équivalent | R1 | `bash scripts/smoke.sh --ios` passé |
 
@@ -157,9 +163,9 @@ Invariants respectés Flutter 1→6 :
 
 | Document | Mise à jour |
 |---|---|
-| `docs/project-status/IMPLEMENTATION_MATRIX.md` | Flutter row : `TEST_WIDGET_PASSED` → `IMPLEMENTATION_AVANCEE` (V1 Review) ; Flutter 7 : B1 fermé ; Flutter 8 : B2 fermé ; Flutter 9 : B3 fermé |
-| `docs/project-status/NEXT_ACTIONS.md` | Revue ajoutée ; Flutter 7 complété ; Flutter 8 complété ; Flutter 9 complété ; prochaine action : Flutter 10 — UI states |
-| `docs/project-status/SESSION_HANDOFF.md` | mobile-flutter mis à jour : `IMPLEMENTATION_AVANCEE`, B1/B2/B3 fermés Flutter 7/8/9 |
+| `docs/project-status/IMPLEMENTATION_MATRIX.md` | Flutter row : `TEST_WIDGET_PASSED` → `IMPLEMENTATION_AVANCEE` (V1 Review) ; Flutter 7 : B1 fermé ; Flutter 8 : B2 fermé ; Flutter 9 : B3 fermé ; Flutter 10 : B4 fermé |
+| `docs/project-status/NEXT_ACTIONS.md` | Revue ajoutée ; Flutter 7 complété ; Flutter 8 complété ; Flutter 9 complété ; Flutter 10 complété ; prochaine action : Flutter 11 — login form |
+| `docs/project-status/SESSION_HANDOFF.md` | mobile-flutter mis à jour : `IMPLEMENTATION_AVANCEE`, B1/B2/B3/B4 fermés Flutter 7/8/9/10 |
 | `docs/project-status/FOUNDATION_CURRENT_STATE.md` | mobile-flutter mis à jour |
 | `docs/project-status/MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md` | Rapport smoke Flutter 9 — 7/7 passés, B3 fermé |
 | `cores/mobile-flutter/README.md` | Statut mis à jour ; Flutter 7 ✅ ; Flutter 8 ✅ |

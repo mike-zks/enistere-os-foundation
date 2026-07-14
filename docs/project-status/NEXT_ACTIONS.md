@@ -277,9 +277,18 @@
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 > **B3 FERMÉ.** C3 : refresh 401 ❌ → ✅. C4 : ✅ PARTIAL → ✅. Score §29 : 5/11 → 7/11.
 >
-> **Prochaine action UNIQUE** : **Mobile Core Flutter 10 — UI states**.
-> Objectif : fermer B4 — implémenter `LoadingState`, `EmptyState`, `ErrorState`, `SuccessState`
-> (widgets Foundation obligatoires §9.8/§24, tokens Enistere ADR-034). Aucun backend réel. Aucun changement RN/Web.
+> ✅ **Mobile Core Flutter 10 — UI states Foundation (B4) : RÉALISÉ** (2026-07-14).
+> Rapport : `docs/project-status/MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md`.
+> Livrables : `lib/src/core/states/loading_state.dart` / `empty_state.dart` / `error_state.dart` /
+> `success_state.dart` — widgets Foundation ADR-034 alignés `EnistereThemeExtension` (espacements, couleurs
+> `colorDanger`/`colorSuccess`/`colorTextMuted`, primaire `ColorScheme`) ; Semantics `label` (LoadingState) +
+> `liveRegion` (ErrorState/SuccessState) ; 39 tests widget headless ; smoke `emulator-5554` 7/7 ✅ (aucune
+> régression) ; 213/213 tests headless.
+> **B4 FERMÉ.** C7 : ❌ → ✅. Score §29 : 7/11 → 8/11. Bloquant restant : B5 (login form).
+>
+> **Prochaine action UNIQUE** : **Mobile Core Flutter 11 — Login form**.
+> Objectif : fermer B5 — `SignInScreen` avec champs email + password + validation + erreur accessible
+> (ferme C9 §29). Aucun backend réel. Aucun changement RN/Web/Auth/Refresh.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
