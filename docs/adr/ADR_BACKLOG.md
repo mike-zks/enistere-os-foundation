@@ -119,7 +119,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-032 | Charts web et UI Kit | Future | web-nextjs, ui-kit | Non | À rédiger | Recharts ou alternative si dashboards avancés. |
 | ADR-033 | Carousel UI | Future | ui-kit, mobile-react-native, web-nextjs | Non | À rédiger | À traiter si composant structurant. |
 | ADR-034 | Flutter UI : Material 3 vs composants maison | Future | ui-kit, mobile-flutter | Non | Validé | Option D : Material 3 contrôlé par tokens Enistere + composants maison ciblés ; à traiter avant Mobile Core Flutter. |
-| ADR-035 | Angular UI : Angular Material vs PrimeNG | Future | ui-kit, web-angular | Non | À rédiger | À traiter avant Web Core Angular. |
+| ADR-035 | Angular UI : Angular Material vs PrimeNG | Future | ui-kit, web-angular | Non | Validé | Option D : Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés ; bloquant avant Web Core Angular 1 — Core specification. |
 | ADR-036 | Observabilité distribuée et tracing | Future | cloud, api-nestjs, web-nextjs | Non | À rédiger | Après monitoring de base. |
 | ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Utile pour SaaS et rollout progressif. RN 17 livre seulement des primitives config/flags locales génériques, sans remote-config, réseau, persistance ni ciblage utilisateur. |
 | ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | À cadrer avec confidentialité, consentement et coûts. RN 13 livre seulement un modèle d'événements/redaction + adapter placeholder, sans SDK réel, transport ni identify. **RN 21 livre seulement un gate de consentement générique (default-deny, persistance déléguée aux préférences RN 20), sans SDK/réseau/UI/identifiant/PII — RN 21 ne décide pas cet ADR et ne choisit aucun SDK, coût, politique privacy ou UI de consentement.** |
@@ -162,7 +162,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-032 | Charts web/UI Kit | Future | web-nextjs, ui-kit | Non | À rédiger | Recharts ou alternative. |
 | ADR-033 | Carousel UI | Future | ui-kit, mobile-react-native, web-nextjs | Non | À rédiger | Librairie et accessibilité. |
 | ADR-034 | Flutter UI | Future | ui-kit, mobile-flutter | Non | Validé | Material 3 contrôlé par tokens Enistere + composants maison ciblés. |
-| ADR-035 | Angular UI | Future | ui-kit, web-angular | Non | À rédiger | Angular Material vs PrimeNG. |
+| ADR-035 | Angular UI | Future | ui-kit, web-angular | Non | Validé | Option D : Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés. |
 | ADR-036 | Observabilité distribuée | Future | cloud, api-nestjs, web-nextjs | Non | À rédiger | Tracing futur. |
 | ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Rollout progressif ; RN 17 ne décide pas d'un remote-config réel. |
 | ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/consentement/coûts ; RN 13 ne décide pas d'un SDK réel ; RN 21 = gate de consentement générique préparatoire (ne décide pas cet ADR). |
