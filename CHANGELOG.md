@@ -6,6 +6,32 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 4 — OpenAPI + Upload MinIO/S3
+
+- `pom.xml` : ajout `springdoc-openapi-starter-webmvc-ui:2.8.6` (OpenAPI SB 4.x), `io.minio:minio:8.5.17` (S3-compatible storage).
+- `OpenApiConfig` : bean `OpenAPI` (titre, version, description, `SecurityScheme` Bearer JWT).
+- `FilesConfig` : `@ConfigurationProperties(prefix="enistere.files")` + `@Validated` — endpoint, bucket, region, accessKey, secretKey, maxSizeBytes ; valeurs via env vars uniquement.
+- `StorageConfig` : `MinioClient` bean `@Profile("!test")`.
+- `application.yml` : `spring.servlet.multipart.max-file-size: 10MB` / `max-request-size: 11MB` ; `springdoc.api-docs.path: /v3/api-docs` ; `enistere.files.*` via env vars (aucun secret réel).
+- `V2__add_stored_files.sql` : table `stored_files` (13 colonnes, `owner_id` FK `users(id)`, `storage_key UNIQUE`) + 3 index (`owner_id`, `category`, `status`).
+- `FileCategory` (9 valeurs : IMAGE, DOCUMENT, AVATAR, MEDIA, VIDEO, AUDIO, IDENTITY_DOCUMENT, ATTACHMENT, OTHER), `FileStatus` (5 valeurs).
+- `StoredFile` : entité JPA extends `BaseEntity` ; champs internes : `storageKey`, `bucket`, `ownerId`, `mimeType`, `extension` ; champs metadata : `originalName`, `size`, `category`, `status`, `subjectId`.
+- `StoredFileRepository` : Spring Data JPA.
+- `FileUploadRequestDto` : `@NotNull FileCategory category`, `@Size(max=128) String subjectId` (multipart form params).
+- `StoredFileResponseDto` (DTO public) : `id`, `originalName`, `contentType`, `size`, `category`, `createdAt` — **jamais** `storageKey`, `bucket`, `signedUrl`, `ownerId`.
+- `StorageService` (interface) + `MinioStorageService` (`@Profile("!test")`, `PutObjectArgs`/`RemoveObjectArgs`) + `FakeStorageService` test (`@Profile("test")`, in-memory stub, `src/test/java`).
+- `FileService` : validation MIME whitelist (14 types : images, PDF, office, vidéo, audio, texte) ; validation taille (`maxSizeBytes`) ; `storageKey` 100% serveur (`category/UUID.ext`) ; `originalName` sanitisé (basename, max 255 chars) ; log structuré sans chemin/contenu/URL signée ; `@Transactional`.
+- `FilesController` : `POST /api/v1/files/upload` (`multipart/form-data`, `@Tag("Files")`, `@Operation`, `Authentication auth`) ; réponse 201 + DTO public uniquement.
+- `SecurityConfig` mis à jour : `/v3/api-docs/**`, `/swagger-ui/**`, `/swagger-ui.html` en `permitAll`.
+- `GlobalExceptionHandler` mis à jour : `BindException` → 400 (validation `@ModelAttribute`) ; `MaxUploadSizeExceededException` → 413 ; `HttpMediaTypeNotSupportedException` → 415.
+- `application-test.yml` : `enistere.files.*` dummy + springdoc disabled ; profil "test" active `FakeStorageService`.
+- Tests : `FileValidationTest` (16 tests unitaires — MIME whitelist, taille, `FileCategory` 9 valeurs) ; `FilesUploadIntegrationTest` (9 tests — 401 sans token, 201 DTO public, non-leak internalFields, 400 category manquant/invalide, 415 MIME bloqué, 400 empty, 201 subjectId) ; `FlywayMigrationTest` +3 tests (table `stored_files`, 13 colonnes, 3 index).
+- `./mvnw verify` : **71/71 ✅ BUILD SUCCESS**.
+- Adaptations Spring Boot 4.x : springdoc 2.8.6 compatible SB 4.1.0/SF 7.x sans changement artifact ; `Authentication auth` (pas `@AuthenticationPrincipal UserDetails`) car `JwtAuthenticationFilter` pose le principal comme `String` email.
+- Non livré (Spring Boot 5) : liste/delete/download URL signée, MinIO Testcontainers, validation binaire Apache Tika, quarantaine, CI Java.
+- `api-spring` : **`PERSISTENCE_RBAC_READY` → `FILE_UPLOAD_READY`**.
+- Statuts mis à jour : `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`.
+
 ### API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC
 
 - `pom.xml` : ajout `spring-boot-starter-data-jpa`, `postgresql` (runtime), `spring-boot-starter-flyway`, `flyway-database-postgresql` (runtime), `bcprov-jdk18on:1.82` (Bouncy Castle — Argon2 dep explicite), `spring-boot-testcontainers`, `testcontainers-junit-jupiter`, `testcontainers-postgresql` (TC 2.0.5 artifact IDs).

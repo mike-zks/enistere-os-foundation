@@ -7,3 +7,15 @@ enistere:
       memory: 4096      # 4 MB — fast for tests only, not production-grade (ADR-039 §22)
       iterations: 1
       parallelism: 1
+  files:
+    endpoint: http://localhost:9000
+    bucket: test-bucket
+    region: us-east-1
+    access-key: test-access-key
+    secret-key: test-secret-key
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

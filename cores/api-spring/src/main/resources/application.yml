@@ -20,6 +20,11 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 11MB
 
 management:
   endpoints:
@@ -37,6 +42,12 @@ logging:
     org.springframework.security: WARN
     org.flywaydb: INFO
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 enistere:
   security:
     jwt:
@@ -49,3 +60,10 @@ enistere:
       parallelism: 1
       memory: 65536     # 64 MB — OWASP minimum recommendation
       iterations: 3
+  files:
+    # PRODUCTION: override all enistere.files.* via environment variables — never commit real secrets
+    endpoint: ${FILES_ENDPOINT:http://localhost:9000}
+    bucket: ${FILES_BUCKET:enistere-dev}
+    region: ${FILES_REGION:us-east-1}
+    access-key: ${FILES_ACCESS_KEY:minioadmin}
+    secret-key: ${FILES_SECRET_KEY:minioadmin}
