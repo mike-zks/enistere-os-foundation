@@ -6,6 +6,31 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 1 — Core specification
+
+- `cores/web-angular/CORE_SPECIFICATION.md` (créé, 32 §) : spécification complète du socle Angular de référence pour backoffices, dashboards administratifs et SI internes Enistere.
+- `cores/web-angular/README.md` (créé) : statut `SPECIFICATION_DOCUMENTAIRE`, positionnement (Web Next.js vs Web Angular), décision ADR-035, missions ordonnées Angular 1→V1.
+- **ADR fondateur** : ADR-035 — Angular Material (CDK + M3) contrôlé par tokens Enistere + composants maison (Reactive Forms obligatoire ; pas de PrimeNG, pas de shadcn/Radix côté Angular).
+- **Architecture spécifiée** : Angular standalone (17+, `standalone: true` obligatoire, zéro NgModule métier), TypeScript strict, feature-first (4 couches : Présentation / Application / Domaine / Infrastructure).
+- **Routing** : Angular Router + guards fonctionnels (`CanActivateFn`/`CanMatchFn`) + lazy loading + `provideRouter(routes, withComponentInputBinding(), withRouterConfig({...}))`.
+- **State** : Angular Signals (`signal()`/`computed()`/`effect()`) pour l'état local ; RxJS services (BehaviorSubject, shareReplay) pour le server state ; TanStack Query Angular différé à §32.
+- **HTTP** : HttpClient + `provideHttpClient(withInterceptors([...]))` + 4 intercepteurs fonctionnels (AuthInterceptor Bearer, RefreshInterceptor 401 coalescent + logout, ErrorInterceptor mapping `AppError`, LogInterceptor sans body/token/URL signée).
+- **Reactive Forms** obligatoires (Template-driven tolérés uniquement pour cas triviaux auto-contenus) ; formulaires Angular Material form fields.
+- **Thème Material 3 Enistere** : `mat.define-theme()` + `@include mat.theme(...)` — tokens Enistere (ADR-008) via `--mat-sys-*` CSS custom properties ; aucun thème Material prebuilt.
+- **`@angular/cdk/a11y`** : FocusTrap, LiveAnnouncer, FocusMonitor, ListKeyManager — WCAG 2.1 AA cible.
+- **Composants maison Enistere Angular** : LoadingState / EmptyState / ErrorState / SuccessState (standalone, CDK-based, WCAG 2.1 AA).
+- **Auth/Session** : access token en mémoire (signal Angular, non persisté) ; RefreshInterceptor 401 coalescent (un seul refresh concurrent, queue des requêtes en attente, logout si refresh échoue) ; stratégie refresh token différée à §32 (Option A : HttpOnly cookie si API le supporte ; Option B : mémoire seulement).
+- **RBAC** : `PermissionService` + `PermissionDirective` — API Core reste l'autorité.
+- **ADR-016 §F** (adaptateur OpenAPI Angular : Orval Angular vs `typescript-angular`) : décidé par preuve dans Angular 2+, non tranché dans cette spec.
+- **Tests attendus** : TestBed + `@angular/cdk/testing` harness + `HttpClientTestingModule` ; couverture, Jest vs Karma, E2E Playwright/Cypress différés à §32.
+- **§29 V1 critères** : 15 critères (§29.1→§29.15) — standalone, routing, signals, RxJS, forms, thème, intercepteurs, auth, CDK a11y, tests, RBAC, upload, logger, config, build.
+- **§32 décisions pendantes** : 13 entrées (ADR-016§F, Jest vs Karma, Playwright vs Cypress, TanStack Query Angular, refresh token strategy, NgRx, CI Angular, version Angular LTS, SSR, tokens SCSS export, UI Kit Angular surface, localStorage préférences, localStorage preferences).
+- **§30 Missions ordonnées** : Angular 1 (spec ✅) → Angular 2 (starter) → Angular 3 (auth) → Angular 4 (HTTP) → Angular 5 (forms) → Angular 6 (composants) → Angular 7 (upload) → Angular 8 (tests) → Angular V1 (readiness review).
+- **Aucun code généré** : aucun projet Angular, aucun `package.json`, aucun `angular.json`, aucun `src/`, aucune dépendance npm, aucun workflow CI, aucun changement Web Next / UI Kit / API.
+- Mises à jour documentaires : `docs/project-status/DECISIONS_REGISTER.md` (ADR-035 → `PARTIELLEMENT_IMPLEMENTE`), `docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`, `docs/project-status/NEXT_ACTIONS.md`, `docs/project-status/SESSION_HANDOFF.md`.
+- `web-angular` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**. Prochaine action : Web Core Angular 2 — Starter minimal Angular.
+- `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+
 ### V3 ADR-035 — Angular UI stack decision : Angular Material (CDK + M3) + tokens Enistere
 
 - `docs/adr/ADR-035-angular-ui-material-vs-primeng.md` (créé) : ADR complet 12 sections, statut **Validé**, date 2026-07-15.
