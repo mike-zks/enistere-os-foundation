@@ -327,8 +327,24 @@
 > `ADR_BACKLOG.md`, `DECISIONS_REGISTER.md`, docs project-status mis à jour.
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 >
-> **Prochaine action** : **API Core Spring Boot 2 — Starter minimal** (`pom.xml` Maven + structure `src/`
-> + Spring Security 7.x + JWT + auth flow).
+> ✅ **API Core Spring Boot 2 — Starter minimal Maven : RÉALISÉ** (2026-07-15).
+> Livrables : `cores/api-spring/pom.xml` (Spring Boot 4.1.0 Parent POM, JJWT 0.12.6, Java 21),
+> `mvnw` / `mvnw.cmd` / `.mvn/wrapper/maven-wrapper.properties` (Maven Wrapper 3.9.12),
+> structure Java `com.enistere.core` : `EnistereCoreApplication`, `JwtConfig`, `SecurityConfig`
+> (STATELESS, JWT filter, CORS, no CSRF), `ApiError`, `GlobalExceptionHandler`,
+> `JwtTokenProvider`, `JwtAuthenticationFilter`, `AuthController` + DTOs
+> (`/api/v1/auth/{login,me,logout,refresh}`), `application.yml`, `application-test.yml`.
+> Adaptations SB4 : `@AutoConfigureMockMvc` absent → `MockMvcBuilders.webAppContextSetup` + `springSecurity()` ;
+> `ObjectMapper` non injecté → instance locale test ; `spring.jackson.time-zone` retiré (SB4 JacksonProperties) ;
+> `HttpMessageNotReadableException` géré (400 vs 500).
+> Tests : **18/18 ✅** (`JwtTokenProviderTest` 7, `AuthControllerTest` 10, `EnistereCoreApplicationTests` 1).
+> `./mvnw verify` : **BUILD SUCCESS**.
+> Aucun secret hardcodé : `JWT_SECRET`, `STUB_USERNAME`, `STUB_PASSWORD` via env vars.
+> `api-spring` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
+>
+> **Prochaine action** : **API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC**.
+> Objectif : ajouter persistance réelle (User/Role/Permission), migrations Flyway, Spring Data JPA,
+> Spring Security Method Security + RBAC (`@PreAuthorize`), refresh token persisté, UserDetailsService.
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).

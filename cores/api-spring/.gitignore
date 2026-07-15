@@ -1,0 +1,5 @@
+target/
+*.class
+.env
+.env.local
+*.log
