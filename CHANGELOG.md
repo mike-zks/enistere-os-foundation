@@ -6,6 +6,21 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 8 — Redis health + Rate limiting + MinIO Testcontainers
+
+- `pom.xml` : ajout `spring-boot-starter-data-redis` (Lettuce — version gérée par Spring Boot parent 4.1.0) ; `RedisHealthIndicator` auto-configuré via Actuator.
+- `application.yml` : `spring.data.redis.url: ${REDIS_URL:redis://localhost:6379}` + `connect-timeout: 2000` + `timeout: 2000` ; bloc `enistere.security.rate-limit.*` (enabled/auth-capacity/auth-refill-seconds/upload-capacity/upload-refill-seconds/download-url-capacity/download-url-refill-seconds) avec defaults via env vars.
+- `application-test.yml` : `management.health.redis.enabled: false` (Redis désactivé par défaut en test) ; `management.endpoint.health.show-details: always` ; `enistere.security.rate-limit.enabled: false` ; `io.lettuce: ERROR` / `io.netty: ERROR` (suppression logs Lettuce en test).
+- `RateLimitConfig.java` (créé) : `@ConfigurationProperties(prefix = "enistere.security.rate-limit")` + `@Validated` ; 7 champs (enabled, authCapacity, authRefillSeconds, uploadCapacity, uploadRefillSeconds, downloadUrlCapacity, downloadUrlRefillSeconds).
+- `RateLimitInterceptor.java` (créé) : `@Component @ConditionalOnProperty(name = "enistere.security.rate-limit.enabled", havingValue = "true", matchIfMissing = true)` + `HandlerInterceptor.preHandle()` fixed-window en mémoire (`ConcurrentHashMap<String, RateWindow>` par IP) ; 4 endpoints : `/api/v1/auth/login`, `/api/v1/auth/refresh`, `/api/v1/files/upload`, `/api/v1/files/*/download-url` ; 429 via `ResponseStatusException(TOO_MANY_REQUESTS)` → `GlobalExceptionHandler.handleResponseStatus()` → `ApiError` ; aucun log de token/email/body ; `clearWindows()` pour isolation inter-tests.
+- `WebMvcConfig.java` (créé) : `@Configuration WebMvcConfigurer` ; `@Autowired(required=false) RateLimitInterceptor` — no-op si bean absent (profil test avec `enabled: false`) ; `.addPathPatterns(...)` sur 4 patterns.
+- `RateLimitIntegrationTest.java` (créé) : `@TestPropertySource(properties = {"enistere.security.rate-limit.enabled=true", "auth-capacity=2", "upload-capacity=1", "download-url-capacity=1", ...})` ; 4 tests : login 429, upload 429, download-url 429, actuator/health non limité ; `clearWindows()` en `@BeforeEach`.
+- `RedisHealthIntegrationTest.java` (créé) : `@TestPropertySource(properties = "management.health.redis.enabled=true")` + `GenericContainer("redis:7-alpine")` static + `@DynamicPropertySource` → `spring.data.redis.url` ; 2 tests : `$.components.redis.status = UP` + `$.components.db.status = UP`.
+- `MinioStorageIntegrationTest.java` (créé) : `@Import(MinioTestConfig.class)` + `GenericContainer("minio/minio:RELEASE.2024-01-16T16-07-38Z")` static (`.withCommand("server", "/data")`, `Wait.forHttp("/minio/health/live")`) + `@DynamicPropertySource` (override `enistere.files.*`) + `MinioTestConfig @TestConfiguration @Primary @Bean StorageService` (override `FakeStorageService`) ; `testMinioClient` static pour assertions ; 3 tests : upload → `listObjects().hasNext()`, URL `X-Amz-*` (pas fake-storage.test), `Cache-Control: no-store`.
+- **Tests : 99/99 ✅ BUILD SUCCESS** (90 SB7 + 4 RateLimit + 2 RedisHealth + 3 MinioTC).
+- **§30 C10 fermé** (Redis UP + db UP en TC) ; **R1 fermé** (MinIO TC réel) ; **R3 fermé** (rate limiting en mémoire) ; **R5 fermé** (Lettuce lazy, RedisHealthIndicator).
+- `api-spring` : **`VALIDE_V1`** — score §30 **15/15** ✅.
+
 ### API Core Spring Boot 5 — CI Java + Quality Gate Spring Boot
 
 - `.github/workflows/api-spring-ci.yml` (L5) : Java 21 Temurin (`actions/setup-java@v4`, cache maven), Maven Wrapper `chmod +x cores/api-spring/mvnw`, `./mvnw verify --no-transfer-progress` (71 tests : unit + Testcontainers PostgreSQL) ; Docker natif `ubuntu-latest` (aucun `services:` — TC autonome) ; `permissions: contents:read` ; `concurrency: cancel-in-progress`.

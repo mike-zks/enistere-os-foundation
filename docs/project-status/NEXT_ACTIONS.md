@@ -371,9 +371,15 @@
 > Tests : `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 3 + `FlywayMigrationTest` +3 = **90/90 ✅ BUILD SUCCESS**. Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis différé) / 0 ✗**.
 > `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
 >
-> **Prochaine action** : **API Core Spring Boot 8 — Redis cache + rate limiting + MinIO TC** (différé, non bloquant V1).
-> Périmètre suggéré : Spring Data Redis + `health/redis` ; rate limiting (Bucket4j) ; MinIO Testcontainers e2e réel ; Health indicator MinIO.
-> iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
+> ✅ **API Core Spring Boot 8 — Redis cache + rate limiting + MinIO Testcontainers : RÉALISÉ** (2026-07-15).
+> R1 fermé — `MinioStorageIntegrationTest` : TC `minio/minio:RELEASE.2024-01-16T16-07-38Z` ; upload réel `MinioStorageService` → `statObject` TC ; URL présignée `X-Amz-*` réelle (pas fake-storage.test) ; `Cache-Control: no-store` vérifié. `@TestConfiguration @Primary StorageService` override de `FakeStorageService` ; `@DynamicPropertySource` override de `enistere.files.*` ; `@Import(MinioTestConfig.class)`.
+> R3 fermé — `RateLimitInterceptor` (fixed-window en mémoire, `@ConditionalOnProperty`) ; 4 endpoints : `/api/v1/auth/login`, `/api/v1/auth/refresh`, `/api/v1/files/upload`, `/api/v1/files/*/download-url` ; 429 via `GlobalExceptionHandler.handleResponseStatus()` → `ApiError` ; aucun log de token/email/body ; `RateLimitConfig` (`@ConfigurationProperties(prefix="enistere.security.rate-limit")`) ; `WebMvcConfig` enregistre l'intercepteur conditionnellement ; disabled par défaut en test (`enabled: false` dans `application-test.yml`) ; `RateLimitIntegrationTest` 4 tests.
+> R5 fermé — `spring-boot-starter-data-redis` (Lettuce) ; `spring.data.redis.url=${REDIS_URL:redis://localhost:6379}` ; `RedisHealthIndicator` auto-configuré via Actuator ; `RedisHealthIntegrationTest` TC `redis:7-alpine` + `@DynamicPropertySource` → `/actuator/health` $.components.redis.status = UP ; disabled par défaut (`management.health.redis.enabled: false`) re-enabled dans `RedisHealthIntegrationTest` via `@TestPropertySource`.
+> C10 fermé — `/actuator/health` retourne `db` UP (PostgreSQL) + `redis` UP (TC Redis) avec `show-details: always`.
+> Tests : **99/99 ✅ BUILD SUCCESS** (90 SB7 + 4 RateLimit + 2 RedisHealth + 3 MinioTC). Score §30 : **15/15 ✅**.
+> `api-spring` : **`VALIDE_V1`** (réserves R1/R3/R5 + C10 fermées).
+>
+> **Prochaine action** : iOS Flutter smoke — exécuter `bash scripts/smoke.sh --ios` quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.

@@ -115,6 +115,12 @@
             <version>${minio.version}</version>
         </dependency>
 
+        <!-- Spring Data Redis (Lettuce client + Redis health indicator via Actuator) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <!-- Configuration processor (IDE metadata for @ConfigurationProperties) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
