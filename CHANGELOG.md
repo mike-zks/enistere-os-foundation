@@ -6,6 +6,20 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 2 — Starter minimal Maven
+
+- `cores/api-spring/pom.xml` : Spring Boot 4.1.0 Parent POM + JJWT 0.12.6 + Java 21 (ADR-041 : Maven).
+- `mvnw` / `mvnw.cmd` / `.mvn/wrapper/maven-wrapper.properties` : Maven Wrapper 3.9.12.
+- Structure Java `com.enistere.core` : `EnistereCoreApplication`, `JwtConfig`, `SecurityConfig` (STATELESS, JWT filter, CORS dev, no CSRF, Spring Security 7.x), `ApiError`, `GlobalExceptionHandler`, `JwtTokenProvider` (JJWT 0.12.x), `JwtAuthenticationFilter`, `AuthController` + DTOs.
+- Endpoints : `POST /api/v1/auth/login` (stub → JWT), `GET /api/v1/auth/me`, `POST /api/v1/auth/logout` (stateless 204), `POST /api/v1/auth/refresh` (501 — DB en Spring Boot 3), `GET /actuator/health`, `GET /actuator/info`.
+- Auth stub sans DB (credentials config env vars `STUB_USERNAME`/`STUB_PASSWORD`, JWT réel JJWT 0.12.x, refresh token 501 déféré).
+- Aucun secret hardcodé : `JWT_SECRET` requis en production (env var).
+- Adaptations Spring Boot 4.x : `@AutoConfigureMockMvc` absent → `MockMvcBuilders.webAppContextSetup` + `SecurityMockMvcConfigurers.springSecurity()` ; `ObjectMapper` bean non injecté en test → instance locale ; `HttpMessageNotReadableException` géré (400 au lieu de 500).
+- Tests : **18/18 ✅** (`JwtTokenProviderTest` 7 · `AuthControllerTest` 10 · `EnistereCoreApplicationTests` 1).
+- `./mvnw verify` : **BUILD SUCCESS**.
+- `api-spring` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
+- Statuts mis à jour : `README.md`, `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `SESSION_HANDOFF.md`, `DECISIONS_REGISTER.md`.
+
 ### API Core Spring Boot 2A — ADR build system Maven vs Gradle
 
 - Nouvel ADR : `docs/adr/ADR-041-build-system-api-spring-maven-vs-gradle.md`.

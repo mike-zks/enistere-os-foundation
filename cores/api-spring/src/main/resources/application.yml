@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: enistere-api-spring-core
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    root: INFO
+    com.enistere: DEBUG
+
+enistere:
+  security:
+    jwt:
+      # PRODUCTION: override with JWT_SECRET env var (min 32 bytes, cryptographically random)
+      secret: ${JWT_SECRET:enistere-dev-only-jwt-secret-starter-2026-not-for-production}
+      expiration: 900  # access token lifetime in seconds (15 min)
+    stub:
+      # PRODUCTION: replace with DB-backed UserDetailsService in Spring Boot 3
+      username: ${STUB_USERNAME:admin@enistere.dev}
+      password: ${STUB_PASSWORD:dev-password-not-for-production}

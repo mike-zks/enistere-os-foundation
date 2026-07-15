@@ -66,6 +66,22 @@
 > Gradle autorisé uniquement par exception documentée dans un projet dérivé.
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 >
+> **Mise à jour API Core Spring Boot 2 — Starter minimal Maven (2026-07-15)** :
+> `cores/api-spring/pom.xml` (Spring Boot 4.1.0, JJWT 0.12.6, Java 21),
+> `mvnw` / `mvnw.cmd` / `.mvn/wrapper/` (Maven Wrapper 3.9.12),
+> structure Java `com.enistere.core` : `EnistereCoreApplication`, `JwtConfig`,
+> `SecurityConfig` (STATELESS, JWT filter, CORS dev, no CSRF, Spring Security 7.x),
+> `ApiError` record, `GlobalExceptionHandler` (`@RestControllerAdvice`),
+> `JwtTokenProvider` (JJWT 0.12.x — generate/validate/extract),
+> `JwtAuthenticationFilter` (`OncePerRequestFilter`),
+> `AuthController` (`/api/v1/auth/{login,me,logout,refresh}`) + DTOs,
+> `application.yml`, `application-test.yml`.
+> Tests : **18/18 ✅** (`JwtTokenProviderTest` 7 · `AuthControllerTest` 10 · context loads 1).
+> `./mvnw verify` : **BUILD SUCCESS**.
+> Aucun secret hardcodé — `JWT_SECRET`, `STUB_USERNAME`, `STUB_PASSWORD` via env vars.
+> Auth stub temporaire (credentials config, JWT réel, sans DB) — refresh token 501, DB en Spring Boot 3.
+> `api-spring` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
+>
 > **Mise à jour Mobile Core Flutter V1 Final Readiness Decision (2026-07-14)** : rapport
 > `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. Mobile Core Flutter promu de
 > **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**. Décision : R1 (iOS Linux) acceptée comme réserve

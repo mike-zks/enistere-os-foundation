@@ -1,0 +1,8 @@
+enistere:
+  security:
+    jwt:
+      secret: test-jwt-secret-for-junit-only-not-for-production-min32c
+      expiration: 60
+    stub:
+      username: test@enistere.dev
+      password: test-password

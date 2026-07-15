@@ -1,78 +1,136 @@
 # API Core Spring Boot
 
-> Statut : **`SPECIFICATION_DOCUMENTAIRE`** (Spring Boot 1, 2026-07-14)
+> Statut : **`STARTER_INITIALISE`** (Spring Boot 2, 2026-07-15)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
-> Stack cible : Spring Boot 4.x + Spring Security 7.x + PostgreSQL + JPA/Hibernate + Flyway + Redis + MinIO + springdoc-openapi + JUnit 5 + Testcontainers
+> Stack : Spring Boot 4.1.0 + Spring Security 7.1.0 + JJWT 0.12.6 + Java 21 (Maven — ADR-041)
 
 Socle backend **Java / Spring Boot** générique et réutilisable pour les futures applications Enistere orientées enterprise, finance, administration et systèmes d'information.
 
-Ce core complète l'API Core NestJS (`VALIDE_V1`) en ciblant l'écosystème JVM — Spring Security établi, JPA avec transactions managées, Testcontainers pour tests d'intégration réalistes. Il ne contient aucune logique métier ni aucun code runtime à ce stade.
+## Lancer le projet
 
-## Ce que ce core fournira (cible V1)
+```bash
+# Prérequis : Java 21 (SDKMAN recommandé)
+sdk use java 21.0.9-librca
 
-| Module | Stack | Notes |
-|---|---|---|
-| Auth JWT | Spring Security 7.x + JWT | access token court, refresh token persisté, rotation, révocation, logout serveur |
-| RBAC | Spring Security Method Security | `@PreAuthorize`, `@Roles`, `@Permissions` |
-| Gestion utilisateurs | Spring Data JPA + PostgreSQL | profil courant, statut actif, association rôles, soft delete |
-| Validation | Jakarta Bean Validation | `@Valid`, `MethodValidationPostProcessor`, contraintes custom |
-| Gestion erreurs | `@ControllerAdvice` | `ApiError` stable sans stack trace en production |
-| Migrations | Flyway | `V{n}__description.sql`, seed séparé local/test/production |
-| Logs structurés | SLF4J / Logback | jamais de secret, token ou donnée personnelle |
-| Audit logs | Table `audit_logs` + AOP | login/logout/refresh/rôles/upload/suppression |
-| Upload fichiers | MinIO / S3 Java SDK | validation MIME/taille/extension, nommage UUID, URLs signées courtes |
-| Cache | Spring Data Redis | conventions clés+TTL, blacklist refresh tokens révoqués, dégradation gracieuse |
-| Jobs asynchrones | Spring `@Async` + Scheduler | tâches légères idempotentes, planification |
-| Mail minimal | Spring Mail | abstraction fournisseur, envoi asynchrone, logs sans contenu |
-| Health checks | Spring Boot Actuator | db/redis/storage/readiness/liveness |
-| Documentation API | springdoc-openapi | export YAML versionné, compatible `@enistere/api-contracts` |
-| Tests | JUnit 5 + Testcontainers | unit services + integration contrôleurs + auth + RBAC + migrations |
+# Lancer les tests
+./mvnw test
 
-## Statut actuel
+# Build complet (compile + test + package)
+./mvnw verify
 
-```txt
-cores/api-spring/
-├── CORE_SPECIFICATION.md   ← Spring Boot 1 (42 sections)
-└── README.md               ← Spring Boot 1
+# Lancer l'application
+./mvnw spring-boot:run
+
+# Variables d'environnement (production obligatoires)
+export JWT_SECRET=<votre-secret-min-32-bytes-cryptographiquement-aleatoire>
+export STUB_USERNAME=admin@votredomaine.com
+export STUB_PASSWORD=<votre-mot-de-passe>
 ```
 
-Aucun starter, aucun `pom.xml`, aucun code Java, aucune dépendance.
+## Structure actuelle (Spring Boot 2)
 
-## Stack technique
+```
+cores/api-spring/
+├── pom.xml                           ← Spring Boot 4.1.0 Parent POM (ADR-041 : Maven)
+├── mvnw / mvnw.cmd                   ← Maven Wrapper 3.9.12
+├── .mvn/wrapper/
+│   └── maven-wrapper.properties
+├── src/main/
+│   ├── java/com/enistere/core/
+│   │   ├── EnistereCoreApplication.java
+│   │   ├── config/
+│   │   │   ├── JwtConfig.java        ← @ConfigurationProperties(enistere.security.jwt)
+│   │   │   └── SecurityConfig.java   ← STATELESS, JWT filter, CORS, no CSRF
+│   │   ├── common/exception/
+│   │   │   ├── ApiError.java         ← {status, code, message, errors, timestamp, path}
+│   │   │   └── GlobalExceptionHandler.java
+│   │   ├── infrastructure/security/
+│   │   │   ├── JwtTokenProvider.java ← générer/valider/extraire JWT (JJWT 0.12.x)
+│   │   │   └── JwtAuthenticationFilter.java ← OncePerRequestFilter, Bearer header
+│   │   └── modules/auth/
+│   │       ├── AuthController.java   ← /api/v1/auth/{login,me,logout,refresh}
+│   │       └── dto/
+│   │           ├── LoginRequestDto.java
+│   │           ├── LoginResponseDto.java
+│   │           └── MeResponseDto.java
+│   └── resources/
+│       └── application.yml
+├── src/test/
+│   ├── java/com/enistere/core/
+│   │   ├── EnistereCoreApplicationTests.java
+│   │   ├── infrastructure/security/JwtTokenProviderTest.java  ← 7 tests
+│   │   └── modules/auth/AuthControllerTest.java              ← 10 tests
+│   └── resources/
+│       └── application-test.yml
+├── CORE_SPECIFICATION.md             ← 42 sections (Spring Boot 1)
+└── README.md
+```
 
-| Composant | Choix retenu | Décision |
+## Endpoints disponibles
+
+| Méthode | Route | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/login` | Public | Connexion stub → JWT access token |
+| `GET` | `/api/v1/auth/me` | JWT requis | Email depuis token |
+| `POST` | `/api/v1/auth/logout` | JWT requis | Stateless (client supprime le token) |
+| `POST` | `/api/v1/auth/refresh` | JWT requis | 501 — refresh persistance (Spring Boot 3) |
+| `GET` | `/actuator/health` | Public | Status UP/DOWN |
+| `GET` | `/actuator/info` | Public | Infos application |
+
+## Sécurité
+
+- **STATELESS** — aucune session serveur, `SessionCreationPolicy.STATELESS`
+- **JWT** — access token 15 min, JJWT 0.12.x, HS256, signature vérifiée par requête
+- **Spring Security 7.x** — toutes routes protégées par défaut, filtre JWT avant UsernamePasswordAuthenticationFilter
+- **CSRF désactivé** — REST API stateless
+- **CORS** — origines configurables, dev defaults `localhost:{3000,4200,8080,8081,19006}`
+- **Erreurs** — `ApiError` sans stack trace en production
+- **Secrets** — jamais dans le code source ; env vars `JWT_SECRET`, `STUB_USERNAME`, `STUB_PASSWORD`
+
+## Auth stub (temporaire — Spring Boot 3 remplacera par DB)
+
+```yaml
+# application.yml par défaut (dev uniquement)
+enistere:
+  security:
+    stub:
+      username: ${STUB_USERNAME:admin@enistere.dev}
+      password: ${STUB_PASSWORD:dev-password-not-for-production}
+```
+
+Le stub valide les credentials en mémoire et émet un vrai JWT (cryptographie réelle). Aucune persistance. Le refresh token (`501`) nécessite PostgreSQL — Spring Boot 3.
+
+## Tests (18/18 ✅)
+
+```
+JwtTokenProviderTest  : 7 tests — génération, validation, extraction, tampering
+AuthControllerTest    : 10 tests — login/me/logout/refresh/health + auth non valide
+EnistereCoreApplicationTests : 1 test — context loads
+```
+
+```bash
+./mvnw test      # unit + integration (18 tests)
+./mvnw verify    # compile + test + package
+```
+
+## Décisions prises
+
+| Décision | Valeur | ADR |
 |---|---|---|
-| Framework | Spring Boot 4.x | Version stable courante à vérifier via Spring Initializr au moment du starter |
-| Sécurité | Spring Security 7.x | Standard Spring Boot aligné avec Spring Boot 4.x |
-| ORM | Spring Data JPA / Hibernate | Standard Spring Data |
-| Base de données | PostgreSQL | Cloud Core + API NestJS alignés |
-| Migrations | Flyway | Décision Spring Boot 2 |
-| Cache | Spring Data Redis | Cloud Core Redis |
-| Stockage | MinIO / S3 Java SDK | Cloud Core MinIO aligné |
-| OpenAPI | springdoc-openapi | Compatibilité `@enistere/api-contracts` |
-| Tests | JUnit 5 + Testcontainers | §06_DEPENDENCY_STRATEGY.md |
-| Build | Maven ou Gradle | **ADR pendante — tranchée en Spring Boot 2** |
-
-## Cohérence avec API Core NestJS
-
-Les deux API cores partagent les **intentions** (auth JWT, RBAC, OpenAPI, fichiers, audit, sécurité) sans dupliquer l'implémentation. Voir `CORE_SPECIFICATION.md §42` pour le tableau de correspondance complet.
-
-## Décisions pendantes
-
-Voir `CORE_SPECIFICATION.md §40` — les principales :
-
-- Maven vs Gradle (build system) — ADR avant mission Spring Boot 2
-- validation avancée (Jakarta BV suffit pour V1)
-- cache local Caffeine vs Redis selon cas d'usage
-- queue broker (Spring Async vs RabbitMQ/Kafka si volume requiert un broker)
+| Build system | Maven + Spring Boot Parent POM | ADR-041 |
+| Spring Boot | 4.1.0 (stable, Java 21) | ADR-041 |
+| JWT library | JJWT 0.12.6 | — |
+| Auth stub | credentials config + JWT réel, sans DB | §30 Spring Boot 3 |
+| Refresh token | 501 Not Implemented | §14 — DB requise |
 
 ## Missions ordonnées
 
-| # | Mission | Livrable |
-|---|---|---|
-| Spring Boot 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` ✅ |
-| Spring Boot 2 | Starter minimal | build system + structure `src/` + Spring Security + JWT + auth flow |
-| Spring Boot 3 | PostgreSQL + JPA + Flyway + RBAC | entités, migrations, rôles, permissions |
-| Spring Boot 4 | OpenAPI + Upload MinIO | springdoc + MinIO SDK + upload service |
-| Spring Boot 5 | Tests + CI | JUnit + Testcontainers + health checks |
-| Spring Boot V1 | Readiness review | rapport V1 — critères §30 vérifiés |
+| # | Mission | Livrable | Statut |
+|---|---|---|---|
+| Spring Boot 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` | ✅ `SPECIFICATION_DOCUMENTAIRE` |
+| Spring Boot 2A | ADR build system | `ADR-041-build-system-api-spring-maven-vs-gradle.md` | ✅ |
+| Spring Boot 2 | Starter minimal | `pom.xml` + src/ + Spring Security + JWT + auth flow | ✅ `STARTER_INITIALISE` |
+| Spring Boot 3 | PostgreSQL + JPA + Flyway + RBAC | entités, migrations, rôles, permissions | ⏳ |
+| Spring Boot 4 | OpenAPI + Upload MinIO | springdoc + MinIO SDK + upload service | ⏳ |
+| Spring Boot 5 | Tests + CI | JUnit + Testcontainers + health checks | ⏳ |
+| Spring Boot V1 | Readiness review | rapport V1 — critères §30 vérifiés | ⏳ |
