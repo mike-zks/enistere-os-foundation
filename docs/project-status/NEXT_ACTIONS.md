@@ -364,8 +364,15 @@
 > Réserves acceptées : R1 MinIO TC, R2 CORS env var, R3 rate limiting, R4 Tika, R5 Redis (toutes différées SB7+).
 > `api-spring` : **`CI_JAVA_READY` → `IMPLEMENTATION_AVANCEE`**.
 >
-> **Prochaine action** : **API Core Spring Boot 7 — AuditModule + download URL signée + CORS env var**.
-> Périmètre : migration V3 `audit_logs` (7 colonnes) + `AuditService` + events sensibles (LOGIN_SUCCESS/FAILURE, LOGOUT, TOKEN_REFRESH, FILE_UPLOAD, ADMIN_ACCESS) ; `GET /api/v1/files/:id` (metadata sans champs internes) ; `GET /api/v1/files/:id/download-url` (presigned URL courte durée, jamais loggée) ; `${CORS_ALLOWED_ORIGINS}` env var. Critère de succès : B1 + B2 fermés → relancer V1 Readiness.
+> ✅ **API Core Spring Boot 7 — AuditModule + URL signée + CORS env var : RÉALISÉ** (2026-07-15).
+> B1 fermé — migration `V3__add_audit_logs.sql` (8 colonnes, 3 index) ; `AuditLog` + `AuditEventType` (7 valeurs) + `AuditService` (`@Transactional(REQUIRES_NEW)`, best-effort) ; traçage complet : LOGIN_SUCCESS/FAILURE, LOGOUT, TOKEN_REFRESH, FILE_UPLOAD, FILE_DOWNLOAD_URL_CREATED, ADMIN_ACCESS ; aucun payload sensible (ni password, ni refresh token, ni storageKey, ni URL) dans audit_logs.
+> B2 fermé — `GET /api/v1/files/{id}/download-url` : ownership `findByIdAndOwnerId()` + 404 anti-énumération ; `StorageService.generatePresignedDownloadUrl()` + `MinioStorageService` (GetPresignedObjectUrlArgs) + `FakeStorageService` ; `Cache-Control: no-store` ; `FilesConfig.presignedUrlTtlSeconds` via env.
+> C15 fermé — `CorsConfig` injectable via `${CORS_ALLOWED_ORIGINS:...}` ; CSV robuste ; `SecurityConfig` utilise `getAllowedOriginsList()` jamais wildcard.
+> Tests : `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 2 + `FlywayMigrationTest` +3 = **89/89 ✅ BUILD SUCCESS**. Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis différé) / 0 ✗**.
+> `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
+>
+> **Prochaine action** : **API Core Spring Boot 8 — Redis cache + rate limiting + MinIO TC** (différé, non bloquant V1).
+> Périmètre suggéré : Spring Data Redis + `health/redis` ; rate limiting (Bucket4j) ; MinIO Testcontainers e2e réel ; Health indicator MinIO.
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).

@@ -26,6 +26,9 @@ public class FilesConfig {
     @Positive
     private long maxSizeBytes = 10_485_760L;
 
+    @Positive
+    private int presignedUrlTtlSeconds = 300;
+
     public String getEndpoint() { return endpoint; }
     public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
 
@@ -43,4 +46,7 @@ public class FilesConfig {
 
     public long getMaxSizeBytes() { return maxSizeBytes; }
     public void setMaxSizeBytes(long maxSizeBytes) { this.maxSizeBytes = maxSizeBytes; }
+
+    public int getPresignedUrlTtlSeconds() { return presignedUrlTtlSeconds; }
+    public void setPresignedUrlTtlSeconds(int presignedUrlTtlSeconds) { this.presignedUrlTtlSeconds = presignedUrlTtlSeconds; }
 }

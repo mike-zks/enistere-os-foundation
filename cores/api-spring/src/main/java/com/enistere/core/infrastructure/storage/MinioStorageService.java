@@ -1,9 +1,11 @@
 package com.enistere.core.infrastructure.storage;
 
 import com.enistere.core.config.FilesConfig;
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.http.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Profile("!test")
@@ -57,6 +60,23 @@ public class MinioStorageService implements StorageService {
         } catch (Exception e) {
             log.error("Storage delete failed");
             throw new RuntimeException("Storage delete failed", e);
+        }
+    }
+
+    @Override
+    public String generatePresignedDownloadUrl(String storageKey, int ttlSeconds) {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                    .method(Method.GET)
+                    .bucket(filesConfig.getBucket())
+                    .object(storageKey)
+                    .expiry(ttlSeconds, TimeUnit.SECONDS)
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Presigned URL generation failed");
+            throw new RuntimeException("Presigned URL generation failed", e);
         }
     }
 }

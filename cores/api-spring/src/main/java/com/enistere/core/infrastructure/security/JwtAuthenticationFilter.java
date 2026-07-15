@@ -34,11 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
         if (jwtTokenProvider.validateToken(token)) {
             String email = jwtTokenProvider.extractSubject(token);
+            String userId = jwtTokenProvider.extractUserId(token);
             List<String> permissions = jwtTokenProvider.extractPermissions(token);
             List<SimpleGrantedAuthority> authorities = permissions.stream()
                 .map(SimpleGrantedAuthority::new)
                 .toList();
             var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
+            auth.setDetails(userId); // userId from JWT claim — used by controllers for audit logging
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(request, response);

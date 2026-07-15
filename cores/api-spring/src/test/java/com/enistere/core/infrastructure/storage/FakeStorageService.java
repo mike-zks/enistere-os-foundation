@@ -23,6 +23,11 @@ public class FakeStorageService implements StorageService {
         uploaded.remove(storageKey);
     }
 
+    @Override
+    public String generatePresignedDownloadUrl(String storageKey, int ttlSeconds) {
+        return "https://fake-storage.test/presigned/" + storageKey + "?expires=" + ttlSeconds;
+    }
+
     public boolean wasUploaded(String storageKey) {
         return uploaded.containsKey(storageKey);
     }
