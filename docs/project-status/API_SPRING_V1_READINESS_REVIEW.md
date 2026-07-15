@@ -7,7 +7,7 @@
 > `FOUNDATION_CURRENT_STATE.md` ; `IMPLEMENTATION_MATRIX.md` ; `QUALITY_GATES_MATRIX.md` ;
 > `NEXT_ACTIONS.md` ; ADR-039, ADR-040, ADR-041 ; code source Java complet.
 > **Décision SB6** : `IMPLEMENTATION_PARTIELLE / CI_JAVA_READY` → **`IMPLEMENTATION_AVANCEE`**
-> **Décision SB7** : `IMPLEMENTATION_AVANCEE` → **`VALIDE_V1`** (B1+B2+C15 fermés, 89/89 ✅)
+> **Décision SB7** : `IMPLEMENTATION_AVANCEE` → **`VALIDE_V1`** (B1+B2+C15 fermés, 90/90 ✅)
 
 ---
 
@@ -23,7 +23,7 @@ vérifié contre le code, pas seulement la documentation.
 
 | # | Critère §30 | Statut | Preuve | Gap restant | Mission qui ferme |
 |---|---|---|---|---|---|
-| C1 | Application démarre sur JVM locale sans erreur | ✅ **SATISFAIT** | CI L5 `api-spring-ci.yml` — `./mvnw verify` 89/89 ✅ BUILD SUCCESS | — | — |
+| C1 | Application démarre sur JVM locale sans erreur | ✅ **SATISFAIT** | CI L5 `api-spring-ci.yml` — `./mvnw verify` 90/90 ✅ BUILD SUCCESS | — | — |
 | C2 | Connexion PostgreSQL + migrations Flyway appliquées | ✅ **SATISFAIT** | `V1__init_schema.sql` (6 tables) + `V2__add_stored_files.sql` + `V3__add_audit_logs.sql` ; `FlywayMigrationTest` 10 tests ; Testcontainers PostgreSQL | — | — |
 | C3 | Auth flow : login → access+refresh → /auth/me → logout | ✅ **SATISFAIT** | `AuthController` (login/me/logout/refresh) ; `AuthService` complet ; `AuthIntegrationTest` 14 tests ; `AuthControllerTest` 10 tests | — | — |
 | C4 | Tokens : access JWT court, refresh token persisté invalidable | ✅ **SATISFAIT** | `JwtTokenProvider` (JJWT 0.12.6, 900s) ; `RefreshToken` (SHA-256, `revoke()`, `isExpired()`, table `refresh_tokens`) ; rotation à chaque refresh | — | — |
@@ -34,7 +34,7 @@ vérifié contre le code, pas seulement la documentation.
 | C9 | Upload MinIO : MIME/taille, nommage sûr, **URL signée** | ✅ **SATISFAIT** | MIME whitelist 14 types ✅ ; taille (`maxSizeBytes`) ✅ ; `storageKey = category/UUID.ext` ✅ ; `FilesController POST /upload` ✅ ; **`GET /api/v1/files/{id}/download-url`** : presigned URL TTL 300s, no-store, anti-énumération 404, ownership check ; `FakeStorageService.generatePresignedDownloadUrl()` ; `FilesDownloadUrlIntegrationTest` 6 tests ✅ | — | — |
 | C10 | Health checks Actuator : état base et cache | ⚠️ **PARTIEL** | Spring Boot Actuator actif (`/actuator/health,info`) ; `show-details: when-authorized` ✅ ; `DataSourceHealthIndicator` auto-configuré → `/actuator/health/db` disponible implicitement — **Redis ABSENT** (pas de Spring Data Redis, pas de `redis` health indicator) ; **storage indicator ABSENT** (MinIO health non configuré) | Redis absent — `health/redis` non disponible ; MinIO health indicator absent | **SB8+** |
 | C11 | Documentation OpenAPI générée et accessible en dev | ✅ **SATISFAIT** | `springdoc-openapi-starter-webmvc-ui:2.8.6` ; `OpenApiConfig` (Bearer JWT, Info) ; `/v3/api-docs` + `/swagger-ui.html` en `permitAll` ; `SecurityConfig` autorise ces paths | — | — |
-| C12 | Tests JUnit + Testcontainers passent | ✅ **SATISFAIT** | **89/89 ✅** : 71 SB5 + `FlywayMigrationTest` +3 (V3 audit_logs) + `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 2 | — | — |
+| C12 | Tests JUnit + Testcontainers passent | ✅ **SATISFAIT** | **90/90 ✅** : 71 SB5 + `FlywayMigrationTest` +3 (V3 audit_logs) + `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 3 | — | — |
 | C13 | Aucun secret dans Git, aucun token ou password dans les logs | ✅ **SATISFAIT** | `application.yml` via env vars uniquement ; `AuditService` : tronque ip/ua, jamais token/URL/storageKey ; `FileService.getDownloadUrl()` : log `fileId+category` jamais l'URL signée ; `AuditIntegrationTest` vérifie token+storageKey absents des audit_logs | — | — |
 | C14 | Audit logs présents pour actions sensibles | ✅ **SATISFAIT** | `V3__add_audit_logs.sql` (8 colonnes, 3 index) ; `AuditService` (REQUIRES_NEW, best-effort) ; `AuditLog` entité JPA ; events : `LOGIN_SUCCESS`, `LOGIN_FAILURE`, `LOGOUT`, `TOKEN_REFRESH`, `FILE_UPLOAD`, `FILE_DOWNLOAD_URL_CREATED`, `ADMIN_ACCESS` ; `AuditIntegrationTest` 7 tests ✅ | — | — |
 | C15 | CORS strict configuré | ✅ **SATISFAIT** | `CorsConfig` (`@ConfigurationProperties(prefix="enistere.security.cors")`) ; `allowed-origins: ${CORS_ALLOWED_ORIGINS:...}` injectable via env var ; parsing CSV robuste ; `setAllowedOriginPatterns()` (jamais `*`) ; `CorsIntegrationTest` 2 tests (origin autorisée ✅, origin inconnue ✗) | — | — |
@@ -108,7 +108,7 @@ vérifié contre le code, pas seulement la documentation.
 
 ### Justification
 
-- **14/15 critères §30 pleinement satisfaits** avec preuve directe dans le code et tests CI L5 89/89 ✅ ;
+- **14/15 critères §30 pleinement satisfaits** avec preuve directe dans le code et tests CI L5 90/90 ✅ ;
 - **B1 fermé** : AuditModule complet (7 events, REQUIRES_NEW, best-effort, sans fuite sensible) ;
 - **B2 fermé** : URL signée (`GET /files/{id}/download-url`, presigned TTL 300s, no-store, anti-énumération 404) ;
 - **C15 fermé** : CORS injectable via env var `CORS_ALLOWED_ORIGINS` ;
@@ -140,7 +140,7 @@ C8  ✅  ApiError stable
 C9  ✅  Upload MIME/taille/nommage + URL signée (SB7)
 C10 ⚠️  Health (DB auto-✅ — Redis ✗ — storage ✗) — réserve R5
 C11 ✅  OpenAPI générée
-C12 ✅  Tests TC 89/89
+C12 ✅  Tests TC 90/90
 C13 ✅  Aucun secret/token/URL en log ou audit_logs
 C14 ✅  Audit logs complets (SB7 — AuditModule)
 C15 ✅  CORS injectable via env var (SB7)

@@ -368,7 +368,7 @@
 > B1 fermé — migration `V3__add_audit_logs.sql` (8 colonnes, 3 index) ; `AuditLog` + `AuditEventType` (7 valeurs) + `AuditService` (`@Transactional(REQUIRES_NEW)`, best-effort) ; traçage complet : LOGIN_SUCCESS/FAILURE, LOGOUT, TOKEN_REFRESH, FILE_UPLOAD, FILE_DOWNLOAD_URL_CREATED, ADMIN_ACCESS ; aucun payload sensible (ni password, ni refresh token, ni storageKey, ni URL) dans audit_logs.
 > B2 fermé — `GET /api/v1/files/{id}/download-url` : ownership `findByIdAndOwnerId()` + 404 anti-énumération ; `StorageService.generatePresignedDownloadUrl()` + `MinioStorageService` (GetPresignedObjectUrlArgs) + `FakeStorageService` ; `Cache-Control: no-store` ; `FilesConfig.presignedUrlTtlSeconds` via env.
 > C15 fermé — `CorsConfig` injectable via `${CORS_ALLOWED_ORIGINS:...}` ; CSV robuste ; `SecurityConfig` utilise `getAllowedOriginsList()` jamais wildcard.
-> Tests : `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 2 + `FlywayMigrationTest` +3 = **89/89 ✅ BUILD SUCCESS**. Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis différé) / 0 ✗**.
+> Tests : `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 3 + `FlywayMigrationTest` +3 = **90/90 ✅ BUILD SUCCESS**. Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis différé) / 0 ✗**.
 > `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
 >
 > **Prochaine action** : **API Core Spring Boot 8 — Redis cache + rate limiting + MinIO TC** (différé, non bloquant V1).

@@ -61,11 +61,11 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            auditService.record(AuditEventType.LOGIN_FAILURE, null, "auth", email, ipAddress, userAgent);
+            auditService.record(AuditEventType.LOGIN_FAILURE, null, "auth", null, ipAddress, userAgent);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         if (!user.isActive()) {
-            auditService.record(AuditEventType.LOGIN_FAILURE, null, "auth", email, ipAddress, userAgent);
+            auditService.record(AuditEventType.LOGIN_FAILURE, null, "auth", null, ipAddress, userAgent);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account disabled");
         }
 
@@ -73,7 +73,7 @@ public class AuthService {
         userRepository.save(user);
 
         LoginResponseDto response = buildTokenResponse(user);
-        auditService.record(AuditEventType.LOGIN_SUCCESS, user.getId(), "auth", email, ipAddress, userAgent);
+        auditService.record(AuditEventType.LOGIN_SUCCESS, user.getId(), "auth", null, ipAddress, userAgent);
         return response;
     }
 

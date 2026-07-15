@@ -158,7 +158,7 @@ cores/api-spring/
 | `FILE_DOWNLOAD_URL_CREATED` | `FileService.getDownloadUrl()` | ownerId | fileId UUID |
 | `ADMIN_ACCESS` | `AdminController.ping()` | userId | "ping" |
 
-## Tests (89/89 ✅)
+## Tests (90/90 ✅)
 
 ```
 JwtTokenProviderTest              :  9 tests
@@ -175,7 +175,7 @@ EnistereCoreApplicationTests      :  1 test
 ```
 
 ```bash
-./mvnw test      # 89/89 ✅ — nécessite Docker (Testcontainers)
+./mvnw test      # 90/90 ✅ — nécessite Docker (Testcontainers)
 ./mvnw verify    # compile + test + package
 ```
 

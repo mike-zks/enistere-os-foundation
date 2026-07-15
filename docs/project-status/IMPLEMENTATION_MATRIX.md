@@ -104,7 +104,7 @@
 > C15 fermé — `CorsConfig` (`@ConfigurationProperties`) injectable via `${CORS_ALLOWED_ORIGINS:...}` ; CSV parsing robuste ;
 > `SecurityConfig` utilise `corsConfig.getAllowedOriginsList()` — jamais wildcard `*` avec credentials.
 > Tests : `FlywayMigrationTest` +3 (V3 audit_logs) ; `AuditIntegrationTest` 7 ; `FilesDownloadUrlIntegrationTest` 6 ;
-> `CorsIntegrationTest` 2 ; total **89/89 ✅ BUILD SUCCESS**.
+> `CorsIntegrationTest` 3 ; total **90/90 ✅ BUILD SUCCESS**.
 > Satisfaits C9 (URL signée ✅), C14 (audit logs ✅), C15 (CORS env var ✅). Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis) / 0 ✗**.
 > `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
 > Réserve maintenue : R5 Redis/cache absent (différé SB8+).

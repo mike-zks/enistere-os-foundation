@@ -57,6 +57,11 @@ class AuditIntegrationTest extends AbstractIntegrationTest {
             "SELECT COUNT(*) FROM audit_logs WHERE event_type = 'LOGIN_SUCCESS' AND user_id = ?",
             Integer.class, userId);
         assertThat(count).isGreaterThanOrEqualTo(1);
+
+        Integer withEmail = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM audit_logs WHERE event_type = 'LOGIN_SUCCESS' AND target_id = ?",
+            Integer.class, email);
+        assertThat(withEmail).isZero();
     }
 
     @Test
@@ -77,6 +82,11 @@ class AuditIntegrationTest extends AbstractIntegrationTest {
             "(target_id = ? OR user_agent = ?)",
             Integer.class, wrongPassword, wrongPassword);
         assertThat(withPassword).isZero();
+
+        Integer withEmail = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM audit_logs WHERE event_type = 'LOGIN_FAILURE' AND target_id = ?",
+            Integer.class, email);
+        assertThat(withEmail).isZero();
     }
 
     @Test

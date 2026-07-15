@@ -18,6 +18,7 @@ public class CorsConfig {
     public List<String> getAllowedOriginsList() {
         return Arrays.stream(allowedOrigins.split(","))
             .map(String::trim)
+            .filter(s -> !s.contains("*"))
             .filter(s -> !s.isEmpty())
             .toList();
     }
