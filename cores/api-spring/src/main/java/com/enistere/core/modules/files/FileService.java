@@ -61,13 +61,14 @@ public class FileService {
         String extension = extractExtension(file.getOriginalFilename());
         String storageKey = generateStorageKey(category, extension);
 
-        log.info("File upload: category={} size={} mimeType={} key={}",
-            category, file.getSize(), file.getContentType(), storageKey);
+        log.info("File upload requested: category={} size={} mimeType={}",
+            category, file.getSize(), file.getContentType());
 
         try {
             storageService.upload(file.getInputStream(), storageKey, file.getContentType(), file.getSize());
         } catch (IOException e) {
-            log.error("Storage upload failed: key={}", storageKey);
+            log.error("Storage upload failed: category={} size={} mimeType={}",
+                category, file.getSize(), file.getContentType());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Storage failure");
         }
 

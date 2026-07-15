@@ -37,9 +37,9 @@ public class MinioStorageService implements StorageService {
                     .contentType(contentType)
                     .build()
             );
-            log.info("Stored object: bucket={} key={} size={}", filesConfig.getBucket(), storageKey, size);
+            log.info("Stored object: size={} contentType={}", size, contentType);
         } catch (Exception e) {
-            log.error("Storage upload failed: key={} error={}", storageKey, e.getMessage());
+            log.error("Storage upload failed: size={} contentType={}", size, contentType);
             throw new IOException("Storage upload failed", e);
         }
     }
@@ -53,9 +53,9 @@ public class MinioStorageService implements StorageService {
                     .object(storageKey)
                     .build()
             );
-            log.info("Deleted object: key={}", storageKey);
+            log.info("Deleted object");
         } catch (Exception e) {
-            log.error("Storage delete failed: key={} error={}", storageKey, e.getMessage());
+            log.error("Storage delete failed");
             throw new RuntimeException("Storage delete failed", e);
         }
     }
