@@ -1120,7 +1120,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | spécification absente ; **ADR-034 validé** |
-| Web Core Angular | spécification absente + **ADR-035 non rédigé** |
+| Web Core Angular | spécification absente ; **ADR-035 validé** — blocker UI levé |
 | AI / Docs / Quality Cores | spécifications absentes |
 | API Core Spring Boot | spécification absente |
 
