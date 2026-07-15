@@ -359,7 +359,7 @@
 >
 > ✅ **API Core Spring Boot 6 — V1 Readiness Review : RÉALISÉ** (2026-07-15).
 > Rapport : `docs/project-status/API_SPRING_V1_READINESS_REVIEW.md`.
-> Matrice §30 : **10/15 satisfaits** (C1 démarrage, C2 PG+Flyway, C3 auth flow, C4 tokens, C5 routes protégées, C6 RBAC, C7 DTO validation, C8 ApiError, C11 OpenAPI, C12 TC 71/71, C13 secrets/logs), **3/15 partiels** (C9 URL signée absente, C10 Redis/storage health absents, C15 CORS origines hardcodées), **1/15 non satisfait** (C14 audit logs — table absente, AuditModule §9 absent).
+> Matrice §30 : **11/15 satisfaits** (C1 démarrage, C2 PG+Flyway, C3 auth flow, C4 tokens, C5 routes protégées, C6 RBAC, C7 DTO validation, C8 ApiError, C11 OpenAPI, C12 TC 71/71, C13 secrets/logs), **3/15 partiels** (C9 URL signée absente, C10 Redis/storage health absents, C15 CORS origines hardcodées), **1/15 non satisfait** (C14 audit logs — table absente, AuditModule §9 absent).
 > Bloquants V1 : **B1 audit logs** (§9 module obligatoire — `audit_logs` table + AuditService + events LOGIN/FILE_UPLOAD manquants) ; **B2 URL signée** (§20 presigned URL absent — pas de `GET /files/:id/download-url`).
 > Réserves acceptées : R1 MinIO TC, R2 CORS env var, R3 rate limiting, R4 Tika, R5 Redis (toutes différées SB7+).
 > `api-spring` : **`CI_JAVA_READY` → `IMPLEMENTATION_AVANCEE`**.

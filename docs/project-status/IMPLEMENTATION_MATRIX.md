@@ -83,7 +83,7 @@
 > `api-spring` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
 >
 > **Mise à jour API Core Spring Boot 6 — V1 Readiness Review (2026-07-15)** :
-> Rapport `API_SPRING_V1_READINESS_REVIEW.md`. Matrice §30 : **10/15 satisfaits, 3/15 partiels, 1/15 non satisfait**.
+> Rapport `API_SPRING_V1_READINESS_REVIEW.md`. Matrice §30 : **11/15 satisfaits, 3/15 partiels, 1/15 non satisfait**.
 > Satisfaits : C1 démarrage JVM, C2 PostgreSQL+Flyway, C3 auth flow, C4 tokens JWT+refresh, C5 routes protégées, C6 RBAC,
 > C7 validation DTO, C8 ApiError, C11 OpenAPI, C12 tests TC 71/71, C13 secrets/logs.
 > Partiels : C9 (URL signée absente), C10 (Redis/storage health absents), C15 (CORS hardcodé).

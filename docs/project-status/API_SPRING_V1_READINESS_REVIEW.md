@@ -44,7 +44,7 @@ vérifié contre le code, pas seulement la documentation.
 
 | Catégorie | Critères | Détail |
 |---|---|---|
-| ✅ Satisfait | **10/15** | C1 C2 C3 C4 C5 C6 C7 C8 C11 C12 C13 |
+| ✅ Satisfait | **11/15** | C1 C2 C3 C4 C5 C6 C7 C8 C11 C12 C13 |
 | ⚠️ Partiel | **3/15** | C9 (URL signée absente), C10 (Redis/storage health absents), C15 (CORS hardcodé) |
 | ✗ Non satisfait | **1/15** | C14 (audit logs — module obligatoire §9 absent) |
 
@@ -85,10 +85,10 @@ Redis est complètement absent du runtime (pas de Spring Data Redis, pas de conf
 
 | Réserve | Justification | Impact |
 |---|---|---|
-| R1 — MinIO TC absent | FakeStorageService est le pattern intentionnel pour les tests unitaires/intégration Spring Boot. `MinioStorageService` existe pour la production. L'absence de TC MinIO est documentée comme déferré SB5 (mission prohibitions). | Non bloquant — couverture MinIO réelle à ajouter dans SB7 ou SB8. |
+| R1 — MinIO TC absent | FakeStorageService est le pattern intentionnel pour les tests unitaires/intégration Spring Boot. `MinioStorageService` existe pour la production. L'absence de TC MinIO est documentée comme différée hors périmètre de la mission upload/CI. | Non bloquant — couverture MinIO réelle à ajouter dans SB7 ou SB8. |
 | R2 — CORS origines hardcodées | Valeurs de dev uniquement, sans valeur de production. Spring Security CORS configuré et actif. La variable `CORS_ALLOWED_ORIGINS` est à externaliser dans SB7. | Non bloquant — risque limité au dev local. |
 | R3 — Rate limiting absent | §13 mentionne le rate limiting sur endpoints sensibles. Aucune implémentation (Bucket4j, Spring Rate Limiter). | Non bloquant pour V1 — différé SB7+ ou projet dérivé. |
-| R4 — Tika/signature binaire absente | Validation MIME basée sur `Content-Type` déclaré (whitelist 14 types). Apache Tika (validation binaire) différé SB5 par mission. | Non bloquant pour V1 — whitelist déclarative acceptable avec ADR. |
+| R4 — Tika/signature binaire absente | Validation MIME basée sur `Content-Type` déclaré (whitelist 14 types). Apache Tika (validation binaire) différé futur. | Non bloquant pour V1 — whitelist déclarative acceptable avec ADR. |
 | R5 — Redis/cache absent | Spring Data Redis et cache non implémentés. Health indicator Redis absent par cohérence. | Non bloquant pour V1 — module différé SB7+. |
 
 ---
@@ -100,7 +100,7 @@ Redis est complètement absent du runtime (pas de Spring Data Redis, pas de conf
 ### Justification
 
 **Pour la promotion :**
-- 10/15 critères §30 pleinement satisfaits avec preuve directe dans le code ;
+- 11/15 critères §30 pleinement satisfaits avec preuve directe dans le code ;
 - Auth complète (login/refresh/me/logout), RBAC @PreAuthorize, Flyway V1+V2, OpenAPI, DTO validation, ApiError, logs sûrs (ADR-040) — tous dans les tests 71/71 ✅ ;
 - CI L5 reproductible (`api-spring-ci.yml`) — tout contributeur peut vérifier localement ;
 - 5 réserves formellement acceptées (R1→R5).
@@ -117,7 +117,7 @@ Il serait possible de déclarer B2 comme réserve formellement acceptée (style 
 
 ## 7. Score §30
 
-**10/15 satisfaits — 3/15 partiels — 1/15 non satisfait**
+**11/15 satisfaits — 3/15 partiels — 1/15 non satisfait**
 
 ```
 C1  ✅  Démarrage JVM

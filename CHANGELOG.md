@@ -19,7 +19,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 ### API Core Spring Boot 6 — V1 Readiness Review
 
 - `docs/project-status/API_SPRING_V1_READINESS_REVIEW.md` (créé) : revue complète §30 CORE_SPECIFICATION.md — 15 critères audités sur code source Java, migrations SQL, `application.yml`, CI L5 71/71 ✅.
-- Résultat §30 : **10/15 ✅ + 3/15 ⚠️ + 1/15 ✗** (C1–C8 ✅ C9 ⚠️ C10 ⚠️ C11–C13 ✅ C14 ✗ C15 ⚠️).
+- Résultat §30 : **11/15 ✅ + 3/15 ⚠️ + 1/15 ✗** (C1–C8 ✅ C9 ⚠️ C10 ⚠️ C11–C13 ✅ C14 ✗ C15 ⚠️).
 - Bloquants V1 : **B1** — `AuditModule` (§9 module obligatoire) complètement absent : aucune table `audit_logs` dans V1/V2, aucun `AuditService`, aucun `@Aspect`, aucun event `LOGIN_SUCCESS/FAILURE/LOGOUT/TOKEN_REFRESH/FILE_UPLOAD/ADMIN_ACCESS` tracé. **B2** — URL signée (`GET /files/:id/download-url`, presigned URL §20) absente dans `FilesController`.
 - Réserves acceptées : R1 MinIO TC (FakeStorageService pattern intentionnel), R2 CORS hardcodé (dev local — variable `CORS_ALLOWED_ORIGINS` à externaliser SB7), R3 rate limiting différé, R4 Tika MIME différé, R5 Redis absent.
 - Décision : `CI_JAVA_READY` → **`IMPLEMENTATION_AVANCEE`**. `VALIDE_V1` différé jusqu'à fermeture B1+B2.
