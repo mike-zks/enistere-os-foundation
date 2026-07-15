@@ -30,6 +30,12 @@ springdoc:
   swagger-ui:
     enabled: false
 
+spring:
+  data:
+    redis:
+      repositories:
+        enabled: false
+
 logging:
   level:
     io.lettuce: ERROR
