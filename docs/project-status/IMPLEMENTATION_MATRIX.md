@@ -82,6 +82,17 @@
 > Auth stub temporaire (credentials config, JWT réel, sans DB) — refresh token 501, DB en Spring Boot 3.
 > `api-spring` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
 >
+> **Mise à jour API Core Spring Boot 6 — V1 Readiness Review (2026-07-15)** :
+> Rapport `API_SPRING_V1_READINESS_REVIEW.md`. Matrice §30 : **10/15 satisfaits, 3/15 partiels, 1/15 non satisfait**.
+> Satisfaits : C1 démarrage JVM, C2 PostgreSQL+Flyway, C3 auth flow, C4 tokens JWT+refresh, C5 routes protégées, C6 RBAC,
+> C7 validation DTO, C8 ApiError, C11 OpenAPI, C12 tests TC 71/71, C13 secrets/logs.
+> Partiels : C9 (URL signée absente), C10 (Redis/storage health absents), C15 (CORS hardcodé).
+> Non satisfait : C14 (audit logs — module obligatoire §9 absent, table manquante, pas d'events).
+> Bloquants : **B1 audit logs** (§9 module obligatoire) ; **B2 URL signée** (§20 presigned URL absente).
+> Réserves acceptées : R1 MinIO TC, R2 CORS env var, R3 rate limiting, R4 Tika, R5 Redis.
+> `api-spring` : **`CI_JAVA_READY` → `IMPLEMENTATION_AVANCEE`**.
+> Prochaine : **API Core Spring Boot 7 — AuditModule + download URL signée + CORS env var**.
+>
 > **Mise à jour API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC (2026-07-15)** :
 > `pom.xml` : `spring-boot-starter-data-jpa`, `postgresql`, `spring-boot-starter-flyway`, `flyway-database-postgresql`, `bcprov-jdk18on:1.82`, `spring-boot-testcontainers`, `testcontainers-junit-jupiter`, `testcontainers-postgresql` (TC 2.0.5 IDs).
 > Migration `V1__init_schema.sql` (6 tables, 5 index). `BaseEntity`, `DatabaseConfig` (`@EnableJpaAuditing`), `Argon2Config`.

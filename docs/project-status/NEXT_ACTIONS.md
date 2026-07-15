@@ -357,7 +357,15 @@
 > Livrables : `.github/workflows/api-spring-ci.yml` (L5 : Java 21 Temurin + Maven Wrapper + `./mvnw verify --no-transfer-progress` + Testcontainers PostgreSQL ; Docker natif `ubuntu-latest` ; FakeStorageService ; aucun MinIO réel, aucun secret) ; `cores/quality-core/scripts/quality-gates.mjs` — scope `api-spring` ajouté (8ème scope, `SPRING_CWD = cores/api-spring`, `./mvnw verify --no-transfer-progress`, descriptions et exclusions documentées, `all-safe` mis à jour) ; `cores/quality-core/scripts/quality-gates.test.mjs` — 36 → **42 tests** (suite `buildPlan — api-spring`, `listScopes` 7→8, `all-safe` n'inclut pas api-spring) ; `cores/quality-core/QUALITY_GATES_MATRIX.md` — L5 dans légende, api-spring dans matrice et §2.9, `api-spring-verify` check recommandé §3.
 > `api-spring` : **`FILE_UPLOAD_READY` → `CI_JAVA_READY`**. Aucun changement métier api-spring. Aucun changement NestJS/Web/Mobile/UI Kit/Cloud.
 >
-> **Prochaine action** : **API Core Spring Boot 6 — V1 Readiness Review** : vérifier si api-spring peut avancer vers `VALIDE_V1` (critères §30 `CORE_SPECIFICATION.md` ; gaps restants : liste/delete/download, MinIO Testcontainers, Tika binaire, URL signée).
+> ✅ **API Core Spring Boot 6 — V1 Readiness Review : RÉALISÉ** (2026-07-15).
+> Rapport : `docs/project-status/API_SPRING_V1_READINESS_REVIEW.md`.
+> Matrice §30 : **10/15 satisfaits** (C1 démarrage, C2 PG+Flyway, C3 auth flow, C4 tokens, C5 routes protégées, C6 RBAC, C7 DTO validation, C8 ApiError, C11 OpenAPI, C12 TC 71/71, C13 secrets/logs), **3/15 partiels** (C9 URL signée absente, C10 Redis/storage health absents, C15 CORS origines hardcodées), **1/15 non satisfait** (C14 audit logs — table absente, AuditModule §9 absent).
+> Bloquants V1 : **B1 audit logs** (§9 module obligatoire — `audit_logs` table + AuditService + events LOGIN/FILE_UPLOAD manquants) ; **B2 URL signée** (§20 presigned URL absent — pas de `GET /files/:id/download-url`).
+> Réserves acceptées : R1 MinIO TC, R2 CORS env var, R3 rate limiting, R4 Tika, R5 Redis (toutes différées SB7+).
+> `api-spring` : **`CI_JAVA_READY` → `IMPLEMENTATION_AVANCEE`**.
+>
+> **Prochaine action** : **API Core Spring Boot 7 — AuditModule + download URL signée + CORS env var**.
+> Périmètre : migration V3 `audit_logs` (7 colonnes) + `AuditService` + events sensibles (LOGIN_SUCCESS/FAILURE, LOGOUT, TOKEN_REFRESH, FILE_UPLOAD, ADMIN_ACCESS) ; `GET /api/v1/files/:id` (metadata sans champs internes) ; `GET /api/v1/files/:id/download-url` (presigned URL courte durée, jamais loggée) ; `${CORS_ALLOWED_ORIGINS}` env var. Critère de succès : B1 + B2 fermés → relancer V1 Readiness.
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
