@@ -1,7 +1,7 @@
 # API_SPRING_V1_READINESS_REVIEW.md — Revue de readiness V1 API Core Spring Boot
 
 > **Date initiale** : 2026-07-15 (SB6)
-> **Mise à jour** : 2026-07-15 (SB7 — B1 fermé, B2 fermé, C15 fermé)
+> **Mise à jour** : 2026-07-15 (SB7 — B1 fermé, B2 fermé, C15 fermé ; SB8 — C10/R1/R3/R5 fermés)
 > **Auteur** : revue automatique (Spring Boot 6 → Spring Boot 7)
 > **Sources lues** : `CORE_SPECIFICATION.md` §9/§13/§19/§20/§28/§30/§31/§33/§41` ;
 > `FOUNDATION_CURRENT_STATE.md` ; `IMPLEMENTATION_MATRIX.md` ; `QUALITY_GATES_MATRIX.md` ;
@@ -32,9 +32,9 @@ vérifié contre le code, pas seulement la documentation.
 | C7 | Validation DTO rejette entrées invalides (400) sans fuite | ✅ **SATISFAIT** | `GlobalExceptionHandler` : `MethodArgumentNotValidException`, `BindException`, `ConstraintViolationException` → 400 + fields ; aucun stack trace (`handleGeneric` opaque) | — | — |
 | C8 | ApiError stable (400/401/403/404/500) sans stack trace | ✅ **SATISFAIT** | `ApiError` record (status/code/message/errors/timestamp/path) ; `GlobalExceptionHandler` exhaustif ; `handleGeneric` → 500 opaque ; `FilesUploadIntegrationTest` non-leak | — | — |
 | C9 | Upload MinIO : MIME/taille, nommage sûr, **URL signée** | ✅ **SATISFAIT** | MIME whitelist 14 types ✅ ; taille (`maxSizeBytes`) ✅ ; `storageKey = category/UUID.ext` ✅ ; `FilesController POST /upload` ✅ ; **`GET /api/v1/files/{id}/download-url`** : presigned URL TTL 300s, no-store, anti-énumération 404, ownership check ; `FakeStorageService.generatePresignedDownloadUrl()` ; `FilesDownloadUrlIntegrationTest` 6 tests ✅ | — | — |
-| C10 | Health checks Actuator : état base et cache | ⚠️ **PARTIEL** | Spring Boot Actuator actif (`/actuator/health,info`) ; `show-details: when-authorized` ✅ ; `DataSourceHealthIndicator` auto-configuré → `/actuator/health/db` disponible implicitement — **Redis ABSENT** (pas de Spring Data Redis, pas de `redis` health indicator) ; **storage indicator ABSENT** (MinIO health non configuré) | Redis absent — `health/redis` non disponible ; MinIO health indicator absent | **SB8+** |
+| C10 | Health checks Actuator : état base et cache | ✅ **SATISFAIT** | `spring-boot-starter-data-redis` (Lettuce) ; `RedisHealthIndicator` auto-configuré via Actuator ; `/actuator/health` → `$.components.db` UP + `$.components.redis` UP (TC `redis:7-alpine`) ; `management.endpoint.health.show-details: always` en test ; `RedisHealthIntegrationTest` 2 tests ✅ | — | — |
 | C11 | Documentation OpenAPI générée et accessible en dev | ✅ **SATISFAIT** | `springdoc-openapi-starter-webmvc-ui:2.8.6` ; `OpenApiConfig` (Bearer JWT, Info) ; `/v3/api-docs` + `/swagger-ui.html` en `permitAll` ; `SecurityConfig` autorise ces paths | — | — |
-| C12 | Tests JUnit + Testcontainers passent | ✅ **SATISFAIT** | **90/90 ✅** : 71 SB5 + `FlywayMigrationTest` +3 (V3 audit_logs) + `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 3 | — | — |
+| C12 | Tests JUnit + Testcontainers passent | ✅ **SATISFAIT** | **99/99 ✅** : 90 SB7 + `RateLimitIntegrationTest` 4 + `RedisHealthIntegrationTest` 2 + `MinioStorageIntegrationTest` 3 | — | — |
 | C13 | Aucun secret dans Git, aucun token ou password dans les logs | ✅ **SATISFAIT** | `application.yml` via env vars uniquement ; `AuditService` : tronque ip/ua, jamais token/URL/storageKey ; `FileService.getDownloadUrl()` : log `fileId+category` jamais l'URL signée ; `AuditIntegrationTest` vérifie token+storageKey absents des audit_logs | — | — |
 | C14 | Audit logs présents pour actions sensibles | ✅ **SATISFAIT** | `V3__add_audit_logs.sql` (8 colonnes, 3 index) ; `AuditService` (REQUIRES_NEW, best-effort) ; `AuditLog` entité JPA ; events : `LOGIN_SUCCESS`, `LOGIN_FAILURE`, `LOGOUT`, `TOKEN_REFRESH`, `FILE_UPLOAD`, `FILE_DOWNLOAD_URL_CREATED`, `ADMIN_ACCESS` ; `AuditIntegrationTest` 7 tests ✅ | — | — |
 | C15 | CORS strict configuré | ✅ **SATISFAIT** | `CorsConfig` (`@ConfigurationProperties(prefix="enistere.security.cors")`) ; `allowed-origins: ${CORS_ALLOWED_ORIGINS:...}` injectable via env var ; parsing CSV robuste ; wildcards ignorés avec credentials ; `setAllowedOrigins()` ; `CorsIntegrationTest` 3 tests (origin autorisée ✅, origin inconnue ✗, wildcard ignoré) | — | — |
@@ -43,21 +43,20 @@ vérifié contre le code, pas seulement la documentation.
 
 ## 3. Résumé des statuts
 
-### SB7 — résultat final
+### SB8 — résultat final
 
 | Catégorie | Critères | Détail |
 |---|---|---|
-| ✅ Satisfait | **14/15** | C1–C9 C11–C15 |
-| ⚠️ Partiel | **1/15** | C10 (Redis/storage health absents — module différé) |
+| ✅ Satisfait | **15/15** | C1–C15 |
+| ⚠️ Partiel | **0/15** | — |
 | ✗ Non satisfait | **0/15** | — |
 
-### Évolution SB6 → SB7
+### Évolution SB7 → SB8
 
-| Critère | SB6 | SB7 |
+| Critère | SB7 | SB8 |
 |---|---|---|
-| C9 (URL signée) | ⚠️ PARTIEL | ✅ SATISFAIT |
-| C14 (audit logs) | ✗ NON SATISFAIT | ✅ SATISFAIT |
-| C15 (CORS env var) | ⚠️ PARTIEL | ✅ SATISFAIT |
+| C10 (Redis/cache health) | ⚠️ PARTIEL | ✅ SATISFAIT |
+| C12 (Tests TC) | ✅ 90/90 | ✅ 99/99 |
 
 ---
 
@@ -90,43 +89,39 @@ vérifié contre le code, pas seulement la documentation.
 
 ---
 
-## 5. Réserves formellement maintenues
+## 5. Réserves — statut SB8
 
-| Réserve | Justification | Impact |
+| Réserve | Statut | Détail |
 |---|---|---|
-| R1 — MinIO TC absent | FakeStorageService est le pattern intentionnel pour les tests Spring Boot. `MinioStorageService` existe pour la production. | Non bloquant — couverture MinIO réelle possible en SB8. |
-| R2 — CORS env var configurée | ✅ FERMÉ SB7 — le CORS est maintenant injectable. | — |
-| R3 — Rate limiting absent | §13 mentionne le rate limiting. Aucune implémentation (Bucket4j, Spring Rate Limiter). | Non bloquant pour V1 — différé SB8+. |
-| R4 — Tika/signature binaire absente | Validation MIME basée sur `Content-Type` déclaré (whitelist 14 types). | Non bloquant pour V1 — whitelist déclarative acceptable. |
-| R5 — Redis/cache absent | Spring Data Redis et cache non implémentés. Health indicator Redis absent. | Non bloquant pour V1 — module différé SB8+. |
+| R1 — MinIO TC | ✅ **FERMÉ SB8** | `MinioStorageIntegrationTest` : TC `minio/minio:...`, upload réel, URL présignée `X-Amz-*`, `Cache-Control: no-store`. |
+| R2 — CORS env var | ✅ **FERMÉ SB7** | `CorsConfig` injectable via `${CORS_ALLOWED_ORIGINS}`. |
+| R3 — Rate limiting | ✅ **FERMÉ SB8** | `RateLimitInterceptor` fixed-window en mémoire ; 4 endpoints ; 429 ApiError ; `RateLimitConfig` externalisé. |
+| R4 — Tika/signature binaire | Acceptée | Validation MIME whitelist 14 types sur `Content-Type` déclaré — non bloquant V1. |
+| R5 — Redis/cache | ✅ **FERMÉ SB8** | `spring-boot-starter-data-redis` Lettuce ; `RedisHealthIndicator` auto-configuré ; TC `redis:7-alpine` ; 2 tests ✅. |
 
 ---
 
 ## 6. Décision de statut
 
-**`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**
+**`VALIDE_V1` confirmé (SB7) + réserves C10/R1/R3/R5 fermées (SB8)**
 
-### Justification
+### Justification SB8
 
-- **14/15 critères §30 pleinement satisfaits** avec preuve directe dans le code et tests CI L5 90/90 ✅ ;
-- **B1 fermé** : AuditModule complet (7 events, REQUIRES_NEW, best-effort, sans fuite sensible) ;
-- **B2 fermé** : URL signée (`GET /files/{id}/download-url`, presigned TTL 300s, no-store, anti-énumération 404) ;
-- **C15 fermé** : CORS injectable via env var `CORS_ALLOWED_ORIGINS` ;
-- **1 réserve de statut maintenue** : C10 Redis/storage health absents — module différé ; acceptable en V1 car Redis n'est pas encore implémenté dans le core.
+- **15/15 critères §30 pleinement satisfaits** avec preuve directe dans le code et tests CI L5 99/99 ✅ ;
+- **C10 fermé** : Redis health indicator via `spring-boot-starter-data-redis` (Lettuce) + `RedisHealthIntegrationTest` TC redis:7-alpine ;
+- **R1 fermé** : `MinioStorageIntegrationTest` TC minio réel — upload + URL présignée `X-Amz-*` + `Cache-Control: no-store` ;
+- **R3 fermé** : `RateLimitInterceptor` fixed-window sur 4 endpoints sensibles ; 429 `ApiError` ; `RateLimitConfig` externalisé ; désactivé en profil test ;
+- **R5 fermé** : Lettuce lazy (démarrage sans Redis) ; health indicator auto-configuré via Actuator ; TC pour tests Redis.
 
-### Pourquoi VALIDE_V1 est défendable
+### Aucune réserve bloquante restante
 
-1. Les deux bloquants V1 documentés dans SB6 (B1 et B2) sont implémentés et testés ;
-2. La spécification §9 liste AuditModule comme module obligatoire — il est maintenant présent ;
-3. §20 exige URL signée — elle est maintenant implémentée avec no-store et anti-énumération ;
-4. §27 liste CORS_ALLOWED_ORIGINS — elle est maintenant injectable sans modification du code ;
-5. C10 (Redis health) est acceptable en V1 : Redis lui-même n'est pas requis par V1 ; le health indicator ne peut pas exister avant le module Redis — accepté comme réserve cohérente avec R5.
+Réserve R4 (Tika/signature binaire) : whitelist MIME 14 types déclarative — acceptable V1, non bloquant.
 
 ---
 
-## 7. Score §30 — SB7 final
+## 7. Score §30 — SB8 final
 
-**14/15 satisfaits — 1/15 partiel — 0/15 non satisfait**
+**15/15 satisfaits — 0/15 partiel — 0/15 non satisfait**
 
 ```
 C1  ✅  Démarrage JVM
@@ -137,10 +132,10 @@ C5  ✅  Routes protégées
 C6  ✅  RBAC
 C7  ✅  Validation DTO
 C8  ✅  ApiError stable
-C9  ✅  Upload MIME/taille/nommage + URL signée (SB7)
-C10 ⚠️  Health (DB auto-✅ — Redis ✗ — storage ✗) — réserve R5
+C9  ✅  Upload MIME/taille/nommage + URL signée (SB7) + MinIO TC réel (SB8)
+C10 ✅  Health DB + Redis (TC redis:7-alpine, SB8)
 C11 ✅  OpenAPI générée
-C12 ✅  Tests TC 90/90
+C12 ✅  Tests TC 99/99 (SB8)
 C13 ✅  Aucun secret/token/URL en log ou audit_logs
 C14 ✅  Audit logs complets (SB7 — AuditModule)
 C15 ✅  CORS injectable via env var (SB7)
@@ -148,14 +143,18 @@ C15 ✅  CORS injectable via env var (SB7)
 
 ---
 
-## 8. Prochaine action (post-VALIDE_V1)
+## 8. Missions SB1–SB8 — statut final
 
-**API Core Spring Boot 8 — Redis cache + rate limiting + MinIO Testcontainers**
+| Mission | Livrable principal | Statut |
+|---|---|---|
+| SB1 | CORE_SPECIFICATION.md | ✅ |
+| SB2A | ADR-041 Maven vs Gradle | ✅ |
+| SB2 | Starter Maven minimal (18 tests) | ✅ |
+| SB3 | PostgreSQL + JPA + Flyway + RBAC (43 tests) | ✅ |
+| SB4 | OpenAPI + Upload MinIO (71 tests) | ✅ |
+| SB5 | CI Java + Quality Gate | ✅ |
+| SB6 | V1 Readiness Review | ✅ |
+| SB7 | AuditModule + URL signée + CORS (90 tests) | ✅ |
+| SB8 | Redis + Rate Limit + MinIO TC (99 tests) | ✅ |
 
-Périmètre suggéré (non bloquant V1, différé) :
-- Spring Data Redis + `health/redis` indicator ;
-- Rate limiting sur endpoints sensibles (Bucket4j ou Spring Rate Limiter) ;
-- MinIO Testcontainers pour tests e2e de l'upload et de l'URL signée réelle ;
-- Health indicator MinIO (storage).
-
-Ces éléments fermeraient C10, R3, R5 et R1. Aucun n'est bloquant pour V1.
+**Score §30 final : 15/15 ✅ — aucune réserve bloquante.**

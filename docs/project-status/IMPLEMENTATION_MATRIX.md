@@ -106,8 +106,29 @@
 > Tests : `FlywayMigrationTest` +3 (V3 audit_logs) ; `AuditIntegrationTest` 7 ; `FilesDownloadUrlIntegrationTest` 6 ;
 > `CorsIntegrationTest` 3 ; total **90/90 ✅ BUILD SUCCESS**.
 > Satisfaits C9 (URL signée ✅), C14 (audit logs ✅), C15 (CORS env var ✅). Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis) / 0 ✗**.
-> `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
-> Réserve maintenue : R5 Redis/cache absent (différé SB8+).
+> `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`** (SB7).
+> Réserve R5 Redis/cache différée SB8.
+>
+> **API Core Spring Boot 8 — Redis health + Rate limiting + MinIO TC (2026-07-15)** :
+> `spring-boot-starter-data-redis` (Lettuce, version SB parent) ; `spring.data.redis.url: ${REDIS_URL:redis://localhost:6379}` ;
+> `RedisHealthIndicator` auto-configuré via Actuator ; `management.health.redis.enabled: false` en test (re-enabled dans `RedisHealthIntegrationTest`).
+> `RateLimitConfig @ConfigurationProperties(prefix="enistere.security.rate-limit")` + `@Validated` ;
+> `RateLimitInterceptor @Component @ConditionalOnProperty(enabled, matchIfMissing=true)` fixed-window `ConcurrentHashMap<String,RateWindow>` par IP ;
+> 4 endpoints : `/api/v1/auth/login`, `/api/v1/auth/refresh`, `/api/v1/files/upload`, `/api/v1/files/*/download-url` ;
+> 429 via `ResponseStatusException(TOO_MANY_REQUESTS)` → `GlobalExceptionHandler.handleResponseStatus()` → `ApiError` ;
+> `clearWindows()` pour isolation inter-tests ; `WebMvcConfig @Configuration WebMvcConfigurer` + `@Autowired(required=false) RateLimitInterceptor`.
+> `RedisHealthIntegrationTest` : `GenericContainer("redis:7-alpine")` static + `@DynamicPropertySource` → `spring.data.redis.url` ;
+> `@TestPropertySource(properties = "management.health.redis.enabled=true")` ; 2 tests (redis UP, db UP).
+> `MinioStorageIntegrationTest` : `GenericContainer("minio/minio:RELEASE.2024-01-16T16-07-38Z")` static +
+> `Wait.forHttp("/minio/health/live")` + `@DynamicPropertySource` (override `enistere.files.*`) +
+> `@Import(MinioTestConfig.class)` + `@TestConfiguration @Primary @Bean StorageService` (override `FakeStorageService`) ;
+> `testMinioClient` static pour assertions ; 3 tests (upload → `listObjects`, URL `X-Amz-*`, `Cache-Control: no-store`).
+> `application-test.yml` mis à jour : `management.health.redis.enabled: false` + `show-details: always` +
+> `enistere.security.rate-limit.enabled: false` + `io.lettuce/io.netty: ERROR`.
+> Tests : **99/99 ✅ BUILD SUCCESS** (90 SB7 + 4 RateLimitIntegrationTest + 2 RedisHealthIntegrationTest + 3 MinioStorageIntegrationTest).
+> C10 fermé (DB + Redis UP en TC) ; R1 fermé (MinIO TC réel) ; R3 fermé (rate limiting) ; R5 fermé (Lettuce + health indicator).
+> Score §30 : **15/15 ✅ / 0 ⚠️ / 0 ✗**.
+> `api-spring` : **`VALIDE_V1`** confirmé — aucune réserve bloquante.
 >
 > **Mise à jour API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC (2026-07-15)** :
 > `pom.xml` : `spring-boot-starter-data-jpa`, `postgresql`, `spring-boot-starter-flyway`, `flyway-database-postgresql`, `bcprov-jdk18on:1.82`, `spring-boot-testcontainers`, `testcontainers-junit-jupiter`, `testcontainers-postgresql` (TC 2.0.5 IDs).
