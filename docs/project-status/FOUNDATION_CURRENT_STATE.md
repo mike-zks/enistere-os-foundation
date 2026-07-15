@@ -1,7 +1,7 @@
 # FOUNDATION_CURRENT_STATE.md — État courant officiel d'Enistere OS Foundation
 
 > **Photographie officielle** de l'état réel du repository, vérifiée fichier par fichier.
-> **Dernière mise à jour : 2026-07-14.**
+> **Dernière mise à jour : 2026-07-15.**
 >
 > ⚠️ **Ne pas supposer qu'un core est implémenté parce que sa spécification existe.** Un
 > `CORE_SPECIFICATION.md` ≠ un starter ; un README ≠ une implémentation ; un rapport ≠ une preuve
@@ -15,7 +15,7 @@ techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quali
 Mobile Core React Native et Mobile Core Flutter sont **VALIDE_V1**. Mobile Flutter a été
 promu le 2026-07-14 par `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` : B1→B5 fermés,
 score §29 9/11 + 2 PARTIAL, R1 iOS Linux acceptée comme réserve environnementale sans
-succès iOS artificiel. Les cores vides restent `ai-core` et `web-angular`. `api-spring` passe de `DOSSIER_SEULEMENT` à **`STARTER_INITIALISE`** (Spring Boot 2, 2026-07-15 : Spring Boot 4.1.0, JJWT 0.12.6, Java 21, Maven, Spring Security 7.x STATELESS + JWT filter, auth shell stub, `./mvnw verify` 18/18 ✅).
+succès iOS artificiel. Les cores vides restent `ai-core` et `web-angular`. `api-spring` passe de `DOSSIER_SEULEMENT` à **`IMPLEMENTATION_PARTIELLE`**, sous-statut `PERSISTENCE_RBAC_READY` (Spring Boot 3, 2026-07-15 : PostgreSQL + Spring Data JPA + Flyway 11 + Argon2id (ADR-039) + refresh tokens persistés SHA-256 + RBAC `@PreAuthorize` + Testcontainers ; `./mvnw verify` 43/43 ✅).
 
 | Catégorie | État |
 |---|---|
@@ -34,7 +34,7 @@ succès iOS artificiel. Les cores vides restent `ai-core` et `web-angular`. `api
 | CI/CD, conteneurisation | **CI niveaux 1–3 + registry (niveau 4 partiel) + CC10 staging HTTPS réel VALIDÉ** : `ci.yml` + `api-runtime-ci.yml` + `web-e2e-ci.yml` + **`registry-ci.yml`** (images GHCR publiques) ; **Dockerfiles** API/Web ; **CC10** : `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, 4 conteneurs `healthy`, `staging.enistere.com` + `s3-staging.enistere.com` HTTPS, auth BFF + upload + URL signée + téléchargement **bout-en-bout validés** |
 | Foundation baseline | **`FOUNDATION_V1_RELEASED`** — release `foundation-v1.0.0` publiée le 2026-07-12 ; revue `FOUNDATION_V1_BASELINE_READINESS_REVIEW.md` ; API/Web/UI Kit/Quality Core `VALIDE_V1`, packages API `IMPLEMENTATION_AVANCEE`, CI L1-L4 verte sur `main`, ruleset `protect-main` actif |
 | Release notes | **`FOUNDATION_V1_RELEASED`** — `FOUNDATION_V1_RELEASE_NOTES.md` publié pour `foundation-v1-baseline` ; tag `foundation-v1.0.0` ; GitHub Release publiée |
-| V3 | **Mobile Core Flutter VALIDE_V1** (2026-07-14) — Flutter 1→11 + V1 Final Readiness Decision. §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests headless · smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux réserve environnementale acceptée. Rapport : `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. **API Core Spring Boot 1 SPECIFICATION_DOCUMENTAIRE** (2026-07-14) — `CORE_SPECIFICATION.md` 42 sections + `README.md` ; aucun starter Java. **ADR-041 — Build system Spring Boot : Maven** (2026-07-14) — Maven retenu comme build system V1 (`pom.xml`, Spring Boot Parent POM, `mvn verify`, Maven Wrapper) ; `docs/adr/ADR-041-build-system-api-spring-maven-vs-gradle.md`. **API Core Spring Boot 2 STARTER_INITIALISE** (2026-07-15) — Spring Boot 4.1.0 + Java 21 + Maven ; Spring Security 7.x STATELESS + JWT filter (JJWT 0.12.6) ; auth shell stub (credentials config, vrai JWT, sans DB) ; `./mvnw verify` 18/18 ✅ ; aucun secret hardcodé. |
+| V3 | **Mobile Core Flutter VALIDE_V1** (2026-07-14) — Flutter 1→11 + V1 Final Readiness Decision. §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests headless · smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux réserve environnementale acceptée. Rapport : `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`. **API Core Spring Boot 1 SPECIFICATION_DOCUMENTAIRE** (2026-07-14) — `CORE_SPECIFICATION.md` 42 sections + `README.md` ; aucun starter Java. **ADR-041 — Build system Spring Boot : Maven** (2026-07-14) — Maven retenu comme build system V1 (`pom.xml`, Spring Boot Parent POM, `mvn verify`, Maven Wrapper) ; `docs/adr/ADR-041-build-system-api-spring-maven-vs-gradle.md`. **API Core Spring Boot 2 STARTER_INITIALISE** (2026-07-15) — Spring Boot 4.1.0 + Java 21 + Maven ; Spring Security 7.x STATELESS + JWT filter (JJWT 0.12.6) ; auth shell stub (credentials config, vrai JWT, sans DB) ; `./mvnw verify` 18/18 ✅ ; aucun secret hardcodé. **API Core Spring Boot 3 IMPLEMENTATION_PARTIELLE / PERSISTENCE_RBAC_READY** (2026-07-15) — PostgreSQL + Spring Data JPA + Flyway 11 + Argon2id (ADR-039) ; entités User/Role/Permission/RefreshToken ; refresh tokens persistés SHA-256 ; RBAC `@PreAuthorize` + permissions JWT stateless ; Testcontainers singleton ; `./mvnw verify` 43/43 ✅. |
 | **État Git** | Historique Git actif ; `main` aligné sur `origin/main` après publication Foundation V1 et suivi post-release ; tag `foundation-v1.0.0` publié sur `2981f2c` ; protection `main` active via Rulesets ; flux PR actif |
 
 ## 2. Principes de vérité
@@ -69,7 +69,7 @@ enistere-os-foundation/
     mobile-flutter/       VALIDE_V1 (Flutter V1 Final Readiness Decision 2026-07-14 ; Flutter 1→11 ; §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests · smoke emulator-5554 7/7 ✅ ; R1 iOS Linux réserve environnementale acceptée — même que RN B2)
     quality-core/      VALIDE_V1 (gates, checklists, runbooks, templates, prompts, release process utilisé, helper release/reporting)
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
-    api-spring/           SPECIFICATION_DOCUMENTAIRE (Spring Boot 1, 2026-07-14 — CORE_SPECIFICATION.md 42 sections + README.md ; aucun starter, aucun code Java)
+    api-spring/           IMPLEMENTATION_PARTIELLE / PERSISTENCE_RBAC_READY (Spring Boot 3, 2026-07-15 — PostgreSQL + JPA + Flyway + Argon2id + refresh tokens + RBAC ; 43/43 ✅)
     ai-core/ web-angular/   → vides
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -89,7 +89,7 @@ enistere-os-foundation/
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + BFF Files + layouts public/protégé + RHF+Zod ; 14/14 critères §56 ; 450 tests + 15 E2E) | **VALIDE_V1** |
 | `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→37 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29 ; iOS RN30 bloqué Linux ; RN31 en attente macOS ; sign-in RN32 ; thème RN33 ; doctor green RN34 ; **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35 ; upload diagnostics screen RN36 + smoke `POST /files` ; RN37 PreferenceStore decision ; 367/367 tests ; §9.4 8/8 ; B2 iOS réserve environnementale acceptée**) | **VALIDE_V1** |
 | `ai-core` | oui (vide) | non | non | **DOSSIER_SEULEMENT** |
-| `api-spring` | oui | oui | non | **SPECIFICATION_DOCUMENTAIRE** (Spring Boot 1 + 2A, 2026-07-14 — `CORE_SPECIFICATION.md` 42 sections ; `README.md` ; ADR-041 Maven validé ; aucun starter, aucun code Java) |
+| `api-spring` | oui | oui | **oui** (Spring Boot 3 — entités JPA User/Role/Permission/RefreshToken, migrations Flyway, Argon2id, refresh tokens SHA-256, RBAC `@PreAuthorize`, 43/43 tests Testcontainers) | **IMPLEMENTATION_PARTIELLE** (sous-statut `PERSISTENCE_RBAC_READY`, 2026-07-15) |
 | `docs-core` | oui | oui | **oui** (script link check + guides) | **VALIDE_V1** |
 | `mobile-flutter` | oui | oui | oui (starter + auth shell + Dio client + upload + SecureStorage + RefreshInterceptor + UI states Flutter 10 + **formulaire sign-in Flutter 11** — 218/218 tests + smoke `emulator-5554` 7/7) | **VALIDE_V1** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux réserve environnementale acceptée — identique à RN B2 ; rapports `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` + Flutter 7→11 smoke reports + `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`) |
 | `quality-core` | oui | oui | **oui** (gouvernance qualité : gates, checklists, runbooks, templates, prompts, release process utilisé ; scripts `quality-gates` + `release-helper` + `quality-report` testés) | **VALIDE_V1** |

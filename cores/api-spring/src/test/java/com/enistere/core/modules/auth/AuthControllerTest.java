@@ -1,59 +1,43 @@
 package com.enistere.core.modules.auth;
 
+import com.enistere.core.AbstractIntegrationTest;
+import com.enistere.core.TestDataFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class AuthControllerTest {
+class AuthControllerTest extends AbstractIntegrationTest {
 
     @Autowired
-    private WebApplicationContext context;
+    private TestDataFactory factory;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private MockMvc mockMvc;
+    private String email;
+    private final String password = "controller-test-password";
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-            .webAppContextSetup(context)
-            .apply(SecurityMockMvcConfigurers.springSecurity())
-            .build();
-    }
-
-    private String loginAndGetToken() throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"test@enistere.dev\",\"password\":\"test-password\"}"))
-            .andExpect(status().isOk())
-            .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsString())
-            .get("accessToken").asText();
+    void createUser() {
+        email = factory.uniqueEmail();
+        factory.createUser(email, password);
     }
 
     @Test
     void login_validCredentials_returns200WithToken() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"test@enistere.dev\",\"password\":\"test-password\"}"))
+                .content(loginBody(email, password)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.accessToken").isNotEmpty())
+            .andExpect(jsonPath("$.refreshToken").isNotEmpty())
             .andExpect(jsonPath("$.tokenType").value("Bearer"))
             .andExpect(jsonPath("$.expiresIn").value(60));
     }
@@ -62,7 +46,7 @@ class AuthControllerTest {
     void login_invalidCredentials_returns401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"wrong@test.com\",\"password\":\"wrong-password\"}"))
+                .content(loginBody(email, "wrong-password")))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.status").value(401))
             .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
@@ -94,11 +78,12 @@ class AuthControllerTest {
 
     @Test
     void me_withValidToken_returns200WithEmail() throws Exception {
-        String token = loginAndGetToken();
+        String token = loginAndGetAccessToken();
         mockMvc.perform(get("/api/v1/auth/me")
                 .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.email").value("test@enistere.dev"));
+            .andExpect(jsonPath("$.email").value(email))
+            .andExpect(jsonPath("$.userId").isNotEmpty());
     }
 
     @Test
@@ -109,24 +94,50 @@ class AuthControllerTest {
 
     @Test
     void logout_withValidToken_returns204() throws Exception {
-        String token = loginAndGetToken();
+        String token = loginAndGetAccessToken();
         mockMvc.perform(post("/api/v1/auth/logout")
                 .header("Authorization", "Bearer " + token))
             .andExpect(status().isNoContent());
     }
 
     @Test
-    void refresh_withValidToken_returns501() throws Exception {
-        String token = loginAndGetToken();
+    void refresh_withValidRefreshToken_returns200() throws Exception {
+        String refreshToken = loginAndGetRefreshToken();
         mockMvc.perform(post("/api/v1/auth/refresh")
-                .header("Authorization", "Bearer " + token))
-            .andExpect(status().isNotImplemented())
-            .andExpect(jsonPath("$.status").value(501));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"" + refreshToken + "\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.accessToken").isNotEmpty())
+            .andExpect(jsonPath("$.refreshToken").isNotEmpty());
     }
 
     @Test
     void health_withoutToken_returns200() throws Exception {
         mockMvc.perform(get("/actuator/health"))
             .andExpect(status().isOk());
+    }
+
+    private String loginAndGetAccessToken() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody(email, password)))
+            .andExpect(status().isOk())
+            .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+            .get("accessToken").asText();
+    }
+
+    private String loginAndGetRefreshToken() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody(email, password)))
+            .andExpect(status().isOk())
+            .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+            .get("refreshToken").asText();
+    }
+
+    private String loginBody(String email, String password) {
+        return String.format("{\"email\":\"%s\",\"password\":\"%s\"}", email, password);
     }
 }

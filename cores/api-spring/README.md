@@ -1,8 +1,8 @@
 # API Core Spring Boot
 
-> Statut : **`STARTER_INITIALISE`** (Spring Boot 2, 2026-07-15)
+> Statut : **`IMPLEMENTATION_PARTIELLE`** — sous-statut `PERSISTENCE_RBAC_READY` (Spring Boot 3, 2026-07-15)
 > Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
-> Stack : Spring Boot 4.1.0 + Spring Security 7.1.0 + JJWT 0.12.6 + Java 21 (Maven — ADR-041)
+> Stack : Spring Boot 4.1.0 + Spring Security 7.1.0 + JJWT 0.12.6 + PostgreSQL + Flyway 11 + Java 21 (Maven — ADR-041)
 
 Socle backend **Java / Spring Boot** générique et réutilisable pour les futures applications Enistere orientées enterprise, finance, administration et systèmes d'information.
 
@@ -12,22 +12,23 @@ Socle backend **Java / Spring Boot** générique et réutilisable pour les futur
 # Prérequis : Java 21 (SDKMAN recommandé)
 sdk use java 21.0.9-librca
 
-# Lancer les tests
+# Lancer les tests (nécessite Docker — Testcontainers démarre PostgreSQL automatiquement)
 ./mvnw test
 
 # Build complet (compile + test + package)
 ./mvnw verify
 
-# Lancer l'application
+# Lancer l'application (nécessite PostgreSQL)
 ./mvnw spring-boot:run
 
 # Variables d'environnement (production obligatoires)
 export JWT_SECRET=<votre-secret-min-32-bytes-cryptographiquement-aleatoire>
-export STUB_USERNAME=admin@votredomaine.com
-export STUB_PASSWORD=<votre-mot-de-passe>
+export DB_URL=jdbc:postgresql://localhost:5432/enistere_dev
+export DB_USERNAME=enistere
+export DB_PASSWORD=<votre-mot-de-passe>
 ```
 
-## Structure actuelle (Spring Boot 2)
+## Structure actuelle (Spring Boot 3)
 
 ```
 cores/api-spring/
@@ -39,27 +40,60 @@ cores/api-spring/
 │   ├── java/com/enistere/core/
 │   │   ├── EnistereCoreApplication.java
 │   │   ├── config/
+│   │   │   ├── Argon2Config.java     ← @ConfigurationProperties(enistere.security.argon2)
+│   │   │   ├── DatabaseConfig.java   ← @EnableJpaAuditing
 │   │   │   ├── JwtConfig.java        ← @ConfigurationProperties(enistere.security.jwt)
-│   │   │   └── SecurityConfig.java   ← STATELESS, JWT filter, CORS, no CSRF
+│   │   │   └── SecurityConfig.java   ← STATELESS, JWT filter, CORS, RBAC, DaoAuthProvider
 │   │   ├── common/exception/
-│   │   │   ├── ApiError.java         ← {status, code, message, errors, timestamp, path}
+│   │   │   ├── ApiError.java
 │   │   │   └── GlobalExceptionHandler.java
-│   │   ├── infrastructure/security/
-│   │   │   ├── JwtTokenProvider.java ← générer/valider/extraire JWT (JJWT 0.12.x)
-│   │   │   └── JwtAuthenticationFilter.java ← OncePerRequestFilter, Bearer header
-│   │   └── modules/auth/
-│   │       ├── AuthController.java   ← /api/v1/auth/{login,me,logout,refresh}
-│   │       └── dto/
-│   │           ├── LoginRequestDto.java
-│   │           ├── LoginResponseDto.java
-│   │           └── MeResponseDto.java
+│   │   ├── infrastructure/
+│   │   │   ├── persistence/
+│   │   │   │   └── BaseEntity.java   ← @MappedSuperclass, UUID PK, @CreatedDate/@LastModifiedDate
+│   │   │   └── security/
+│   │   │       ├── EnistereUserDetailsService.java ← DB-backed UserDetailsService
+│   │   │       ├── JwtAuthenticationFilter.java    ← lit permissions[] du JWT
+│   │   │       └── JwtTokenProvider.java           ← generateAccessToken(email, userId, permissions)
+│   │   └── modules/
+│   │       ├── admin/
+│   │       │   └── AdminController.java   ← GET /api/v1/admin/ping (@PreAuthorize)
+│   │       ├── auth/
+│   │       │   ├── AuthController.java    ← login / me / logout / refresh
+│   │       │   ├── AuthService.java       ← auth DB, Argon2 verify, tokens, refresh rotation
+│   │       │   ├── RefreshToken.java      ← entité (hash SHA-256 uniquement)
+│   │       │   ├── RefreshTokenRepository.java
+│   │       │   └── dto/
+│   │       │       ├── LoginRequestDto.java
+│   │       │       ├── LoginResponseDto.java  ← accessToken + refreshToken
+│   │       │       ├── LogoutRequestDto.java
+│   │       │       ├── MeResponseDto.java     ← userId, email, roles[], permissions[]
+│   │       │       └── RefreshRequestDto.java
+│   │       ├── permissions/
+│   │       │   ├── Permission.java       ← entité JPA
+│   │       │   └── PermissionRepository.java
+│   │       ├── roles/
+│   │       │   ├── Role.java             ← entité JPA (@ManyToMany permissions)
+│   │       │   └── RoleRepository.java
+│   │       └── users/
+│   │           ├── User.java             ← entité JPA (passwordHash, @ManyToMany roles)
+│   │           └── UserRepository.java
 │   └── resources/
-│       └── application.yml
+│       ├── application.yml
+│       └── db/migration/
+│           └── V1__init_schema.sql       ← 6 tables, 5 indexes (Flyway — autorité du schéma)
 ├── src/test/
 │   ├── java/com/enistere/core/
+│   │   ├── AbstractIntegrationTest.java      ← singleton TC container + @DynamicPropertySource
 │   │   ├── EnistereCoreApplicationTests.java
-│   │   ├── infrastructure/security/JwtTokenProviderTest.java  ← 7 tests
-│   │   └── modules/auth/AuthControllerTest.java              ← 10 tests
+│   │   ├── FlywayMigrationTest.java          ← 4 tests — tables et indexes
+│   │   ├── TestDataFactory.java              ← helpers user/role/permission en base
+│   │   ├── infrastructure/security/
+│   │   │   └── JwtTokenProviderTest.java     ← 9 tests
+│   │   └── modules/
+│   │       ├── admin/RbacIntegrationTest.java   ← 5 tests RBAC
+│   │       └── auth/
+│   │           ├── AuthControllerTest.java      ← 10 tests
+│   │           └── AuthIntegrationTest.java     ← 14 tests
 │   └── resources/
 │       └── application-test.yml
 ├── CORE_SPECIFICATION.md             ← 42 sections (Spring Boot 1)
@@ -70,58 +104,71 @@ cores/api-spring/
 
 | Méthode | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/v1/auth/login` | Public | Connexion stub → JWT access token |
-| `GET` | `/api/v1/auth/me` | JWT requis | Email depuis token |
-| `POST` | `/api/v1/auth/logout` | JWT requis | Stateless (client supprime le token) |
-| `POST` | `/api/v1/auth/refresh` | JWT requis | 501 — refresh persistance (Spring Boot 3) |
+| `POST` | `/api/v1/auth/login` | Public | Connexion DB → access token + refresh token |
+| `GET` | `/api/v1/auth/me` | JWT requis | userId, email, roles, permissions |
+| `POST` | `/api/v1/auth/logout` | JWT requis | Révoque le refresh token ; sans body → 204 no-op |
+| `POST` | `/api/v1/auth/refresh` | Public | Rotation refresh token → nouvelle paire |
+| `GET` | `/api/v1/admin/ping` | JWT + `admin.access` | Probe RBAC — `@PreAuthorize("hasAuthority('admin.access')")` |
 | `GET` | `/actuator/health` | Public | Status UP/DOWN |
 | `GET` | `/actuator/info` | Public | Infos application |
 
 ## Sécurité
 
 - **STATELESS** — aucune session serveur, `SessionCreationPolicy.STATELESS`
-- **JWT** — access token 15 min, JJWT 0.12.x, HS256, signature vérifiée par requête
-- **Spring Security 7.x** — toutes routes protégées par défaut, filtre JWT avant UsernamePasswordAuthenticationFilter
+- **JWT claims** — `sub` (email) + `userId` (UUID) + `permissions` (List) ; access token 15 min (test : 60 s)
+- **Argon2id** — `Argon2PasswordEncoder` (ADR-039) — mémoire 64 MB, 3 itérations, parallelism 1 ; test : 4 MB, 1 iter
+- **Refresh token rotation** — token brut 256-bit aléatoire, hash SHA-256 (64 hex) stocké en base ; révoqué à chaque usage
+- **RBAC** — `@EnableMethodSecurity` + `@PreAuthorize("hasAuthority(...)")` ; permissions issues du JWT (stateless)
+- **Spring Security 7.x** — `DaoAuthenticationProvider(userDetailsService)` + `AuthenticationManager`
 - **CSRF désactivé** — REST API stateless
 - **CORS** — origines configurables, dev defaults `localhost:{3000,4200,8080,8081,19006}`
-- **Erreurs** — `ApiError` sans stack trace en production
-- **Secrets** — jamais dans le code source ; env vars `JWT_SECRET`, `STUB_USERNAME`, `STUB_PASSWORD`
+- **Erreurs** — `ApiError` sans stack trace ; `AccessDeniedException`/`AuthenticationException` propagées à Spring Security
+- **Secrets** — jamais dans le code source ; env vars `JWT_SECRET`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
+- **JPA entities** — jamais exposées directement en HTTP (DTOs dédiés uniquement)
 
-## Auth stub (temporaire — Spring Boot 3 remplacera par DB)
+## Flyway — schéma DB
 
-```yaml
-# application.yml par défaut (dev uniquement)
-enistere:
-  security:
-    stub:
-      username: ${STUB_USERNAME:admin@enistere.dev}
-      password: ${STUB_PASSWORD:dev-password-not-for-production}
+Flyway est l'autorité unique sur le schéma (`ddl-auto: none`). Migration `V1__init_schema.sql` :
+
+| Table | Description |
+|---|---|
+| `users` | Comptes utilisateurs (`email`, `password_hash` Argon2) |
+| `roles` | Rôles nommés |
+| `permissions` | Permissions nommées (`admin.access`, etc.) |
+| `user_roles` | Table de jonction M2M users ↔ roles |
+| `role_permissions` | Table de jonction M2M roles ↔ permissions |
+| `refresh_tokens` | Hash SHA-256 des refresh tokens, `expires_at`, `revoked_at` |
+
+## Tests (43/43 ✅)
+
 ```
-
-Le stub valide les credentials en mémoire et émet un vrai JWT (cryptographie réelle). Aucune persistance. Le refresh token (`501`) nécessite PostgreSQL — Spring Boot 3.
-
-## Tests (18/18 ✅)
-
-```
-JwtTokenProviderTest  : 7 tests — génération, validation, extraction, tampering
-AuthControllerTest    : 10 tests — login/me/logout/refresh/health + auth non valide
-EnistereCoreApplicationTests : 1 test — context loads
+JwtTokenProviderTest     :  9 tests — génération, validation, extraction userId/permissions
+FlywayMigrationTest      :  4 tests — tables et indexes (Testcontainers PostgreSQL 16-alpine)
+AuthControllerTest       : 10 tests — login/me/logout/refresh/health
+AuthIntegrationTest      : 14 tests — login valid/invalid, me, refresh rotation, logout, format erreur
+RbacIntegrationTest      :  5 tests — admin 200, user 403, unauthenticated 401, /me permissions
+EnistereCoreApplicationTests :  1 test — context loads
 ```
 
 ```bash
-./mvnw test      # unit + integration (18 tests)
+# Prérequis : Docker (Testcontainers)
+./mvnw test      # 43 tests (unit + integration Testcontainers)
 ./mvnw verify    # compile + test + package
 ```
 
 ## Décisions prises
 
-| Décision | Valeur | ADR |
+| Décision | Valeur | ADR / §ref |
 |---|---|---|
 | Build system | Maven + Spring Boot Parent POM | ADR-041 |
 | Spring Boot | 4.1.0 (stable, Java 21) | ADR-041 |
 | JWT library | JJWT 0.12.6 | — |
-| Auth stub | credentials config + JWT réel, sans DB | §30 Spring Boot 3 |
-| Refresh token | 501 Not Implemented | §14 — DB requise |
+| Password hashing | Argon2id via `Argon2PasswordEncoder` + Bouncy Castle | ADR-039 |
+| Migrations DB | Flyway 11.x + `flyway-database-postgresql` + `spring-boot-starter-flyway` | §12 |
+| JPA | Spring Data JPA + Hibernate 6.x + UUID PK | §12 |
+| Refresh token | Hash SHA-256 (64 hex) stocké, token brut retourné une fois | §14 |
+| RBAC | `@PreAuthorize` + permissions dans JWT (stateless) | §13 |
+| Tests | Testcontainers singleton + `@DynamicPropertySource` | §30 |
 
 ## Missions ordonnées
 
@@ -130,7 +177,7 @@ EnistereCoreApplicationTests : 1 test — context loads
 | Spring Boot 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` | ✅ `SPECIFICATION_DOCUMENTAIRE` |
 | Spring Boot 2A | ADR build system | `ADR-041-build-system-api-spring-maven-vs-gradle.md` | ✅ |
 | Spring Boot 2 | Starter minimal | `pom.xml` + src/ + Spring Security + JWT + auth flow | ✅ `STARTER_INITIALISE` |
-| Spring Boot 3 | PostgreSQL + JPA + Flyway + RBAC | entités, migrations, rôles, permissions | ⏳ |
+| Spring Boot 3 | PostgreSQL + JPA + Flyway + RBAC | entités, migrations, rôles, permissions, 43 tests | ✅ `IMPLEMENTATION_PARTIELLE / PERSISTENCE_RBAC_READY` |
 | Spring Boot 4 | OpenAPI + Upload MinIO | springdoc + MinIO SDK + upload service | ⏳ |
 | Spring Boot 5 | Tests + CI | JUnit + Testcontainers + health checks | ⏳ |
 | Spring Boot V1 | Readiness review | rapport V1 — critères §30 vérifiés | ⏳ |

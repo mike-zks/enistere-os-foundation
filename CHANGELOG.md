@@ -6,6 +6,27 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC
+
+- `pom.xml` : ajout `spring-boot-starter-data-jpa`, `postgresql` (runtime), `spring-boot-starter-flyway`, `flyway-database-postgresql` (runtime), `bcprov-jdk18on:1.82` (Bouncy Castle — Argon2 dep explicite), `spring-boot-testcontainers`, `testcontainers-junit-jupiter`, `testcontainers-postgresql` (TC 2.0.5 artifact IDs).
+- Migration Flyway `V1__init_schema.sql` : 6 tables (`users`, `roles`, `permissions`, `user_roles`, `role_permissions`, `refresh_tokens`) + 5 index ; `ddl-auto: none` (Flyway autorité du schéma).
+- `BaseEntity` (`@MappedSuperclass`, UUID PK auto, `@CreatedDate`/`@LastModifiedDate`), `DatabaseConfig` (`@EnableJpaAuditing`), `Argon2Config` (`@ConfigurationProperties`).
+- Entités JPA : `User` (email, passwordHash Argon2, active, lastLoginAt, Set<Role>), `Role` (name, Set<Permission>), `Permission` (name, description), `RefreshToken` (tokenHash SHA-256, expiresAt, revokedAt).
+- Repositories : `UserRepository`, `RoleRepository`, `PermissionRepository` (JPQL `findPermissionNamesByUserId`), `RefreshTokenRepository`.
+- `EnistereUserDetailsService` (`UserDetailsService` DB-backed via `PermissionRepository`).
+- `JwtTokenProvider` mis à jour : `generateAccessToken(email, userId, permissions)` — claims `userId` + `permissions[]` (stateless RBAC) ; suppression `extractRole`, ajout `extractUserId` + `extractPermissions`.
+- `JwtAuthenticationFilter` mis à jour : lit `permissions[]` du JWT → `List<SimpleGrantedAuthority>`.
+- `AuthService` : login Argon2 verify, `buildTokenResponse` (access + refresh), refresh rotation (revoke + issue), logout (revoke), `me` (DTO sans entité).
+- `AuthController` mis à jour : refresh réel (`POST /api/v1/auth/refresh`), logout avec `@RequestBody(required = false)` (backward compat.), DTOs `RefreshRequestDto`/`LogoutRequestDto`.
+- `AdminController` : `GET /api/v1/admin/ping` avec `@PreAuthorize("hasAuthority('admin.access')")`.
+- `SecurityConfig` mis à jour : `Argon2PasswordEncoder(argon2Config.*)` ; `DaoAuthenticationProvider(userDetailsService)` ; `AuthenticationManager` bean ; `/api/v1/auth/refresh` en `permitAll`.
+- `GlobalExceptionHandler` mis à jour : `AccessDeniedException`/`AuthenticationException` re-throwées vers Spring Security (évite 500 sur 403).
+- Tests : `AbstractIntegrationTest` (singleton TC container + `@DynamicPropertySource`), `TestDataFactory` (`@Component @Profile("test")`), `FlywayMigrationTest` (4 tests tables/index), `JwtTokenProviderTest` mis à jour (9 tests — permissions[], userId, sans extractRole), `AuthControllerTest` mis à jour (10 tests DB-backed), `AuthIntegrationTest` (14 tests), `RbacIntegrationTest` (5 tests RBAC).
+- `./mvnw verify` : **43/43 ✅ BUILD SUCCESS**.
+- Adaptations Spring Boot 4.x : `DaoAuthenticationProvider(userDetailsService)` (constructeur obligatoire SS7) ; `spring-boot-starter-flyway` requis (FlywayAutoConfiguration hors `spring-boot-autoconfigure` en SB 4.x) ; TC 2.0.5 artifact IDs `testcontainers-junit-jupiter`/`testcontainers-postgresql`.
+- `api-spring` : **`STARTER_INITIALISE` → `IMPLEMENTATION_PARTIELLE`**, sous-statut `PERSISTENCE_RBAC_READY`.
+- Statuts mis à jour : `README.md`, `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `SESSION_HANDOFF.md`.
+
 ### API Core Spring Boot 2 — Starter minimal Maven
 
 - `cores/api-spring/pom.xml` : Spring Boot 4.1.0 Parent POM + JJWT 0.12.6 + Java 21 (ADR-041 : Maven).
