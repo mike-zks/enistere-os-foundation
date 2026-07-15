@@ -88,4 +88,42 @@ class FlywayMigrationTest extends AbstractIntegrationTest {
             assertThat(count).as("Index '%s' should exist", index).isEqualTo(1);
         }
     }
+
+    @Test
+    void migrations_applied_auditLogsTableExists() {
+        Integer count = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'audit_logs'",
+            Integer.class
+        );
+        assertThat(count).as("Table 'audit_logs' should exist after V3 migration").isEqualTo(1);
+    }
+
+    @Test
+    void migrations_applied_auditLogsColumnsExist() {
+        String[] expectedColumns = {
+            "id", "event_type", "user_id", "target_type", "target_id",
+            "ip_address", "user_agent", "created_at"
+        };
+        for (String column : expectedColumns) {
+            Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'audit_logs' AND column_name = ?",
+                Integer.class, column
+            );
+            assertThat(count).as("Column 'audit_logs.%s' should exist", column).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void migrations_applied_auditLogsIndexesExist() {
+        String[] expectedIndexes = {
+            "idx_audit_logs_user_id", "idx_audit_logs_event_type", "idx_audit_logs_created_at"
+        };
+        for (String index : expectedIndexes) {
+            Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'audit_logs' AND indexname = ?",
+                Integer.class, index
+            );
+            assertThat(count).as("Index '%s' should exist", index).isEqualTo(1);
+        }
+    }
 }

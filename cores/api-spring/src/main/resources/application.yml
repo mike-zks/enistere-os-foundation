@@ -60,6 +60,9 @@ enistere:
       parallelism: 1
       memory: 65536     # 64 MB — OWASP minimum recommendation
       iterations: 3
+    cors:
+      # PRODUCTION: override with CORS_ALLOWED_ORIGINS env var (comma-separated list of origins)
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:8080,http://localhost:8081,http://localhost:19006}
   files:
     # PRODUCTION: override all enistere.files.* via environment variables — never commit real secrets
     endpoint: ${FILES_ENDPOINT:http://localhost:9000}
@@ -67,3 +70,4 @@ enistere:
     region: ${FILES_REGION:us-east-1}
     access-key: ${FILES_ACCESS_KEY:minioadmin}
     secret-key: ${FILES_SECRET_KEY:minioadmin}
+    presigned-url-ttl-seconds: ${FILES_PRESIGNED_TTL_SECONDS:300}

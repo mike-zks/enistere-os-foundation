@@ -93,6 +93,22 @@
 > `api-spring` : **`CI_JAVA_READY` → `IMPLEMENTATION_AVANCEE`**.
 > Prochaine : **API Core Spring Boot 7 — AuditModule + download URL signée + CORS env var**.
 >
+> **API Core Spring Boot 7 — AuditModule + URL signée + CORS env var (2026-07-15)** :
+> B1 fermé — `V3__add_audit_logs.sql` (8 colonnes, 3 index) ; `AuditLog` entité JPA ; `AuditEventType` enum (7 valeurs) ;
+> `AuditService` (`@Transactional(propagation = REQUIRES_NEW)`, best-effort, catch-all) ; traçage : `AuthService`
+> (LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT, TOKEN_REFRESH), `FileService` (FILE_UPLOAD, FILE_DOWNLOAD_URL_CREATED),
+> `AdminController` (ADMIN_ACCESS) ; aucun payload sensible dans audit_logs (ni password, ni refresh token, ni storageKey, ni URL).
+> B2 fermé — `GET /api/v1/files/{id}/download-url` : ownership-check `findByIdAndOwnerId()` + anti-énumération 404 ;
+> `StorageService.generatePresignedDownloadUrl()` interface + MinioStorageService (GetPresignedObjectUrlArgs TTL 300s)
+> + FakeStorageService (URL factice) ; `Cache-Control: no-store` ; `FilesConfig.presignedUrlTtlSeconds` configurable via env.
+> C15 fermé — `CorsConfig` (`@ConfigurationProperties`) injectable via `${CORS_ALLOWED_ORIGINS:...}` ; CSV parsing robuste ;
+> `SecurityConfig` utilise `corsConfig.getAllowedOriginsList()` — jamais wildcard `*` avec credentials.
+> Tests : `FlywayMigrationTest` +3 (V3 audit_logs) ; `AuditIntegrationTest` 7 ; `FilesDownloadUrlIntegrationTest` 6 ;
+> `CorsIntegrationTest` 3 ; total **90/90 ✅ BUILD SUCCESS**.
+> Satisfaits C9 (URL signée ✅), C14 (audit logs ✅), C15 (CORS env var ✅). Score §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis) / 0 ✗**.
+> `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**.
+> Réserve maintenue : R5 Redis/cache absent (différé SB8+).
+>
 > **Mise à jour API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC (2026-07-15)** :
 > `pom.xml` : `spring-boot-starter-data-jpa`, `postgresql`, `spring-boot-starter-flyway`, `flyway-database-postgresql`, `bcprov-jdk18on:1.82`, `spring-boot-testcontainers`, `testcontainers-junit-jupiter`, `testcontainers-postgresql` (TC 2.0.5 IDs).
 > Migration `V1__init_schema.sql` (6 tables, 5 index). `BaseEntity`, `DatabaseConfig` (`@EnableJpaAuditing`), `Argon2Config`.

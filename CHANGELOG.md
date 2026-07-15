@@ -16,6 +16,33 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 - `api-spring` : **`FILE_UPLOAD_READY` → `CI_JAVA_READY`**.
 - Statuts mis à jour : `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`, `QUALITY_GATES_MATRIX.md`.
 
+### API Core Spring Boot 7 — AuditModule + download URL signée + CORS env var
+
+- `cores/api-spring/src/main/resources/db/migration/V3__add_audit_logs.sql` (créé) : table `audit_logs` (8 colonnes : `id UUID`, `event_type VARCHAR(64)`, `user_id UUID` nullable, `target_type VARCHAR(64)` nullable, `target_id VARCHAR(255)` nullable, `ip_address VARCHAR(45)` nullable, `user_agent VARCHAR(512)` nullable, `created_at TIMESTAMPTZ`) + 3 index (`user_id`, `event_type`, `created_at`).
+- `AuditEventType` enum (7 valeurs) : `LOGIN_SUCCESS`, `LOGIN_FAILURE`, `LOGOUT`, `TOKEN_REFRESH`, `FILE_UPLOAD`, `FILE_DOWNLOAD_URL_CREATED`, `ADMIN_ACCESS`.
+- `AuditLog` entité JPA (sans extension `BaseEntity` — table append-only sans `updated_at`) ; `AuditLogRepository extends JpaRepository<AuditLog, UUID>`.
+- `AuditService` : `@Transactional(propagation = Propagation.REQUIRES_NEW)` + best-effort (catch-all, jamais de fuite vers le flux principal) ; troncature ip (45 chars) et ua (512 chars) ; aucun payload sensible (ni password, ni refresh token, ni storageKey, ni URL signée, ni body fichier).
+- `AuthService` mis à jour : `login()` / `logout()` / `refresh()` acceptent `ipAddress`/`userAgent` ; trace LOGIN_SUCCESS/FAILURE (userId=null pour FAILURE — anti-énumération), LOGOUT, TOKEN_REFRESH.
+- `FileService` mis à jour : `upload()` trace FILE_UPLOAD (targetId = UUID fichier, jamais storageKey) ; `getDownloadUrl()` nouveau — ownership via `findByIdAndOwnerId()`, génère presigned URL, trace FILE_DOWNLOAD_URL_CREATED (jamais l'URL).
+- `AdminController` mis à jour : `ping()` trace ADMIN_ACCESS.
+- `AuthController`, `FilesController`, `AdminController` mis à jour : extraction `HttpServletRequest` pour ip/ua ; userId extrait de `Authentication.details` (posé par `JwtAuthenticationFilter.setDetails(userId)`).
+- `JwtAuthenticationFilter` mis à jour : `auth.setDetails(userId)` — userId du JWT claim disponible downstream.
+- `StorageService` interface mise à jour : `generatePresignedDownloadUrl(String storageKey, int ttlSeconds)` ajouté.
+- `MinioStorageService` mis à jour : implémente `generatePresignedDownloadUrl()` via `GetPresignedObjectUrlArgs` (Method.GET, TimeUnit.SECONDS).
+- `FakeStorageService` (test) mis à jour : implémente `generatePresignedDownloadUrl()` → URL factice déterministe `https://fake-storage.test/presigned/{storageKey}?expires={ttlSeconds}`.
+- `FilesController` mis à jour : `GET /api/v1/files/{id}/download-url` — ownership check + `ResponseEntity.ok().cacheControl(CacheControl.noStore())`.
+- `DownloadUrlResponseDto` record : `fileId`, `url`, `expiresIn`.
+- `StoredFileRepository` mis à jour : `findByIdAndOwnerId(UUID id, UUID ownerId)` ajouté.
+- `FilesConfig` mis à jour : `presignedUrlTtlSeconds` (défaut 300, `@Positive`) via `${FILES_PRESIGNED_TTL_SECONDS:300}`.
+- `CorsConfig` créé : `@ConfigurationProperties(prefix="enistere.security.cors")`, `allowedOrigins` String via `${CORS_ALLOWED_ORIGINS:http://localhost:3000,...}`, `getAllowedOriginsList()` parsing CSV robuste.
+- `SecurityConfig` mis à jour : `corsConfigurationSource()` utilise `corsConfig.getAllowedOriginsList()` — jamais `*` avec credentials.
+- `application.yml` mis à jour : `enistere.security.cors.allowed-origins` + `enistere.files.presigned-url-ttl-seconds`.
+- `@ConfigurationPropertiesScan` sur `EnistereCoreApplication` : `CorsConfig` + `FilesConfig` pickés automatiquement.
+- Tests nouveaux : `AuditIntegrationTest` (7 tests — loginSuccess sans email en target, loginFailure sans password/email, logout, refresh sans refresh token, fileUpload sans storageKey, downloadUrl sans URL, adminPing) ; `FilesDownloadUrlIntegrationTest` (6 tests — 401, 200 owner, no-store, 404 autre user anti-énumération, 404 inexistant, pas de fuite interne) ; `CorsIntegrationTest` (3 tests — origin autorisée, origin inconnue, wildcard ignoré avec credentials) ; `FlywayMigrationTest` +3 tests (table `audit_logs`, 8 colonnes, 3 index). Total : **90/90 ✅ BUILD SUCCESS**.
+- Aucun changement NestJS/Web/Mobile/UI Kit/Cloud/packages/root. Aucun secret réel. Aucun déploiement.
+- `api-spring` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. §30 : **14/15 ✅ / 1 ⚠️ (C10 Redis différé) / 0 ✗**.
+- Statuts mis à jour : `API_SPRING_V1_READINESS_REVIEW.md` (B1/B2/C15 fermés, VALIDE_V1), `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `cores/api-spring/README.md`.
+
 ### API Core Spring Boot 6 — V1 Readiness Review
 
 - `docs/project-status/API_SPRING_V1_READINESS_REVIEW.md` (créé) : revue complète §30 CORE_SPECIFICATION.md — 15 critères audités sur code source Java, migrations SQL, `application.yml`, CI L5 71/71 ✅.
