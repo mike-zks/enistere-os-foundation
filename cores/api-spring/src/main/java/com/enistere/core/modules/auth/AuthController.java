@@ -1,5 +1,6 @@
 package com.enistere.core.modules.auth;
 
+import com.enistere.core.config.JwtConfig;
 import com.enistere.core.infrastructure.security.JwtTokenProvider;
 import com.enistere.core.modules.auth.dto.LoginRequestDto;
 import com.enistere.core.modules.auth.dto.LoginResponseDto;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtConfig jwtConfig;
 
     @Value("${enistere.security.stub.username}")
     private String stubUsername;
@@ -28,18 +30,19 @@ public class AuthController {
     @Value("${enistere.security.stub.password}")
     private String stubPassword;
 
-    public AuthController(JwtTokenProvider jwtTokenProvider) {
+    public AuthController(JwtTokenProvider jwtTokenProvider, JwtConfig jwtConfig) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.jwtConfig = jwtConfig;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto request) {
-        // Stub auth — no DB. Replace with UserDetailsService + BCrypt in Spring Boot 3.
+        // Stub auth — no DB. Replace with UserDetailsService + Argon2id in Spring Boot 3.
         if (!stubUsername.equals(request.email()) || !stubPassword.equals(request.password())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         String token = jwtTokenProvider.generateAccessToken(request.email(), "ADMIN");
-        return ResponseEntity.ok(new LoginResponseDto(token, "Bearer", 900L));
+        return ResponseEntity.ok(new LoginResponseDto(token, "Bearer", jwtConfig.getExpiration()));
     }
 
     @GetMapping("/me")

@@ -55,7 +55,7 @@ class AuthControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.accessToken").isNotEmpty())
             .andExpect(jsonPath("$.tokenType").value("Bearer"))
-            .andExpect(jsonPath("$.expiresIn").value(900));
+            .andExpect(jsonPath("$.expiresIn").value(60));
     }
 
     @Test
