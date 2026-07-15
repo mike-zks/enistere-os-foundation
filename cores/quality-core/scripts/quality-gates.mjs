@@ -162,8 +162,8 @@ const SCOPE_EXCLUDED = {
     'Cloud / staging gates (runbook CC11 — non reproductibles localement)',
   ],
   'api-spring': [
-    'MinIO Testcontainers (déferré SB5 — FakeStorageService utilisé en test)',
-    'Apache Tika MIME detection (déferré SB5 — whitelist statique)',
+    'MinIO Testcontainers (différé futur — FakeStorageService utilisé en test)',
+    'Apache Tika MIME detection (différé futur — whitelist statique)',
     'smoke réel contre MinIO de staging (hors scope CI, runbook CC11)',
   ],
 };

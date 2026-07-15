@@ -122,8 +122,8 @@
 | Flyway migrations (V1+V2) | inclus dans `./mvnw verify` (FlywayMigrationTest) | Java 21, Testcontainers PostgreSQL | **L5** | chaque PR |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
-> **Gates exclus** : MinIO Testcontainers (déferré SB5, FakeStorageService utilisé) ;
-> Apache Tika (déferré SB5, whitelist statique) ; smoke réel contre MinIO staging (runbook CC11).
+> **Gates exclus** : MinIO Testcontainers (différé futur, FakeStorageService utilisé) ;
+> Apache Tika (différé futur, whitelist statique) ; smoke réel contre MinIO staging (runbook CC11).
 >
 > **Note branch protection** : pour ajouter `api-spring-verify` comme check requis sur `main`,
 > ajouter le nom de job exact au ruleset `protect-main` (runbook `BRANCH_PROTECTION_RUNBOOK.md`).
@@ -174,7 +174,7 @@
 | web-nextjs | CI `main` (L1) + CI L3 + revue VALIDE_V1 2026-07-10 | 450/450 + 15 E2E verts |
 | mobile-react-native | local RN35 2026-07-11 | 367/367 + doctor 19/19 + smoke Android verts |
 | api-nestjs | CI `main` (L2) | 386u + 101e2e verts |
-| api-spring | local SB4 2026-07-07 | 71/71 verts (32u + 39 TC) |
+| api-spring | CI L5 `api-spring-verify` 2026-07-15 | 71/71 verts (32u + 39 TC) |
 | cloud | CI `main` (L4) + staging CC10/CC11 | images GHCR + staging HTTPS validé |
 
 ## 5. Script de sélection locale (Quality Core 2)
