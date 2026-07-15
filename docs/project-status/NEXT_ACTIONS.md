@@ -353,7 +353,11 @@
 > Non livré (Spring Boot 5) : liste/delete/download/URL signée, MinIO Testcontainers, validation Tika binaire, quarantaine.
 > `api-spring` : **`PERSISTENCE_RBAC_READY` → `FILE_UPLOAD_READY`**.
 >
-> **Prochaine action** : **API Core Spring Boot 5 — durcissement runtime** : CI Java (`./mvnw verify` dans `api-runtime-ci.yml`), validation binaire Tika, MinIO Testcontainers, review V1 Readiness formelle.
+> ✅ **API Core Spring Boot 5 — CI Java + Quality Gate Spring Boot : RÉALISÉ** (2026-07-15).
+> Livrables : `.github/workflows/api-spring-ci.yml` (L5 : Java 21 Temurin + Maven Wrapper + `./mvnw verify --no-transfer-progress` + Testcontainers PostgreSQL ; Docker natif `ubuntu-latest` ; FakeStorageService ; aucun MinIO réel, aucun secret) ; `cores/quality-core/scripts/quality-gates.mjs` — scope `api-spring` ajouté (8ème scope, `SPRING_CWD = cores/api-spring`, `./mvnw verify --no-transfer-progress`, descriptions et exclusions documentées, `all-safe` mis à jour) ; `cores/quality-core/scripts/quality-gates.test.mjs` — 36 → **42 tests** (suite `buildPlan — api-spring`, `listScopes` 7→8, `all-safe` n'inclut pas api-spring) ; `cores/quality-core/QUALITY_GATES_MATRIX.md` — L5 dans légende, api-spring dans matrice et §2.9, `api-spring-verify` check recommandé §3.
+> `api-spring` : **`FILE_UPLOAD_READY` → `CI_JAVA_READY`**. Aucun changement métier api-spring. Aucun changement NestJS/Web/Mobile/UI Kit/Cloud.
+>
+> **Prochaine action** : **API Core Spring Boot 6 — V1 Readiness Review** : vérifier si api-spring peut avancer vers `VALIDE_V1` (critères §30 `CORE_SPECIFICATION.md` ; gaps restants : liste/delete/download, MinIO Testcontainers, Tika binaire, URL signée).
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).

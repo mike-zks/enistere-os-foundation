@@ -1,16 +1,17 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-12 (Quality Core coverage standardization decision).
+> Dernière mise à jour : 2026-07-15 (Spring Boot 5 — L5 api-spring-ci.yml + scope api-spring).
 >
 > **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
-> Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `all-safe`
+> Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `api-spring` | `all-safe`
 >
 > **Synthèse tests/couverture locale** : `node cores/quality-core/scripts/quality-report.mjs markdown`
 >
 > Légende CI : **L1** = `ci.yml` (non-régression monorepo) ; **L2** = `api-runtime-ci.yml`
 > (runtime API : PG+MinIO) ; **L3** = `web-e2e-ci.yml` (E2E navigateur Playwright) ;
-> **L4** = `registry-ci.yml` (images GHCR + api-smoke).
+> **L4** = `registry-ci.yml` (images GHCR + api-smoke) ; **L5** = `api-spring-ci.yml`
+> (Maven verify : Java 21 + Testcontainers PostgreSQL).
 >
 > Légende gate : ✅ = gate actif et documenté | — = gate absent ou non applicable |
 > ⚠️ = gate présent mais incomplet ou bloqué | 🔒 = gate final staging (non reproductible localement)
@@ -26,6 +27,7 @@
 | **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (450) | ✅ L1 | ✅ L1 | ✅ L3 (15) | — | — | — | — | — |
 | **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
 | **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
+| **api-spring** | ✅ L5 (mvnw) | — | ✅ L5 (71: 32u+39e2e TC) | ✅ L5 (Flyway) | — | — | — | — | — | — | ✅ L5 |
 | **cloud** | — | — | — | — | — | — | 🔒 staging | ✅ L4 | — | — | — |
 
 ## 2. Détail par core / package
@@ -107,6 +109,25 @@
 | build | `cd cores/api-nestjs && npm run build` | Node 24 | **L2** | chaque PR API |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
+### 2.9 cores/api-spring
+
+> Maven Wrapper (`./mvnw verify`) — Java 21 Temurin, Spring Boot 4.1.0, Flyway V1+V2.
+> Tests unitaires (32) + intégration Testcontainers PostgreSQL (39) = **71 tests**.
+> FakeStorageService `@Profile("test")` — aucun MinIO réel, aucun secret.
+> Docker requis (Testcontainers) — exclu de `all-safe`.
+
+| Gate | Commande | Environnement | CI | Fréquence |
+|---|---|---|---|---|
+| compile + tests (71) | `cd cores/api-spring && ./mvnw verify --no-transfer-progress` | Java 21 Temurin, Docker (TC PostgreSQL) | **L5** | chaque PR |
+| Flyway migrations (V1+V2) | inclus dans `./mvnw verify` (FlywayMigrationTest) | Java 21, Testcontainers PostgreSQL | **L5** | chaque PR |
+| audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
+
+> **Gates exclus** : MinIO Testcontainers (différé futur, FakeStorageService utilisé) ;
+> Apache Tika (différé futur, whitelist statique) ; smoke réel contre MinIO staging (runbook CC11).
+>
+> **Note branch protection** : pour ajouter `api-spring-verify` comme check requis sur `main`,
+> ajouter le nom de job exact au ruleset `protect-main` (runbook `BRANCH_PROTECTION_RUNBOOK.md`).
+
 ### 2.8 cores/cloud
 
 | Gate | Commande | Environnement | CI | Fréquence |
@@ -136,6 +157,7 @@
 | 8 | `api-smoke` | `registry-ci.yml` | requis |
 | 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
 | 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
+| 11 | `api-spring-verify` | `api-spring-ci.yml` | promotion recommandée, non appliquée |
 
 > Les noms de checks correspondent au **`name:` du job** dans le YAML (jamais au `name:` du workflow).
 > Renommer un job casse l'exigence. Le runbook `BRANCH_PROTECTION_RUNBOOK.md` contient la procédure
@@ -152,6 +174,7 @@
 | web-nextjs | CI `main` (L1) + CI L3 + revue VALIDE_V1 2026-07-10 | 450/450 + 15 E2E verts |
 | mobile-react-native | local RN35 2026-07-11 | 367/367 + doctor 19/19 + smoke Android verts |
 | api-nestjs | CI `main` (L2) | 386u + 101e2e verts |
+| api-spring | CI L5 `api-spring-verify` 2026-07-15 | 71/71 verts (32u + 39 TC) |
 | cloud | CI `main` (L4) + staging CC10/CC11 | images GHCR + staging HTTPS validé |
 
 ## 5. Script de sélection locale (Quality Core 2)
@@ -180,9 +203,10 @@ node cores/quality-core/scripts/quality-gates.mjs run ui-kit
 | `ui-kit` | 5 | — |
 | `web` | 4 | E2E Playwright |
 | `mobile-static` | 4 (typecheck, lint, test, doctor) | expo export, smoke:android, smoke:ios |
-| `all-safe` | 17 (packages + ui-kit + web + root-audit) | mobile, api-nestjs e2e, E2E, Cloud |
+| `api-spring` | 1 (`./mvnw verify`) | MinIO TC (déferré), Tika (déferré), smoke staging |
+| `all-safe` | 17 (packages + ui-kit + web + root-audit) | mobile, api-nestjs e2e, api-spring (Docker), E2E, Cloud |
 
-Tests unitaires : `node --test cores/quality-core/scripts/quality-gates.test.mjs` — 36/36.
+Tests unitaires : `node --test cores/quality-core/scripts/quality-gates.test.mjs` — 42/42.
 
 ## 6. Baseline tests / coverage locale (Quality Core reporting)
 
