@@ -7,7 +7,7 @@
  *   node cores/quality-core/scripts/quality-gates.mjs plan <scope>
  *   node cores/quality-core/scripts/quality-gates.mjs run <scope>
  *
- * Scopes : docs | packages | ui-kit | web | root-audit | mobile-static | all-safe
+ * Scopes : docs | packages | ui-kit | web | root-audit | mobile-static | api-spring | all-safe
  *
  * Aucune dépendance externe. Compatible Node 24.
  * Gates exclus : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e.
@@ -26,6 +26,7 @@ const __dirname = dirname(__filename);
 
 export const REPO_ROOT = resolve(__dirname, '../../..');
 const MOBILE_CWD = resolve(REPO_ROOT, 'cores/mobile-react-native');
+const SPRING_CWD = resolve(REPO_ROOT, 'cores/api-spring');
 
 // ---------------------------------------------------------------------------
 // Step builder helpers (no external state)
@@ -107,6 +108,11 @@ const SCOPE_GATES = {
     mobTest(),
     mob('doctor'),
   ],
+
+  // Maven verify — requiert Docker (Testcontainers PostgreSQL). FakeStorageService en test.
+  'api-spring': [
+    step('api-spring: verify', './mvnw', ['verify', '--no-transfer-progress'], SPRING_CWD),
+  ],
 };
 
 // all-safe : packages + ui-kit + web + root-audit
@@ -136,7 +142,9 @@ export const SCOPE_DESCRIPTIONS = {
   'mobile-static':
     'Gates mobiles statiques : typecheck, lint, test (367), doctor. Exclus : expo export, smoke:android, smoke:ios.',
   'all-safe':
-    'packages + ui-kit + web + root-audit. Exclus : mobile, api-nestjs e2e, E2E Playwright, Cloud.',
+    'packages + ui-kit + web + root-audit. Exclus : mobile, api-nestjs e2e, api-spring (Docker requis), E2E Playwright, Cloud.',
+  'api-spring':
+    'Maven verify — Java 21, Flyway V1+V2, 71 tests (unit + Testcontainers PostgreSQL). Requiert Docker.',
 };
 
 const SCOPE_EXCLUDED = {
@@ -148,9 +156,15 @@ const SCOPE_EXCLUDED = {
   'all-safe': [
     'mobile-static (lancez séparément avec le scope mobile-static)',
     'api-nestjs lint / test / test:e2e (PostgreSQL + MinIO requis pour e2e)',
+    'api-spring (Docker requis pour Testcontainers PostgreSQL — lancez séparément)',
     'E2E Playwright web-nextjs (stack API + PG + MinIO + Chromium requise)',
     'smoke:android / smoke:ios (device ou émulateur requis)',
     'Cloud / staging gates (runbook CC11 — non reproductibles localement)',
+  ],
+  'api-spring': [
+    'MinIO Testcontainers (déferré SB5 — FakeStorageService utilisé en test)',
+    'Apache Tika MIME detection (déferré SB5 — whitelist statique)',
+    'smoke réel contre MinIO de staging (hors scope CI, runbook CC11)',
   ],
 };
 

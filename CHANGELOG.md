@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### API Core Spring Boot 5 — CI Java + Quality Gate Spring Boot
+
+- `.github/workflows/api-spring-ci.yml` (L5) : Java 21 Temurin (`actions/setup-java@v4`, cache maven), Maven Wrapper `chmod +x cores/api-spring/mvnw`, `./mvnw verify --no-transfer-progress` (71 tests : unit + Testcontainers PostgreSQL) ; Docker natif `ubuntu-latest` (aucun `services:` — TC autonome) ; `permissions: contents:read` ; `concurrency: cancel-in-progress`.
+- `cores/quality-core/scripts/quality-gates.mjs` : `SPRING_CWD = resolve(REPO_ROOT, 'cores/api-spring')` ; scope `api-spring` (8ème scope : `step('api-spring: verify', './mvnw', ['verify', '--no-transfer-progress'], SPRING_CWD)`) ; `SCOPE_DESCRIPTIONS['api-spring']` (mentionne Docker + Testcontainers) ; `SCOPE_EXCLUDED['api-spring']` (MinIO TC déferré, Tika déferré, smoke staging) ; `all-safe` updated : exclusion api-spring documentée + description mise à jour ; commentaire module mis à jour.
+- `cores/quality-core/scripts/quality-gates.test.mjs` : `const SPRING_CWD` ajouté ; `listScopes` : **7 → 8 scopes** (api-spring inclus) ; suite `buildPlan — api-spring` (4 tests : 1 étape mvnw, cwd SPRING_CWD, exclusions, description) ; `all-safe` : test `n'inclut pas api-spring` + test `documente l'exclusion api-spring` ; **36 → 42 tests node:test** (42/42 ✅).
+- `cores/quality-core/QUALITY_GATES_MATRIX.md` : légende L5 ajoutée ; ligne api-spring dans matrice §1 (typecheck/test/build L5) ; §2.9 `cores/api-spring` (table gate, exclusions, note branch protection) ; check `api-spring-verify` recommandé §3 ; scope api-spring dans §5 ; preuves §4 api-spring local SB4 71/71.
+- Aucun changement métier api-spring. Aucun changement NestJS/Web/Mobile/UI Kit/Cloud.
+- `api-spring` : **`FILE_UPLOAD_READY` → `CI_JAVA_READY`**.
+- Statuts mis à jour : `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`, `QUALITY_GATES_MATRIX.md`.
+
 ### API Core Spring Boot 4 — OpenAPI + Upload MinIO/S3
 
 - `pom.xml` : ajout `springdoc-openapi-starter-webmvc-ui:2.8.6` (OpenAPI SB 4.x), `io.minio:minio:8.5.17` (S3-compatible storage).

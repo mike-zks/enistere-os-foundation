@@ -13,16 +13,17 @@ import { buildPlan, listScopes, SCOPE_DESCRIPTIONS, REPO_ROOT } from './quality-
 import { resolve } from 'node:path';
 
 const MOBILE_CWD = resolve(REPO_ROOT, 'cores/mobile-react-native');
+const SPRING_CWD = resolve(REPO_ROOT, 'cores/api-spring');
 
 // ---------------------------------------------------------------------------
 // listScopes
 // ---------------------------------------------------------------------------
 
 describe('listScopes', () => {
-  it('retourne les 7 scopes attendus', () => {
+  it('retourne les 8 scopes attendus', () => {
     const scopes = listScopes();
-    assert.strictEqual(scopes.length, 7);
-    for (const s of ['docs', 'root-audit', 'packages', 'ui-kit', 'web', 'mobile-static', 'all-safe']) {
+    assert.strictEqual(scopes.length, 8);
+    for (const s of ['docs', 'root-audit', 'packages', 'ui-kit', 'web', 'mobile-static', 'api-spring', 'all-safe']) {
       assert.ok(scopes.includes(s), `scope manquant : ${s}`);
     }
   });
@@ -286,13 +287,53 @@ describe('buildPlan — all-safe', () => {
     assert.ok(!labels.some((l) => l.includes('api-nestjs')));
   });
 
-  it('documente les gates exclus (mobile, api-nestjs, E2E, Cloud)', () => {
+  it("n'inclut pas api-spring", () => {
+    const labels = buildPlan('all-safe').steps.map((s) => s.label);
+    assert.ok(!labels.some((l) => l.includes('api-spring')));
+  });
+
+  it('documente les gates exclus (mobile, api-nestjs, api-spring, E2E, Cloud)', () => {
     const excl = buildPlan('all-safe').excluded;
     assert.ok(excl.length > 0, 'aucun gate exclu documenté');
     assert.ok(excl.some((e) => e.toLowerCase().includes('mobile')));
     assert.ok(excl.some((e) => e.toLowerCase().includes('api-nestjs')));
+    assert.ok(excl.some((e) => e.toLowerCase().includes('api-spring')));
     assert.ok(excl.some((e) => e.toLowerCase().includes('e2e') || e.toLowerCase().includes('playwright')));
     assert.ok(excl.some((e) => e.toLowerCase().includes('cloud') || e.toLowerCase().includes('staging')));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildPlan — api-spring
+// ---------------------------------------------------------------------------
+
+describe('buildPlan — api-spring', () => {
+  it('a exactement 1 étape : mvnw verify', () => {
+    const plan = buildPlan('api-spring');
+    assert.ok(plan !== null);
+    assert.strictEqual(plan.steps.length, 1);
+    assert.strictEqual(plan.steps[0].cmd, './mvnw');
+    assert.deepStrictEqual(plan.steps[0].args, ['verify', '--no-transfer-progress']);
+    assert.strictEqual(plan.steps[0].cwd, SPRING_CWD);
+  });
+
+  it('s\'exécute dans cores/api-spring (pas la racine)', () => {
+    const plan = buildPlan('api-spring');
+    assert.strictEqual(plan.steps[0].cwd, SPRING_CWD);
+    assert.notStrictEqual(plan.steps[0].cwd, REPO_ROOT);
+  });
+
+  it('documente les gates exclus (MinIO Testcontainers, Tika, smoke staging)', () => {
+    const excl = buildPlan('api-spring').excluded;
+    assert.ok(excl.length > 0, 'aucun gate exclu documenté');
+    assert.ok(excl.some((e) => e.toLowerCase().includes('minio')));
+    assert.ok(excl.some((e) => e.toLowerCase().includes('tika')));
+    assert.ok(excl.some((e) => e.toLowerCase().includes('staging') || e.toLowerCase().includes('smoke')));
+  });
+
+  it('sa description mentionne Docker et Testcontainers', () => {
+    assert.match(buildPlan('api-spring').description, /Docker/);
+    assert.match(buildPlan('api-spring').description, /Testcontainers/);
   });
 });
 
