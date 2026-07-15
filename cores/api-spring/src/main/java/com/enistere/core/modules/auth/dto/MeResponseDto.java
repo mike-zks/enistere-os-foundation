@@ -1,3 +1,10 @@
 package com.enistere.core.modules.auth.dto;
 
-public record MeResponseDto(String email) {}
+import java.util.List;
+
+public record MeResponseDto(
+    String userId,
+    String email,
+    List<String> roles,
+    List<String> permissions
+) {}

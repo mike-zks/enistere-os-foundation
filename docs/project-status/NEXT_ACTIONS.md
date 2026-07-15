@@ -342,7 +342,13 @@
 > Aucun secret hardcodé : `JWT_SECRET`, `STUB_USERNAME`, `STUB_PASSWORD` via env vars.
 > `api-spring` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
 >
-> **Prochaine action** : **API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC**.
+> ✅ **API Core Spring Boot 3 — PostgreSQL + JPA + Flyway + RBAC : RÉALISÉ** (2026-07-15).
+> Entités JPA (User/Role/Permission/RefreshToken), migration Flyway V1 (6 tables, 5 index),
+> Argon2id (ADR-039), refresh tokens SHA-256 rotatifs, RBAC `@PreAuthorize` + permissions JWT stateless,
+> Testcontainers singleton + `@DynamicPropertySource`. `./mvnw verify` **43/43 ✅**.
+> `api-spring` : **`STARTER_INITIALISE` → `IMPLEMENTATION_PARTIELLE`**, sous-statut `PERSISTENCE_RBAC_READY`.
+>
+> **Prochaine action** : **API Core Spring Boot 4 — OpenAPI + Upload MinIO**.
 > Objectif : ajouter persistance réelle (User/Role/Permission), migrations Flyway, Spring Data JPA,
 > Spring Security Method Security + RBAC (`@PreAuthorize`), refresh token persisté, UserDetailsService.
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
