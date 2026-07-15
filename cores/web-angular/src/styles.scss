@@ -1,0 +1,186 @@
+// ============================================================
+// ENISTERE ANGULAR — Global styles
+// Material 3 theme + Enistere design tokens (ADR-035 / ADR-008)
+// Source tokens: ui-kit/generated/css/tokens.css
+// ============================================================
+
+@use '@angular/material' as mat;
+
+// ---- Material core styles (typography baseline, ripple) ----
+@include mat.core();
+
+// ---- Enistere M3 themes ----
+$enistere-light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+    tertiary: mat.$cyan-palette,
+  ),
+  density: (scale: 0),
+));
+
+$enistere-dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$azure-palette,
+    tertiary: mat.$cyan-palette,
+  ),
+  density: (scale: 0),
+));
+
+// ---- Enistere design tokens (aligned with ui-kit/generated/css/tokens.css) ----
+:root {
+  // Spacing
+  --enistere-spacing-0: 0px;
+  --enistere-spacing-1: 4px;
+  --enistere-spacing-2: 8px;
+  --enistere-spacing-3: 12px;
+  --enistere-spacing-4: 16px;
+  --enistere-spacing-5: 20px;
+  --enistere-spacing-6: 24px;
+  --enistere-spacing-8: 32px;
+  --enistere-spacing-10: 40px;
+  --enistere-spacing-12: 48px;
+  --enistere-spacing-16: 64px;
+  --enistere-spacing-20: 80px;
+  --enistere-spacing-24: 96px;
+
+  // Radius
+  --enistere-radius-none: 0px;
+  --enistere-radius-sm: 4px;
+  --enistere-radius-md: 8px;
+  --enistere-radius-lg: 12px;
+  --enistere-radius-xl: 20px;
+  --enistere-radius-full: 9999px;
+
+  // Typography
+  --enistere-font-family-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --enistere-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --enistere-font-size-xs: 12px;
+  --enistere-font-size-sm: 14px;
+  --enistere-font-size-md: 16px;
+  --enistere-font-size-lg: 18px;
+  --enistere-font-size-xl: 20px;
+  --enistere-font-size-2xl: 24px;
+  --enistere-font-size-3xl: 30px;
+  --enistere-font-size-4xl: 36px;
+  --enistere-font-weight-regular: 400;
+  --enistere-font-weight-medium: 500;
+  --enistere-font-weight-semibold: 600;
+  --enistere-font-weight-bold: 700;
+  --enistere-line-height-tight: 1.2;
+  --enistere-line-height-normal: 1.5;
+  --enistere-line-height-relaxed: 1.7;
+  --enistere-letter-spacing-tight: -0.2px;
+  --enistere-letter-spacing-normal: 0px;
+  --enistere-letter-spacing-wide: 0.4px;
+
+  // Shadows
+  --enistere-shadow-none: none;
+  --enistere-shadow-sm: 0px 1px 2px 0px rgba(15, 23, 42, 0.08);
+  --enistere-shadow-md: 0px 4px 8px -2px rgba(15, 23, 42, 0.12);
+  --enistere-shadow-lg: 0px 12px 24px -4px rgba(15, 23, 42, 0.16);
+
+  // Durations
+  --enistere-duration-fast: 120ms;
+  --enistere-duration-normal: 200ms;
+  --enistere-duration-slow: 320ms;
+
+  // Easings
+  --enistere-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --enistere-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --enistere-easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --enistere-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  // Semantic colors (light, default)
+  --enistere-color-background-default: #ffffff;
+  --enistere-color-background-muted: #f8fafc;
+  --enistere-color-background-elevated: #ffffff;
+  --enistere-color-foreground-default: #0f172a;
+  --enistere-color-foreground-muted: #64748b;
+  --enistere-color-foreground-inverse: #ffffff;
+  --enistere-color-border-default: #e2e8f0;
+  --enistere-color-border-strong: #cbd5e1;
+  --enistere-color-border-focus: #3b82f6;
+  --enistere-color-action-primary: #2563eb;
+  --enistere-color-action-primary-hover: #1d4ed8;
+  --enistere-color-action-primary-pressed: #1e40af;
+  --enistere-color-action-disabled: #cbd5e1;
+  --enistere-color-status-success: #16a34a;
+  --enistere-color-status-warning: #f59e0b;
+  --enistere-color-status-danger: #dc2626;
+  --enistere-color-status-info: #2563eb;
+  --enistere-color-focus-ring: #3b82f6;
+  --enistere-color-overlay: #0f172a;
+}
+
+// Dark mode — Enistere semantic color overrides
+[data-theme='dark'] {
+  --enistere-color-background-default: #020617;
+  --enistere-color-background-muted: #0f172a;
+  --enistere-color-background-elevated: #1e293b;
+  --enistere-color-foreground-default: #f8fafc;
+  --enistere-color-foreground-muted: #94a3b8;
+  --enistere-color-foreground-inverse: #0f172a;
+  --enistere-color-border-default: #334155;
+  --enistere-color-border-strong: #475569;
+  --enistere-color-border-focus: #60a5fa;
+  --enistere-color-action-primary: #3b82f6;
+  --enistere-color-action-primary-hover: #60a5fa;
+  --enistere-color-action-primary-pressed: #93c5fd;
+  --enistere-color-action-disabled: #334155;
+  --enistere-color-status-success: #22c55e;
+  --enistere-color-status-warning: #f59e0b;
+  --enistere-color-status-danger: #ef4444;
+  --enistere-color-status-info: #3b82f6;
+  --enistere-color-focus-ring: #60a5fa;
+  --enistere-color-overlay: #020617;
+}
+
+// ---- Apply Material 3 light theme + Enistere token mapping ----
+html {
+  @include mat.all-component-themes($enistere-light-theme);
+
+  // Map Enistere design tokens → Material 3 system tokens (--mat-sys-*)
+  // These override the palette-derived defaults generated above.
+  // Because --mat-sys-* references var(--enistere-*), dark mode token
+  // changes on [data-theme='dark'] propagate automatically via CSS cascade.
+  --mat-sys-primary: var(--enistere-color-action-primary);
+  --mat-sys-on-primary: var(--enistere-color-foreground-inverse);
+  --mat-sys-primary-container: #dbeafe;
+  --mat-sys-on-primary-container: #1e40af;
+  --mat-sys-surface: var(--enistere-color-background-default);
+  --mat-sys-on-surface: var(--enistere-color-foreground-default);
+  --mat-sys-surface-variant: var(--enistere-color-background-muted);
+  --mat-sys-on-surface-variant: var(--enistere-color-foreground-muted);
+  --mat-sys-outline: var(--enistere-color-border-default);
+  --mat-sys-outline-variant: var(--enistere-color-border-strong);
+  --mat-sys-error: var(--enistere-color-status-danger);
+  --mat-sys-on-error: var(--enistere-color-foreground-inverse);
+  --mat-sys-background: var(--enistere-color-background-default);
+  --mat-sys-on-background: var(--enistere-color-foreground-default);
+
+  font-family: var(--enistere-font-family-sans);
+}
+
+// Material dark theme colors (applied when [data-theme='dark'] is on html/body)
+html[data-theme='dark'],
+[data-theme='dark'] > html {
+  @include mat.all-component-colors($enistere-dark-theme);
+}
+
+// ---- Global resets ----
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--enistere-color-foreground-default);
+  background-color: var(--enistere-color-background-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

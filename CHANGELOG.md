@@ -6,6 +6,28 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 2 — Starter minimal Angular
+
+- `cores/web-angular/package.json` (créé) : `@angular/core` 22.0.6, `@angular/material` + `@angular/cdk` 22.0.4, `typescript` 6.0.3, `@angular/cli` 22.0.0 + `@angular-devkit/build-angular` 22.0.0 (downgraded pour compatibilité Node 24.14.0 — CLI 22.x requiert `>=24.15.0`) ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible production ; scripts `build:architect` + `test:architect` via `./node_modules/.bin/architect`.
+- `cores/web-angular/angular.json` (créé) : builder `@angular-devkit/build-angular:application` (esbuild Angular 17+), entrée `src/main.ts`, styles `src/styles.scss`, karma test runner avec `karmaConfig: karma.conf.js`.
+- `cores/web-angular/tsconfig.json` (créé) : TypeScript strict (`strict: true`, `noImplicitOverride`, `noPropertyAccessFromIndexSignature`), `moduleResolution: bundler`, `target: ES2022`, `useDefineForClassFields: false` (compatibilité décorateurs Angular), `angularCompilerOptions: { strictInjectionParameters, strictInputAccessModifiers, strictTemplates }`.
+- `cores/web-angular/karma.conf.js` (créé) : launcher custom `ChromeHeadlessNoSandbox` (`--no-sandbox --disable-gpu --disable-dev-shm-usage`) pour CI sans espace sandbox.
+- `cores/web-angular/src/main.ts` (créé) : `bootstrapApplication(AppComponent, appConfig)` — bootstrap standalone sans NgModule.
+- `cores/web-angular/src/styles.scss` (créé) : thème Material 3 Enistere — `mat.define-theme()` avec `mat.$azure-palette` (primaire) + `mat.$cyan-palette` (tertiaire), `@include mat.all-component-themes()`, tokens Enistere `--enistere-color-*` / `--enistere-font-*` / `--enistere-spacing-*` / `--enistere-radius-*` / `--enistere-shadow-*`, mapping `--mat-sys-primary: var(--enistere-color-action-primary)` (et autres), dark mode via `[data-theme='dark']` qui surcharge les tokens Enistere → propage automatiquement aux `--mat-sys-*`.
+- `cores/web-angular/src/app/app.config.ts` (créé) : `provideRouter(routes, withComponentInputBinding())`, `provideHttpClient(withFetch())`, `provideAnimationsAsync()`.
+- `cores/web-angular/src/app/app.routes.ts` (créé) : route `/` lazy → `HomeComponent`, wildcard `redirectTo: ''`.
+- `cores/web-angular/src/app/app.component.ts` (créé) : `AppComponent` standalone, `imports: [RouterOutlet]`.
+- `cores/web-angular/src/app/app.component.spec.ts` (créé) : 3 tests (create, title, router-outlet présent).
+- `cores/web-angular/src/app/pages/home/home.component.ts` (créé) : `HomeComponent` standalone, aucun import (page shell publique minimale).
+- `cores/web-angular/src/app/pages/home/home.component.html` (créé) : `<main class="home-shell">`, `<h1>Enistère Angular</h1>`, section `aria-label="Statut du projet"` avec `.status-value = 'STARTER_INITIALISE'`.
+- `cores/web-angular/src/app/pages/home/home.component.spec.ts` (créé) : 5 tests (create, main.home-shell, h1 contient 'Enistère', .status-value = 'STARTER_INITIALISE', aria-label section présent).
+- **Tests : 8/8 ✅** — `architect web-angular:test` (ChromeHeadless 150.0.0.0, 3 AppComponent + 5 HomeComponent).
+- **Build : SUCCESS** — `architect web-angular:build` → 340 KB initial, zéro erreur TypeScript strict.
+- Contrainte Node : Angular CLI 22.x requiert `^22.22.3 || ^24.15.0 || >=26.0.0` ; environnement = Node 24.14.0 → build et tests via `./node_modules/.bin/architect` (bypasse le gate version CLI sans patcher `node_modules`).
+- Mises à jour documentaires : `docs/project-status/DECISIONS_REGISTER.md` (ADR-035 Angular 2 note), `docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`, `docs/project-status/NEXT_ACTIONS.md`, `docs/project-status/SESSION_HANDOFF.md`.
+- `web-angular` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**. Prochaine action : Web Core Angular 3 — Auth flow + routing protégé.
+- `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+
 ### Web Core Angular 1 — Core specification
 
 - `cores/web-angular/CORE_SPECIFICATION.md` (créé, 32 §) : spécification complète du socle Angular de référence pour backoffices, dashboards administratifs et SI internes Enistere.
