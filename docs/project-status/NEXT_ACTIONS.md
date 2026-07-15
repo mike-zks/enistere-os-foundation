@@ -391,13 +391,24 @@
 > Reactive Forms obligatoire. Pas de PrimeNG, pas de shadcn/Radix côté Angular.
 > ADR-016 §F (adaptateur OpenAPI Angular) décidé par preuve dans Web Core Angular 1.
 > Aucun starter Angular, aucune dépendance npm, aucun runtime créé.
-> `web-angular` reste `DOSSIER_SEULEMENT` — blocker UI levé.
->
-> **Prochaine action** : **Web Core Angular 1 — Core specification**.
-> Objectif : rédiger `cores/web-angular/CORE_SPECIFICATION.md` et `cores/web-angular/README.md`
-> avant tout starter Angular.
 >
 > **Historique** : cette prochaine action était SB8 (Redis+RateLimit+MinIO Testcontainers) ; réalisé 2026-07-15.
+
+> ✅ **V3 Web Core Angular 1 — Core specification : RÉALISÉ** (2026-07-15).
+> Livrables : `cores/web-angular/CORE_SPECIFICATION.md` (32 §) + `cores/web-angular/README.md`.
+> Spécification documentaire complète : architecture Angular standalone feature-first, Reactive Forms
+> obligatoires, Angular Material CDK + M3 + tokens Enistere (ADR-035), HttpClient + intercepteurs,
+> Angular Signals, RxJS services, `@angular/cdk/a11y`, composants maison Enistere Angular,
+> RBAC `PermissionService`/`PermissionDirective`, 15 critères §29 V1, missions ordonnées Angular 1→V1,
+> 13 décisions pendantes (§32 : client OpenAPI, tests, E2E, TanStack Query Angular, NgRx...).
+> `web-angular` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+>
+> **Prochaine action** : **Web Core Angular 2 — Starter minimal Angular**.
+> Objectif : créer `package.json` + `src/main.ts` + `app.config.ts` + structure `src/` + thème Material 3 Enistere.
+> Prérequis : Angular 1 ✅.
+>
+> **Historique** : cette prochaine action était V3 ADR-035 ; réalisé 2026-07-15.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
