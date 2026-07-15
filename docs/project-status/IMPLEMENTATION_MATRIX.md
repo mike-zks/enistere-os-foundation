@@ -377,6 +377,16 @@
 >
 > **Mise à jour UI Kit V1 Readiness Review (2026-07-11)** : Le UI Kit passe de **`IMPLEMENTATION_PARTIELLE`** à **`IMPLEMENTATION_AVANCEE`** après revue officielle. Score initial : **3/4 critères §12.4** + **8/9 critères §59** ; gap bloquant VALIDE_V1 = composants React Native de base (différés ADR-010). Fermé par RN35 : scores finaux **4/4 §12.4** + **9/9 §59**.
 
+> **Mise à jour ADR-035 (2026-07-15)** : `docs/adr/ADR-035-angular-ui-material-vs-primeng.md` validé.
+> Décision : **Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés**
+> pour le futur Web Core Angular. Angular CDK = couche comportementale/a11y ; tokens Enistere pilotent
+> l'identité via `mat.define-theme()` + CSS custom properties `--mat-*` ; composants maison Enistere Angular
+> ciblés (LoadingState/EmptyState/ErrorState/SuccessState) ; Reactive Forms obligatoire ;
+> `@angular/cdk/testing` pour les tests composants ; pas de PrimeNG ni shadcn/Radix côté Angular ;
+> ADR-016 §F (adaptateur OpenAPI Angular) décidé par preuve dans Web Core Angular.
+> Aucun starter Angular, aucune dépendance npm, aucun runtime.
+> `web-angular` reste **`DOSSIER_SEULEMENT`** ; prochaine action : Web Core Angular 1 — Core specification.
+>
 | Élément | Dossier | Spéc. | ADR | Starter | Code | Tests | Revue | Statut officiel | Dernière preuve | Prochaine condition |
 |---|---|---|---|---|---|---|---|---|---|---|
 | API Core NestJS | ✓ | ✓ | ✓ (002,003,004,006,007,016,039,040…) | ✓ | ✓ | ✓ (**386 u** + e2e CI runtime) | ✓ (`API_CORE_V1_READINESS_REVIEW.md` + rapports permanents) | **VALIDE_V1** | lint/build/test 386/386/openapi:check/audit 0 vuln + CI runtime | — (V1 déclaré) |
@@ -391,7 +401,7 @@
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
 | Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé, appliqué V1) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5 + SecureStorage Flutter 8 + RefreshInterceptor Flutter 9 + UI states Flutter 10 + sign-in form Flutter 11) | ✓ (218 tests : theme + unit/auth + unit/secure_session_store + widget × 3 + widget/sign_in_screen (10) + widget/states + unit/api × 5 + unit/upload + intégration × 7) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 9/11 §29, B1→B5 fermés, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 ; `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md` — B2 ; `MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md` — B3 ; `MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md` — B4 ; `MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md` — B5 ; `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` — promotion V1) | **VALIDE_V1** | Flutter V1 Final Readiness Decision (2026-07-14) : B1→B5 fermés, score §29 9/11 + 2 PARTIAL iOS R1 ; 218/218 tests headless ; smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux acceptée comme réserve environnementale non bloquante, sans succès iOS artificiel | — (V1 déclaré ; smoke iOS uniquement quand macOS/Xcode ou device iOS réel disponible) |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
-| Web Core Angular | ✓ (vide) | — | ADR-035 (à rédiger) | — | — | — | — | **DOSSIER_SEULEMENT** | — | spécification + ADR-035 |
+| Web Core Angular | ✓ (vide) | — | **ADR-035 (Validé, 2026-07-15)** | — | — | — | — | **DOSSIER_SEULEMENT** | ADR-035 validé : Angular Material (CDK + M3) + tokens Enistere | Web Core Angular 1 — Core specification |
 
 ### 1.1 Foundation baseline
 
@@ -461,4 +471,4 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |
 | `OPENAPI_CLIENT_PROOF.md` réfère un code retiré | MINEURE |
 | `tools/` et `examples/` vides | MINEURE |
-| ADR-017→033 et ADR-035→038 cités au backlog mais non rédigés | HISTORIQUE (attendu) |
+| ADR-017→033 et ADR-036→038 cités au backlog mais non rédigés | HISTORIQUE (attendu) |

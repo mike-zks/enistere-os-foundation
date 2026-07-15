@@ -6,6 +6,23 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### V3 ADR-035 — Angular UI stack decision : Angular Material (CDK + M3) + tokens Enistere
+
+- `docs/adr/ADR-035-angular-ui-material-vs-primeng.md` (créé) : ADR complet 12 sections, statut **Validé**, date 2026-07-15.
+- **Décision (Option D)** : Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés comme stack UI officielle du futur Web Core Angular.
+- **Angular CDK** : couche comportementale/a11y — FocusTrap, LiveAnnouncer, FocusMonitor, ListKeyManager, Overlay, VirtualScroll. Identique au rôle de Material 3 dans ADR-034 (Flutter).
+- **Tokens Enistere** (ADR-008) : identité pilotée via `mat.define-theme()` + CSS custom properties `--mat-*` et `--enistere-*`. Aucune identité Material par défaut exposée.
+- **Composants maison Enistere Angular** : LoadingState / EmptyState / ErrorState / SuccessState construits sur CDK primitives.
+- **Reactive Forms** obligatoire (§08_STANDARDS §20, ADR §9.4). Tables/dialogs Angular Material. `@angular/cdk/testing` pour tests composants.
+- **State management** : Angular Signals préféré ; NgRx différé pour projets dérivés complexes. Services RxJS + éventuel TanStack Query Angular si validé par preuve.
+- **Règles d'application** : PrimeNG interdit comme bibliothèque principale ; shadcn/Radix interdit côté Angular.
+- **ADR-016 §F** (adaptateur OpenAPI Angular) : décidé par preuve dans Web Core Angular 1, non résolu dans cet ADR.
+- **Cohérence multi-framework** : React (shadcn ADR-009) / RN (maison ADR-010) / Flutter (Material 3 ADR-034) / Angular (CDK+M3 ADR-035) — tous pilotés par `ui-kit/tokens/`.
+- Aucun fichier `cores/web-angular/**` modifié. Aucun starter Angular. Aucune dépendance npm. Aucun workflow CI. Aucun changement runtime.
+- `web-angular` : reste **`DOSSIER_SEULEMENT`** — blocker UI levé. Prochaine action : Web Core Angular 1 — Core specification.
+- Mises à jour documentaires : `docs/adr/ADR_BACKLOG.md` (ADR-035 Validé), `docs/project-status/DECISIONS_REGISTER.md` (21 ADR, ADR-035 row), `docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`, `docs/project-status/NEXT_ACTIONS.md`, `docs/project-status/SESSION_HANDOFF.md`.
+- `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+
 ### API Core Spring Boot 8 — Redis health + Rate limiting + MinIO Testcontainers
 
 - `pom.xml` : ajout `spring-boot-starter-data-redis` (Lettuce — version gérée par Spring Boot parent 4.1.0) ; `RedisHealthIndicator` auto-configuré via Actuator.

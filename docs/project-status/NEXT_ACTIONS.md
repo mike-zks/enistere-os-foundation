@@ -379,7 +379,25 @@
 > Tests : **99/99 ✅ BUILD SUCCESS** (90 SB7 + 4 RateLimit + 2 RedisHealth + 3 MinioTC). Score §30 : **15/15 ✅**.
 > `api-spring` : **`VALIDE_V1`** (réserves R1/R3/R5 + C10 fermées).
 >
-> **Prochaine action** : iOS Flutter smoke — exécuter `bash scripts/smoke.sh --ios` quand un hôte macOS/Xcode ou device iOS réel est disponible.
+> **Prochaine action** : V3 ADR-035 — Angular UI stack decision.
+>
+> Note iOS Flutter smoke : exécuter `bash scripts/smoke.sh --ios` quand un hôte macOS/Xcode ou device iOS réel est disponible (contrainte environnementale non bloquante).
+
+> ✅ **V3 ADR-035 — Angular UI stack decision : RÉALISÉ** (2026-07-15).
+> ADR : `docs/adr/ADR-035-angular-ui-material-vs-primeng.md`.
+> Décision : **Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés**.
+> Angular CDK = moteur comportemental/a11y ; tokens Enistere pilotent l'identité via `mat.define-theme()` ;
+> composants maison Enistere Angular ciblés (LoadingState/EmptyState/ErrorState/SuccessState).
+> Reactive Forms obligatoire. Pas de PrimeNG, pas de shadcn/Radix côté Angular.
+> ADR-016 §F (adaptateur OpenAPI Angular) décidé par preuve dans Web Core Angular 1.
+> Aucun starter Angular, aucune dépendance npm, aucun runtime créé.
+> `web-angular` reste `DOSSIER_SEULEMENT` — blocker UI levé.
+>
+> **Prochaine action** : **Web Core Angular 1 — Core specification**.
+> Objectif : rédiger `cores/web-angular/CORE_SPECIFICATION.md` et `cores/web-angular/README.md`
+> avant tout starter Angular.
+>
+> **Historique** : cette prochaine action était SB8 (Redis+RateLimit+MinIO Testcontainers) ; réalisé 2026-07-15.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
@@ -1102,7 +1120,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | spécification absente ; **ADR-034 validé** |
-| Web Core Angular | spécification absente + **ADR-035 non rédigé** |
+| Web Core Angular | spécification absente ; **ADR-035 validé** — blocker UI levé |
 | AI / Docs / Quality Cores | spécifications absentes |
 | API Core Spring Boot | spécification absente |
 
