@@ -348,9 +348,12 @@
 > Testcontainers singleton + `@DynamicPropertySource`. `./mvnw verify` **43/43 ✅**.
 > `api-spring` : **`STARTER_INITIALISE` → `IMPLEMENTATION_PARTIELLE`**, sous-statut `PERSISTENCE_RBAC_READY`.
 >
-> **Prochaine action** : **API Core Spring Boot 4 — OpenAPI + Upload MinIO**.
-> Objectif : ajouter persistance réelle (User/Role/Permission), migrations Flyway, Spring Data JPA,
-> Spring Security Method Security + RBAC (`@PreAuthorize`), refresh token persisté, UserDetailsService.
+> ✅ **API Core Spring Boot 4 — OpenAPI + Upload MinIO/S3 : RÉALISÉ** (2026-07-15).
+> Livrables : `springdoc-openapi-starter-webmvc-ui:2.8.6` + `io.minio:minio:8.5.17` ; `OpenApiConfig` (Bearer JWT, springdoc SB 4.x) ; `FilesConfig` (`@ConfigurationProperties(prefix="enistere.files")` + `@Validated`) ; migration Flyway `V2__add_stored_files.sql` (13 colonnes + 3 index) ; entité `StoredFile` + `FileCategory`/`FileStatus` enums + `StoredFileRepository` ; DTO public `StoredFileResponseDto` (sans `storageKey`/`bucket`/`signedUrl`/`ownerId`) ; `StorageService` interface + `MinioStorageService` (`@Profile("!test")`) + `FakeStorageService` test (`@Profile("test")`) ; `FileService` (validation MIME whitelist 14 types, taille, nom sanitisé, `storageKey` 100% serveur) ; `FilesController` (`POST /api/v1/files/upload`, `@Tag`, `@Operation`, `Authentication auth`) ; `GlobalExceptionHandler` : 413 `MaxUploadSizeExceededException`, 415 `HttpMediaTypeNotSupportedException`, `BindException` ; `SecurityConfig` : `/v3/api-docs/**`/`/swagger-ui/**` `permitAll` ; `application.yml` : `spring.servlet.multipart.max-file-size: 10MB` + `enistere.files.*` env vars ; `application-test.yml` : dummy files.* + springdoc disabled. Tests : `FileValidationTest` (16 tests unitaires), `FilesUploadIntegrationTest` (9 tests : 401, 201 public DTO, non-leak, 400 manquant/invalide, 415 MIME bloqué, empty, subjectId), `FlywayMigrationTest` +3 tests V2. `./mvnw verify` **71/71 ✅ BUILD SUCCESS**.
+> Non livré (Spring Boot 5) : liste/delete/download/URL signée, MinIO Testcontainers, validation Tika binaire, quarantaine.
+> `api-spring` : **`PERSISTENCE_RBAC_READY` → `FILE_UPLOAD_READY`**.
+>
+> **Prochaine action** : **API Core Spring Boot 5 — durcissement runtime** : CI Java (`./mvnw verify` dans `api-runtime-ci.yml`), validation binaire Tika, MinIO Testcontainers, review V1 Readiness formelle.
 > iOS Flutter : exécuter `bash scripts/smoke.sh --ios` uniquement quand un hôte macOS/Xcode ou device iOS réel est disponible.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
