@@ -16,6 +16,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 - `api-spring` : **`FILE_UPLOAD_READY` → `CI_JAVA_READY`**.
 - Statuts mis à jour : `NEXT_ACTIONS.md`, `FOUNDATION_CURRENT_STATE.md`, `QUALITY_GATES_MATRIX.md`.
 
+### API Core Spring Boot 6 — V1 Readiness Review
+
+- `docs/project-status/API_SPRING_V1_READINESS_REVIEW.md` (créé) : revue complète §30 CORE_SPECIFICATION.md — 15 critères audités sur code source Java, migrations SQL, `application.yml`, CI L5 71/71 ✅.
+- Résultat §30 : **11/15 ✅ + 3/15 ⚠️ + 1/15 ✗** (C1–C8 ✅ C9 ⚠️ C10 ⚠️ C11–C13 ✅ C14 ✗ C15 ⚠️).
+- Bloquants V1 : **B1** — `AuditModule` (§9 module obligatoire) complètement absent : aucune table `audit_logs` dans V1/V2, aucun `AuditService`, aucun `@Aspect`, aucun event `LOGIN_SUCCESS/FAILURE/LOGOUT/TOKEN_REFRESH/FILE_UPLOAD/ADMIN_ACCESS` tracé. **B2** — URL signée (`GET /files/:id/download-url`, presigned URL §20) absente dans `FilesController`.
+- Réserves acceptées : R1 MinIO TC (FakeStorageService pattern intentionnel), R2 CORS hardcodé (dev local — variable `CORS_ALLOWED_ORIGINS` à externaliser SB7), R3 rate limiting différé, R4 Tika MIME différé, R5 Redis absent.
+- Décision : `CI_JAVA_READY` → **`IMPLEMENTATION_AVANCEE`**. `VALIDE_V1` différé jusqu'à fermeture B1+B2.
+- Aucun code runtime Spring Boot modifié. Aucun workflow CI. Aucune dépendance. Aucun changement NestJS/Web/Mobile/UI Kit/Cloud/packages/root.
+- Statuts mis à jour : `FOUNDATION_CURRENT_STATE.md` (statut `IMPLEMENTATION_AVANCEE`), `IMPLEMENTATION_MATRIX.md` (SB6 entry), `NEXT_ACTIONS.md` (SB6 ✅ + SB7 next), `SESSION_HANDOFF.md`.
+- Prochaine action : **API Core Spring Boot 7 — AuditModule + download URL signée + CORS env var**.
+
 ### API Core Spring Boot 4 — OpenAPI + Upload MinIO/S3
 
 - `pom.xml` : ajout `springdoc-openapi-starter-webmvc-ui:2.8.6` (OpenAPI SB 4.x), `io.minio:minio:8.5.17` (S3-compatible storage).
