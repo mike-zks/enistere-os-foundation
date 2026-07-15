@@ -37,7 +37,7 @@ vérifié contre le code, pas seulement la documentation.
 | C12 | Tests JUnit + Testcontainers passent | ✅ **SATISFAIT** | **90/90 ✅** : 71 SB5 + `FlywayMigrationTest` +3 (V3 audit_logs) + `AuditIntegrationTest` 7 + `FilesDownloadUrlIntegrationTest` 6 + `CorsIntegrationTest` 3 | — | — |
 | C13 | Aucun secret dans Git, aucun token ou password dans les logs | ✅ **SATISFAIT** | `application.yml` via env vars uniquement ; `AuditService` : tronque ip/ua, jamais token/URL/storageKey ; `FileService.getDownloadUrl()` : log `fileId+category` jamais l'URL signée ; `AuditIntegrationTest` vérifie token+storageKey absents des audit_logs | — | — |
 | C14 | Audit logs présents pour actions sensibles | ✅ **SATISFAIT** | `V3__add_audit_logs.sql` (8 colonnes, 3 index) ; `AuditService` (REQUIRES_NEW, best-effort) ; `AuditLog` entité JPA ; events : `LOGIN_SUCCESS`, `LOGIN_FAILURE`, `LOGOUT`, `TOKEN_REFRESH`, `FILE_UPLOAD`, `FILE_DOWNLOAD_URL_CREATED`, `ADMIN_ACCESS` ; `AuditIntegrationTest` 7 tests ✅ | — | — |
-| C15 | CORS strict configuré | ✅ **SATISFAIT** | `CorsConfig` (`@ConfigurationProperties(prefix="enistere.security.cors")`) ; `allowed-origins: ${CORS_ALLOWED_ORIGINS:...}` injectable via env var ; parsing CSV robuste ; `setAllowedOriginPatterns()` (jamais `*`) ; `CorsIntegrationTest` 2 tests (origin autorisée ✅, origin inconnue ✗) | — | — |
+| C15 | CORS strict configuré | ✅ **SATISFAIT** | `CorsConfig` (`@ConfigurationProperties(prefix="enistere.security.cors")`) ; `allowed-origins: ${CORS_ALLOWED_ORIGINS:...}` injectable via env var ; parsing CSV robuste ; wildcards ignorés avec credentials ; `setAllowedOrigins()` ; `CorsIntegrationTest` 3 tests (origin autorisée ✅, origin inconnue ✗, wildcard ignoré) | — | — |
 
 ---
 
@@ -85,8 +85,8 @@ vérifié contre le code, pas seulement la documentation.
 
 `CorsConfig` (`@ConfigurationProperties`) injectable via `${CORS_ALLOWED_ORIGINS:...}` :
 - Parsing CSV robuste (`split(",")`, trim, filter empty) ;
-- `SecurityConfig` utilise `corsConfig.getAllowedOriginsList()` — jamais `*` avec credentials ;
-- `CorsIntegrationTest` vérifie origin autorisée et origin inconnue rejetée.
+- `SecurityConfig` utilise `corsConfig.getAllowedOriginsList()` via `setAllowedOrigins()` — jamais `*` avec credentials ;
+- `CorsIntegrationTest` vérifie origin autorisée, origin inconnue rejetée et wildcard ignoré.
 
 ---
 
