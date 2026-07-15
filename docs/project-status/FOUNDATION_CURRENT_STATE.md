@@ -15,7 +15,9 @@ techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quali
 Mobile Core React Native et Mobile Core Flutter sont **VALIDE_V1**. Mobile Flutter a été
 promu le 2026-07-14 par `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` : B1→B5 fermés,
 score §29 9/11 + 2 PARTIAL, R1 iOS Linux acceptée comme réserve environnementale sans
-succès iOS artificiel. Les cores vides restent `ai-core` et `web-angular`. `api-spring` est **`VALIDE_V1`** (Spring Boot 8, 2026-07-15 — §30 **15/15 ✅** / 0 ⚠️ / 0 ✗ ; SB7 : B1 AuditModule ✅ + B2 URL signée ✅ + C15 CORS env var ✅ ; SB8 : C10 Redis health ✅ + R1 MinIO TC ✅ + R3 rate limiting ✅ + R5 Redis ✅ ; `./mvnw verify` **99/99 ✅** ; CI L5 active).
+succès iOS artificiel. `web-angular` est **`SPECIFICATION_DOCUMENTAIRE`** (Angular 1,
+2026-07-15 — `CORE_SPECIFICATION.md` + `README.md`). Le seul core encore vide est `ai-core`.
+`api-spring` est **`VALIDE_V1`** (Spring Boot 8, 2026-07-15 — §30 **15/15 ✅** / 0 ⚠️ / 0 ✗ ; SB7 : B1 AuditModule ✅ + B2 URL signée ✅ + C15 CORS env var ✅ ; SB8 : C10 Redis health ✅ + R1 MinIO TC ✅ + R3 rate limiting ✅ + R5 Redis ✅ ; `./mvnw verify` **99/99 ✅** ; CI L5 active).
 
 | Catégorie | État |
 |---|---|

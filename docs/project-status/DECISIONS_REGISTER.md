@@ -404,8 +404,9 @@ backups, déploiement avancé, charts, observabilité distribuée, feature flags
 analytics…). **Aucun fichier ADR correspondant n'existe** → `NON_APPLICABLE_ACTUELLEMENT` jusqu'à
 rédaction.
 
-> **Note ADR-035 (2026-07-15)** : ADR-035 est maintenant validé. `web-angular` reste
-> `DOSSIER_SEULEMENT` tant que sa spécification et son starter ne sont pas livrés.
+> **Note ADR-035 (2026-07-15)** : ADR-035 est maintenant validé et partiellement implémenté
+> par Angular 1. `web-angular` est `SPECIFICATION_DOCUMENTAIRE` tant que le starter n'est
+> pas livré.
 
 > **Note ADR-034 (2026-07-14)** : ADR-034 est maintenant validé. `mobile-flutter` reste
 > `DOSSIER_SEULEMENT` tant que sa spécification et son starter ne sont pas livrés.
