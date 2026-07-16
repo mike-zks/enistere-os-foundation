@@ -7,9 +7,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessNoSandbox",
-    "lint": "ng lint",
+    "test": "architect web-angular:test",
+    "test:ci": "architect web-angular:test",
     "build:architect": "architect web-angular:build",
     "test:architect": "architect web-angular:test"
   },
@@ -31,9 +30,12 @@
   "engines": {
     "node": ">=24.15.0 || >=22.22.3"
   },
+  "overrides": {
+    "vite": "7.3.6"
+  },
   "devDependencies": {
-    "@angular-devkit/build-angular": "22.0.0",
-    "@angular/cli": "22.0.0",
+    "@angular/build": "22.0.7",
+    "@angular/cli": "22.0.7",
     "@angular/compiler-cli": "22.0.6",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.4.0",

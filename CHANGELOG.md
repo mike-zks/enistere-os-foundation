@@ -8,8 +8,8 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ### Web Core Angular 2 — Starter minimal Angular
 
-- `cores/web-angular/package.json` (créé) : `@angular/core` 22.0.6, `@angular/material` + `@angular/cdk` 22.0.4, `typescript` 6.0.3, `@angular/cli` 22.0.0 + `@angular-devkit/build-angular` 22.0.0 (downgraded pour compatibilité Node 24.14.0 — CLI 22.x requiert `>=24.15.0`) ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible production ; scripts `build:architect` + `test:architect` via `./node_modules/.bin/architect`.
-- `cores/web-angular/angular.json` (créé) : builder `@angular-devkit/build-angular:application` (esbuild Angular 17+), entrée `src/main.ts`, styles `src/styles.scss`, karma test runner avec `karmaConfig: karma.conf.js`.
+- `cores/web-angular/package.json` (créé) : `@angular/core` 22.0.6, `@angular/material` + `@angular/cdk` 22.0.4, `typescript` 6.0.3, `@angular/cli` 22.0.7 + `@angular/build` 22.0.7 ; override borné `vite` 7.3.6 (corrige l'audit `esbuild` transitif) ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible production ; scripts test via `architect web-angular:test` pour un run CI déterministe. Aucun script `lint` n'est exposé tant qu'Angular ESLint n'est pas installé/configuré.
+- `cores/web-angular/angular.json` (créé) : builder `@angular/build:application` (esbuild Angular 17+), entrée `src/main.ts`, styles `src/styles.scss`, karma test runner avec `karmaConfig: karma.conf.js`.
 - `cores/web-angular/tsconfig.json` (créé) : TypeScript strict (`strict: true`, `noImplicitOverride`, `noPropertyAccessFromIndexSignature`), `moduleResolution: bundler`, `target: ES2022`, `useDefineForClassFields: false` (compatibilité décorateurs Angular), `angularCompilerOptions: { strictInjectionParameters, strictInputAccessModifiers, strictTemplates }`.
 - `cores/web-angular/karma.conf.js` (créé) : launcher custom `ChromeHeadlessNoSandbox` (`--no-sandbox --disable-gpu --disable-dev-shm-usage`) pour CI sans espace sandbox.
 - `cores/web-angular/src/main.ts` (créé) : `bootstrapApplication(AppComponent, appConfig)` — bootstrap standalone sans NgModule.
@@ -23,7 +23,7 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 - `cores/web-angular/src/app/pages/home/home.component.spec.ts` (créé) : 5 tests (create, main.home-shell, h1 contient 'Enistère', .status-value = 'STARTER_INITIALISE', aria-label section présent).
 - **Tests : 8/8 ✅** — `architect web-angular:test` (ChromeHeadless 150.0.0.0, 3 AppComponent + 5 HomeComponent).
 - **Build : SUCCESS** — `architect web-angular:build` → 340 KB initial, zéro erreur TypeScript strict.
-- Contrainte Node : Angular CLI 22.x requiert `^22.22.3 || ^24.15.0 || >=26.0.0` ; environnement = Node 24.14.0 → build et tests via `./node_modules/.bin/architect` (bypasse le gate version CLI sans patcher `node_modules`).
+- Contrainte Node : Angular 22.x requiert `^22.22.3 || ^24.15.0 || >=26.0.0` ; l'environnement local Node 24.14.0 était trop ancien pour `ng`, donc les preuves locales ont utilisé `./node_modules/.bin/architect` et la CI valide l'exécution complète sur un runtime compatible.
 - Mises à jour documentaires : `docs/project-status/DECISIONS_REGISTER.md` (ADR-035 Angular 2 note), `docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`, `docs/project-status/NEXT_ACTIONS.md`, `docs/project-status/SESSION_HANDOFF.md`.
 - `web-angular` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**. Prochaine action : Web Core Angular 3 — Auth flow + routing protégé.
 - `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.

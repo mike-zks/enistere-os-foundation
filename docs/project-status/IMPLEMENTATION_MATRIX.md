@@ -395,12 +395,12 @@
 > (Loading/Empty/Error/SuccessState), `PermissionService` + `PermissionDirective` RBAC, 15 critères §29 V1,
 > missions ordonnées Angular 1→V1 (9 missions), 13 décisions pendantes §32.
 > `web-angular` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
-> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅. Prochaine action : Web Core Angular 2 — Starter minimal.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅. Prochaine action : Web Core Angular 3 — Auth flow + routing protégé.
 >
 > **Mise à jour Web Core Angular 2 — Starter minimal Angular (2026-07-15)** : 22 fichiers créés dans `cores/web-angular/` —
-> `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4, typescript 6.0.3, @angular/cli 22.0.0 +
-> @angular-devkit/build-angular 22.0.0 — downgraded pour Node 24.14.0 ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible prod),
-> `angular.json` (builder `@angular-devkit/build-angular:application`, esbuild, karma test runner),
+> `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4, typescript 6.0.3, @angular/cli 22.0.7 +
+> @angular/build 22.0.7 ; override `vite` 7.3.6 pour audit 0 ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible prod),
+> `angular.json` (builder `@angular/build:application`, esbuild, karma test runner),
 > `tsconfig.json` (strict + `strictTemplates` + ES2022 + `useDefineForClassFields: false` + `moduleResolution: bundler`),
 > `karma.conf.js` (ChromeHeadlessNoSandbox — `--no-sandbox --disable-gpu --disable-dev-shm-usage`),
 > `src/main.ts` (`bootstrapApplication(AppComponent, appConfig)`),
