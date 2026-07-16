@@ -6,6 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 1 — Core specification
+
+- `cores/ai-core/CORE_SPECIFICATION.md` : création de la spécification AI Core (Prompt Registry, Context Builder, Redaction Layer, RAG/Retrieval, Agent Orchestrator, Evaluation Harness, Provider Adapters, Audit Trail, sécurité, readiness).
+- `cores/ai-core/README.md` : création du README de core et des missions futures.
+- `ai-core` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
+- Aucun runtime, SDK IA, provider, RAG runtime, base vectorielle, endpoint, workflow, dépendance ou secret.
+
 ### Quality Web Angular CI gate
 
 - `.github/workflows/web-angular-ci.yml` : ajout d'un workflow dédié au core Angular (`npm ci`, `npm run test:ci`, `npm run build`, `npm audit`) avec job `web-angular`.
