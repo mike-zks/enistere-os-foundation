@@ -6,6 +6,19 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 7 — Upload fichiers
+
+- `cores/web-angular/src/app/core/upload/file-category.ts` : `FileCategory` union (9 valeurs : `IMAGE`/`DOCUMENT`/`AVATAR`/`VIDEO`/`AUDIO`/`IDENTITY_DOCUMENT`/`ATTACHMENT`/`MEDIA`/`OTHER`) + `FILE_CATEGORIES` pour le select Material (value/label).
+- `cores/web-angular/src/app/core/upload/app-file.model.ts` : `AppFile` interface (`file: File`, `category: FileCategory`, `subjectId?: string`) + `MAX_FILE_SIZE_BYTES` (10 MB) + `isValidAppFile()` (taille ≥ 1 octet ≤ 10 MB) + `isAllowedFileType()` (whitelist 14 MIME, bypass si type vide — backend autoritaire) + `describeFileForLog()` (retourne `{extension, sizeBytes}` uniquement — jamais nom/path/contenu/token).
+- `cores/web-angular/src/app/core/upload/uploaded-file-metadata.model.ts` : `UploadedFileMetadata` DTO public (`id`, `category`) — sans `storageKey`, `bucket`, `signedUrl`, `ownerId`.
+- `cores/web-angular/src/app/core/upload/upload.service.ts` : `UploadService` injectable `providedIn: 'root'` — `upload(appFile): Observable<RequestState<UploadedFileMetadata>>` via `HttpClient.post()` + `FormData` (file, category, subjectId conditionnel) ; Content-Type intentionnellement absent (boundary multipart posé par le navigateur) ; erreurs 413/415/401 mappées via `AppApiError` existant (`errorInterceptor` + `createRequestState`).
+- `cores/web-angular/src/app/features/upload/upload-form/upload-form.component.ts` : composant standalone Reactive Forms — `fb.nonNullable.group({category: required, subjectId: maxLength(128)})` ; `signal<File|null>()` pour le fichier natif ; `signal<RequestState<UploadedFileMetadata>>(idleState())` pour l'état ; `errorMessage` computed (`FileTooLarge`/`UnsupportedType`/`Unauthorized`/`RateLimited`/défaut) ; `submit()` + `reset()` + `ngOnDestroy` (`Subscription` gérée).
+- `cores/web-angular/src/app/features/upload/upload-form/upload-form.component.html` : `@if` Angular 17+ sur `state().status` pour basculer entre formulaire, `<enistere-loading-state>`, `<enistere-success-state>` et `<enistere-error-state>` ; `mat-select` catégorie + `matInput` subjectId optionnel + `mat-flat-button` submit désactivé si formulaire invalide.
+- `cores/web-angular/src/app/features/upload/upload-form/upload-form.component.scss` : tokens Enistere (`--enistere-spacing-*`, `--enistere-font-size-*`, `--enistere-font-weight-semibold`, `--enistere-color-foreground-*`, `--enistere-color-primary`).
+- Tests : 35 nouveaux tests — `app-file.model.spec.ts` × 12 (`isValidAppFile`, `isAllowedFileType`, `describeFileForLog` + non-fuite du nom de fichier) ; `upload.service.spec.ts` × 9 (FormData, Content-Type absent, category/subjectId, 413→FileTooLarge, 415→UnsupportedType, 401→Unauthorized via `errorInterceptor`) ; `upload-form.component.spec.ts` × 13 (rendu idle, file input, catégorie select, submit désactivé, appel service, states loading/success/error, reset, non-fuite nom fichier dans le DOM).
+- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `FOUNDATION_STATES_READY` → `UPLOAD_READY`.
+- `web-angular` : **`FOUNDATION_STATES_READY` → `UPLOAD_READY`**. Build SUCCESS + 205/205 tests ✅.
+
 ### Web Core Angular 6 — Composants Foundation Enistere
 
 - `cores/web-angular/src/app/shared/components/loading-state/enistere-loading-state.component.ts` : `EnistereLoadingStateComponent` standalone — signal `message` (défaut `'Chargement en cours…'`), signal `size` (`small`/`medium`/`large`, défaut `medium`), `MatProgressSpinnerModule`, `diameterFor` map (`small:24`, `medium:40`, `large:64`).
