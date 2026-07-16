@@ -395,7 +395,25 @@
 > (Loading/Empty/Error/SuccessState), `PermissionService` + `PermissionDirective` RBAC, 15 critères §29 V1,
 > missions ordonnées Angular 1→V1 (9 missions), 13 décisions pendantes §32.
 > `web-angular` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
-> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅. Prochaine action : Web Core Angular 2 — Starter minimal.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅. Prochaine action : Web Core Angular 3 — Auth flow + routing protégé.
+>
+> **Mise à jour Web Core Angular 2 — Starter minimal Angular (2026-07-15)** : 22 fichiers créés dans `cores/web-angular/` —
+> `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4, typescript 6.0.3, @angular/cli 22.0.7 +
+> @angular/build 22.0.7 ; override `vite` 7.3.6 pour audit 0 ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible prod),
+> `angular.json` (builder `@angular/build:application`, esbuild, karma test runner),
+> `tsconfig.json` (strict + `strictTemplates` + ES2022 + `useDefineForClassFields: false` + `moduleResolution: bundler`),
+> `karma.conf.js` (ChromeHeadlessNoSandbox — `--no-sandbox --disable-gpu --disable-dev-shm-usage`),
+> `src/main.ts` (`bootstrapApplication(AppComponent, appConfig)`),
+> `src/styles.scss` (thème Material 3 : `mat.define-theme()` + `mat.$azure-palette`, `@include mat.all-component-themes()`,
+> tokens Enistere `--enistere-*` → `--mat-sys-*`, dark mode `[data-theme='dark']`, `mat.$cyan-palette` tertiaire),
+> `src/app/app.config.ts` (`provideRouter(routes, withComponentInputBinding())`, `provideHttpClient(withFetch())`, `provideAnimationsAsync()`),
+> `src/app/app.routes.ts` (lazy `HomeComponent`, wildcard `redirectTo: ''`), `src/app/app.component.ts` (standalone, `RouterOutlet`),
+> `src/app/pages/home/home.component.ts` (page shell publique, `.status-value = 'STARTER_INITIALISE'`).
+> Tests : **8/8 ✅** via `architect web-angular:test` (ChromeHeadless 150.0.0.0 : 3 AppComponent + 5 HomeComponent).
+> Build : `architect web-angular:build` SUCCESS (340 KB initial, zéro erreur TypeScript strict).
+> Contrainte Node : Angular CLI 22.x requiert `^22.22.3 || ^24.15.0` ; environnement = Node 24.14.0 → build/tests via `./node_modules/.bin/architect`.
+> `web-angular` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅. Prochaine action : Web Core Angular 3 — Auth flow + routing protégé.
 >
 | Élément | Dossier | Spéc. | ADR | Starter | Code | Tests | Revue | Statut officiel | Dernière preuve | Prochaine condition |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -411,7 +429,7 @@
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
 | Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé, appliqué V1) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5 + SecureStorage Flutter 8 + RefreshInterceptor Flutter 9 + UI states Flutter 10 + sign-in form Flutter 11) | ✓ (218 tests : theme + unit/auth + unit/secure_session_store + widget × 3 + widget/sign_in_screen (10) + widget/states + unit/api × 5 + unit/upload + intégration × 7) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 9/11 §29, B1→B5 fermés, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 ; `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md` — B2 ; `MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md` — B3 ; `MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md` — B4 ; `MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md` — B5 ; `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` — promotion V1) | **VALIDE_V1** | Flutter V1 Final Readiness Decision (2026-07-14) : B1→B5 fermés, score §29 9/11 + 2 PARTIAL iOS R1 ; 218/218 tests headless ; smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux acceptée comme réserve environnementale non bloquante, sans succès iOS artificiel | — (V1 déclaré ; smoke iOS uniquement quand macOS/Xcode ou device iOS réel disponible) |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
-| Web Core Angular | ✓ | **✓ (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15)** | **ADR-035 (Validé, 2026-07-15)** | — | — | — | — | **SPECIFICATION_DOCUMENTAIRE** | `quality-gates docs` 2/2 ✅ · `git diff --check` ✅ (Angular 1, 2026-07-15) | Web Core Angular 2 — Starter minimal Angular |
+| Web Core Angular | ✓ | **✓ (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15)** | **ADR-035 (Validé, 2026-07-15)** | **✓ (Angular 2 : `package.json` @angular/core 22.0.6 + @angular/material/cdk 22.0.4 + `angular.json` esbuild + `tsconfig.*` strict + `karma.conf.js` ChromeHeadlessNoSandbox + `src/main.ts` + `src/styles.scss` thème M3 Enistere + `app.config.ts` + `app.routes.ts` + AppComponent + HomeComponent page shell, 2026-07-15)** | **✓ (Angular 2 — AppComponent + HomeComponent standalone ; 22 fichiers ; Angular 22.0.6 + Material 22.0.4 ; TypeScript 6.0.3 strict)** | **✓ (8/8 Angular 2 : 3 AppComponent + 5 HomeComponent — architect ChromeHeadless 150.0.0.0 ; build SUCCESS 340 KB)** | — | **STARTER_INITIALISE** | `architect web-angular:build` SUCCESS 340 KB · `architect web-angular:test` 8/8 ✅ · ChromeHeadless 150.0.0.0 (Angular 2, 2026-07-15) | Web Core Angular 3 — Auth flow + routing protégé |
 
 ### 1.1 Foundation baseline
 

@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `SPECIFICATION_DOCUMENTAIRE`
+**Statut** : `STARTER_INITIALISE`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -73,7 +73,7 @@ Sections clés :
 | # | Mission | Livrable | Statut |
 |---|---|---|---|
 | Angular 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` | ✅ Réalisé (2026-07-15) |
-| Angular 2 | Starter minimal Angular | `package.json` + structure `src/` + thème Material 3 Enistere | À faire |
+| Angular 2 | Starter minimal Angular | `package.json` + structure `src/` + thème Material 3 Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | À faire |
 | Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | À faire |
 | Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | À faire |
@@ -86,9 +86,9 @@ Sections clés :
 
 ## Statut
 
-`SPECIFICATION_DOCUMENTAIRE` — aucun starter Angular, aucun code TypeScript Angular, aucune dépendance npm.
+`STARTER_INITIALISE` — starter Angular 22 standalone minimal, thème Material 3 Enistere, TypeScript strict, build et tests de base.
 
-La prochaine action est **Web Core Angular 2 — Starter minimal Angular**.
+La prochaine action est **Web Core Angular 3 — Auth flow + routing protégé**.
 
 ---
 

@@ -404,11 +404,30 @@
 > `web-angular` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 >
-> **Prochaine action** : **Web Core Angular 2 — Starter minimal Angular**.
-> Objectif : créer `package.json` + `src/main.ts` + `app.config.ts` + structure `src/` + thème Material 3 Enistere.
-> Prérequis : Angular 1 ✅.
->
 > **Historique** : cette prochaine action était V3 ADR-035 ; réalisé 2026-07-15.
+
+> ✅ **Web Core Angular 2 — Starter minimal Angular : RÉALISÉ** (2026-07-15).
+> Livrables : 22 fichiers dans `cores/web-angular/` — `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4,
+> typescript 6.0.3, @angular/cli 22.0.7 + @angular/build 22.0.7, override `vite` 7.3.6),
+> `angular.json` (builder `@angular/build:application`, esbuild),
+> `tsconfig.json` (strict + strictTemplates + ES2022 + `useDefineForClassFields: false`),
+> `karma.conf.js` (ChromeHeadlessNoSandbox — `--no-sandbox --disable-gpu --disable-dev-shm-usage`),
+> `src/main.ts` (`bootstrapApplication(AppComponent, appConfig)`),
+> `src/styles.scss` (thème Material 3 : `mat.define-theme()` + `mat.$azure-palette`, `@include mat.all-component-themes()`,
+> tokens Enistere `--enistere-*` → `--mat-sys-*`, dark mode `[data-theme='dark']`),
+> `src/app/app.config.ts` (`provideRouter(routes, withComponentInputBinding())`, `provideHttpClient(withFetch())`, `provideAnimationsAsync()`),
+> `src/app/app.routes.ts` (lazy `HomeComponent`, wildcard `redirectTo: ''`),
+> `src/app/app.component.ts` (standalone, `RouterOutlet`), `src/app/pages/home/home.component.ts` (page shell, statut `STARTER_INITIALISE`).
+> Tests : **8/8** ✅ (3 AppComponent + 5 HomeComponent) via `architect web-angular:test` — ChromeHeadless 150.0.0.0.
+> Build : `architect web-angular:build` → SUCCESS (340 KB initial), zéro erreur TypeScript strict.
+> Contrainte Node : Angular CLI 22.x requiert `^22.22.3 || ^24.15.0` ; environnement = Node 24.14.0 → build/tests via `./node_modules/.bin/architect`.
+> `web-angular` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
+> `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+>
+> **Prochaine action** : **Web Core Angular 3 — Auth flow + routing protégé**.
+> Prérequis : Angular 2 ✅.
+>
+> **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
 > ✅ **Foundation V1 Release Publication : RÉALISÉE** (2026-07-12).
 > Notes publiées : `docs/project-status/FOUNDATION_V1_RELEASE_NOTES.md`.
@@ -1131,7 +1150,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **SPECIFICATION_DOCUMENTAIRE** — Angular 1 réalisé ; prochaine action : Angular 2 starter |
+| Web Core Angular | **STARTER_INITIALISE** — Angular 2 réalisé ; prochaine action : Angular 3 auth flow |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
