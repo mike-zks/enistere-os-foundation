@@ -1221,18 +1221,22 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | spécification absente |
+| AI Core | **SPECIFICATION_DOCUMENTAIRE** — AI Core 1 : `CORE_SPECIFICATION.md` + `README.md`, aucun runtime/provider/dépendance |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
 ## 8. Prochaine action recommandée après Quality Web Angular CI
 
-**Prochaine action UNIQUE recommandée** : **AI Core 1 — Core specification**.
+> ✅ **AI Core 1 — Core specification : RÉALISÉ** (2026-07-16).
+> Livrables : `cores/ai-core/CORE_SPECIFICATION.md` + `cores/ai-core/README.md`.
+> Statut : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
+> Aucun runtime, provider, SDK, RAG, base vectorielle, endpoint, dépendance ou secret.
 
-Justification : tous les cores applicatifs principaux et Quality/Docs sont `VALIDE_V1`; `ai-core` reste
-le seul core `DOSSIER_SEULEMENT`. La mission doit rester documentaire : lire `strategy/10_AI_STRATEGY.md`,
-`strategy/04_ROADMAP_GLOBAL.md`, les ADR existants et le backlog ADR, puis produire
-`cores/ai-core/CORE_SPECIFICATION.md` + `README.md` sans runtime, dépendance, modèle, provider ou secret.
+**Prochaine action UNIQUE recommandée** : **AI Core 2 — Prompt registry model + validator local**.
+
+Objectif : ajouter un registre de prompts local et validable, sans provider IA réel. Périmètre recommandé :
+`cores/ai-core/src/prompt-registry/*`, tests purs Node si un package minimal est décidé, ou documents/templates
+si la mission reste docs-only. Interdits : SDK IA, clé API, appel réseau, RAG runtime, base vectorielle.
 
 ## 4. Prérequis
 
