@@ -88,7 +88,7 @@ Sections clés :
 
 `FOUNDATION_STATES_READY` — 4 composants Foundation standalone (`EnistereLoadingStateComponent`, `EnistereEmptyStateComponent`, `EnistereErrorStateComponent`, `EnistereSuccessStateComponent`) : signal inputs typés (`input()`/`input.required<T>()`), signal outputs (`output<void>()`), `role="status"` + `aria-live="polite"` (loading/empty/success), `role="alert"` + `aria-live="assertive"` (error), tokens Enistere (`--enistere-color-status-danger/success`, `--enistere-color-foreground-muted/default`, `--enistere-font-size-lg`, `--enistere-spacing-*`), `MatProgressSpinnerModule` (loading), `MatButtonModule` (actions optionnelles). Build SUCCESS + 170/170 tests.
 
-La prochaine action est **Web Core Angular 7 — PermissionService + PermissionDirective ou Upload selon roadmap**.
+La prochaine action est **Web Core Angular 7 — Upload fichiers**.
 
 ---
 
