@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `STARTER_INITIALISE`
+**Statut** : `AUTH_ROUTING_READY`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -74,7 +74,7 @@ Sections clés :
 |---|---|---|---|
 | Angular 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` | ✅ Réalisé (2026-07-15) |
 | Angular 2 | Starter minimal Angular | `package.json` + structure `src/` + thème Material 3 Enistere | ✅ Réalisé (2026-07-16) |
-| Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | À faire |
+| Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | ✅ Réalisé (2026-07-16) |
 | Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | À faire |
 | Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | À faire |
 | Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState + PermissionDirective + CDK a11y | À faire |
@@ -86,9 +86,9 @@ Sections clés :
 
 ## Statut
 
-`STARTER_INITIALISE` — starter Angular 22 standalone minimal, thème Material 3 Enistere, TypeScript strict, build et tests de base.
+`AUTH_ROUTING_READY` — auth flow signal-based, routing protégé par guards fonctionnels, intercepteur Bearer mémoire, pages login/dashboard shells accessibles, tests AuthService/guards/intercepteur.
 
-La prochaine action est **Web Core Angular 3 — Auth flow + routing protégé**.
+La prochaine action est **Web Core Angular 4 — Client HTTP + server state**.
 
 ---
 

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home.component';
 
@@ -6,7 +7,7 @@ describe('HomeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
-      providers: [provideNoopAnimations()],
+      providers: [provideRouter([]), provideNoopAnimations()],
     }).compileComponents();
   });
 
@@ -30,11 +31,11 @@ describe('HomeComponent', () => {
     expect(el.querySelector('h1')?.textContent?.trim()).toContain('Enistère');
   });
 
-  it('should show STARTER_INITIALISE status badge', () => {
+  it('should show AUTH_ROUTING_READY status badge', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('STARTER_INITIALISE');
+    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('AUTH_ROUTING_READY');
   });
 
   it('should have a labelled status section', () => {
@@ -43,5 +44,15 @@ describe('HomeComponent', () => {
     const el = fixture.nativeElement as HTMLElement;
     const section = el.querySelector('section[aria-label]');
     expect(section).toBeTruthy();
+  });
+
+  it('should have navigation links to login and dashboard', () => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const nav = el.querySelector('nav[aria-label]');
+    expect(nav).toBeTruthy();
+    const links = nav?.querySelectorAll('a');
+    expect(links?.length).toBeGreaterThanOrEqual(2);
   });
 });
