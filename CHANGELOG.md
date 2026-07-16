@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 4 — Client HTTP + server-state RxJS
+
+- `cores/web-angular/src/app/core/config/api-config.ts` : `APP_BASE_URL = new InjectionToken<string>('APP_BASE_URL')` + `ApiConfig` interface. Note : le timeout par requête n'est pas natif dans Angular HttpClient — utilisation du RxJS `timeout()` différée Angular 5+.
+- `cores/web-angular/src/app/core/errors/app-api-error.ts` : `ApiErrorCode` union de 12 valeurs (`BadRequest` / `Unauthorized` / `Forbidden` / `NotFound` / `Conflict` / `FileTooLarge` / `UnsupportedType` / `ValidationError` / `RateLimited` / `ServerError` / `NetworkError` / `Unknown`) + interface `AppApiError` (`code`, `statusCode: number | null`, `requestId: string | null`) + `mapHttpError()` (status 0 → NetworkError, `x-request-id` extrait des en-têtes, corps jamais exposé) + `isAppApiError()` type-guard.
+- `cores/web-angular/src/app/core/interceptors/error.interceptor.ts` : transforme `HttpErrorResponse` en `AppApiError` typée ; 401 surfacé comme `Unauthorized` sans refresh automatique ; aucune stack, body, token ou en-tête sensible loggué ou exposé.
+- `cores/web-angular/src/app/core/interceptors/log.interceptor.ts` : `sanitizePath()` extrait le pathname seul (query params, fragment et URL signée jamais loggués) ; logs `[HTTP] method path status +duration ms` UNIQUEMENT — JAMAIS body, Authorization, query params sensibles, URL signée.
+- `cores/web-angular/src/app/core/server-state/request-state.ts` : `RequestState<T>` (`idle` / `loading` / `success` / `error`) + factories `idleState` / `loadingState` / `successState` / `errorState` + `createRequestState<T>(source$)` : émission immédiate de `loadingState`, puis `successState(data)` ou `errorState(appError)` ; les erreurs non-`AppApiError` sont enveloppées dans `{ code: 'Unknown' }`.
+- `cores/web-angular/src/app/app.config.ts` mis à jour : `withInterceptors([authInterceptor, logInterceptor, errorInterceptor])` (ordre : `auth` outermost → `log` → `error` innermost — error transforme en premier sur la réponse, log voit le statusCode typé) + `{ provide: APP_BASE_URL, useValue: '' }` (URLs relatives par défaut, surcharge via `fileReplacements` Angular 5+).
+- Tests : 41 nouveaux tests (`api-config.spec.ts` × 2, `app-api-error.spec.ts` × 17, `error.interceptor.spec.ts` × 6, `log.interceptor.spec.ts` × 7 dont vérification stricte de l'absence d'Authorization/body/query params, `request-state.spec.ts` × 9).
+- `web-angular` : **`AUTH_ROUTING_READY` → `HTTP_SERVER_STATE_READY`**. Prochaine action : Web Core Angular 5 — Reactive Forms + Angular Material.
+
 ### Web Core Angular 3 — Auth flow + routing protégé
 
 - `cores/web-angular/src/app/core/auth/` : `AuthState` (`loading` / `authenticated` / `unauthenticated` / `refreshing` / `expired`), `AuthService` signal-based avec access token en mémoire privée uniquement, signal public en lecture seule, `login()` placeholder, `logout()` purge mémoire et `restoreSession()` sans persistance.

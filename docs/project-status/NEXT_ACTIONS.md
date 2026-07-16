@@ -431,8 +431,19 @@
 > protégée, pages login/dashboard shells accessibles. `web-angular` :
 > **`STARTER_INITIALISE` → `AUTH_ROUTING_READY`**.
 >
-> **Prochaine action** : **Web Core Angular 4 — Client HTTP + server state**.
-> Prérequis : Angular 3 ✅.
+> ✅ **Web Core Angular 4 — Client HTTP + server-state RxJS : RÉALISÉ** (2026-07-16).
+> Livrables :
+> - `src/app/core/config/api-config.ts` : `APP_BASE_URL = new InjectionToken<string>('APP_BASE_URL')` + `ApiConfig` interface (timeout documenté/différé Angular 5+).
+> - `src/app/core/errors/app-api-error.ts` : `ApiErrorCode` union (12 valeurs) + `AppApiError` + `mapHttpError()` (400/401/403/404/409/413/415/422/429/5xx/réseau ; `x-request-id` extrait ; corps jamais exposé) + `isAppApiError()` type-guard.
+> - `src/app/core/interceptors/error.interceptor.ts` : `HttpErrorResponse` → `AppApiError`, 401 surfacé sans refresh, aucune stack/body/token sensible loggué.
+> - `src/app/core/interceptors/log.interceptor.ts` : `sanitizePath()` pathname seul, logs `[HTTP] method path status +duration ms` UNIQUEMENT — JAMAIS body/Authorization/query params sensibles/URL signée.
+> - `src/app/core/server-state/request-state.ts` : `RequestState<T>` factories + `createRequestState<T>()` (startWith loading → success → catchError AppApiError/Unknown).
+> - `src/app/app.config.ts` : `withInterceptors([authInterceptor, logInterceptor, errorInterceptor])` + `APP_BASE_URL: ''`.
+> - Tests : `api-config.spec.ts` + `app-api-error.spec.ts` + `error.interceptor.spec.ts` + `log.interceptor.spec.ts` (vérification absence Authorization/body/query params) + `request-state.spec.ts`.
+> `web-angular` : **`AUTH_ROUTING_READY` → `HTTP_SERVER_STATE_READY`**.
+>
+> **Prochaine action** : **Web Core Angular 5 — Reactive Forms + Angular Material**.
+> Prérequis : Angular 4 ✅.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
