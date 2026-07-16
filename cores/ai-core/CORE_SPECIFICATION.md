@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
 > Statut : PREUVE_TECHNIQUE
-> Mission courante : AI Core 3 — Redaction layer pure + tests
+> Mission courante : AI Core 4 — Context builder allow-list
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -126,6 +126,17 @@ Responsabilites :
 - exclure secrets, `.env`, artefacts de build, donnees personnelles ;
 - produire un contexte explicite et auditable ;
 - signaler les documents absents.
+
+Preuve technique livree par AI Core 4 :
+
+- `src/context/context-builder.mjs` construit un contexte local depuis une allow-list explicite ;
+- `src/context/index.mjs` expose le module ;
+- `test/context-builder.test.mjs` couvre la normalisation de chemins, le refus des chemins interdits,
+  les fichiers manquants, la deduplication, la redaction appliquee, les limites par fichier et les limites
+  globales.
+
+Le builder est local, auditable, sans provider, sans RAG runtime, sans indexation globale, sans appel reseau,
+sans stockage de traces et sans dependance.
 
 ### 5.3 Redaction Layer
 
@@ -530,7 +541,7 @@ AI Core ne doit pas :
 
 1. AI Core 2 — Prompt registry model + validator documentaire/local. **Realise**.
 2. AI Core 3 — Redaction layer pure + tests. **Realise**.
-3. AI Core 4 — Context builder allow-list + reports.
+3. AI Core 4 — Context builder allow-list + reports. **Realise**.
 4. AI Core 5 — Provider adapter seam + fake provider.
 5. AI Core 6 — Evaluation harness initial.
 6. AI Core 7 — Retrieval/RAG design decision (ADR si choix vector DB/provider).

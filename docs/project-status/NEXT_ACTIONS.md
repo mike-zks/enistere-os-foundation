@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **PREUVE_TECHNIQUE** — AI Core 3 : prompt registry + redaction layer Node purs, aucun runtime/provider/dépendance |
+| AI Core | **PREUVE_TECHNIQUE** — AI Core 4 : prompt registry + redaction layer + context builder Node purs, aucun runtime/provider/dépendance |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1247,14 +1247,21 @@ deux cores. À arbitrer par décision humaine.
 > Vérifications : tests Node redaction + tests Prompt Registry + `quality-gates docs`.
 > Aucun provider, SDK IA, appel réseau, RAG runtime, base vectorielle, endpoint, workflow, dépendance,
 > secret ou stockage de traces.
+>
+> ✅ **AI Core 4 — Context builder allow-list : RÉALISÉ** (2026-07-16).
+> Livrables : `cores/ai-core/src/context/context-builder.mjs`, `src/context/index.mjs`,
+> `test/context-builder.test.mjs`.
+> Statut : **`PREUVE_TECHNIQUE` maintenu**.
+> Vérifications : tests Node context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
+> Aucun provider, SDK IA, appel réseau, RAG runtime, base vectorielle, indexation globale, endpoint, workflow,
+> dépendance, secret ou stockage de traces.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 4 — Context builder allow-list**.
+**Prochaine action UNIQUE recommandée** : **AI Core 5 — Provider adapter seam + fake provider**.
 
-Objectif : construire un contexte local minimal et auditable à partir d'une allow-list explicite de fichiers,
-en appliquant la redaction AI Core 3 avant toute sortie de contexte. Périmètre recommandé :
-`cores/ai-core/src/context/*`, `cores/ai-core/test/context*.test.mjs`, README/spec/statut. Interdits :
-SDK IA, clé API, appel réseau, provider réel, RAG runtime, base vectorielle, indexation globale du repo,
-stockage de traces ou intégration à un workflow.
+Objectif : définir un seam provider local et un fake provider déterministe pour tests, sans provider réel.
+Périmètre recommandé : `cores/ai-core/src/provider/*`, `cores/ai-core/test/provider*.test.mjs`,
+README/spec/statut. Interdits : SDK IA réel, clé API, appel réseau, modèle réel, streaming réel, embeddings,
+RAG runtime, base vectorielle, stockage de traces ou intégration à un workflow.
 
 ## 4. Prérequis
 
