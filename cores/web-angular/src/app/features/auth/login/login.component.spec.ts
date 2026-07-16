@@ -46,6 +46,23 @@ describe('LoginComponent', () => {
     expect(el.querySelector('form')).toBeTruthy();
   });
 
+  it('should use Angular Material form fields', () => {
+    const { fixture } = setup();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const fields = el.querySelectorAll('mat-form-field');
+    expect(fields.length).toBe(2);
+  });
+
+  it('should use password input type for password field', () => {
+    const { fixture } = setup();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const passwordInput = el.querySelector('input[type="password"]') as HTMLInputElement;
+    expect(passwordInput).toBeTruthy();
+    expect(passwordInput.type).toBe('password');
+  });
+
   it('should have an invalid form initially', () => {
     const { component } = setup();
     expect(component.loginForm.invalid).toBeTrue();
@@ -102,7 +119,41 @@ describe('LoginComponent', () => {
     component.loginForm.controls.email.markAsTouched();
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('#email-error')).toBeTruthy();
+    const matError = el.querySelector('mat-error');
+    expect(matError).toBeTruthy();
+    expect(matError?.textContent?.trim()).toContain('obligatoire');
+  });
+
+  it('should show email invalid error when email format is wrong', () => {
+    const { fixture, component } = setup();
+    component.loginForm.controls.email.setValue('not-an-email');
+    component.loginForm.controls.email.markAsTouched();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const matError = el.querySelector('mat-error');
+    expect(matError).toBeTruthy();
+    expect(matError?.textContent?.trim()).toContain("n'est pas valide");
+  });
+
+  it('should show password required error when password is touched and empty', () => {
+    const { fixture, component } = setup();
+    component.loginForm.controls.email.setValue('user@example.com');
+    component.loginForm.controls.password.markAsTouched();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const matErrors = el.querySelectorAll('mat-error');
+    const passwordError = Array.from(matErrors).find(e => e.textContent?.includes('Mot de passe'));
+    expect(passwordError).toBeTruthy();
+  });
+
+  it('should not expose password value in the DOM', () => {
+    const { fixture, component } = setup();
+    component.loginForm.setValue({ email: 'user@example.com', password: 'SuperSecret123' });
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).not.toContain('SuperSecret123');
+    const passwordInput = el.querySelector('input[type="password"]') as HTMLInputElement;
+    expect(passwordInput.type).toBe('password');
   });
 
   it('should disable submit button when form is invalid', () => {

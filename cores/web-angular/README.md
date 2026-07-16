@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `HTTP_SERVER_STATE_READY`
+**Statut** : `FORMS_MATERIAL_READY`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -76,7 +76,7 @@ Sections clés :
 | Angular 2 | Starter minimal Angular | `package.json` + structure `src/` + thème Material 3 Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | ✅ Réalisé (2026-07-16) |
 | Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | ✅ Réalisé (2026-07-16) |
-| Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | À faire |
+| Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | ✅ Réalisé (2026-07-16) |
 | Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState + PermissionDirective + CDK a11y | À faire |
 | Angular 7 | Upload fichiers | UploadService + FormData + états upload | À faire |
 | Angular 8 | Tests + smoke | TestBed + CDK testing harness + rapport | À faire |
@@ -86,9 +86,9 @@ Sections clés :
 
 ## Statut
 
-`HTTP_SERVER_STATE_READY` — couche HTTP Angular générique : `AppApiError` typée, `ErrorInterceptor` (transformation `HttpErrorResponse` → `AppApiError`, 401 surfacé sans refresh), `LogInterceptor` (method+path+status+durée, jamais body/Authorization/query params sensibles/URL signée), `RequestState<T>` RxJS (idle/loading/success/error + `createRequestState()`), `APP_BASE_URL` token. Ordre intercepteurs : `auth → log → error`. Tests complets.
+`FORMS_MATERIAL_READY` — Angular Material form fields sur la page de connexion : `mat-form-field` (appearance=outline), `matInput`, `mat-error` avec validation `required`/`email`/`minlength`, `mat-flat-button` pour le submit, utilitaire pur `getFieldError()` (required/email/minlength/maxlength/pattern), SCSS nettoyé (styles custom input supprimés). Construits sur `HTTP_SERVER_STATE_READY` (Angular 4). Build SUCCESS + 136/136 tests.
 
-La prochaine action est **Web Core Angular 5 — Reactive Forms + Angular Material**.
+La prochaine action est **Web Core Angular 6 — Composants Foundation Enistere**.
 
 ---
 

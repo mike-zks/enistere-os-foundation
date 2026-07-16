@@ -11,55 +11,31 @@
     novalidate
     aria-label="Formulaire de connexion"
   >
-    <div class="form-field">
-      <label for="email-input" class="field-label">
-        Adresse e-mail
-        <span aria-hidden="true" class="required-mark">*</span>
-      </label>
+    <mat-form-field appearance="outline" class="login-field">
+      <mat-label>Adresse e-mail</mat-label>
       <input
-        id="email-input"
+        matInput
         type="email"
         formControlName="email"
-        class="field-input"
         autocomplete="email"
-        [attr.aria-invalid]="loginForm.controls.email.invalid && loginForm.controls.email.touched ? true : null"
-        aria-describedby="email-error"
-        placeholder="votre@email.com"
       />
-      @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
-        <span id="email-error" class="field-error" role="alert">
-          @if (loginForm.controls.email.hasError('required')) {
-            L'adresse e-mail est obligatoire.
-          } @else if (loginForm.controls.email.hasError('email')) {
-            L'adresse e-mail n'est pas valide.
-          }
-        </span>
+      @if (getFieldError(loginForm.controls.email, 'Adresse e-mail'); as emailErr) {
+        <mat-error>{{ emailErr }}</mat-error>
       }
-    </div>
+    </mat-form-field>
 
-    <div class="form-field">
-      <label for="password-input" class="field-label">
-        Mot de passe
-        <span aria-hidden="true" class="required-mark">*</span>
-      </label>
+    <mat-form-field appearance="outline" class="login-field">
+      <mat-label>Mot de passe</mat-label>
       <input
-        id="password-input"
+        matInput
         type="password"
         formControlName="password"
-        class="field-input"
         autocomplete="current-password"
-        [attr.aria-invalid]="loginForm.controls.password.invalid && loginForm.controls.password.touched ? true : null"
-        aria-describedby="password-error"
-        placeholder="Mot de passe"
       />
-      @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
-        <span id="password-error" class="field-error" role="alert">
-          @if (loginForm.controls.password.hasError('required')) {
-            Le mot de passe est obligatoire.
-          }
-        </span>
+      @if (getFieldError(loginForm.controls.password, 'Mot de passe'); as passwordErr) {
+        <mat-error>{{ passwordErr }}</mat-error>
       }
-    </div>
+    </mat-form-field>
 
     @if (errorMessage) {
       <div class="form-error-banner" role="alert" aria-live="polite">
@@ -68,8 +44,9 @@
     }
 
     <button
+      mat-flat-button
       type="submit"
-      class="submit-btn"
+      class="login-submit"
       [disabled]="loginForm.invalid || isLoading"
       [attr.aria-busy]="isLoading ? true : null"
     >
