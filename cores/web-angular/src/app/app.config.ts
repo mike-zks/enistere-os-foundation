@@ -4,20 +4,22 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { routes } from './app.routes';
 import { APP_BASE_URL } from './core/config/api-config';
+import { AuthApi, PlaceholderAuthApi } from './core/auth/auth.api';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { refreshInterceptor } from './core/interceptors/refresh.interceptor';
 import { logInterceptor } from './core/interceptors/log.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { AuthService } from './core/auth/auth.service';
 
-// Interceptor order: auth (outermost) → log → error (innermost).
-// On request:  auth adds Bearer  → log starts timer  → error passes through.
-// On response: error maps errors → log records result → auth sees typed AppApiError.
+// Interceptor array order: auth → refresh → log → error.
+// On request:  auth adds Bearer → refresh passes through → log starts timer → error passes through.
+// On response: error maps errors → log records result → refresh retries on 401 → auth sees result.
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([authInterceptor, logInterceptor, errorInterceptor]),
+      withInterceptors([authInterceptor, refreshInterceptor, logInterceptor, errorInterceptor]),
     ),
     provideAnimationsAsync(),
     provideAppInitializer(() => {
@@ -25,5 +27,7 @@ export const appConfig: ApplicationConfig = {
     }),
     // Relative URLs by default — override per-environment via Angular fileReplacements (Angular 5+).
     { provide: APP_BASE_URL, useValue: '' },
+    // Placeholder auth API — projects can replace this seam with a real backend adapter.
+    { provide: AuthApi, useClass: PlaceholderAuthApi },
   ],
 };

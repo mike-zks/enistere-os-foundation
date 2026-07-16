@@ -6,15 +6,24 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 9 — RefreshInterceptor + login API seam
+
+- `cores/web-angular/src/app/core/auth/auth.api.ts` : ajout de `AuthApi` injectable + `PlaceholderAuthApi` pour découpler le core Angular d'un backend réel.
+- `AuthService` : `login()` devient Observable, access token reste en mémoire privée, purge token sur erreur login, `logout()` best-effort, `refreshSession()` coalescé et purge sur échec.
+- `RefreshInterceptor` : 401 authentifié → refresh → retry unique ; endpoints `/auth/login`, `/auth/refresh`, `/auth/logout` exclus ; pas de boucle ; logout/purge si refresh échoue.
+- Multipart : le retry `FormData` ne force jamais `Content-Type`, le navigateur conserve la génération du boundary.
+- Tests : `auth.api.spec.ts`, `refresh.interceptor.spec.ts`, specs auth/login/navigation/dashboard ajustées ; **248/248 tests Angular ✅**.
+- Rapport `WEB_ANGULAR9_REFRESH_INTERCEPTOR_REPORT.md` ajouté ; `WEB_ANGULAR_V1_READINESS_REVIEW.md` mis à jour : B1 fermé, score **13/15 SATISFAIT + 1/15 PARTIEL + 1/15 NON SATISFAIT**. `VALIDE_V1` reste différé par B2 PermissionService/PermissionDirective.
+
 ### Web Core Angular V1 Readiness Review
 
-- Rapport `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` : 15 critères §29 vérifiés un par un — **11 / 15 SATISFAIT**, **3 / 15 PARTIEL**, **1 / 15 NON SATISFAIT**.
+- Rapport `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` : 15 critères §29 vérifiés un par un — **13 / 15 SATISFAIT**, **1 / 15 PARTIEL**, **1 / 15 NON SATISFAIT** après Angular 9.
 - Cohérence ADR-035 vérifiée : Angular Material CDK + M3, Reactive Forms, Foundation components Angular, CDK harnesses, Angular Signals, PrimeNG absent.
-- Blockers V1 : B1 (RefreshInterceptor/login API seam absent), B2 (PermissionService/PermissionDirective absent). Réserves non-bloquantes : R1 (CDK a11y FocusTrap/LiveAnnouncer — ARIA HTML équivalent, FocusTrap nécessite modales), R2 (CI Angular gate — non requis §29, reporté §32).
+- Blockers V1 : B2 (PermissionService/PermissionDirective absent). B1 RefreshInterceptor/login API seam est fermé par Angular 9. Réserves non-bloquantes : R1 (CDK a11y FocusTrap/LiveAnnouncer — ARIA HTML équivalent, FocusTrap nécessite modales), R2 (CI Angular gate — non requis §29, reporté §32).
 - Décisions §32 tracées : 2 TRANSCHÉ (framework tests Jasmine/Karma, version Angular 22.0.6), 9 DIFFÉRÉ (refresh, OpenAPI, E2E, TanStack Query Angular, NgRx, SSR, UI Kit Angular, CI gate, préférences).
 - `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`.
 - Mise à jour docs : `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md`, `cores/web-angular/README.md`.
-- `web-angular` : **`TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`**. `VALIDE_V1` différé jusqu'à fermeture B1/B2. Build SUCCESS + **224/224 tests** ✅ — 0 vulnérabilité.
+- `web-angular` : **`TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`**. `VALIDE_V1` différé jusqu'à fermeture B2. Build SUCCESS + **248/248 tests** ✅ — 0 vulnérabilité.
 
 ### Web Core Angular 8 — Tests + smoke
 

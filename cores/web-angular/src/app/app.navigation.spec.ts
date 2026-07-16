@@ -3,11 +3,16 @@ import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from './app.routes';
+import { AuthApi, PlaceholderAuthApi } from './core/auth/auth.api';
 
 describe('App Navigation Integration (RouterTestingHarness)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideRouter(routes), provideNoopAnimations()],
+      providers: [
+        provideRouter(routes),
+        provideNoopAnimations(),
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
+      ],
     }).compileComponents();
   });
 

@@ -80,27 +80,27 @@ Sections clés :
 | Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState standalone, signal inputs, a11y roles, tokens Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 7 | Upload fichiers | UploadService + FormData + états upload | ✅ Réalisé (2026-07-16) |
 | Angular 8 | Tests + smoke | TestBed + CDK testing harness + rapport | ✅ Réalisé (2026-07-16) |
+| Angular 9 | RefreshInterceptor + login API seam | `AuthApi` seam + login Observable + refresh coalescé + retry 401 unique | ✅ Réalisé (2026-07-16) |
 | Angular V1 | Readiness review | Rapport V1 Readiness | ✅ Réalisé (2026-07-16) |
 
 ---
 
 ## Statut
 
-`IMPLEMENTATION_AVANCEE` — **11 / 15 critères §29 satisfaits**, **3 / 15 partiels** et **1 / 15 non satisfait**. `VALIDE_V1` est différé par deux blockers : **B1 RefreshInterceptor/login API seam** et **B2 PermissionService/PermissionDirective**. Vérifications : **224 / 224 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
+`IMPLEMENTATION_AVANCEE` — **13 / 15 critères §29 satisfaits**, **1 / 15 partiel** et **1 / 15 non satisfait**. `VALIDE_V1` est différé par un blocker restant : **B2 PermissionService/PermissionDirective**. Vérifications Angular 9 : **248 / 248 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
 
 Rapport de readiness : `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` (2026-07-16).
 
-Primitives upload Angular : `FileCategory` (9 valeurs) + `AppFile` + `UploadService` HttpClient+FormData (Content-Type jamais forcé) + `UploadFormComponent` Reactive Forms + états Foundation + CDK harnesses + `RouterTestingHarness` (Angular 8).
+Auth Angular 9 : `AuthApi` seam injectable + `PlaceholderAuthApi`, `AuthService.login()` Observable, access token en mémoire uniquement, `refreshSession()` coalescé, `RefreshInterceptor` 401 → refresh → retry unique → logout/purge si échec, `FormData` retry sans `Content-Type` forcé. Primitives upload Angular : `FileCategory` (9 valeurs) + `AppFile` + `UploadService` HttpClient+FormData (Content-Type jamais forcé) + `UploadFormComponent` Reactive Forms + états Foundation + CDK harnesses + `RouterTestingHarness` (Angular 8).
 
 **Blockers V1 :**
-- **B1** — RefreshInterceptor / login API seam : 401 → refresh coalescé → retry unique → logout/purge si échec (§29.3, §29.5)
 - **B2** — PermissionService + PermissionDirective RBAC : affichage conditionnel UX testé, API Core toujours autorité (§29.13)
 
 **Réserves non-bloquantes :**
 - **R1** — CDK a11y FocusTrap/LiveAnnouncer : ARIA HTML équivalent ; FocusTrap nécessite des modales (§29.9)
 - **R2** — CI Angular gate : non requis §29 ; reporté mission qualité/CI (§32)
 
-**Prochaine action** : Web Core Angular 9 — RefreshInterceptor + login API seam.
+**Prochaine action** : Web Core Angular 10 — PermissionService + PermissionDirective.
 
 ---
 

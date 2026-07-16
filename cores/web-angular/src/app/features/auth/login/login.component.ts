@@ -45,13 +45,15 @@ export class LoginComponent implements OnInit {
 
     const { email, password } = this.loginForm.getRawValue();
 
-    try {
-      this.authService.login(email, password);
-      void this.router.navigateByUrl(this.returnUrl);
-    } catch {
-      this.errorMessage = 'Erreur de connexion. Veuillez réessayer.';
-    } finally {
-      this.isLoading = false;
-    }
+    this.authService.login(email, password).subscribe({
+      next: () => {
+        this.isLoading = false;
+        void this.router.navigateByUrl(this.returnUrl);
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = 'Erreur de connexion. Veuillez réessayer.';
+      },
+    });
   }
 }

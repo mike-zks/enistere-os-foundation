@@ -15,8 +15,8 @@ techniques réelles** : API Core, Web Core, Cloud Core, UI Kit, Docs Core, Quali
 Mobile Core React Native et Mobile Core Flutter sont **VALIDE_V1**. Mobile Flutter a été
 promu le 2026-07-14 par `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` : B1→B5 fermés,
 score §29 9/11 + 2 PARTIAL, R1 iOS Linux acceptée comme réserve environnementale sans
-succès iOS artificiel. `web-angular` est **`IMPLEMENTATION_AVANCEE`** (Angular V1 Readiness Review,
-2026-07-16 — 11/15 §29 SATISFAIT + 3/15 PARTIEL + 1/15 NON SATISFAIT ; blockers B1 RefreshInterceptor/login API seam + B2 PermissionService/PermissionDirective ; build SUCCESS + 224/224 tests). Le seul core encore vide est `ai-core`.
+succès iOS artificiel. `web-angular` est **`IMPLEMENTATION_AVANCEE`** (Angular 9, 2026-07-16 —
+B1 RefreshInterceptor/login API seam fermé ; readiness mise à jour 13/15 §29 SATISFAIT + 1/15 PARTIEL + 1/15 NON SATISFAIT ; blocker restant B2 PermissionService/PermissionDirective ; build SUCCESS + 248/248 tests). Le seul core encore vide est `ai-core`.
 `api-spring` est **`VALIDE_V1`** (Spring Boot 8, 2026-07-15 — §30 **15/15 ✅** / 0 ⚠️ / 0 ✗ ; SB7 : B1 AuditModule ✅ + B2 URL signée ✅ + C15 CORS env var ✅ ; SB8 : C10 Redis health ✅ + R1 MinIO TC ✅ + R3 rate limiting ✅ + R5 Redis ✅ ; `./mvnw verify` **99/99 ✅** ; CI L5 active).
 
 | Catégorie | État |
@@ -73,7 +73,7 @@ enistere-os-foundation/
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
     api-spring/           VALIDE_V1 (SB8 — §30 15/15 ✅ ; 99/99 ✅ ; L5 CI ; Redis+RateLimit+MinioTC)
     ai-core/               → vide
-    web-angular/           IMPLEMENTATION_AVANCEE (Angular V1 Readiness Review, 2026-07-16 — 11/15 §29 SATISFAIT + 3/15 PARTIEL + 1/15 NON SATISFAIT ; blockers B1 RefreshInterceptor/login API seam + B2 PermissionService/PermissionDirective ; 224/224 tests)
+    web-angular/           IMPLEMENTATION_AVANCEE (Angular 9, 2026-07-16 — B1 RefreshInterceptor/login API seam fermé ; 13/15 §29 SATISFAIT + 1/15 PARTIEL + 1/15 NON SATISFAIT ; blocker restant B2 PermissionService/PermissionDirective ; 248/248 tests)
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
     api-client-fetch/  @enistere/api-client-fetch (0.1.0, privé)
@@ -96,7 +96,7 @@ enistere-os-foundation/
 | `docs-core` | oui | oui | **oui** (script link check + guides) | **VALIDE_V1** |
 | `mobile-flutter` | oui | oui | oui (starter + auth shell + Dio client + upload + SecureStorage + RefreshInterceptor + UI states Flutter 10 + **formulaire sign-in Flutter 11** — 218/218 tests + smoke `emulator-5554` 7/7) | **VALIDE_V1** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux réserve environnementale acceptée — identique à RN B2 ; rapports `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` + Flutter 7→11 smoke reports + `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`) |
 | `quality-core` | oui | oui | **oui** (gouvernance qualité : gates, checklists, runbooks, templates, prompts, release process utilisé ; scripts `quality-gates` + `release-helper` + `quality-report` testés) | **VALIDE_V1** |
-| `web-angular` | oui | **oui** (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15) | **oui** (Angular 2 starter + Angular 3 auth/routing + Angular 4 HTTP/server-state + Angular 5 Reactive Forms + Angular Material + Angular 6 Foundation state components + Angular 7 Upload fichiers + Angular 8 Tests + smoke — RouterTestingHarness + CDK harnesses ; 224/224 tests) | **IMPLEMENTATION_AVANCEE** (Angular V1 Readiness Review, 2026-07-16 — 11/15 §29 SATISFAIT + 3/15 PARTIEL + 1/15 NON SATISFAIT ; `VALIDE_V1` différé par B1/B2) |
+| `web-angular` | oui | **oui** (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15) | **oui** (Angular 2 starter + Angular 3 auth/routing + Angular 4 HTTP/server-state + Angular 5 Reactive Forms + Angular Material + Angular 6 Foundation state components + Angular 7 Upload fichiers + Angular 8 Tests + smoke + Angular 9 RefreshInterceptor/login API seam ; 248/248 tests) | **IMPLEMENTATION_AVANCEE** (Angular 9, 2026-07-16 — 13/15 §29 SATISFAIT + 1/15 PARTIEL + 1/15 NON SATISFAIT ; `VALIDE_V1` différé par B2) |
 
 **API Core NestJS** — modules présents : `config`, `database` (Prisma/PostgreSQL), `health`,
 `auth` (login, sessions, refresh, JWT), `users`, `roles`, `permissions`, `audit`, `files` (S3/MinIO),
@@ -395,7 +395,7 @@ politiques** : artefacts = aucun upload (Option A), couverture = exécutée non 
 futur), `actionlint` futur — **workflows inchangés, aucun job renommé**. Depuis les incréments Cloud suivants,
 ADR-013 reste **partiel** (niveaux 1–4 partiels + **protection `main` active via GitHub Rulesets**) et
 ADR-014 est **PARTIELLEMENT_IMPLEMENTE** (registry GHCR, images immuables, sans déploiement automatique).
-**Prochaine action** : Web Core Angular 9 — RefreshInterceptor + login API seam, puis Angular 10 — PermissionService + PermissionDirective, avant nouvelle revue V1.
+**Prochaine action** : Web Core Angular 10 — PermissionService + PermissionDirective, puis nouvelle revue V1.
 Détail : [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md).
 
 ## 16. Règles de mise à jour

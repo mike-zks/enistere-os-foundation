@@ -2,7 +2,9 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 import { LoginComponent } from './login.component';
+import { AuthApi, PlaceholderAuthApi } from '../../../core/auth/auth.api';
 import { AuthService } from '../../../core/auth/auth.service';
 
 function buildActivatedRoute(queryParams: Record<string, string> = {}) {
@@ -23,6 +25,7 @@ describe('LoginComponent', () => {
         provideRouter([]),
         provideNoopAnimations(),
         { provide: ActivatedRoute, useValue: buildActivatedRoute(queryParams) },
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
       ],
     });
     const fixture = TestBed.createComponent(LoginComponent);
@@ -70,14 +73,14 @@ describe('LoginComponent', () => {
 
   it('should not call authService.login when form is invalid', () => {
     const { component, authService } = setup();
-    spyOn(authService, 'login');
+    spyOn(authService, 'login').and.returnValue(of(undefined));
     component.submit();
     expect(authService.login).not.toHaveBeenCalled();
   });
 
   it('should call authService.login with email and password', () => {
     const { component, authService } = setup();
-    spyOn(authService, 'login');
+    spyOn(authService, 'login').and.returnValue(of(undefined));
     component.loginForm.setValue({ email: 'user@example.com', password: 'password123' });
     component.submit();
     expect(authService.login).toHaveBeenCalledWith('user@example.com', 'password123');

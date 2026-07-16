@@ -9,6 +9,7 @@ import {
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { authGuard } from './auth.guard';
 import { guestGuard } from './guest.guard';
+import { AuthApi, PlaceholderAuthApi } from './auth.api';
 import { AuthService } from './auth.service';
 
 function fakeState(url: string): RouterStateSnapshot {
@@ -23,14 +24,18 @@ describe('authGuard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideNoopAnimations()],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
+      ],
     });
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
   });
 
   it('returns true when authenticated', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     const result = TestBed.runInInjectionContext(() =>
       authGuard(fakeRoute, fakeState('/dashboard')),
     );
@@ -77,7 +82,11 @@ describe('guestGuard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideNoopAnimations()],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
+      ],
     });
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
@@ -91,7 +100,7 @@ describe('guestGuard', () => {
   });
 
   it('returns a UrlTree redirecting to /dashboard when authenticated', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     const result = TestBed.runInInjectionContext(() =>
       guestGuard(fakeRoute, fakeState('/login')),
     );
@@ -100,7 +109,7 @@ describe('guestGuard', () => {
   });
 
   it('returns true after logout (user is no longer authenticated)', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     authService.logout();
     const result = TestBed.runInInjectionContext(() =>
       guestGuard(fakeRoute, fakeState('/login')),
