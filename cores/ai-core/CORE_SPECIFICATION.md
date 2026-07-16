@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
 > Statut : IMPLEMENTATION_PARTIELLE
-> Mission courante : AI Core 6 — Evaluation harness initial
+> Mission courante : AI Core 7 — Retrieval/RAG design decision
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -180,6 +180,19 @@ Exigences :
 - pas de donnees client par defaut.
 
 La base vectorielle et le modele d'embedding sont des decisions futures, sous ADR si structurants.
+
+Decision AI Core 7 :
+
+- Retrieval/RAG V1 = retrieval documentaire local par allow-list explicite ;
+- le Context Builder AI Core 4 reste le mecanisme V1 pour assembler le contexte ;
+- la redaction AI Core 3 reste obligatoire avant toute sortie ;
+- l'Evaluation Harness AI Core 6 controle perimetre, documents requis, gates, format et secrets detectables ;
+- aucun embedding, vector store, provider reel, SDK IA, index persistant, appel reseau, ingestion automatique
+  ou donnees client par defaut ;
+- un ADR futur devient obligatoire avant de choisir embedding model, vector DB, provider/SDK, service RAG,
+  stockage d'index, retention de traces ou ingestion automatique.
+
+Rapport : `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md`.
 
 ### 5.5 Agent Orchestrator
 
@@ -534,9 +547,9 @@ AI Core pourra viser `IMPLEMENTATION_PARTIELLE` quand il aura au minimum :
 - rapports d'execution versionnables ;
 - tests automatises.
 
-Apres AI Core 6, le seuil technique minimal est partiellement atteint (registry, redaction, context builder,
-provider fake, evaluation harness, tests). Les elements encore manquants pour viser plus haut sont les
-rapports d'execution versionnables et la decision retrieval/RAG.
+Apres AI Core 7, le seuil technique minimal est partiellement atteint (registry, redaction, context builder,
+provider fake, evaluation harness, tests, decision retrieval/RAG V1). L'element encore manquant pour viser
+plus haut est le format de rapports d'execution versionnables.
 
 ## 19. VALIDE_V1 futur
 
@@ -572,8 +585,9 @@ AI Core ne doit pas :
 3. AI Core 4 — Context builder allow-list + reports. **Realise**.
 4. AI Core 5 — Provider adapter seam + fake provider. **Realise**.
 5. AI Core 6 — Evaluation harness initial. **Realise**.
-6. AI Core 7 — Retrieval/RAG design decision (ADR si choix vector DB/provider).
-7. AI Core V1 Readiness Review.
+6. AI Core 7 — Retrieval/RAG design decision (ADR si choix vector DB/provider). **Realise**.
+7. AI Core 8 — Governance/execution report schema.
+8. AI Core V1 Readiness Review.
 
 ## 22. Decisions pendantes
 

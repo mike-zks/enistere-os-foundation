@@ -33,6 +33,14 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > sans SDK réel, sans persistance, sans réseau externe et sans choix produit.
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
 > fondation" et "décision stratégique".
+>
+> Note de cohérence — 2026-07-16 : **AI Core 7** documente une décision
+> Retrieval/RAG V1 conservatrice (`AI_CORE7_RETRIEVAL_RAG_DECISION.md`) :
+> corpus Foundation versionné + allow-list explicite + Context Builder +
+> redaction + Evaluation Harness + revue humaine. Cette décision **ne choisit
+> aucun** embedding model, vector DB, provider/SDK IA, service RAG déployé,
+> stockage d'index, ingestion automatique ou politique de traces. Tout choix
+> de ce type nécessitera une décision dédiée, potentiellement un ADR futur.
 
 ## 2. Objectif du backlog ADR
 
