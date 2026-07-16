@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 9 — Prompt execution runner
+
+- `cores/ai-core/src/runner/prompt-runner.mjs` : ajout d'un runner local gouverné qui compose registry, context builder, safe provider adapter, fake provider, evaluation harness et execution report.
+- `cores/ai-core/src/runner/index.mjs` : exports publics du module.
+- `cores/ai-core/test/prompt-runner.test.mjs` : tests Node purs couvrant exécution complète, redaction, refus du contexte hors allow-list, documents manquants, prompt inactif et absence de prompt brut dans le rapport.
+- `docs/project-status/AI_CORE9_PROMPT_RUNNER_REPORT.md` : rapport de mission et fermeture de B1.
+- `ai-core` reste **`IMPLEMENTATION_AVANCEE`** ; `VALIDE_V1` reste différé par B2 retrieval source citation helper et B3 runbook d'usage AI Core.
+- Aucun provider réel, SDK IA, clé API, appel réseau, embedding, vector DB, service RAG, endpoint, workflow CI automatique ou stockage de traces.
+
 ### AI Core V1 Readiness Review
 
 - `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` : revue officielle AI Core.

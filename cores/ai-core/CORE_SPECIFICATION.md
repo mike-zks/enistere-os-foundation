@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
 > Statut : IMPLEMENTATION_AVANCEE
-> Mission courante : AI Core V1 Readiness Review
+> Mission courante : AI Core 9 — Prompt execution runner
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -531,6 +531,22 @@ Le rapport relie :
 Le module ne stocke rien, n'ecrit aucun fichier, n'appelle aucun provider, n'effectue aucun appel reseau et
 refuse les payloads de prompt complet (`promptText`, `rawPrompt`, `fullPrompt`, `messages`).
 
+### 15.2 Prompt execution runner
+
+Preuve technique livree par AI Core 9 :
+
+- `src/runner/prompt-runner.mjs` compose le registry, le context builder, le safe provider adapter, le fake
+  provider, l'evaluation harness et le schema de rapport ;
+- `src/runner/index.mjs` expose le module ;
+- `test/prompt-runner.test.mjs` couvre execution complete, redaction, refus de contexte hors allow-list,
+  documents requis manquants, prompt inactif et absence de prompt brut dans le rapport.
+
+Le runner execute uniquement un prompt `active`, construit son contexte depuis `requiredDocuments + allowedFiles`,
+refuse l'execution si le contexte est incomplet, et utilise un fake provider deterministe par defaut.
+
+Il ne choisit aucun provider reel, n'ajoute aucun SDK IA, n'appelle aucun reseau, n'ecrit aucune trace et ne
+remplace pas la revue humaine.
+
 ## 16. Tests futurs
 
 Tests cibles :
@@ -574,6 +590,10 @@ Apres AI Core 8, le seuil technique minimal `IMPLEMENTATION_PARTIELLE` est couve
 context builder, provider fake, evaluation harness, decision retrieval/RAG V1, rapports d'execution
 versionnables et tests. La promotion eventuelle au-dela de `IMPLEMENTATION_PARTIELLE` doit passer par une
 readiness review dediee.
+
+Apres AI Core 9, le runner de prompt gouverne est livre et B1 est ferme. Le statut reste
+`IMPLEMENTATION_AVANCEE` : `VALIDE_V1` reste differe par le helper de citation retrieval et le runbook
+d'usage AI Core.
 
 Revue AI Core V1 (2026-07-16) :
 
@@ -621,7 +641,8 @@ AI Core ne doit pas :
 6. AI Core 7 — Retrieval/RAG design decision (ADR si choix vector DB/provider). **Realise**.
 7. AI Core 8 — Governance/execution report schema. **Realise**.
 8. AI Core V1 Readiness Review. **Realise**.
-9. AI Core 9 — Prompt execution runner (fake provider only).
+9. AI Core 9 — Prompt execution runner (fake provider only). **Realise**.
+10. AI Core 10 — Retrieval source citation helper.
 
 ## 22. Decisions pendantes
 

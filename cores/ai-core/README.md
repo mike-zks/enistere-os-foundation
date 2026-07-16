@@ -7,7 +7,8 @@ specialises, redaction, RAG documentaire, evaluation et connecteurs provider fut
 
 Ce core contient actuellement des preuves techniques locales : un registre de prompts gouvernes,
 un validateur Node pur, une redaction layer pure, un context builder allow-list et un provider seam avec
-fake provider deterministe, ainsi qu'un evaluation harness local. Il ne contient toujours :
+fake provider deterministe, ainsi qu'un evaluation harness local et un runner de prompt gouverne. Il ne
+contient toujours :
 
 - aucun SDK IA ;
 - aucun provider reel configure ;
@@ -185,6 +186,32 @@ Commandes :
 node --test cores/ai-core/test/report-schema.test.mjs
 ```
 
+## Prompt Runner
+
+Livrables AI Core 9 :
+
+- `src/runner/prompt-runner.mjs` : runner local gouverne ;
+- `src/runner/index.mjs` : exports publics du module ;
+- `test/prompt-runner.test.mjs` : tests Node purs.
+
+Le runner :
+
+- resout un prompt `active` depuis le registry ;
+- construit le contexte via la allow-list du prompt (`requiredDocuments + allowedFiles`) ;
+- refuse l'execution si un document requis manque ou si un fichier est hors allow-list ;
+- invoque par defaut `createSafeProviderAdapter(createFakeProvider())` ;
+- produit une completion fake deterministe, une evaluation locale et un rapport `ai-execution-report/v1` ;
+- ne stocke jamais le prompt brut dans le rapport.
+
+Commandes :
+
+```bash
+node --test cores/ai-core/test/prompt-runner.test.mjs
+```
+
+Le runner ne branche aucun provider reel, SDK IA, reseau, embedding, vector DB, endpoint, workflow CI
+automatique ou stockage de traces.
+
 ## References
 
 - `CORE_SPECIFICATION.md`
@@ -204,6 +231,7 @@ AI Core preparera a terme :
 - des provider adapters injectables ;
 - un fake provider pour tests ;
 - un evaluation harness ;
+- un runner de prompt gouverne local ;
 - un retrieval documentaire avec corpus allow-list ;
 - des rapports d'execution IA sans secrets.
 
@@ -234,7 +262,8 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 7 | Realise | Retrieval/RAG design decision |
 | AI Core 8 | Realise | Governance/execution report schema |
 | AI Core V1 Review | Realise | IMPLEMENTATION_AVANCEE, VALIDE_V1 differe |
-| AI Core 9 | Propose | Prompt execution runner (fake provider only) |
+| AI Core 9 | Realise | Prompt execution runner (fake provider only) |
+| AI Core 10 | Propose | Retrieval source citation helper |
 
 ## Gates
 
@@ -305,6 +334,16 @@ Mission Execution Report Schema :
 ```bash
 node --test cores/ai-core/test/report-schema.test.mjs
 node --test cores/ai-core/test/report-schema.test.mjs cores/ai-core/test/evaluation-harness.test.mjs cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
+node cores/ai-core/scripts/validate-prompt-registry.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Prompt Runner :
+
+```bash
+node --test cores/ai-core/test/prompt-runner.test.mjs
+node --test cores/ai-core/test/prompt-runner.test.mjs cores/ai-core/test/report-schema.test.mjs cores/ai-core/test/evaluation-harness.test.mjs cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
 node cores/ai-core/scripts/validate-prompt-registry.mjs
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check
