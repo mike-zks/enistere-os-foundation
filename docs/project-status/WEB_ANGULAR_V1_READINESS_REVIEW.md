@@ -27,13 +27,14 @@ décider si `web-angular` peut être promu vers `VALIDE_V1`.
 | Critères §29 partiels | **1 / 15 PARTIEL** |
 | Critères §29 non satisfaits | **0 / 15 ✗** |
 | Blockers V1 | **0** |
-| Réserves non-bloquantes | **2** (R1–R2) |
+| Réserves non-bloquantes | **1** (R1) |
 | Tests | **267 / 267 ✅** |
 | Build production | **SUCCESS** |
 | Audit vulnérabilités | **0** |
 
 **→ PROMOTION `VALIDE_V1` acceptée.** B1 et B2 sont fermés. La réserve R1 reste
 partielle mais non bloquante, car les modales/overlays ne font pas partie du starter V1.
+La réserve post-readiness R2 est fermée par le gate CI `web-angular` dédié.
 
 ---
 
@@ -130,14 +131,15 @@ partielle mais non bloquante, car les modales/overlays ne font pas partie du sta
 - **LiveAnnouncer** : les attributs `aria-live` HTML offrent une couverture WCAG 2.1 AA équivalente pour les états de chargement/erreur/succès.
 - **Débloquant** : le projet dérivé ajoute des modales `MatDialog` et câble `FocusTrap`/`LiveAnnouncer` dans ses overlays.
 
-### R2 — CI Angular gate (post-readiness)
+### R2 — CI Angular gate (post-readiness) — FERMÉE par Quality Web Angular CI gate
 
-**Nature** : réserve de gouvernance — **NON-BLOQUANTE** (pas un critère §29).
+**Nature** : ancienne réserve de gouvernance — **FERMÉE** le 2026-07-16.
 
-- Pas de workflow GitHub Actions dédié à `web-angular`.
-- `web-angular` absent du scope `quality-gates.mjs`.
-- PRs modifiant `cores/web-angular/` ne sont pas bloquées par un check CI automatique.
-- **Recommandation** : ajouter un scope `web-angular` dans `quality-gates.mjs` et un job dans `ci.yml` (ou un `web-angular-ci.yml` dédié) — §32 : "CI Angular | Mission Angular 8+".
+- `.github/workflows/web-angular-ci.yml` existe.
+- Le job `web-angular` exécute `npm run test:ci`, `npm run build`, puis `npm audit`.
+- Le scope local `node cores/quality-core/scripts/quality-gates.mjs run web-angular` existe.
+- Rapport : `QUALITY_WEB_ANGULAR_CI_GATE_REPORT.md`.
+- **Limite gouvernance** : le check n'est pas automatiquement requis dans le ruleset `protect-main` ; sa promotion reste une action humaine/admin documentée dans le Quality Core.
 
 ---
 
@@ -152,7 +154,7 @@ partielle mais non bloquante, car les modales/overlays ne font pas partie du sta
 | Stratégie refresh token | **FERMÉE AU NIVEAU FOUNDATION** : refresh via `AuthApi` seam + `RefreshInterceptor`; choix backend/cookie/token court délégué au projet dérivé |
 | Client OpenAPI Angular | **DIFFÉRÉ** : ADR-016 §F — `HttpClient` natif + types manuels V1 |
 | Framework E2E | **DIFFÉRÉ** : non requis V1 (pas de §29 E2E) |
-| CI Angular | **DIFFÉRÉ** : réserve R2 (post-readiness) |
+| CI Angular | **FERMÉ** : workflow `web-angular-ci.yml` + scope `quality-gates web-angular` |
 | NgRx | **DIFFÉRÉ** : projets dérivés |
 | SSR / Angular Universal | **DIFFÉRÉ** : non requis V1 |
 | Export tokens SCSS / Surface UI Kit Angular | **DIFFÉRÉ** : UI Kit V3 |
@@ -182,8 +184,7 @@ Mise à jour finale Angular 10 : **`VALIDE_V1`**.
 Le Web Core Angular satisfait **14 / 15** critères §29 sans réserve, **1 / 15** partiellement
 et **0 / 15** reste non satisfait. Le core est donc validé V1.
 
-Les réserves R1/R2 sont documentées et non bloquantes. R1 dépend de modales/overlays
-absents du starter V1 par design ; R2 relève de Quality Core/CI post-readiness.
+La réserve R1 est documentée et non bloquante. R1 dépend de modales/overlays
+absents du starter V1 par design. R2 est fermée par le gate CI Angular dédié.
 
-**Prochaine action** : Quality/Governance — ajouter un gate CI `web-angular` dédié,
-ou poursuivre le prochain core prioritaire de la roadmap.
+**Prochaine action** : poursuivre le prochain core prioritaire de la roadmap.

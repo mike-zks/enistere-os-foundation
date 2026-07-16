@@ -1,0 +1,48 @@
+name: Web Angular CI
+
+# Gate CI dédié Web Core Angular — Angular 22 / Material 3 / Karma ChromeHeadless.
+# Projet npm autonome (hors workspaces racine), sans secret, sans backend, sans déploiement.
+# Valide le starter Angular VALIDE_V1 : tests Karma, build production et audit npm local.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-angular-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-angular:
+    name: web-angular
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: cores/web-angular/package-lock.json
+
+      - name: Install dependencies
+        working-directory: cores/web-angular
+        run: npm ci
+
+      - name: Angular tests (Karma / ChromeHeadless)
+        working-directory: cores/web-angular
+        run: npm run test:ci
+
+      - name: Angular production build
+        working-directory: cores/web-angular
+        run: npm run build
+
+      - name: npm audit
+        working-directory: cores/web-angular
+        run: npm audit

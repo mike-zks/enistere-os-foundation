@@ -7,7 +7,7 @@
 > Ce runbook décrit la procédure exacte, les noms de checks exacts, les options recommandées
 > et la checklist de vérification post-activation.
 >
-> Dernière mise à jour : 2026-07-12 (Quality Core CI-required checks alignment).
+> Dernière mise à jour : 2026-07-16 (Web Angular CI gate documenté).
 
 ---
 
@@ -35,6 +35,8 @@ est la dernière étape documentée de l'ADR-013 pour le scope "checks requis".
   - `api-runtime-ci.yml` → job `api-runtime`
   - `web-e2e-ci.yml` → job `web-e2e`
   - `registry-ci.yml` → jobs `api-smoke`, `images (…)` (matrix)
+  - `api-spring-ci.yml` → job `api-spring-verify`
+  - `web-angular-ci.yml` → job `web-angular`
 - Aucun secret supplémentaire n'est nécessaire — tous les workflows utilisent le
   `GITHUB_TOKEN` automatique ou des valeurs de test jetables définies dans le workflow.
 
@@ -79,6 +81,13 @@ est la dernière étape documentée de l'ADR-013 pour le scope "checks requis".
 > **Note matrix** : le job `images` utilise une `strategy.matrix` avec deux entrées. GitHub
 > génère un check distinct par entrée de matrice, avec un nom composé : `<job-name> (<matrix.name>, <matrix.context>, <matrix.file>)`. Ces noms sont stables tant que les valeurs de matrice ne changent pas.
 
+### 3.5 Checks additionnels documentés
+
+| Nom exact du check | Workflow | Vérifie |
+|---|---|---|
+| `api-spring-verify` | `api-spring-ci.yml` | API Spring Boot : Java 21, Maven Wrapper, `./mvnw verify`, Testcontainers PostgreSQL |
+| `web-angular` | `web-angular-ci.yml` | Web Angular : `npm run test:ci`, `npm run build`, `npm audit` |
+
 ---
 
 ## 4. Classification des checks
@@ -106,10 +115,12 @@ Ces checks sont légers, déjà verts en CI, et couvrent la non-régression core
 |---|---|---|---|
 | `images (api-nestjs, ...)` | L4 | variable | Build image API ; partiellement redondant avec `api-smoke`, mais protège la matrice image |
 | `images (web-nextjs, ...)` | L4 | variable | Build image Web ; ferme l'angle mort Dockerfile Web cassé malgré `web-nextjs` vert |
+| `api-spring-verify` | L5 | variable | Gate Java/Testcontainers dédié ; mature, mais non appliqué dans le ruleset actuel |
+| `web-angular` | L6 | variable | Gate Angular dédié ; mature, mais non appliqué dans le ruleset actuel |
 
 > **Décision 2026-07-12** : promotion recommandée, non appliquée. Registry CI PR #106 a produit
-> `api-smoke` et les deux checks `images (...)` verts. Les deux checks peuvent devenir requis si une
-> action humaine/admin accepte le coût et la fragilité des noms matrix. Rapport :
+> `api-smoke` et les deux checks `images (...)` verts. Les checks additionnels peuvent devenir requis si une
+> action humaine/admin accepte le coût et la stabilité des noms. Rapport :
 > `docs/project-status/QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md`.
 
 ### 4.3 Non requis — gates finaux staging / mobile device (hors CI)
@@ -259,7 +270,8 @@ Activation réalisée via GitHub Rulesets :
   conversations résolues obligatoires, status checks requis en mode strict.
 - Checks requis actifs : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`,
   `audit`, `api-runtime`, `web-e2e`, `api-smoke`.
-- Checks images : non requis dans le ruleset actuel, restent recommandés phase 2.
+- Checks additionnels (`images (...)`, `api-spring-verify`, `web-angular`) : non requis dans le
+  ruleset actuel, restent recommandés pour promotion humaine.
 
 ### 6.5 Supprimer la branche de test
 
@@ -292,13 +304,13 @@ La protection de branche **ne requiert aucun nouveau secret** car :
 | CI Niveau 2 (`api-runtime-ci.yml`) | ✅ IMPLANTÉ |
 | CI Niveau 3 (`web-e2e-ci.yml`) | ✅ IMPLANTÉ |
 | CI Niveau 4 partiel (`registry-ci.yml`) | ✅ IMPLANTÉ (sans déploiement) |
-| Protection de branche `main` | ✅ **ACTIVÉE** — GitHub Ruleset `protect-main`, enforcement `active`, 8 checks requis |
+| Protection de branche `main` | ✅ **ACTIVÉE** — GitHub Ruleset `protect-main`, enforcement `active`, 8 checks requis ; checks additionnels documentés non requis |
 | Couverture publiée | ❌ Non commencé |
 | Release / versioning | ❌ Non commencé |
 | Déploiement par environnement | ❌ Non commencé |
 
 > La protection de branche est désormais appliquée via GitHub Rulesets.
-> Les prochaines évolutions possibles sont : rendre les deux checks `images` requis,
+> Les prochaines évolutions possibles sont : rendre les checks additionnels (`images`, `api-spring-verify`, `web-angular`) requis,
 > ajouter des approbations obligatoires, ou documenter une procédure de hotfix.
 
 ---

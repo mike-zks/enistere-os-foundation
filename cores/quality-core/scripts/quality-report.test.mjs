@@ -20,6 +20,7 @@ describe('QUALITY_SCOPES', () => {
       'api-client-fetch',
       'ui-kit',
       'web-nextjs',
+      'web-angular',
       'mobile-react-native',
       'api-nestjs',
       'quality-core',
@@ -81,7 +82,7 @@ describe('buildMarkdownReport', () => {
   it('génère un rapport markdown déterministe avec synthèse et matrice', () => {
     const report = buildMarkdownReport({ date: '2026-07-12' });
     assert.match(report, /# Quality Report — Tests \/ Coverage Baseline \(2026-07-12\)/);
-    assert.match(report, /Scopes suivis : 8/);
+    assert.match(report, /Scopes suivis : 9/);
     assert.match(report, /Coverage disponible localement : 3/);
     assert.match(report, /Pourcentage global non calculé/);
     assert.match(report, /\| Scope \| Tests attendus \| Gate test \| Coverage \| Commande coverage \| CI \|/);

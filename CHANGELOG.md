@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Quality Web Angular CI gate
+
+- `.github/workflows/web-angular-ci.yml` : ajout d'un workflow dédié au core Angular (`npm ci`, `npm run test:ci`, `npm run build`, `npm audit`) avec job `web-angular`.
+- `cores/quality-core/scripts/quality-gates.mjs` : ajout du scope local `web-angular` (`test:ci`, `build`, `audit`) ; scope explicitement exclu de `all-safe` car Karma/ChromeHeadless doit être lancé séparément.
+- `cores/quality-core/scripts/quality-gates.test.mjs` : couverture du nouveau scope et des exclusions `all-safe`.
+- `cores/quality-core/scripts/quality-report.mjs` : ajout du scope `web-angular` à la synthèse locale tests/couverture.
+- `QUALITY_GATES_MATRIX.md`, `BRANCH_PROTECTION_RUNBOOK.md`, `README.md` Quality Core et `WEB_ANGULAR_V1_READINESS_REVIEW.md` mis à jour ; réserve Angular R2 fermée.
+- Le check `web-angular` est documenté comme promotion recommandée, non appliquée automatiquement dans le ruleset `protect-main`.
+
 ### Web Core Angular 10 — PermissionService + PermissionDirective
 
 - `cores/web-angular/src/app/core/permissions/permission.service.ts` : ajout de `PermissionService` signal-based, in-memory, avec normalisation défensive des rôles/permissions, rejet des wildcards et helpers RBAC.
