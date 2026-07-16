@@ -473,8 +473,15 @@
 > Tests : 224/224 ✅. Build SUCCESS, audit 0 vuln.
 > `web-angular` : **`UPLOAD_READY` → `TEST_SMOKE_READY`**.
 >
-> **Prochaine action** : **Web Core Angular V1 Readiness Review**.
-> Prérequis : Angular 8 ✅.
+> ✅ **Web Core Angular V1 Readiness Review : RÉALISÉ** (2026-07-16).
+> Rapport : `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md`.
+> Décision : Web Core Angular passe de **`TEST_SMOKE_READY`** à **`IMPLEMENTATION_AVANCEE`**.
+> `VALIDE_V1` est différé : 11/15 §29 SATISFAIT + 3/15 PARTIEL + 1/15 NON SATISFAIT.
+> Blockers V1 : B1 RefreshInterceptor/login API seam ; B2 PermissionService + PermissionDirective.
+> Réserves non-bloquantes : R1 CDK a11y FocusTrap/LiveAnnouncer ; R2 CI Angular gate.
+> Cohérence ADR-035 confirmée. 224/224 tests ✅. BUILD SUCCESS. 0 vuln.
+>
+> **Prochaine action** : **Web Core Angular 9 — RefreshInterceptor + login API seam**.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1199,7 +1206,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **TEST_SMOKE_READY** — Angular 8 réalisé (2026-07-16) ; prochaine action : Angular V1 Readiness Review |
+| Web Core Angular | **IMPLEMENTATION_AVANCEE** — Angular V1 Readiness Review réalisée (2026-07-16) ; `VALIDE_V1` différé par B1 RefreshInterceptor/login API seam + B2 PermissionService/PermissionDirective ; prochaine action : Angular 9 |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
