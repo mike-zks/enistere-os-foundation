@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
 > Statut : IMPLEMENTATION_PARTIELLE
-> Mission courante : AI Core 5 — Provider adapter seam + fake provider
+> Mission courante : AI Core 6 — Evaluation harness initial
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -221,6 +221,18 @@ Exemples de controles :
 - non-regression documentaire.
 
 Les evaluations automatiques peuvent aider, mais ne remplacent pas la revue humaine.
+
+Preuve technique livree par AI Core 6 :
+
+- `src/evaluation/evaluation-harness.mjs` evalue localement le perimetre modifie, les fichiers interdits,
+  les documents requis, les gates attendus, le format de rapport, la preuve de verification et les secrets
+  detectables via la redaction AI Core 3 ;
+- `src/evaluation/index.mjs` expose le module ;
+- `test/evaluation-harness.test.mjs` couvre les statuts `pass`/`warn`/`fail`, le score, les chemins hors
+  perimetre, les gates manquants, les documents manquants, le format de rapport et la detection de secrets.
+
+Cette preuve n'ajoute aucun LLM judge, provider, SDK IA, appel reseau, embeddings, base vectorielle,
+workflow CI automatique ou stockage de traces.
 
 ### 5.7 Provider Adapters
 
@@ -522,9 +534,9 @@ AI Core pourra viser `IMPLEMENTATION_PARTIELLE` quand il aura au minimum :
 - rapports d'execution versionnables ;
 - tests automatises.
 
-Apres AI Core 5, le seuil technique minimal est partiellement atteint (registry, redaction, context builder,
-provider fake, tests). Les elements encore manquants pour viser plus haut sont l'evaluation harness initial,
-les rapports d'execution versionnables et la decision retrieval/RAG.
+Apres AI Core 6, le seuil technique minimal est partiellement atteint (registry, redaction, context builder,
+provider fake, evaluation harness, tests). Les elements encore manquants pour viser plus haut sont les
+rapports d'execution versionnables et la decision retrieval/RAG.
 
 ## 19. VALIDE_V1 futur
 
@@ -559,7 +571,7 @@ AI Core ne doit pas :
 2. AI Core 3 — Redaction layer pure + tests. **Realise**.
 3. AI Core 4 — Context builder allow-list + reports. **Realise**.
 4. AI Core 5 — Provider adapter seam + fake provider. **Realise**.
-5. AI Core 6 — Evaluation harness initial.
+5. AI Core 6 — Evaluation harness initial. **Realise**.
 6. AI Core 7 — Retrieval/RAG design decision (ADR si choix vector DB/provider).
 7. AI Core V1 Readiness Review.
 

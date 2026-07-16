@@ -7,7 +7,7 @@ specialises, redaction, RAG documentaire, evaluation et connecteurs provider fut
 
 Ce core contient actuellement des preuves techniques locales : un registre de prompts gouvernes,
 un validateur Node pur, une redaction layer pure, un context builder allow-list et un provider seam avec
-fake provider deterministe. Il ne contient toujours :
+fake provider deterministe, ainsi qu'un evaluation harness local. Il ne contient toujours :
 
 - aucun SDK IA ;
 - aucun provider reel configure ;
@@ -116,6 +116,33 @@ Commandes :
 node --test cores/ai-core/test/provider.test.mjs
 ```
 
+## Evaluation Harness
+
+Livrables AI Core 6 :
+
+- `src/evaluation/evaluation-harness.mjs` : evaluation deterministe d'une sortie de mission IA ;
+- `src/evaluation/index.mjs` : exports publics du module ;
+- `test/evaluation-harness.test.mjs` : tests Node purs.
+
+Le harness verifie :
+
+- fichiers modifies dans le perimetre autorise ;
+- fichiers explicitement interdits ou chemins non sûrs ;
+- documents requis mentionnes ;
+- gates attendus declares ;
+- format minimal de rapport (`summary`, `files`, `verification`, `limits`, `next`) ;
+- presence d'une preuve de verification ;
+- absence de donnees sensibles detectables par la redaction AI Core 3.
+
+Commandes :
+
+```bash
+node --test cores/ai-core/test/evaluation-harness.test.mjs
+```
+
+Cette evaluation reste locale et deterministe. Elle n'utilise aucun LLM judge, aucun provider, aucun
+reseau, aucune cle API et aucun stockage de traces. Elle assiste la revue humaine sans la remplacer.
+
 ## References
 
 - `CORE_SPECIFICATION.md`
@@ -161,7 +188,7 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 3 | Realise | Redaction layer pure + tests |
 | AI Core 4 | Realise | Context builder allow-list |
 | AI Core 5 | Realise | Provider adapter seam + fake provider |
-| AI Core 6 | Propose | Evaluation harness initial |
+| AI Core 6 | Realise | Evaluation harness initial |
 | AI Core 7 | Propose | Retrieval/RAG design decision |
 
 ## Gates
@@ -206,6 +233,16 @@ Mission Provider Seam :
 ```bash
 node --test cores/ai-core/test/provider.test.mjs
 node --test cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
+node cores/ai-core/scripts/validate-prompt-registry.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Evaluation Harness :
+
+```bash
+node --test cores/ai-core/test/evaluation-harness.test.mjs
+node --test cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
 node cores/ai-core/scripts/validate-prompt-registry.mjs
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check
