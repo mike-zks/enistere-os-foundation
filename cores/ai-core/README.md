@@ -6,7 +6,7 @@ AI Core cadre l'usage avance de l'IA dans Enistere OS Foundation : prompts gouve
 specialises, redaction, RAG documentaire, evaluation et connecteurs provider futurs.
 
 Ce core contient actuellement des preuves techniques locales : un registre de prompts gouvernes,
-un validateur Node pur et une redaction layer pure. Il ne contient toujours :
+un validateur Node pur, une redaction layer pure et un context builder allow-list. Il ne contient toujours :
 
 - aucun SDK IA ;
 - aucun provider configure ;
@@ -64,6 +64,32 @@ node --test cores/ai-core/test/redaction.test.mjs
 
 La redaction est une brique locale. Elle n'envoie rien a un provider et ne persiste aucune trace.
 
+## Context Builder
+
+Livrables AI Core 4 :
+
+- `src/context/context-builder.mjs` : construction de contexte depuis une allow-list explicite ;
+- `src/context/index.mjs` : exports publics du module ;
+- `test/context-builder.test.mjs` : tests Node purs.
+
+Le builder :
+
+- normalise les chemins relatifs ;
+- refuse les chemins absolus, `..`, `.env`, `node_modules`, `dist`, `build`, `.git` et dossiers similaires ;
+- lit uniquement les fichiers explicitement demandés ;
+- applique la redaction AI Core 3 avant toute sortie ;
+- signale les fichiers manquants, refusés, tronqués et redigés ;
+- borne la taille par fichier et la taille totale du contexte.
+
+Commandes :
+
+```bash
+node --test cores/ai-core/test/context-builder.test.mjs
+```
+
+Le builder ne fait pas de RAG, pas d'indexation globale et pas d'appel provider. Il prepare seulement un
+contexte local minimal, auditable et redacté.
+
 ## References
 
 - `CORE_SPECIFICATION.md`
@@ -107,7 +133,7 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 1 | Realise | Core specification + README |
 | AI Core 2 | Realise | Prompt registry model + validator local |
 | AI Core 3 | Realise | Redaction layer pure + tests |
-| AI Core 4 | Propose | Context builder allow-list |
+| AI Core 4 | Realise | Context builder allow-list |
 | AI Core 5 | Propose | Provider adapter seam + fake provider |
 | AI Core 6 | Propose | Evaluation harness initial |
 | AI Core 7 | Propose | Retrieval/RAG design decision |
@@ -135,6 +161,16 @@ Mission Redaction Layer :
 ```bash
 node --test cores/ai-core/test/redaction.test.mjs
 node --test cores/ai-core/test/prompt-registry.test.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Context Builder :
+
+```bash
+node --test cores/ai-core/test/context-builder.test.mjs
+node --test cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
+node cores/ai-core/scripts/validate-prompt-registry.mjs
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check
 ```

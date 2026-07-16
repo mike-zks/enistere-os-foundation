@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 4 — Context builder allow-list
+
+- `cores/ai-core/src/context/context-builder.mjs` : ajout d'un builder local de contexte depuis une allow-list explicite, avec refus `.env`, chemins absolus, `..`, `node_modules`, `dist`, `build`, `.git` et assimilés.
+- `cores/ai-core/src/context/index.mjs` : exports publics du module.
+- `cores/ai-core/test/context-builder.test.mjs` : tests Node purs couvrant normalisation, chemins refusés, fichiers manquants, déduplication, redaction appliquée, limites par fichier et limite globale.
+- Le builder applique la redaction AI Core 3 avant toute sortie et produit un rapport `includedFiles` / `skippedFiles` / `missingFiles`.
+- `ai-core` reste **`PREUVE_TECHNIQUE`**.
+- Aucun SDK IA, provider, clé API, appel réseau, RAG runtime, base vectorielle, endpoint, workflow, dépendance, secret, indexation globale ou stockage de traces.
+
 ### AI Core 3 — Redaction layer pure + tests
 
 - `cores/ai-core/src/redaction/redaction.mjs` : ajout d'une couche de redaction pure (`redactText`, `redactValue`, `isSensitiveKey`) pour clés sensibles, credentials `Bearer`/`Basic`, JWT, paramètres d'URL signée, secrets `.env`, blocs de clé privée, emails, chemins locaux, erreurs sans stack, cycles et profondeur maximale.
