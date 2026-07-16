@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
-> Statut : SPECIFICATION_DOCUMENTAIRE
-> Mission : AI Core 1 — Core specification
+> Statut : PREUVE_TECHNIQUE
+> Mission courante : AI Core 2 — Prompt registry model + validator local
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -104,6 +104,16 @@ Responsabilites :
 - lier une mission a ses gates.
 
 Source actuelle : `prompts/`.
+
+Preuve technique livree par AI Core 2 :
+
+- `prompt-registry.json` reference les prompts gouvernes existants ;
+- `src/prompt-registry/model.mjs` valide la forme des definitions ;
+- `src/prompt-registry/validator.mjs` valide le fichier et les references locales ;
+- `scripts/validate-prompt-registry.mjs` expose une commande locale ;
+- `test/prompt-registry.test.mjs` couvre les invariants principaux.
+
+Cette preuve ne rend aucun prompt executable automatiquement et ne branche aucun provider IA.
 
 ### 5.2 Context Builder
 
@@ -509,7 +519,7 @@ AI Core ne doit pas :
 
 ## 21. Missions futures recommandees
 
-1. AI Core 2 — Prompt registry model + validator documentaire/local.
+1. AI Core 2 — Prompt registry model + validator documentaire/local. **Realise**.
 2. AI Core 3 — Redaction layer pure + tests.
 3. AI Core 4 — Context builder allow-list + reports.
 4. AI Core 5 — Provider adapter seam + fake provider.

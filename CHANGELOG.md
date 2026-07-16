@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 2 — Prompt registry model + validator local
+
+- `cores/ai-core/prompt-registry.json` : registre local des 8 prompts gouvernés existants.
+- `cores/ai-core/src/prompt-registry/model.mjs` + `validator.mjs` : validation pure Node de la forme, des rôles, des risques, des gates, des chemins sûrs, des doublons et des références locales.
+- `cores/ai-core/scripts/validate-prompt-registry.mjs` : CLI locale de validation.
+- `cores/ai-core/test/prompt-registry.test.mjs` : tests Node purs.
+- `ai-core` : **`SPECIFICATION_DOCUMENTAIRE` → `PREUVE_TECHNIQUE`**.
+- Aucun SDK IA, provider, clé API, appel réseau, RAG runtime, base vectorielle, endpoint, workflow, dépendance ou secret.
+
 ### AI Core 1 — Core specification
 
 - `cores/ai-core/CORE_SPECIFICATION.md` : création de la spécification AI Core (Prompt Registry, Context Builder, Redaction Layer, RAG/Retrieval, Agent Orchestrator, Evaluation Harness, Provider Adapters, Audit Trail, sécurité, readiness).
