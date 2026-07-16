@@ -1263,14 +1263,25 @@ deux cores. À arbitrer par décision humaine.
 > Vérifications : tests Node provider + context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
 > Aucun provider réel, SDK IA, clé API, appel réseau, modèle réel, streaming réel, embeddings, RAG runtime,
 > base vectorielle, endpoint, workflow, dépendance, secret ou stockage de traces.
+>
+> ✅ **AI Core 6 — Evaluation harness initial : RÉALISÉ** (2026-07-16).
+> Livrables : `cores/ai-core/src/evaluation/evaluation-harness.mjs`, `src/evaluation/index.mjs`,
+> `test/evaluation-harness.test.mjs`.
+> Statut : **`IMPLEMENTATION_PARTIELLE` maintenu**.
+> Vérifications : tests Node evaluation + provider + context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
+> Aucun LLM judge, provider réel, SDK IA, clé API, appel réseau, modèle réel, embeddings, RAG runtime,
+> base vectorielle, endpoint, workflow CI automatique, dépendance, secret ou stockage de traces.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 6 — Evaluation harness initial**.
+**Prochaine action UNIQUE recommandée** : **AI Core 7 — Retrieval/RAG design decision**.
 
-Objectif : ajouter un harness d'évaluation local qui vérifie périmètre, absence de secrets après redaction,
-gates déclarés, documents requis et format de rapport, sans LLM judge réel. Périmètre recommandé :
-`cores/ai-core/src/evaluation/*`, `cores/ai-core/test/evaluation*.test.mjs`, README/spec/statut.
-Interdits : SDK IA réel, provider judge, clé API, appel réseau, modèle réel, embeddings, RAG runtime,
-base vectorielle, workflow CI automatique ou stockage de traces.
+Objectif : décider le cadrage Retrieval/RAG V1 de l'AI Core avant toute implémentation lourde : corpus
+autorisé, stratégie d'indexation, contraintes de données sensibles, besoin ou non d'ADR pour embeddings /
+vector store / provider, et limites strictes pour une future preuve locale. Périmètre recommandé :
+`cores/ai-core/CORE_SPECIFICATION.md`, `cores/ai-core/README.md`, `docs/adr/ADR_BACKLOG.md`,
+`docs/project-status/*`, `CHANGELOG.md`.
+Interdits : aucun vector DB, aucun embedding model, aucun provider réel, aucun SDK IA, aucune clé API,
+aucun appel réseau, aucune indexation globale du repository, aucun workflow CI automatique, aucun stockage
+de traces.
 
 ## 4. Prérequis
 

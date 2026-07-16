@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 6 — Evaluation harness initial
+
+- `cores/ai-core/src/evaluation/evaluation-harness.mjs` : ajout d'un harness local deterministe pour evaluer perimetre, fichiers interdits, documents requis, gates attendus, format de rapport, verification declaree et secrets detectables via la redaction.
+- `cores/ai-core/src/evaluation/index.mjs` : exports publics du module.
+- `cores/ai-core/test/evaluation-harness.test.mjs` : tests Node purs couvrant statuts `pass`/`warn`/`fail`, score, perimetre, gates manquants, documents manquants, format incomplet et detection de secrets.
+- `ai-core` reste **`IMPLEMENTATION_PARTIELLE`**.
+- Aucun LLM judge, provider reel, SDK IA, cle API, appel reseau, modele reel, embeddings, RAG runtime, base vectorielle, workflow CI automatique, dependance ou stockage de traces.
+
 ### AI Core 5 — Provider adapter seam + fake provider
 
 - `cores/ai-core/src/provider/provider-model.mjs` : capabilities, validation de requête et `AiProviderError` contrôlé.
