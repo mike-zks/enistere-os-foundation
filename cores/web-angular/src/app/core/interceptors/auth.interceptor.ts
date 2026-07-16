@@ -2,9 +2,9 @@ import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 
-const AUTH_ENDPOINT_PATTERNS = ['/auth/login', '/auth/refresh', '/auth/logout'];
+export const AUTH_ENDPOINT_PATTERNS = ['/auth/login', '/auth/refresh', '/auth/logout'];
 
-function isAuthEndpoint(url: string): boolean {
+export function isAuthEndpoint(url: string): boolean {
   return AUTH_ENDPOINT_PATTERNS.some((pattern) => url.includes(pattern));
 }
 

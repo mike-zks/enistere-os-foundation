@@ -1,12 +1,17 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, catchError, finalize, map, shareReplay, tap, throwError } from 'rxjs';
+import { AuthApi } from './auth.api';
 import type { AuthState } from './auth.state';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly api = inject(AuthApi);
   private readonly _authState = signal<AuthState>('unauthenticated');
   private readonly _accessToken = signal<string | null>(null);
 
   readonly authState = this._authState.asReadonly();
+
+  private refreshInFlight$: Observable<string> | null = null;
 
   getAccessToken(): string | null {
     return this._accessToken();
@@ -16,22 +21,52 @@ export class AuthService {
     return this.authState() === 'authenticated';
   }
 
-  login(_email: string, _password: string): void {
+  login(email: string, password: string): Observable<void> {
     this._authState.set('loading');
-    // Placeholder: stores a synthetic token in memory only — no API call, no persistence.
-    // Replace with real POST /api/v1/auth/login in Angular 4+ mission.
-    this._accessToken.set('placeholder-memory-token');
-    this._authState.set('authenticated');
+    return this.api.login({ email, password }).pipe(
+      tap((tokens) => {
+        this._accessToken.set(tokens.accessToken);
+        this._authState.set('authenticated');
+      }),
+      map(() => undefined as void),
+      catchError((err: unknown) => {
+        this._accessToken.set(null);
+        this._authState.set('unauthenticated');
+        return throwError(() => err);
+      }),
+    );
+  }
+
+  refreshSession(): Observable<string> {
+    if (this.refreshInFlight$) {
+      return this.refreshInFlight$;
+    }
+    this._authState.set('refreshing');
+    this.refreshInFlight$ = this.api.refresh().pipe(
+      tap((tokens) => {
+        this._accessToken.set(tokens.accessToken);
+        this._authState.set('authenticated');
+      }),
+      map((tokens) => tokens.accessToken),
+      catchError((err: unknown) => {
+        this._authState.set('expired');
+        this._accessToken.set(null);
+        return throwError(() => err);
+      }),
+      finalize(() => { this.refreshInFlight$ = null; }),
+      shareReplay(1),
+    );
+    return this.refreshInFlight$;
   }
 
   logout(): void {
+    this.api.logout().subscribe({ error: () => {} });
     this._accessToken.set(null);
     this._authState.set('unauthenticated');
   }
 
   restoreSession(): void {
-    // No persistent storage in this mission — always cold-start unauthenticated.
-    // RefreshInterceptor with cookie HttpOnly strategy is deferred to Angular 4+.
+    // No persistent storage — always cold-start unauthenticated.
     this._authState.set('unauthenticated');
   }
 }

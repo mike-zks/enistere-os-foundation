@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { DashboardComponent } from './dashboard.component';
 import { AuthService } from '../../core/auth/auth.service';
+import { AuthApi, PlaceholderAuthApi } from '../../core/auth/auth.api';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -12,7 +13,11 @@ describe('DashboardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
-      providers: [provideRouter([]), provideNoopAnimations()],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(DashboardComponent);
@@ -41,7 +46,7 @@ describe('DashboardComponent', () => {
   });
 
   it('should expose authState signal', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     expect(component.authState()).toBe('authenticated');
   });
 

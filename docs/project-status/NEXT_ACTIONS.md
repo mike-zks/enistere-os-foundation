@@ -481,7 +481,11 @@
 > Réserves non-bloquantes : R1 CDK a11y FocusTrap/LiveAnnouncer ; R2 CI Angular gate.
 > Cohérence ADR-035 confirmée. 224/224 tests ✅. BUILD SUCCESS. 0 vuln.
 >
-> **Prochaine action** : **Web Core Angular 9 — RefreshInterceptor + login API seam**.
+> ✅ **Web Core Angular 9 — RefreshInterceptor + login API seam : RÉALISÉ** (2026-07-16).
+> Livrables : `AuthApi` seam injectable + `PlaceholderAuthApi`, `AuthService.login()` Observable, `refreshSession()` coalescé, `RefreshInterceptor` 401→refresh→retry unique→logout/purge si échec, endpoints auth exclus, retry `FormData` sans `Content-Type` forcé. Rapport `WEB_ANGULAR9_REFRESH_INTERCEPTOR_REPORT.md`.
+> B1 fermé. Readiness mise à jour : 13/15 §29 SATISFAIT + 1/15 PARTIEL + 1/15 NON SATISFAIT. Tests : 248/248 ✅.
+>
+> **Prochaine action** : **Web Core Angular 10 — PermissionService + PermissionDirective**.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1206,7 +1210,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **IMPLEMENTATION_AVANCEE** — Angular V1 Readiness Review réalisée (2026-07-16) ; `VALIDE_V1` différé par B1 RefreshInterceptor/login API seam + B2 PermissionService/PermissionDirective ; prochaine action : Angular 9 |
+| Web Core Angular | **IMPLEMENTATION_AVANCEE** — Angular 9 ferme B1 RefreshInterceptor/login API seam ; `VALIDE_V1` différé par B2 PermissionService/PermissionDirective ; prochaine action : Angular 10 |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |

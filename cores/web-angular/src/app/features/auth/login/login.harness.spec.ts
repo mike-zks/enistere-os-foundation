@@ -6,6 +6,7 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { MatFormFieldHarness } from '@angular/material/form-field/testing';
 import { MatInputHarness } from '@angular/material/input/testing';
 import { LoginComponent } from './login.component';
+import { AuthApi, PlaceholderAuthApi } from '../../../core/auth/auth.api';
 
 describe('LoginComponent CDK harnesses', () => {
   let fixture: ComponentFixture<LoginComponent>;
@@ -14,7 +15,11 @@ describe('LoginComponent CDK harnesses', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
-      providers: [provideRouter([]), provideNoopAnimations()],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);

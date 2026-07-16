@@ -5,6 +5,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
+import { AuthApi, PlaceholderAuthApi } from '../auth/auth.api';
 import { authInterceptor } from './auth.interceptor';
 import { AuthService } from '../auth/auth.service';
 
@@ -18,6 +19,7 @@ describe('authInterceptor', () => {
       providers: [
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
+        { provide: AuthApi, useClass: PlaceholderAuthApi },
       ],
     });
     httpController = TestBed.inject(HttpTestingController);
@@ -37,7 +39,7 @@ describe('authInterceptor', () => {
   });
 
   it('injects Authorization Bearer header when token present', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     httpClient.get('/api/v1/data').subscribe();
     const req = httpController.expectOne('/api/v1/data');
     expect(req.request.headers.get('Authorization')).toMatch(/^Bearer .+/);
@@ -45,7 +47,7 @@ describe('authInterceptor', () => {
   });
 
   it('does not inject header on /auth/login endpoint', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     httpClient.post('/api/v1/auth/login', {}).subscribe();
     const req = httpController.expectOne('/api/v1/auth/login');
     expect(req.request.headers.has('Authorization')).toBeFalse();
@@ -53,7 +55,7 @@ describe('authInterceptor', () => {
   });
 
   it('does not inject header on /auth/refresh endpoint', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     httpClient.post('/api/v1/auth/refresh', {}).subscribe();
     const req = httpController.expectOne('/api/v1/auth/refresh');
     expect(req.request.headers.has('Authorization')).toBeFalse();
@@ -61,7 +63,7 @@ describe('authInterceptor', () => {
   });
 
   it('does not inject header on /auth/logout endpoint', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     httpClient.post('/api/v1/auth/logout', {}).subscribe();
     const req = httpController.expectOne('/api/v1/auth/logout');
     expect(req.request.headers.has('Authorization')).toBeFalse();
@@ -69,7 +71,7 @@ describe('authInterceptor', () => {
   });
 
   it('removes Authorization header after logout', () => {
-    authService.login('user@example.com', 'pass');
+    authService.login('user@example.com', 'pass').subscribe();
     authService.logout();
     httpClient.get('/api/v1/data').subscribe();
     const req = httpController.expectOne('/api/v1/data');
