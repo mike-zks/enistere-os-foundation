@@ -16,5 +16,12 @@
     <p class="dashboard-status">
       État auth : <strong>{{ authState() }}</strong>
     </p>
+    <p
+      *enisterePermission="'files.upload'"
+      class="dashboard-permission"
+      aria-label="Action autorisée par permission"
+    >
+      Upload autorisé
+    </p>
   </section>
 </main>

@@ -1,13 +1,16 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { DashboardComponent } from './dashboard.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthApi, PlaceholderAuthApi } from '../../core/auth/auth.api';
+import { PermissionService } from '../../core/permissions/permission.service';
 
 describe('DashboardComponent', () => {
+  let fixture: ComponentFixture<DashboardComponent>;
   let component: DashboardComponent;
   let authService: AuthService;
+  let permissionService: PermissionService;
   let router: Router;
 
   beforeEach(async () => {
@@ -20,9 +23,10 @@ describe('DashboardComponent', () => {
       ],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
+    permissionService = TestBed.inject(PermissionService);
     router = TestBed.inject(Router);
     fixture.detectChanges();
   });
@@ -48,6 +52,17 @@ describe('DashboardComponent', () => {
   it('should expose authState signal', () => {
     authService.login('user@example.com', 'pass').subscribe();
     expect(component.authState()).toBe('authenticated');
+  });
+
+  it('hides permission-gated content without permission', () => {
+    expect(document.querySelector('.dashboard-permission')).toBeNull();
+  });
+
+  it('shows permission-gated content when permission is granted', () => {
+    permissionService.setAuthorization({ permissions: ['files.upload'] });
+    fixture.detectChanges();
+
+    expect(document.querySelector('.dashboard-permission')?.textContent?.trim()).toBe('Upload autorisé');
   });
 
   describe('logout()', () => {

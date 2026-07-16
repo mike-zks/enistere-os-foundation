@@ -2,10 +2,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, finalize, map, shareReplay, tap, throwError } from 'rxjs';
 import { AuthApi } from './auth.api';
 import type { AuthState } from './auth.state';
+import { PermissionService } from '../permissions/permission.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly api = inject(AuthApi);
+  private readonly permissionService = inject(PermissionService);
   private readonly _authState = signal<AuthState>('unauthenticated');
   private readonly _accessToken = signal<string | null>(null);
 
@@ -31,6 +33,7 @@ export class AuthService {
       map(() => undefined as void),
       catchError((err: unknown) => {
         this._accessToken.set(null);
+        this.permissionService.clear();
         this._authState.set('unauthenticated');
         return throwError(() => err);
       }),
@@ -51,6 +54,7 @@ export class AuthService {
       catchError((err: unknown) => {
         this._authState.set('expired');
         this._accessToken.set(null);
+        this.permissionService.clear();
         return throwError(() => err);
       }),
       finalize(() => { this.refreshInFlight$ = null; }),
@@ -62,11 +66,13 @@ export class AuthService {
   logout(): void {
     this.api.logout().subscribe({ error: () => {} });
     this._accessToken.set(null);
+    this.permissionService.clear();
     this._authState.set('unauthenticated');
   }
 
   restoreSession(): void {
     // No persistent storage — always cold-start unauthenticated.
+    this.permissionService.clear();
     this._authState.set('unauthenticated');
   }
 }
