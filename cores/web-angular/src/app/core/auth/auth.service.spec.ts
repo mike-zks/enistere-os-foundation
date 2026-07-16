@@ -47,6 +47,11 @@ describe('AuthService', () => {
       expect(state).not.toContain('Bearer');
     });
 
+    it('authState is read-only for consumers', () => {
+      expect('set' in service.authState).toBeFalse();
+      expect('update' in service.authState).toBeFalse();
+    });
+
     it('isAuthenticated() returns true', () => {
       service.login('user@example.com', 'secret');
       expect(service.isAuthenticated()).toBeTrue();
