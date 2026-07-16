@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core V1 Readiness Review
+
+- `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` : revue officielle AI Core.
+- Verdict : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`**.
+- §18 : **7/7 satisfaits** ; §19 futur : **5/8 satisfaits + 3/8 partiels + 0 non satisfaits**.
+- `VALIDE_V1` reste différé : runner de prompt gouverné, helper de citation retrieval et runbook d'usage AI Core manquants.
+- Aucun provider réel, SDK IA, clé API, appel réseau, embedding, vector DB, service RAG, stockage de traces ou workflow CI automatique.
+
 ### AI Core 8 — Governance/execution report schema
 
 - `cores/ai-core/src/reports/execution-report.mjs` : ajout du schéma local `ai-execution-report/v1` pour rapporter mission, prompt id/version/role, documents lus, fichiers modifiés, gates, limites, évaluation et prochaine action.
