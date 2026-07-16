@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 7 — Retrieval/RAG design decision
+
+- `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md` : décision Retrieval/RAG V1 documentée.
+- Retrieval V1 retenu : corpus documentaire Foundation versionné + allow-list explicite + Context Builder AI Core 4 + redaction AI Core 3 + Evaluation Harness AI Core 6 + revue humaine.
+- Aucun embedding, vector DB, provider réel, SDK IA, index persistant, appel réseau, ingestion globale, workflow CI automatique, dépendance ou stockage de traces.
+- Tout choix futur d'embedding, vector store, provider/SDK, service RAG déployé, stockage d'index, rétention de traces ou données projet/client dans un corpus IA nécessitera une décision dédiée, potentiellement un ADR.
+- `ai-core` reste **`IMPLEMENTATION_PARTIELLE`**.
+
 ### AI Core 6 — Evaluation harness initial
 
 - `cores/ai-core/src/evaluation/evaluation-harness.mjs` : ajout d'un harness local deterministe pour evaluer perimetre, fichiers interdits, documents requis, gates attendus, format de rapport, verification declaree et secrets detectables via la redaction.

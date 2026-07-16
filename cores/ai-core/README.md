@@ -12,7 +12,7 @@ fake provider deterministe, ainsi qu'un evaluation harness local. Il ne contient
 - aucun SDK IA ;
 - aucun provider reel configure ;
 - aucune cle API ;
-- aucun RAG runtime ;
+- aucun RAG runtime, embedding ou vector store ;
 - aucune base vectorielle ;
 - aucun endpoint ;
 - aucun workflow de deploiement.
@@ -143,6 +143,20 @@ node --test cores/ai-core/test/evaluation-harness.test.mjs
 Cette evaluation reste locale et deterministe. Elle n'utilise aucun LLM judge, aucun provider, aucun
 reseau, aucune cle API et aucun stockage de traces. Elle assiste la revue humaine sans la remplacer.
 
+## Retrieval / RAG Decision
+
+Decision AI Core 7 :
+
+- Retrieval/RAG V1 = retrieval documentaire local par allow-list explicite ;
+- le Context Builder AI Core 4 assemble le contexte ;
+- la Redaction Layer AI Core 3 reste obligatoire ;
+- l'Evaluation Harness AI Core 6 controle perimetre, docs requis, gates, format de rapport et secrets ;
+- aucun embedding, vector DB, provider reel, SDK IA, index persistant, appel reseau ou ingestion globale ;
+- tout choix futur d'embedding/vector store/provider/service RAG persistant necessite une decision separee,
+  potentiellement un ADR.
+
+Rapport : `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md`.
+
 ## References
 
 - `CORE_SPECIFICATION.md`
@@ -162,7 +176,7 @@ AI Core preparera a terme :
 - des provider adapters injectables ;
 - un fake provider pour tests ;
 - un evaluation harness ;
-- un futur RAG documentaire avec corpus allow-list ;
+- un retrieval documentaire avec corpus allow-list ;
 - des rapports d'execution IA sans secrets.
 
 ## Limites actuelles
@@ -189,7 +203,8 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 4 | Realise | Context builder allow-list |
 | AI Core 5 | Realise | Provider adapter seam + fake provider |
 | AI Core 6 | Realise | Evaluation harness initial |
-| AI Core 7 | Propose | Retrieval/RAG design decision |
+| AI Core 7 | Realise | Retrieval/RAG design decision |
+| AI Core 8 | Propose | Governance/execution report schema |
 
 ## Gates
 
@@ -244,6 +259,13 @@ Mission Evaluation Harness :
 node --test cores/ai-core/test/evaluation-harness.test.mjs
 node --test cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
 node cores/ai-core/scripts/validate-prompt-registry.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Retrieval/RAG Decision :
+
+```bash
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check
 ```

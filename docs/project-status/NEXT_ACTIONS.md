@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **IMPLEMENTATION_PARTIELLE** — AI Core 5 : prompt registry + redaction + context builder + provider seam/fake provider Node purs, aucun provider réel/runtime/dépendance |
+| AI Core | **IMPLEMENTATION_PARTIELLE** — AI Core 7 : prompt registry + redaction + context builder + provider seam/fake provider + evaluation harness + décision Retrieval/RAG V1, aucun provider réel/runtime/dépendance |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1271,17 +1271,23 @@ deux cores. À arbitrer par décision humaine.
 > Vérifications : tests Node evaluation + provider + context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
 > Aucun LLM judge, provider réel, SDK IA, clé API, appel réseau, modèle réel, embeddings, RAG runtime,
 > base vectorielle, endpoint, workflow CI automatique, dépendance, secret ou stockage de traces.
+>
+> ✅ **AI Core 7 — Retrieval/RAG design decision : RÉALISÉ** (2026-07-16).
+> Rapport : `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md`.
+> Décision : Retrieval/RAG V1 = corpus documentaire Foundation versionné + allow-list explicite +
+> Context Builder AI Core 4 + redaction AI Core 3 + Evaluation Harness AI Core 6 + revue humaine.
+> Statut : **`IMPLEMENTATION_PARTIELLE` maintenu**.
+> Vérifications : `quality-gates docs`.
+> Aucun embedding, vector DB, provider réel, SDK IA, clé API, appel réseau, modèle réel, index persistant,
+> ingestion globale, workflow CI automatique, dépendance ou stockage de traces.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 7 — Retrieval/RAG design decision**.
+**Prochaine action UNIQUE recommandée** : **AI Core 8 — Governance/execution report schema**.
 
-Objectif : décider le cadrage Retrieval/RAG V1 de l'AI Core avant toute implémentation lourde : corpus
-autorisé, stratégie d'indexation, contraintes de données sensibles, besoin ou non d'ADR pour embeddings /
-vector store / provider, et limites strictes pour une future preuve locale. Périmètre recommandé :
-`cores/ai-core/CORE_SPECIFICATION.md`, `cores/ai-core/README.md`, `docs/adr/ADR_BACKLOG.md`,
-`docs/project-status/*`, `CHANGELOG.md`.
-Interdits : aucun vector DB, aucun embedding model, aucun provider réel, aucun SDK IA, aucune clé API,
-aucun appel réseau, aucune indexation globale du repository, aucun workflow CI automatique, aucun stockage
-de traces.
+Objectif : définir un format local de rapport IA versionnable reliant prompt id/version, documents lus,
+fichiers modifiés, gates, limites, findings d'évaluation et prochaine action. Périmètre recommandé :
+`cores/ai-core/src/reports/*`, `cores/ai-core/test/report*.test.mjs`, README/spec/statut.
+Interdits : provider réel, SDK IA, clé API, appel réseau, stockage externe, workflow CI automatique,
+trace sensible, prompt complet non rédigé ou donnée client.
 
 ## 4. Prérequis
 
