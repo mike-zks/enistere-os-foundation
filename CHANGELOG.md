@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 3 — Auth flow + routing protégé
+
+- `cores/web-angular/src/app/core/auth/` : `AuthState` (`loading` / `authenticated` / `unauthenticated` / `refreshing` / `expired`), `AuthService` signal-based avec access token en mémoire privée uniquement, signal public en lecture seule, `login()` placeholder, `logout()` purge mémoire et `restoreSession()` sans persistance.
+- Guards fonctionnels `authGuard` / `guestGuard` : routes protégées, redirection `/login?returnUrl=...`, `returnUrl` assaini anti open-redirect (`//`, URL externes, `/%2F`).
+- `authInterceptor` : injection `Authorization: Bearer` depuis mémoire, exclusion des endpoints `/auth/login`, `/auth/refresh`, `/auth/logout`.
+- Routes Angular : `/login` public, `/dashboard` protégé, lazy loading, wildcard sûr.
+- Pages shells : login accessible (Reactive Forms minimal, ARIA) et dashboard protégé avec logout.
+- Tests Angular : AuthService, guards, returnUrl, interceptor, routing, login/dashboard — **76/76** ✅ après la garde read-only.
+- `web-angular` : **`STARTER_INITIALISE` → `AUTH_ROUTING_READY`**. Prochaine action : Web Core Angular 4 — Client HTTP + server state.
+
 ### Web Core Angular 2 — Starter minimal Angular
 
 - `cores/web-angular/package.json` (créé) : `@angular/core` 22.0.6, `@angular/material` + `@angular/cdk` 22.0.4, `typescript` 6.0.3, `@angular/cli` 22.0.7 + `@angular/build` 22.0.7 ; override borné `vite` 7.3.6 (corrige l'audit `esbuild` transitif) ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible production ; scripts test via `architect web-angular:test` pour un run CI déterministe. Aucun script `lint` n'est exposé tant qu'Angular ESLint n'est pas installé/configuré.

@@ -7,10 +7,15 @@
   <section class="home-status" aria-label="Statut du projet">
     <div class="status-badge">
       <span class="status-label">Statut</span>
-      <span class="status-value">STARTER_INITIALISE</span>
+      <span class="status-value">AUTH_ROUTING_READY</span>
     </div>
     <p class="home-description">
-      Angular 22 standalone · Material 3 · Tokens Enistere (ADR-035)
+      Angular 22 standalone · Material 3 · Tokens Enistere (ADR-035) · Auth + routing protégé
     </p>
   </section>
+
+  <nav class="home-nav" aria-label="Navigation principale">
+    <a routerLink="/login" class="home-nav-link">Connexion</a>
+    <a routerLink="/dashboard" class="home-nav-link">Dashboard</a>
+  </nav>
 </main>

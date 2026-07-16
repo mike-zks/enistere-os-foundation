@@ -1,0 +1,20 @@
+<main class="dashboard-shell">
+  <header class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <button
+      type="button"
+      class="logout-btn"
+      (click)="logout()"
+      aria-label="Se déconnecter de l'application"
+    >
+      Déconnexion
+    </button>
+  </header>
+
+  <section class="dashboard-content" aria-label="Contenu principal">
+    <p class="dashboard-message">Bienvenue sur Enistere Angular.</p>
+    <p class="dashboard-status">
+      État auth : <strong>{{ authState() }}</strong>
+    </p>
+  </section>
+</main>

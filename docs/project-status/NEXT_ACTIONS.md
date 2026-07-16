@@ -424,8 +424,15 @@
 > `web-angular` : **`SPECIFICATION_DOCUMENTAIRE` → `STARTER_INITIALISE`**.
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 >
-> **Prochaine action** : **Web Core Angular 3 — Auth flow + routing protégé**.
-> Prérequis : Angular 2 ✅.
+> ✅ **Web Core Angular 3 — Auth flow + routing protégé : RÉALISÉ** (2026-07-16).
+> Livrables : `AuthService` signal-based avec access token mémoire privé et signal public read-only,
+> `AuthState` loading/authenticated/unauthenticated/refreshing/expired, guards fonctionnels `authGuard`/`guestGuard`,
+> `sanitizeReturnUrl` anti open-redirect, `AuthInterceptor` Bearer mémoire, routes `/login` et `/dashboard`
+> protégée, pages login/dashboard shells accessibles. `web-angular` :
+> **`STARTER_INITIALISE` → `AUTH_ROUTING_READY`**.
+>
+> **Prochaine action** : **Web Core Angular 4 — Client HTTP + server state**.
+> Prérequis : Angular 3 ✅.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1150,7 +1157,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **STARTER_INITIALISE** — Angular 2 réalisé ; prochaine action : Angular 3 auth flow |
+| Web Core Angular | **AUTH_ROUTING_READY** — Angular 3 réalisé ; prochaine action : Angular 4 client HTTP + server state |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
