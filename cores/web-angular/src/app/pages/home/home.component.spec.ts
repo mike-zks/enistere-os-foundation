@@ -31,11 +31,11 @@ describe('HomeComponent', () => {
     expect(el.querySelector('h1')?.textContent?.trim()).toContain('Enistère');
   });
 
-  it('should show UPLOAD_READY status badge', () => {
+  it('should show TEST_SMOKE_READY status badge', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('UPLOAD_READY');
+    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('TEST_SMOKE_READY');
   });
 
   it('should have a labelled status section', () => {

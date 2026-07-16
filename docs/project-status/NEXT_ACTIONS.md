@@ -468,8 +468,13 @@
 > Tests : 205/205 ✅. Build SUCCESS, audit 0 vuln, quality-gates docs 2/2 ✅.
 > `web-angular` : **`FOUNDATION_STATES_READY` → `UPLOAD_READY`**.
 >
-> **Prochaine action** : **Web Core Angular 8 — Tests + smoke**.
-> Prérequis : Angular 7 ✅.
+> ✅ **Web Core Angular 8 — Tests + smoke : RÉALISÉ** (2026-07-16).
+> Livrables : `app.navigation.spec.ts` (5 tests `RouterTestingHarness` — lazy-loaded routes, authGuard redirect /dashboard→/login?returnUrl, guestGuard, wildcard) + `login.harness.spec.ts` (5 tests CDK `MatFormFieldHarness`/`MatInputHarness` — labels, types) + `upload-form.harness.spec.ts` (4 tests CDK `MatSelectHarness`/`MatButtonHarness`/`MatProgressSpinnerHarness`) + `enistere-loading-state.harness.spec.ts` (2 tests CDK spinner). Zéro dépendance ajoutée. Rapport `WEB_ANGULAR8_TESTS_SMOKE_REPORT.md`.
+> Tests : 224/224 ✅. Build SUCCESS, audit 0 vuln.
+> `web-angular` : **`UPLOAD_READY` → `TEST_SMOKE_READY`**.
+>
+> **Prochaine action** : **Web Core Angular V1 Readiness Review**.
+> Prérequis : Angular 8 ✅.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1194,7 +1199,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **UPLOAD_READY** — Angular 7 réalisé (2026-07-16) ; prochaine action : Angular 8 Tests + smoke |
+| Web Core Angular | **TEST_SMOKE_READY** — Angular 8 réalisé (2026-07-16) ; prochaine action : Angular V1 Readiness Review |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
