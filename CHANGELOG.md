@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 8 — Governance/execution report schema
+
+- `cores/ai-core/src/reports/execution-report.mjs` : ajout du schéma local `ai-execution-report/v1` pour rapporter mission, prompt id/version/role, documents lus, fichiers modifiés, gates, limites, évaluation et prochaine action.
+- `cores/ai-core/src/reports/index.mjs` : exports publics du module.
+- `cores/ai-core/test/report-schema.test.mjs` : tests Node purs couvrant création, validation, redaction, refus des prompts bruts, statuts conservateurs, déduplication et bornes.
+- `cores/ai-core/src/redaction/redaction.mjs` : durcissement de la redaction des secrets `.env` inline (`KEY=value`) dans les textes libres.
+- `ai-core` reste **`IMPLEMENTATION_PARTIELLE`** ; prochaine étape = readiness review dédiée.
+- Aucun provider réel, SDK IA, clé API, appel réseau, stockage externe, workflow CI automatique, trace sensible ou prompt complet persisté.
+
 ### AI Core 7 — Retrieval/RAG design decision
 
 - `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md` : décision Retrieval/RAG V1 documentée.

@@ -157,6 +157,34 @@ Decision AI Core 7 :
 
 Rapport : `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md`.
 
+## Execution Reports
+
+Livrables AI Core 8 :
+
+- `src/reports/execution-report.mjs` : schema local de rapport d'execution IA ;
+- `src/reports/index.mjs` : exports publics du module ;
+- `test/report-schema.test.mjs` : tests Node purs.
+
+Le rapport standardise :
+
+- mission (`name`, `scope`, `objective`) ;
+- prompt gouverne (`id`, `version`, `role`) sans prompt complet ;
+- documents lus ;
+- fichiers modifies ;
+- gates et statuts ;
+- limites connues ;
+- resultat d'evaluation ;
+- prochaine action.
+
+Le module applique la redaction AI Core 3, refuse les payloads de prompt brut (`promptText`, `rawPrompt`,
+`fullPrompt`, `messages`) et ne persiste rien.
+
+Commandes :
+
+```bash
+node --test cores/ai-core/test/report-schema.test.mjs
+```
+
 ## References
 
 - `CORE_SPECIFICATION.md`
@@ -204,7 +232,8 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 5 | Realise | Provider adapter seam + fake provider |
 | AI Core 6 | Realise | Evaluation harness initial |
 | AI Core 7 | Realise | Retrieval/RAG design decision |
-| AI Core 8 | Propose | Governance/execution report schema |
+| AI Core 8 | Realise | Governance/execution report schema |
+| AI Core 9 | Propose | AI Core V1 Readiness Review |
 
 ## Gates
 
@@ -266,6 +295,16 @@ git diff --check
 Mission Retrieval/RAG Decision :
 
 ```bash
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Execution Report Schema :
+
+```bash
+node --test cores/ai-core/test/report-schema.test.mjs
+node --test cores/ai-core/test/report-schema.test.mjs cores/ai-core/test/evaluation-harness.test.mjs cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
+node cores/ai-core/scripts/validate-prompt-registry.mjs
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check
 ```
