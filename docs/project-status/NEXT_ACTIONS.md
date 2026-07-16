@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **IMPLEMENTATION_PARTIELLE** — AI Core 7 : prompt registry + redaction + context builder + provider seam/fake provider + evaluation harness + décision Retrieval/RAG V1, aucun provider réel/runtime/dépendance |
+| AI Core | **IMPLEMENTATION_PARTIELLE** — AI Core 8 : prompt registry + redaction + context builder + provider seam/fake provider + evaluation harness + décision Retrieval/RAG V1 + schema de rapport d'execution, aucun provider réel/runtime/dépendance |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1280,14 +1280,24 @@ deux cores. À arbitrer par décision humaine.
 > Vérifications : `quality-gates docs`.
 > Aucun embedding, vector DB, provider réel, SDK IA, clé API, appel réseau, modèle réel, index persistant,
 > ingestion globale, workflow CI automatique, dépendance ou stockage de traces.
+>
+> ✅ **AI Core 8 — Governance/execution report schema : RÉALISÉ** (2026-07-16).
+> Livrables : `cores/ai-core/src/reports/execution-report.mjs`, `src/reports/index.mjs`,
+> `test/report-schema.test.mjs`.
+> Statut : **`IMPLEMENTATION_PARTIELLE` maintenu**.
+> Vérifications : tests Node reports + evaluation + provider + context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
+> Aucun provider réel, SDK IA, clé API, appel réseau, stockage externe, workflow CI automatique,
+> trace sensible, prompt complet non rédigé ou donnée client.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 8 — Governance/execution report schema**.
+**Prochaine action UNIQUE recommandée** : **AI Core V1 Readiness Review**.
 
-Objectif : définir un format local de rapport IA versionnable reliant prompt id/version, documents lus,
-fichiers modifiés, gates, limites, findings d'évaluation et prochaine action. Périmètre recommandé :
-`cores/ai-core/src/reports/*`, `cores/ai-core/test/report*.test.mjs`, README/spec/statut.
-Interdits : provider réel, SDK IA, clé API, appel réseau, stockage externe, workflow CI automatique,
-trace sensible, prompt complet non rédigé ou donnée client.
+Objectif : évaluer si AI Core peut passer de `IMPLEMENTATION_PARTIELLE` à un statut supérieur, sur preuve
+réelle : registry, redaction, context builder, provider fake, evaluation harness, décision Retrieval/RAG V1,
+schema de rapport, tests et limites. Périmètre recommandé :
+`docs/project-status/AI_CORE_V1_READINESS_REVIEW.md`, `cores/ai-core/CORE_SPECIFICATION.md`,
+`cores/ai-core/README.md`, `docs/project-status/*`, `CHANGELOG.md`.
+Interdits : promotion automatique sans critères, provider réel, SDK IA, clé API, appel réseau, vector DB,
+embedding model, workflow CI automatique ou stockage de traces.
 
 ## 4. Prérequis
 

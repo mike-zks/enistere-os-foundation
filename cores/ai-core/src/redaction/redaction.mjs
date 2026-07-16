@@ -137,7 +137,7 @@ export function redactText(input) {
 
   text = applyPattern(
     text,
-    /(^|\n)\s*([A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API_KEY|PRIVATE_KEY|ACCESS_KEY|REFRESH)[A-Z0-9_]*)\s*=\s*[^\n]+/g,
+    /(^|[\n\s;,(])([A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API_KEY|PRIVATE_KEY|ACCESS_KEY|REFRESH)[A-Z0-9_]*)\s*=\s*[^\n\s,;)]+/g,
     (_match, prefix, key) => `${prefix}${key}=${REDACTED}`,
     kinds,
     'env_secret',
