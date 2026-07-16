@@ -1,0 +1,11 @@
+<div class="empty-state" role="status" aria-live="polite">
+  <h2 class="state-title">{{ title() }}</h2>
+  @if (description()) {
+    <p class="state-description">{{ description() }}</p>
+  }
+  @if (actionLabel()) {
+    <button mat-flat-button class="state-action" (click)="actionClicked.emit()">
+      {{ actionLabel() }}
+    </button>
+  }
+</div>

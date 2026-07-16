@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `FORMS_MATERIAL_READY`
+**Statut** : `FOUNDATION_STATES_READY`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -77,7 +77,7 @@ Sections clés :
 | Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | ✅ Réalisé (2026-07-16) |
 | Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | ✅ Réalisé (2026-07-16) |
 | Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | ✅ Réalisé (2026-07-16) |
-| Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState + PermissionDirective + CDK a11y | À faire |
+| Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState standalone, signal inputs, a11y roles, tokens Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 7 | Upload fichiers | UploadService + FormData + états upload | À faire |
 | Angular 8 | Tests + smoke | TestBed + CDK testing harness + rapport | À faire |
 | Angular V1 | Readiness review | Rapport V1 Readiness | À faire |
@@ -86,9 +86,9 @@ Sections clés :
 
 ## Statut
 
-`FORMS_MATERIAL_READY` — Angular Material form fields sur la page de connexion : `mat-form-field` (appearance=outline), `matInput`, `mat-error` avec validation `required`/`email`/`minlength`, `mat-flat-button` pour le submit, utilitaire pur `getFieldError()` (required/email/minlength/maxlength/pattern), SCSS nettoyé (styles custom input supprimés). Construits sur `HTTP_SERVER_STATE_READY` (Angular 4). Build SUCCESS + 136/136 tests.
+`FOUNDATION_STATES_READY` — 4 composants Foundation standalone (`EnistereLoadingStateComponent`, `EnistereEmptyStateComponent`, `EnistereErrorStateComponent`, `EnistereSuccessStateComponent`) : signal inputs typés (`input()`/`input.required<T>()`), signal outputs (`output<void>()`), `role="status"` + `aria-live="polite"` (loading/empty/success), `role="alert"` + `aria-live="assertive"` (error), tokens Enistere (`--enistere-color-status-danger/success`, `--enistere-color-foreground-muted/default`, `--enistere-font-size-lg`, `--enistere-spacing-*`), `MatProgressSpinnerModule` (loading), `MatButtonModule` (actions optionnelles). Build SUCCESS + 170/170 tests.
 
-La prochaine action est **Web Core Angular 6 — Composants Foundation Enistere**.
+La prochaine action est **Web Core Angular 7 — PermissionService + PermissionDirective ou Upload selon roadmap**.
 
 ---
 
