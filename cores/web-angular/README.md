@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `VALIDE_V1`
+**Statut** : `IMPLEMENTATION_AVANCEE`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -86,19 +86,21 @@ Sections clés :
 
 ## Statut
 
-`VALIDE_V1` — **11 / 15 critères §29 satisfaits** + **4 / 15 partiels** avec réserves formellement acceptées (R1 RefreshInterceptor, R2 PermissionDirective, R3 CDK a11y FocusTrap/LiveAnnouncer, R4 CI gate) — **224 / 224 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
+`IMPLEMENTATION_AVANCEE` — **11 / 15 critères §29 satisfaits**, **3 / 15 partiels** et **1 / 15 non satisfait**. `VALIDE_V1` est différé par deux blockers : **B1 RefreshInterceptor/login API seam** et **B2 PermissionService/PermissionDirective**. Vérifications : **224 / 224 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
 
 Rapport de readiness : `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` (2026-07-16).
 
 Primitives upload Angular : `FileCategory` (9 valeurs) + `AppFile` + `UploadService` HttpClient+FormData (Content-Type jamais forcé) + `UploadFormComponent` Reactive Forms + états Foundation + CDK harnesses + `RouterTestingHarness` (Angular 8).
 
-**Réserves formellement acceptées :**
-- **R1** — RefreshInterceptor / login() réel : seam en place, débloqué par backend réel (§29.3, §29.5)
-- **R2** — PermissionDirective RBAC : directive display-UX déléguée au premier projet dérivé (§29.13)
-- **R3** — CDK a11y FocusTrap/LiveAnnouncer : ARIA HTML équivalent ; FocusTrap nécessite des modales (§29.9)
-- **R4** — CI Angular gate : non requis §29 ; reporté post-V1 (§32)
+**Blockers V1 :**
+- **B1** — RefreshInterceptor / login API seam : 401 → refresh coalescé → retry unique → logout/purge si échec (§29.3, §29.5)
+- **B2** — PermissionService + PermissionDirective RBAC : affichage conditionnel UX testé, API Core toujours autorité (§29.13)
 
-**Prochaine action** : Web Core Angular V2 (CI gate + RefreshInterceptor + PermissionDirective + E2E).
+**Réserves non-bloquantes :**
+- **R1** — CDK a11y FocusTrap/LiveAnnouncer : ARIA HTML équivalent ; FocusTrap nécessite des modales (§29.9)
+- **R2** — CI Angular gate : non requis §29 ; reporté mission qualité/CI (§32)
+
+**Prochaine action** : Web Core Angular 9 — RefreshInterceptor + login API seam.
 
 ---
 

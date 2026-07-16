@@ -8,13 +8,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ### Web Core Angular V1 Readiness Review
 
-- Rapport `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` : 15 critères §29 vérifiés un par un — **11 / 15 SATISFAIT** + **4 / 15 PARTIEL** avec réserves formellement acceptées, **0 critère non satisfait**.
+- Rapport `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` : 15 critères §29 vérifiés un par un — **11 / 15 SATISFAIT**, **3 / 15 PARTIEL**, **1 / 15 NON SATISFAIT**.
 - Cohérence ADR-035 vérifiée : Angular Material CDK + M3, Reactive Forms, Foundation components Angular, CDK harnesses, Angular Signals, PrimeNG absent.
-- Réserves formellement acceptées : R1 (RefreshInterceptor/login() placeholder — seam présent), R2 (PermissionDirective — display-UX déléguée au projet dérivé, API = autorité), R3 (CDK a11y FocusTrap/LiveAnnouncer — ARIA HTML équivalent, FocusTrap nécessite modales), R4 (CI Angular gate — non requis §29, reporté §32 post-V1).
+- Blockers V1 : B1 (RefreshInterceptor/login API seam absent), B2 (PermissionService/PermissionDirective absent). Réserves non-bloquantes : R1 (CDK a11y FocusTrap/LiveAnnouncer — ARIA HTML équivalent, FocusTrap nécessite modales), R2 (CI Angular gate — non requis §29, reporté §32).
 - Décisions §32 tracées : 2 TRANSCHÉ (framework tests Jasmine/Karma, version Angular 22.0.6), 9 DIFFÉRÉ (refresh, OpenAPI, E2E, TanStack Query Angular, NgRx, SSR, UI Kit Angular, CI gate, préférences).
-- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `TEST_SMOKE_READY` → `VALIDE_V1`.
+- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`.
 - Mise à jour docs : `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md`, `cores/web-angular/README.md`.
-- `web-angular` : **`TEST_SMOKE_READY` → `VALIDE_V1`**. Build SUCCESS + **224/224 tests** ✅ — 0 vulnérabilité.
+- `web-angular` : **`TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`**. `VALIDE_V1` différé jusqu'à fermeture B1/B2. Build SUCCESS + **224/224 tests** ✅ — 0 vulnérabilité.
 
 ### Web Core Angular 8 — Tests + smoke
 
