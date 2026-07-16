@@ -489,7 +489,13 @@
 > Livrables : `PermissionService` signal-based in-memory, `PermissionDirective` standalone `*enisterePermission`, modes `all`/`any`, normalisation roles/permissions sans wildcard, purge permissions via AuthService, preuve dashboard `files.upload`. Rapport `WEB_ANGULAR10_PERMISSION_RBAC_REPORT.md`.
 > B2 fermé. Readiness finale : **14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT**. Tests : **267/267 ✅**. Décision : `web-angular` → **`VALIDE_V1`**.
 >
-> **Prochaine action recommandée** : **Quality/Governance — gate CI `web-angular` dédié** (réserve R2), ou prochain core prioritaire de la roadmap.
+> ✅ **Quality/Governance — gate CI `web-angular` dédié : RÉALISÉ** (2026-07-16).
+> Livrables : `.github/workflows/web-angular-ci.yml` + scope local `quality-gates web-angular`
+> (`test:ci`, `build`, `audit`) + mise à jour `WEB_ANGULAR_V1_READINESS_REVIEW.md`.
+> Réserve R2 fermée. Le check `web-angular` reste promotion recommandée, non appliquée automatiquement
+> dans le ruleset `protect-main`.
+>
+> **Prochaine action recommandée** : **AI Core 1 — Core specification**.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1214,10 +1220,19 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; prochaine action recommandée : gate CI `web-angular` dédié ou prochain core roadmap |
+| Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
+
+## 8. Prochaine action recommandée après Quality Web Angular CI
+
+**Prochaine action UNIQUE recommandée** : **AI Core 1 — Core specification**.
+
+Justification : tous les cores applicatifs principaux et Quality/Docs sont `VALIDE_V1`; `ai-core` reste
+le seul core `DOSSIER_SEULEMENT`. La mission doit rester documentaire : lire `strategy/10_AI_STRATEGY.md`,
+`strategy/04_ROADMAP_GLOBAL.md`, les ADR existants et le backlog ADR, puis produire
+`cores/ai-core/CORE_SPECIFICATION.md` + `README.md` sans runtime, dépendance, modèle, provider ou secret.
 
 ## 4. Prérequis
 

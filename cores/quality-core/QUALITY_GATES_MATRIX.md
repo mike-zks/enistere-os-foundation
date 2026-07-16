@@ -1,17 +1,18 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-15 (Spring Boot 5 — L5 api-spring-ci.yml + scope api-spring).
+> Dernière mise à jour : 2026-07-16 (Web Angular CI — workflow web-angular-ci.yml + scope web-angular).
 >
 > **Script de sélection locale** : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`
-> Scopes : `docs` | `packages` | `ui-kit` | `web` | `root-audit` | `mobile-static` | `api-spring` | `all-safe`
+> Scopes : `docs` | `packages` | `ui-kit` | `web` | `web-angular` | `root-audit` | `mobile-static` | `api-spring` | `all-safe`
 >
 > **Synthèse tests/couverture locale** : `node cores/quality-core/scripts/quality-report.mjs markdown`
 >
 > Légende CI : **L1** = `ci.yml` (non-régression monorepo) ; **L2** = `api-runtime-ci.yml`
 > (runtime API : PG+MinIO) ; **L3** = `web-e2e-ci.yml` (E2E navigateur Playwright) ;
 > **L4** = `registry-ci.yml` (images GHCR + api-smoke) ; **L5** = `api-spring-ci.yml`
-> (Maven verify : Java 21 + Testcontainers PostgreSQL).
+> (Maven verify : Java 21 + Testcontainers PostgreSQL) ; **L6** = `web-angular-ci.yml`
+> (Angular 22 : Karma/ChromeHeadless + build + audit).
 >
 > Légende gate : ✅ = gate actif et documenté | — = gate absent ou non applicable |
 > ⚠️ = gate présent mais incomplet ou bloqué | 🔒 = gate final staging (non reproductible localement)
@@ -25,6 +26,7 @@
 | **api-client-fetch** | ✅ L1 | — | ✅ L1 (30) | ✅ L1 | — | — | — | — | — | — | — |
 | **ui-kit** | ✅ L1 | ✅ local | ✅ L1 (181) + coverage local | ✅ L1 | ✅ L1 | — | — | — | — | ✅ local | — |
 | **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (450) | ✅ L1 | ✅ L1 | ✅ L3 (15) | — | — | — | — | — |
+| **web-angular** | ✅ L6 (build TS) | — | ✅ L6 (267) | ✅ L6 | ✅ L6 | — | — | — | — | — | — |
 | **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
 | **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
 | **api-spring** | ✅ L5 (mvnw) | — | ✅ L5 (71: 32u+39e2e TC) | ✅ L5 (Flyway) | — | — | — | — | — | — | ✅ L5 |
@@ -79,7 +81,17 @@
 | build (sans API) | `npm run build --workspace=@enistere/web-nextjs` | Node 24 | **L1** | chaque PR |
 | E2E Playwright (15) | `npx playwright test` | Node 24, API+PG+MinIO+Web+Chromium | **L3** | chaque PR |
 
-### 2.6 cores/mobile-react-native
+### 2.6 cores/web-angular
+
+| Gate | Commande | Environnement | CI | Fréquence |
+|---|---|---|---|---|
+| tests (267) | `cd cores/web-angular && npm run test:ci` | Node 24, Karma, ChromeHeadless | **L6** | chaque PR |
+| build production | `cd cores/web-angular && npm run build` | Node 24, Angular 22 | **L6** | chaque PR |
+| audit (0 vuln) | `cd cores/web-angular && npm audit` | Node 24 | **L6** | chaque PR |
+
+> Projet npm autonome, hors workspaces racine. Aucun backend, secret, service externe ou déploiement.
+
+### 2.7 cores/mobile-react-native
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
@@ -95,7 +107,7 @@
 > **Note smoke iOS** : `npm run smoke:ios` est bloqué en environnement Linux (`detectedPlatform: linux`).
 > Il doit être exécuté sur macOS avec Xcode installé (Mobile Core RN31 — en attente macOS/device réel).
 
-### 2.7 cores/api-nestjs
+### 2.8 cores/api-nestjs
 
 > L'API Core est un projet npm autonome et n'expose pas de script `typecheck` dédié.
 > Le gate de compilation TypeScript est `npm run build` (Nest build).
@@ -128,7 +140,7 @@
 > **Note branch protection** : pour ajouter `api-spring-verify` comme check requis sur `main`,
 > ajouter le nom de job exact au ruleset `protect-main` (runbook `BRANCH_PROTECTION_RUNBOOK.md`).
 
-### 2.8 cores/cloud
+### 2.10 cores/cloud
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
@@ -158,6 +170,7 @@
 | 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
 | 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
 | 11 | `api-spring-verify` | `api-spring-ci.yml` | promotion recommandée, non appliquée |
+| 12 | `web-angular` | `web-angular-ci.yml` | promotion recommandée, non appliquée |
 
 > Les noms de checks correspondent au **`name:` du job** dans le YAML (jamais au `name:` du workflow).
 > Renommer un job casse l'exigence. Le runbook `BRANCH_PROTECTION_RUNBOOK.md` contient la procédure
@@ -175,6 +188,7 @@
 | mobile-react-native | local RN35 2026-07-11 | 367/367 + doctor 19/19 + smoke Android verts |
 | api-nestjs | CI `main` (L2) | 386u + 101e2e verts |
 | api-spring | CI L5 `api-spring-verify` 2026-07-15 | 71/71 verts (32u + 39 TC) |
+| web-angular | CI L6 `web-angular` + readiness V1 2026-07-16 | 267/267 verts + build + audit 0 |
 | cloud | CI `main` (L4) + staging CC10/CC11 | images GHCR + staging HTTPS validé |
 
 ## 5. Script de sélection locale (Quality Core 2)
@@ -202,11 +216,12 @@ node cores/quality-core/scripts/quality-gates.mjs run ui-kit
 | `packages` | 7 (api-contracts + api-client-fetch) | — |
 | `ui-kit` | 5 | — |
 | `web` | 4 | E2E Playwright |
+| `web-angular` | 3 (test:ci, build, audit) | — |
 | `mobile-static` | 4 (typecheck, lint, test, doctor) | expo export, smoke:android, smoke:ios |
 | `api-spring` | 1 (`./mvnw verify`) | MinIO TC (déferré), Tika (déferré), smoke staging |
-| `all-safe` | 17 (packages + ui-kit + web + root-audit) | mobile, api-nestjs e2e, api-spring (Docker), E2E, Cloud |
+| `all-safe` | 17 (packages + ui-kit + web + root-audit) | mobile, web-angular (Karma/ChromeHeadless), api-nestjs e2e, api-spring (Docker), E2E, Cloud |
 
-Tests unitaires : `node --test cores/quality-core/scripts/quality-gates.test.mjs` — 42/42.
+Tests unitaires : `node cores/quality-core/scripts/quality-gates.test.mjs` — 48/48.
 
 ## 6. Baseline tests / coverage locale (Quality Core reporting)
 
@@ -223,9 +238,9 @@ node cores/quality-core/scripts/quality-report.mjs markdown
 
 | Indicateur | Valeur |
 |---|---:|
-| Scopes suivis | 8 |
+| Scopes suivis | 9 |
 | Coverage disponible localement | 3 |
-| Coverage absente ou non standardisée | 5 |
+| Coverage absente ou non standardisée | 6 |
 
 Coverage locale disponible :
 

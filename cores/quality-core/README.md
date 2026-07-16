@@ -23,7 +23,7 @@ release Foundation appliquee, reporting coverage local et decisions residuelles 
 | `RELEASE_PROCESS_RUNBOOK.md` | **Processus de release gouverné** — 5 types de release, prérequis généraux, procédure 8 étapes, format notes, convention de tagging futur |
 | `AI_PROMPT_GOVERNANCE.md` | **Gouvernance des prompts IA** — responsabilités, lectures obligatoires, format minimal, sécurité, rapport attendu |
 | `scripts/quality-gates.mjs` | Script Node 24, sans dépendance — sélection et exécution locale des gates sûrs |
-| `scripts/quality-gates.test.mjs` | 36 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
+| `scripts/quality-gates.test.mjs` | 48 tests unitaires (node:test) — vérifient les plans sans exécuter les commandes |
 | `scripts/release-helper.mjs` | Helper local de préparation release — liste les types gouvernés et génère un brouillon Markdown sur stdout |
 | `scripts/release-helper.test.mjs` | Tests unitaires du helper release — validation parsing, types, redaction et brouillon |
 | `scripts/quality-report.mjs` | Helper local de synthèse tests/couverture — sortie Markdown stdout, sans lancer les tests |
@@ -66,13 +66,16 @@ node cores/quality-core/scripts/quality-gates.mjs run <scope>
 | `packages` | api-contracts + api-client-fetch : typecheck, build, generate:check, test |
 | `ui-kit` | typecheck, lint, test (181), build, tokens:check |
 | `web` | typecheck, lint, test (450), build |
+| `web-angular` | test:ci (267), build, audit — projet npm autonome |
 | `mobile-static` | typecheck, lint, test (367), doctor — **sans** expo export ni smoke |
-| `all-safe` | packages + ui-kit + web + root-audit — **sans** mobile, api-nestjs e2e, E2E, Cloud |
+| `all-safe` | packages + ui-kit + web + root-audit — **sans** mobile, web-angular, api-nestjs e2e, api-spring, E2E, Cloud |
 
 ### Gates explicitement exclus de `all-safe`
 
 - `mobile-static` — lancez séparément
+- `web-angular` — Karma/ChromeHeadless, lancez séparément via le scope dédié
 - `api-nestjs e2e` — PostgreSQL + MinIO requis
+- `api-spring` — Docker/Testcontainers requis
 - `E2E Playwright` — stack API + PG + MinIO + Chromium requise
 - `smoke:android / smoke:ios` — device ou émulateur requis
 - `Cloud / staging` — runbook CC11, non reproductibles localement
@@ -80,8 +83,8 @@ node cores/quality-core/scripts/quality-gates.mjs run <scope>
 ### Lancer les tests du script
 
 ```bash
-node --test cores/quality-core/scripts/quality-gates.test.mjs
-# 36/36 tests unitaires — vérification des plans sans exécution des commandes
+node cores/quality-core/scripts/quality-gates.test.mjs
+# 48/48 tests unitaires — vérification des plans sans exécution des commandes
 ```
 
 ## Commandes existantes par core
@@ -129,6 +132,14 @@ npm run build --workspace=@enistere/web-nextjs               # sans API
 npx playwright test                                          # 15 tests E2E (stack réelle)
 ```
 
+### cores/web-angular
+```bash
+cd cores/web-angular
+npm run test:ci                                             # 267 tests Karma/ChromeHeadless
+npm run build                                               # build production Angular
+npm audit                                                   # 0 vuln requis
+```
+
 ### cores/mobile-react-native
 ```bash
 cd cores/mobile-react-native
@@ -169,6 +180,7 @@ docker build -t enistere/web-nextjs .                        # image Web
 | api-contracts | typecheck + build + generate:check + test | audit |
 | api-client-fetch | typecheck + build + test | audit |
 | web-nextjs | typecheck + lint + test + build | E2E (stack réelle) |
+| web-angular | test:ci + build + audit | CI `web-angular` dédiée |
 | mobile-react-native | typecheck + lint + test + expo-doctor | expo export + smoke android |
 | api-nestjs | typecheck + lint + test | test:e2e (PG+MinIO) + openapi:check |
 | cloud | docker build images | api-smoke (gate CI) |
@@ -181,7 +193,7 @@ docker build -t enistere/web-nextjs .                        # image Web
 | Auteur PR | Exécuter les gates minimaux avant ouverture de PR |
 | Reviewer | Vérifier que les gates appropriés ont été exécutés (checklist PR) |
 | Mainteneur | Décider des promotions de statut (checklist revue de statut) |
-| CI | Enforcer les checks requis sur `main` (7+1 checks documentés — ADR-013, CC4) |
+| CI | Enforcer les checks requis sur `main` (8 requis actifs ; checks additionnels recommandés documentés — ADR-013, CC4) |
 
 ## État attendu pour Quality Core V2 / VF
 

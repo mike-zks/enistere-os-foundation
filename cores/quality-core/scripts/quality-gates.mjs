@@ -7,7 +7,7 @@
  *   node cores/quality-core/scripts/quality-gates.mjs plan <scope>
  *   node cores/quality-core/scripts/quality-gates.mjs run <scope>
  *
- * Scopes : docs | packages | ui-kit | web | root-audit | mobile-static | api-spring | all-safe
+ * Scopes : docs | packages | ui-kit | web | web-angular | root-audit | mobile-static | api-spring | all-safe
  *
  * Aucune dépendance externe. Compatible Node 24.
  * Gates exclus : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e.
@@ -27,6 +27,7 @@ const __dirname = dirname(__filename);
 export const REPO_ROOT = resolve(__dirname, '../../..');
 const MOBILE_CWD = resolve(REPO_ROOT, 'cores/mobile-react-native');
 const SPRING_CWD = resolve(REPO_ROOT, 'cores/api-spring');
+const ANGULAR_CWD = resolve(REPO_ROOT, 'cores/web-angular');
 
 // ---------------------------------------------------------------------------
 // Step builder helpers (no external state)
@@ -101,6 +102,13 @@ const SCOPE_GATES = {
     ws('web-nextjs', 'build'),
   ],
 
+  // Standalone Angular project (not a root npm workspace): build covers strict TS.
+  'web-angular': [
+    step('web-angular: test:ci', 'npm', ['run', 'test:ci'], ANGULAR_CWD),
+    step('web-angular: build', 'npm', ['run', 'build'], ANGULAR_CWD),
+    step('web-angular: audit', 'npm', ['audit'], ANGULAR_CWD),
+  ],
+
   // Static gates only: no expo export (Metro bundle), no smoke (device/émulateur requis)
   'mobile-static': [
     mob('typecheck'),
@@ -116,7 +124,7 @@ const SCOPE_GATES = {
 };
 
 // all-safe : packages + ui-kit + web + root-audit
-// Excludes: mobile-static, api-nestjs (e2e = PG+MinIO requis), E2E Playwright, Cloud
+// Excludes: mobile-static, web-angular (Karma/ChromeHeadless), api-nestjs, api-spring, E2E, Cloud
 SCOPE_GATES['all-safe'] = [
   ...SCOPE_GATES.packages,
   ...SCOPE_GATES['ui-kit'],
@@ -139,10 +147,12 @@ export const SCOPE_DESCRIPTIONS = {
     'Gates UI Kit : typecheck, lint, test (181, jest-axe), build, tokens:check.',
   web:
     'Gates Web Core : typecheck, lint, test (450), build.',
+  'web-angular':
+    'Gates Web Core Angular : test:ci (Karma/ChromeHeadless), build production, npm audit. Projet npm autonome.',
   'mobile-static':
     'Gates mobiles statiques : typecheck, lint, test (367), doctor. Exclus : expo export, smoke:android, smoke:ios.',
   'all-safe':
-    'packages + ui-kit + web + root-audit. Exclus : mobile, api-nestjs e2e, api-spring (Docker requis), E2E Playwright, Cloud.',
+    'packages + ui-kit + web + root-audit. Exclus : mobile, web-angular (Karma/ChromeHeadless), api-nestjs e2e, api-spring (Docker requis), E2E Playwright, Cloud.',
   'api-spring':
     'Maven verify — Java 21, Flyway V1+V2, 71 tests (unit + Testcontainers PostgreSQL). Requiert Docker.',
 };
@@ -155,6 +165,7 @@ const SCOPE_EXCLUDED = {
   ],
   'all-safe': [
     'mobile-static (lancez séparément avec le scope mobile-static)',
+    'web-angular (Karma/ChromeHeadless — lancez séparément avec le scope web-angular)',
     'api-nestjs lint / test / test:e2e (PostgreSQL + MinIO requis pour e2e)',
     'api-spring (Docker requis pour Testcontainers PostgreSQL — lancez séparément)',
     'E2E Playwright web-nextjs (stack API + PG + MinIO + Chromium requise)',

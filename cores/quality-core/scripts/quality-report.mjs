@@ -61,6 +61,16 @@ export const QUALITY_SCOPES = Object.freeze([
     notes: 'Coverage disponible via node --test --experimental-test-coverage ; non publiee.',
   }),
   Object.freeze({
+    id: 'web-angular',
+    label: 'cores/web-angular',
+    packageJson: 'cores/web-angular/package.json',
+    testCommand: 'cd cores/web-angular && npm run test:ci',
+    expectedTests: '267',
+    coverageCommand: null,
+    ciLevel: 'L6',
+    notes: 'Karma/ChromeHeadless + build + audit ; pas de coverage standardisee.',
+  }),
+  Object.freeze({
     id: 'mobile-react-native',
     label: 'cores/mobile-react-native',
     packageJson: 'cores/mobile-react-native/package.json',

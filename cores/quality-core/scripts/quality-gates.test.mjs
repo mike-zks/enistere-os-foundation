@@ -14,16 +14,17 @@ import { resolve } from 'node:path';
 
 const MOBILE_CWD = resolve(REPO_ROOT, 'cores/mobile-react-native');
 const SPRING_CWD = resolve(REPO_ROOT, 'cores/api-spring');
+const ANGULAR_CWD = resolve(REPO_ROOT, 'cores/web-angular');
 
 // ---------------------------------------------------------------------------
 // listScopes
 // ---------------------------------------------------------------------------
 
 describe('listScopes', () => {
-  it('retourne les 8 scopes attendus', () => {
+  it('retourne les 9 scopes attendus', () => {
     const scopes = listScopes();
-    assert.strictEqual(scopes.length, 8);
-    for (const s of ['docs', 'root-audit', 'packages', 'ui-kit', 'web', 'mobile-static', 'api-spring', 'all-safe']) {
+    assert.strictEqual(scopes.length, 9);
+    for (const s of ['docs', 'root-audit', 'packages', 'ui-kit', 'web', 'web-angular', 'mobile-static', 'api-spring', 'all-safe']) {
       assert.ok(scopes.includes(s), `scope manquant : ${s}`);
     }
   });
@@ -189,6 +190,48 @@ describe('buildPlan — web', () => {
 });
 
 // ---------------------------------------------------------------------------
+// buildPlan — web-angular
+// ---------------------------------------------------------------------------
+
+describe('buildPlan — web-angular', () => {
+  it('a 3 étapes : test:ci, build, audit', () => {
+    const plan = buildPlan('web-angular');
+    assert.ok(plan !== null);
+    assert.strictEqual(plan.steps.length, 3);
+    assert.deepStrictEqual(plan.steps.map((s) => s.label), [
+      'web-angular: test:ci',
+      'web-angular: build',
+      'web-angular: audit',
+    ]);
+  });
+
+  it('toutes les étapes s\'exécutent dans cores/web-angular', () => {
+    buildPlan('web-angular').steps.forEach((s) =>
+      assert.strictEqual(s.cwd, ANGULAR_CWD, `cwd inattendu : ${s.cwd}`),
+    );
+  });
+
+  it('utilise les scripts npm autonomes du core Angular', () => {
+    const steps = buildPlan('web-angular').steps;
+    assert.deepStrictEqual(steps[0].args, ['run', 'test:ci']);
+    assert.deepStrictEqual(steps[1].args, ['run', 'build']);
+    assert.deepStrictEqual(steps[2].args, ['audit']);
+  });
+
+  it("n'inclut pas workspace npm ni E2E", () => {
+    buildPlan('web-angular').steps.forEach((s) => {
+      const args = s.args.join(' ');
+      assert.ok(!args.includes('--workspace'));
+      assert.ok(!args.toLowerCase().includes('e2e'));
+    });
+  });
+
+  it('sa description mentionne Karma/ChromeHeadless', () => {
+    assert.match(buildPlan('web-angular').description, /Karma\/ChromeHeadless/);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // buildPlan — mobile-static
 // ---------------------------------------------------------------------------
 
@@ -292,10 +335,16 @@ describe('buildPlan — all-safe', () => {
     assert.ok(!labels.some((l) => l.includes('api-spring')));
   });
 
-  it('documente les gates exclus (mobile, api-nestjs, api-spring, E2E, Cloud)', () => {
+  it("n'inclut pas web-angular", () => {
+    const labels = buildPlan('all-safe').steps.map((s) => s.label);
+    assert.ok(!labels.some((l) => l.includes('web-angular')));
+  });
+
+  it('documente les gates exclus (mobile, web-angular, api-nestjs, api-spring, E2E, Cloud)', () => {
     const excl = buildPlan('all-safe').excluded;
     assert.ok(excl.length > 0, 'aucun gate exclu documenté');
     assert.ok(excl.some((e) => e.toLowerCase().includes('mobile')));
+    assert.ok(excl.some((e) => e.toLowerCase().includes('web-angular')));
     assert.ok(excl.some((e) => e.toLowerCase().includes('api-nestjs')));
     assert.ok(excl.some((e) => e.toLowerCase().includes('api-spring')));
     assert.ok(excl.some((e) => e.toLowerCase().includes('e2e') || e.toLowerCase().includes('playwright')));

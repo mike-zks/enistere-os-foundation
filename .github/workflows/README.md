@@ -1,7 +1,6 @@
 # CI — workflows GitHub Actions
 
-Deux workflows, **lecture seule** (`permissions: contents: read`), **sans secret GitHub, sans registry/GHCR,
-sans déploiement** :
+Workflows CI, **lecture seule** (`permissions: contents: read`), **sans secret GitHub, sans déploiement** :
 
 | Workflow | Rôle | Niveau (Cloud Core) |
 |---|---|---|
@@ -9,6 +8,8 @@ sans déploiement** :
 | [`api-runtime-ci.yml`](api-runtime-ci.yml) | Runtime de l'**API NestJS** : PostgreSQL + MinIO **jetables**, migrations Prisma, unit + e2e, OpenAPI check, build, audit | Niveau 2 |
 | [`web-e2e-ci.yml`](web-e2e-ci.yml) | **E2E navigateur** : stack réelle (PostgreSQL + MinIO + API + Web) + Playwright/Chromium ; parcours Health, Auth, Files | Niveau 3 |
 | [`registry-ci.yml`](registry-ci.yml) | **Registry GHCR** : build images API/Web ; **push sur `main` seulement** (tags immuables, pas de `latest`) — **sans déploiement** | Niveau 4 (partiel) |
+| [`api-spring-ci.yml`](api-spring-ci.yml) | **API Spring Boot** : Maven Wrapper + Java 21 + Testcontainers PostgreSQL | Niveau 5 |
+| [`web-angular-ci.yml`](web-angular-ci.yml) | **Web Angular** : Karma/ChromeHeadless + build production + audit npm local | Niveau 6 |
 
 ## `ci.yml` — CI minimale V1 (ADR-013)
 
