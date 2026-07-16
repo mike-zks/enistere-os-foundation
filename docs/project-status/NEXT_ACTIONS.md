@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core V1 Readiness Review : §18 7/7, §19 futur 5/8 + 3 partiels ; VALIDE_V1 différé |
+| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core 9 livré : B1 prompt runner fermé ; VALIDE_V1 reste différé par B2 citation retrieval + B3 runbook |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1296,14 +1296,24 @@ deux cores. À arbitrer par décision humaine.
 > `VALIDE_V1` reste différé par B1 prompt runner gouverné, B2 retrieval source citation helper, B3 runbook
 > d'usage AI Core.
 > Vérifications : tests Node AI Core + validation registry + `quality-gates docs`.
+>
+> ✅ **AI Core 9 — Prompt execution runner (fake provider only) : RÉALISÉ** (2026-07-16).
+> Rapport : `docs/project-status/AI_CORE9_PROMPT_RUNNER_REPORT.md`.
+> Livrables : `cores/ai-core/src/runner/prompt-runner.mjs`, `src/runner/index.mjs`,
+> `test/prompt-runner.test.mjs`.
+> B1 fermé : un prompt `active` peut être exécuté localement via registry + context builder allow-list +
+> redaction + safe provider adapter + fake provider + evaluation harness + report schema.
+> Statut : **`IMPLEMENTATION_AVANCEE` maintenu**.
+> `VALIDE_V1` reste différé par B2 retrieval source citation helper et B3 runbook d'usage AI Core.
+> Aucun provider réel, SDK IA, clé API, appel réseau, embedding, vector DB, service RAG, endpoint,
+> stockage externe, workflow CI automatique ou prompt brut en rapport.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 9 — Prompt execution runner (fake provider only)**.
+**Prochaine action UNIQUE recommandée** : **AI Core 10 — Retrieval source citation helper**.
 
-Objectif : rendre un prompt gouverné exécutable localement via registry + context builder + redaction +
-safe provider adapter + fake provider + execution report schema. Périmètre recommandé :
-`cores/ai-core/src/execution/*`, `cores/ai-core/test/execution*.test.mjs`, README/spec/statut.
-Interdits : provider réel, SDK IA, clé API, appel réseau, vector DB, embedding model, service RAG,
-stockage externe, workflow CI automatique, prompt complet en rapport ou donnée client.
+Objectif : matérialiser des citations de sources documentaires à partir des fichiers inclus dans le contexte,
+sans RAG runtime, embedding, vector DB, provider réel, réseau, stockage d'index ou donnée client.
+Périmètre recommandé : `cores/ai-core/src/retrieval/*`, `cores/ai-core/test/retrieval*.test.mjs`,
+README/spec/statut.
 
 ## 4. Prérequis
 
