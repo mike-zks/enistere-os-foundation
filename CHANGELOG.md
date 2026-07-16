@@ -6,6 +6,18 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 6 — Composants Foundation Enistere
+
+- `cores/web-angular/src/app/shared/components/loading-state/enistere-loading-state.component.ts` : `EnistereLoadingStateComponent` standalone — signal `message` (défaut `'Chargement en cours…'`), signal `size` (`small`/`medium`/`large`, défaut `medium`), `MatProgressSpinnerModule`, `diameterFor` map (`small:24`, `medium:40`, `large:64`).
+- `cores/web-angular/src/app/shared/components/empty-state/enistere-empty-state.component.ts` : `EnistereEmptyStateComponent` standalone — `input.required<string>()` `title`, `input<string>()` `description` + `actionLabel`, `output<void>()` `actionClicked`, `MatButtonModule`.
+- `cores/web-angular/src/app/shared/components/error-state/enistere-error-state.component.ts` : `EnistereErrorStateComponent` standalone — `input.required<string>()` `title`, `input<string>()` `description` + `retryLabel`, `output<void>()` `retried`, `MatButtonModule`.
+- `cores/web-angular/src/app/shared/components/success-state/enistere-success-state.component.ts` : `EnistereSuccessStateComponent` standalone — `input.required<string>()` `title`, `input<string>()` `description` + `actionLabel`, `output<void>()` `actionClicked`, `MatButtonModule`.
+- Templates : `role="status"` + `aria-live="polite"` (loading/empty/success) ; `role="alert"` + `aria-live="assertive"` (error) ; `@if` Angular 17+ pour description et action optionnelles ; `[attr.aria-label]="message()"` sur loading.
+- SCSS : conteneurs `flex column`, `align-items: center`, `gap: var(--enistere-spacing-4)`, `padding: var(--enistere-spacing-8)`. Titres `.state-title` : `--enistere-color-foreground-default` (empty/success → `--enistere-color-status-success` ; error → `--enistere-color-status-danger`). Descriptions `.state-description`/`.loading-message` : `--enistere-color-foreground-muted`, `max-width: 480px`.
+- Tests : 34 tests (7 loading + 9 empty + 9 error + 9 success) — `fixture.componentRef.setInput()` signal inputs, `provideNoopAnimations()`, vérification role a11y, titre, description optionnelle, bouton absent sans label, émission output.
+- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `FORMS_MATERIAL_READY` → `FOUNDATION_STATES_READY`.
+- `web-angular` : **`FORMS_MATERIAL_READY` → `FOUNDATION_STATES_READY`**. Build SUCCESS + 170/170 tests ✅.
+
 ### Web Core Angular 5 — Reactive Forms + Angular Material
 
 - `cores/web-angular/src/app/core/forms/form-error.utils.ts` : utilitaire pur `getFieldError(control, label): string | null` — mappage des erreurs Angular (`required`, `email`, `minlength`, `maxlength`, `pattern`) vers des messages lisibles ; aucune dépendance à un DTO backend ; priorité : `required` > `email` > longueur > format.

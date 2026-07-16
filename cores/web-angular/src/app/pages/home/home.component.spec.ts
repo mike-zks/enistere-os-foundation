@@ -31,11 +31,11 @@ describe('HomeComponent', () => {
     expect(el.querySelector('h1')?.textContent?.trim()).toContain('Enistère');
   });
 
-  it('should show FORMS_MATERIAL_READY status badge', () => {
+  it('should show FOUNDATION_STATES_READY status badge', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('FORMS_MATERIAL_READY');
+    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('FOUNDATION_STATES_READY');
   });
 
   it('should have a labelled status section', () => {

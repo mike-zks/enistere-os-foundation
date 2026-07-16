@@ -451,9 +451,20 @@
 > - `src/app/pages/home/home.component.html` + spec : badge `FORMS_MATERIAL_READY`.
 > - Tests : 136/136 ✅. Build SUCCESS, audit 0, quality-gates docs ✅, `git diff --check` ✅.
 > `web-angular` : **`HTTP_SERVER_STATE_READY` → `FORMS_MATERIAL_READY`**.
+
+> ✅ **Web Core Angular 6 — Composants Foundation Enistere : RÉALISÉ** (2026-07-16).
+> Livrables :
+> - `src/app/shared/components/loading-state/enistere-loading-state.component.{ts,html,scss,spec.ts}` : signal `message` (défaut `'Chargement en cours…'`) + `size` (`small`/`medium`/`large`, défaut `medium`) + `MatProgressSpinnerModule` (`diameterFor` map 24/40/64) ; `role="status"` + `aria-live="polite"` + `[attr.aria-label]="message()"` ; 7 tests.
+> - `src/app/shared/components/empty-state/enistere-empty-state.component.{ts,html,scss,spec.ts}` : `input.required<string>()` `title` + `input<string>()` `description`/`actionLabel` + `output<void>()` `actionClicked` ; `role="status"` + `aria-live="polite"` ; bouton absent sans label, émission output ; 9 tests.
+> - `src/app/shared/components/error-state/enistere-error-state.component.{ts,html,scss,spec.ts}` : `input.required<string>()` `title` + `input<string>()` `description`/`retryLabel` + `output<void>()` `retried` ; `role="alert"` + `aria-live="assertive"` ; retry absent sans label, émission output ; 9 tests.
+> - `src/app/shared/components/success-state/enistere-success-state.component.{ts,html,scss,spec.ts}` : `input.required<string>()` `title` + `input<string>()` `description`/`actionLabel` + `output<void>()` `actionClicked` ; `role="status"` + `aria-live="polite"` ; action absente sans label, émission output ; 9 tests.
+> - SCSS : tokens Enistere `--enistere-color-status-danger/success`, `--enistere-color-foreground-default/muted`, `--enistere-spacing-4/8`, `--enistere-font-size-lg`, `--enistere-font-weight-semibold` ; `max-width: 480px` sur descriptions.
+> - `src/app/pages/home/home.component.html` + spec : badge `FOUNDATION_STATES_READY`.
+> - Tests : 170/170 ✅. Build SUCCESS, audit 0 vuln, quality-gates docs 2/2 ✅, `git diff --check` ✅.
+> `web-angular` : **`FORMS_MATERIAL_READY` → `FOUNDATION_STATES_READY`**.
 >
-> **Prochaine action** : **Web Core Angular 6 — Composants Foundation Enistere**.
-> Prérequis : Angular 5 ✅.
+> **Prochaine action** : **Web Core Angular 7 — Upload fichiers**.
+> Prérequis : Angular 6 ✅.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1178,7 +1189,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **FORMS_MATERIAL_READY** — Angular 5 réalisé ; prochaine action : Angular 6 Composants Foundation Enistere |
+| Web Core Angular | **FOUNDATION_STATES_READY** — Angular 6 réalisé ; prochaine action : Angular 7 Upload fichiers |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
