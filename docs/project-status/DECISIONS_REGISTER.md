@@ -405,9 +405,9 @@ analytics…). **Aucun fichier ADR correspondant n'existe** → `NON_APPLICABLE_
 rédaction.
 
 > **Note ADR-035 (2026-07-16)** : ADR-035 est validé et partiellement implémenté
-> par Angular 1 + Angular 2 + Angular 3 + Angular 4. `web-angular` est
-> `HTTP_SERVER_STATE_READY` tant que les formulaires Reactive Forms/Material, les composants
-> Foundation Angular et les modules V1 ne sont pas livrés.
+> par Angular 1 + Angular 2 + Angular 3 + Angular 4 + Angular 5. `web-angular` est
+> `FORMS_MATERIAL_READY` tant que les composants Foundation Angular et les modules V1
+> ne sont pas livrés.
 
 > **Note ADR-034 (2026-07-14)** : ADR-034 est maintenant validé. `mobile-flutter` reste
 > `DOSSIER_SEULEMENT` tant que sa spécification et son starter ne sont pas livrés.
