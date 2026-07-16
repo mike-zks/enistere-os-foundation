@@ -420,8 +420,25 @@
 > loading/authenticated/unauthenticated/refreshing/expired, guards fonctionnels `authGuard`/`guestGuard`,
 > `sanitizeReturnUrl` anti open-redirect, `AuthInterceptor` Bearer mémoire, routes `/login` et `/dashboard`
 > protégée, pages login/dashboard shells accessibles. Tests Angular : **76/76** ✅ après correction
-> read-only. `web-angular` : **`STARTER_INITIALISE` → `AUTH_ROUTING_READY`**. Prochaine action :
-> Web Core Angular 4 — Client HTTP + server state.
+> read-only. `web-angular` : **`STARTER_INITIALISE` → `AUTH_ROUTING_READY`**.
+>
+> **Mise à jour Web Core Angular 4 — Client HTTP + server-state RxJS (2026-07-16)** :
+> `APP_BASE_URL = new InjectionToken<string>('APP_BASE_URL')` + `ApiConfig` interface (timeout documenté différé) ;
+> `AppApiError` (`code: ApiErrorCode` union 12 valeurs, `statusCode: number | null`, `requestId: string | null`) +
+> `mapHttpError()` (400→'BadRequest', 401→'Unauthorized', 403→'Forbidden', 404→'NotFound', 409→'Conflict',
+> 413→'FileTooLarge', 415→'UnsupportedType', 422→'ValidationError', 429→'RateLimited', 5xx→'ServerError',
+> status 0→'NetworkError', x-request-id extrait, corps jamais exposé) + `isAppApiError()` type-guard ;
+> `errorInterceptor` : `HttpErrorResponse` → `AppApiError`, 401 surfacé sans refresh automatique ;
+> `logInterceptor` : `sanitizePath()` (pathname seul, jamais query params/URL signée), logs
+> `method + path + status + duration` UNIQUEMENT — jamais body/Authorization/query params sensibles ;
+> `RequestState<T>` factories `idleState`/`loadingState`/`successState`/`errorState` + `createRequestState<T>(source$)`
+> (startWith loading → map success → catchError AppApiError) ;
+> `app.config.ts` mis à jour : `withInterceptors([authInterceptor, logInterceptor, errorInterceptor])` +
+> `{ provide: APP_BASE_URL, useValue: '' }`.
+> Tests : `api-config.spec.ts` (2), `app-api-error.spec.ts` (17), `error.interceptor.spec.ts` (6),
+> `log.interceptor.spec.ts` (7, dont vérification absence Authorization/body/query params), `request-state.spec.ts` (9).
+> `web-angular` : **`AUTH_ROUTING_READY` → `HTTP_SERVER_STATE_READY`**. Prochaine action :
+> Web Core Angular 5 — Reactive Forms + Angular Material.
 >
 | Élément | Dossier | Spéc. | ADR | Starter | Code | Tests | Revue | Statut officiel | Dernière preuve | Prochaine condition |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -437,7 +454,7 @@
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
 | Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé, appliqué V1) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5 + SecureStorage Flutter 8 + RefreshInterceptor Flutter 9 + UI states Flutter 10 + sign-in form Flutter 11) | ✓ (218 tests : theme + unit/auth + unit/secure_session_store + widget × 3 + widget/sign_in_screen (10) + widget/states + unit/api × 5 + unit/upload + intégration × 7) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 9/11 §29, B1→B5 fermés, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 ; `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md` — B2 ; `MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md` — B3 ; `MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md` — B4 ; `MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md` — B5 ; `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` — promotion V1) | **VALIDE_V1** | Flutter V1 Final Readiness Decision (2026-07-14) : B1→B5 fermés, score §29 9/11 + 2 PARTIAL iOS R1 ; 218/218 tests headless ; smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux acceptée comme réserve environnementale non bloquante, sans succès iOS artificiel | — (V1 déclaré ; smoke iOS uniquement quand macOS/Xcode ou device iOS réel disponible) |
 | Quality Core | ✓ | ✓ | — | — | ✓ (scripts `quality-gates` + `release-helper` + `quality-report` testés ; release process utilisé) | ✓ (`QUALITY_CORE_V2_READINESS_REVIEW.md` + `QUALITY_CORE_ADVANCED_READINESS_REVIEW.md` + `QUALITY_CORE_RELEASE_HELPER_REPORT.md` + `QUALITY_CORE_COVERAGE_REPORTING_BASELINE.md` + `QUALITY_CORE_REQUIRED_CHECKS_ALIGNMENT.md` + `QUALITY_CORE_COVERAGE_STANDARDIZATION_DECISION.md` + `QUALITY_CORE_V1_READINESS_REVIEW.md`) | ✓ | **VALIDE_V1** | `CORE_SPECIFICATION.md` + `QUALITY_GATES_MATRIX.md` + `BRANCH_PROTECTION_RUNBOOK.md` + `RELEASE_PROCESS_RUNBOOK.md` + `AI_PROMPT_GOVERNANCE.md` + 3 checklists + `scripts/quality-gates.mjs` + `scripts/release-helper.mjs` + `scripts/quality-report.mjs` + templates GitHub + prompts catalogués + release `foundation-v1.0.0` gouvernée + Docs Core connecté au gate docs + décision checks `images` + coverage UI Kit/Web/API reconnue | — (V1 déclaré) |
-| Web Core Angular | ✓ | **✓ (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15)** | **ADR-035 (Validé, 2026-07-15)** | **✓ (Angular 2 starter + Angular 3 auth/routing : `AuthService` Signals read-only, guards, `AuthInterceptor`, `/login`, `/dashboard`)** | **✓ (Angular 3 — auth shell signal-based, routing protégé, token mémoire privé, login/dashboard shells)** | **✓ (76/76 Angular 3 ; build production propre)** | — | **AUTH_ROUTING_READY** | `architect web-angular:build` SUCCESS · `architect web-angular:test` 76/76 ✅ · `npm audit` 0 vuln | Web Core Angular 4 — Client HTTP + server state |
+| Web Core Angular | ✓ | **✓ (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15)** | **ADR-035 (Validé, 2026-07-15)** | **✓ (Angular 2 starter + Angular 3 auth/routing + Angular 4 HTTP/server-state : `AppApiError`+`mapHttpError`+`isAppApiError`, `ErrorInterceptor`, `LogInterceptor` (jamais body/Authorization/query params sensibles/URL signée), `RequestState<T>`+`createRequestState()`, `APP_BASE_URL` token, ordre `auth → log → error`)** | **✓ (Angular 3+4 — couche HTTP générique complète, intercepteurs typés, server-state primitives RxJS)** | **✓ (Angular 3+4 ; build SUCCESS ; tests AppApiError/intercepteurs/RequestState/api-config + 76 Angular 3)** | — | **HTTP_SERVER_STATE_READY** | `architect web-angular:build` SUCCESS · `architect web-angular:test` ✅ · `npm audit` 0 vuln | Web Core Angular 5 — Reactive Forms + Angular Material |
 
 ### 1.1 Foundation baseline
 

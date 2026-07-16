@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `AUTH_ROUTING_READY`
+**Statut** : `HTTP_SERVER_STATE_READY`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -75,7 +75,7 @@ Sections clés :
 | Angular 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` | ✅ Réalisé (2026-07-15) |
 | Angular 2 | Starter minimal Angular | `package.json` + structure `src/` + thème Material 3 Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | ✅ Réalisé (2026-07-16) |
-| Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | À faire |
+| Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | ✅ Réalisé (2026-07-16) |
 | Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | À faire |
 | Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState + PermissionDirective + CDK a11y | À faire |
 | Angular 7 | Upload fichiers | UploadService + FormData + états upload | À faire |
@@ -86,9 +86,9 @@ Sections clés :
 
 ## Statut
 
-`AUTH_ROUTING_READY` — auth flow signal-based, routing protégé par guards fonctionnels, intercepteur Bearer mémoire, pages login/dashboard shells accessibles, tests AuthService/guards/intercepteur.
+`HTTP_SERVER_STATE_READY` — couche HTTP Angular générique : `AppApiError` typée, `ErrorInterceptor` (transformation `HttpErrorResponse` → `AppApiError`, 401 surfacé sans refresh), `LogInterceptor` (method+path+status+durée, jamais body/Authorization/query params sensibles/URL signée), `RequestState<T>` RxJS (idle/loading/success/error + `createRequestState()`), `APP_BASE_URL` token. Ordre intercepteurs : `auth → log → error`. Tests complets.
 
-La prochaine action est **Web Core Angular 4 — Client HTTP + server state**.
+La prochaine action est **Web Core Angular 5 — Reactive Forms + Angular Material**.
 
 ---
 
