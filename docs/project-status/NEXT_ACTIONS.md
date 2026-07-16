@@ -463,8 +463,13 @@
 > - Tests : 170/170 ✅. Build SUCCESS, audit 0 vuln, quality-gates docs 2/2 ✅, `git diff --check` ✅.
 > `web-angular` : **`FORMS_MATERIAL_READY` → `FOUNDATION_STATES_READY`**.
 >
-> **Prochaine action** : **Web Core Angular 7 — Upload fichiers**.
-> Prérequis : Angular 6 ✅.
+> ✅ **Web Core Angular 7 — Upload fichiers : RÉALISÉ** (2026-07-16).
+> Livrables : `core/upload/file-category.ts` (FileCategory 9 valeurs) + `app-file.model.ts` (AppFile + isValidAppFile/isAllowedFileType/describeFileForLog) + `uploaded-file-metadata.model.ts` + `upload.service.ts` (HttpClient+FormData, Content-Type jamais forcé, 413/415/401 via AppApiError + createRequestState) + `features/upload/upload-form/` (UploadFormComponent Reactive Forms + Material + états Foundation).
+> Tests : 205/205 ✅. Build SUCCESS, audit 0 vuln, quality-gates docs 2/2 ✅.
+> `web-angular` : **`FOUNDATION_STATES_READY` → `UPLOAD_READY`**.
+>
+> **Prochaine action** : **Web Core Angular 8 — Tests + smoke**.
+> Prérequis : Angular 7 ✅.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1189,7 +1194,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **FOUNDATION_STATES_READY** — Angular 6 réalisé ; prochaine action : Angular 7 Upload fichiers |
+| Web Core Angular | **UPLOAD_READY** — Angular 7 réalisé (2026-07-16) ; prochaine action : Angular 8 Tests + smoke |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |

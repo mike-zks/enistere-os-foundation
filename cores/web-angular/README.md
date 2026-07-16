@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `FOUNDATION_STATES_READY`
+**Statut** : `UPLOAD_READY`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -78,7 +78,7 @@ Sections clés :
 | Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | ✅ Réalisé (2026-07-16) |
 | Angular 5 | Reactive Forms + Angular Material | formulaires + validation + `mat-form-field` | ✅ Réalisé (2026-07-16) |
 | Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState standalone, signal inputs, a11y roles, tokens Enistere | ✅ Réalisé (2026-07-16) |
-| Angular 7 | Upload fichiers | UploadService + FormData + états upload | À faire |
+| Angular 7 | Upload fichiers | UploadService + FormData + états upload | ✅ Réalisé (2026-07-16) |
 | Angular 8 | Tests + smoke | TestBed + CDK testing harness + rapport | À faire |
 | Angular V1 | Readiness review | Rapport V1 Readiness | À faire |
 
@@ -86,9 +86,9 @@ Sections clés :
 
 ## Statut
 
-`FOUNDATION_STATES_READY` — 4 composants Foundation standalone (`EnistereLoadingStateComponent`, `EnistereEmptyStateComponent`, `EnistereErrorStateComponent`, `EnistereSuccessStateComponent`) : signal inputs typés (`input()`/`input.required<T>()`), signal outputs (`output<void>()`), `role="status"` + `aria-live="polite"` (loading/empty/success), `role="alert"` + `aria-live="assertive"` (error), tokens Enistere (`--enistere-color-status-danger/success`, `--enistere-color-foreground-muted/default`, `--enistere-font-size-lg`, `--enistere-spacing-*`), `MatProgressSpinnerModule` (loading), `MatButtonModule` (actions optionnelles). Build SUCCESS + 170/170 tests.
+`UPLOAD_READY` — primitives upload Angular génériques : `FileCategory` (9 valeurs : `IMAGE`/`DOCUMENT`/`AVATAR`/`VIDEO`/`AUDIO`/`IDENTITY_DOCUMENT`/`ATTACHMENT`/`MEDIA`/`OTHER`) + `AppFile` interface (`file`, `category`, `subjectId?`) + `isValidAppFile`/`isAllowedFileType`/`describeFileForLog` (extension+sizeBytes uniquement — jamais nom/path/contenu). `UploadService` : `HttpClient.post()` + `FormData` (Content-Type jamais forcé — boundary posé par le navigateur) → `Observable<RequestState<UploadedFileMetadata>>` via `createRequestState`. Mapping `AppApiError` : 413→`FileTooLarge`, 415→`UnsupportedType`, 401→`Unauthorized`. `UploadFormComponent` : Reactive Forms (`category` required, `subjectId` optionnel max 128), signal `selectedFile`, état `signal<RequestState<...>>` ; états Loading/Error/Success via composants Foundation Angular 6. Build SUCCESS + 205/205 tests.
 
-La prochaine action est **Web Core Angular 7 — Upload fichiers**.
+La prochaine action est **Web Core Angular 8 — Tests + smoke**.
 
 ---
 

@@ -1,0 +1,39 @@
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-4);
+  max-width: 480px;
+  padding: var(--enistere-spacing-6);
+}
+
+.upload-title {
+  font-size: var(--enistere-font-size-lg);
+  font-weight: var(--enistere-font-weight-semibold);
+  color: var(--enistere-color-foreground-default);
+  margin: 0 0 var(--enistere-spacing-2);
+}
+
+.upload-file-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--enistere-spacing-2);
+}
+
+.upload-file-label {
+  font-size: var(--enistere-font-size-sm);
+  color: var(--enistere-color-foreground-muted);
+}
+
+.upload-file-input {
+  font-size: var(--enistere-font-size-md);
+  color: var(--enistere-color-foreground-default);
+  accent-color: var(--enistere-color-primary);
+}
+
+.upload-field {
+  width: 100%;
+}
+
+.upload-submit {
+  align-self: flex-start;
+}
