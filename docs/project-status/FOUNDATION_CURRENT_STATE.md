@@ -73,7 +73,7 @@ enistere-os-foundation/
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
     api-spring/           VALIDE_V1 (SB8 — §30 15/15 ✅ ; 99/99 ✅ ; L5 CI ; Redis+RateLimit+MinioTC)
     ai-core/               → vide
-    web-angular/           UPLOAD_READY (Angular 7, 2026-07-16 — FileCategory + AppFile + UploadService (HttpClient+FormData, no Content-Type, 413/415/401 via AppApiError) + UploadFormComponent (Reactive Forms+Material, états Foundation) ; 205/205 tests)
+    web-angular/           TEST_SMOKE_READY (Angular 8, 2026-07-16 — 16 tests RouterTestingHarness + CDK harnesses ; build SUCCESS ; 224/224 tests)
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
     api-client-fetch/  @enistere/api-client-fetch (0.1.0, privé)
@@ -96,7 +96,7 @@ enistere-os-foundation/
 | `docs-core` | oui | oui | **oui** (script link check + guides) | **VALIDE_V1** |
 | `mobile-flutter` | oui | oui | oui (starter + auth shell + Dio client + upload + SecureStorage + RefreshInterceptor + UI states Flutter 10 + **formulaire sign-in Flutter 11** — 218/218 tests + smoke `emulator-5554` 7/7) | **VALIDE_V1** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux réserve environnementale acceptée — identique à RN B2 ; rapports `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` + Flutter 7→11 smoke reports + `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`) |
 | `quality-core` | oui | oui | **oui** (gouvernance qualité : gates, checklists, runbooks, templates, prompts, release process utilisé ; scripts `quality-gates` + `release-helper` + `quality-report` testés) | **VALIDE_V1** |
-| `web-angular` | oui | **oui** (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15) | **oui** (Angular 2 starter + Angular 3 auth/routing + Angular 4 HTTP/server-state + Angular 5 Reactive Forms + Angular Material + Angular 6 Foundation state components + Angular 7 Upload fichiers — `FileCategory`/`AppFile`/`UploadService`/`UploadFormComponent`, FormData no Content-Type, 413/415/401 via AppApiError, états Foundation) | **UPLOAD_READY** |
+| `web-angular` | oui | **oui** (`CORE_SPECIFICATION.md` 32 §, `README.md` — Angular 1, 2026-07-15) | **oui** (Angular 2 starter + Angular 3 auth/routing + Angular 4 HTTP/server-state + Angular 5 Reactive Forms + Angular Material + Angular 6 Foundation state components + Angular 7 Upload fichiers + Angular 8 Tests + smoke — RouterTestingHarness + CDK harnesses ; 224/224 tests) | **TEST_SMOKE_READY** |
 
 **API Core NestJS** — modules présents : `config`, `database` (Prisma/PostgreSQL), `health`,
 `auth` (login, sessions, refresh, JWT), `users`, `roles`, `permissions`, `audit`, `files` (S3/MinIO),
