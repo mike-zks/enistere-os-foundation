@@ -9,7 +9,12 @@ import { EnistereErrorStateComponent } from '../../../shared/components/error-st
 import { EnistereLoadingStateComponent } from '../../../shared/components/loading-state/enistere-loading-state.component';
 import { EnistereSuccessStateComponent } from '../../../shared/components/success-state/enistere-success-state.component';
 import { getFieldError } from '../../../core/forms/form-error.utils';
-import { idleState, type RequestState } from '../../../core/server-state/request-state';
+import { errorState, idleState, type RequestState } from '../../../core/server-state/request-state';
+import {
+  MAX_FILE_SIZE_BYTES,
+  isAllowedFileType,
+  isValidAppFile,
+} from '../../../core/upload/app-file.model';
 import { FILE_CATEGORIES, type FileCategory } from '../../../core/upload/file-category';
 import { UploadService } from '../../../core/upload/upload.service';
 import type { UploadedFileMetadata } from '../../../core/upload/uploaded-file-metadata.model';
@@ -72,6 +77,20 @@ export class UploadFormComponent implements OnDestroy {
 
     const file = this.selectedFile()!;
     const { category, subjectId } = this.uploadForm.getRawValue();
+
+    if (!isValidAppFile(file)) {
+      this.state.set(errorState({
+        code: file.size > MAX_FILE_SIZE_BYTES ? 'FileTooLarge' : 'BadRequest',
+        statusCode: null,
+        requestId: null,
+      }));
+      return;
+    }
+
+    if (!isAllowedFileType(file)) {
+      this.state.set(errorState({ code: 'UnsupportedType', statusCode: null, requestId: null }));
+      return;
+    }
 
     this.sub?.unsubscribe();
     this.sub = this.uploadService

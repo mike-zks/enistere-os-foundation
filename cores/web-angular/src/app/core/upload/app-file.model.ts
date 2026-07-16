@@ -1,6 +1,7 @@
 import type { FileCategory } from './file-category';
 
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB — client-side UX guard; backend is authoritative
+const MAX_LOG_EXTENSION_LENGTH = 16;
 
 const ALLOWED_MIME_TYPES = new Set<string>([
   'image/jpeg',
@@ -37,6 +38,10 @@ export function isAllowedFileType(file: File): boolean {
 // Safe descriptor for logging — extension and size only, never filename/path/content/token.
 export function describeFileForLog(file: File): { extension: string; sizeBytes: number } {
   const lastDot = file.name.lastIndexOf('.');
-  const extension = lastDot >= 0 ? file.name.slice(lastDot + 1).toLowerCase() : '';
+  const rawExtension = lastDot >= 0 ? file.name.slice(lastDot + 1).toLowerCase() : '';
+  const extension = /^[a-z0-9]+$/.test(rawExtension) &&
+    rawExtension.length <= MAX_LOG_EXTENSION_LENGTH
+    ? rawExtension
+    : '';
   return { extension, sizeBytes: file.size };
 }

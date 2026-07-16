@@ -68,6 +68,14 @@ describe('AppFile utilities', () => {
       expect(describeFileForLog(file).extension).toBe('');
     });
 
+    it('should sanitize unsafe or oversized extensions', () => {
+      const unsafe = new File(['x'], 'report.pdf<script>', { type: 'application/pdf' });
+      const oversized = new File(['x'], 'report.verylongextensionvalue', { type: 'application/pdf' });
+
+      expect(describeFileForLog(unsafe).extension).toBe('');
+      expect(describeFileForLog(oversized).extension).toBe('');
+    });
+
     it('should never include the filename in the descriptor', () => {
       const file = new File(['x'], 'secret-contract.pdf', { type: 'application/pdf' });
       const desc = describeFileForLog(file);

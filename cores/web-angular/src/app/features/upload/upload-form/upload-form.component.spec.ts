@@ -99,6 +99,34 @@ describe('UploadFormComponent', () => {
     );
   });
 
+  it('should reject oversized files before calling UploadService', () => {
+    const big = new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'big.pdf', {
+      type: 'application/pdf',
+    });
+    setFile(big);
+    fixture.componentInstance.uploadForm.controls.category.setValue('DOCUMENT');
+    fixture.detectChanges();
+
+    compiled.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+
+    expect(uploadSpy).not.toHaveBeenCalled();
+    expect(compiled.textContent).toContain('Le fichier dépasse la taille autorisée.');
+  });
+
+  it('should reject unsupported MIME types before calling UploadService', () => {
+    const executable = new File(['x'], 'run.exe', { type: 'application/x-executable' });
+    setFile(executable);
+    fixture.componentInstance.uploadForm.controls.category.setValue('DOCUMENT');
+    fixture.detectChanges();
+
+    compiled.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+
+    expect(uploadSpy).not.toHaveBeenCalled();
+    expect(compiled.textContent).toContain('Type de fichier non supporté.');
+  });
+
   it('should show loading state during upload', () => {
     setState(loadingState());
     expect(compiled.querySelector('form.upload-form')).toBeNull();

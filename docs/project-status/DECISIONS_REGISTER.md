@@ -405,9 +405,9 @@ analytics…). **Aucun fichier ADR correspondant n'existe** → `NON_APPLICABLE_
 rédaction.
 
 > **Note ADR-035 (2026-07-16)** : ADR-035 est validé et partiellement implémenté
-> par Angular 1 + Angular 2 + Angular 3 + Angular 4 + Angular 5 + Angular 6.
-> `web-angular` est `FOUNDATION_STATES_READY` tant que les modules V1 suivants
-> ne sont pas livrés.
+> par Angular 1 + Angular 2 + Angular 3 + Angular 4 + Angular 5 + Angular 6
+> + Angular 7. `web-angular` est `UPLOAD_READY`; Angular 8 — Tests + smoke
+> reste la prochaine étape avant la revue V1.
 
 > **Note ADR-034 (2026-07-14)** : ADR-034 est maintenant validé. `mobile-flutter` reste
 > `DOSSIER_SEULEMENT` tant que sa spécification et son starter ne sont pas livrés.
