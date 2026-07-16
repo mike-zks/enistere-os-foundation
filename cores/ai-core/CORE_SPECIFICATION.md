@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
 > Statut : PREUVE_TECHNIQUE
-> Mission courante : AI Core 2 — Prompt registry model + validator local
+> Mission courante : AI Core 3 — Redaction layer pure + tests
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -142,6 +142,15 @@ Doit masquer :
 - emails et PII si non necessaires ;
 - extraits `.env` ;
 - payloads utilisateurs.
+
+Preuve technique livree par AI Core 3 :
+
+- `src/redaction/redaction.mjs` fournit `redactText`, `redactValue`, `isSensitiveKey` et marqueurs controles ;
+- `src/redaction/index.mjs` expose le module ;
+- `test/redaction.test.mjs` couvre les cles sensibles, credentials Authorization, JWT, URLs signees,
+  secrets `.env`, cles privees, emails, chemins locaux, erreurs, cycles et profondeur maximale.
+
+La couche est pure, locale, sans provider, sans stockage, sans appel reseau et sans dependance.
 
 La redaction doit etre conservative : sur-redaction acceptable, fuite non acceptable.
 
@@ -520,7 +529,7 @@ AI Core ne doit pas :
 ## 21. Missions futures recommandees
 
 1. AI Core 2 — Prompt registry model + validator documentaire/local. **Realise**.
-2. AI Core 3 — Redaction layer pure + tests.
+2. AI Core 3 — Redaction layer pure + tests. **Realise**.
 3. AI Core 4 — Context builder allow-list + reports.
 4. AI Core 5 — Provider adapter seam + fake provider.
 5. AI Core 6 — Evaluation harness initial.

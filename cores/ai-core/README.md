@@ -5,8 +5,8 @@
 AI Core cadre l'usage avance de l'IA dans Enistere OS Foundation : prompts gouvernes, assistants
 specialises, redaction, RAG documentaire, evaluation et connecteurs provider futurs.
 
-Ce core contient actuellement une premiere preuve technique locale : un registre de prompts gouvernes
-et un validateur Node pur. Il ne contient toujours :
+Ce core contient actuellement des preuves techniques locales : un registre de prompts gouvernes,
+un validateur Node pur et une redaction layer pure. Il ne contient toujours :
 
 - aucun SDK IA ;
 - aucun provider configure ;
@@ -36,6 +36,33 @@ node --test cores/ai-core/test/prompt-registry.test.mjs
 Le registre ne rend aucun prompt executable automatiquement. Il ne fait que declarer et valider les
 metadonnees de gouvernance : role, perimetre, documents requis, fichiers autorises/interdits, gates,
 risque et statut.
+
+## Redaction Layer
+
+Livrables AI Core 3 :
+
+- `src/redaction/redaction.mjs` : redaction de texte libre et de valeurs structurees ;
+- `src/redaction/index.mjs` : exports publics du module ;
+- `test/redaction.test.mjs` : tests Node purs.
+
+La couche masque notamment :
+
+- cles sensibles (`Authorization`, `access_token`, `refreshToken`, `API_KEY`, `password`, `email`) ;
+- credentials `Bearer` / `Basic` ;
+- JWT ;
+- parametres d'URL signee ;
+- secrets `.env` ;
+- blocs de cle privee ;
+- emails ;
+- chemins locaux `file://`, `content://`, `ph://`.
+
+Commandes :
+
+```bash
+node --test cores/ai-core/test/redaction.test.mjs
+```
+
+La redaction est une brique locale. Elle n'envoie rien a un provider et ne persiste aucune trace.
 
 ## References
 
@@ -79,7 +106,7 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 |---|---|---|
 | AI Core 1 | Realise | Core specification + README |
 | AI Core 2 | Realise | Prompt registry model + validator local |
-| AI Core 3 | Propose | Redaction layer pure + tests |
+| AI Core 3 | Realise | Redaction layer pure + tests |
 | AI Core 4 | Propose | Context builder allow-list |
 | AI Core 5 | Propose | Provider adapter seam + fake provider |
 | AI Core 6 | Propose | Evaluation harness initial |
@@ -98,6 +125,15 @@ Mission Prompt Registry :
 
 ```bash
 node cores/ai-core/scripts/validate-prompt-registry.mjs
+node --test cores/ai-core/test/prompt-registry.test.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Redaction Layer :
+
+```bash
+node --test cores/ai-core/test/redaction.test.mjs
 node --test cores/ai-core/test/prompt-registry.test.mjs
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check
