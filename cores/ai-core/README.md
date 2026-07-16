@@ -1,6 +1,6 @@
 # AI Core
 
-**Statut** : `IMPLEMENTATION_PARTIELLE`
+**Statut** : `IMPLEMENTATION_AVANCEE`
 
 AI Core cadre l'usage avance de l'IA dans Enistere OS Foundation : prompts gouvernes, assistants
 specialises, redaction, RAG documentaire, evaluation et connecteurs provider futurs.
@@ -233,7 +233,8 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 6 | Realise | Evaluation harness initial |
 | AI Core 7 | Realise | Retrieval/RAG design decision |
 | AI Core 8 | Realise | Governance/execution report schema |
-| AI Core 9 | Propose | AI Core V1 Readiness Review |
+| AI Core V1 Review | Realise | IMPLEMENTATION_AVANCEE, VALIDE_V1 differe |
+| AI Core 9 | Propose | Prompt execution runner (fake provider only) |
 
 ## Gates
 

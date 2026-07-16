@@ -1,7 +1,7 @@
 # AI Core — Core Specification
 
-> Statut : IMPLEMENTATION_PARTIELLE
-> Mission courante : AI Core 8 — Governance/execution report schema
+> Statut : IMPLEMENTATION_AVANCEE
+> Mission courante : AI Core V1 Readiness Review
 > Date : 2026-07-16
 
 ## 1. Objectif
@@ -575,6 +575,15 @@ context builder, provider fake, evaluation harness, decision retrieval/RAG V1, r
 versionnables et tests. La promotion eventuelle au-dela de `IMPLEMENTATION_PARTIELLE` doit passer par une
 readiness review dediee.
 
+Revue AI Core V1 (2026-07-16) :
+
+- rapport : `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` ;
+- §18 : **7/7 satisfaits** ;
+- §19 futur : **5/8 satisfaits + 3/8 partiels + 0 non satisfaits** ;
+- decision : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`** ;
+- `VALIDE_V1` differe : runner de prompt gouverne, helper de citation retrieval et runbook d'usage AI Core
+  restent a livrer.
+
 ## 19. VALIDE_V1 futur
 
 Un AI Core `VALIDE_V1` futur doit prouver :
@@ -611,7 +620,8 @@ AI Core ne doit pas :
 5. AI Core 6 — Evaluation harness initial. **Realise**.
 6. AI Core 7 — Retrieval/RAG design decision (ADR si choix vector DB/provider). **Realise**.
 7. AI Core 8 — Governance/execution report schema. **Realise**.
-8. AI Core V1 Readiness Review.
+8. AI Core V1 Readiness Review. **Realise**.
+9. AI Core 9 — Prompt execution runner (fake provider only).
 
 ## 22. Decisions pendantes
 
