@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 8 — Tests + smoke
+
+- `cores/web-angular/src/app/app.navigation.spec.ts` : 5 tests d'intégration router via `RouterTestingHarness` — navigation lazy-loaded (`loadComponent`) route `/` → `app-home`, `/login` → `app-login` (guestGuard permissif), `/dashboard` → redirect `/login?returnUrl=...` (authGuard), param `returnUrl` vérifié, wildcard `/page-inconnue` → `/`.
+- `cores/web-angular/src/app/features/auth/login/login.harness.spec.ts` : 5 tests CDK — `MatFormFieldHarness` ×3 (2 fields, labels "Adresse e-mail" / "Mot de passe"), `MatInputHarness.getType()` ×2 (email / password). Complémentaires aux 14 tests DOM existants.
+- `cores/web-angular/src/app/features/upload/upload-form/upload-form.harness.spec.ts` : 4 tests CDK — `MatSelectHarness` (9 options = `FILE_CATEGORIES.length`, labels "Document"/"Image"), `MatButtonHarness.with({ text: 'Envoyer' })`, `MatProgressSpinnerHarness` présent après `state.set(loadingState())`. Complémentaires aux 15 tests DOM existants.
+- `cores/web-angular/src/app/shared/components/loading-state/enistere-loading-state.harness.spec.ts` : 2 tests CDK — `MatProgressSpinnerHarness` trouvé + `getMode() === 'indeterminate'`. Complémentaires aux 7 tests DOM existants.
+- Zéro nouvelle dépendance (harnesses dans `@angular/cdk@22.0.4` / `@angular/material@22.0.4`). Zéro feature runtime.
+- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `UPLOAD_READY` → `TEST_SMOKE_READY`.
+- Rapport `docs/project-status/WEB_ANGULAR8_TESTS_SMOKE_REPORT.md` : 27 suites de tests documentées, résultats smoke ChromeHeadless, couverture par domaine.
+- `web-angular` : **`UPLOAD_READY` → `TEST_SMOKE_READY`**. Build SUCCESS + **224/224 tests** ✅ — 0 vulnérabilité.
+
 ### Web Core Angular 7 — Upload fichiers
 
 - `cores/web-angular/src/app/core/upload/file-category.ts` : `FileCategory` union (9 valeurs : `IMAGE`/`DOCUMENT`/`AVATAR`/`VIDEO`/`AUDIO`/`IDENTITY_DOCUMENT`/`ATTACHMENT`/`MEDIA`/`OTHER`) + `FILE_CATEGORIES` pour le select Material (value/label).
