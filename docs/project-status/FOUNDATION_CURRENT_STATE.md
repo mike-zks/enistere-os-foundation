@@ -16,7 +16,7 @@ Mobile Core React Native et Mobile Core Flutter sont **VALIDE_V1**. Mobile Flutt
 promu le 2026-07-14 par `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` : B1→B5 fermés,
 score §29 9/11 + 2 PARTIAL, R1 iOS Linux acceptée comme réserve environnementale sans
 succès iOS artificiel. `web-angular` est **`VALIDE_V1`** (Angular 10, 2026-07-16 —
-B1 RefreshInterceptor/login API seam fermé ; B2 PermissionService/PermissionDirective fermé ; readiness finale 14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT ; build SUCCESS + 267/267 tests). `ai-core` est désormais **`SPECIFICATION_DOCUMENTAIRE`** (AI Core 1, 2026-07-16 — cadrage IA/RAG/agents/evaluation/provider seams, aucun runtime ni dépendance).
+B1 RefreshInterceptor/login API seam fermé ; B2 PermissionService/PermissionDirective fermé ; readiness finale 14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT ; build SUCCESS + 267/267 tests). `ai-core` est désormais **`PREUVE_TECHNIQUE`** (AI Core 2, 2026-07-16 — registre de prompts local + validateur Node pur ; aucun provider, SDK IA, RAG runtime, endpoint, secret, dépendance ou réseau).
 `api-spring` est **`VALIDE_V1`** (Spring Boot 8, 2026-07-15 — §30 **15/15 ✅** / 0 ⚠️ / 0 ✗ ; SB7 : B1 AuditModule ✅ + B2 URL signée ✅ + C15 CORS env var ✅ ; SB8 : C10 Redis health ✅ + R1 MinIO TC ✅ + R3 rate limiting ✅ + R5 Redis ✅ ; `./mvnw verify` **99/99 ✅** ; CI L5 active).
 
 | Catégorie | État |
@@ -72,7 +72,7 @@ enistere-os-foundation/
     quality-core/      VALIDE_V1 (gates, checklists, runbooks, templates, prompts, release process utilisé, helper release/reporting)
     docs-core/         VALIDE_V1 (documentation centrale stable + chemins cores actifs + gates docs reproductibles)
     api-spring/           VALIDE_V1 (SB8 — §30 15/15 ✅ ; 99/99 ✅ ; L5 CI ; Redis+RateLimit+MinioTC)
-    ai-core/               SPECIFICATION_DOCUMENTAIRE (AI Core 1 — spec + README, aucun runtime)
+    ai-core/               PREUVE_TECHNIQUE (AI Core 2 — prompt registry + validator local, aucun provider/runtime)
     web-angular/           VALIDE_V1 (Angular 10, 2026-07-16 — B1/B2 fermés ; 14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT ; 267/267 tests)
   packages/
     api-contracts/     @enistere/api-contracts (0.1.0, privé)
@@ -91,7 +91,7 @@ enistere-os-foundation/
 | `cloud` | oui | oui | **oui** (CI runtime API + E2E navigateur + registry GHCR + **CC10 staging HTTPS réel** : reverse proxy compatible Traefik + Let's Encrypt + `docker-compose.cc10.yml` + 4 conteneurs `healthy` ; auth/upload/URL signée/téléchargement validés + **CC11 socle opérationnel** : health ×3/TLS OK, backup PG + restore validé, backup MinIO + restore test PASSED, rollback `sha-484f98d` healthy, rotation smoke ; Redis reporté V2) | **VALIDE_V1** |
 | `web-nextjs` | oui | oui | **oui** (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + BFF Files + layouts public/protégé + RHF+Zod ; 14/14 critères §56 ; 450 tests + 15 E2E) | **VALIDE_V1** |
 | `mobile-react-native` | oui | oui | **oui** (Expo SDK 55 + Expo Router ; socle RN 1→37 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29 ; iOS RN30 bloqué Linux ; RN31 en attente macOS ; sign-in RN32 ; thème RN33 ; doctor green RN34 ; **tokens UI Kit alignés + LoadingView/EmptyView/ErrorView + 13 tests alignment RN35 ; upload diagnostics screen RN36 + smoke `POST /files` ; RN37 PreferenceStore decision ; 367/367 tests ; §9.4 8/8 ; B2 iOS réserve environnementale acceptée**) | **VALIDE_V1** |
-| `ai-core` | oui | oui (`CORE_SPECIFICATION.md`, `README.md`) | non | **SPECIFICATION_DOCUMENTAIRE** |
+| `ai-core` | oui | oui (`CORE_SPECIFICATION.md`, `README.md`) | **oui** (`prompt-registry.json` + validateur Node pur) | **PREUVE_TECHNIQUE** |
 | `api-spring` | oui | oui | **oui** (Spring Boot 1→8 — JPA + Flyway V1+V2+V3 + Argon2id + RBAC + OpenAPI + upload + URL signée + AuditModule + CORS env var + Redis + RateLimitInterceptor + MinioTC ; 99/99 ✅ ; CI L5) | **VALIDE_V1** (SB8, 2026-07-15 — §30 15/15 ✅ ; C10/R1/R3/R5 fermés) |
 | `docs-core` | oui | oui | **oui** (script link check + guides) | **VALIDE_V1** |
 | `mobile-flutter` | oui | oui | oui (starter + auth shell + Dio client + upload + SecureStorage + RefreshInterceptor + UI states Flutter 10 + **formulaire sign-in Flutter 11** — 218/218 tests + smoke `emulator-5554` 7/7) | **VALIDE_V1** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux réserve environnementale acceptée — identique à RN B2 ; rapports `MOBILE_FLUTTER_V1_READINESS_REVIEW.md` + Flutter 7→11 smoke reports + `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md`) |

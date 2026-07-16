@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **SPECIFICATION_DOCUMENTAIRE** — AI Core 1 : `CORE_SPECIFICATION.md` + `README.md`, aucun runtime/provider/dépendance |
+| AI Core | **PREUVE_TECHNIQUE** — AI Core 2 : `prompt-registry.json` + validateur local Node pur, aucun runtime/provider/dépendance |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1231,12 +1231,21 @@ deux cores. À arbitrer par décision humaine.
 > Livrables : `cores/ai-core/CORE_SPECIFICATION.md` + `cores/ai-core/README.md`.
 > Statut : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 > Aucun runtime, provider, SDK, RAG, base vectorielle, endpoint, dépendance ou secret.
+>
+> ✅ **AI Core 2 — Prompt registry model + validator local : RÉALISÉ** (2026-07-16).
+> Livrables : `cores/ai-core/prompt-registry.json`, `src/prompt-registry/model.mjs`,
+> `src/prompt-registry/validator.mjs`, `scripts/validate-prompt-registry.mjs`,
+> `test/prompt-registry.test.mjs`.
+> Statut : **`SPECIFICATION_DOCUMENTAIRE` → `PREUVE_TECHNIQUE`**.
+> Vérifications : registry validée (8 prompts) + tests Node + `quality-gates docs`.
+> Aucun provider, SDK IA, RAG runtime, base vectorielle, endpoint, dépendance, secret ou appel réseau.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 2 — Prompt registry model + validator local**.
+**Prochaine action UNIQUE recommandée** : **AI Core 3 — Redaction layer pure + tests**.
 
-Objectif : ajouter un registre de prompts local et validable, sans provider IA réel. Périmètre recommandé :
-`cores/ai-core/src/prompt-registry/*`, tests purs Node si un package minimal est décidé, ou documents/templates
-si la mission reste docs-only. Interdits : SDK IA, clé API, appel réseau, RAG runtime, base vectorielle.
+Objectif : ajouter une couche de redaction locale, pure et testée, réutilisable par les futures étapes
+Context Builder / Provider Adapter / Audit Trail. Périmètre recommandé : `cores/ai-core/src/redaction/*`,
+`cores/ai-core/test/redaction*.test.mjs`, README/spec/statut. Interdits : SDK IA, clé API, appel réseau,
+provider réel, RAG runtime, base vectorielle, stockage de traces, intégration à un workflow.
 
 ## 4. Prérequis
 

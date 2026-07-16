@@ -1,0 +1,168 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-07-16",
+  "prompts": [
+    {
+      "id": "master-context",
+      "version": "1.0.0",
+      "title": "Master Context IA",
+      "role": "executor",
+      "scope": "global",
+      "path": "prompts/global/master-context.md",
+      "allowedInputs": ["mission", "repository-state", "project-status"],
+      "requiredDocuments": [
+        "strategy/10_AI_STRATEGY.md",
+        "cores/quality-core/AI_PROMPT_GOVERNANCE.md",
+        "docs/project-status/NEXT_ACTIONS.md",
+        "docs/project-status/IMPLEMENTATION_MATRIX.md"
+      ],
+      "allowedFiles": ["prompts/global/master-context.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Context summary for a governed AI mission, without secrets or autonomous decisions.",
+      "gates": ["scope-review", "human-review"],
+      "riskLevel": "medium",
+      "status": "active"
+    },
+    {
+      "id": "execution-template",
+      "version": "1.0.0",
+      "title": "Execution Template",
+      "role": "executor",
+      "scope": "global",
+      "path": "prompts/global/execution-template.md",
+      "allowedInputs": ["mission-brief", "allowed-scope", "quality-gates"],
+      "requiredDocuments": [
+        "strategy/05_EXECUTION_CHAIN.md",
+        "strategy/10_AI_STRATEGY.md",
+        "cores/quality-core/AI_PROMPT_GOVERNANCE.md"
+      ],
+      "allowedFiles": ["prompts/global/execution-template.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Execution guidance constrained by mission scope, gates, and final reporting requirements.",
+      "gates": ["quality-gates-docs", "git-diff-check", "human-review"],
+      "riskLevel": "medium",
+      "status": "active"
+    },
+    {
+      "id": "mission-brief-template",
+      "version": "1.0.0",
+      "title": "Mission Brief Template",
+      "role": "architect",
+      "scope": "global",
+      "path": "prompts/global/mission-brief-template.md",
+      "allowedInputs": ["objective", "perimeter", "documents", "gates"],
+      "requiredDocuments": [
+        "strategy/04_ROADMAP_GLOBAL.md",
+        "strategy/10_AI_STRATEGY.md",
+        "docs/project-status/NEXT_ACTIONS.md",
+        "docs/project-status/SESSION_HANDOFF.md"
+      ],
+      "allowedFiles": ["prompts/global/mission-brief-template.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Governed mission prompt with explicit role, context, perimeter, interdits, gates, and final report format.",
+      "gates": ["scope-review", "human-review"],
+      "riskLevel": "medium",
+      "status": "active"
+    },
+    {
+      "id": "review-template",
+      "version": "1.0.0",
+      "title": "Review Template",
+      "role": "reviewer",
+      "scope": "global",
+      "path": "prompts/global/review-template.md",
+      "allowedInputs": ["diff", "test-results", "mission-report"],
+      "requiredDocuments": [
+        "strategy/08_STANDARDS.md",
+        "strategy/10_AI_STRATEGY.md",
+        "docs/project-status/IMPLEMENTATION_MATRIX.md"
+      ],
+      "allowedFiles": ["prompts/global/review-template.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Review report focused on bugs, risks, regressions, test gaps, and scope compliance.",
+      "gates": ["scope-review", "human-review"],
+      "riskLevel": "medium",
+      "status": "active"
+    },
+    {
+      "id": "core-specification-generator",
+      "version": "1.0.0",
+      "title": "Core Specification Generator",
+      "role": "architect",
+      "scope": "architecture",
+      "path": "prompts/architecture/core-specification-generator.md",
+      "allowedInputs": ["core-name", "roadmap-section", "strategy-documents"],
+      "requiredDocuments": [
+        "strategy/03_ARCHITECTURE_TARGET.md",
+        "strategy/04_ROADMAP_GLOBAL.md",
+        "strategy/10_AI_STRATEGY.md"
+      ],
+      "allowedFiles": ["prompts/architecture/core-specification-generator.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Draft CORE_SPECIFICATION.md content aligned with roadmap, strategy, security, and dependency rules.",
+      "gates": ["quality-gates-docs", "git-diff-check", "human-review"],
+      "riskLevel": "high",
+      "status": "active"
+    },
+    {
+      "id": "readme-generator",
+      "version": "1.0.0",
+      "title": "README Generator",
+      "role": "documentation",
+      "scope": "documentation",
+      "path": "prompts/documentation/readme-generator.md",
+      "allowedInputs": ["repository-state", "core-specification", "implemented-files"],
+      "requiredDocuments": [
+        "strategy/08_STANDARDS.md",
+        "strategy/10_AI_STRATEGY.md",
+        "docs/project-status/FOUNDATION_CURRENT_STATE.md"
+      ],
+      "allowedFiles": ["prompts/documentation/readme-generator.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "README content faithful to the repository, with no unimplemented capability presented as available.",
+      "gates": ["quality-gates-docs", "git-diff-check", "human-review"],
+      "riskLevel": "medium",
+      "status": "active"
+    },
+    {
+      "id": "core-specification-review",
+      "version": "1.0.0",
+      "title": "Core Specification Review",
+      "role": "reviewer",
+      "scope": "review",
+      "path": "prompts/review/core-specification-review.md",
+      "allowedInputs": ["core-specification", "roadmap-section", "strategy-documents"],
+      "requiredDocuments": [
+        "strategy/03_ARCHITECTURE_TARGET.md",
+        "strategy/04_ROADMAP_GLOBAL.md",
+        "strategy/10_AI_STRATEGY.md"
+      ],
+      "allowedFiles": ["prompts/review/core-specification-review.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Review findings for specification coherence, missing constraints, security gaps, and readiness accuracy.",
+      "gates": ["scope-review", "human-review"],
+      "riskLevel": "medium",
+      "status": "active"
+    },
+    {
+      "id": "security-review",
+      "version": "1.0.0",
+      "title": "Security Review",
+      "role": "security_reviewer",
+      "scope": "security",
+      "path": "prompts/security/security-review.md",
+      "allowedInputs": ["diff", "architecture", "security-constraints"],
+      "requiredDocuments": [
+        "strategy/07_SECURITY.md",
+        "strategy/06_DEPENDENCY_STRATEGY.md",
+        "strategy/10_AI_STRATEGY.md"
+      ],
+      "allowedFiles": ["prompts/security/security-review.md"],
+      "forbiddenFiles": [".env", ".env.local", "node_modules", "dist", "build"],
+      "expectedOutput": "Security review focused on secrets, auth, tokens, logs, dependencies, cloud boundaries, and sensitive data exposure.",
+      "gates": ["scope-review", "human-review"],
+      "riskLevel": "high",
+      "status": "active"
+    }
+  ]
+}
