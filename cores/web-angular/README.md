@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `IMPLEMENTATION_AVANCEE`
+**Statut** : `VALIDE_V1`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -81,26 +81,26 @@ Sections clés :
 | Angular 7 | Upload fichiers | UploadService + FormData + états upload | ✅ Réalisé (2026-07-16) |
 | Angular 8 | Tests + smoke | TestBed + CDK testing harness + rapport | ✅ Réalisé (2026-07-16) |
 | Angular 9 | RefreshInterceptor + login API seam | `AuthApi` seam + login Observable + refresh coalescé + retry 401 unique | ✅ Réalisé (2026-07-16) |
+| Angular 10 | PermissionService + PermissionDirective | RBAC UX conditionnel, API Core autorité | ✅ Réalisé (2026-07-16) |
 | Angular V1 | Readiness review | Rapport V1 Readiness | ✅ Réalisé (2026-07-16) |
 
 ---
 
 ## Statut
 
-`IMPLEMENTATION_AVANCEE` — **13 / 15 critères §29 satisfaits**, **1 / 15 partiel** et **1 / 15 non satisfait**. `VALIDE_V1` est différé par un blocker restant : **B2 PermissionService/PermissionDirective**. Vérifications Angular 9 : **248 / 248 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
+`VALIDE_V1` — **14 / 15 critères §29 satisfaits**, **1 / 15 partiel** et **0 / 15 non satisfait**. Le dernier blocker V1 (**B2 PermissionService/PermissionDirective**) est fermé par Angular 10 ; la réserve §29.9 CDK a11y reste non bloquante. Vérifications Angular 10 : **267 / 267 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
 
 Rapport de readiness : `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` (2026-07-16).
 
-Auth Angular 9 : `AuthApi` seam injectable + `PlaceholderAuthApi`, `AuthService.login()` Observable, access token en mémoire uniquement, `refreshSession()` coalescé, `RefreshInterceptor` 401 → refresh → retry unique → logout/purge si échec, `FormData` retry sans `Content-Type` forcé. Primitives upload Angular : `FileCategory` (9 valeurs) + `AppFile` + `UploadService` HttpClient+FormData (Content-Type jamais forcé) + `UploadFormComponent` Reactive Forms + états Foundation + CDK harnesses + `RouterTestingHarness` (Angular 8).
+Auth Angular 9 : `AuthApi` seam injectable + `PlaceholderAuthApi`, `AuthService.login()` Observable, access token en mémoire uniquement, `refreshSession()` coalescé, `RefreshInterceptor` 401 → refresh → retry unique → logout/purge si échec, `FormData` retry sans `Content-Type` forcé. Permissions Angular 10 : `PermissionService` in-memory + `PermissionDirective` structurelle `*enisterePermission`, affichage conditionnel UX uniquement, purge au logout/expiration. Primitives upload Angular : `FileCategory` (9 valeurs) + `AppFile` + `UploadService` HttpClient+FormData (Content-Type jamais forcé) + `UploadFormComponent` Reactive Forms + états Foundation + CDK harnesses + `RouterTestingHarness` (Angular 8).
 
-**Blockers V1 :**
-- **B2** — PermissionService + PermissionDirective RBAC : affichage conditionnel UX testé, API Core toujours autorité (§29.13)
+**Blockers V1 :** aucun.
 
 **Réserves non-bloquantes :**
 - **R1** — CDK a11y FocusTrap/LiveAnnouncer : ARIA HTML équivalent ; FocusTrap nécessite des modales (§29.9)
 - **R2** — CI Angular gate : non requis §29 ; reporté mission qualité/CI (§32)
 
-**Prochaine action** : Web Core Angular 10 — PermissionService + PermissionDirective.
+**Prochaine action** : Quality/Governance — ajouter un gate CI `web-angular` dédié (réserve R2), ou poursuivre un autre core prioritaire selon roadmap.
 
 ---
 

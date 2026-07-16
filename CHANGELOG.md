@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 10 — PermissionService + PermissionDirective
+
+- `cores/web-angular/src/app/core/permissions/permission.service.ts` : ajout de `PermissionService` signal-based, in-memory, avec normalisation défensive des rôles/permissions, rejet des wildcards et helpers RBAC.
+- `cores/web-angular/src/app/core/permissions/permission.directive.ts` : ajout de la directive standalone `*enisterePermission`, compatible permission simple, listes, objet `{ role, roles, permission, permissions, mode }`, modes `all`/`any`.
+- `AuthService` purge désormais les permissions sur erreur login, refresh expiré, logout et restore cold-start.
+- `DashboardComponent` ajoute une preuve de contenu conditionnel `files.upload` sans logique métier ; affichage UX uniquement, API Core reste autorité.
+- Tests : `permission.service.spec.ts`, `permission.directive.spec.ts`, `dashboard.component.spec.ts` ajusté ; **267/267 tests Angular ✅**.
+- Rapport `WEB_ANGULAR10_PERMISSION_RBAC_REPORT.md` ajouté ; `WEB_ANGULAR_V1_READINESS_REVIEW.md` mis à jour : B2 fermé, score **14/15 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT**.
+- `web-angular` : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. Réserve R1 CDK a11y maintenue comme non bloquante ; R2 CI Angular gate reportée Quality/Governance.
+
 ### Web Core Angular 9 — RefreshInterceptor + login API seam
 
 - `cores/web-angular/src/app/core/auth/auth.api.ts` : ajout de `AuthApi` injectable + `PlaceholderAuthApi` pour découpler le core Angular d'un backend réel.
@@ -17,13 +27,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ### Web Core Angular V1 Readiness Review
 
-- Rapport `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` : 15 critères §29 vérifiés un par un — **13 / 15 SATISFAIT**, **1 / 15 PARTIEL**, **1 / 15 NON SATISFAIT** après Angular 9.
+- Rapport `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` : 15 critères §29 vérifiés un par un — **14 / 15 SATISFAIT**, **1 / 15 PARTIEL**, **0 / 15 NON SATISFAIT** après Angular 10.
 - Cohérence ADR-035 vérifiée : Angular Material CDK + M3, Reactive Forms, Foundation components Angular, CDK harnesses, Angular Signals, PrimeNG absent.
-- Blockers V1 : B2 (PermissionService/PermissionDirective absent). B1 RefreshInterceptor/login API seam est fermé par Angular 9. Réserves non-bloquantes : R1 (CDK a11y FocusTrap/LiveAnnouncer — ARIA HTML équivalent, FocusTrap nécessite modales), R2 (CI Angular gate — non requis §29, reporté §32).
+- Blockers V1 : aucun. B1 RefreshInterceptor/login API seam est fermé par Angular 9 ; B2 PermissionService/PermissionDirective est fermé par Angular 10. Réserves non-bloquantes : R1 (CDK a11y FocusTrap/LiveAnnouncer — ARIA HTML équivalent, FocusTrap nécessite modales), R2 (CI Angular gate — non requis §29, reporté §32).
 - Décisions §32 tracées : 2 TRANSCHÉ (framework tests Jasmine/Karma, version Angular 22.0.6), 9 DIFFÉRÉ (refresh, OpenAPI, E2E, TanStack Query Angular, NgRx, SSR, UI Kit Angular, CI gate, préférences).
-- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`.
+- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `TEST_SMOKE_READY` → `VALIDE_V1`.
 - Mise à jour docs : `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md`, `cores/web-angular/README.md`.
-- `web-angular` : **`TEST_SMOKE_READY` → `IMPLEMENTATION_AVANCEE`**. `VALIDE_V1` différé jusqu'à fermeture B2. Build SUCCESS + **248/248 tests** ✅ — 0 vulnérabilité.
+- `web-angular` : **`TEST_SMOKE_READY` → `VALIDE_V1`**. Build SUCCESS + **267/267 tests** ✅ — 0 vulnérabilité.
 
 ### Web Core Angular 8 — Tests + smoke
 

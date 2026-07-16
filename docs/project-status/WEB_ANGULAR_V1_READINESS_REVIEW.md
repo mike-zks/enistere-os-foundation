@@ -1,21 +1,21 @@
 # WEB_ANGULAR_V1_READINESS_REVIEW.md — Web Core Angular V1 Readiness Review
 
-**Date** : 2026-07-16  
-**Branch** : `feat/web-angular-v1-readiness-review`  
-**Statut avant** : `TEST_SMOKE_READY`  
-**Statut après** : **`IMPLEMENTATION_AVANCEE`**
-**Décision** : V1 DIFFÉRÉE — blockers identifiés
+**Date** : 2026-07-16
+**Branch** : `feat/web-angular-v1-readiness-review` ; mise à jour finale Angular 10
+**Statut avant** : `TEST_SMOKE_READY`
+**Statut après** : **`VALIDE_V1`**
+**Décision** : V1 VALIDÉE — B1/B2 fermés, zéro blocker restant
 
 ---
 
 ## 1. Contexte
 
-Le Web Core Angular a traversé 8 missions (Angular 1→8) depuis la spécification initiale
-(2026-07-15) jusqu'aux tests CDK harness et smoke (2026-07-16).
+Le Web Core Angular a traversé 10 missions (Angular 1→10) depuis la spécification initiale
+(2026-07-15) jusqu'au refresh 401, au seam d'authentification et au RBAC UX conditionnel
+(2026-07-16).
 
 Cette revue évalue formellement les **15 critères §29** de `CORE_SPECIFICATION.md` pour
-décider si `web-angular` peut être promu vers `VALIDE_V1` ou s'il doit rester en statut
-avancé avec blockers documentés.
+décider si `web-angular` peut être promu vers `VALIDE_V1`.
 
 ---
 
@@ -23,18 +23,17 @@ avancé avec blockers documentés.
 
 | Dimension | Résultat |
 |---|---|
-| Critères §29 satisfaits | **13 / 15 ✅** |
+| Critères §29 satisfaits | **14 / 15 ✅** |
 | Critères §29 partiels | **1 / 15 PARTIEL** |
-| Critères §29 non satisfaits | **1 / 15 ✗** |
-| Blockers V1 | **1** (B2) |
+| Critères §29 non satisfaits | **0 / 15 ✗** |
+| Blockers V1 | **0** |
 | Réserves non-bloquantes | **2** (R1–R2) |
-| Tests | **248 / 248 ✅** |
+| Tests | **267 / 267 ✅** |
 | Build production | **SUCCESS** |
 | Audit vulnérabilités | **0** |
 
-**→ PROMOTION VALIDE_V1 refusée à ce stade.** Le core est solide et passe à
-`IMPLEMENTATION_AVANCEE`, mais un module explicitement requis par la spécification
-n'est pas encore livré : `PermissionDirective`.
+**→ PROMOTION `VALIDE_V1` acceptée.** B1 et B2 sont fermés. La réserve R1 reste
+partielle mais non bloquante, car les modales/overlays ne font pas partie du starter V1.
 
 ---
 
@@ -52,9 +51,9 @@ n'est pas encore livré : `PermissionDirective`.
 | §29.8 | Les composants Enistere Angular existent (Loading/Empty/Error/Success) | ✅ SATISFAIT | `EnistereLoadingStateComponent`, `EnistereEmptyStateComponent`, `EnistereErrorStateComponent`, `EnistereSuccessStateComponent` · signal inputs · a11y roles · 34 tests DOM + 2 tests CDK `MatProgressSpinnerHarness` | — |
 | §29.9 | L'accessibilité CDK est en place (FocusTrap modales, LiveAnnouncer états) | PARTIEL | ARIA HTML : `role="status"`, `aria-live="polite"`, `role="alert"`, `aria-live="assertive"` sur Foundation components ✅ · `@angular/cdk/a11y` installé (CDK 22.0.4) mais **FocusTrap** (modales absentes du starter) et **LiveAnnouncer** (ARIA attributes = couverture équivalente) non instanciés | **R1** |
 | §29.10 | Les tests unitaires couvrent AuthService, intercepteurs et guards | ✅ SATISFAIT | `auth.service.spec.ts` · `auth.api.spec.ts` · `guards.spec.ts` · `auth.interceptor.spec.ts` · `refresh.interceptor.spec.ts` · `error.interceptor.spec.ts` · `log.interceptor.spec.ts` · `return-url.utils.spec.ts` | — |
-| §29.11 | Les tests composants couvrent les états UI et les formulaires | ✅ SATISFAIT | Foundation states · `login.component.spec.ts` · `upload-form.component.spec.ts` · CDK harnesses · `app.navigation.spec.ts` · **248 / 248 ✅** | — |
+| §29.11 | Les tests composants couvrent les états UI et les formulaires | ✅ SATISFAIT | Foundation states · `login.component.spec.ts` · `upload-form.component.spec.ts` · CDK harnesses · `app.navigation.spec.ts` · PermissionDirective DOM tests · **267 / 267 ✅** | — |
 | §29.12 | Le client HTTP Angular est configuré et typé (TypeScript strict) | ✅ SATISFAIT | `tsconfig.json` : `strict`, `strictInjectionParameters`, `strictInputAccessModifiers`, `strictTemplates` · `HttpClient` + `withFetch()` + `withInterceptors()` · `APP_BASE_URL InjectionToken<string>` · `AppApiError`/`ApiErrorCode` · `RequestState<T>` | — |
-| §29.13 | Les permissions RBAC s'affichent conditionnellement (PermissionDirective) | ✗ NON SATISFAIT | **PermissionService et PermissionDirective non implémentés** alors qu'ils sont explicitement requis par §9.9, §29.13 et la mission Angular 6 de §30. L'API reste l'autorité finale (ADR-006), mais le critère porte bien sur l'affichage conditionnel Angular. | **B2** |
+| §29.13 | Les permissions RBAC s'affichent conditionnellement (PermissionDirective) | ✅ SATISFAIT | Angular 10 : `PermissionService` signal-based in-memory, `PermissionDirective` standalone `*enisterePermission`, modes `all`/`any`, roles/permissions normalisés sans wildcard, dashboard proof. L'API reste l'autorité finale (ADR-006). | — |
 | §29.14 | L'app tourne localement dans un navigateur moderne (Chrome, Firefox, Safari) | ✅ SATISFAIT | `npm run test:ci` : ChromeHeadless 150.0.0.0 (Chromium) ✅ · bundle statique servi via `ng serve` (même infrastructure) | — |
 | §29.15 | `ng build --configuration=production` produit un bundle valide | ✅ SATISFAIT | `angular.json` : `"defaultConfiguration": "production"` · `npm run build` → `ng build` → production · 396 kB initial / 91 kB gzip · bundle complet dans `dist/web-angular/` | — |
 
@@ -90,7 +89,8 @@ n'est pas encore livré : `PermissionDirective`.
 | Angular 7 — Upload fichiers | ✅ | `UploadService` + `UploadFormComponent` |
 | Angular 8 — Tests + smoke | ✅ | 16 tests CDK harnesses + `RouterTestingHarness` |
 | Angular 9 — RefreshInterceptor + login API seam | ✅ | `AuthApi`, `RefreshInterceptor`, tests 401/retry/coalescence/FormData |
-| Angular V1 — Readiness review | ✅ | Ce rapport, mis à jour après Angular 9 |
+| Angular 10 — PermissionService + PermissionDirective | ✅ | RBAC UX conditionnel, tests service/directive/dashboard |
+| Angular V1 — Readiness review | ✅ | Ce rapport, mis à jour après Angular 10 |
 
 ---
 
@@ -108,15 +108,15 @@ n'est pas encore livré : `PermissionDirective`.
 
 **Limite acceptée** : l'adaptateur réel backend reste remplaçable par projet dérivé ; la Foundation fournit le seam et le placeholder.
 
-### B2 — PermissionService / PermissionDirective (§29.13)
+### B2 — PermissionService / PermissionDirective (§29.13) — FERMÉ par Angular 10
 
-**Nature** : blocker fonctionnel V1.
+**Nature** : ancien blocker fonctionnel V1, fermé le 2026-07-16.
 
-- `PermissionDirective` non implémentée — listée dans §30 Angular 6 mais non livrée (périmètre réduit lors de la livraison : seuls Loading/Empty/Error/SuccessState livrés).
-- **À livrer avant `VALIDE_V1`** : `PermissionService` minimal (permissions/roles en mémoire
-  depuis l'état auth ou une source injectable) + `PermissionDirective` structurelle
-  (`*enisterePermission`) testée, sans prétendre remplacer l'autorisation backend.
-- **Contrainte** : affichage conditionnel = UX uniquement ; l'API Core reste l'autorité.
+- `PermissionService` minimal livré : rôles/permissions en mémoire, normalisés, sans wildcard.
+- `PermissionDirective` structurelle `*enisterePermission` livrée et testée.
+- Modes `all`/`any` couverts.
+- Purge des permissions au logout, restore cold-start, erreur login et expiration refresh.
+- **Contrainte maintenue** : affichage conditionnel = UX uniquement ; l'API Core reste l'autorité.
 
 ## 6. Réserves non-bloquantes
 
@@ -163,7 +163,7 @@ n'est pas encore livré : `PermissionDirective`.
 
 | Check | Résultat |
 |---|---|
-| `npm run test:ci` | ✅ 248 / 248 |
+| `npm run test:ci` | ✅ 267 / 267 |
 | `npm run build` | ✅ SUCCESS (production) |
 | `npm audit` | ✅ 0 vulnérabilités |
 | `quality-gates docs` | ✅ 2 / 2 |
@@ -175,14 +175,15 @@ n'est pas encore livré : `PermissionDirective`.
 
 ## 9. Décision finale
 
-**`TEST_SMOKE_READY → IMPLEMENTATION_AVANCEE`**
+**`TEST_SMOKE_READY → VALIDE_V1`**
+Mise à jour intermédiaire Angular 9 : `IMPLEMENTATION_AVANCEE`.
+Mise à jour finale Angular 10 : **`VALIDE_V1`**.
 
-Le Web Core Angular satisfait **13 / 15** critères §29 sans réserve, **1 / 15** partiellement
-et **1 / 15** reste non satisfait. Le core est donc avancé, cohérent et testable, mais
-`VALIDE_V1` est différé tant que B2 n'est pas fermé.
+Le Web Core Angular satisfait **14 / 15** critères §29 sans réserve, **1 / 15** partiellement
+et **0 / 15** reste non satisfait. Le core est donc validé V1.
 
-Les réserves R1/R2 sont documentées et non bloquantes, mais elles ne compensent pas
-l'absence de `PermissionDirective`, élément explicitement nommé dans la spécification V1.
+Les réserves R1/R2 sont documentées et non bloquantes. R1 dépend de modales/overlays
+absents du starter V1 par design ; R2 relève de Quality Core/CI post-readiness.
 
-**Prochaine action** : Web Core Angular 10 — `PermissionService` + `PermissionDirective`,
-puis nouvelle revue V1 finale.
+**Prochaine action** : Quality/Governance — ajouter un gate CI `web-angular` dédié,
+ou poursuivre le prochain core prioritaire de la roadmap.
