@@ -442,8 +442,18 @@
 > - Tests : `api-config.spec.ts` + `app-api-error.spec.ts` + `error.interceptor.spec.ts` + `log.interceptor.spec.ts` (vérification absence Authorization/body/query params) + `request-state.spec.ts`.
 > `web-angular` : **`AUTH_ROUTING_READY` → `HTTP_SERVER_STATE_READY`**.
 >
-> **Prochaine action** : **Web Core Angular 5 — Reactive Forms + Angular Material**.
-> Prérequis : Angular 4 ✅.
+> ✅ **Web Core Angular 5 — Reactive Forms + Angular Material : RÉALISÉ** (2026-07-16).
+> Livrables :
+> - `src/app/core/forms/form-error.utils.ts` : `getFieldError(control, label): string | null` — pur, sans dépendance backend, couvre `required`/`email`/`minlength`/`maxlength`/`pattern`.
+> - `src/app/features/auth/login/login.component.ts` : `MatFormFieldModule` + `MatInputModule` + `MatButtonModule` + `getFieldError` protégé.
+> - `src/app/features/auth/login/login.component.html` : `mat-form-field appearance="outline"`, `matInput`, `mat-label`, `mat-error` via `@if (getFieldError(...); as err)`, `button mat-flat-button`.
+> - `src/app/features/auth/login/login.component.scss` : styles custom input supprimés (`.form-field`, `.field-label`, `.field-input`, `.field-error`, `.submit-btn`) ; `.login-field { width: 100%; }` + `.login-submit { width: 100%; min-height: 44px; }`.
+> - `src/app/pages/home/home.component.html` + spec : badge `FORMS_MATERIAL_READY`.
+> - Tests : 136/136 ✅. Build SUCCESS, audit 0, quality-gates docs ✅, `git diff --check` ✅.
+> `web-angular` : **`HTTP_SERVER_STATE_READY` → `FORMS_MATERIAL_READY`**.
+>
+> **Prochaine action** : **Web Core Angular 6 — Composants Foundation Enistere**.
+> Prérequis : Angular 5 ✅.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
@@ -1168,7 +1178,7 @@ deux cores. À arbitrer par décision humaine.
 | Intégrer les packages dans le Mobile | **FAIT (RN 4)** — `@enistere/api-client-fetch` + `@enistere/api-contracts` **consommés** par le core mobile (liés `file:` + Metro, **sans** ajout aux workspaces racine — choix validé) ; bundle Metro prouvé ; **couche server-state RN 5 livrée** (hooks `useAuthedQuery`/`useAuthedMutation`) |
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
-| Web Core Angular | **HTTP_SERVER_STATE_READY** — Angular 4 réalisé ; prochaine action : Angular 5 Reactive Forms + Angular Material |
+| Web Core Angular | **FORMS_MATERIAL_READY** — Angular 5 réalisé ; prochaine action : Angular 6 Composants Foundation Enistere |
 | AI Core | spécification absente |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |

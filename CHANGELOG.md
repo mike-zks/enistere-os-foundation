@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Web Core Angular 5 — Reactive Forms + Angular Material
+
+- `cores/web-angular/src/app/core/forms/form-error.utils.ts` : utilitaire pur `getFieldError(control, label): string | null` — mappage des erreurs Angular (`required`, `email`, `minlength`, `maxlength`, `pattern`) vers des messages lisibles ; aucune dépendance à un DTO backend ; priorité : `required` > `email` > longueur > format.
+- `cores/web-angular/src/app/features/auth/login/login.component.ts` : ajout de `MatFormFieldModule`, `MatInputModule`, `MatButtonModule` aux imports standalone ; exposition de `getFieldError` comme propriété `protected readonly` utilisable dans le template.
+- `cores/web-angular/src/app/features/auth/login/login.component.html` : migration complète vers Angular Material — `mat-form-field appearance="outline"`, `matInput` sur les champs `email` et `password`, `mat-label` (sans astérisque manuel), `mat-error` liés à `getFieldError()` via la syntaxe `@if (expr; as alias)`, `button mat-flat-button` pour le submit. Accessibilité assurée par Material.
+- `cores/web-angular/src/app/features/auth/login/login.component.scss` : suppression des styles custom d'input (`.form-field`, `.field-label`, `.required-mark`, `.field-input`, `.field-error`, `.submit-btn`) ; conservation des styles de layout (`.login-shell`, `.login-header`, `.login-nav`, `.nav-link`, `.form-error-banner`) ; ajout de `.login-field { width: 100%; }` et `.login-submit { width: 100%; min-height: 44px; }` pour surcharger Material.
+- `cores/web-angular/src/app/pages/home/home.component.html` : badge statut mis à jour `AUTH_ROUTING_READY` → `FORMS_MATERIAL_READY`.
+- Tests : 14 nouveaux / mis à jour (`form-error.utils.spec.ts` × 9 couvrant tous les cas d'erreur + `login.component.spec.ts` 3 nouveaux : Material form fields présents, type password, pas de fuite de mot de passe dans le DOM + 3 mis à jour : email-error via `mat-error`, email invalide, password requis).
+- `web-angular` : **`HTTP_SERVER_STATE_READY` → `FORMS_MATERIAL_READY`**. Build SUCCESS + 136/136 tests ✅.
+
 ### Web Core Angular 4 — Client HTTP + server-state RxJS
 
 - `cores/web-angular/src/app/core/config/api-config.ts` : `APP_BASE_URL = new InjectionToken<string>('APP_BASE_URL')` + `ApiConfig` interface. Note : le timeout par requête n'est pas natif dans Angular HttpClient — utilisation du RxJS `timeout()` différée Angular 5+.
