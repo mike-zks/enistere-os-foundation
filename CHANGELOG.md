@@ -6,6 +6,16 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 5 — Provider adapter seam + fake provider
+
+- `cores/ai-core/src/provider/provider-model.mjs` : capabilities, validation de requête et `AiProviderError` contrôlé.
+- `cores/ai-core/src/provider/fake-provider.mjs` : fake provider déterministe sans réseau, modèle réel ni stockage.
+- `cores/ai-core/src/provider/provider-adapter.mjs` : adapter sûr qui valide et redige la requête avant invocation provider.
+- `cores/ai-core/src/provider/index.mjs` : exports publics du module.
+- `cores/ai-core/test/provider.test.mjs` : tests Node purs couvrant validation, capabilities, completions déterministes, erreurs contrôlées, redaction avant provider et metadonnées non sensibles.
+- `ai-core` : **`PREUVE_TECHNIQUE` → `IMPLEMENTATION_PARTIELLE`**.
+- Aucun SDK IA réel, provider réel, clé API, appel réseau, modèle réel, streaming réel, embeddings, RAG runtime, base vectorielle, endpoint, workflow, dépendance, secret ou stockage de traces.
+
 ### AI Core 4 — Context builder allow-list
 
 - `cores/ai-core/src/context/context-builder.mjs` : ajout d'un builder local de contexte depuis une allow-list explicite, avec refus `.env`, chemins absolus, `..`, `node_modules`, `dist`, `build`, `.git` et assimilés.

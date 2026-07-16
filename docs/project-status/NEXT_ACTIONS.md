@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **PREUVE_TECHNIQUE** — AI Core 4 : prompt registry + redaction layer + context builder Node purs, aucun runtime/provider/dépendance |
+| AI Core | **IMPLEMENTATION_PARTIELLE** — AI Core 5 : prompt registry + redaction + context builder + provider seam/fake provider Node purs, aucun provider réel/runtime/dépendance |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1255,13 +1255,22 @@ deux cores. À arbitrer par décision humaine.
 > Vérifications : tests Node context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
 > Aucun provider, SDK IA, appel réseau, RAG runtime, base vectorielle, indexation globale, endpoint, workflow,
 > dépendance, secret ou stockage de traces.
+>
+> ✅ **AI Core 5 — Provider adapter seam + fake provider : RÉALISÉ** (2026-07-16).
+> Livrables : `cores/ai-core/src/provider/provider-model.mjs`, `fake-provider.mjs`,
+> `provider-adapter.mjs`, `index.mjs`, `test/provider.test.mjs`.
+> Statut : **`PREUVE_TECHNIQUE` → `IMPLEMENTATION_PARTIELLE`**.
+> Vérifications : tests Node provider + context + redaction + Prompt Registry + validation registry + `quality-gates docs`.
+> Aucun provider réel, SDK IA, clé API, appel réseau, modèle réel, streaming réel, embeddings, RAG runtime,
+> base vectorielle, endpoint, workflow, dépendance, secret ou stockage de traces.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 5 — Provider adapter seam + fake provider**.
+**Prochaine action UNIQUE recommandée** : **AI Core 6 — Evaluation harness initial**.
 
-Objectif : définir un seam provider local et un fake provider déterministe pour tests, sans provider réel.
-Périmètre recommandé : `cores/ai-core/src/provider/*`, `cores/ai-core/test/provider*.test.mjs`,
-README/spec/statut. Interdits : SDK IA réel, clé API, appel réseau, modèle réel, streaming réel, embeddings,
-RAG runtime, base vectorielle, stockage de traces ou intégration à un workflow.
+Objectif : ajouter un harness d'évaluation local qui vérifie périmètre, absence de secrets après redaction,
+gates déclarés, documents requis et format de rapport, sans LLM judge réel. Périmètre recommandé :
+`cores/ai-core/src/evaluation/*`, `cores/ai-core/test/evaluation*.test.mjs`, README/spec/statut.
+Interdits : SDK IA réel, provider judge, clé API, appel réseau, modèle réel, embeddings, RAG runtime,
+base vectorielle, workflow CI automatique ou stockage de traces.
 
 ## 4. Prérequis
 
