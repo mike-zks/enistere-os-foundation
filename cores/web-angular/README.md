@@ -2,7 +2,7 @@
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
-**Statut** : `TEST_SMOKE_READY`
+**Statut** : `VALIDE_V1`
 
 **ADR fondateur** : [ADR-035 — Angular Material (CDK + M3) + tokens Enistere](../../docs/adr/ADR-035-angular-ui-material-vs-primeng.md)
 
@@ -80,17 +80,25 @@ Sections clés :
 | Angular 6 | Composants Foundation Enistere | Loading/Empty/Error/SuccessState standalone, signal inputs, a11y roles, tokens Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 7 | Upload fichiers | UploadService + FormData + états upload | ✅ Réalisé (2026-07-16) |
 | Angular 8 | Tests + smoke | TestBed + CDK testing harness + rapport | ✅ Réalisé (2026-07-16) |
-| Angular V1 | Readiness review | Rapport V1 Readiness | À faire |
+| Angular V1 | Readiness review | Rapport V1 Readiness | ✅ Réalisé (2026-07-16) |
 
 ---
 
 ## Statut
 
-`TEST_SMOKE_READY` — primitives upload Angular génériques : `FileCategory` (9 valeurs : `IMAGE`/`DOCUMENT`/`AVATAR`/`VIDEO`/`AUDIO`/`IDENTITY_DOCUMENT`/`ATTACHMENT`/`MEDIA`/`OTHER`) + `AppFile` interface (`file`, `category`, `subjectId?`) + `isValidAppFile`/`isAllowedFileType`/`describeFileForLog` (extension+sizeBytes uniquement — jamais nom/path/contenu). `UploadService` : `HttpClient.post()` + `FormData` (Content-Type jamais forcé — boundary posé par le navigateur) → `Observable<RequestState<UploadedFileMetadata>>` via `createRequestState`. Mapping `AppApiError` : 413→`FileTooLarge`, 415→`UnsupportedType`, 401→`Unauthorized`. `UploadFormComponent` : Reactive Forms (`category` required, `subjectId` optionnel max 128), signal `selectedFile`, état `signal<RequestState<...>>` ; états Loading/Error/Success via composants Foundation Angular 6. Build SUCCESS + 224/224 tests.
+`VALIDE_V1` — **11 / 15 critères §29 satisfaits** + **4 / 15 partiels** avec réserves formellement acceptées (R1 RefreshInterceptor, R2 PermissionDirective, R3 CDK a11y FocusTrap/LiveAnnouncer, R4 CI gate) — **224 / 224 tests ✅ · BUILD SUCCESS · 0 vulnérabilité**.
 
-Angular 8 (2026-07-16) : 16 tests ajoutés — `RouterTestingHarness` (5 tests d'intégration router : navigation lazy-loaded, authGuard redirect avec returnUrl, guestGuard, wildcard) + CDK harnesses : `MatFormFieldHarness`/`MatInputHarness` sur LoginComponent (5), `MatSelectHarness`/`MatButtonHarness`/`MatProgressSpinnerHarness` sur UploadFormComponent (4), `MatProgressSpinnerHarness` sur EnistereLoadingStateComponent (2). Zéro nouvelle dépendance runtime.
+Rapport de readiness : `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md` (2026-07-16).
 
-La prochaine action est **Web Core Angular V1 Readiness Review**.
+Primitives upload Angular : `FileCategory` (9 valeurs) + `AppFile` + `UploadService` HttpClient+FormData (Content-Type jamais forcé) + `UploadFormComponent` Reactive Forms + états Foundation + CDK harnesses + `RouterTestingHarness` (Angular 8).
+
+**Réserves formellement acceptées :**
+- **R1** — RefreshInterceptor / login() réel : seam en place, débloqué par backend réel (§29.3, §29.5)
+- **R2** — PermissionDirective RBAC : directive display-UX déléguée au premier projet dérivé (§29.13)
+- **R3** — CDK a11y FocusTrap/LiveAnnouncer : ARIA HTML équivalent ; FocusTrap nécessite des modales (§29.9)
+- **R4** — CI Angular gate : non requis §29 ; reporté post-V1 (§32)
+
+**Prochaine action** : Web Core Angular V2 (CI gate + RefreshInterceptor + PermissionDirective + E2E).
 
 ---
 

@@ -473,8 +473,15 @@
 > Tests : 224/224 ✅. Build SUCCESS, audit 0 vuln.
 > `web-angular` : **`UPLOAD_READY` → `TEST_SMOKE_READY`**.
 >
-> **Prochaine action** : **Web Core Angular V1 Readiness Review**.
-> Prérequis : Angular 8 ✅.
+> ✅ **Web Core Angular V1 Readiness Review : RÉALISÉ** (2026-07-16).
+> Rapport : `docs/project-status/WEB_ANGULAR_V1_READINESS_REVIEW.md`.
+> Décision : Web Core Angular passe de **`TEST_SMOKE_READY`** à **`VALIDE_V1`**.
+> 11/15 §29 SATISFAIT + 4/15 PARTIEL avec réserves R1–R4 formellement acceptées non-bloquantes :
+> R1 RefreshInterceptor/login() (seam présent — backend réel) ; R2 PermissionDirective (display-UX, projet dérivé) ;
+> R3 CDK a11y FocusTrap/LiveAnnouncer (ARIA HTML équivalent ; modales V2+) ; R4 CI gate (non §29 — §32 post-V1).
+> Cohérence ADR-035 confirmée. 224/224 tests ✅. BUILD SUCCESS. 0 vuln.
+>
+> **Prochaine action** : **Web Core Angular V2** — CI gate + RefreshInterceptor + PermissionDirective + E2E.
 >
 > **Historique** : cette prochaine action était Angular 1 (Core specification) ; réalisé 2026-07-15.
 
