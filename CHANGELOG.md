@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 3 — Redaction layer pure + tests
+
+- `cores/ai-core/src/redaction/redaction.mjs` : ajout d'une couche de redaction pure (`redactText`, `redactValue`, `isSensitiveKey`) pour clés sensibles, credentials `Bearer`/`Basic`, JWT, paramètres d'URL signée, secrets `.env`, blocs de clé privée, emails, chemins locaux, erreurs sans stack, cycles et profondeur maximale.
+- `cores/ai-core/src/redaction/index.mjs` : exports publics du module.
+- `cores/ai-core/test/redaction.test.mjs` : tests Node purs.
+- `ai-core` reste **`PREUVE_TECHNIQUE`**.
+- Aucun SDK IA, provider, clé API, appel réseau, RAG runtime, base vectorielle, endpoint, workflow, dépendance, secret ou stockage de traces.
+
 ### AI Core 2 — Prompt registry model + validator local
 
 - `cores/ai-core/prompt-registry.json` : registre local des 8 prompts gouvernés existants.
