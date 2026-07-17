@@ -1334,11 +1334,20 @@ deux cores. À arbitrer par décision humaine.
 > Limites maintenues : aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding,
 > vector DB, endpoint, workflow CI automatique, trace storage ou donnée client.
 
-**Prochaine action UNIQUE recommandée** : **retour pilotage global**.
+> ✅ **Packages Distribution 1 — decision de distribution des packages officiels : RÉALISÉ** (2026-07-17).
+> Rapport : `docs/project-status/PACKAGES_DISTRIBUTION_DECISION.md`.
+> Decision : cible principale **GitHub Packages npm registry** pour `@enistere/*`, repli gouverne
+> **GitHub Release tarballs**. Aucune publication, aucun token, aucun workflow et aucun changement
+> `package.json` dans cette mission.
+> ADR-016 reste **PARTIELLEMENT_IMPLEMENTE** : strategie decidee, publication effective et gate
+> `pack/publish dry-run` encore a livrer.
 
-Objectif : sélectionner le prochain core ou incrément post-V1 selon la roadmap et les gaps réels. Toute
-suite AI Core impliquant provider réel, SDK IA, embeddings, vector store, RAG runtime, stockage de traces
-ou CI IA automatique doit passer par une décision dédiée.
+**Prochaine action UNIQUE recommandée** : **Packages Distribution 2 — preparation publish-ready sans publication**.
+
+Objectif : rendre `@enistere/api-contracts` et `@enistere/api-client-fetch` techniquement prets a
+distribuer sans les publier : metadata package, `publishConfig` GitHub Packages, relation SemVer explicite,
+`npm pack --dry-run` verifie, rapport d'artefacts et documentation d'installation. Interdits : `npm publish`,
+secrets, workflow automatique, changement de contrat ou code runtime.
 
 ## 4. Prérequis
 

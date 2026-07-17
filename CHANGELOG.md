@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Packages Distribution 1 — Decision de distribution
+
+- `docs/project-status/PACKAGES_DISTRIBUTION_DECISION.md` : decision de distribution des packages officiels TypeScript.
+- Cible principale retenue : GitHub Packages npm registry pour `@enistere/*`.
+- Repli gouverne retenu : artefacts GitHub Release (`npm pack` tarballs) si le registry prive n'est pas encore disponible.
+- Aucun package publie, aucun token, aucun workflow, aucun changement `package.json`.
+- ADR-016 reste **PARTIELLEMENT_IMPLEMENTE** : strategie decidee ; publication effective et gate `npm pack --dry-run` restent a livrer.
+
 ### AI Core V1 Final Readiness Decision
 
 - `docs/project-status/AI_CORE_V1_FINAL_READINESS_DECISION.md` : décision finale de promotion AI Core.

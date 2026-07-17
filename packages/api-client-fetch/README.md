@@ -87,5 +87,7 @@ d'en-tête Authorization, d'URL signée ni de réponse brute. Helpers : `isUnaut
 ## Versionnement & interdiction
 
 `0.1.0` (pré-1.0). Dépend de `@enistere/api-contracts` (lien workspace en développement ; une plage
-SemVer sera figée à la publication). Ce package **n'est pas publié** dans cette phase ; aucun hook
-TanStack Query, aucun adaptateur Next.js/SecureStore concret n'y est ajouté.
+SemVer sera figée à la publication). Distribution cible décidée : **GitHub Packages npm registry** pour
+le scope `@enistere/*`, avec repli gouverné par artefacts **GitHub Release** (`npm pack` tarballs).
+Ce package **n'est pas publié** dans cette phase ; aucun hook TanStack Query, aucun adaptateur
+Next.js/SecureStore concret n'y est ajouté.
