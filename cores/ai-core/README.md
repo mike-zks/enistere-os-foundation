@@ -1,14 +1,16 @@
 # AI Core
 
-**Statut** : `IMPLEMENTATION_AVANCEE`
+**Statut** : `VALIDE_V1`
 
 AI Core cadre l'usage avance de l'IA dans Enistere OS Foundation : prompts gouvernes, assistants
 specialises, redaction, RAG documentaire, evaluation et connecteurs provider futurs.
 
-Ce core contient actuellement des preuves techniques locales : un registre de prompts gouvernes,
-un validateur Node pur, une redaction layer pure, un context builder allow-list et un provider seam avec
-fake provider deterministe, ainsi qu'un evaluation harness local et un runner de prompt gouverne. Il ne
-contient toujours :
+Ce core contient des preuves techniques locales : un registre de prompts gouvernes, un validateur Node pur,
+une redaction layer pure, un context builder allow-list, un provider seam avec fake provider deterministe,
+un evaluation harness local, un runner de prompt gouverne, des citations retrieval et un runbook d'usage.
+La decision `AI_CORE_V1_FINAL_READINESS_DECISION.md` confirme §19 **8/8 satisfaits** et ferme B1/B2/B3.
+
+Il ne contient toujours :
 
 - aucun SDK IA ;
 - aucun provider reel configure ;
@@ -312,7 +314,7 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 9 | Realise | Prompt execution runner (fake provider only) |
 | AI Core 10 | Realise | Retrieval source citation helper |
 | AI Core 11 | Realise | AI Core usage runbook |
-| AI Core V1 Final Decision | Propose | Decide VALIDE_V1 after B1/B2/B3 closure |
+| AI Core V1 Final Decision | Realise | VALIDE_V1 after B1/B2/B3 closure |
 
 ## Gates
 

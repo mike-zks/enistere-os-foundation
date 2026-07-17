@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core 11 livré : B1 runner + B2 citations + B3 runbook fermés ; prochaine action = V1 final readiness decision |
+| AI Core | **VALIDE_V1** — AI Core V1 Final Readiness Decision réalisée ; §19 8/8 ; B1/B2/B3 fermés |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1327,10 +1327,18 @@ deux cores. À arbitrer par décision humaine.
 > Aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding, vector DB, endpoint,
 > workflow CI automatique ou stockage de traces.
 
-**Prochaine action UNIQUE recommandée** : **AI Core V1 Final Readiness Decision**.
+> ✅ **AI Core V1 Final Readiness Decision : RÉALISÉE** (2026-07-17).
+> Rapport : `docs/project-status/AI_CORE_V1_FINAL_READINESS_DECISION.md`.
+> Décision : `ai-core` passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+> §19 : **8/8 satisfaits**. B1 prompt runner, B2 citations retrieval et B3 runbook sont fermés.
+> Limites maintenues : aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding,
+> vector DB, endpoint, workflow CI automatique, trace storage ou donnée client.
 
-Objectif : vérifier que B1, B2 et B3 sont bien fermés et décider si `ai-core` peut passer de
-`IMPLEMENTATION_AVANCEE` à `VALIDE_V1`, sans ajouter de runtime.
+**Prochaine action UNIQUE recommandée** : **retour pilotage global**.
+
+Objectif : sélectionner le prochain core ou incrément post-V1 selon la roadmap et les gaps réels. Toute
+suite AI Core impliquant provider réel, SDK IA, embeddings, vector store, RAG runtime, stockage de traces
+ou CI IA automatique doit passer par une décision dédiée.
 
 ## 4. Prérequis
 

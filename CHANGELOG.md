@@ -6,6 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core V1 Final Readiness Decision
+
+- `docs/project-status/AI_CORE_V1_FINAL_READINESS_DECISION.md` : décision finale de promotion AI Core.
+- `ai-core` passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`**.
+- §19 est désormais **8/8 satisfait** ; B1 runner, B2 citations retrieval et B3 runbook sont fermés.
+- Limites maintenues : aucun provider réel, SDK IA, appel réseau, RAG runtime, embedding, vector DB, endpoint, workflow CI automatique, trace storage ou donnée client.
+
 ### AI Core 11 — Usage runbook
 
 - `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md` : ajout du runbook d'usage gouverné AI Core.
