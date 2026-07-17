@@ -6,6 +6,13 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Developer Quickstart 1 — parcours d'onboarding 15 minutes
+
+- `docs/onboarding/DEVELOPER_QUICKSTART.md` : parcours court pour verifier un clone, lire les sources de verite minimales, lancer `quality-gates docs`, executer `npm run example:api-client-node` et choisir une mission via `NEXT_ACTIONS.md`.
+- `docs/README.md` et `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` : liens vers le quickstart.
+- `docs/project-status/DEVELOPER_QUICKSTART1_REPORT.md` : rapport de mission.
+- Aucun runtime, dependance, workflow, publication package, staging ou test serveur reel.
+
 ### Examples Core 1 — API client Node smoke example
 
 - `examples/README.md` : index des exemples consommateurs.
