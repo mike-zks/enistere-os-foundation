@@ -20,6 +20,7 @@
     "build": "npm run build --workspace=@enistere/api-contracts && npm run build --workspace=@enistere/api-client-fetch",
     "typecheck": "npm run typecheck --workspace=@enistere/api-contracts && npm run typecheck --workspace=@enistere/api-client-fetch",
     "test": "npm run build --workspace=@enistere/api-contracts && npm run test --workspace=@enistere/api-contracts && npm run test --workspace=@enistere/api-client-fetch",
-    "pack:dry-run": "npm run pack:dry-run --workspace=@enistere/api-contracts && npm run pack:dry-run --workspace=@enistere/api-client-fetch"
+    "pack:dry-run": "npm run pack:dry-run --workspace=@enistere/api-contracts && npm run pack:dry-run --workspace=@enistere/api-client-fetch",
+    "example:api-client-node": "npm run build --workspace=@enistere/api-contracts && npm run build --workspace=@enistere/api-client-fetch && node examples/api-client-node/smoke.mjs"
   }
 }

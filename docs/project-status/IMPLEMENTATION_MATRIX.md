@@ -670,5 +670,5 @@ Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE
 | Packages non intégrés (à clarifier dans les futurs cores) | IMPORTANTE |
 | `strategy/` Phase 0 vs état réel (non versionné par ADR) | IMPORTANTE |
 | `OPENAPI_CLIENT_PROOF.md` réfère un code retiré | MINEURE |
-| `tools/` et `examples/` vides | MINEURE |
+| `tools/` vide ; `examples/` a désormais un premier smoke consommateur (`examples/api-client-node`) | MINEURE |
 | ADR-017→033 et ADR-036→038 cités au backlog mais non rédigés | HISTORIQUE (attendu) |

@@ -1348,12 +1348,22 @@ deux cores. À arbitrer par décision humaine.
 > `@enistere/api-contracts: 0.1.0`, lockfile synchronise, dry-runs `npm pack --dry-run` verifiés.
 > Aucun `npm publish`, token, `.npmrc`, workflow, changement runtime ou artefact `.tgz` versionne.
 
-**Prochaine action UNIQUE recommandée** : **Packages Release 1 — publication controlee ou release tarballs**.
+> ✅ **Examples Core 1 — API client Node smoke example : RÉALISÉ** (2026-07-17).
+> Rapport : `docs/project-status/EXAMPLES_CORE1_API_CLIENT_NODE_REPORT.md`.
+> Livrables : `examples/README.md`, `examples/api-client-node/README.md`,
+> `examples/api-client-node/smoke.mjs`, script racine `example:api-client-node`.
+> Le smoke prouve un appel public `/health` sans `Authorization` et un appel authentifie `/auth/me`
+> via `InMemorySessionAdapter`, sans backend, sans reseau, sans secret et sans token logge.
 
-Objectif : executer une premiere distribution controlee des packages, seulement apres decision humaine
-explicite du canal (**GitHub Packages** ou **GitHub Release tarballs**) et verification des permissions.
-Interdits : publication automatique sur simple merge, token dans le depot, dependance a Swagger production,
-changement de contrat non revu.
+**Prochaine action UNIQUE recommandée** : **Developer Quickstart 1 — parcours d'onboarding 15 minutes**.
+
+Objectif : reduire la friction d'adoption soulignee par la revue externe : installation, lecture minimale,
+gates locales, execution de `npm run example:api-client-node`, et liens vers les statuts/specs essentiels.
+La mission doit rester documentaire + scripts existants, sans nouveau runtime ni publication.
+
+Action bloquee/conditionnelle : **Packages Release 1 — publication controlee ou release tarballs** reste
+disponible uniquement apres decision humaine explicite du canal (**GitHub Packages** ou **GitHub Release
+tarballs**) et verification des permissions.
 
 ## 4. Prérequis
 

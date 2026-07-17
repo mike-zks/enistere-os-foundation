@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Examples Core 1 — API client Node smoke example
+
+- `examples/README.md` : index des exemples consommateurs.
+- `examples/api-client-node/README.md` : guide d'execution local et forme attendue apres publication des packages.
+- `examples/api-client-node/smoke.mjs` : exemple executable Node sans backend, avec `fetch` mocke, appel public `/health` sans `Authorization` et appel authentifie `/auth/me` via `InMemorySessionAdapter`.
+- `package.json` : script `example:api-client-node`.
+- `docs/project-status/EXAMPLES_CORE1_API_CLIENT_NODE_REPORT.md` : rapport de mission, garde-fous et verification.
+- Aucun secret, aucun appel reseau, aucun backend, aucun artefact genere versionne.
+
 ### Packages Distribution 2 — Publish-ready sans publication
 
 - `packages/api-contracts/package.json` : `private:false`, `publishConfig` GitHub Packages, script `pack:dry-run`.
