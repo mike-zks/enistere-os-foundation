@@ -54,6 +54,10 @@ type LoginOk = OperationJsonResponse<'auth_login', 200>;
 suppression de champ, etc.) entraînera une montée de version coordonnée avec `@enistere/api-client-fetch`.
 La détection de breaking changes (oasdiff) relèvera de la CI (ADR-013), hors de ce package.
 
+Distribution cible décidée : **GitHub Packages npm registry** pour le scope `@enistere/*`, avec repli
+gouverné par artefacts **GitHub Release** (`npm pack` tarballs). Le package reste non publié tant que la
+préparation publish-ready et la publication contrôlée ne sont pas livrées.
+
 ## Interdiction
 
 Ne pas modifier `src/generated/schema.ts` à la main. Toute évolution passe par le contrat + `npm run

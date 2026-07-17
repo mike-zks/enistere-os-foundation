@@ -347,6 +347,10 @@ au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `we
 (client Fetch typé + wrappers : auth, erreurs, timeout, refresh, multipart). Workspaces npm
 (`packages/*`, `cores/ui-kit`, `cores/web-nextjs`). **Non publiés** ; UI Kit **consommé** + `api-client-fetch`
 **instancié (public/Health + authentifié/BFF Auth)** par le Web Core. Usage authentifié **intégré** (preuve API réelle).
+Distribution des packages décidée le 2026-07-17 : **GitHub Packages npm registry** comme cible principale,
+**GitHub Release tarballs** comme repli gouverné. Aucun package publié, aucun token/workflow ajouté.
+Rapport : `docs/project-status/PACKAGES_DISTRIBUTION_DECISION.md`. Prochaine étape package : préparation
+publish-ready sans publication (`publishConfig`, SemVer, `npm pack --dry-run`, rapport d'artefacts).
 
 ## 7. ADR clés
 
@@ -1779,6 +1783,13 @@ rapport `docs/project-status/AI_CORE_V1_FINAL_READINESS_DECISION.md`. Décision 
 retrieval et B3 runbook sont fermés. Limites maintenues : aucun provider réel, SDK IA, clé API, appel
 réseau, RAG runtime, embedding, vector DB, endpoint, workflow CI automatique, trace storage ou donnée
 client. Prochaine action : **retour pilotage global**.
+
+**✅ Packages Distribution 1 — decision de distribution : RÉALISÉ** (`packages/`, `docs/project-status/`)
+(2026-07-17) : rapport `docs/project-status/PACKAGES_DISTRIBUTION_DECISION.md`. Decision : cible principale
+**GitHub Packages npm registry** pour `@enistere/*`, repli **GitHub Release tarballs**. Aucun `npm publish`,
+aucun token, aucun workflow, aucun `package.json` modifié. ADR-016 reste **PARTIELLEMENT_IMPLEMENTE** :
+strategie decidee, publication effective et gate `npm pack --dry-run` a livrer. Prochaine action :
+**Packages Distribution 2 — preparation publish-ready sans publication**.
 
 **✅ API Core Spring Boot 5 — CI Java + Quality Gate : RÉALISÉ** (2026-07-15) :
 `api-spring-ci.yml` créé (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL). Scope `api-spring`
