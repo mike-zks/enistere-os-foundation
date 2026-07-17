@@ -6,6 +6,9 @@
 Ce guide aide un contributeur ou un agent IA a demarrer une mission dans Enistere OS Foundation sans
 dependre de l'historique de conversation.
 
+Pour un premier tour rapide sans mission de code, commencer par
+[`DEVELOPER_QUICKSTART.md`](./DEVELOPER_QUICKSTART.md).
+
 ## 1. Regle principale
 
 Toujours partir du repository.

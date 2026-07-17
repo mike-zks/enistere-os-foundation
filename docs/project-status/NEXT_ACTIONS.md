@@ -1355,15 +1355,20 @@ deux cores. À arbitrer par décision humaine.
 > Le smoke prouve un appel public `/health` sans `Authorization` et un appel authentifie `/auth/me`
 > via `InMemorySessionAdapter`, sans backend, sans reseau, sans secret et sans token logge.
 
-**Prochaine action UNIQUE recommandée** : **Developer Quickstart 1 — parcours d'onboarding 15 minutes**.
+> ✅ **Developer Quickstart 1 — parcours d'onboarding 15 minutes : RÉALISÉ** (2026-07-17).
+> Rapport : `docs/project-status/DEVELOPER_QUICKSTART1_REPORT.md`.
+> Livrable : `docs/onboarding/DEVELOPER_QUICKSTART.md`.
+> Le parcours relie verification Git, lecture minimale des sources de verite, `quality-gates docs`,
+> `npm run example:api-client-node`, listing des gates et choix de mission via `NEXT_ACTIONS.md`.
+> Aucun runtime, workflow, dependance, publication ou test serveur reel.
 
-Objectif : reduire la friction d'adoption soulignee par la revue externe : installation, lecture minimale,
-gates locales, execution de `npm run example:api-client-node`, et liens vers les statuts/specs essentiels.
-La mission doit rester documentaire + scripts existants, sans nouveau runtime ni publication.
+**Prochaine action UNIQUE recommandée** : **à décider par le pilote selon le canal de distribution**.
 
-Action bloquee/conditionnelle : **Packages Release 1 — publication controlee ou release tarballs** reste
-disponible uniquement apres decision humaine explicite du canal (**GitHub Packages** ou **GitHub Release
-tarballs**) et verification des permissions.
+Option prioritaire si une distribution externe est decidee : **Packages Release 1 — publication controlee ou
+release tarballs**.
+
+Option sans publication : **Examples Core 2 — mini-stack local documente** pour montrer un flux API/Web local
+avec services jetables, sans secrets ni staging reel.
 
 ## 4. Prérequis
 

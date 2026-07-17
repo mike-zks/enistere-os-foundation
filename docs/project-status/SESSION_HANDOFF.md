@@ -1811,6 +1811,14 @@ Aucun backend, reseau, secret, token logge ou artefact genere versionne. Prochai
 **Developer Quickstart 1 — parcours d'onboarding 15 minutes**. Packages Release 1 reste conditionnee a une
 decision humaine explicite du canal de publication.
 
+**✅ Developer Quickstart 1 — parcours d'onboarding 15 minutes : RÉALISÉ** (`docs/onboarding/`,
+`docs/project-status/`) (2026-07-17) : rapport `docs/project-status/DEVELOPER_QUICKSTART1_REPORT.md`.
+Livrable : `docs/onboarding/DEVELOPER_QUICKSTART.md`, relie depuis `docs/README.md` et
+`CONTRIBUTOR_ONBOARDING.md`. Parcours : Git status, lecture minimale status, `quality-gates docs`,
+`npm run example:api-client-node`, listing gates, choix mission via `NEXT_ACTIONS.md`. Aucun runtime,
+dependance, workflow, publication package ou test serveur reel. Prochaine action : arbitrage pilote entre
+**Packages Release 1** (si canal explicitement decide) et **Examples Core 2** (si l'on continue sans publication).
+
 **✅ API Core Spring Boot 5 — CI Java + Quality Gate : RÉALISÉ** (2026-07-15) :
 `api-spring-ci.yml` créé (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL). Scope `api-spring`
 ajouté dans `quality-gates.mjs` (8e scope, exclu `all-safe`, Docker requis). Tests `quality-gates` : **42/42 ✅**.
