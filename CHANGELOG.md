@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 11 — Usage runbook
+
+- `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md` : ajout du runbook d'usage gouverné AI Core.
+- `docs/project-status/AI_CORE11_USAGE_RUNBOOK_REPORT.md` : rapport de mission et fermeture de B3.
+- Le runbook couvre préparation de mission, validation registry, contexte allow-list, runner fake-provider, citations, evaluation, reports, gates, responsabilités humaines, checklists et escalades.
+- `ai-core` reste **`IMPLEMENTATION_AVANCEE`** jusqu'à une décision finale dédiée ; B1, B2 et B3 sont désormais fermés.
+- Aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding, vector DB, endpoint, workflow CI automatique ou stockage de traces.
+
 ### AI Core 10 — Retrieval source citation helper
 
 - `cores/ai-core/src/retrieval/source-citations.mjs` : ajout de helpers purs pour matérialiser des citations de sources documentaires déjà incluses dans le contexte.

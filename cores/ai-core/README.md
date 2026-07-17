@@ -239,9 +239,29 @@ node --test cores/ai-core/test/retrieval-citations.test.mjs
 Le module ne fait pas de RAG runtime, embedding, vector DB, provider reel, reseau, lecture disque, stockage
 d'index ou persistance de trace.
 
+## Usage Runbook
+
+Livrable AI Core 11 :
+
+- `AI_CORE_USAGE_RUNBOOK.md` : procédure d'usage gouverné du core.
+
+Le runbook couvre :
+
+- préparation d'une mission ;
+- validation du registry ;
+- construction du contexte ;
+- exécution locale via fake provider ;
+- citations retrieval ;
+- évaluation ;
+- rapport d'exécution ;
+- gates minimaux ;
+- responsabilités humaines ;
+- escalades obligatoires avant provider réel, SDK, embeddings, vector DB, RAG runtime, traces ou données client.
+
 ## References
 
 - `CORE_SPECIFICATION.md`
+- `AI_CORE_USAGE_RUNBOOK.md`
 - `strategy/10_AI_STRATEGY.md`
 - `cores/quality-core/AI_PROMPT_GOVERNANCE.md`
 - `prompts/README.md`
@@ -291,7 +311,8 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core V1 Review | Realise | IMPLEMENTATION_AVANCEE, VALIDE_V1 differe |
 | AI Core 9 | Realise | Prompt execution runner (fake provider only) |
 | AI Core 10 | Realise | Retrieval source citation helper |
-| AI Core 11 | Propose | AI Core usage runbook |
+| AI Core 11 | Realise | AI Core usage runbook |
+| AI Core V1 Final Decision | Propose | Decide VALIDE_V1 after B1/B2/B3 closure |
 
 ## Gates
 

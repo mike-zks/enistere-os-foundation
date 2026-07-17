@@ -609,6 +609,9 @@ d'usage AI Core.
 Apres AI Core 10, le helper de citation retrieval est livre et B2 est ferme. `VALIDE_V1` reste differe par
 B3 : runbook d'usage AI Core.
 
+Apres AI Core 11, le runbook d'usage AI Core est livre et B3 est ferme. La promotion eventuelle a
+`VALIDE_V1` doit passer par une decision finale dediee.
+
 Revue AI Core V1 (2026-07-16) :
 
 - rapport : `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` ;
@@ -657,7 +660,8 @@ AI Core ne doit pas :
 8. AI Core V1 Readiness Review. **Realise**.
 9. AI Core 9 — Prompt execution runner (fake provider only). **Realise**.
 10. AI Core 10 — Retrieval source citation helper. **Realise**.
-11. AI Core 11 — AI Core usage runbook.
+11. AI Core 11 — AI Core usage runbook. **Realise**.
+12. AI Core V1 Final Readiness Decision.
 
 ## 22. Decisions pendantes
 

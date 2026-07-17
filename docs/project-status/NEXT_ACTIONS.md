@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core 10 livré : B1 runner + B2 citations fermés ; VALIDE_V1 reste différé par B3 runbook |
+| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core 11 livré : B1 runner + B2 citations + B3 runbook fermés ; prochaine action = V1 final readiness decision |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1317,12 +1317,20 @@ deux cores. À arbitrer par décision humaine.
 > `VALIDE_V1` reste différé uniquement par B3 runbook d'usage AI Core.
 > Aucun RAG runtime, embedding, vector DB, provider réel, SDK IA, appel réseau, lecture disque dans le
 > module, stockage d'index ou trace persistée.
+>
+> ✅ **AI Core 11 — AI Core usage runbook : RÉALISÉ** (2026-07-17).
+> Rapport : `docs/project-status/AI_CORE11_USAGE_RUNBOOK_REPORT.md`.
+> Livrable : `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md`.
+> B3 fermé : le runbook couvre registry, context builder, runner, citations, evaluation, reports,
+> gates, responsabilités humaines, checklists et escalades obligatoires.
+> `ai-core` reste **`IMPLEMENTATION_AVANCEE`** jusqu'à décision finale dédiée.
+> Aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding, vector DB, endpoint,
+> workflow CI automatique ou stockage de traces.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 11 — AI Core usage runbook**.
+**Prochaine action UNIQUE recommandée** : **AI Core V1 Final Readiness Decision**.
 
-Objectif : documenter comment utiliser registry, context builder, runner, citations, evaluation et reports,
-avec responsabilités humaines, interdits, commandes et gates. Périmètre recommandé :
-`cores/ai-core/AI_CORE_USAGE_RUNBOOK.md`, README/spec/statut.
+Objectif : vérifier que B1, B2 et B3 sont bien fermés et décider si `ai-core` peut passer de
+`IMPLEMENTATION_AVANCEE` à `VALIDE_V1`, sans ajouter de runtime.
 
 ## 4. Prérequis
 
