@@ -1,7 +1,7 @@
 {
   "name": "@enistere/api-contracts",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "Types OpenAPI canoniques Enistere (générés depuis le contrat du API Core). Runtime-indépendant — aucune logique HTTP/auth, aucun framework UI.",
   "license": "UNLICENSED",
   "type": "module",
@@ -18,6 +18,10 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "engines": {
     "node": ">=20"
   },
@@ -27,6 +31,7 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "prebuild": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "tsc -p tsconfig.json",
+    "pack:dry-run": "npm pack --dry-run",
     "test": "tsc -p tsconfig.test.json && node --test build/test/test/*.test.js",
     "clean": "node -e \"const f=require('node:fs');for(const d of ['dist','build'])f.rmSync(d,{recursive:true,force:true})\""
   },

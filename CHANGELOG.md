@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Packages Distribution 2 — Publish-ready sans publication
+
+- `packages/api-contracts/package.json` : `private:false`, `publishConfig` GitHub Packages, script `pack:dry-run`.
+- `packages/api-client-fetch/package.json` : `private:false`, `publishConfig` GitHub Packages, script `pack:dry-run`, dépendance interne `@enistere/api-contracts: 0.1.0`.
+- `package.json` : script racine `pack:dry-run` pour vérifier les deux workspaces.
+- `package-lock.json` : relation SemVer interne synchronisée.
+- `docs/project-status/PACKAGES_DISTRIBUTION_2_PUBLISH_READY_REPORT.md` : rapport publish-ready, preuves `npm pack --dry-run`, tailles et shasums.
+- Aucun `npm publish`, aucun token, `.npmrc`, workflow, artefact `.tgz`, changement OpenAPI ou runtime.
+
 ### Packages Distribution 1 — Decision de distribution
 
 - `docs/project-status/PACKAGES_DISTRIBUTION_DECISION.md` : decision de distribution des packages officiels TypeScript.

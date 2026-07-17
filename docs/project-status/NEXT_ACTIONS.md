@@ -1342,12 +1342,18 @@ deux cores. À arbitrer par décision humaine.
 > ADR-016 reste **PARTIELLEMENT_IMPLEMENTE** : strategie decidee, publication effective et gate
 > `pack/publish dry-run` encore a livrer.
 
-**Prochaine action UNIQUE recommandée** : **Packages Distribution 2 — preparation publish-ready sans publication**.
+> ✅ **Packages Distribution 2 — preparation publish-ready sans publication : RÉALISÉ** (2026-07-17).
+> Rapport : `docs/project-status/PACKAGES_DISTRIBUTION_2_PUBLISH_READY_REPORT.md`.
+> Livrables : `private:false`, `publishConfig` GitHub Packages, scripts `pack:dry-run`, dependance interne
+> `@enistere/api-contracts: 0.1.0`, lockfile synchronise, dry-runs `npm pack --dry-run` verifiés.
+> Aucun `npm publish`, token, `.npmrc`, workflow, changement runtime ou artefact `.tgz` versionne.
 
-Objectif : rendre `@enistere/api-contracts` et `@enistere/api-client-fetch` techniquement prets a
-distribuer sans les publier : metadata package, `publishConfig` GitHub Packages, relation SemVer explicite,
-`npm pack --dry-run` verifie, rapport d'artefacts et documentation d'installation. Interdits : `npm publish`,
-secrets, workflow automatique, changement de contrat ou code runtime.
+**Prochaine action UNIQUE recommandée** : **Packages Release 1 — publication controlee ou release tarballs**.
+
+Objectif : executer une premiere distribution controlee des packages, seulement apres decision humaine
+explicite du canal (**GitHub Packages** ou **GitHub Release tarballs**) et verification des permissions.
+Interdits : publication automatique sur simple merge, token dans le depot, dependance a Swagger production,
+changement de contrat non revu.
 
 ## 4. Prérequis
 

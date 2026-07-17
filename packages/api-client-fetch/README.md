@@ -3,7 +3,7 @@
 > **Client Fetch typé Enistere** au-dessus d'[`openapi-fetch`](https://openapi-ts.dev/openapi-fetch/)
 > + [`@enistere/api-contracts`](../api-contracts). Fournit le wrapper validé (auth, erreurs, timeout,
 > refresh) — **indépendant de TanStack Query, React, React Native, Angular et Axios**.
-> **Privé / non publié** (version `0.1.0`, phase expérimentale).
+> **Publish-ready / non publié** (version `0.1.0`, phase pré-publication).
 
 ## Création du client
 
@@ -87,7 +87,19 @@ d'en-tête Authorization, d'URL signée ni de réponse brute. Helpers : `isUnaut
 ## Versionnement & interdiction
 
 `0.1.0` (pré-1.0). Dépend de `@enistere/api-contracts` (lien workspace en développement ; une plage
-SemVer sera figée à la publication). Distribution cible décidée : **GitHub Packages npm registry** pour
-le scope `@enistere/*`, avec repli gouverné par artefacts **GitHub Release** (`npm pack` tarballs).
-Ce package **n'est pas publié** dans cette phase ; aucun hook TanStack Query, aucun adaptateur
-Next.js/SecureStore concret n'y est ajouté.
+SemVer `0.1.0` est figée pour la première publication coordonnée). Distribution cible décidée :
+**GitHub Packages npm registry** pour le scope `@enistere/*`, avec repli gouverné par artefacts
+**GitHub Release** (`npm pack` tarballs). Ce package **n'est pas publié** dans cette phase ; aucun hook
+TanStack Query, aucun adaptateur Next.js/SecureStore concret n'y est ajouté.
+
+Dry-run de packaging :
+
+```bash
+npm run pack:dry-run --workspace=@enistere/api-client-fetch
+```
+
+En environnement restreint où le cache npm utilisateur est en lecture seule :
+
+```bash
+npm_config_cache=/tmp/enistere-npm-cache npm run pack:dry-run --workspace=@enistere/api-client-fetch
+```
