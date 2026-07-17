@@ -1,7 +1,7 @@
 {
   "name": "@enistere/api-client-fetch",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "Client Fetch typé Enistere (openapi-fetch + wrappers : auth/erreurs/timeout/refresh/multipart). Indépendant de TanStack Query, React, React Native, Angular et Axios.",
   "license": "UNLICENSED",
   "type": "module",
@@ -18,6 +18,10 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "engines": {
     "node": ">=20"
   },
@@ -25,11 +29,12 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "prebuild": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "tsc -p tsconfig.json",
+    "pack:dry-run": "npm pack --dry-run",
     "test": "tsc -p tsconfig.test.json && node --test build/test/test/*.test.js",
     "clean": "node -e \"const f=require('node:fs');for(const d of ['dist','build'])f.rmSync(d,{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@enistere/api-contracts": "*",
+    "@enistere/api-contracts": "0.1.0",
     "openapi-fetch": "^0.13.0"
   },
   "devDependencies": {

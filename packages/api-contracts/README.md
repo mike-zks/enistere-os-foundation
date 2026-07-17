@@ -2,7 +2,7 @@
 
 > **Types OpenAPI canoniques Enistere** — runtime-indépendant. Générés depuis le contrat du API Core
 > (ADR-016). Aucune logique HTTP/auth, aucune dépendance React/Next.js/React Native/Angular.
-> **Privé / non publié** (version `0.1.0`, phase expérimentale).
+> **Publish-ready / non publié** (version `0.1.0`, phase pré-publication).
 
 ## Rôle
 
@@ -24,6 +24,7 @@ npm run generate:check   # échoue (RC=1) si l'artefact suivi diverge du contrat
 npm run typecheck        # TypeScript strict
 npm run build            # émet dist/ (types + index)
 npm run test             # vérifie 14 opérations, formes, absence de champs sensibles
+npm run pack:dry-run     # vérifie le contenu distribuable sans publier
 ```
 
 ## Imports
@@ -56,7 +57,14 @@ La détection de breaking changes (oasdiff) relèvera de la CI (ADR-013), hors d
 
 Distribution cible décidée : **GitHub Packages npm registry** pour le scope `@enistere/*`, avec repli
 gouverné par artefacts **GitHub Release** (`npm pack` tarballs). Le package reste non publié tant que la
-préparation publish-ready et la publication contrôlée ne sont pas livrées.
+publication contrôlée n'est pas livrée.
+
+En environnement restreint où le cache npm utilisateur est en lecture seule, exécuter le dry-run avec un
+cache temporaire :
+
+```bash
+npm_config_cache=/tmp/enistere-npm-cache npm run pack:dry-run --workspace=@enistere/api-contracts
+```
 
 ## Interdiction
 

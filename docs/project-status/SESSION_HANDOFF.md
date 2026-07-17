@@ -96,8 +96,8 @@ disponibles, sans régression et sans confondre spécification et implémentatio
   **VALIDE_V1** (14/14 critères §56). Build/dev via **webpack**
   (`extensionAlias`). Note transport : le client serveur authentifié **bufferise le corps** (sinon le
   `fetch` patché de Next échouait sur les réponses non-2xx — `expected non-null body source`).
-- **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, privés) — validés
-  **localement** (tests + live 16/16), **non publiés** ; `api-client-fetch` **instancié (public/Health +
+- **Packages** : `@enistere/api-contracts` et `@enistere/api-client-fetch` (0.1.0, **publish-ready**) — validés
+  **localement** (tests + live 16/16 + `npm pack --dry-run`), **non publiés** ; `api-client-fetch` **instancié (public/Health +
   authentifié/BFF Auth login/refresh/logout/me/authorization)** dans le Web Core ; types Auth dérivés via
   `SchemaOf<>` (`UserProfileResponseDto`, `AuthorizationSummaryResponseDto`) — preuve API réelle.
 - **Cloud Core** : **`IMPLEMENTATION_PARTIELLE`** — spec + README + `docs/` (CC1 cadrage) **+ CC2 CI runtime API**
@@ -351,6 +351,9 @@ Distribution des packages décidée le 2026-07-17 : **GitHub Packages npm regist
 **GitHub Release tarballs** comme repli gouverné. Aucun package publié, aucun token/workflow ajouté.
 Rapport : `docs/project-status/PACKAGES_DISTRIBUTION_DECISION.md`. Prochaine étape package : préparation
 publish-ready sans publication (`publishConfig`, SemVer, `npm pack --dry-run`, rapport d'artefacts).
+Préparation publish-ready livrée ensuite : `docs/project-status/PACKAGES_DISTRIBUTION_2_PUBLISH_READY_REPORT.md`
+(`private:false`, `publishConfig`, dependance interne `0.1.0`, dry-runs OK). Prochaine étape package :
+publication contrôlée ou GitHub Release tarballs sur décision humaine explicite.
 
 ## 7. ADR clés
 
@@ -1790,6 +1793,14 @@ client. Prochaine action : **retour pilotage global**.
 aucun token, aucun workflow, aucun `package.json` modifié. ADR-016 reste **PARTIELLEMENT_IMPLEMENTE** :
 strategie decidee, publication effective et gate `npm pack --dry-run` a livrer. Prochaine action :
 **Packages Distribution 2 — preparation publish-ready sans publication**.
+
+**✅ Packages Distribution 2 — preparation publish-ready : RÉALISÉ** (`packages/`, `docs/project-status/`)
+(2026-07-17) : rapport `docs/project-status/PACKAGES_DISTRIBUTION_2_PUBLISH_READY_REPORT.md`. Livrables :
+`private:false`, `publishConfig` GitHub Packages, script racine et workspaces `pack:dry-run`, dependance
+`@enistere/api-contracts: 0.1.0`, lockfile synchronise, dry-runs `npm pack --dry-run` verifies avec cache
+temporaire `/tmp` dans l'environnement restreint. Aucun `npm publish`, aucun token, aucun `.npmrc`, aucun
+workflow, aucun `.tgz` versionne. Prochaine action : **Packages Release 1 — publication controlee ou
+release tarballs**, uniquement apres decision humaine du canal et verification des permissions.
 
 **✅ API Core Spring Boot 5 — CI Java + Quality Gate : RÉALISÉ** (2026-07-15) :
 `api-spring-ci.yml` créé (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL). Scope `api-spring`
