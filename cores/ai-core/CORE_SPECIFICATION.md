@@ -612,6 +612,15 @@ B3 : runbook d'usage AI Core.
 Apres AI Core 11, le runbook d'usage AI Core est livre et B3 est ferme. La promotion eventuelle a
 `VALIDE_V1` doit passer par une decision finale dediee.
 
+Decision finale AI Core V1 (2026-07-17) :
+
+- rapport : `docs/project-status/AI_CORE_V1_FINAL_READINESS_DECISION.md` ;
+- §19 : **8/8 satisfaits** ;
+- B1, B2 et B3 : **fermes** ;
+- decision : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`** ;
+- limites maintenues : aucun provider reel, SDK IA, appel reseau, embedding, vector DB, RAG runtime,
+  endpoint, workflow CI automatique, trace storage ou donnee client.
+
 Revue AI Core V1 (2026-07-16) :
 
 - rapport : `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` ;
@@ -661,7 +670,7 @@ AI Core ne doit pas :
 9. AI Core 9 — Prompt execution runner (fake provider only). **Realise**.
 10. AI Core 10 — Retrieval source citation helper. **Realise**.
 11. AI Core 11 — AI Core usage runbook. **Realise**.
-12. AI Core V1 Final Readiness Decision.
+12. AI Core V1 Final Readiness Decision. **Realise**.
 
 ## 22. Decisions pendantes
 
