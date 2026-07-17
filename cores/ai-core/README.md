@@ -212,6 +212,33 @@ node --test cores/ai-core/test/prompt-runner.test.mjs
 Le runner ne branche aucun provider reel, SDK IA, reseau, embedding, vector DB, endpoint, workflow CI
 automatique ou stockage de traces.
 
+## Retrieval Source Citations
+
+Livrables AI Core 10 :
+
+- `src/retrieval/source-citations.mjs` : helpers purs de citation ;
+- `src/retrieval/index.mjs` : exports publics du module ;
+- `test/retrieval-citations.test.mjs` : tests Node purs.
+
+Le module :
+
+- normalise des sources documentaires deja incluses dans le contexte ;
+- redige les extraits eventuels via la redaction AI Core 3 ;
+- refuse les chemins non sûrs ;
+- deduplique les chemins ;
+- borne le nombre de citations ;
+- formate des citations courtes sans inclure l'extrait ;
+- expose une description de log par compteurs uniquement.
+
+Commandes :
+
+```bash
+node --test cores/ai-core/test/retrieval-citations.test.mjs
+```
+
+Le module ne fait pas de RAG runtime, embedding, vector DB, provider reel, reseau, lecture disque, stockage
+d'index ou persistance de trace.
+
 ## References
 
 - `CORE_SPECIFICATION.md`
@@ -263,7 +290,8 @@ Ces choix sont structurants et devront etre faits par mission dediee, avec ADR s
 | AI Core 8 | Realise | Governance/execution report schema |
 | AI Core V1 Review | Realise | IMPLEMENTATION_AVANCEE, VALIDE_V1 differe |
 | AI Core 9 | Realise | Prompt execution runner (fake provider only) |
-| AI Core 10 | Propose | Retrieval source citation helper |
+| AI Core 10 | Realise | Retrieval source citation helper |
+| AI Core 11 | Propose | AI Core usage runbook |
 
 ## Gates
 
@@ -344,6 +372,16 @@ Mission Prompt Runner :
 ```bash
 node --test cores/ai-core/test/prompt-runner.test.mjs
 node --test cores/ai-core/test/prompt-runner.test.mjs cores/ai-core/test/report-schema.test.mjs cores/ai-core/test/evaluation-harness.test.mjs cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
+node cores/ai-core/scripts/validate-prompt-registry.mjs
+node cores/quality-core/scripts/quality-gates.mjs run docs
+git diff --check
+```
+
+Mission Retrieval Citations :
+
+```bash
+node --test cores/ai-core/test/retrieval-citations.test.mjs
+node --test cores/ai-core/test/retrieval-citations.test.mjs cores/ai-core/test/prompt-runner.test.mjs cores/ai-core/test/report-schema.test.mjs cores/ai-core/test/evaluation-harness.test.mjs cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs
 node cores/ai-core/scripts/validate-prompt-registry.mjs
 node cores/quality-core/scripts/quality-gates.mjs run docs
 git diff --check

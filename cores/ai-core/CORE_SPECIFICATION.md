@@ -194,6 +194,17 @@ Decision AI Core 7 :
 
 Rapport : `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md`.
 
+Preuve technique livree par AI Core 10 :
+
+- `src/retrieval/source-citations.mjs` transforme des sources deja incluses/allow-listees en citations
+  bornees et redactees ;
+- `src/retrieval/index.mjs` expose le module ;
+- `test/retrieval-citations.test.mjs` couvre normalisation, redaction d'extraits, chemins refuses,
+  deduplication, bornes, integration avec `buildContext().includedFiles`, formatage et logs par compteurs.
+
+Le helper ne recherche rien, ne lit pas le disque, n'indexe rien, n'appelle aucun provider et ne stocke aucune
+trace. Il materialise seulement les references de sources deja selectionnees par le contexte.
+
 ### 5.5 Agent Orchestrator
 
 Orchestre des roles IA specialises sans autonomie dangereuse.
@@ -595,6 +606,9 @@ Apres AI Core 9, le runner de prompt gouverne est livre et B1 est ferme. Le stat
 `IMPLEMENTATION_AVANCEE` : `VALIDE_V1` reste differe par le helper de citation retrieval et le runbook
 d'usage AI Core.
 
+Apres AI Core 10, le helper de citation retrieval est livre et B2 est ferme. `VALIDE_V1` reste differe par
+B3 : runbook d'usage AI Core.
+
 Revue AI Core V1 (2026-07-16) :
 
 - rapport : `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` ;
@@ -642,7 +656,8 @@ AI Core ne doit pas :
 7. AI Core 8 — Governance/execution report schema. **Realise**.
 8. AI Core V1 Readiness Review. **Realise**.
 9. AI Core 9 — Prompt execution runner (fake provider only). **Realise**.
-10. AI Core 10 — Retrieval source citation helper.
+10. AI Core 10 — Retrieval source citation helper. **Realise**.
+11. AI Core 11 — AI Core usage runbook.
 
 ## 22. Decisions pendantes
 

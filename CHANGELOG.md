@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### AI Core 10 — Retrieval source citation helper
+
+- `cores/ai-core/src/retrieval/source-citations.mjs` : ajout de helpers purs pour matérialiser des citations de sources documentaires déjà incluses dans le contexte.
+- `cores/ai-core/src/retrieval/index.mjs` : exports publics du module.
+- `cores/ai-core/test/retrieval-citations.test.mjs` : tests Node purs couvrant normalisation, redaction d'extraits, chemins refusés, déduplication, bornes, intégration `buildContext().includedFiles`, formatage et logs par compteurs.
+- `docs/project-status/AI_CORE10_RETRIEVAL_CITATIONS_REPORT.md` : rapport de mission et fermeture de B2.
+- `ai-core` reste **`IMPLEMENTATION_AVANCEE`** ; `VALIDE_V1` reste différé uniquement par B3 runbook d'usage AI Core.
+- Aucun RAG runtime, embedding, vector DB, provider réel, SDK IA, appel réseau, lecture disque dans le module, stockage d'index ou trace persistée.
+
 ### AI Core 9 — Prompt execution runner
 
 - `cores/ai-core/src/runner/prompt-runner.mjs` : ajout d'un runner local gouverné qui compose registry, context builder, safe provider adapter, fake provider, evaluation harness et execution report.
