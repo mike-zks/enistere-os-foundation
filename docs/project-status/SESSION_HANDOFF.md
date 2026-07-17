@@ -1802,6 +1802,15 @@ temporaire `/tmp` dans l'environnement restreint. Aucun `npm publish`, aucun tok
 workflow, aucun `.tgz` versionne. Prochaine action : **Packages Release 1 — publication controlee ou
 release tarballs**, uniquement apres decision humaine du canal et verification des permissions.
 
+**✅ Examples Core 1 — API client Node smoke example : RÉALISÉ** (`examples/`, `package.json`,
+`docs/project-status/`) (2026-07-17) : rapport `docs/project-status/EXAMPLES_CORE1_API_CLIENT_NODE_REPORT.md`.
+Livrables : `examples/README.md`, `examples/api-client-node/README.md`, `examples/api-client-node/smoke.mjs`,
+script `npm run example:api-client-node`. Le smoke consomme le `dist` local du client Fetch avec `fetch`
+mocke : `/health` public sans `Authorization`, `/auth/me` authentifie via `InMemorySessionAdapter`.
+Aucun backend, reseau, secret, token logge ou artefact genere versionne. Prochaine action recommandee :
+**Developer Quickstart 1 — parcours d'onboarding 15 minutes**. Packages Release 1 reste conditionnee a une
+decision humaine explicite du canal de publication.
+
 **✅ API Core Spring Boot 5 — CI Java + Quality Gate : RÉALISÉ** (2026-07-15) :
 `api-spring-ci.yml` créé (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL). Scope `api-spring`
 ajouté dans `quality-gates.mjs` (8e scope, exclu `all-safe`, Docker requis). Tests `quality-gates` : **42/42 ✅**.
