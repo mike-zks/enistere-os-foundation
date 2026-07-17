@@ -1221,7 +1221,7 @@ deux cores. À arbitrer par décision humaine.
 | Publier les packages | **CI minimale présente** (ADR-013 partiel) mais **registry/publication non décidés** (ADR-014 non implémenté) |
 | Mobile Core Flutter | **VALIDE_V1** — Flutter 1→11 + V1 final readiness |
 | Web Core Angular | **VALIDE_V1** — Angular 10 ferme B2 PermissionService/PermissionDirective ; gate CI `web-angular` dédié livré par Quality/Governance |
-| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core 9 livré : B1 prompt runner fermé ; VALIDE_V1 reste différé par B2 citation retrieval + B3 runbook |
+| AI Core | **IMPLEMENTATION_AVANCEE** — AI Core 10 livré : B1 runner + B2 citations fermés ; VALIDE_V1 reste différé par B3 runbook |
 | Docs / Quality Cores | **VALIDE_V1** |
 | API Core Spring Boot | **VALIDE_V1** — Spring Boot 8, §30 15/15 |
 
@@ -1307,13 +1307,22 @@ deux cores. À arbitrer par décision humaine.
 > `VALIDE_V1` reste différé par B2 retrieval source citation helper et B3 runbook d'usage AI Core.
 > Aucun provider réel, SDK IA, clé API, appel réseau, embedding, vector DB, service RAG, endpoint,
 > stockage externe, workflow CI automatique ou prompt brut en rapport.
+>
+> ✅ **AI Core 10 — Retrieval source citation helper : RÉALISÉ** (2026-07-17).
+> Rapport : `docs/project-status/AI_CORE10_RETRIEVAL_CITATIONS_REPORT.md`.
+> Livrables : `cores/ai-core/src/retrieval/source-citations.mjs`, `src/retrieval/index.mjs`,
+> `test/retrieval-citations.test.mjs`.
+> B2 fermé : les fichiers inclus dans un contexte peuvent être matérialisés en citations sûres, bornées,
+> dédupliquées et redigées. Statut : **`IMPLEMENTATION_AVANCEE` maintenu**.
+> `VALIDE_V1` reste différé uniquement par B3 runbook d'usage AI Core.
+> Aucun RAG runtime, embedding, vector DB, provider réel, SDK IA, appel réseau, lecture disque dans le
+> module, stockage d'index ou trace persistée.
 
-**Prochaine action UNIQUE recommandée** : **AI Core 10 — Retrieval source citation helper**.
+**Prochaine action UNIQUE recommandée** : **AI Core 11 — AI Core usage runbook**.
 
-Objectif : matérialiser des citations de sources documentaires à partir des fichiers inclus dans le contexte,
-sans RAG runtime, embedding, vector DB, provider réel, réseau, stockage d'index ou donnée client.
-Périmètre recommandé : `cores/ai-core/src/retrieval/*`, `cores/ai-core/test/retrieval*.test.mjs`,
-README/spec/statut.
+Objectif : documenter comment utiliser registry, context builder, runner, citations, evaluation et reports,
+avec responsabilités humaines, interdits, commandes et gates. Périmètre recommandé :
+`cores/ai-core/AI_CORE_USAGE_RUNBOOK.md`, README/spec/statut.
 
 ## 4. Prérequis
 

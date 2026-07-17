@@ -89,6 +89,14 @@
 > citation retrieval et B3 runbook. Aucun provider réel, SDK IA, clé API, appel réseau, embedding,
 > vector DB, service RAG, endpoint, workflow CI automatique ou stockage de traces.
 >
+> **Mise à jour AI Core 10 — Retrieval source citation helper (2026-07-17)** :
+> `src/retrieval/source-citations.mjs` + `src/retrieval/index.mjs` ajoutent des helpers purs de citation :
+> normalisation de sources incluses, redaction d'extraits, refus de chemins non sûrs, déduplication, bornes,
+> formatage court et logs par compteurs. Tests : `node --test cores/ai-core/test/retrieval-citations.test.mjs` ✅.
+> B2 est fermé. `ai-core` reste **`IMPLEMENTATION_AVANCEE`** ; `VALIDE_V1` reste différé uniquement par
+> B3 runbook d'usage AI Core. Aucun RAG runtime, embedding, vector DB, provider réel, SDK IA, appel réseau,
+> lecture disque dans le module, stockage d'index ou trace persistée.
+>
 > **Mise à jour Quality Core 5 (2026-07-11)** : `RELEASE_PROCESS_RUNBOOK.md` créé dans `cores/quality-core/`. Processus de release gouverné : 5 définitions (merge / promotion / release Foundation / staging / production), 5 types de release (`foundation-v1-baseline` / `core-v1-validation` / `quality-v2-increment` / `staging-candidate` / `hotfix`), prérequis généraux (4 catégories), procédure en 8 étapes, format notes de release, convention de tagging futur (sans tag créé). `docs/checklists/RELEASE_READINESS_CHECKLIST.md` mis à jour : section Foundation Release (Partie 5). Aucun workflow modifié, aucune release créée, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Governance 3 (2026-07-11)** : protection de `main` vérifiée **active via GitHub Rulesets**.
