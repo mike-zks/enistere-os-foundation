@@ -8,8 +8,8 @@
 
 - `strategy/04_ROADMAP_GLOBAL.md` §9 — modules V1 (§9.2 « MMKV storage ») + livrables (§9.3 « storage service »).
 - `docs/adr/ADR-015-secure-mobile-storage.md` §15, §16, §21, §24.
-- `cores/mobile-react-native/CORE_SPECIFICATION.md` §18, §19.
-- `cores/mobile-react-native/ARCHITECTURE.md` §29.
+- `starters/react-native/CORE_SPECIFICATION.md` §18, §19.
+- `starters/react-native/ARCHITECTURE.md` §29.
 - `docs/project-status/MOBILE_CORE_V1_READINESS_REVIEW.md` — réserve B3.
 - `docs/project-status/NEXT_ACTIONS.md` — candidats post-RN36.
 - `docs/project-status/DECISIONS_REGISTER.md` — statut ADR-015.
@@ -211,7 +211,7 @@ Après RN37 : **B3 ne bloque plus VALIDE_V1**. La seule réserve active est **B2
 
 ## 9. Vérifications
 
-- `node cores/quality-core/scripts/quality-gates.mjs run docs` : voir résultat §10.
+- `node factory/quality/core/scripts/quality-gates.mjs run docs` : voir résultat §10.
 - `git diff --check` : aucune whitespace error.
 - `npm audit` : sandboxed (réseau sandbox — non bloquant, 0 vuln connu).
 
@@ -224,6 +224,6 @@ Après RN37 : **B3 ne bloque plus VALIDE_V1**. La seule réserve active est **B2
 - `docs/project-status/IMPLEMENTATION_MATRIX.md` — note RN37 ajoutée
 - `docs/project-status/DECISIONS_REGISTER.md` — note ADR-015 RN37 ajoutée
 - `docs/project-status/SESSION_HANDOFF.md` — B3 statut mis à jour
-- `cores/mobile-react-native/README.md` — B3 statut mis à jour
-- `cores/mobile-react-native/ARCHITECTURE.md` §29 — décision câblage documentée
+- `starters/react-native/README.md` — B3 statut mis à jour
+- `starters/react-native/ARCHITECTURE.md` §29 — décision câblage documentée
 - `CHANGELOG.md` — section RN37 ajoutée

@@ -1,7 +1,7 @@
 # Mobile RN32 — Formulaire Sign-in Générique RHF/Zod
 
 Date : 2026-07-08  
-Core : `cores/mobile-react-native`  
+Core : `starters/react-native`
 Statut : **STARTER_SIGN_IN_FORM_READY**
 
 ## Objectif
@@ -100,7 +100,7 @@ procédure `smoke-ios.js` est mise à jour pour décrire le formulaire RN32.
 
 ## Vérifications RN32
 
-Depuis `cores/mobile-react-native` :
+Depuis `starters/react-native` :
 
 - `npm run typecheck` — **vert**
 - `npm run lint` — **vert**

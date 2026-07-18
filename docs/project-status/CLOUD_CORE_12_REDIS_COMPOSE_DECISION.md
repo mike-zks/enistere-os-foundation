@@ -11,7 +11,7 @@
 Les deux gaps bloquants identifies par `CLOUD_CORE_V1_READINESS_REVIEW.md` sont tranches :
 
 1. **Redis est reporte post-V1 / V2**.
-2. **`cores/cloud/staging/docker-compose.cc10.yml` est le compose serveur/staging V1 officiel**.
+2. **`deployment/core/staging/docker-compose.cc10.yml` est le compose serveur/staging V1 officiel**.
 
 Les preuves runtime restent celles de CC10/CC11. Les tests Cloud reels ne sont pas relances dans cette mission :
 ils restent des gates finaux gouvernes par runbook.
@@ -19,14 +19,14 @@ ils restent des gates finaux gouvernes par runbook.
 ## Sources lues
 
 - `strategy/04_ROADMAP_GLOBAL.md` §11 ;
-- `cores/cloud/CORE_SPECIFICATION.md` §21, §47, §48, §52 ;
-- `cores/api-nestjs/CORE_SPECIFICATION.md` §21 ;
-- `cores/api-nestjs/docs/API_CORE_V1_NEXT_ROADMAP.md` §6 ;
-- `cores/cloud/staging/docker-compose.cc10.yml` ;
-- `cores/cloud/staging/docker-compose.staging.example.yml` ;
-- `cores/cloud/staging/.env.staging.example` ;
-- `cores/cloud/docs/CC10_STAGING_DEPLOYMENT_REPORT.md` ;
-- `cores/cloud/docs/CC11_STAGING_OPERATIONAL_REPORT.md` ;
+- `deployment/core/CORE_SPECIFICATION.md` §21, §47, §48, §52 ;
+- `starters/nestjs/CORE_SPECIFICATION.md` §21 ;
+- `starters/nestjs/docs/API_CORE_V1_NEXT_ROADMAP.md` §6 ;
+- `deployment/core/staging/docker-compose.cc10.yml` ;
+- `deployment/core/staging/docker-compose.staging.example.yml` ;
+- `deployment/core/staging/.env.staging.example` ;
+- `deployment/core/docs/CC10_STAGING_DEPLOYMENT_REPORT.md` ;
+- `deployment/core/docs/CC11_STAGING_OPERATIONAL_REPORT.md` ;
 - `docs/project-status/CLOUD_CORE_V1_READINESS_REVIEW.md`.
 
 ## Decision 1 — Redis
@@ -50,7 +50,7 @@ Regle V1 :
 
 ## Decision 2 — Compose V1
 
-`cores/cloud/staging/docker-compose.cc10.yml` devient le **compose serveur/staging V1 officiel**.
+`deployment/core/staging/docker-compose.cc10.yml` devient le **compose serveur/staging V1 officiel**.
 
 Justification :
 
@@ -93,7 +93,7 @@ Preuves principales :
 ## Verifications locales
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 npm audit
 ```
 

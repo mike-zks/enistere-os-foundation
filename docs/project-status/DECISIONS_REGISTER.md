@@ -6,7 +6,7 @@
 > Statuts d'implémentation : `DECIDE_NON_IMPLEMENTE`, `PARTIELLEMENT_IMPLEMENTE`, `IMPLEMENTE`,
 > `IMPLEMENTE_ET_REVU`, `NON_APPLICABLE_ACTUELLEMENT`.
 
-## 1. ADR rédigés et Validés (21)
+## 1. ADR rédigés et Validés (22)
 
 | ADR | Décision (résumé) | Statut ADR | Statut implémentation | Core | Preuve |
 |---|---|---|---|---|---|
@@ -30,7 +30,8 @@
 | ADR-039 | Hachage = Argon2id (vs bcrypt) | Validé | **IMPLEMENTE_ET_REVU** | api-nestjs | `PasswordHasher` + tests |
 | ADR-040 | Logging structuré (Pino) | Validé | **IMPLEMENTE_ET_REVU** (api) / **PARTIELLEMENT_IMPLEMENTE** (mobile) | api/cloud/mobile | **API Core** : Pino + `STRUCTURED_LOGGING_COMPATIBILITY_PROOF` + e2e. **+ Mobile Core (RN 8)** : **logger client générique** `createLogger` (`debug`/`info`/`warn`/`error`, **niveaux** `isLevelEnabled`, **sink pluggable** — défaut `consoleSink`, **horloge injectée**, corrélation `child`/`withRequestId` = `requestId` §14) avec **redaction centrale** (§17 : `redactValue`/`redactString` — `Authorization`/cookies/tokens/JWT/`secret`/`apiKey`/**URL signées**/`signature`, **chemins device** `file://`/`content://`, **emails/PII**) appliquée **avant** tout sink ; `safeErrorFields(QueryError)` (corrélation, **sans message/payload**, §18) ; **correctif `describeFileForLog`** → `{type,extension}` (plus de nom brut, §18/§22) ; `Error` sérialisé **sans `stack`** ; **JSON structuré stdout/console**, **aucun transport réseau/persistance/backend d'observabilité** (§24 ; Sentry/Loki/OTel relèvent d'ADR-018/036 / Cloud Core). **Aucune dépendance ajoutée.** **+ Mobile RN 9/10** : permissions (RN 9) et notifications (RN 10) **logguent via ce logger** avec **champs sûrs seulement** — permissions `{kind,status}`, notifications `{id,status,state,count}` — **jamais** de contenu de notification (title/body/data) ni de cause d'erreur sensible (`describeNotificationForLog` = métadonnées). **+ Mobile RN 13** : **analytics/télémétrie** réutilise la **redaction RN 8** (`isSensitiveKey`/`redactString`) pour `sanitizeAnalyticsEvent` (clés sensibles supprimées + valeurs scrubbées) et logge **uniquement** `{eventName,propertyCount}` — **jamais** les valeurs ; **aucun SDK réel/réseau/persistance/user-id réel** (SDK Sentry/Amplitude/… = ADR projet dérivé). **+ Mobile RN 19** : **crash / error-reporting** réutilise la **redaction centrale RN 8** — `CrashReportEvent` **borné** dont `message`/`stack`/`context` sont **rédigés** (`sanitizeCrashMessage`/`sanitizeCrashStack` **jamais de stack brute** + cap frames §19 ; `sanitizeCrashContext` clés sensibles → `[Redacted]`) et logge **uniquement** `{operation,severity,source}` — **jamais** message/stack/context, **jamais** token/URL signée/URI device/PII/body/user-id réel ; service **best-effort non-intrusif** (sync throw + async reject capturés, **jamais de faux succès**) ; **sans SDK réel/réseau/persistance/batching/crash handler global** ; **ne décide PAS ADR-019** (Sentry/Crashlytics = ADR-019, **reste À RÉDIGER**). **+ Mobile RN 21** : **consentement télémétrie / privacy gate** — primitive **préparatoire** `src/consent` (catégories `analytics`/`crash`/`performance`/`diagnostics` × `granted`/`denied`/`unknown` ; **`isTelemetryAllowed` default-deny** — seul `granted` autorise) destinée à **gater** l'émission analytics (RN 13) / crash (RN 19) **avant** tout envoi ; persistance **déléguée aux préférences non sensibles RN 20** (clés `privacy.consent.*`) ; logs `{operation,category,status}`/`{operation,count}` seuls ; **aucun SDK réel/réseau/UI/identifiant/PII** ; **ne décide PAS ADR-038** (analytics produit/consentement/coûts = ADR-038, **reste À RÉDIGER**) et **ne câble pas** analytics/crash. **+ Mobile RN 22** : **environnement / métadonnées app** — primitive **préparatoire** `src/app-environment` fournissant un **contexte technique coarse et NON identifiant** (`os` + version **majeure** + app/build version + channel + locale + environnement) destiné à être attaché **plus tard** aux télémétries (analytics RN 13 / crash RN 19) **une fois gaté par le consentement RN 21** ; **`sanitizeAppEnvironmentSnapshot`** (allow-list stricte) **drop** tout identifiant device/installation (IDFA/Android ID/installation id/serial/MAC/IP/modèle précis) ; logs `{operation}`+champs grossiers seuls ; **ne persiste rien, ne collecte rien auto** ; **aucun `expo-device`/`expo-application` réel/PII** ; **ne décide ni ADR-038/ADR-019/ADR-018**. **+ Mobile RN 23** : **presse-papiers sécurisé** `src/clipboard` — le clipboard est un **canal transitoire/partagé/non fiable** dont le **contenu n'est JAMAIS loggé** (métadonnées seules `{operation,result,sensitivity,length}`) ni persisté ; **`isSensitiveClipboardText`** réutilise la **redaction RN 8** pour classer un texte sensible (Bearer/JWT/email/URL signée/URI device) ; `copy` **refuse** le contenu sensible sans opt-in (`rejected`), `getString` opt-in jamais auto et **jamais loggé** ; **aucun `expo-clipboard` réel/réseau/persistance** ; clipboard **non stocké** dans preferences/Zustand/Query/SecureStore. **+ Mobile RN 24** : **retry/backoff générique** `src/retry` logge uniquement `{attempt,delayMs}` via logger injecté, jamais message/body/url/token ; `getRetryDecision` expose une raison enum sûre ; 401/403/session-expired restent hors retry. Reste : recâbler les `console.*` existants ; collecte/transport côté Cloud Core ; **adaptateur crash réel + ADR-019** ; **SDK télémétrie réel + UI consentement + câblage du gate + du contexte env (ADR-038)** |
 | ADR-035 | Angular UI : Angular Material (CDK + M3) contrôlé par tokens Enistere + composants maison | Validé | **IMPLEMENTE** | ui-kit, web-angular | Option D : Angular Material (CDK + Material 3) contrôlé par tokens Enistere (ADR-008) via `mat.define-theme()` / CSS custom properties `--mat-*` + composants maison Enistere Angular ciblés + Reactive Forms obligatoire + `@angular/cdk/testing` + Angular Signals / NgRx différé projet dérivé. Pas de PrimeNG, pas de shadcn/Radix côté Angular. Adaptateur OpenAPI Angular (ADR-016 §F) décidé par preuve dans Web Core Angular. Décision 2026-07-15. **Angular 1→10 (2026-07-15/16)** : spécification, starter Angular 22, auth/routing shell, HttpClient/server-state RxJS, Reactive Forms + Material, Foundation state components, upload fichiers, tests/smoke CDK, RefreshInterceptor/login API seam, PermissionService + PermissionDirective livrés. **Readiness finale après Angular 10 (2026-07-16)** : `web-angular` = `VALIDE_V1`. Score : 14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT ; 267/267 tests ✅. |
-| ADR-041 | Build system Spring Boot = Maven | Validé | **IMPLEMENTE** | api-spring | `cores/api-spring/pom.xml` (Spring Boot 4.1.0 Parent POM, JJWT 0.12.6, Java 21) + `mvnw`/`mvnw.cmd`/`.mvn/wrapper/` (Maven Wrapper 3.9.12) + CI L5 `api-spring-verify` (`./mvnw verify --no-transfer-progress`, 71/71 ✅ avec Testcontainers PostgreSQL). Gradle autorisé uniquement par exception documentée dans un projet dérivé. |
+| ADR-041 | Build system Spring Boot = Maven | Validé | **IMPLEMENTE** | api-spring | `starters/spring/pom.xml` (Spring Boot 4.1.0 Parent POM, JJWT 0.12.6, Java 21) + `mvnw`/`mvnw.cmd`/`.mvn/wrapper/` (Maven Wrapper 3.9.12) + CI L5 `api-spring-verify` (`./mvnw verify --no-transfer-progress`, 71/71 ✅ avec Testcontainers PostgreSQL). Gradle autorisé uniquement par exception documentée dans un projet dérivé. |
+| ADR-042 | Project Factory AI-native | Validé | **EN_IMPLEMENTATION** | Foundation V2 | Six starters indépendants ; Factory, capability/deployment packs et packages transverses ; blueprint neutre ; agents locaux sous double approbation humaine. |
 
 > **Note RN25 (ADR-038/019/040)** : `src/telemetry` compose désormais explicitement
 > consentement RN21 + contexte safe RN22 + analytics RN13/crash RN19 via un
@@ -131,7 +132,7 @@
 > Auth imposent `gcTime` → chaque `QueryClient` de test est `clear()` en `afterEach` (sinon timer GC ref).
 >
 > **Checkpoint de gouvernance Web Core (2026-06-10)** — revue de socle (rapport permanent
-> `cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`). Verdict : socle **cohérent et sûr**, **aucune
+> `starters/nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`). Verdict : socle **cohérent et sûr**, **aucune
 > dette bloquante**, statut **maintenu** `IMPLEMENTATION_PARTIELLE`. **Orientation SSR Auth tranchée
 > (hybride)** : pages **publiques** = **Option A** (client-only, actuelle) ; layouts/pages **privés** =
 > **Option C** (résolution Auth **serveur read-only** : Server Component → cookie store read-only → client
@@ -156,7 +157,7 @@
 > de middleware**, **pas de self-fetch**, **pas de QueryClient serveur global**. Redirection anonyme interne
 > `/?auth=required` (**temporaire** jusqu'à Web Auth 5) ; sous le **streaming** App Router, `redirect()` est
 > délivré en 200 via RSC `NEXT_REDIRECT` + meta-refresh (honoré ; **aucune donnée privée** exposée — vérifié).
-> Preuve API réelle **26/26**. Détail : `cores/web-nextjs/docs/protected-routes.md`.
+> Preuve API réelle **26/26**. Détail : `starters/nextjs/docs/protected-routes.md`.
 >
 > **Web Auth 5 — page de connexion & navigation (implémente ADR-004/005/011/012)** : page **publique
 > `/login`** (Server Component) qui **assainit** `returnTo` (`sanitizeReturnTo` — **anti open-redirect** :
@@ -171,10 +172,10 @@
 > **génériques** (401 **sans énumération**). La redirection anonyme du layout protégé pointe vers
 > `/login?returnTo=/protected`. **Aucun middleware, aucune Server Action.** Preuve API réelle **22/22**
 > (dont open redirect **bloqué** : `returnTo=https://evil…` → cible réelle `/protected`). Détail :
-> `cores/web-nextjs/docs/login-flow.md`.
+> `starters/nextjs/docs/login-flow.md`.
 >
 > **Revue globale Auth Web (1 → 5)** — verdict **`AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (rapport permanent
-> `cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md`). Le socle Auth Web, traité comme **un système unique** :
+> `starters/nextjs/docs/WEB_AUTH_V1_REVIEW.md`). Le socle Auth Web, traité comme **un système unique** :
 > **aucun défaut de sécurité bloquant** (pas de fuite de token source/HTML/RSC/bundle, **aucun open redirect**,
 > session cohérente 401→anonymous / 403·5xx·réseau distincts, CSRF complet sur les mutations + Origin/Referer
 > fail-closed, contenu privé jamais exposé avant validation, caches isolés/purgés, droits dynamiques **sans
@@ -211,11 +212,11 @@
 > permission 403 → non-propriétaire avec permission 404 → quarantaine 409 → objet supprimé 503 → logout 401 +
 > page → `/login` ; **aucun** storageKey/bucket/X-Amz-Signature/credentials en métadonnées, logs ou bundle).
 > **ADR-007 n'est que partiellement consommé côté Web** (lecture/téléchargement uniquement). Statut Web Core
-> **maintenu** `IMPLEMENTATION_PARTIELLE`. Détail : `cores/web-nextjs/docs/files-read-download.md`.
+> **maintenu** `IMPLEMENTATION_PARTIELLE`. Détail : `starters/nextjs/docs/files-read-download.md`.
 >
 > **Revue globale Web Core — incrément V1 (2026-06-10)** — revue **transverse de stabilisation** de l'incrément
 > complet (Health + Auth 1→5 + UI 1 + Files 1) comme **un système unique**, **sans nouvelle fonctionnalité**
-> (rapport permanent `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`). Vérifié fichier par fichier +
+> (rapport permanent `starters/nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`). Vérifié fichier par fichier +
 > commandes + **runtime réel** : architecture (couches, aucun import inversé, frontières client/serveur par test
 > statique — `next/headers`/server-config/handlers/http Files **interdits côté client**), BFF **ciblé** (jamais
 > proxy ; UUID 400 sans appel API ; CSRF/Origin fail-closed avant API ; `no-store`), TanStack Query (clés
@@ -244,7 +245,7 @@
   déploiement et environnements protégés. **ADR-014** (registry images / GHCR) **non implémenté** — la CI
   minimale ne construit ni ne pousse aucune image. Détail : `.github/workflows/README.md`.
 - **Cloud Core 1 — cadrage d'exécution CI/CD & environnements (2026-06-10)** : prolonge ADR-013 **sans**
-  déploiement/Docker/registry/secret. Documents (`cores/cloud/docs/`) : `CLOUD_CORE_V1_EXECUTION_BASELINE.md`
+  déploiement/Docker/registry/secret. Documents (`deployment/core/docs/`) : `CLOUD_CORE_V1_EXECUTION_BASELINE.md`
   (17 sections), `GITHUB_BRANCH_PROTECTION_CHECKLIST.md` (application **manuelle** dans GitHub Settings, rend
   les 5 checks CI bloquants, force-push/suppression interdits), `SECRETS_POLICY.md` (aucun secret en Git/CI ;
   noms futurs sans valeurs ; jamais en `NEXT_PUBLIC_*` ; GitHub Environments futurs), `REGISTRY_POLICY.md`
@@ -265,7 +266,7 @@
   monitoring/rollback). ADR-013 **reste partiel** (niveaux 1–2) ; **ADR-014 `NON_IMPLEMENTE`**. Prochaine
   action : **Cloud Core 3 — E2E navigateur (niveau 3)** + protection de branche (manuel).
 - **Cloud Core 3 — CI E2E navigateur (niveau 3, 2026-06-10)** : implémente le niveau 3. Workflow
-  **`.github/workflows/web-e2e-ci.yml`** + suite **Playwright** (`cores/web-nextjs/e2e/`) démarrant une **stack
+  **`.github/workflows/web-e2e-ci.yml`** + suite **Playwright** (`starters/nextjs/e2e/`) démarrant une **stack
   réelle éphémère** (PostgreSQL `services:` + MinIO `docker run` + **API NestJS** + **Web Next.js**) et rejouant
   les **parcours navigateur** Chromium headless : **Health** (accueil + sans fuite), **Auth** (anonyme→/login,
   identifiants invalides→erreur générique, login→/protected, **logout**→/login), **Files** (métadonnées sans
@@ -294,8 +295,8 @@
   **Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4). **Note actuelle** : depuis Governance 3,
   la protection `main` est active via GitHub Rulesets (`protect-main`).
 - **Cloud Core 5 — Registry GHCR sans déploiement (niveau 4 partiel, 2026-06-10)** : début d'**ADR-014**
-  (registry **uniquement**). **Dockerfiles** `cores/api-nestjs/Dockerfile` (contexte `cores/api-nestjs/`,
-  multi-stage, `prisma generate` au build, **non-root**, openssl runtime) et `cores/web-nextjs/Dockerfile`
+  (registry **uniquement**). **Dockerfiles** `starters/nestjs/Dockerfile` (contexte `starters/nestjs/`,
+  multi-stage, `prisma generate` au build, **non-root**, openssl runtime) et `starters/nextjs/Dockerfile`
   (contexte **racine**, Next.js **`output: 'standalone'`** + `outputFileTracingRoot` racine, **non-root**) +
   `.dockerignore` (API + racine, **aucun `.env` copié**). **Workflow** `registry-ci.yml` : `permissions:
   contents:read + packages:write` ; **PR → build sans push** ; **push `main` → login GHCR (`GITHUB_TOKEN`) +
@@ -311,10 +312,10 @@
   `latest`**), checks requis verts (PR #1/#2).
 - **Cloud Core 6 — déploiement staging manuel (2026-06-11)** : **cadrage** d'un déploiement staging manuel à
   partir des images GHCR immuables — **aucune exécution réelle, aucun secret, aucune production, aucun `latest`,
-  aucune automatisation/workflow deploy**. Livrables : `cores/cloud/staging/docker-compose.staging.example.yml`
+  aucune automatisation/workflow deploy**. Livrables : `deployment/core/staging/docker-compose.staging.example.yml`
   (api+web+postgres+minio, réseau interne, healthchecks, **migrations hors démarrage**, PostgreSQL non exposé,
-  MinIO API exposé pour URL signées), `cores/cloud/staging/.env.staging.example` (placeholders ; secrets API
-  **non passés** au conteneur Web), `cores/cloud/staging/README.md`, runbooks **`STAGING_DEPLOYMENT_RUNBOOK.md`**
+  MinIO API exposé pour URL signées), `deployment/core/staging/.env.staging.example` (placeholders ; secrets API
+  **non passés** au conteneur Web), `deployment/core/staging/README.md`, runbooks **`STAGING_DEPLOYMENT_RUNBOOK.md`**
   & **`STAGING_ROLLBACK_RUNBOOK.md`**. **Migrations Prisma découplées de l'image** (runtime sans CLI → `migrate
   deploy` depuis les sources). **Rollback image** simple par tag immuable ; **rollback DB non garanti**
   (migrations additives). **Contrainte URL signée** = hôte `S3_ENDPOINT` joignable navigateur ; **`NEXT_PUBLIC_*`
@@ -326,7 +327,7 @@
 - **Cloud Core 7 — préparation serveur staging & dry-run contrôlé (2026-06-11)** : **dry-run local réel** à
   partir des **images GHCR immuables** (`sha-7b07e5e`) + `.env.staging` **réel hors dépôt** (secrets jetables
   `openssl`, **shred** après) — **aucun déploiement réel, aucun secret committé, aucun `latest`, aucun workflow
-  deploy**. Résultats (`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`) : ✅ `docker compose config` valide (tag
+  deploy**. Résultats (`deployment/core/docs/STAGING_DRY_RUN_REPORT.md`) : ✅ `docker compose config` valide (tag
   immuable, aucun `latest`), images **tirées en anonyme** (registry public), `postgres healthy` + `minio` +
   bucket, **image Web boote** (HTTP 200, Next 16.2.7) ; ❌ **défaut BLOQUANT** : l'**image API ne démarre pas**
   (crash-loop) — le **query engine** Prisma de `.prisma/client` est compilé pour **OpenSSL 1.1.x** alors que la
@@ -353,7 +354,7 @@
   vérifie le chargement du moteur Prisma sans DB ; non-root + openssl + moteur présent) → **`images` `needs:
   api-smoke`** ⇒ **push GHCR conditionné au smoke**. **Stratégie migrations** tranchée = **Option A (depuis
   l'image)** (CLI + schema-engine 3.0.x embarqués). **Aucune** modification de la logique métier ;
-  `cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** ; **aucun secret/`latest`/
+  `starters/nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** ; **aucun secret/`latest`/
   déploiement**. ⚠️ Le `docker build` **local** est bloqué (egress npm) → l'**image GHCR corrigée** est
   **reconstruite/publiée par la registry CI au merge** (tags ≤ `sha-7b07e5e` restent cassés). Statuts
   **inchangés** (Cloud Core `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement staging =
@@ -363,7 +364,7 @@
   (API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en environnement **Type D :
   local, sans exposition publique** (PAS de serveur distant/SSH/DNS/HTTPS — requalifié honnêtement, cf.
   consigne §6). `.env.staging` **réel hors dépôt** (secrets jetables, shred). Résultats
-  (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : `compose config` valide (**no `latest`**), **migrations
+  (`deployment/core/docs/STAGING_EXECUTION_REPORT.md`) : `compose config` valide (**no `latest`**), **migrations
   depuis l'image** (Option A, offline, 5 appliquées), **API & Web `Up (healthy)`**, `/health/live`+`/health/ready`
   +`/`+`/login` = **200**, **endpoint MinIO Option A joignable** par l'hôte (navigateur). ⚠️ **Non validé** :
   **URL signée** de bout en bout (presign `mc` → **403** ; presign **de l'API non exercé**) et **Auth/Files**

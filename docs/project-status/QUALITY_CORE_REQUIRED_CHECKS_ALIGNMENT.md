@@ -14,9 +14,9 @@ Cette mission ne modifie pas le ruleset GitHub. Toute activation reste une actio
 ## 2. Sources vérifiées
 
 - `strategy/04_ROADMAP_GLOBAL.md` — V2 : industrialisation, CI/CD, tests, versioning.
-- `cores/quality-core/CORE_SPECIFICATION.md` — rôle non-runtime, pas de workflow/ruleset implicite.
-- `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md` — noms exacts des 10 checks.
-- `cores/quality-core/QUALITY_GATES_MATRIX.md` — matrice des gates L1-L4.
+- `factory/quality/core/CORE_SPECIFICATION.md` — rôle non-runtime, pas de workflow/ruleset implicite.
+- `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md` — noms exacts des 10 checks.
+- `factory/quality/core/QUALITY_GATES_MATRIX.md` — matrice des gates L1-L4.
 - `.github/workflows/README.md` — workflows CI et statut ruleset.
 - GitHub Ruleset `protect-main` via API GitHub.
 - Registry CI PR #106 via `gh run view 29209012769`.
@@ -56,8 +56,8 @@ Run vérifié : Registry CI de la PR #106, `29209012769`, conclusion `success`.
 | Job | Résultat | Durée observée | Rôle |
 |---|---:|---:|---|
 | `api-smoke` | success | 1m45s | Build image API + exécution smoke runtime Prisma |
-| `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | success | 17s | Constructibilité image API, sans push en PR |
-| `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | success | 26s | Constructibilité image Web, sans push en PR |
+| `images (api-nestjs, ./starters/nestjs, ./starters/nestjs/Dockerfile)` | success | 17s | Constructibilité image API, sans push en PR |
+| `images (web-nextjs, ., ./starters/nextjs/Dockerfile)` | success | 26s | Constructibilité image Web, sans push en PR |
 
 Constat : les deux jobs `images (...)` sont stables sur le run observé et peu coûteux sur cette exécution.
 
@@ -87,8 +87,8 @@ Les deux checks `images (...)` doivent être considérés comme candidats mûrs 
 
 Action humaine recommandée, si l'équipe accepte le coût et la fragilité des noms matrix :
 
-- ajouter `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` aux checks requis ;
-- ajouter `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` aux checks requis ;
+- ajouter `images (api-nestjs, ./starters/nestjs, ./starters/nestjs/Dockerfile)` aux checks requis ;
+- ajouter `images (web-nextjs, ., ./starters/nextjs/Dockerfile)` aux checks requis ;
 - relancer une PR docs-only de vérification et confirmer que les 10 checks bloquent correctement le merge.
 
 ## 7. Hors périmètre confirmé

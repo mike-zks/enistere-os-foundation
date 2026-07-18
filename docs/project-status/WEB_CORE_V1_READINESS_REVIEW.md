@@ -4,7 +4,7 @@
 > **Mise à jour : 2026-07-10 (post V1 Gap 3)** — critère #9 fermé, readiness **14/14 — V1 pleinement stable**.
 > Sources : `CORE_SPECIFICATION.md` (§56 critères V1, §9 modules obligatoires, §10 modules optionnels),
 > `strategy/04_ROADMAP_GLOBAL.md` (§10 V1), `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md`,
-> `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, `e2e/`, `src/`.
+> `starters/nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`, `e2e/`, `src/`.
 
 ---
 
@@ -237,9 +237,9 @@ indisponible sur Linux.
 
 ## 9. Références
 
-- `cores/web-nextjs/CORE_SPECIFICATION.md` §56 (critères V1), §9 (modules obligatoires)
+- `starters/nextjs/CORE_SPECIFICATION.md` §56 (critères V1), §9 (modules obligatoires)
 - `strategy/04_ROADMAP_GLOBAL.md` §10 (Web Core V1 modules et livrables)
-- `cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md` (revue précédente)
+- `starters/nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md` (revue précédente)
 - `docs/project-status/FOUNDATION_CURRENT_STATE.md`
 - `docs/project-status/IMPLEMENTATION_MATRIX.md`
 - `docs/project-status/NEXT_ACTIONS.md`

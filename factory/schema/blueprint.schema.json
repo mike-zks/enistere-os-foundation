@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enistere.com/schemas/blueprint/v1",
+  "title": "Enistere Project Blueprint",
+  "type": "object",
+  "required": ["version", "project", "topology", "stack", "designSystem", "domain", "capabilities", "deployment"],
+  "properties": {
+    "version": { "const": "1" },
+    "project": {
+      "type": "object",
+      "required": ["name", "slug"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "slug": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$" }
+      },
+      "additionalProperties": false
+    },
+    "topology": { "const": "monorepo" },
+    "designSystem": { "type": "boolean", "default": true },
+    "stack": {
+      "type": "object",
+      "required": ["api"],
+      "properties": {
+        "api": { "enum": ["nestjs", "spring"] },
+        "web": { "enum": ["nextjs", "angular", null] },
+        "mobile": { "enum": ["react-native", "flutter", null] }
+      },
+      "additionalProperties": false
+    },
+    "domain": {
+      "type": "object",
+      "required": ["entities"],
+      "properties": { "entities": { "type": "array" } },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "enum": ["base", "auth", "rbac", "files", "audit", "notifications", "observability"] },
+      "contains": { "const": "base" },
+      "uniqueItems": true
+    },
+    "deployment": {
+      "type": "object",
+      "required": ["environments"],
+      "properties": {
+        "environments": {
+          "type": "array",
+          "items": { "enum": ["local", "staging"] },
+          "contains": { "const": "local" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

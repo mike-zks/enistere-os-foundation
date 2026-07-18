@@ -1,5 +1,5 @@
 # Contexte de build (racine) — utilisé par l'image Web (Cloud Core 5). Réduit le contexte, évite les secrets.
-# NB : l'API a son propre contexte (`cores/api-nestjs/`) avec son `.dockerignore`.
+# NB : l'API a son propre contexte (`starters/nestjs/`) avec son `.dockerignore`.
 
 # Dépendances et artefacts (reconstruits dans l'image)
 **/node_modules
@@ -21,8 +21,8 @@
 **/*.tsbuildinfo
 
 # Inutile au build du Web
-cores/api-nestjs
-cores/web-nextjs/e2e
-cores/web-nextjs/playwright.config.ts
+starters/nestjs
+starters/nextjs/e2e
+starters/nextjs/playwright.config.ts
 **/Dockerfile
 **/.dockerignore

@@ -1,12 +1,27 @@
 # IMPLEMENTATION_MATRIX.md — Matrice d'implémentation officielle
 
+> **Vue V2 active (2026-07-18)** : la taxonomie des cores est retiree par ADR-042. Les six starters
+> sont des produits techniques independants ; Factory, capabilities, deployment et packages sont des
+> fonctions de l'usine. Le detail historique V1 ci-dessous reste une preuve, pas une liste de composants
+> a fusionner.
+
+| Bloc V2 | Etat | Preuve actuelle |
+|---|---|---|
+| Starters | MIGRATION_EN_COURS | six manifests et sources sous `starters/` |
+| Factory kernel | IMPLEMENTATION_PARTIELLE | blueprint, plan, generate, verify, lock |
+| Agents locaux | IMPLEMENTATION_PARTIELLE | Codex/Claude/Gemini + worktree + double approbation |
+| Capability packs | IMPLEMENTATION_PARTIELLE | base/auth/rbac/files |
+| Deployment packs | IMPLEMENTATION_PARTIELLE | Compose local/staging genere |
+| Packages | V1_PRESERVE | noms publics et contrats conserves |
+| Golden projects | PREUVE_STRUCTURELLE | matrice 18 profils ; runtime R8 restant |
+
 > Vérifiée depuis le repository (2026-07-12). Légende des statuts officiels : `ABSENT`,
 > `DOSSIER_SEULEMENT`, `SPECIFICATION_DOCUMENTAIRE`, `ADR_EN_COURS`, `PREUVE_TECHNIQUE`,
 > `STARTER_INITIALISE`, `CADRAGE_OPERATIONNEL` (cadrage gouverné — docs de politique/exécution, **sans** infra
 > réelle ni starter), `IMPLEMENTATION_PARTIELLE`, `IMPLEMENTATION_AVANCEE`, `VALIDE_V1`, `SUSPENDU`,
 > `A_REVOIR`. Colonnes : ✓ = présent/fait, — = absent/non fait.
 
-## 1. Cores et packages
+## 1. Historique V1 des cores et packages
 
 > **Mise à jour Project Factory 1 — Stack Profiles Matrix (2026-07-18)** :
 > `docs/project-factory/DERIVED_PROJECT_PROCESS.md` et `docs/project-factory/STACK_PROFILES_MATRIX.md`
@@ -22,19 +37,19 @@
 > gates et ecarts documentes. Aucun generateur CLI, runtime, workflow, dependance ou exemple derive.
 
 > **Mise à jour AI Core 1 — Core specification (2026-07-16)** :
-> `cores/ai-core/CORE_SPECIFICATION.md` (24 sections : objectif, rôle dans la Foundation,
+> `factory/ai/core/CORE_SPECIFICATION.md` (24 sections : objectif, rôle dans la Foundation,
 > périmètre V1/VF, Prompt Registry, Context Builder, Redaction Layer, Retrieval/RAG Layer,
 > Agent Orchestrator, Evaluation Harness, Provider Adapters, Audit Trail, sécurité, modèles
-> conceptuels, readiness, missions futures) + `cores/ai-core/README.md`.
+> conceptuels, readiness, missions futures) + `factory/ai/core/README.md`.
 > Aucun runtime, provider, SDK IA, RAG exécutable, base vectorielle, endpoint, workflow,
 > dépendance, secret ou appel réseau. `ai-core` :
 > **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 >
 > **Mise à jour AI Core 2 — Prompt registry model + validator local (2026-07-16)** :
-> `cores/ai-core/prompt-registry.json` référence les 8 prompts gouvernés existants.
+> `factory/ai/core/prompt-registry.json` référence les 8 prompts gouvernés existants.
 > `src/prompt-registry/model.mjs` + `src/prompt-registry/validator.mjs` + `scripts/validate-prompt-registry.mjs`
 > valident localement la forme, les rôles, les niveaux de risque, les gates autorisés et les références
-> de fichiers. Tests : `node --test cores/ai-core/test/prompt-registry.test.mjs` ✅.
+> de fichiers. Tests : `node --test factory/ai/core/test/prompt-registry.test.mjs` ✅.
 > Aucun provider, SDK IA, RAG runtime, base vectorielle, endpoint, workflow, dépendance, secret ou appel réseau.
 > `ai-core` : **`SPECIFICATION_DOCUMENTAIRE` → `PREUVE_TECHNIQUE`**.
 >
@@ -42,7 +57,7 @@
 > `src/redaction/redaction.mjs` + `src/redaction/index.mjs` ajoutent une couche de redaction pure
 > (`redactText`, `redactValue`, `isSensitiveKey`) : clés sensibles, credentials `Bearer`/`Basic`, JWT,
 > paramètres d'URL signée, secrets `.env`, blocs de clé privée, emails, chemins locaux, erreurs sans stack,
-> cycles et profondeur maximale. Tests : `node --test cores/ai-core/test/redaction.test.mjs` ✅.
+> cycles et profondeur maximale. Tests : `node --test factory/ai/core/test/redaction.test.mjs` ✅.
 > Aucun provider, SDK IA, appel réseau, stockage de traces, endpoint, workflow, dépendance ou secret.
 > `ai-core` reste **`PREUVE_TECHNIQUE`**.
 >
@@ -50,14 +65,14 @@
 > `src/context/context-builder.mjs` + `src/context/index.mjs` ajoutent un builder local de contexte :
 > allow-list explicite de fichiers, refus `.env`/`node_modules`/`dist`/`build`/`.git`/chemins absolus/`..`,
 > redaction AI Core 3 avant sortie, rapport `includedFiles`/`skippedFiles`/`missingFiles`, bornes par fichier et
-> bornes globales. Tests : `node --test cores/ai-core/test/context-builder.test.mjs` ✅.
+> bornes globales. Tests : `node --test factory/ai/core/test/context-builder.test.mjs` ✅.
 > Aucun provider, SDK IA, RAG runtime, indexation globale, base vectorielle, endpoint, workflow, dépendance,
 > secret, stockage de traces ou appel réseau. `ai-core` reste **`PREUVE_TECHNIQUE`**.
 >
 > **Mise à jour AI Core 5 — Provider adapter seam + fake provider (2026-07-16)** :
 > `src/provider/provider-model.mjs` + `fake-provider.mjs` + `provider-adapter.mjs` + `index.mjs` ajoutent
 > un seam provider local, un fake provider déterministe et un adapter sûr qui valide puis redige la requête
-> avant invocation. Tests : `node --test cores/ai-core/test/provider.test.mjs` ✅. Aucun provider réel,
+> avant invocation. Tests : `node --test factory/ai/core/test/provider.test.mjs` ✅. Aucun provider réel,
 > SDK IA, clé API, appel réseau, modèle réel, streaming réel, embeddings, RAG runtime, base vectorielle,
 > endpoint, workflow, dépendance, secret ou stockage de traces. `ai-core` :
 > **`PREUVE_TECHNIQUE` → `IMPLEMENTATION_PARTIELLE`**.
@@ -66,7 +81,7 @@
 > `src/evaluation/evaluation-harness.mjs` + `src/evaluation/index.mjs` ajoutent un harness local
 > déterministe qui évalue le périmètre modifié, les fichiers interdits, les documents requis, les gates
 > attendus, le format de rapport, la preuve de vérification et les secrets détectables via la redaction
-> AI Core 3. Tests : `node --test cores/ai-core/test/evaluation-harness.test.mjs` ✅. Aucun LLM judge,
+> AI Core 3. Tests : `node --test factory/ai/core/test/evaluation-harness.test.mjs` ✅. Aucun LLM judge,
 > provider réel, SDK IA, clé API, appel réseau, modèle réel, embeddings, RAG runtime, base vectorielle,
 > endpoint, workflow CI automatique, dépendance ou stockage de traces. `ai-core` reste
 > **`IMPLEMENTATION_PARTIELLE`**.
@@ -84,7 +99,7 @@
 > `ai-execution-report/v1` : mission, prompt id/version/role, documents lus, fichiers modifiés, gates,
 > limites, evaluation et prochaine action. Le module applique la redaction AI Core 3, refuse les prompts
 > bruts (`promptText`, `rawPrompt`, `fullPrompt`, `messages`), n'ecrit aucun fichier, ne contacte aucun
-> provider et ne stocke aucune trace. Tests : `node --test cores/ai-core/test/report-schema.test.mjs` ✅.
+> provider et ne stocke aucune trace. Tests : `node --test factory/ai/core/test/report-schema.test.mjs` ✅.
 > `ai-core` reste **`IMPLEMENTATION_PARTIELLE`** ; prochaine étape : readiness review dédiée.
 >
 > **Mise à jour AI Core V1 Readiness Review (2026-07-16)** :
@@ -97,7 +112,7 @@
 > `src/runner/prompt-runner.mjs` + `src/runner/index.mjs` ajoutent un runner local gouverné :
 > résolution d'un prompt `active`, contexte strict `requiredDocuments + allowedFiles`, refus si contexte
 > incomplet, invocation via safe adapter + fake provider, évaluation locale et rapport
-> `ai-execution-report/v1`. Tests : `node --test cores/ai-core/test/prompt-runner.test.mjs` ✅.
+> `ai-execution-report/v1`. Tests : `node --test factory/ai/core/test/prompt-runner.test.mjs` ✅.
 > B1 est fermé. `ai-core` reste **`IMPLEMENTATION_AVANCEE`** ; `VALIDE_V1` reste différé par B2
 > citation retrieval et B3 runbook. Aucun provider réel, SDK IA, clé API, appel réseau, embedding,
 > vector DB, service RAG, endpoint, workflow CI automatique ou stockage de traces.
@@ -105,13 +120,13 @@
 > **Mise à jour AI Core 10 — Retrieval source citation helper (2026-07-17)** :
 > `src/retrieval/source-citations.mjs` + `src/retrieval/index.mjs` ajoutent des helpers purs de citation :
 > normalisation de sources incluses, redaction d'extraits, refus de chemins non sûrs, déduplication, bornes,
-> formatage court et logs par compteurs. Tests : `node --test cores/ai-core/test/retrieval-citations.test.mjs` ✅.
+> formatage court et logs par compteurs. Tests : `node --test factory/ai/core/test/retrieval-citations.test.mjs` ✅.
 > B2 est fermé. `ai-core` reste **`IMPLEMENTATION_AVANCEE`** ; `VALIDE_V1` reste différé uniquement par
 > B3 runbook d'usage AI Core. Aucun RAG runtime, embedding, vector DB, provider réel, SDK IA, appel réseau,
 > lecture disque dans le module, stockage d'index ou trace persistée.
 >
 > **Mise à jour AI Core 11 — Usage runbook (2026-07-17)** :
-> `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md` documente l'usage gouverné : préparation mission, registry,
+> `factory/ai/core/AI_CORE_USAGE_RUNBOOK.md` documente l'usage gouverné : préparation mission, registry,
 > context builder, runner, citations, evaluation, reports, gates, responsabilités humaines, checklists et
 > escalades obligatoires. B3 est fermé. `ai-core` reste **`IMPLEMENTATION_AVANCEE`** jusqu'à une décision
 > finale dédiée. Aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding, vector DB,
@@ -123,7 +138,7 @@
 > **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. Limites maintenues : aucun provider réel, SDK IA, clé API,
 > appel réseau, RAG runtime, embedding, vector DB, endpoint, workflow CI automatique, trace storage ou donnée client.
 >
-> **Mise à jour Quality Core 5 (2026-07-11)** : `RELEASE_PROCESS_RUNBOOK.md` créé dans `cores/quality-core/`. Processus de release gouverné : 5 définitions (merge / promotion / release Foundation / staging / production), 5 types de release (`foundation-v1-baseline` / `core-v1-validation` / `quality-v2-increment` / `staging-candidate` / `hotfix`), prérequis généraux (4 catégories), procédure en 8 étapes, format notes de release, convention de tagging futur (sans tag créé). `docs/checklists/RELEASE_READINESS_CHECKLIST.md` mis à jour : section Foundation Release (Partie 5). Aucun workflow modifié, aucune release créée, aucune dépendance, aucun changement runtime.
+> **Mise à jour Quality Core 5 (2026-07-11)** : `RELEASE_PROCESS_RUNBOOK.md` créé dans `factory/quality/core/`. Processus de release gouverné : 5 définitions (merge / promotion / release Foundation / staging / production), 5 types de release (`foundation-v1-baseline` / `core-v1-validation` / `quality-v2-increment` / `staging-candidate` / `hotfix`), prérequis généraux (4 catégories), procédure en 8 étapes, format notes de release, convention de tagging futur (sans tag créé). `docs/checklists/RELEASE_READINESS_CHECKLIST.md` mis à jour : section Foundation Release (Partie 5). Aucun workflow modifié, aucune release créée, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Governance 3 (2026-07-11)** : protection de `main` vérifiée **active via GitHub Rulesets**.
 > Ruleset `protect-main`, enforcement `active`, cible `~DEFAULT_BRANCH`, suppression et non-fast-forward interdits,
@@ -164,14 +179,14 @@
 > aucun runtime modifié.
 >
 > **Mise à jour API Core Spring Boot 1 — Core specification (2026-07-14)** :
-> `cores/api-spring/CORE_SPECIFICATION.md` (42 sections : résumé exécutif, rôle, objectifs,
+> `starters/spring/CORE_SPECIFICATION.md` (42 sections : résumé exécutif, rôle, objectifs,
 > périmètre, architecture cible, structure cible, modules obligatoires V1, modules optionnels,
 > standards API/sécurité/qualité Java, auth JWT Spring Security, RBAC Method Security,
 > users/roles/permissions, validation Jakarta BV, gestion erreurs `@ControllerAdvice`,
 > logs SLF4J/Logback, audit logs, upload MinIO, cache Redis, jobs Spring Async/Scheduler,
 > OpenAPI springdoc, health Actuator, tests JUnit 5 + Testcontainers, §30 critères V1,
 > §41 missions ordonnées, §42 cohérence NestJS, §40 décisions pendantes) +
-> `cores/api-spring/README.md`. Aucun starter, aucun code Java, aucune dépendance.
+> `starters/spring/README.md`. Aucun starter, aucun code Java, aucune dépendance.
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 > `api-spring` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 >
@@ -182,7 +197,7 @@
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 >
 > **Mise à jour API Core Spring Boot 2 — Starter minimal Maven (2026-07-15)** :
-> `cores/api-spring/pom.xml` (Spring Boot 4.1.0, JJWT 0.12.6, Java 21),
+> `starters/spring/pom.xml` (Spring Boot 4.1.0, JJWT 0.12.6, Java 21),
 > `mvnw` / `mvnw.cmd` / `.mvn/wrapper/` (Maven Wrapper 3.9.12),
 > structure Java `com.enistere.core` : `EnistereCoreApplication`, `JwtConfig`,
 > `SecurityConfig` (STATELESS, JWT filter, CORS dev, no CSRF, Spring Security 7.x),
@@ -360,7 +375,7 @@
 > `lib/src/app/router.dart`, `lib/src/features/home/home_screen.dart`. Tests 20/20. Analyse 0 issue.
 > Mobile Core Flutter : **`SPECIFICATION_DOCUMENTAIRE`** → **`STARTER_INITIALISE`**.
 >
-> **Mise à jour Mobile Core Flutter 1 (2026-07-14)** : `cores/mobile-flutter/CORE_SPECIFICATION.md` + `README.md` créés.
+> **Mise à jour Mobile Core Flutter 1 (2026-07-14)** : `starters/flutter/CORE_SPECIFICATION.md` + `README.md` créés.
 > Mobile Core Flutter passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. Stack cible :
 > go_router, Riverpod (`AsyncNotifierProvider`/`NotifierProvider`), Dio (intercepteurs Auth/Refresh/Error/Logging),
 > Freezed + Json Serializable, flutter_secure_storage, Material 3 + tokens Enistere (ADR-034). 32 sections :
@@ -411,13 +426,13 @@
 > pour `foundation-v1.0.0`.
 >
 > **Mise à jour Quality Core 7 (2026-07-12)** : prompts IA standardisés et catalogués :
-> `AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`, `prompts/global/mission-brief-template.md`.
+> `AI_PROMPT_GOVERNANCE.md`, `factory/ai/prompts/README.md`, `factory/ai/prompts/global/mission-brief-template.md`.
 > Aucun runtime, workflow ou dépendance ajouté.
 >
 > **Mise à jour Docs Core 1 (2026-07-12)** : démarrage du Docs Core comme
-> **`SPECIFICATION_DOCUMENTAIRE`**. Livrables : `cores/docs-core/CORE_SPECIFICATION.md`,
-> `cores/docs-core/README.md`, `docs/README.md` (index central strategy/ADR/project-status/runbooks/
-> prompts/quality gates). Aucun runtime, workflow, dépendance, RAG ou site documentaire.
+> **`SPECIFICATION_DOCUMENTAIRE`**. Livrables : `factory/quality/core/CORE_SPECIFICATION.md`,
+> `factory/quality/core/README.md`, `docs/README.md` (index central strategy/ADR/project-status/runbooks/
+> factory/ai/prompts/quality gates). Aucun runtime, workflow, dépendance, RAG ou site documentaire.
 >
 > **Mise à jour Docs Core 2 (2026-07-12)** : audit documentaire de navigation réalisé :
 > `DOCS_CORE_NAVIGATION_AUDIT.md`. Corrections ciblées du README racine, de `DECISIONS_REGISTER.md`
@@ -428,7 +443,7 @@
 > workflow, dépendance, génération automatique ou RAG.
 >
 > **Mise à jour Docs Core 4 (2026-07-12)** : revue de liens documentaire ciblée :
-> `cores/docs-core/scripts/check-doc-links.mjs` + tests `node:test` + rapport
+> `factory/quality/core/scripts/docs-link-check.mjs` + tests `node:test` + rapport
 > `DOCS_CORE_LINK_CHECK_REPORT.md`. Résultat local : `Docs Core link check passed (53 files)`.
 > Docs Core passe de **`SPECIFICATION_DOCUMENTAIRE`** à **`IMPLEMENTATION_PARTIELLE`**.
 >
@@ -478,13 +493,13 @@
 > synthese stdout-only des gates de tests et de la disponibilite coverage locale. Coverage locale disponible
 > pour Web et API ; aucun pourcentage global calcule.
 >
-> **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `cores/quality-core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+> **Mise à jour Quality Core 4 (2026-07-11)** : templates GitHub modernisés. `.github/PULL_REQUEST_TEMPLATE.md` : sections Quality Gates (scope / commandes exécutées / gates exclus), Hors périmètre confirmé, Sécurité renforcée, Statut / gouvernance (si project-status modifié). `.github/ISSUE_TEMPLATE/` : `bug_report.md` (environnement, reproduction, impact sécurité, gate concerné), `feature_request.md` (core ciblé, roadmap, hors périmètre, critères), `security_issue.md` (canal privé si sensible, classification impact, scopes sensibles). `.github/ISSUE_TEMPLATE/config.yml` : lien Security Advisories. `factory/quality/core/CORE_SPECIFICATION.md` et `README.md` mis à jour. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
-> **Mise à jour Quality Core 3 (2026-07-11)** : `BRANCH_PROTECTION_RUNBOOK.md` ajouté dans `cores/quality-core/`. Procédure d'activation manuelle de la protection de branche `main` : 10 noms de checks exacts (8 requis immédiats + 2 recommandés phase 2), options recommandées (PR obligatoire, checks requis, branches à jour, admins inclus différé), checklist post-activation. `.github/workflows/README.md` mis à jour avec le tableau complet. **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+> **Mise à jour Quality Core 3 (2026-07-11)** : `BRANCH_PROTECTION_RUNBOOK.md` ajouté dans `factory/quality/core/`. Procédure d'activation manuelle de la protection de branche `main` : 10 noms de checks exacts (8 requis immédiats + 2 recommandés phase 2), options recommandées (PR obligatoire, checks requis, branches à jour, admins inclus différé), checklist post-activation. `.github/workflows/README.md` mis à jour avec le tableau complet. **Protection branche `main` : documentée, non appliquée** — action humaine requise. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour Quality Core 2 (2026-07-11)** : `scripts/quality-gates.mjs` ajouté (Node 24, sans dépendance) — `list` / `plan <scope>` / `run <scope>` ; 7 scopes (`docs`/`packages`/`ui-kit`/`web`/`root-audit`/`mobile-static`/`all-safe`) ; arrêt au premier échec, code de sortie propagé. Tests : `scripts/quality-gates.test.mjs` (**36/36 tests node:test**, vérification des plans sans exécution). Statut : **SPECIFICATION_DOCUMENTAIRE** (inchangé). Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
-> **Mise à jour Quality Core 1 (2026-07-11)** : Quality Core passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` créés dans `cores/quality-core/`. Checklists PR/release/revue créées dans `docs/checklists/`. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
+> **Mise à jour Quality Core 1 (2026-07-11)** : Quality Core passe de **`DOSSIER_SEULEMENT`** à **`SPECIFICATION_DOCUMENTAIRE`**. `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` créés dans `factory/quality/core/`. Checklists PR/release/revue créées dans `docs/checklists/`. Aucun workflow modifié, aucune dépendance, aucun changement runtime.
 >
 > **Mise à jour UI Kit VALIDE_V1 review (2026-07-11)** : Le UI Kit passe de **`IMPLEMENTATION_AVANCEE`** à **`VALIDE_V1`** après revue officielle (rapport `UI_KIT_V1_READINESS_REVIEW.md` §8). Critères §12.4 **4/4** + §59 **9/9**. Justification : tokens ADR-008 ✅, 19 primitives Web testées et documentées, consommation Web Core VALIDE_V1 prouvée, cohérence mobile/web prouvée par RN35 (tokens verbatim + 13 tests). Réserves non bloquantes documentées (§10) : Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core (ADR-010 intentionnel). Vérifications : typecheck ✅ lint ✅ 181/181 ✅ build ✅ tokens:check ✅ audit 0 vuln ✅ diff --check ✅.
 >
@@ -502,8 +517,8 @@
 > Aucun starter Angular, aucune dépendance npm, aucun runtime.
 > `web-angular` reste **`DOSSIER_SEULEMENT`** ; prochaine action : Web Core Angular 1 — Core specification.
 >
-> **Mise à jour Web Core Angular 1 — Core specification (2026-07-15)** : `cores/web-angular/CORE_SPECIFICATION.md`
-> (32 §) + `cores/web-angular/README.md` créés. Spécification complète : architecture Angular standalone feature-first,
+> **Mise à jour Web Core Angular 1 — Core specification (2026-07-15)** : `starters/angular/CORE_SPECIFICATION.md`
+> (32 §) + `starters/angular/README.md` créés. Spécification complète : architecture Angular standalone feature-first,
 > Reactive Forms obligatoires, Angular Material CDK + M3 + tokens Enistere (ADR-035), HttpClient + intercepteurs
 > (Auth/Refresh/Error/Log), Angular Signals (état local), RxJS services (server state), `@angular/cdk/a11y`
 > (FocusTrap/LiveAnnouncer/FocusMonitor/ListKeyManager), composants maison Enistere Angular
@@ -512,7 +527,7 @@
 > `web-angular` : **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**.
 > `quality-gates docs` 2/2 ✅ · `git diff --check` ✅. Prochaine action : Web Core Angular 3 — Auth flow + routing protégé.
 >
-> **Mise à jour Web Core Angular 2 — Starter minimal Angular (2026-07-15)** : 22 fichiers créés dans `cores/web-angular/` —
+> **Mise à jour Web Core Angular 2 — Starter minimal Angular (2026-07-15)** : 22 fichiers créés dans `starters/angular/` —
 > `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4, typescript 6.0.3, @angular/cli 22.0.7 +
 > @angular/build 22.0.7 ; override `vite` 7.3.6 pour audit 0 ; `engines.node: >=24.15.0 || >=22.22.3` documente la cible prod),
 > `angular.json` (builder `@angular/build:application`, esbuild, karma test runner),
@@ -609,7 +624,7 @@
 | Web Core Next.js | ✓ | ✓ | ✓ (004,005,006,007,009,011,012,016…) | **✓** | **✓ (App Router + UI Kit + API publique Health + TanStack Query + BFF Auth + me/authorization + session state + layout protégé serveur read-only Option C + hydratation + page /protected + page de connexion /login + états UI Web UI 1 + Files 1 lecture/téléchargement + Files 2 upload multipart BFF + Files 3 suppression BFF : assertDelete, DELETE /api/files/:id, UUID 400 avant appel API, CSRF/Origin 403 avant appel API, client `writable`, 409→NOT_DELETABLE, anti-énumération 404, deleteFile BFF client, useDeleteFile mutation+anti-double+removeQueries, Dialog confirmation UI Kit 4, onDeleteSuccess prop, FileDetailsWithNav + Files 4 liste BFF : GET /api/files, validation limit/offset 400 avant appel API, client read-only, FileListResponse, listFiles BFF client, fileKeys.list stable, useFileList retry:false, FileListView états loading/vide/erreur/liste pagination + Files 6 revue V1 : D1 cache delete→list, D2 cache upload→list, D3 message 409 neutre, D4 upload 409→QUOTA_EXCEEDED ; rapport WEB_FILES_V1_REVIEW.md ; verdict stable avec réserves mineures + Files 7 admin BFF : handlers quarantaine/restauration, routes /api/files/[id]/quarantine+/restore, client BFF quarantineFile/restoreFile, hooks useQuarantineFile/useRestoreFile mutation+anti-double+fileKeys.all, AdminFileActions UI admin séparée, page /protected/files/[id]/admin — CSRF+Origin, API autorité, jamais Bearer navigateur + V1 Gap 1 : layout public `(public)/`, landing page statique `/`, robots.ts, sitemap.ts + V1 Gap 2 : DashboardShell Server Component, (protected)/layout.tsx + V1 Gap 3 : upload-form-schema.ts (Zod v4), upload-form.tsx (RHF useForm+zodResolver), react-hook-form@^7.81.0/zod@^4.4.3/@hookform/resolvers@^5.4.0 ; 14/14 critères §56 — VALIDE_V1)** | **✓ (450 tests, a11y + sonde HTTP + preuve API réelle Auth/session + protégé 26/26 + login 22/22 + Files API+MinIO 21/21 + revue V1 runtime 49/49 + 15 tests E2E)** | **✓ (gouvernance + revue Auth V1 `WEB_AUTH_V1_REVIEW.md` + revue incrément V1 `WEB_CORE_V1_INCREMENT_REVIEW.md` → `WEB_CORE_V1_INCREMENT_STABLE_WITH_RESERVATIONS` + revue Files V1 `WEB_FILES_V1_REVIEW.md` → stable avec réserves mineures + `WEB_CORE_V1_READINESS_REVIEW.md` → VALIDE_V1 14/14)** | **VALIDE_V1** | build/lint/typecheck/**450 tests** verts + preuves API réelles (Auth/session ; protégé ; login ; runtime V1 33/33 ; **Files API+MinIO 21/21** ; **revue incrément V1 49/49** incl. URL expirée + pannes) | — (V1 déclaré) |
 | Mobile Core React Native | ✓ | ✓ | ✓ (003,004,008,010,011,012,015,016…) | **✓ (Expo SDK 55 + Expo Router)** | **✓ (RN 1→37)** : primitives RN 1→25 ; Settings RN26 ; shell RN27 ; smoke Android RN28/RN29 ; iOS RN30 bloqué Linux ; RN31 en attente macOS/Xcode ; sign-in RN32 ; thème RN33 ; patch Expo SDK RN34 ; RN35 tokens alignés UI Kit + aliases `*View` ; **RN36 upload runtime starter proof** (écran protégé `upload.tsx` + smoke Android `POST /files`) ; **RN37 PreferenceStore native strategy decision** (store natif délégué aux projets dérivés, B3 fermé comme réserve formellement acceptée). Aucun réseau métier, endpoint métier, SDK/adaptateur natif réel, retry branché, persistance nouvelle ni changement AuthEngine/`withAuthRetry`/`authedRequest`/QueryClient/mutations. | **✓ (55 fichiers `node --test` / 367 cas + `expo export -p ios` + smoke Android Emulator + smoke iOS blocked documenté)** | **✓ (`MOBILE_CORE_V1_FINAL_READINESS_DECISION.md` : VALIDE_V1 ; B2 iOS accepté comme réserve environnementale documentée)** | **VALIDE_V1** | typecheck + lint + **test 55 fichiers / 367 cas** + **expo-doctor 19/19** + **expo export -p ios** + **smoke Android Emulator `emulator-5554` passed** + **`npm run smoke:ios` blocked** (`detectedPlatform: linux`) verts/documentés (local) | — (V1 déclaré ; RN31 quand environnement Apple disponible) |
 | UI Kit (`@enistere/ui-kit`) | ✓ | ✓ | ✓ (008,009,010) | **✓** | **✓ (tokens + 19 primitives Web : Button/Input/Label/Text/Spinner/VisuallyHidden + Alert/Card/FormField + Dialog/Select/Toast + Badge/Divider/Skeleton + LoadingState/EmptyState/ErrorState/SuccessState)** | **✓ (181, a11y/jest-axe, React 19)** | **✓ (UI Kit VALIDE_V1 review 2026-07-11 : §12.4 4/4 + §59 9/9 ; rapport `UI_KIT_V1_READINESS_REVIEW.md` §8 ; réserves non bloquantes §10)** | **VALIDE_V1** | typecheck ✅ lint ✅ **181/181** ✅ build ✅ tokens:check ✅ audit 0 vuln ✅ diff --check ✅ + **réellement consommé Web Core VALIDE_V1** + **cohérence mobile/web prouvée RN35** | — (V1 déclaré) |
-| AI Core | ✓ | ✓ (`CORE_SPECIFICATION.md`, `README.md`, `AI_CORE_USAGE_RUNBOOK.md`) | — | — | ✓ (`prompt-registry.json` + validateur Node pur + redaction layer + context builder + provider fake + evaluation harness + décision Retrieval/RAG V1 + schema rapport + prompt runner + retrieval citations + usage runbook) | ✓ (tests Node + validation registry + redaction + context + provider + evaluation + report schema + runner + citations + readiness decisions) | — | **VALIDE_V1** | `validate-prompt-registry` + `node --test cores/ai-core/test/*.test.mjs` + `quality-gates docs` | — (V1 déclaré ; provider réel/SDK/RAG runtime post-V1 sous décision dédiée) |
+| AI Core | ✓ | ✓ (`CORE_SPECIFICATION.md`, `README.md`, `AI_CORE_USAGE_RUNBOOK.md`) | — | — | ✓ (`prompt-registry.json` + validateur Node pur + redaction layer + context builder + provider fake + evaluation harness + décision Retrieval/RAG V1 + schema rapport + prompt runner + retrieval citations + usage runbook) | ✓ (tests Node + validation registry + redaction + context + provider + evaluation + report schema + runner + citations + readiness decisions) | — | **VALIDE_V1** | `validate-prompt-registry` + `node --test factory/ai/core/test/*.test.mjs` + `quality-gates docs` | — (V1 déclaré ; provider réel/SDK/RAG runtime post-V1 sous décision dédiée) |
 | API Core Spring Boot | ✓ | ✓ (42 §) | ADR-041 (Maven, Validé) | ✓ (SB 2 : Spring Boot 4.1.0 + JJWT 0.12.6 + Spring Security 7.x STATELESS + JWT filter + auth stub shell) | ✓ (SB 3 : User/Role/Permission/RefreshToken JPA, migration Flyway V1, Argon2id, AuthService, refresh rotation SHA-256, RBAC `@PreAuthorize`, AdminController) | ✓ (43 tests : JwtTokenProviderTest 9 + FlywayMigrationTest 4 + AuthControllerTest 10 + AuthIntegrationTest 14 + RbacIntegrationTest 5 + contextLoads 1 — Testcontainers singleton) | — (rapport V1 non réalisé) | **IMPLEMENTATION_PARTIELLE** (sous-statut `PERSISTENCE_RBAC_READY`, 2026-07-15) | `./mvnw verify` 43/43 ✅ BUILD SUCCESS ; `git diff --check` ✅ | Spring Boot 4 (OpenAPI + MinIO) puis Spring Boot V1 readiness review |
 | Docs Core | ✓ | ✓ | — | — | ✓ (script link check + guides + `quality-gates docs`) | ✓ (`check-doc-links.test.mjs`, `quality-gates.test.mjs`) | ✓ (`DOCS_CORE_NAVIGATION_AUDIT.md`, `DOCS_CORE_LINK_CHECK_REPORT.md`, `DOCS_CORE_V2_READINESS_REVIEW.md`, `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`, `DOCS_CORE_V1_READINESS_REVIEW.md`) | **VALIDE_V1** | documentation centrale stable, chemins de lecture des cores actifs, gates docs reproductibles | — (V1 déclaré) |
 | Mobile Core Flutter | ✓ | ✓ (spec 32 §) | ADR-034 (Validé, appliqué V1) | ✓ (starter Flutter 2) | ✓ (auth shell Flutter 3 + Dio client Flutter 4 + upload primitives Flutter 5 + SecureStorage Flutter 8 + RefreshInterceptor Flutter 9 + UI states Flutter 10 + sign-in form Flutter 11) | ✓ (218 tests : theme + unit/auth + unit/secure_session_store + widget × 3 + widget/sign_in_screen (10) + widget/states + unit/api × 5 + unit/upload + intégration × 7) | ✓ (`MOBILE_FLUTTER_V1_READINESS_REVIEW.md` — 9/11 §29, B1→B5 fermés, réserves R1→R5 ; `MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` — B1 ; `MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md` — B2 ; `MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md` — B3 ; `MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md` — B4 ; `MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md` — B5 ; `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` — promotion V1) | **VALIDE_V1** | Flutter V1 Final Readiness Decision (2026-07-14) : B1→B5 fermés, score §29 9/11 + 2 PARTIAL iOS R1 ; 218/218 tests headless ; smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux acceptée comme réserve environnementale non bloquante, sans succès iOS artificiel | — (V1 déclaré ; smoke iOS uniquement quand macOS/Xcode ou device iOS réel disponible) |
@@ -657,7 +672,7 @@
 | Mail / Notifications | ✓ | — | — | — | V2/V3 | infra |
 | Observabilité (métriques/traces) | ✓ | — | — | — | V2 | Cloud Core |
 
-Légende domaines : voir aussi la matrice native `cores/api-nestjs/docs/API_CORE_V1_IMPLEMENTATION_STATUS.md`
+Légende domaines : voir aussi la matrice native `starters/nestjs/docs/API_CORE_V1_IMPLEMENTATION_STATUS.md`
 (référence détaillée maintenue dans le core). Ce tableau en est la synthèse de pilotage.
 
 ## 4. Contradictions détectées (documentées, NON corrigées)

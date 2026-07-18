@@ -1,74 +1,58 @@
 # Enistere OS Foundation
 
-Enistere OS Foundation est le socle interne destiné à standardiser la création, la documentation,
-la gouvernance, la qualité et les fondations techniques des projets logiciels Enistere.
+Enistere OS Foundation est une usine de projets AI-native. Un blueprint neutre choisit une API,
+éventuellement un Web et un Mobile, des capacités et des environnements. La CLI `enistere` produit
+un monorepo dérivé gouverné, sans faire d'un framework la source de vérité.
 
-Le repository combine aujourd'hui :
+## Architecture V2
 
-- le cadrage stratégique initial ;
-- des ADR validés ;
-- des cores V1 validés ou avancés ;
-- des runbooks Cloud/Quality ;
-- un index documentaire central.
+- `starters/` : six starters indépendants (`nestjs`, `spring`, `nextjs`, `angular`, `react-native`, `flutter`).
+- `factory/` : CLI, moteur déterministe, orchestration d'agents locaux, policies et templates.
+- `capabilities/` : packs transverses sélectionnables (`base`, `auth`, `rbac`, `files`, puis extensions).
+- `deployment/` : packs d'exécution local et staging intégrés aux projets générés.
+- `packages/` : artefacts partagés conservant leurs noms publics (`api-contracts`, `api-client-fetch`, `ui-kit`).
+- `strategy/` : direction et règles durables.
+- `docs/` : ADR, guides, décisions et rapports. Il n'existe plus de Docs Core séparé.
 
-## Objectifs
+Cloud, IA et Quality ne sont pas des applications à combiner avec un projet. Le Cloud fournit des
+deployment packs, l'IA orchestre la Factory sous approbation humaine, et Quality impose les gates.
 
-- Centraliser les documents stratégiques de référence.
-- Définir une structure modulaire pour les futurs cores techniques.
-- Préparer les prompts IA, templates, outils, exemples et guides.
-- Poser une base claire avant toute génération de code applicatif.
+## Démarrage
 
-## Structure
+```bash
+npm install
+npm run factory:test
+npm run enistere -- doctor
+npm run enistere -- init /tmp/enistere.yaml sample-app
+npm run enistere -- plan /tmp/enistere.yaml
+npm run enistere -- generate /tmp/enistere.yaml /tmp/sample-app
+```
 
-- `strategy/` : documents stratégiques de cadrage.
-- `docs/` : index central Docs Core, ADR, guides, checklists, runbooks, onboarding, décisions et glossaire.
-- `cores/` : socles techniques par domaine (`api-nestjs`, `web-nextjs`, `mobile-react-native`,
-  `ui-kit`, `cloud`, `quality-core`, `docs-core`, et cores futurs).
-- `packages/` : **packages partagés** du monorepo (npm workspaces).
-- `.github/workflows/` : CI non-régression, runtime API, E2E Web et registry GHCR.
-- `prompts/` : prompts IA classés par usage.
-- `tools/` : futurs générateurs, scripts, validateurs et outils de release.
-- `templates/` : modèles documentaires réutilisables.
-- `examples/` : futurs exemples de référence.
+Le fichier `enistere.yaml` utilise actuellement le sous-ensemble YAML compatible JSON. La génération
+crée un `enistere.lock`, matérialise les starters et packages sélectionnés, émet le contrat CRUD neutre
+et ajoute les packs Compose local/staging. `designSystem` vaut `true` par défaut et peut être désactivé.
 
-## Packages partagés (`packages/`)
+## Profils
 
-Workspaces npm (`"workspaces": ["packages/*", "cores/ui-kit", "cores/web-nextjs"]`). Issus de la preuve
-ADR-016 (voir `cores/api-nestjs/docs/OPENAPI_CLIENT_PROOF.md`) :
+Une API est obligatoire. Web et Mobile sont optionnels, soit 18 compositions prises en charge :
 
-- **`@enistere/api-contracts`** — types OpenAPI canoniques (générés depuis `cores/api-nestjs/openapi/openapi.json`), runtime-indépendant.
-- **`@enistere/api-client-fetch`** — client Fetch typé (`openapi-fetch` + wrappers Enistere : auth, erreurs, timeout, refresh, multipart). Indépendant de TanStack Query, React, React Native, Angular et **Axios**.
+- API : NestJS ou Spring Boot ;
+- Web : aucun, Next.js ou Angular ;
+- Mobile : aucun, React Native ou Flutter.
 
-Commandes (racine) : `npm install`, `npm run build`, `npm test`, `npm run generate:check`.
+Des exemples sont disponibles dans [`examples/blueprints/`](examples/blueprints/).
 
-> **Statut** : packages **créés et validés localement** (builds, tests, preuve live 16/16). **Non
-> publiés**. Le **Web Core** (`cores/web-nextjs/`) **instancie** `@enistere/api-client-fetch` pour les
-> endpoints **publics** (Health) avec **TanStack Query** (ADR-012) et SSR/hydratation, **et pour le BFF
-> Auth** (login/refresh/logout + me/authorization) — types Auth dérivés via `SchemaOf<>` ; preuve API
-> réelle. La **publication** reste à venir (non requise V1).
+## Gouvernance
 
-## État du projet (pilotage)
+Les agents Codex, Claude Code et Gemini sont des exécutants locaux interchangeables. Une validation
+humaine est requise avant leur exécution puis avant l'application de leur diff. Ils travaillent dans
+un worktree temporaire et ne disposent d'aucune autorité de merge, tag ou release.
 
-L'index documentaire central est [`docs/README.md`](docs/README.md).
+Sources de vérité :
 
-La **source de vérité de pilotage** est le checkpoint documentaire [`docs/project-status/`](docs/project-status/README.md),
-qui reflète l'**état réel du repository** (vérifié fichier par fichier). À lire avant toute
-recommandation ou mission :
+1. [`strategy/`](strategy/)
+2. [`docs/adr/ADR-042-ai-native-project-factory-architecture.md`](docs/adr/ADR-042-ai-native-project-factory-architecture.md)
+3. [`docs/project-status/NEXT_ACTIONS.md`](docs/project-status/NEXT_ACTIONS.md)
+4. code, tests et gates réels
 
-- [`docs/project-status/README.md`](docs/project-status/README.md) — rôles, ordre de lecture, protocoles.
-- [`docs/project-status/SESSION_HANDOFF.md`](docs/project-status/SESSION_HANDOFF.md) — transfert de session (à lire en premier).
-- [`docs/project-status/FOUNDATION_CURRENT_STATE.md`](docs/project-status/FOUNDATION_CURRENT_STATE.md) — photographie générale.
-- [`docs/project-status/IMPLEMENTATION_MATRIX.md`](docs/project-status/IMPLEMENTATION_MATRIX.md) — matrice d'implémentation.
-- [`docs/project-status/NEXT_ACTIONS.md`](docs/project-status/NEXT_ACTIONS.md) — prochaine action autorisée.
-
-> Ne pas supposer qu'un core est implémenté parce que sa spécification existe : se référer à la matrice.
-
-## Statut
-
-Voir l'état détaillé et vérifié dans [`docs/project-status/`](docs/project-status/README.md).
-
-Synthèse courante :
-
-- Foundation V1 publiée : `foundation-v1.0.0`.
-- `api-nestjs`, `web-nextjs`, `ui-kit`, `cloud`, `docs-core` et `quality-core` : `VALIDE_V1`.
-- `mobile-react-native` : starter Expo/RN avancé, aligné UI Kit, avec smoke Android validé et iOS bloqué par environnement macOS/Xcode absent.
+Les états historiques V1 restent consultables dans [`docs/project-status/`](docs/project-status/).

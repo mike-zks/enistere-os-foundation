@@ -11,13 +11,13 @@ Un script Node pur controle les liens Markdown internes du perimetre documentair
 
 - `README.md` ;
 - `docs/` ;
-- `cores/docs-core/` ;
-- `prompts/README.md`.
+- `factory/quality/core/` ;
+- `factory/ai/prompts/README.md`.
 
 ## Livrables
 
-- `cores/docs-core/scripts/check-doc-links.mjs` ;
-- `cores/docs-core/scripts/check-doc-links.test.mjs` ;
+- `factory/quality/core/scripts/docs-link-check.mjs` ;
+- `factory/quality/core/scripts/check-doc-links.test.mjs` ;
 - ce rapport.
 
 ## Comportement du script
@@ -38,8 +38,8 @@ les faux positifs sur les titres generes par differents moteurs Markdown.
 ## Preuve locale
 
 ```bash
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
-node cores/docs-core/scripts/check-doc-links.mjs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
+node factory/quality/core/scripts/docs-link-check.mjs
 ```
 
 Resultat observe :

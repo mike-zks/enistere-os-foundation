@@ -29,10 +29,10 @@ runbooks, les checklists qualite et les prompts IA.
 | Conduire une revue de statut | [`guides/CORE_STATUS_REVIEW_GUIDE.md`](guides/CORE_STATUS_REVIEW_GUIDE.md) |
 | Comprendre les termes et statuts | [`glossary/GLOSSARY.md`](glossary/GLOSSARY.md) |
 | Comprendre les decisions d'architecture | [`adr/`](adr/) |
-| Choisir les gates qualite | [`../cores/quality-core/QUALITY_GATES_MATRIX.md`](../cores/quality-core/QUALITY_GATES_MATRIX.md) |
+| Choisir les gates qualite | [`../factory/quality/core/QUALITY_GATES_MATRIX.md`](../factory/quality/core/QUALITY_GATES_MATRIX.md) |
 | Preparer une PR | [`checklists/PR_QUALITY_CHECKLIST.md`](checklists/PR_QUALITY_CHECKLIST.md) |
 | Preparer une release ou promotion | [`checklists/RELEASE_READINESS_CHECKLIST.md`](checklists/RELEASE_READINESS_CHECKLIST.md) |
-| Preparer une mission IA | [`../cores/quality-core/AI_PROMPT_GOVERNANCE.md`](../cores/quality-core/AI_PROMPT_GOVERNANCE.md) |
+| Preparer une mission IA | [`../factory/quality/core/AI_PROMPT_GOVERNANCE.md`](../factory/quality/core/AI_PROMPT_GOVERNANCE.md) |
 
 ## Sources de pilotage
 
@@ -86,20 +86,20 @@ Les documents strategy cadrent la vision et la roadmap. L'etat courant reste dan
 
 | Core | Documentation principale |
 |---|---|
-| API Core NestJS | [`../cores/api-nestjs/README.md`](../cores/api-nestjs/README.md), [`../cores/api-nestjs/CORE_SPECIFICATION.md`](../cores/api-nestjs/CORE_SPECIFICATION.md) |
-| Web Core Next.js | [`../cores/web-nextjs/README.md`](../cores/web-nextjs/README.md), [`../cores/web-nextjs/CORE_SPECIFICATION.md`](../cores/web-nextjs/CORE_SPECIFICATION.md) |
-| Mobile Core React Native | [`../cores/mobile-react-native/README.md`](../cores/mobile-react-native/README.md), [`../cores/mobile-react-native/CORE_SPECIFICATION.md`](../cores/mobile-react-native/CORE_SPECIFICATION.md) |
-| UI Kit | [`../cores/ui-kit/README.md`](../cores/ui-kit/README.md), [`../cores/ui-kit/CORE_SPECIFICATION.md`](../cores/ui-kit/CORE_SPECIFICATION.md), [`../cores/ui-kit/docs/components.md`](../cores/ui-kit/docs/components.md) |
-| Cloud Core | [`../cores/cloud/README.md`](../cores/cloud/README.md), [`../cores/cloud/CORE_SPECIFICATION.md`](../cores/cloud/CORE_SPECIFICATION.md), [`../cores/cloud/docs/`](../cores/cloud/docs/) |
-| Quality Core | [`../cores/quality-core/README.md`](../cores/quality-core/README.md), [`../cores/quality-core/CORE_SPECIFICATION.md`](../cores/quality-core/CORE_SPECIFICATION.md) |
-| Docs Core | [`../cores/docs-core/README.md`](../cores/docs-core/README.md), [`../cores/docs-core/CORE_SPECIFICATION.md`](../cores/docs-core/CORE_SPECIFICATION.md) |
+| API Core NestJS | [`../starters/nestjs/README.md`](../starters/nestjs/README.md), [`../starters/nestjs/CORE_SPECIFICATION.md`](../starters/nestjs/CORE_SPECIFICATION.md) |
+| Web Core Next.js | [`../starters/nextjs/README.md`](../starters/nextjs/README.md), [`../starters/nextjs/CORE_SPECIFICATION.md`](../starters/nextjs/CORE_SPECIFICATION.md) |
+| Mobile Core React Native | [`../starters/react-native/README.md`](../starters/react-native/README.md), [`../starters/react-native/CORE_SPECIFICATION.md`](../starters/react-native/CORE_SPECIFICATION.md) |
+| UI Kit | [`../packages/ui-kit/README.md`](../packages/ui-kit/README.md), [`../packages/ui-kit/CORE_SPECIFICATION.md`](../packages/ui-kit/CORE_SPECIFICATION.md), [`../packages/ui-kit/docs/components.md`](../packages/ui-kit/docs/components.md) |
+| Cloud Core | [`../deployment/core/README.md`](../deployment/core/README.md), [`../deployment/core/CORE_SPECIFICATION.md`](../deployment/core/CORE_SPECIFICATION.md), [`../deployment/core/docs/`](../deployment/core/docs/) |
+| Quality Core | [`../factory/quality/core/README.md`](../factory/quality/core/README.md), [`../factory/quality/core/CORE_SPECIFICATION.md`](../factory/quality/core/CORE_SPECIFICATION.md) |
+| Docs Core | [`../factory/quality/core/README.md`](../factory/quality/core/README.md), [`../factory/quality/core/CORE_SPECIFICATION.md`](../factory/quality/core/CORE_SPECIFICATION.md) |
 
 ## Runbooks et checklists
 
 Runbooks specialises :
 
-- Cloud : [`../cores/cloud/docs/`](../cores/cloud/docs/) ;
-- Quality Core : [`../cores/quality-core/`](../cores/quality-core/).
+- Cloud : [`../deployment/core/docs/`](../deployment/core/docs/) ;
+- Quality Core : [`../factory/quality/core/`](../factory/quality/core/).
 
 Checklists transverses :
 
@@ -121,13 +121,13 @@ Checklists transverses :
 
 ## Prompts IA
 
-Les prompts sont dans [`../prompts/`](../prompts/).
+Les prompts sont dans [`../factory/ai/prompts/`](../factory/ai/prompts/).
 
 Points d'entree :
 
-- [`../prompts/README.md`](../prompts/README.md) ;
-- [`../prompts/global/mission-brief-template.md`](../prompts/global/mission-brief-template.md) ;
-- [`../cores/quality-core/AI_PROMPT_GOVERNANCE.md`](../cores/quality-core/AI_PROMPT_GOVERNANCE.md).
+- [`../factory/ai/prompts/README.md`](../factory/ai/prompts/README.md) ;
+- [`../factory/ai/prompts/global/mission-brief-template.md`](../factory/ai/prompts/global/mission-brief-template.md) ;
+- [`../factory/quality/core/AI_PROMPT_GOVERNANCE.md`](../factory/quality/core/AI_PROMPT_GOVERNANCE.md).
 
 ## Regles d'entretien
 

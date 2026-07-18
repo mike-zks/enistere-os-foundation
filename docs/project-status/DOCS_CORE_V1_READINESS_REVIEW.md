@@ -18,8 +18,8 @@ Docs Core remplit les criteres `VALIDE_V1` de sa specification :
 
 - `strategy/04_ROADMAP_GLOBAL.md` §13 ;
 - `strategy/02_GOVERNANCE.md` ;
-- `cores/docs-core/CORE_SPECIFICATION.md` ;
-- `cores/docs-core/README.md` ;
+- `factory/quality/core/CORE_SPECIFICATION.md` ;
+- `factory/quality/core/README.md` ;
 - `docs/README.md` ;
 - `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` ;
 - `docs/guides/DOCUMENTATION_MAINTENANCE_GUIDE.md` ;
@@ -53,9 +53,9 @@ Docs Core remplit les criteres `VALIDE_V1` de sa specification :
 ## Verifications
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
-node --test cores/quality-core/scripts/quality-gates.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs run docs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
+node --test factory/quality/core/scripts/quality-gates.test.mjs
 npm audit
 git diff --check
 ```

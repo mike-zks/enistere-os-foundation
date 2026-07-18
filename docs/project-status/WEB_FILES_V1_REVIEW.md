@@ -12,8 +12,8 @@
 ### API NestJS
 | Fichier | Statut |
 |---------|--------|
-| `cores/api-nestjs/src/files/files.controller.ts` | Revu — OK |
-| `cores/api-nestjs/src/files/files.service.ts` | Revu — OK |
+| `starters/nestjs/src/files/files.controller.ts` | Revu — OK |
+| `starters/nestjs/src/files/files.service.ts` | Revu — OK |
 
 ### Packages
 | Fichier | Statut |
@@ -23,40 +23,40 @@
 ### Web BFF (handlers)
 | Fichier | Statut |
 |---------|--------|
-| `cores/web-nextjs/src/core/files/handlers/list-files-handler.ts` | Revu — OK |
-| `cores/web-nextjs/src/core/files/handlers/get-file-metadata-handler.ts` | Revu — OK |
-| `cores/web-nextjs/src/core/files/handlers/upload-file-handler.ts` | **Corrigé (D4)** |
-| `cores/web-nextjs/src/core/files/handlers/delete-file-handler.ts` | Revu — OK |
-| `cores/web-nextjs/src/core/files/handlers/create-download-url-handler.ts` | Revu — OK |
-| `cores/web-nextjs/src/core/files/http/files-response.ts` | Revu — OK |
+| `starters/nextjs/src/core/files/handlers/list-files-handler.ts` | Revu — OK |
+| `starters/nextjs/src/core/files/handlers/get-file-metadata-handler.ts` | Revu — OK |
+| `starters/nextjs/src/core/files/handlers/upload-file-handler.ts` | **Corrigé (D4)** |
+| `starters/nextjs/src/core/files/handlers/delete-file-handler.ts` | Revu — OK |
+| `starters/nextjs/src/core/files/handlers/create-download-url-handler.ts` | Revu — OK |
+| `starters/nextjs/src/core/files/http/files-response.ts` | Revu — OK |
 
 ### Web BFF (client + query)
 | Fichier | Statut |
 |---------|--------|
-| `cores/web-nextjs/src/core/files/client/files-bff-client.ts` | Revu — OK |
-| `cores/web-nextjs/src/core/query/keys/file-keys.ts` | Revu — OK |
+| `starters/nextjs/src/core/files/client/files-bff-client.ts` | Revu — OK |
+| `starters/nextjs/src/core/query/keys/file-keys.ts` | Revu — OK |
 
 ### Features (hooks + UI)
 | Fichier | Statut |
 |---------|--------|
-| `cores/web-nextjs/src/features/files/file-error.ts` | **Corrigé (D3)** |
-| `cores/web-nextjs/src/features/files/file-queries.ts` | Revu — R1/R2 |
-| `cores/web-nextjs/src/features/files/use-file-list.ts` | Revu — R1 |
-| `cores/web-nextjs/src/features/files/use-delete-file.ts` | **Corrigé (D1)** |
-| `cores/web-nextjs/src/features/files/use-upload-file.ts` | **Corrigé (D2)** |
-| `cores/web-nextjs/src/features/files/use-create-download-url.ts` | Revu — OK |
-| `cores/web-nextjs/src/features/files/file-details.tsx` | Revu — OK |
-| `cores/web-nextjs/src/features/files/file-metadata-view.tsx` | Revu — OK |
+| `starters/nextjs/src/features/files/file-error.ts` | **Corrigé (D3)** |
+| `starters/nextjs/src/features/files/file-queries.ts` | Revu — R1/R2 |
+| `starters/nextjs/src/features/files/use-file-list.ts` | Revu — R1 |
+| `starters/nextjs/src/features/files/use-delete-file.ts` | **Corrigé (D1)** |
+| `starters/nextjs/src/features/files/use-upload-file.ts` | **Corrigé (D2)** |
+| `starters/nextjs/src/features/files/use-create-download-url.ts` | Revu — OK |
+| `starters/nextjs/src/features/files/file-details.tsx` | Revu — OK |
+| `starters/nextjs/src/features/files/file-metadata-view.tsx` | Revu — OK |
 
 ### Tests
 | Fichier | Statut |
 |---------|--------|
-| `cores/web-nextjs/test/list-files-handler.test.ts` | Revu — OK (9 tests) |
-| `cores/web-nextjs/test/files-handlers.test.ts` | Revu — OK |
-| `cores/web-nextjs/test/upload-handler.test.ts` | **+1 test D4** |
-| `cores/web-nextjs/test/use-delete-file.test.tsx` | **+1 test D1** |
-| `cores/web-nextjs/test/use-upload-file.test.tsx` | **+1 test D2** |
-| `cores/web-nextjs/test/use-create-download-url.test.tsx` | Mis à jour (D3) |
+| `starters/nextjs/test/list-files-handler.test.ts` | Revu — OK (9 tests) |
+| `starters/nextjs/test/files-handlers.test.ts` | Revu — OK |
+| `starters/nextjs/test/upload-handler.test.ts` | **+1 test D4** |
+| `starters/nextjs/test/use-delete-file.test.tsx` | **+1 test D1** |
+| `starters/nextjs/test/use-upload-file.test.tsx` | **+1 test D2** |
+| `starters/nextjs/test/use-create-download-url.test.tsx` | Mis à jour (D3) |
 
 ---
 

@@ -1,6 +1,6 @@
 # CORE_STATUS_REVIEW_CHECKLIST.md — Checklist revue de statut d'un core
 
-> Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`.
+> Référence : `factory/quality/core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`.
 > Dernière mise à jour : 2026-07-11 (Quality Core 1).
 
 ## Quand utiliser cette checklist

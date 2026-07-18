@@ -97,7 +97,7 @@ enistere-os-foundation/
 ├── strategy/
 ├── docs/
 ├── cores/
-├── prompts/
+├── factory/ai/prompts/
 ├── tools/
 ├── templates/
 └── examples/
@@ -147,7 +147,7 @@ docs/
 ## 8. Structure prompts
 
 ```txt id="p5d5oa"
-prompts/
+factory/ai/prompts/
 ├── global/
 ├── architecture/
 ├── generation/

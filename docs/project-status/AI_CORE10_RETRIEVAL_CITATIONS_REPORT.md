@@ -13,9 +13,9 @@ contexte peuvent maintenant être matérialisées en citations bornées, sûres 
 
 ## 2. Livrables
 
-- `cores/ai-core/src/retrieval/source-citations.mjs` : helpers purs de citation.
-- `cores/ai-core/src/retrieval/index.mjs` : exports publics.
-- `cores/ai-core/test/retrieval-citations.test.mjs` : tests Node purs.
+- `factory/ai/core/src/retrieval/source-citations.mjs` : helpers purs de citation.
+- `factory/ai/core/src/retrieval/index.mjs` : exports publics.
+- `factory/ai/core/test/retrieval-citations.test.mjs` : tests Node purs.
 
 ## 3. Architecture
 

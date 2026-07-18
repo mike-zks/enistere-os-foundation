@@ -1,0 +1,1 @@
+{"schemaVersion":"1","id":"nextjs","kind":"web","framework":"Next.js","commands":{"install":["npm","ci"],"dev":["npm","run","dev"],"test":["npm","test"],"build":["npm","run","build"],"verify":["npm","run","check"]},"capabilitySlots":["base","auth","rbac","files","audit","notifications","observability"],"deployment":{"dockerfile":"Dockerfile","healthPath":"/status"}}

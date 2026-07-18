@@ -23,7 +23,7 @@ Documents officiels versionnés
 
 - `strategy/10_AI_STRATEGY.md` §33–§37 ;
 - `strategy/04_ROADMAP_GLOBAL.md` §20 ;
-- `cores/ai-core/CORE_SPECIFICATION.md` §5.4, §6, §8, §10, §18 ;
+- `factory/ai/core/CORE_SPECIFICATION.md` §5.4, §6, §8, §10, §18 ;
 - `docs/adr/ADR_BACKLOG.md` ;
 - `docs/project-status/NEXT_ACTIONS.md` ;
 - `docs/project-status/FOUNDATION_CURRENT_STATE.md` ;
@@ -64,7 +64,7 @@ Corpus documentaire autorisé par défaut, à condition d'être explicitement al
 - `docs/glossary/*.md` ;
 - `cores/*/CORE_SPECIFICATION.md` ;
 - `cores/*/README.md` ;
-- `prompts/*.md` et `prompts/**/*.md` ;
+- `factory/ai/prompts/*.md` et `factory/ai/prompts/**/*.md` ;
 - `CHANGELOG.md` ;
 - `README.md`.
 

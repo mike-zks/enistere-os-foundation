@@ -2,7 +2,7 @@
 
 > Date : 2026-07-13
 > Décision : **IMPLEMENTATION_AVANCEE → VALIDE_V1**
-> Périmètre : `cores/quality-core`, checklists, templates, prompts, release process, gates locaux,
+> Périmètre : `factory/quality/core`, checklists, templates, prompts, release process, gates locaux,
 > ruleset `main`, reporting coverage local.
 
 ## Synthèse
@@ -33,12 +33,12 @@ gouvernance non-runtime.
 - `strategy/05_EXECUTION_CHAIN.md` ;
 - `strategy/09_GIT_STRATEGY.md` ;
 - `strategy/10_AI_STRATEGY.md` ;
-- `cores/quality-core/CORE_SPECIFICATION.md` ;
-- `cores/quality-core/README.md` ;
-- `cores/quality-core/QUALITY_GATES_MATRIX.md` ;
-- `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md` ;
-- `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` ;
-- `cores/quality-core/AI_PROMPT_GOVERNANCE.md` ;
+- `factory/quality/core/CORE_SPECIFICATION.md` ;
+- `factory/quality/core/README.md` ;
+- `factory/quality/core/QUALITY_GATES_MATRIX.md` ;
+- `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md` ;
+- `factory/quality/core/RELEASE_PROCESS_RUNBOOK.md` ;
+- `factory/quality/core/AI_PROMPT_GOVERNANCE.md` ;
 - `docs/checklists/PR_QUALITY_CHECKLIST.md` ;
 - `docs/checklists/RELEASE_READINESS_CHECKLIST.md` ;
 - `docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md` ;
@@ -60,7 +60,7 @@ gouvernance non-runtime.
 | Les tests peuvent être lancés | `quality-gates.mjs` : `docs`, `packages`, `ui-kit`, `web`, `mobile-static`, `all-safe`. | ✅ |
 | Les scripts fonctionnent | `quality-gates`, `release-helper`, `quality-report` testés. | ✅ |
 | Les releases sont documentées | `RELEASE_PROCESS_RUNBOOK.md`, `FOUNDATION_V1_RELEASE_NOTES.md`, release publiée. | ✅ |
-| Les prompts IA sont versionnés | `AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`, `mission-brief-template.md`. | ✅ |
+| Les prompts IA sont versionnés | `AI_PROMPT_GOVERNANCE.md`, `factory/ai/prompts/README.md`, `mission-brief-template.md`. | ✅ |
 | La documentation est structurée | README, matrice, runbooks, checklists, Docs Core `VALIDE_V1`. | ✅ |
 | Les checklists qualité existent | PR, release readiness, core status review. | ✅ |
 
@@ -94,9 +94,9 @@ Score : **7/7**.
 
 | Commande | Résultat |
 |---|---|
-| `node --test cores/quality-core/scripts/quality-gates.test.mjs cores/quality-core/scripts/release-helper.test.mjs cores/quality-core/scripts/quality-report.test.mjs` | ✅ |
-| `node cores/quality-core/scripts/quality-gates.mjs run docs` | ✅ |
-| `node cores/quality-core/scripts/quality-report.mjs markdown` | ✅ |
+| `node --test factory/quality/core/scripts/quality-gates.test.mjs factory/quality/core/scripts/release-helper.test.mjs factory/quality/core/scripts/quality-report.test.mjs` | ✅ |
+| `node factory/quality/core/scripts/quality-gates.mjs run docs` | ✅ |
+| `node factory/quality/core/scripts/quality-report.mjs markdown` | ✅ |
 | `npm audit` | ✅ 0 vulnérabilité |
 | `git diff --check` | ✅ |
 

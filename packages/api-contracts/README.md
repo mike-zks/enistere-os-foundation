@@ -12,7 +12,7 @@ ultérieurement, par les cores Web/Mobile (via les hooks TanStack Query qu'ils m
 
 ## Source
 
-Contrat canonique : `cores/api-nestjs/openapi/openapi.json` (jamais un serveur HTTP, jamais `/docs`,
+Contrat canonique : `starters/nestjs/openapi/openapi.json` (jamais un serveur HTTP, jamais `/docs`,
 jamais une URL de production). Le fichier `src/generated/schema.ts` est **généré** et **ne doit jamais
 être édité à la main**.
 

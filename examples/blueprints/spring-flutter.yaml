@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "project": { "name": "Enistere Mobile", "slug": "enistere-mobile" },
+  "topology": "monorepo",
+  "designSystem": false,
+  "stack": { "api": "spring", "web": null, "mobile": "flutter" },
+  "domain": { "entities": [] },
+  "capabilities": ["base", "auth"],
+  "deployment": { "environments": ["local"] }
+}

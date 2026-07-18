@@ -1,13 +1,13 @@
 # PR_QUALITY_CHECKLIST.md — Checklist qualité par type de PR
 
-> Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`.
+> Référence : `factory/quality/core/QUALITY_GATES_MATRIX.md`.
 > Dernière mise à jour : 2026-07-12 (Docs Core 6).
-> Script optionnel : `node cores/quality-core/scripts/quality-gates.mjs plan <scope>` pour voir les gates d'un scope sans les exécuter.
+> Script optionnel : `node factory/quality/core/scripts/quality-gates.mjs plan <scope>` pour voir les gates d'un scope sans les exécuter.
 
 ## Comment utiliser cette checklist
 
 1. Identifier le type de la PR dans la table ci-dessous.
-2. Optionnel : visualiser le plan avant d'exécuter — `node cores/quality-core/scripts/quality-gates.mjs plan <scope>`.
+2. Optionnel : visualiser le plan avant d'exécuter — `node factory/quality/core/scripts/quality-gates.mjs plan <scope>`.
 3. Exécuter les gates minimaux **avant d'ouvrir la PR** (manuellement ou via `run <scope>`).
 4. Exécuter les gates recommandés si le type de PR le justifie.
 5. Cocher les cases dans la description de la PR ou dans la revue.
@@ -18,7 +18,7 @@
 
 ### docs-only (project-status, ADR, checklists, stratégie)
 
-- [ ] `node cores/quality-core/scripts/quality-gates.mjs run docs` — whitespace + liens internes
+- [ ] `node factory/quality/core/scripts/quality-gates.mjs run docs` — whitespace + liens internes
 - [ ] Liens internes cohérents (fichiers référencés existent)
 - [ ] Statuts dans `IMPLEMENTATION_MATRIX.md` cohérents avec les preuves documentées
 - [ ] `SESSION_HANDOFF.md` mis à jour si l'état courant change
@@ -85,25 +85,25 @@ Audit root recommandé mais non bloquant.
 
 ### mobile-react-native (Mobile Core)
 
-- [ ] `cd cores/mobile-react-native && npm run typecheck`
-- [ ] `cd cores/mobile-react-native && npm run lint`
-- [ ] `cd cores/mobile-react-native && npm test` — 367/367 verts (ou nouveau total)
-- [ ] `cd cores/mobile-react-native && npx expo export -p ios` — bundle iOS sans erreur
-- [ ] `cd cores/mobile-react-native && npm run doctor` — 19/19 checks (ou nouveau total)
+- [ ] `cd starters/react-native && npm run typecheck`
+- [ ] `cd starters/react-native && npm run lint`
+- [ ] `cd starters/react-native && npm test` — 367/367 verts (ou nouveau total)
+- [ ] `cd starters/react-native && npx expo export -p ios` — bundle iOS sans erreur
+- [ ] `cd starters/react-native && npm run doctor` — 19/19 checks (ou nouveau total)
 - [ ] `npm audit` root — 0 vuln
 - [ ] `git diff --check`
-- [ ] `cd cores/mobile-react-native && npm run smoke:android` recommandé (nécessite emulator Android `emulator-5554`)
-- [ ] `cd cores/mobile-react-native && npm run smoke:ios` si macOS disponible (bloqué Linux — RN31 en attente macOS/Xcode)
+- [ ] `cd starters/react-native && npm run smoke:android` recommandé (nécessite emulator Android `emulator-5554`)
+- [ ] `cd starters/react-native && npm run smoke:ios` si macOS disponible (bloqué Linux — RN31 en attente macOS/Xcode)
 
 ---
 
 ### api-nestjs (API Core)
 
-- [ ] `cd cores/api-nestjs && npm run lint`
-- [ ] `cd cores/api-nestjs && npm test` — 386/386 verts (ou nouveau total)
-- [ ] `cd cores/api-nestjs && npm run test:e2e` — 101/101 verts (nécessite PostgreSQL + MinIO)
-- [ ] `cd cores/api-nestjs && npm run openapi:check` — pas de drift
-- [ ] `cd cores/api-nestjs && npm run build` — compilation TypeScript / Nest
+- [ ] `cd starters/nestjs && npm run lint`
+- [ ] `cd starters/nestjs && npm test` — 386/386 verts (ou nouveau total)
+- [ ] `cd starters/nestjs && npm run test:e2e` — 101/101 verts (nécessite PostgreSQL + MinIO)
+- [ ] `cd starters/nestjs && npm run openapi:check` — pas de drift
+- [ ] `cd starters/nestjs && npm run build` — compilation TypeScript / Nest
 - [ ] `npm audit` root — 0 vuln
 - [ ] `git diff --check`
 
@@ -111,8 +111,8 @@ Audit root recommandé mais non bloquant.
 
 ### cloud (images, infra)
 
-- [ ] `docker build -t enistere/api-nestjs .` (dans `cores/api-nestjs/`) — image API build
-- [ ] `docker build -t enistere/web-nextjs .` (dans `cores/web-nextjs/`) — image Web build
+- [ ] `docker build -t enistere/api-nestjs .` (dans `starters/nestjs/`) — image API build
+- [ ] `docker build -t enistere/web-nextjs .` (dans `starters/nextjs/`) — image Web build
 - [ ] CI L4 (`registry-ci.yml`) — job `api-smoke` vert (gate push GHCR)
 - [ ] `git diff --check`
 - [ ] Tests staging (🔒 staging) : health HTTPS × 3, TLS, backup/restore — selon runbook CC11

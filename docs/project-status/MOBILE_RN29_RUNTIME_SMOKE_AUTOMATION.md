@@ -1,7 +1,7 @@
 # Mobile RN29 — Runtime Smoke Automation Report
 
 Date : 2026-06-16  
-Core : `cores/mobile-react-native`  
+Core : `starters/react-native`
 Statut : **STARTER_SMOKE_AUTOMATION_READY**
 
 ## Objectif
@@ -13,7 +13,7 @@ adaptateur natif réel et sans logique métier.
 ## Script ajouté
 
 - Commande : `npm run smoke:android`
-- Fichier : `cores/mobile-react-native/scripts/smoke-android.js`
+- Fichier : `starters/react-native/scripts/smoke-android.js`
 - Outils utilisés : Node stdlib, `adb`, Expo CLI via `npx`
 - Rapport JSON par défaut :
   `/tmp/enistere-mobile-rn29-smoke-report.json`

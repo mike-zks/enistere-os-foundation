@@ -52,11 +52,11 @@ Documents stratégiques :
 
 Cores prioritaires :
 
-- `cores/api-nestjs/CORE_SPECIFICATION.md`
-- `cores/cloud/CORE_SPECIFICATION.md`
-- `cores/mobile-react-native/CORE_SPECIFICATION.md`
-- `cores/web-nextjs/CORE_SPECIFICATION.md`
-- `cores/ui-kit/CORE_SPECIFICATION.md`
+- `starters/nestjs/CORE_SPECIFICATION.md`
+- `deployment/core/CORE_SPECIFICATION.md`
+- `starters/react-native/CORE_SPECIFICATION.md`
+- `starters/nextjs/CORE_SPECIFICATION.md`
+- `packages/ui-kit/CORE_SPECIFICATION.md`
 
 Backlog ADR :
 

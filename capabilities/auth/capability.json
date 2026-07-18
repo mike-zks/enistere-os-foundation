@@ -1,0 +1,1 @@
+{"schemaVersion":"1","id":"auth","requires":["base"],"responsibilities":["login","refresh","logout","session"],"targets":["nestjs","spring","nextjs","angular","react-native","flutter"]}

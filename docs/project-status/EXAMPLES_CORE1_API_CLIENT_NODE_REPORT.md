@@ -53,7 +53,7 @@ Apres publication GitHub Packages ou GitHub Release tarballs, un projet externe 
 
 ```bash
 npm run example:api-client-node
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 git diff --check
 ```
 

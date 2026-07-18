@@ -17,7 +17,7 @@ Scripts coverage détectés :
 |---|---|---|
 | `@enistere/ui-kit` | `npm run test:coverage --workspace=@enistere/ui-kit` | disponible |
 | `@enistere/web-nextjs` | `npm run test:coverage --workspace=@enistere/web-nextjs` | disponible |
-| `cores/api-nestjs` | `cd cores/api-nestjs && npm run test:cov` | disponible |
+| `starters/nestjs` | `cd starters/nestjs && npm run test:cov` | disponible |
 
 Correction effectuée : `quality-report.mjs` ne listait pas encore le script `test:coverage` existant du
 UI Kit. Le baseline passe donc de **2/8** à **3/8** scopes avec coverage locale disponible.
@@ -28,9 +28,9 @@ UI Kit. Le baseline passe donc de **2/8** à **3/8** scopes avec coverage locale
 |---|---|---|
 | `@enistere/api-contracts` | ne pas ajouter maintenant | package types/génération OpenAPI ; couverture runtime peu significative |
 | `@enistere/api-client-fetch` | différer | couverture utile à terme, mais nécessite une politique cohérente avec les tests réseau/mocks |
-| `cores/mobile-react-native` | différer | tests Node agnostiques + composants RN typecheck-only ; coverage partielle serait trompeuse |
-| `cores/quality-core` | différer | scripts Node purs, pas de package npm dédié ; tests ciblés suffisants actuellement |
-| `cores/docs-core` | différer | link-check documentaire ; coverage de script peu utile comme indicateur qualité |
+| `starters/react-native` | différer | tests Node agnostiques + composants RN typecheck-only ; coverage partielle serait trompeuse |
+| `factory/quality/core` | différer | scripts Node purs, pas de package npm dédié ; tests ciblés suffisants actuellement |
+| `factory/quality/core` | différer | link-check documentaire ; coverage de script peu utile comme indicateur qualité |
 
 ## 4. Décision
 

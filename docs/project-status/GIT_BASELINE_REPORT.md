@@ -23,13 +23,13 @@
 
 ## Versionnés intentionnellement
 
-`cores/api-nestjs/openapi/openapi.json` (snapshot canonique), `packages/api-contracts/src/generated/schema.ts`
-(types générés suivis), `cores/api-nestjs/prisma/migrations/` (5 migrations), `package-lock.json`
-(racine + api-nestjs), `cores/api-nestjs/.env.example` (placeholders, **pas** de secret réel).
+`starters/nestjs/openapi/openapi.json` (snapshot canonique), `packages/api-contracts/src/generated/schema.ts`
+(types générés suivis), `starters/nestjs/prisma/migrations/` (5 migrations), `package-lock.json`
+(racine + api-nestjs), `starters/nestjs/.env.example` (placeholders, **pas** de secret réel).
 
 ## Répartition (fichiers indexés)
 
-`cores/api-nestjs` ~221 · `packages/api-client-fetch` 30 · `docs/adr` 20 · `packages/api-contracts` 9 ·
+`starters/nestjs` ~221 · `packages/api-client-fetch` 30 · `docs/adr` 20 · `packages/api-contracts` 9 ·
 `docs/project-status` 6 · `strategy` 10 · `prompts` 7 · `templates` 4 · `.github` (templates) ·
 racine (`README.md`, `CHANGELOG.md`, `.gitignore`, `package.json`, `package-lock.json`, etc.).
 
@@ -74,5 +74,5 @@ est une **décision humaine/gouvernance**.
 ## Prochaine action
 
 Le prérequis « baseline Git » étant satisfait, la prochaine action est l'**initialisation du starter
-UI Kit minimal** (`cores/ui-kit/`) — voir [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md). Décision humaine
+UI Kit minimal** (`packages/ui-kit/`) — voir [`NEXT_ACTIONS.md`](./NEXT_ACTIONS.md). Décision humaine
 recommandée : **pousser** la baseline vers `origin`.

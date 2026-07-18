@@ -50,7 +50,7 @@ documentaires minimales.
 ## 6. Verification attendue
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 git diff --check
 ```
 

@@ -10,7 +10,7 @@
 Le repository dispose maintenant :
 
 - d'un index central : `docs/README.md` ;
-- d'un Docs Core cadre : `cores/docs-core/CORE_SPECIFICATION.md` + `README.md` ;
+- d'un Docs Core cadre : `factory/quality/core/CORE_SPECIFICATION.md` + `README.md` ;
 - d'un README racine simplifie, qui ne duplique plus un etat technique long et fragile ;
 - d'un registre ADR corrige pour les points UI Kit recents.
 

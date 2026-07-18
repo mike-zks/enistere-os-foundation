@@ -2,6 +2,11 @@
 
 # Enistere OS Foundation — Stratégie IA
 
+> **Position V2 approuvee le 2026-07-18** : l'IA n'est plus un core lateral. Elle appartient au control
+> plane de la Factory. Le moteur deterministe reste utilisable sans agent ; Codex, Claude Code et Gemini
+> sont branches par adapters locaux et travaillent dans des worktrees temporaires. Deux validations
+> humaines sont obligatoires : validation du blueprint et application du diff.
+
 ## 1. Résumé exécutif
 
 Ce document définit la stratégie d’utilisation de l’intelligence artificielle dans Enistere OS Foundation.
@@ -556,13 +561,13 @@ Décrire les fichiers docs à mettre à jour.
 Tous les prompts utiles doivent être stockés dans :
 
 ```txt
-prompts/
+factory/ai/prompts/
 ```
 
 Structure recommandée :
 
 ```txt
-prompts/
+factory/ai/prompts/
 ├── global/
 │   ├── master-context.md
 │   ├── execution-template.md
@@ -616,7 +621,7 @@ prompts/
 Un prompt global doit exister :
 
 ```txt
-prompts/global/master-context.md
+factory/ai/prompts/global/master-context.md
 ```
 
 Rôle :
@@ -1148,7 +1153,7 @@ Objectifs :
 ai-core/
 ├── README.md
 ├── CORE_SPECIFICATION.md
-├── prompts/
+├── factory/ai/prompts/
 ├── agents/
 ├── workflows/
 ├── rag/

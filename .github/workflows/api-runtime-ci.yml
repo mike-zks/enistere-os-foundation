@@ -6,8 +6,8 @@ name: API Runtime CI
 # SANS déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement protégé.
 #
 # Notes d'implémentation :
-# - `cores/api-nestjs/` est un projet npm AUTONOME (lockfile propre, hors workspaces racine) :
-#   on installe et exécute via `working-directory: cores/api-nestjs` + `npm ci`.
+# - `starters/nestjs/` est un projet npm AUTONOME (lockfile propre, hors workspaces racine) :
+#   on installe et exécute via `working-directory: starters/nestjs` + `npm ci`.
 # - PostgreSQL : conteneur `services:` (aucune commande custom requise).
 # - MinIO : démarré via `docker run` (un conteneur `services:` ne peut PAS recevoir la commande
 #   `server /data` ; cette commande est obligatoire pour MinIO) puis bucket de test créé.
@@ -48,7 +48,7 @@ jobs:
           --health-retries 20
 
     # Variables d'environnement de TEST (jetables, non sensibles). Aucune valeur de production.
-    # Aucune référence à secrets.* (cf. cores/cloud/docs/SECRETS_POLICY.md).
+    # Aucune référence à secrets.* (cf. deployment/core/docs/SECRETS_POLICY.md).
     env:
       NODE_ENV: test
       PORT: "3001"
@@ -85,7 +85,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: cores/api-nestjs
+        working-directory: starters/nestjs
 
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: cores/api-nestjs/package-lock.json
+          cache-dependency-path: starters/nestjs/package-lock.json
 
       # MinIO jetable : démarrage via docker run (commande `server` obligatoire) + attente santé.
       - name: Start MinIO (jetable)

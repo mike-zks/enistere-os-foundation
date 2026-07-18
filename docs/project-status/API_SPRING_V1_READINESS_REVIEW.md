@@ -13,7 +13,7 @@
 
 ## 1. Méthode
 
-Lecture directe des fichiers Java (`find cores/api-spring/src -name "*.java"`), des migrations SQL
+Lecture directe des fichiers Java (`find starters/spring/src -name "*.java"`), des migrations SQL
 (V1→V3), de `application.yml`, `application-test.yml`, et du rapport CI. Chaque critère §30 est
 vérifié contre le code, pas seulement la documentation.
 

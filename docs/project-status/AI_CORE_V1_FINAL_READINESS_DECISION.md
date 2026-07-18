@@ -4,7 +4,7 @@
 
 **Décision : `IMPLEMENTATION_AVANCEE` → `VALIDE_V1`.**
 
-AI Core satisfait maintenant les critères V1 de `cores/ai-core/CORE_SPECIFICATION.md` §19. Les trois
+AI Core satisfait maintenant les critères V1 de `factory/ai/core/CORE_SPECIFICATION.md` §19. Les trois
 réserves bloquantes identifiées lors de la revue du 2026-07-16 sont fermées par AI Core 9, AI Core 10 et
 AI Core 11.
 
@@ -14,10 +14,10 @@ choisit aucun provider IA réel, ne déploie aucun service IA et ne contacte auc
 ## 2. Documents lus
 
 - `strategy/10_AI_STRATEGY.md` ;
-- `cores/quality-core/AI_PROMPT_GOVERNANCE.md` ;
-- `cores/ai-core/CORE_SPECIFICATION.md` §15–§22 ;
-- `cores/ai-core/README.md` ;
-- `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md` ;
+- `factory/quality/core/AI_PROMPT_GOVERNANCE.md` ;
+- `factory/ai/core/CORE_SPECIFICATION.md` §15–§22 ;
+- `factory/ai/core/README.md` ;
+- `factory/ai/core/AI_CORE_USAGE_RUNBOOK.md` ;
 - `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md` ;
 - `docs/project-status/AI_CORE9_PROMPT_RUNNER_REPORT.md` ;
 - `docs/project-status/AI_CORE10_RETRIEVAL_CITATIONS_REPORT.md` ;
@@ -40,7 +40,7 @@ choisit aucun provider IA réel, ne déploie aucun service IA et ne contacte auc
 | Execution report schema | `src/reports/*`, schema `ai-execution-report/v1`, pas de prompt brut | ✅ |
 | Prompt runner gouverné | `src/runner/*`, registry + context + fake provider + evaluation + report | ✅ |
 | Retrieval citations | `src/retrieval/*`, citations sûres depuis contexte déjà allow-listé | ✅ |
-| Usage runbook | `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md` | ✅ |
+| Usage runbook | `factory/ai/core/AI_CORE_USAGE_RUNBOOK.md` | ✅ |
 | Tests automatisés | 8 fichiers `node --test` + validation registry | ✅ |
 
 ## 4. Critères §19
@@ -104,9 +104,9 @@ Justification :
 
 ## 8. Vérifications
 
-- `node cores/ai-core/scripts/validate-prompt-registry.mjs`
-- `node --test cores/ai-core/test/*.test.mjs`
-- `node cores/quality-core/scripts/quality-gates.mjs run docs`
+- `node factory/ai/core/scripts/validate-prompt-registry.mjs`
+- `node --test factory/ai/core/test/*.test.mjs`
+- `node factory/quality/core/scripts/quality-gates.mjs run docs`
 - `git diff --check`
 
 ## 9. Prochaine action

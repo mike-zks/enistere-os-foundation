@@ -33,9 +33,9 @@ Guides transverses utiles :
 
 Pour une mission IA, lire aussi :
 
-- [`../../cores/quality-core/AI_PROMPT_GOVERNANCE.md`](../../cores/quality-core/AI_PROMPT_GOVERNANCE.md)
-- [`../../prompts/README.md`](../../prompts/README.md)
-- [`../../prompts/global/mission-brief-template.md`](../../prompts/global/mission-brief-template.md)
+- [`../../factory/quality/core/AI_PROMPT_GOVERNANCE.md`](../../factory/quality/core/AI_PROMPT_GOVERNANCE.md)
+- [`../../factory/ai/prompts/README.md`](../../factory/ai/prompts/README.md)
+- [`../../factory/ai/prompts/global/mission-brief-template.md`](../../factory/ai/prompts/global/mission-brief-template.md)
 
 ## 3. Parcours par role
 
@@ -101,7 +101,7 @@ Objectif : decider une promotion ou une release sans confondre merge et publicat
 
 Lire :
 
-1. [`../../cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`](../../cores/quality-core/RELEASE_PROCESS_RUNBOOK.md)
+1. [`../../factory/quality/core/RELEASE_PROCESS_RUNBOOK.md`](../../factory/quality/core/RELEASE_PROCESS_RUNBOOK.md)
 2. [`../guides/CORE_STATUS_REVIEW_GUIDE.md`](../guides/CORE_STATUS_REVIEW_GUIDE.md)
 3. [`../checklists/RELEASE_READINESS_CHECKLIST.md`](../checklists/RELEASE_READINESS_CHECKLIST.md)
 4. rapport de readiness du core concerne.
@@ -141,16 +141,16 @@ git status --short --branch
 Pour une mission documentaire Docs/Quality :
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
-node cores/quality-core/scripts/quality-gates.mjs plan docs
-node --test cores/quality-core/scripts/quality-gates.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs run docs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs plan docs
+node --test factory/quality/core/scripts/quality-gates.test.mjs
 npm audit
 ```
 
 Pour une mission runtime, utiliser la matrice :
 
-- [`../../cores/quality-core/QUALITY_GATES_MATRIX.md`](../../cores/quality-core/QUALITY_GATES_MATRIX.md)
+- [`../../factory/quality/core/QUALITY_GATES_MATRIX.md`](../../factory/quality/core/QUALITY_GATES_MATRIX.md)
 - [`../checklists/PR_QUALITY_CHECKLIST.md`](../checklists/PR_QUALITY_CHECKLIST.md)
 
 ## 7. Rapport final attendu

@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "project": { "name": "Enistere Field", "slug": "enistere-field" },
+  "topology": "monorepo",
+  "designSystem": true,
+  "stack": { "api": "nestjs", "web": "nextjs", "mobile": "react-native" },
+  "domain": { "entities": [] },
+  "capabilities": ["base", "auth", "rbac", "files"],
+  "deployment": { "environments": ["local", "staging"] }
+}

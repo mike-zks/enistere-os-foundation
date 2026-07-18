@@ -1,5 +1,10 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
+> **Handoff V2 — 2026-07-18** : branche active `refactor/foundation-v2-ai-native`. PR #176 fermee car
+> remplacee. Objectif courant : achever R1-R7 d'ADR-042, valider les six starters apres migration,
+> ouvrir une PR unique de refonte et ne merger qu'avec CI verte. Ne plus lancer de mission d'expansion
+> d'un ancien core avant R8.
+
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
 > **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-18.
 
@@ -53,11 +58,11 @@ flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique
   (health, auth/files, backups/restores, rollback/roll-forward, rotation smoke, runbooks). CC12 reporte Redis
   post-V1/V2 et fait de `docker-compose.cc10.yml` le compose serveur/staging V1 officiel. Les tests serveur
   reels restent des gates finaux, pas des checks de chaque mission.
-- **Docs Core** : **VALIDE_V1** (2026-07-12) — `cores/docs-core/CORE_SPECIFICATION.md`,
-  `cores/docs-core/README.md`, `docs/README.md` index central, `DOCS_CORE_NAVIGATION_AUDIT.md`,
+- **Docs Core** : **VALIDE_V1** (2026-07-12) — `factory/quality/core/CORE_SPECIFICATION.md`,
+  `factory/quality/core/README.md`, `docs/README.md` index central, `DOCS_CORE_NAVIGATION_AUDIT.md`,
   `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` avec parcours par role, `docs/glossary/GLOSSARY.md`,
   `docs/guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`, `docs/guides/CORE_STATUS_REVIEW_GUIDE.md`,
-  `cores/docs-core/scripts/check-doc-links.mjs` + test, `DOCS_CORE_V2_READINESS_REVIEW.md`,
+  `factory/quality/core/scripts/docs-link-check.mjs` + test, `DOCS_CORE_V2_READINESS_REVIEW.md`,
   `DOCS_CORE_GUIDES_ONBOARDING_REPORT.md`, `DOCS_CORE_CI_GATE_DECISION.md`,
   `DOCS_CORE_V1_READINESS_REVIEW.md`. Link check integre au scope local `quality-gates docs`;
   aucun workflow/ruleset modifie. Aucun runtime/dependance/RAG/site docs.
@@ -298,7 +303,7 @@ flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique
   de consentement + câblage du gate dans analytics/crash** (ADR-038), **câblage du contexte environnement dans les
   télémétries** (après gate consentement), **retry/backoff** (= RN 24), **offline sync réelle** (ADR-029), **backend
   d'observabilité** (ADR-018/036). *(Garde CI `npm ls zustand` au root inchangée — mobile autonome, hors scope.)*
-- **VALIDE_V1** : **Quality Core** (`cores/quality-core/`) — Quality Core V1 Readiness Review (2026-07-13) + gate CI Web Angular (2026-07-16) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 8 checks requis, checks additionnels documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** + **`AI_PROMPT_GOVERNANCE.md`** + 3 checklists + templates GitHub PR/Issues + prompts catalogués + **`scripts/quality-gates.mjs`** (9 scopes, incluant `web-angular`) + `scripts/quality-report.mjs` (9 scopes). Processus utilisé pour publier `foundation-v1.0.0` ; Docs Core consomme le scope `quality-gates docs`. **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; checks `images (...)`, `api-spring-verify` et `web-angular` recommandés pour promotion humaine, non appliqués automatiquement.
+- **VALIDE_V1** : **Quality Core** (`factory/quality/core/`) — Quality Core V1 Readiness Review (2026-07-13) + gate CI Web Angular (2026-07-16) : `CORE_SPECIFICATION.md` + `README.md` + `QUALITY_GATES_MATRIX.md` + **`BRANCH_PROTECTION_RUNBOOK.md`** (ruleset `protect-main` actif + 8 checks requis, checks additionnels documentés) + **`RELEASE_PROCESS_RUNBOOK.md`** + **`AI_PROMPT_GOVERNANCE.md`** + 3 checklists + templates GitHub PR/Issues + prompts catalogués + **`scripts/quality-gates.mjs`** (9 scopes, incluant `web-angular`) + `scripts/quality-report.mjs` (9 scopes). Processus utilisé pour publier `foundation-v1.0.0` ; Docs Core consomme le scope `quality-gates docs`. **Protection `main` active via GitHub Rulesets** : 8 checks requis (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`) ; checks `images (...)`, `api-spring-verify` et `web-angular` recommandés pour promotion humaine, non appliqués automatiquement.
 - **`VALIDE_V1`** : `mobile-flutter` (Flutter V1 Final Readiness Decision, 2026-07-14 — rapport `MOBILE_FLUTTER_V1_FINAL_READINESS_DECISION.md` ; §29 9/11 pleinement satisfaits + 2/11 PARTIAL iOS R1 ; B1→B5 tous fermés ; 218/218 tests headless + smoke `emulator-5554` 7/7 ✅ ; R1 iOS Linux acceptée comme réserve environnementale non bloquante — identique à RN B2 ; aucun succès iOS artificiel). Flutter 1→11 : spec, starter, auth shell + guards, Dio client + intercepteurs, upload multipart, SecureStorage + restoreSession(), RefreshInterceptor 401 coalescent, UI states (LoadingState/EmptyState/ErrorState/SuccessState), formulaire sign-in email+password+validation. Réserves maintenues : R1 iOS Linux, R2 pas backend, R3 Freezed, R4 logger redaction, R5 PreferenceStore. Décision post-Flutter V1 : `V3_POST_FLUTTER_ROADMAP_DECISION.md`.
 - **`VALIDE_V1`** : `api-spring` (Spring Boot 8, 2026-07-15 — §30 **15/15 ✅ / 0 ⚠️ / 0 ✗**). SB7 : AuditModule (`V3__add_audit_logs.sql`, `AuditEventType` 7 valeurs, `AuditService` REQUIRES_NEW best-effort, aucun payload sensible) + URL signée (`GET /api/v1/files/{id}/download-url` ownership + 404 anti-énumération + presigned TTL 300s + `Cache-Control: no-store`) + CORS env var (`CorsConfig @ConfigurationProperties`, `${CORS_ALLOWED_ORIGINS}` CSV, jamais `*`). SB8 : `spring-boot-starter-data-redis` (Lettuce lazy, `${REDIS_URL}`) + `RateLimitInterceptor` fixed-window en mémoire sur 4 endpoints (429 `ApiError`, `RateLimitConfig` externalisé, `@ConditionalOnProperty`, désactivé en profil test) + `MinioStorageIntegrationTest` TC `minio/minio:...` (`@TestConfiguration @Primary StorageService`, upload réel, URL `X-Amz-*`, `Cache-Control: no-store`) + `RedisHealthIntegrationTest` TC `redis:7-alpine` (`$.components.redis.status = UP`). C10 fermé. R1/R3/R5 fermés. CI L5 **99/99 ✅ BUILD SUCCESS** ; rapport : `docs/project-status/API_SPRING_V1_READINESS_REVIEW.md`.
 - **Vides** : aucun. **`ai-core`** → **`VALIDE_V1`** (AI Core V1 Final Readiness Decision, 2026-07-17) : §18 **7/7 satisfaits** ; §19 **8/8 satisfaits** ; B1 prompt runner fermé ; B2 retrieval citations fermé ; B3 runbook fermé. Livrables existants : `CORE_SPECIFICATION.md` + `README.md` + `AI_CORE_USAGE_RUNBOOK.md` + registre local `prompt-registry.json` + validateur Node pur (`src/prompt-registry/*`, `scripts/validate-prompt-registry.mjs`, tests) + redaction layer pure (`src/redaction/*`, tests) + context builder allow-list (`src/context/*`, tests) + provider seam/fake provider (`src/provider/*`, tests) + evaluation harness local (`src/evaluation/*`, tests) + décision Retrieval/RAG V1 (`AI_CORE7_RETRIEVAL_RAG_DECISION.md`) + schema local de rapport d'execution (`src/reports/*`, tests) + runner de prompt gouverné fake-provider (`src/runner/*`, tests) + citations retrieval (`src/retrieval/*`, tests). Aucun provider réel, SDK IA, LLM judge, RAG runtime, base vectorielle, endpoint, dépendance, secret, trace storage ou appel réseau. **`web-angular`** → **`VALIDE_V1`** (Angular 10 + Quality Web Angular CI, 2026-07-16) : B1 RefreshInterceptor/login API seam fermé ; B2 PermissionService/PermissionDirective fermé ; readiness finale **14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT**. Réserve non-bloquante restante : R1 CDK a11y FocusTrap/ARIA HTML. R2 CI gate fermée par `web-angular-ci.yml` + scope `quality-gates web-angular`. **267/267 tests ✅**.
@@ -339,8 +344,8 @@ flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique
 
 ## 4. Cores techniquement implémentés
 
-`cores/api-nestjs/` (avancé), `cores/ui-kit/` (**VALIDE_V1** — tokens + 19 primitives Web + états UI, React 19 ; §12.4 4/4 + §59 9/9 ; cohérence mobile/web prouvée RN35) et
-`cores/web-nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + Files + RHF+Zod ; **VALIDE_V1** 14/14 critères §56).
+`starters/nestjs/` (avancé), `packages/ui-kit/` (**VALIDE_V1** — tokens + 19 primitives Web + états UI, React 19 ; §12.4 4/4 + §59 9/9 ; cohérence mobile/web prouvée RN35) et
+`starters/nextjs/` (Next 16 + UI Kit + API publique + TanStack Query + BFF Auth + Files + RHF+Zod ; **VALIDE_V1** 14/14 critères §56).
 
 ## 5. Cores de gouvernance / documentaires
 
@@ -355,7 +360,7 @@ au sens applicatif (`IMPLEMENTATION_PARTIELLE`/`PAUSE_CONTROLEE`). `ui-kit`, `we
 
 `@enistere/api-contracts` (types OpenAPI, runtime-indépendant) ; `@enistere/api-client-fetch`
 (client Fetch typé + wrappers : auth, erreurs, timeout, refresh, multipart). Workspaces npm
-(`packages/*`, `cores/ui-kit`, `cores/web-nextjs`). **Non publiés** ; UI Kit **consommé** + `api-client-fetch`
+(`packages/*`, `packages/ui-kit`, `starters/nextjs`). **Non publiés** ; UI Kit **consommé** + `api-client-fetch`
 **instancié (public/Health + authentifié/BFF Auth)** par le Web Core. Usage authentifié **intégré** (preuve API réelle).
 Distribution des packages décidée le 2026-07-17 : **GitHub Packages npm registry** comme cible principale,
 **GitHub Release tarballs** comme repli gouverné. Aucun package publié, aucun token/workflow ajouté.
@@ -367,7 +372,7 @@ publication contrôlée ou GitHub Release tarballs sur décision humaine explici
 
 ## 7. ADR clés
 
-**21 ADR Validés** (001–016, 034, **035**, 039, 040, **041**). **ADR-035** — Angular UI stack : Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés (2026-07-15) — `docs/adr/ADR-035-angular-ui-material-vs-primeng.md` ; Reactive Forms obligatoire ; pas de PrimeNG ; ADR-016 §F par preuve Web Core Angular 1 — **`IMPLEMENTE`** : `cores/web-angular/CORE_SPECIFICATION.md` (Angular 1) + starter Angular 22.0.6 Material 3 (Angular 2) + auth/routing shell Signals (Angular 3) + couche HTTP/server-state RxJS (Angular 4) + Angular Material form fields Angular 5 (`mat-form-field`, `matInput`, `mat-error`, `getFieldError()`, `mat-flat-button`) + **Foundation state components Angular 6** (`EnistereLoadingState`/`EnistereEmptyState`/`EnistereErrorState`/`EnistereSuccessState` — signal inputs, a11y roles, tokens Enistere) + **Upload fichiers Angular 7** (`FileCategory`/`AppFile`/`UploadService` HttpClient+FormData Content-Type jamais forcé/`UploadFormComponent` Reactive Forms états Foundation) + **Tests + smoke Angular 8** (`RouterTestingHarness` intégration router, CDK harnesses Material) + **RefreshInterceptor/login API seam Angular 9** (`AuthApi` seam, 401→refresh coalescé→retry unique, retry FormData sans Content-Type forcé) + **PermissionService/PermissionDirective Angular 10** (`*enisterePermission`, RBAC UX) ; `web-angular` = `VALIDE_V1`. **ADR-041** — build system Spring Boot : Maven (2026-07-14) — `pom.xml`, Spring Boot Parent POM, `mvn verify`. Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
+**21 ADR Validés** (001–016, 034, **035**, 039, 040, **041**). **ADR-035** — Angular UI stack : Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés (2026-07-15) — `docs/adr/ADR-035-angular-ui-material-vs-primeng.md` ; Reactive Forms obligatoire ; pas de PrimeNG ; ADR-016 §F par preuve Web Core Angular 1 — **`IMPLEMENTE`** : `starters/angular/CORE_SPECIFICATION.md` (Angular 1) + starter Angular 22.0.6 Material 3 (Angular 2) + auth/routing shell Signals (Angular 3) + couche HTTP/server-state RxJS (Angular 4) + Angular Material form fields Angular 5 (`mat-form-field`, `matInput`, `mat-error`, `getFieldError()`, `mat-flat-button`) + **Foundation state components Angular 6** (`EnistereLoadingState`/`EnistereEmptyState`/`EnistereErrorState`/`EnistereSuccessState` — signal inputs, a11y roles, tokens Enistere) + **Upload fichiers Angular 7** (`FileCategory`/`AppFile`/`UploadService` HttpClient+FormData Content-Type jamais forcé/`UploadFormComponent` Reactive Forms états Foundation) + **Tests + smoke Angular 8** (`RouterTestingHarness` intégration router, CDK harnesses Material) + **RefreshInterceptor/login API seam Angular 9** (`AuthApi` seam, 401→refresh coalescé→retry unique, retry FormData sans Content-Type forcé) + **PermissionService/PermissionDirective Angular 10** (`*enisterePermission`, RBAC UX) ; `web-angular` = `VALIDE_V1`. **ADR-041** — build system Spring Boot : Maven (2026-07-14) — `pom.xml`, Spring Boot Parent POM, `mvn verify`. Implémentés et revus : 002 (Prisma), **007** (Files : upload **API** ;
 **consommé en lecture côté Web** — métadonnées publiques + URL signée + téléchargement direct, **sans** upload),
 039 (Argon2id), 040 (logging API). Partiels : **040** (logging **mobile** : logger client générique RN 8 + **redaction centrale** — tokens/URL signées/chemins device/PII — sans transport/persistance), 001 (monorepo), 003, **013** (CI minimale), **004** (session : adapter serveur Web + **état de session
 navigateur** `useSession`/`useAuthorization`, read-only sans refresh silencieux), **005** (cookies web +
@@ -387,55 +392,55 @@ Dockerfiles ; sans déploiement). Détail : [`DECISIONS_REGISTER.md`](./DECISION
 
 ## 8. Dernière étape terminée
 
-**Web Core Angular 10 — PermissionService + PermissionDirective** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` passe **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. Livrables : `PermissionService` signal-based in-memory (rôles/permissions normalisés, sans wildcard, helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions`/`hasAnyPermission`), `PermissionDirective` standalone `*enisterePermission` (permission simple, listes, objet `{role,roles,permission,permissions,mode}`, modes `all`/`any`), purge permissions au logout/restore/erreur login/refresh expiré, preuve dashboard `files.upload`. Rapport `WEB_ANGULAR10_PERMISSION_RBAC_REPORT.md`. Tests : **267/267** ✅. Readiness finale : **14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT**. Prochaine action recommandée : **Quality/Governance — gate CI `web-angular` dédié** ou prochain core prioritaire roadmap.
+**Web Core Angular 10 — PermissionService + PermissionDirective** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` passe **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. Livrables : `PermissionService` signal-based in-memory (rôles/permissions normalisés, sans wildcard, helpers `hasRole`/`hasAnyRole`/`hasPermission`/`hasAllPermissions`/`hasAnyPermission`), `PermissionDirective` standalone `*enisterePermission` (permission simple, listes, objet `{role,roles,permission,permissions,mode}`, modes `all`/`any`), purge permissions au logout/restore/erreur login/refresh expiré, preuve dashboard `files.upload`. Rapport `WEB_ANGULAR10_PERMISSION_RBAC_REPORT.md`. Tests : **267/267** ✅. Readiness finale : **14/15 §29 SATISFAIT + 1/15 PARTIEL + 0/15 NON SATISFAIT**. Prochaine action recommandée : **Quality/Governance — gate CI `web-angular` dédié** ou prochain core prioritaire roadmap.
 
-**Web Core Angular 9 — RefreshInterceptor + login API seam** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` restait **`IMPLEMENTATION_AVANCEE`**, mais B1 était fermé. Livrables : `AuthApi` seam + `PlaceholderAuthApi`, `AuthService.login()` Observable, access token mémoire privé, purge token sur erreur login, `refreshSession()` coalescé, `RefreshInterceptor` 401→refresh→retry unique→logout/purge si échec, endpoints auth exclus, retry `FormData` sans `Content-Type` forcé. Rapport `WEB_ANGULAR9_REFRESH_INTERCEPTOR_REPORT.md`. Tests : **248/248** ✅.
+**Web Core Angular 9 — RefreshInterceptor + login API seam** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` restait **`IMPLEMENTATION_AVANCEE`**, mais B1 était fermé. Livrables : `AuthApi` seam + `PlaceholderAuthApi`, `AuthService.login()` Observable, access token mémoire privé, purge token sur erreur login, `refreshSession()` coalescé, `RefreshInterceptor` 401→refresh→retry unique→logout/purge si échec, endpoints auth exclus, retry `FormData` sans `Content-Type` forcé. Rapport `WEB_ANGULAR9_REFRESH_INTERCEPTOR_REPORT.md`. Tests : **248/248** ✅.
 
-**Web Core Angular 8 — Tests + smoke** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`TEST_SMOKE_READY`**. Livrables : `app.navigation.spec.ts` (5 tests `RouterTestingHarness` — lazy-loaded routes `/`/`/login`/`/dashboard`, authGuard redirect avec `returnUrl`, guestGuard, wildcard) + `features/auth/login/login.harness.spec.ts` (5 tests CDK : `MatFormFieldHarness` 2 fields + labels "Adresse e-mail"/"Mot de passe", `MatInputHarness.getType()` email/password) + `features/upload/upload-form/upload-form.harness.spec.ts` (4 tests CDK : `MatSelectHarness` 9 options FILE_CATEGORIES, labels, `MatButtonHarness` text "Envoyer", `MatProgressSpinnerHarness` en état loading) + `enistere-loading-state.harness.spec.ts` (2 tests CDK spinner : harness trouvé + mode indeterminate). Zéro dépendance ajoutée. Rapport `WEB_ANGULAR8_TESTS_SMOKE_REPORT.md`. Tests : **224/224** ✅ (16 nouveaux). Build SUCCESS, audit 0 vuln, `git diff --check` ✅. Prochaine action : **Web Core Angular V1 Readiness Review**.
+**Web Core Angular 8 — Tests + smoke** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`TEST_SMOKE_READY`**. Livrables : `app.navigation.spec.ts` (5 tests `RouterTestingHarness` — lazy-loaded routes `/`/`/login`/`/dashboard`, authGuard redirect avec `returnUrl`, guestGuard, wildcard) + `features/auth/login/login.harness.spec.ts` (5 tests CDK : `MatFormFieldHarness` 2 fields + labels "Adresse e-mail"/"Mot de passe", `MatInputHarness.getType()` email/password) + `features/upload/upload-form/upload-form.harness.spec.ts` (4 tests CDK : `MatSelectHarness` 9 options FILE_CATEGORIES, labels, `MatButtonHarness` text "Envoyer", `MatProgressSpinnerHarness` en état loading) + `enistere-loading-state.harness.spec.ts` (2 tests CDK spinner : harness trouvé + mode indeterminate). Zéro dépendance ajoutée. Rapport `WEB_ANGULAR8_TESTS_SMOKE_REPORT.md`. Tests : **224/224** ✅ (16 nouveaux). Build SUCCESS, audit 0 vuln, `git diff --check` ✅. Prochaine action : **Web Core Angular V1 Readiness Review**.
 
-**Web Core Angular 7 — Upload fichiers** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`UPLOAD_READY`**. Livrables : `core/upload/file-category.ts` (`FileCategory` 9 valeurs API screaming-case + `FILE_CATEGORIES` label pairs) + `core/upload/app-file.model.ts` (`AppFile {file, category, subjectId?}`, `MAX_FILE_SIZE_BYTES` 10 MB, `isValidAppFile`, `isAllowedFileType` whitelist 14 MIME, `describeFileForLog({extension, sizeBytes})` — jamais nom/path/contenu/token) + `core/upload/uploaded-file-metadata.model.ts` (`UploadedFileMetadata {id, category}` sans champ interne) + `core/upload/upload.service.ts` (`UploadService` `HttpClient.post()` + `FormData`, Content-Type intentionnellement absent, `createRequestState`, mapping 413/415/401 via `errorInterceptor`+`AppApiError`) + `features/upload/upload-form/upload-form.component.{ts,html,scss}` (Reactive Forms `{category: required, subjectId: maxLength(128)}`, `signal<File|null>`, `signal<RequestState<...>>(idleState())`, `errorMessage` computed, états idle/loading/success/error via composants Foundation Angular 6, `reset()`+`ngOnDestroy`). Tests : **205/205** ✅ (35 nouveaux : 12 app-file.model + 9 upload.service + 13 upload-form). Build SUCCESS, audit 0, quality-gates docs 2/2 ✅, `git diff --check` ✅.
+**Web Core Angular 7 — Upload fichiers** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`UPLOAD_READY`**. Livrables : `core/upload/file-category.ts` (`FileCategory` 9 valeurs API screaming-case + `FILE_CATEGORIES` label pairs) + `core/upload/app-file.model.ts` (`AppFile {file, category, subjectId?}`, `MAX_FILE_SIZE_BYTES` 10 MB, `isValidAppFile`, `isAllowedFileType` whitelist 14 MIME, `describeFileForLog({extension, sizeBytes})` — jamais nom/path/contenu/token) + `core/upload/uploaded-file-metadata.model.ts` (`UploadedFileMetadata {id, category}` sans champ interne) + `core/upload/upload.service.ts` (`UploadService` `HttpClient.post()` + `FormData`, Content-Type intentionnellement absent, `createRequestState`, mapping 413/415/401 via `errorInterceptor`+`AppApiError`) + `features/upload/upload-form/upload-form.component.{ts,html,scss}` (Reactive Forms `{category: required, subjectId: maxLength(128)}`, `signal<File|null>`, `signal<RequestState<...>>(idleState())`, `errorMessage` computed, états idle/loading/success/error via composants Foundation Angular 6, `reset()`+`ngOnDestroy`). Tests : **205/205** ✅ (35 nouveaux : 12 app-file.model + 9 upload.service + 13 upload-form). Build SUCCESS, audit 0, quality-gates docs 2/2 ✅, `git diff --check` ✅.
 
-**Web Core Angular 6 — Composants Foundation Enistere** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`FOUNDATION_STATES_READY`**. Livrables : `EnistereLoadingStateComponent` (signal `message`/`size`, `MatProgressSpinnerModule`, `diameterFor` map 24/40/64, `role="status"`, `aria-live="polite"`, `[attr.aria-label]` dynamique) + `EnistereEmptyStateComponent` (`input.required<string>()` `title`, `input<string>()` `description`/`actionLabel`, `output<void>()` `actionClicked`, `role="status"`) + `EnistereErrorStateComponent` (`input.required<string>()` `title`, `input<string>()` `description`/`retryLabel`, `output<void>()` `retried`, `role="alert"`, `aria-live="assertive"`) + `EnistereSuccessStateComponent` (`role="status"`, action optionnelle). SCSS tokens Enistere. `home.component.html` badge `FOUNDATION_STATES_READY`. Tests : **170/170** ✅. Build SUCCESS, audit 0, quality-gates docs 2/2 ✅, `git diff --check` ✅.
+**Web Core Angular 6 — Composants Foundation Enistere** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`FOUNDATION_STATES_READY`**. Livrables : `EnistereLoadingStateComponent` (signal `message`/`size`, `MatProgressSpinnerModule`, `diameterFor` map 24/40/64, `role="status"`, `aria-live="polite"`, `[attr.aria-label]` dynamique) + `EnistereEmptyStateComponent` (`input.required<string>()` `title`, `input<string>()` `description`/`actionLabel`, `output<void>()` `actionClicked`, `role="status"`) + `EnistereErrorStateComponent` (`input.required<string>()` `title`, `input<string>()` `description`/`retryLabel`, `output<void>()` `retried`, `role="alert"`, `aria-live="assertive"`) + `EnistereSuccessStateComponent` (`role="status"`, action optionnelle). SCSS tokens Enistere. `home.component.html` badge `FOUNDATION_STATES_READY`. Tests : **170/170** ✅. Build SUCCESS, audit 0, quality-gates docs 2/2 ✅, `git diff --check` ✅.
 
-**Web Core Angular 5 — Reactive Forms + Angular Material** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`FORMS_MATERIAL_READY`**. Livrables : `form-error.utils.ts` (`getFieldError()` pur — required/email/minlength/maxlength/pattern), `login.component.ts` (imports Material), `login.component.html` (`mat-form-field` outline + `matInput` + `mat-label` + `mat-error` via `@if (getFieldError(); as err)` + `button mat-flat-button`), `login.component.scss` (custom input styles supprimés), `home.component.html` badge `FORMS_MATERIAL_READY`. Tests : **136/136** ✅. Build SUCCESS, audit 0, quality-gates docs ✅, `git diff --check` ✅.
+**Web Core Angular 5 — Reactive Forms + Angular Material** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`FORMS_MATERIAL_READY`**. Livrables : `form-error.utils.ts` (`getFieldError()` pur — required/email/minlength/maxlength/pattern), `login.component.ts` (imports Material), `login.component.html` (`mat-form-field` outline + `matInput` + `mat-label` + `mat-error` via `@if (getFieldError(); as err)` + `button mat-flat-button`), `login.component.scss` (custom input styles supprimés), `home.component.html` badge `FORMS_MATERIAL_READY`. Tests : **136/136** ✅. Build SUCCESS, audit 0, quality-gates docs ✅, `git diff --check` ✅.
 
-**Étape précédente — Web Core Angular 4 — Client HTTP + server-state RxJS** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`HTTP_SERVER_STATE_READY`**. Livrables : `APP_BASE_URL` + `ApiConfig`, `AppApiError`/`ApiErrorCode`/`mapHttpError`/`isAppApiError`, `ErrorInterceptor` (`HttpErrorResponse` → `AppApiError`, 401 surfacé, aucun body/token), `LogInterceptor` (méthode + path + status + duration seulement, query/header/body/URL signée supprimés), `RequestState<T>` + factories + `createRequestState()`, `app.config.ts` avec ordre `authInterceptor → logInterceptor → errorInterceptor`. Tests : **122/122** ✅.
+**Étape précédente — Web Core Angular 4 — Client HTTP + server-state RxJS** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`HTTP_SERVER_STATE_READY`**. Livrables : `APP_BASE_URL` + `ApiConfig`, `AppApiError`/`ApiErrorCode`/`mapHttpError`/`isAppApiError`, `ErrorInterceptor` (`HttpErrorResponse` → `AppApiError`, 401 surfacé, aucun body/token), `LogInterceptor` (méthode + path + status + duration seulement, query/header/body/URL signée supprimés), `RequestState<T>` + factories + `createRequestState()`, `app.config.ts` avec ordre `authInterceptor → logInterceptor → errorInterceptor`. Tests : **122/122** ✅.
 
-**Étape précédente — Web Core Angular 3 — Auth flow + routing protégé** (`cores/web-angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`AUTH_ROUTING_READY`**. Livrables : `AuthState` (`loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired`), `AuthService` Signals (access token mémoire privé, signal public read-only, login placeholder, logout purge, restoreSession sans persistance), guards fonctionnels `authGuard`/`guestGuard`, `sanitizeReturnUrl` anti open-redirect, `AuthInterceptor` Bearer mémoire excluant endpoints auth, routes `/login` et `/dashboard`, pages shells login/dashboard accessibles.
+**Étape précédente — Web Core Angular 3 — Auth flow + routing protégé** (`starters/angular/`, `docs/project-status/`) (2026-07-16) : `web-angular` → **`AUTH_ROUTING_READY`**. Livrables : `AuthState` (`loading`/`authenticated`/`unauthenticated`/`refreshing`/`expired`), `AuthService` Signals (access token mémoire privé, signal public read-only, login placeholder, logout purge, restoreSession sans persistance), guards fonctionnels `authGuard`/`guestGuard`, `sanitizeReturnUrl` anti open-redirect, `AuthInterceptor` Bearer mémoire excluant endpoints auth, routes `/login` et `/dashboard`, pages shells login/dashboard accessibles.
 
-**Étape précédente — Web Core Angular 2 — Starter minimal Angular** (`cores/web-angular/`, `docs/project-status/`) (2026-07-15) : starter Angular 22.0.6 créé. `web-angular` → **`STARTER_INITIALISE`**. Livrables : `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4, typescript 6.0.3, @angular/cli 22.0.7 + @angular/build 22.0.7, override `vite` 7.3.6 pour audit 0 ; `engines.node: >=24.15.0 || >=22.22.3`), `angular.json` (builder `@angular/build:application`, esbuild), `tsconfig.json` (strict + `strictTemplates` + ES2022 + `useDefineForClassFields: false`), `karma.conf.js` (ChromeHeadlessNoSandbox — `--no-sandbox --disable-gpu --disable-dev-shm-usage`, `singleRun`), `src/main.ts` (`bootstrapApplication(AppComponent, appConfig)`), `src/styles.scss` (thème Material 3 : `mat.define-theme()` + `mat.$azure-palette` + `mat.$cyan-palette`, `@include mat.all-component-themes()`, tokens Enistere `--enistere-*` → `--mat-sys-*`, dark mode `[data-theme='dark']`), `src/app/app.config.ts` (`provideRouter`, `provideHttpClient`, animations async), `src/app/app.routes.ts`, `AppComponent`, `HomeComponent`. Tests : **8/8** ✅. Build : SUCCESS 340 KB.
+**Étape précédente — Web Core Angular 2 — Starter minimal Angular** (`starters/angular/`, `docs/project-status/`) (2026-07-15) : starter Angular 22.0.6 créé. `web-angular` → **`STARTER_INITIALISE`**. Livrables : `package.json` (@angular/core 22.0.6, @angular/material/cdk 22.0.4, typescript 6.0.3, @angular/cli 22.0.7 + @angular/build 22.0.7, override `vite` 7.3.6 pour audit 0 ; `engines.node: >=24.15.0 || >=22.22.3`), `angular.json` (builder `@angular/build:application`, esbuild), `tsconfig.json` (strict + `strictTemplates` + ES2022 + `useDefineForClassFields: false`), `karma.conf.js` (ChromeHeadlessNoSandbox — `--no-sandbox --disable-gpu --disable-dev-shm-usage`, `singleRun`), `src/main.ts` (`bootstrapApplication(AppComponent, appConfig)`), `src/styles.scss` (thème Material 3 : `mat.define-theme()` + `mat.$azure-palette` + `mat.$cyan-palette`, `@include mat.all-component-themes()`, tokens Enistere `--enistere-*` → `--mat-sys-*`, dark mode `[data-theme='dark']`), `src/app/app.config.ts` (`provideRouter`, `provideHttpClient`, animations async), `src/app/app.routes.ts`, `AppComponent`, `HomeComponent`. Tests : **8/8** ✅. Build : SUCCESS 340 KB.
 
-**Étape précédente — Web Core Angular 1 — Core specification** (`cores/web-angular/`, `docs/project-status/`) (2026-07-15) : `cores/web-angular/CORE_SPECIFICATION.md` (32 §) + `cores/web-angular/README.md` créés. `web-angular` → **`SPECIFICATION_DOCUMENTAIRE`**. Contenu : architecture Angular standalone feature-first (4 couches), Angular Router + guards fonctionnels (`CanActivateFn`/`CanMatchFn`) + lazy loading, Angular Signals (état local), RxJS services (server state), HttpClient + 4 intercepteurs (AuthInterceptor/RefreshInterceptor/ErrorInterceptor/LogInterceptor), Reactive Forms **obligatoires** (Angular Material form fields), thème `mat.define-theme()` + `--mat-sys-*` + tokens Enistere (ADR-035), composants maison Enistere Angular (LoadingState/EmptyState/ErrorState/SuccessState CDK-based WCAG 2.1 AA), RBAC (`PermissionService` + `PermissionDirective`), auth token en mémoire (signal Angular), stratégie refresh différée (§32), 15 critères V1 (§29), 9 missions ordonnées (Angular 1→V1), 13 décisions pendantes (§32 : ADR-016§F, Jest vs Karma, E2E, TanStack Query Angular, NgRx, SSR, tokens SCSS, etc.). Aucun starter Angular, aucun code TypeScript, aucune dépendance npm. `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
+**Étape précédente — Web Core Angular 1 — Core specification** (`starters/angular/`, `docs/project-status/`) (2026-07-15) : `starters/angular/CORE_SPECIFICATION.md` (32 §) + `starters/angular/README.md` créés. `web-angular` → **`SPECIFICATION_DOCUMENTAIRE`**. Contenu : architecture Angular standalone feature-first (4 couches), Angular Router + guards fonctionnels (`CanActivateFn`/`CanMatchFn`) + lazy loading, Angular Signals (état local), RxJS services (server state), HttpClient + 4 intercepteurs (AuthInterceptor/RefreshInterceptor/ErrorInterceptor/LogInterceptor), Reactive Forms **obligatoires** (Angular Material form fields), thème `mat.define-theme()` + `--mat-sys-*` + tokens Enistere (ADR-035), composants maison Enistere Angular (LoadingState/EmptyState/ErrorState/SuccessState CDK-based WCAG 2.1 AA), RBAC (`PermissionService` + `PermissionDirective`), auth token en mémoire (signal Angular), stratégie refresh différée (§32), 15 critères V1 (§29), 9 missions ordonnées (Angular 1→V1), 13 décisions pendantes (§32 : ADR-016§F, Jest vs Karma, E2E, TanStack Query Angular, NgRx, SSR, tokens SCSS, etc.). Aucun starter Angular, aucun code TypeScript, aucune dépendance npm. `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 
 **Étape précédente — V3 ADR-035 — Angular UI stack decision** (`docs/adr/`, `docs/project-status/`) (2026-07-15) : ADR `docs/adr/ADR-035-angular-ui-material-vs-primeng.md` rédigé et validé. Décision : **Angular Material (CDK + Material 3) contrôlé par tokens Enistere + composants maison ciblés**. ADR-016 §F par preuve Web Core Angular 1. `quality-gates docs` 2/2 ✅ · `git diff --check` ✅.
 
-**Étape précédente — API Core Spring Boot 8 — Redis health + Rate limiting + MinIO TC** (`cores/api-spring/`, `docs/project-status/`) (2026-07-15) : `spring-boot-starter-data-redis` + Lettuce lazy + `${REDIS_URL}` ; `RateLimitConfig @ConfigurationProperties` + `RateLimitInterceptor` fixed-window en mémoire (`@ConditionalOnProperty`, 4 endpoints, 429 `ApiError`, désactivé en profil test) + `WebMvcConfig` ; `MinioStorageIntegrationTest` TC minio réel (`@TestConfiguration @Primary StorageService`, upload → `listObjects`, URL `X-Amz-*`, no-store) ; `RedisHealthIntegrationTest` TC redis:7-alpine (`$.components.redis.status = UP`). CI L5 **99/99 ✅ BUILD SUCCESS**. C10/R1/R3/R5 fermés. §30 **15/15 ✅**. `quality-gates docs` ✅ + `git diff --check` ✅.
+**Étape précédente — API Core Spring Boot 8 — Redis health + Rate limiting + MinIO TC** (`starters/spring/`, `docs/project-status/`) (2026-07-15) : `spring-boot-starter-data-redis` + Lettuce lazy + `${REDIS_URL}` ; `RateLimitConfig @ConfigurationProperties` + `RateLimitInterceptor` fixed-window en mémoire (`@ConditionalOnProperty`, 4 endpoints, 429 `ApiError`, désactivé en profil test) + `WebMvcConfig` ; `MinioStorageIntegrationTest` TC minio réel (`@TestConfiguration @Primary StorageService`, upload → `listObjects`, URL `X-Amz-*`, no-store) ; `RedisHealthIntegrationTest` TC redis:7-alpine (`$.components.redis.status = UP`). CI L5 **99/99 ✅ BUILD SUCCESS**. C10/R1/R3/R5 fermés. §30 **15/15 ✅**. `quality-gates docs` ✅ + `git diff --check` ✅.
 
-**Étape précédente — API Core Spring Boot 7 — AuditModule + URL signée + CORS** (`cores/api-spring/`) (2026-07-15) : `V3__add_audit_logs.sql` + `AuditService` REQUIRES_NEW best-effort (7 events, aucun payload sensible) + `GET /api/v1/files/{id}/download-url` (ownership + 404 anti-énumération + presigned TTL 300s + `Cache-Control: no-store`) + `CorsConfig @ConfigurationProperties` (`${CORS_ALLOWED_ORIGINS}` CSV). B1/B2/C15 fermés. **90/90 ✅ BUILD SUCCESS**. Décision : `IMPLEMENTATION_AVANCEE` → **`VALIDE_V1`**.
+**Étape précédente — API Core Spring Boot 7 — AuditModule + URL signée + CORS** (`starters/spring/`) (2026-07-15) : `V3__add_audit_logs.sql` + `AuditService` REQUIRES_NEW best-effort (7 events, aucun payload sensible) + `GET /api/v1/files/{id}/download-url` (ownership + 404 anti-énumération + presigned TTL 300s + `Cache-Control: no-store`) + `CorsConfig @ConfigurationProperties` (`${CORS_ALLOWED_ORIGINS}` CSV). B1/B2/C15 fermés. **90/90 ✅ BUILD SUCCESS**. Décision : `IMPLEMENTATION_AVANCEE` → **`VALIDE_V1`**.
 
-**Étape précédente — API Core Spring Boot 5 — CI Java + Quality Gate** (`.github/workflows/`, `cores/quality-core/scripts/`, `cores/quality-core/QUALITY_GATES_MATRIX.md`) (2026-07-15) : création `api-spring-ci.yml` (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL, `./mvnw verify --no-transfer-progress`, `ubuntu-latest`) ; ajout scope `api-spring` dans `quality-gates.mjs` (8e scope, CWD `cores/api-spring`, exclu de `all-safe`, Docker requis) ; mise à jour `quality-gates.test.mjs` (36 → **42/42** tests : buildPlan api-spring, listScopes 7→8, exclusions all-safe) ; `QUALITY_GATES_MATRIX.md` : L5 legend, row api-spring (71 tests 32u+39e2e TC), §2.9, check #11. PR #137 ouverte. Vérifications : tests 42/42 ✅.
+**Étape précédente — API Core Spring Boot 5 — CI Java + Quality Gate** (`.github/workflows/`, `factory/quality/core/scripts/`, `factory/quality/core/QUALITY_GATES_MATRIX.md`) (2026-07-15) : création `api-spring-ci.yml` (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL, `./mvnw verify --no-transfer-progress`, `ubuntu-latest`) ; ajout scope `api-spring` dans `quality-gates.mjs` (8e scope, CWD `starters/spring`, exclu de `all-safe`, Docker requis) ; mise à jour `quality-gates.test.mjs` (36 → **42/42** tests : buildPlan api-spring, listScopes 7→8, exclusions all-safe) ; `QUALITY_GATES_MATRIX.md` : L5 legend, row api-spring (71 tests 32u+39e2e TC), §2.9, check #11. PR #137 ouverte. Vérifications : tests 42/42 ✅.
 
-**Étape précédente — Quality Core 5 — release process runbook** (`cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`) (2026-07-11) :
+**Étape précédente — Quality Core 5 — release process runbook** (`factory/quality/core/RELEASE_PROCESS_RUNBOOK.md`) (2026-07-11) :
 processus de release gouverné. **5 définitions** : merge (technique), promotion de statut (gouvernance documentaire), release Foundation (gouvernance globale), staging validation (déploiement technique), production (hors périmètre V1). **Règle fondamentale** : une release Foundation ≠ un simple merge. **5 types** : `foundation-v1-baseline` (critères + gates L1–L4), `core-v1-validation` (par core), `quality-v2-increment` (docs-only gates), `staging-candidate` (rapport CC11 requis), `hotfix` (CI complète, pas de raccourci). **Prérequis généraux** : état `main`, CI L1–L4, qualité locale, documentation, sécurité, Cloud. **Procédure 8 étapes** : type/scope → commits → project-status → gates → exclusions → notes → PR → tag post-merge. **Format notes de release** : résumé / cores / changements / sécurité / migrations / gates exécutés / limites / prochaine action. **Convention tagging futur** : `foundation-vX.Y.Z`, `core-web-vX.Y.Z`, `core-ui-kit-vX.Y.Z`, `quality-v2.N`, `staging-YYYYMMDD-sha`, `hotfix-vX.Y.Z-NNN` — convention proposée, non appliquée. `RELEASE_READINESS_CHECKLIST.md` Partie 5 ajoutée. Aucun tag créé. Aucune release créée. Aucun workflow modifié. Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
 
 **Étape précédente — Quality Core 4 — alignement templates PR / Issues avec Quality Core** (`.github/`) (2026-07-11) :
 modernisation des templates GitHub (PR : Quality Gates / hors périmètre / sécurité / gouvernance ; bug / feature / security : core, roadmap, impact, canal privé). `config.yml` Security Advisories. Vérifications : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
 
-**Étape précédente — Quality Core 3 — runbook de protection de branche et checks requis** (`cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`) (2026-07-11) :
-procédure complète d'activation manuelle de la protection de branche `main`. **10 checks documentés avec noms exacts** : L1 (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`), L2 (`api-runtime`), L3 (`web-e2e`), L4 (`api-smoke`, `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)`, `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)`). Statut courant après Governance 3 : **activé via GitHub Rulesets** (`protect-main`) avec 8 checks requis ; les deux checks `images` restent recommandés phase 2. Vérifications QC3 : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
+**Étape précédente — Quality Core 3 — runbook de protection de branche et checks requis** (`factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md`) (2026-07-11) :
+procédure complète d'activation manuelle de la protection de branche `main`. **10 checks documentés avec noms exacts** : L1 (`api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`), L2 (`api-runtime`), L3 (`web-e2e`), L4 (`api-smoke`, `images (api-nestjs, ./starters/nestjs, ./starters/nestjs/Dockerfile)`, `images (web-nextjs, ., ./starters/nextjs/Dockerfile)`). Statut courant après Governance 3 : **activé via GitHub Rulesets** (`protect-main`) avec 8 checks requis ; les deux checks `images` restent recommandés phase 2. Vérifications QC3 : `git diff --check` ✓, `npm audit` 0 vuln ✓, tests 36/36 ✓.
 
-**Étape précédente — Quality Core 2 — script local de sélection des gates qualité** (`cores/quality-core/scripts/`) (2026-07-11) :
+**Étape précédente — Quality Core 2 — script local de sélection des gates qualité** (`factory/quality/core/scripts/`) (2026-07-11) :
 `scripts/quality-gates.mjs` (Node 24, sans dépendance) — `list` / `plan <scope>` / `run <scope>`. 7 scopes : `docs`, `packages`, `ui-kit`, `web`, `root-audit`, `mobile-static`, `all-safe`. Arrêt au premier échec, code de sortie propagé. Gates exclus par design : Cloud/staging, smoke Android/iOS, E2E Playwright, api-nestjs e2e. `scripts/quality-gates.test.mjs` : **36/36 tests node:test** (plans vérifiés sans exécution). Vérifications : `list` ✓, `plan all-safe` ✓, `plan mobile-static` ✓, tests 36/36 ✓, `git diff --check` ✓, `npm audit` 0 vuln ✓.
 
-**Étape précédente — Quality Core 1 — cadrage opérationnel des gates qualité V2** (`cores/quality-core/`, `docs/checklists/`) (2026-07-11) :
+**Étape précédente — Quality Core 1 — cadrage opérationnel des gates qualité V2** (`factory/quality/core/`, `docs/checklists/`) (2026-07-11) :
 démarrage du Quality Core comme core de gouvernance qualité. Statut : **`SPECIFICATION_DOCUMENTAIRE`**. Fichiers créés : `CORE_SPECIFICATION.md` (objectif, périmètre V2, 4 niveaux qualité, règle tests Cloud, gouvernance promotion statut), `README.md` (commandes existantes par core, guide PR, responsabilités), `QUALITY_GATES_MATRIX.md` (8 cores × 11 types de gate : typecheck/lint/test/build/audit/e2e/smoke/images/doctor/tokens/openapi). Checklists : `PR_QUALITY_CHECKLIST.md`, `RELEASE_READINESS_CHECKLIST.md`, `CORE_STATUS_REVIEW_CHECKLIST.md`. Aucun workflow GitHub modifié. Aucune dépendance. Aucun changement runtime. Vérifications : `git diff --check` ✓, `npm audit` root 0 vuln ✓.
 
 **Étape précédente — UI Kit VALIDE_V1 review** (`docs/project-status/`) (2026-07-11) :
 promotion officielle du UI Kit de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`. §12.4 **4/4** (tokens ✅ + 19 primitives Web ✅ + docs ✅ + cohérence visuelle mobile/web ✅ RN35) ; §59 **9/9** ; consommation prouvée Web Core VALIDE_V1 + Mobile Core STARTER_UI_KIT_ALIGNED. Réserves non bloquantes documentées (Storybook différé, composants avancés V2/VF, composants RN dans Mobile Core ADR-010). Vérifications : `typecheck` ✓, `lint` ✓, `test 181/181` ✓, `build` ✓, `tokens:check` ✓, `audit` 0 vuln ✓, `git diff --check` ✓.
 
-**Étape précédente — Mobile RN35 — Alignement UI Kit / états UI mobile** (`cores/mobile-react-native/`) (2026-07-11) :
+**Étape précédente — Mobile RN35 — Alignement UI Kit / états UI mobile** (`starters/react-native/`) (2026-07-11) :
 ferme le gap bloquant UI Kit V1 Readiness Review. `src/theme/tokens.ts` : couleurs hex, typographie et
-radius alignés **verbatim** sur `cores/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0) —
+radius alignés **verbatim** sur `packages/ui-kit/generated/typescript/tokens.ts` (tokensVersion 0.1.0) —
 mapping `background.default/muted/elevated`, `foreground.default/muted/inverse`, `border.default`,
 `action.primary`, `status.danger/success` pour light+dark. `src/states/index.ts` : aliases
 `LoadingView`/`EmptyView`/`ErrorView`. `test/theme-token-alignment.test.ts` : **13 tests** (spacing,
@@ -448,20 +453,20 @@ Vérifications : `typecheck` ✓, `lint` ✓, `test 367/367` ✓, `expo-doctor 1
 revue officielle du UI Kit après UI Kit 6 et Web Core UI 2. Score initial : **3/4 critères §12.4 + 8/9 critères §59.**
 Décision : **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`**. Gap bloquant fermé par RN35 ; scores finaux **4/4 + 9/9**.
 
-**Étape précédente — Web Core UI 2** (`cores/web-nextjs/src/shared/components/`) :
+**Étape précédente — Web Core UI 2** (`starters/nextjs/src/shared/components/`) :
 `LoadingState`, `EmptyState`, `ErrorState` réécrits comme wrappers minces vers UI Kit 6.
 **0 régression** (450/450). `typecheck`/`lint`/`test 450/450`/`build`/`audit`/`diff --check` verts.
 
-**Étape précédente — UI Kit 6 — State primitives** (`cores/ui-kit/`) :
+**Étape précédente — UI Kit 6 — State primitives** (`packages/ui-kit/`) :
 4 nouvelles primitives (`LoadingState`, `EmptyState`, `ErrorState`, `SuccessState`). **15 → 19 primitives**. **146 → 181 tests**.
 
-**Étape précédente — Cloud Core CC11 — Durcissement opérationnel staging** (`cores/cloud/`) :
+**Étape précédente — Cloud Core CC11 — Durcissement opérationnel staging** (`deployment/core/`) :
 socle opérationnel du staging CC10 vérifié sur 5 axes (health HTTPS ×3, backup PG + restore, backup MinIO + restore, rollback + roll-forward, rotation smoke). Scripts + runbook + rapport versionnés. Aucun secret dans le dépôt.
 
-**Étape précédente — Cloud Core CC10 — Staging réel HTTPS** (`cores/cloud/`) :
+**Étape précédente — Cloud Core CC10 — Staging réel HTTPS** (`deployment/core/`) :
 `docker-compose.cc10.yml`, reverse proxy compatible Traefik + Let's Encrypt HTTP-01, `sha-5bf4c0f`, serveur staging Enistere. CI PR #73 verte.
 
-**Étape précédente — Web Core Files 7 — Admin BFF quarantaine/restauration** (`cores/web-nextjs/`) :
+**Étape précédente — Web Core Files 7 — Admin BFF quarantaine/restauration** (`starters/nextjs/`) :
 ajoute les BFF handlers et primitives UI minimales pour consommer les capacités admin Files déjà présentes côté
 API, sans nouveau comportement API et sans proxy générique. Livrables : `handleQuarantineFile` /
 `handleRestoreFile` (ordre `assertPost` → UUID → CSRF+Origin → client `writable` → 409 explicite
@@ -471,7 +476,7 @@ hooks `useQuarantineFile` / `useRestoreFile` (mutation sans `mutationKey`, anti-
 `fileKeys.all`), `AdminFileActions` (rendu conditionnel par permissions `files.quarantine` / `files.restore`)
 et page séparée `/protected/files/[id]/admin`. **+53 tests, Web 393 → 446**. CI PR #64 verte.
 
-**Étape précédente — API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`cores/api-nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
+**Étape précédente — API Core Files 5 — liste propriétaire de fichiers paginée (read-only)** (`starters/nestjs/`, `packages/api-contracts/`, `packages/api-client-fetch/`) :
 ajoute `GET /files?limit=&offset=` — liste paginée ownership-scoped des fichiers du propriétaire courant.
 `files.read` requis, ownership-scoped, exclusion `DELETED` (`deletedAt: null`), tri `createdAt desc`,
 pagination offset-based (`limit` 1–50, défaut 20 ; `offset ≥ 0`). Trick limit+1 (aucun COUNT séparé).
@@ -490,7 +495,7 @@ ajouté dans `api-client-fetch`. **Vérifications** : `npm test` API **386/386**
 `openapi:generate` + contracts `generate` verts.
 Commit : `feat(api): add paginated owned file list endpoint (Files 5)`.
 
-**Mobile Core React Native 30 — smoke runtime iOS / parity device** (`cores/mobile-react-native/`,
+**Mobile Core React Native 30 — smoke runtime iOS / parity device** (`starters/react-native/`,
 périmètre `scripts/**` + `package.json` + docs) : documente la parité runtime iOS du starter Expo
 public/protégé/settings. `mobile-react-native` → **`STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT`**. Script ajouté :
 `npm run smoke:ios` (`scripts/smoke-ios.js`) — préflight macOS/`xcrun`/`simctl`/`npx`, rapport JSON structuré et
@@ -504,7 +509,7 @@ modification AuthEngine/withAuthRetry/authedRequest/QueryClient/mutations**. Vé
 fichiers `node --test` + expo-doctor 19/19 + expo export iOS + smoke iOS blocked documenté + npm audit +
 git diff --check verts**. Commit attendu : `docs(mobile): document ios smoke runtime blocker`.
 
-**Mobile Core React Native 28 — smoke visuel device/simulateur du starter** (`cores/mobile-react-native/`,
+**Mobile Core React Native 28 — smoke visuel device/simulateur du starter** (`starters/react-native/`,
 périmètre runtime + docs) : vérifie le shell public/protégé/settings sur Android Emulator `Pixel_6a` via Expo Go
 sans nouvelle primitive ni logique métier. `mobile-react-native` → **`STARTER_VISUAL_SMOKE_READY`**. Parcours
 validé : sign-in public, login via mock auth local temporaire exposé par `adb reverse`, Home protégé, Settings
@@ -517,13 +522,13 @@ retry branché ni modification AuthEngine/withAuthRetry/authedRequest/QueryClien
 git diff --check verts**. Commit attendu : `fix(mobile): verify starter visual smoke`. **Historique RN28** :
 la prochaine action était RN29 ; elle est désormais réalisée.
 
-**Mobile Core React Native 27 — durcissement runtime du starter Expo** (`cores/mobile-react-native/`,
+**Mobile Core React Native 27 — durcissement runtime du starter Expo** (`starters/react-native/`,
 périmètre `app/**` + `src/ui/**` + docs) : durcit le shell public/protégé/settings sans nouvelle primitive ni
 logique métier. `mobile-react-native` → **`STARTER_RUNTIME_HARDENED`**. Corrections : `Button` borné/full-width
 avec label réductible, conteneur Sign-in centré et contraint, conteneur Home contraint, lignes Settings multi-ligne.
 Runtime : `expo export -p ios` réussit ; export web non applicable sans `react-native-web`, dépendance non ajoutée.
 
-**Mobile Core React Native 26 — V1 usable starter shell / settings générique** (`cores/mobile-react-native/`,
+**Mobile Core React Native 26 — V1 usable starter shell / settings générique** (`starters/react-native/`,
 périmètre `app/**` + `src/navigation/**` + docs) : ajoute une route Settings protégée pour rendre le starter
 mobile plus exploitable sans logique métier, conformément à `strategy/04_ROADMAP_GLOBAL.md` §9 Mobile Core React
 Native V1. `mobile-react-native` → **`STARTER_SETTINGS_READY`**. `ROUTES.settings = '/settings'`,
@@ -537,7 +542,7 @@ runtime différé, validation par typecheck/lint + non-régression `node --test`
 + expo-doctor 19/19 + git diff --check verts**. Commit attendu :
 `feat(mobile): add generic settings starter shell`. **Historique : RN27 a depuis durci le runtime starter.**
 
-**Mobile Core React Native 25 — telemetry context composition opt-in** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 25 — telemetry context composition opt-in** (`starters/react-native/`, périmètre
 `src/telemetry` + `test/telemetry-*` + docs) : ajoute une couche **opt-in** qui compose explicitement le
 consentement RN 21, le contexte environnement safe RN 22 et les services analytics RN 13 / crash RN 19.
 `mobile-react-native` → **`TELEMETRY_COORDINATOR_READY`**. `TelemetryContext` est borné par l'allow-list RN 22,
@@ -552,7 +557,7 @@ RN 25 ne décide pas ADR-038/ADR-019/ADR-018. **+9 cas `node --test`** (`telemet
 git diff --check verts**. Commit attendu : `feat(mobile): add telemetry coordinator primitives`.
 **Historique : RN26 a finalement livré le Settings starter shell V1.**
 
-**Mobile Core React Native 24 — retry / backoff primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Mobile Core React Native 24 — retry / backoff primitives génériques** (`starters/react-native/`, périmètre
 `src/retry` + `test/retry-*` + docs) : ajoute des primitives **pures et déterministes** sans réseau réel, sans dépendance
 et sans `Date.now()` dans le chemin testé. `mobile-react-native` → **`RETRY_READY`**. **Aucun chemin existant modifié** :
 AuthEngine, `withAuthRetry`/`authedRequest`, QueryClient et mutations restent inchangés. `RetryPolicy` est borné
@@ -569,7 +574,7 @@ Vérifs : **typecheck + lint + test 346/346 + expo-doctor 19/19 + git diff --che
 contenu, aucune persistance.
 
 **Étape précédente — Mobile Core React Native 22 — environnement / métadonnées app primitives génériques non identifiantes (seam, sans
-`expo-application`/`expo-device` réel)** (`cores/mobile-react-native/`, périmètre `src/app-environment` + `test/**` +
+`expo-application`/`expo-device` réel)** (`starters/react-native/`, périmètre `src/app-environment` + `test/**` +
 docs) : ajoute une **couche d'environnement / métadonnées app générique, NON IDENTIFIANTE**, **pure et testable**, **sans
 `expo-device`/`expo-application` réel, sans réseau, sans collecte automatique**. `mobile-react-native` →
 **`APP_ENVIRONMENT_READY`**. **Aucune dépendance ajoutée.** Elle fournit un **contexte technique sûr et grossier** destiné
@@ -598,10 +603,10 @@ grossier ; `app-environment-service` : snapshot assaini gelé, **placeholder str
 `describeForContext` champs autorisés seulement, **adapter défaillant → `{os:unknown}` sans throw**, **logs sans
 identifiant/PII/version exacte**) → **320 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
 typecheck-only). Vérifs : **typecheck + lint + test 320/320 + expo-doctor 19/19 + git diff --check verts** (**RN 22
-n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ;
+n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ;
 aucun autre core. Commit `feat(mobile): add safe app environment primitives`.
 
-**Étape précédente — Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives génériques** (`cores/mobile-react-native/`,
+**Étape précédente — Mobile Core React Native 21 — consentement télémétrie / privacy gate primitives génériques** (`starters/react-native/`,
 périmètre `src/consent` + `test/**` + docs) : ajoute une **couche de consentement télémétrie / privacy gate générique**,
 **pure et testable**, **sans SDK analytics/crash réel, sans réseau, sans UI de consentement, sans identifiant utilisateur
 réel, sans PII**. `mobile-react-native` → **`CONSENT_GATE_READY`**. **Aucune dépendance ajoutée.** C'est une **primitive
@@ -629,11 +634,11 @@ autorisé**, **granted seul autorise**, `denied`/`unknown` bloquent, `sanitizeCo
 throw**, **listener isolé**, **logs enums/count** ; `consent-preference-store` : mapping `privacy.consent.*` **non
 sensible**, round-trip, **`clear()` ne touche que le consentement**) → **309 tests** ; module **entièrement agnostique**
 (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 309/309 + expo-doctor 19/19 + git diff
---check verts** (**RN 21 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
+--check verts** (**RN 21 n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
 `packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add telemetry consent primitives`.
 
 **Étape précédente — Mobile Core React Native 20 — préférences non sensibles persistantes primitives génériques (seam, sans MMKV/AsyncStorage
-réel)** (`cores/mobile-react-native/`, périmètre `src/preferences` + `test/**` + docs) : ajoute une **couche de
+réel)** (`starters/react-native/`, périmètre `src/preferences` + `test/**` + docs) : ajoute une **couche de
 préférences persistantes NON SENSIBLES générique**, **pure et testable**, avec un **seam futur MMKV/AsyncStorage** mais
 **sans MMKV réel, sans AsyncStorage réel, sans SecureStore (secrets), sans Zustand persistant, sans réseau, sans logique
 métier** (ADR-015 §15/§16). `mobile-react-native` → **`PREFERENCES_READY`**. **Aucune dépendance ajoutée.**
@@ -664,11 +669,11 @@ des valeurs sensibles** Bearer/JWT/email/URL signée/URI device, **lecture assai
 défaillant best-effort sans throw**, **listener isolé**, **logs `{operation,count}` sans clé/valeur**, tolérance input
 invalide) → **294 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs :
 **typecheck + lint + test 294/294 + expo-doctor 19/19 + git diff --check verts** (**RN 20 n'ajoute aucune dépendance**).
-**Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
+**Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
 `feat(mobile): add non-sensitive preferences primitives`.
 
 **Étape précédente — Mobile Core React Native 19 — crash / error-reporting primitives génériques (seam, sans SDK réel)**
-(`cores/mobile-react-native/`, périmètre `src/crash-reporting` + `test/**` + docs) : ajoute une **couche de crash /
+(`starters/react-native/`, périmètre `src/crash-reporting` + `test/**` + docs) : ajoute une **couche de crash /
 error-reporting générique**, **pure et testable**, **sans SDK réel** (Sentry/Crashlytics/Bugsnag/Firebase/OTel), **sans
 réseau, sans persistance, sans batching, sans crash handler global obligatoire, sans logique métier**.
 `mobile-react-native` → **`CRASH_REPORTING_READY`**. **Aucune dépendance ajoutée.** C'est une **primitive préparatoire**
@@ -701,10 +706,10 @@ assaini**, **capture ne throw jamais** (adapter sync qui throw), **adapter async
 succès**, **flush best-effort**, **logs `{operation,severity,source}` sans contenu sensible**, **placeholder copies
 défensives**) → **279 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only).
 Vérifs : **typecheck + lint + test 279/279 + expo-doctor 19/19 + git diff --check verts** (**RN 19 n'ajoute aucune
-dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
 core. Commit `feat(mobile): add crash reporting primitives`.
 
-**Étape précédente — Mobile Core React Native 18 — gate biométrique local primitives génériques** (`cores/mobile-react-native/`,
+**Étape précédente — Mobile Core React Native 18 — gate biométrique local primitives génériques** (`starters/react-native/`,
 périmètre `src/biometrics` + `test/**` + docs) : ajoute une **couche de gate biométrique local générique**, **pure et
 testable**, **sans Expo `LocalAuthentication` réel, sans Keychain, sans module natif, sans écran/provider/hook
 obligatoire, sans logique métier**. `mobile-react-native` → **`BIOMETRIC_GATE_READY`**. **Aucune dépendance ajoutée.**
@@ -735,10 +740,10 @@ availability/type/outcome incl. **junk → `unknown`/`error` jamais `success`**,
 (`authenticateCalls === 0`), **erreurs adapter contrôlées (`getAvailability`/`authenticate`) sans throw**, **junk →
 `error`**, **logs sans prompt ni cause** (`operation` seul), placeholder) → **262 tests** ; module **entièrement
 agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 262/262 + expo-doctor
-19/19 + git diff --check verts** (**RN 18 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
+19/19 + git diff --check verts** (**RN 18 n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/
 `ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add biometric gate primitives`.
 
-**Étape précédente — Mobile Core React Native 17 — feature flags / config primitives génériques** (`cores/mobile-react-native/`,
+**Étape précédente — Mobile Core React Native 17 — feature flags / config primitives génériques** (`starters/react-native/`,
 périmètre `src/config` + `test/**` + docs) : **étend** les primitives de configuration (env) avec une **couche de
 feature flags / config générique**, **pure et testable**, **sans SDK remote-config réel, sans réseau, sans persistance,
 sans user targeting réel, sans secret/token/URL signée/payload serveur/PII, sans écran/hook obligatoire/provider
@@ -764,10 +769,10 @@ defaults⊕adapter (**adapter gagne**), `getFlag`/`getAll`, **subscribe/unsubscr
 **refresh best-effort + erreur contrôlée**, **listener isolé**, **erreurs adapter contrôlées**, **logs sans clé/valeur**,
 `dispose`, tolérance input invalide) → **244 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
 typecheck-only). Vérifs : **typecheck + lint + test 244/244 + expo-doctor 19/19 + git diff --check verts** (**RN 17
-n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
+n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
 modifié** ; aucun autre core. Commit `feat(mobile): add generic feature flag primitives`.
 
-**Étape précédente — Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** (`cores/mobile-react-native/`,
+**Étape précédente — Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques** (`starters/react-native/`,
 périmètre `src/offline` + `test/**` + docs) : **étend** les primitives offline de RN 3 avec une **couche de connectivité
 générique**, **pure et testable**, **sans dépendance native** (NetInfo réel), **sans offline sync, sans rejeu auto, sans
 persistance, sans écran/hook obligatoire/provider global**. `mobile-react-native` → **`NETWORK_STATUS_READY`**. **Aucune
@@ -791,10 +796,10 @@ adapter → service + subscribers**, `changedAt` sur status, type-only conserve 
 déterministe**, **listener isolé**, **erreurs adapter contrôlées sans throw**, `dispose`, **logs enums seulement**) →
 **227 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck +
 lint + test 227/227 + expo-doctor 19/19 + git diff --check verts** (**RN 16 n'ajoute aucune dépendance**). **Aucun
-fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
+fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
 `feat(mobile): add generic network status primitives`.
 
-**Étape précédente — Mobile Core React Native 15 — app lifecycle primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 15 — app lifecycle primitives génériques** (`starters/react-native/`, périmètre
 `src/app-lifecycle` + `test/**` + docs) : ajoute une **couche générique de cycle de vie applicatif**, **pure et
 testable**, **sans dépendance native** (RN `AppState` réel), **sans écran, sans hook obligatoire, sans provider global,
 sans stockage, sans logique métier**. `mobile-react-native` → **`APP_LIFECYCLE_READY`**. **Aucune dépendance ajoutée.**
@@ -815,11 +820,11 @@ tests `node --test`** (`app-lifecycle-state` : normalisation incl. `extension`/g
 subscribers**, transition validée, **subscribe/unsubscribe déterministe**, no-op même état, **listener isolé**, **erreurs
 adapter contrôlées sans throw**, `dispose`, **logs enums seulement**) → **212 tests** ; module **entièrement agnostique**
 (aucun hook/provider → rien en typecheck-only). Vérifs : **typecheck + lint + test 212/212 + expo-doctor 19/19 + git
-diff --check verts** (**RN 15 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/
+diff --check verts** (**RN 15 n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/
 `cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add generic app lifecycle primitives`.
 **Prochaine action : Mobile Core React Native 16 — connectivité réseau (network status) primitives génériques.**
 
-**Étape précédente — Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 14 — accessibilité (a11y) primitives génériques** (`starters/react-native/`, périmètre
 `src/a11y` + `test/**` + docs) : ajoute une **couche d'accessibilité générique** (ADR-010 §16, spec §45), **pure et
 testable**, **sans dépendance native** (`AccessibilityInfo` réel), **sans écran/composant UI, sans provider global
 obligatoire, sans stockage**. `mobile-react-native` → **`A11Y_READY`**. **Aucune dépendance ajoutée.** **État**
@@ -843,12 +848,12 @@ announce/focus/isScreenReaderEnabled, **erreurs adapter contrôlées — pas de 
 brut**, `A11yAdapterError`) → **196 tests** ; module **entièrement agnostique** (aucun hook/provider → rien en
 typecheck-only). Vérifs : **typecheck + lint + test 196/196 + expo-doctor 19/19 + git diff --check verts** (**RN 14
 n'ajoute aucune dépendance**). **`DECISIONS_REGISTER` : ADR-010 reste `PARTIELLEMENT_IMPLEMENTE`** (note a11y ajoutée,
-**aucun changement de statut**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
+**aucun changement de statut**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root
 modifié** ; aucun autre core. Commit `feat(mobile): add generic accessibility primitives`. **Prochaine action : Mobile
 Core React Native 15 — app lifecycle / état d'application primitives génériques.**
 
 **Étape précédente — Mobile Core React Native 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel)**
-(`cores/mobile-react-native/`, périmètre `src/analytics` + `test/**` + docs) : ajoute une **couche générique
+(`starters/react-native/`, périmètre `src/analytics` + `test/**` + docs) : ajoute une **couche générique
 d'analytics/télémétrie** au-dessus du logger/redaction RN 8, **sans SDK réel** (Sentry/Amplitude/GA/Segment/Firebase/
 OTel), **sans réseau, sans persistance, sans identité utilisateur réelle, sans logique métier, sans UI**.
 `mobile-react-native` → **`ANALYTICS_READY`**. **Aucune dépendance ajoutée.** Le branchement d'un SDK réel relève d'un
@@ -871,11 +876,11 @@ TESTS** (`getEvents`/`clear`), **aucun SDK/réseau/persistance**. **+16 tests `n
 **l'adapter ne reçoit jamais de valeur sensible**, **erreur adapter contrôlée — track ne throw pas**, **logger ne reçoit
 que `{eventName,propertyCount}`**, `flush` délégué/no-op/échec contrôlé, **sans throw**) → **175 tests** ; module
 **entièrement agnostique** (aucun hook → rien en typecheck-only). Vérifs : **typecheck + lint + test 175/175 +
-expo-doctor 19/19 verts** (**RN 13 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
+expo-doctor 19/19 verts** (**RN 13 n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/
 `ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add generic analytics telemetry
 primitives`. **Prochaine action : Mobile Core React Native 14 — accessibilité (a11y) primitives génériques.**
 
-**Étape précédente — Mobile Core React Native 12 — deep-linking / routing primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 12 — deep-linking / routing primitives génériques** (`starters/react-native/`, périmètre
 `src/linking` + `test/**` + docs) : ajoute une **couche pure de résolution de liens/deep-links vers routes internes
 validées**, **sans dépendance native, sans logique métier, sans UI, sans schéma métier**. `mobile-react-native` →
 **`LINKING_READY`**. **Aucune dépendance ajoutée.** Prépare le **tap de notification (RN 10)** ; **les projets dérivés
@@ -898,11 +903,11 @@ normalizeUrl ; `linking-resolve` : custom valide, universal valide, **host exter
 **open-redirect** `//`/`scheme://`/`..` bloqué/rejeté, **params sensibles retirés**, **bornes**, **input invalide sans
 throw**, `resolveNotificationLink` clé configurable) → **159 tests** ; module **entièrement agnostique** (aucun hook →
 rien en typecheck-only). Vérifs : **typecheck + lint + test 159/159 + expo-doctor 19/19 verts** (**RN 12 n'ajoute aucune
-dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
 core. Commit `feat(mobile): add generic deep-linking routing primitives`. **Prochaine action : Mobile Core React Native
 13 — analytics / télémétrie primitives génériques (avec redaction, sans SDK réel).**
 
-**Étape précédente — Mobile Core React Native 11 — i18n / localisation primitives génériques** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 11 — i18n / localisation primitives génériques** (`starters/react-native/`, périmètre
 `src/i18n` + `test/**` + docs) : ajoute des **primitives i18n/localisation génériques**, testables, **sans contenu
 métier, sans dépendance native, sans appel réseau, sans persistance de locale, sans UI**. `mobile-react-native` →
 **`I18N_READY`**. **Aucune dépendance ajoutée** (tout via `Intl` built-in). **Modèle de locale** (`src/i18n/locale.ts`,
@@ -923,12 +928,12 @@ fallback/direction/résolution ; `i18n-catalog` : interpolation, clé inconnue *
 en/fr ; `i18n-format` : number/currency/date déterministes UTC, **no-throw** ; `i18n-engine` : résolution, fallback,
 match langue, formatters liés, `subscribe`) → **144 tests** ; module **entièrement agnostique** (aucun hook → rien en
 typecheck-only). Vérifs : **typecheck + lint + test 144/144 + expo-doctor 19/19 verts** (**RN 11 n'ajoute aucune
-dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
 core. Commit `feat(mobile): add generic i18n localization primitives`. **Prochaine action : Mobile Core React Native 12
 — deep-linking / routing primitives génériques.**
 
 **Étape précédente — Mobile Core React Native 10 — notifications client (primitives locales génériques, sans push réel)**
-(`cores/mobile-react-native/`, périmètre `src/notifications` + `test/**` + docs) : ajoute une **couche générique de
+(`starters/react-native/`, périmètre `src/notifications` + `test/**` + docs) : ajoute une **couche générique de
 primitives de notifications locales** au-dessus du modèle permissions RN 9, **sans push réel, sans Expo Notifications
 réel, sans backend, sans token device, sans logique métier, sans UI**. `mobile-react-native` → **`NOTIFICATIONS_READY`**.
 **Aucune dépendance ajoutée.** **Message sûr** (`src/notifications/message.ts`, agnostique) : `NotificationMessage`
@@ -952,11 +957,11 @@ jamais persisté. **+16 tests `node --test`** (`notification-message` : bornage 
 de schedule**, granted/limited/unknown→request → schedule, `cancel`/`cancelAll`, **erreur adapter → `NotificationError`
 sans cause brute**, `getDelivered` no-op, **aucune donnée sensible loggée**) → **122 tests** ; module **entièrement
 agnostique** (aucun hook → rien en typecheck-only). Vérifs : **typecheck + lint + test 122/122 + expo-doctor 19/19
-verts** (**RN 10 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
+verts** (**RN 10 n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/
 `packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add generic local notification primitives`.
 **Prochaine action : Mobile Core React Native 11 — i18n / localisation primitives génériques.**
 
-**Étape précédente — Mobile Core React Native 9 — permissions natives génériques gouvernées** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 9 — permissions natives génériques gouvernées** (`starters/react-native/`, périmètre
 `src/permissions` + `test/**` + docs) : ajoute une **abstraction générique, testable et gouvernée** des permissions
 runtime mobiles, **sans logique métier, sans écran/picker, sans notification push réelle, sans upload réel**.
 `mobile-react-native` → **`PERMISSIONS_READY`**. **Aucune dépendance ajoutée.** **Modèle pur**
@@ -981,11 +986,11 @@ chaînes/objets/booléens, idempotence, conservatisme, helpers ; `permission-eng
 refusé**, `ensure`, `blocked`/`unavailable` sans prompt, **erreur adaptateur → `PermissionAdapterError` sans cause
 brute**, `openSettings` supporté/non, **aucune donnée sensible loggée**) → **106 tests** ; le hook (React) est
 **typecheck** seulement. Vérifs : **typecheck + lint + test 106/106 + expo-doctor 19/19 verts** (**RN 9 n'ajoute aucune
-dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
+dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre
 core. Commit `feat(mobile): add generic governed runtime permissions`. **Prochaine action : Mobile Core React Native 10
 — notifications client (cadrage + primitives génériques, sans push réel).**
 
-**Étape précédente — Mobile Core React Native 8 — logger / observabilité client (avec redaction)** (`cores/mobile-react-native/`,
+**Étape précédente — Mobile Core React Native 8 — logger / observabilité client (avec redaction)** (`starters/react-native/`,
 périmètre `src/logger` + `src/upload/file.ts` (correctif `describeFileForLog`) + `test/**` + docs) : ajoute une
 **couche de logging/observabilité générique** avec **redaction stricte**, **sans endpoint métier, sans backend
 d'observabilité, sans transport réseau ni persistance**. `mobile-react-native` → **`OBSERVABILITY_READY`**. **Aucune
@@ -1010,11 +1015,11 @@ changement de comportement**. **+18 tests `node --test`** (`logger-redaction` : 
 Bearer/Basic/JWT/device-uri/URL signée/email, profondeur ; `logger` : niveaux, horloge injectée, redaction au logger,
 `child`/`withRequestId`, `safeErrorFields`) → **89 tests** ; module **entièrement** agnostique (rien en typecheck-only).
 Vérifs : **typecheck + lint + test 89/89 + expo-doctor 19/19 verts** (**RN 8 n'ajoute aucune dépendance**). **Aucun
-fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
+fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit
 `feat(mobile): add client logger with central redaction`. **Prochaine action : Mobile Core React Native 9 —
 permissions natives génériques (gouvernées).**
 
-**Étape précédente — Mobile Core React Native 7 — primitives d'upload sécurisé multipart** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 7 — primitives d'upload sécurisé multipart** (`starters/react-native/`, périmètre
 `src/query` + `src/upload` + tests + docs) : ajoute des **primitives d'upload génériques** au-dessus du client
 officiel et des couches auth/server-state — **sans endpoint métier, sans écran, sans picker, sans logique applicative**.
 `mobile-react-native` → **`UPLOAD_READY`**. **Aucune dépendance ajoutée.** **Descripteur RN** (`src/upload/file.ts`,
@@ -1034,14 +1039,14 @@ reste **exposé** ; câbler `signOut → reset()` vivrait dans `AuthProvider` (`
 câblé, aucun changement de comportement**. **+4 tests `node --test`** (`upload-file` : `isMobileFile`, `describeFileForLog`
 **sans fuite d'`uri`**, `isAllowedFileType` ; `query-errors` 413/415) → **71 tests** ; le hook (React/TanStack/ESM) est
 **typecheck** seulement. Vérifs : **typecheck + lint + test 71/71 verts** (expo-doctor : checks locaux verts ; checks
-réseau Expo/RN-Directory flappent — **RN 7 n'ajoute aucune dépendance**). **Aucun fichier `cores/api-nestjs`/`web-nextjs`/
+réseau Expo/RN-Directory flappent — **RN 7 n'ajoute aucune dépendance**). **Aucun fichier `starters/nestjs`/`web-nextjs`/
 `ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add secure multipart upload
 primitives`. **Prochaine action : Mobile Core React Native 8 — logger/observabilité client (avec redaction).**
 
-**Étape précédente — Mobile Core React Native 6 — état local UI + purge logout déterministe** (`cores/mobile-react-native/`, périmètre
+**Étape précédente — Mobile Core React Native 6 — état local UI + purge logout déterministe** (`starters/react-native/`, périmètre
 `src/auth` + `src/query` + `src/store` + tests + docs) : ajoute un **état local UI générique** (séparé du
 server-state) et **câble le logout** pour purger le cache TanStack Query de façon déterministe. **Zustand approuvé**
-(strategy 06 « Local state: Approved » ; spec §23) ajouté à `cores/mobile-react-native` (`^5`, **0 dépendance**).
+(strategy 06 « Local state: Approved » ; spec §23) ajouté à `starters/react-native` (`^5`, **0 dépendance**).
 **Store** `src/store/` : `ui-state.ts` (**pur/agnostique** : modèle + transitions immutables) + `ui-store.ts`
 (`useUiStore`). État = **uniquement primitives UI non sensibles** : `themePreference` (`'system'|'light'|'dark'`) +
 `flags` (`Record<string,boolean>`) + `reset()`. **Sécurité structurelle** : le type n'autorise qu'un enum + des
@@ -1054,11 +1059,11 @@ invalidation : ordre déterministe `cancel`→`clear`) → **67 tests** ; bindin
 **typecheckés**, hors build Node. Vérifs : **typecheck + lint + test 67/67 verts** (expo-doctor : checks locaux verts ;
 checks réseau Expo/RN-Directory flappent dans cet env — 19/19 obtenu plus tôt ; zustand 0-dep non en cause). **La garde
 CI `npm ls zustand` (root) reste verte** : le mobile est autonome (hors workspaces racine), son Zustand n'est pas dans
-le scope `npm ls` du root (intent ADR-012 « pas de Zustand dans le Web » préservé). **Aucun fichier `cores/api-nestjs`/
+le scope `npm ls` du root (intent ADR-012 « pas de Zustand dans le Web » préservé). **Aucun fichier `starters/nestjs`/
 `web-nextjs`/`ui-kit`/`cloud`/`packages`/root modifié** ; aucun autre core. Commit `feat(mobile): add local ui state and
 deterministic logout purge`. **Prochaine action : Mobile Core React Native 7 — upload sécurisé (multipart).**
 
-**Étape précédente — Mobile Core React Native 5 — couche server-state** (`cores/mobile-react-native/`, périmètre `src/query/**` + tests +
+**Étape précédente — Mobile Core React Native 5 — couche server-state** (`starters/react-native/`, périmètre `src/query/**` + tests +
 docs) : ajoute une couche **server-state générique** au-dessus de **TanStack Query** (ADR-012) et du client officiel,
 **sans endpoint ni schéma métier**. **Query keys** (`createQueryKeys(scope)`, agnostique) : fabrique namespacée,
 typée, **stable** (`normalizeParams` : clés triées, `undefined` retiré → cache hit) ; aucun secret dans une clé.
@@ -1073,11 +1078,11 @@ le message brut/token/URL signée — ADR-016 §28). **Invalidation/purge** : `i
 `src/auth` (hors périmètre) → câblage `signOut → purgeServerState` documenté (= RN 6). **Pas de persistance de cache**.
 `mobile-react-native` → **`SERVER_STATE_READY`**. **+12 tests `node --test`** (query-keys, query-errors : non-fuite du
 message brut) → **59 tests** ; hooks/invalidation **typecheckés**, hors build Node. Vérifs : **typecheck + lint +
-test 59/59 + expo-doctor 19/19 verts**. **Aucun fichier `cores/api-nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/
+test 59/59 + expo-doctor 19/19 verts**. **Aucun fichier `starters/nestjs`/`web-nextjs`/`ui-kit`/`cloud`/`packages`/
 root modifié** ; aucun autre core. Commit `feat(mobile): add server-state data layer`. **Prochaine action : Mobile
 Core React Native 6 — état local (Zustand) + câblage `signOut → purgeServerState`.**
 
-**Étape précédente — Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`cores/mobile-react-native/`) : corrige une
+**Étape précédente — Mobile Core React Native 4B — restauration du `401 → refresh → retry`** (`starters/react-native/`) : corrige une
 régression RN 4 (le client en `enableRefresh:false` + adaptateur no-op → plus de `401`→refresh→retry). Ajoute un **pont
 401 explicite** `src/api/with-auth-retry.ts` (pur/agnostique) : `authedRequest(fn)` = `withAuthRetry(engine.refreshSession,
 fn)` → sur `401` (détecté par `error.isUnauthorized`, sans import ESM) → **`AuthEngine.refreshSession()` COALESCÉ** → **1
@@ -1089,7 +1094,7 @@ seul retry** (relit le Bearer rafraîchi) → si `null` (session **purgée** →
 non touché. Docs : `ARCHITECTURE.md` §12 (pont 401) + `README.md`. Commit `fix(mobile): restore 401 refresh retry with official
 client`. **Prochaine action : Mobile Core React Native 5 — server-state data layer.**
 
-**Étape précédente — Mobile Core React Native 4 — intégration réelle du client officiel** (`cores/mobile-react-native/`, faisant suite
+**Étape précédente — Mobile Core React Native 4 — intégration réelle du client officiel** (`starters/react-native/`, faisant suite
 à RN 1→3) : **remplace** le transport « seam » local par **`@enistere/api-client-fetch` + `@enistere/api-contracts`**
 (ADR-016). **Consommation = core autonome + packages liés `file:`** (écart **validé avec l'utilisateur** : ne PAS
 ajouter l'app Expo SDK 55 au lockfile racine partagé qui pilote le `npm ci` de toute la CI monorepo — risque
@@ -1105,12 +1110,12 @@ token-mapping ; logique réseau du client testée **dans son package** = 29). **
 (référencé par `babel.config.js` mais jamais déclaré — lacune RN 1–3 ; rend le core **bundle-able**). Vérifs :
 **typecheck (types réels) + lint (0) + test 47/47 + expo-doctor 19/19 + `expo export -p ios` (bundle Hermes 2,7 Mo
 **embarquant** `createEnistereApiClient`/`/auth/login`/`/auth/refresh`) verts** ; packages liés `api-contracts` 11/11
-+ `api-client-fetch` 29/29 (inchangés). **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/`packages`
++ `api-client-fetch` 29/29 (inchangés). **Aucun fichier `deployment/core`/`api-nestjs`/`web-nextjs`/`ui-kit`/`packages`
 modifié** ; **aucun autre core démarré** ; Cloud reste **`PAUSE_CONTROLEE`**, staging **`EXECUTION_LOCALE_CONTROLEE`**.
 Commit `feat(mobile): integrate official api-client-fetch`. **Prochaine action : Mobile Core React Native 5 —
 server-state data layer (hooks TanStack Query au-dessus du client officiel)**.
 
-**Étape précédente — Mobile Core React Native 3 — forms, validation & offline-ready primitives** (`cores/mobile-react-native/`,
+**Étape précédente — Mobile Core React Native 3 — forms, validation & offline-ready primitives** (`starters/react-native/`,
 faisant suite à RN 1 starter PR #11 et RN 2 auth/session hardening) : ajoute des **formulaires génériques** et la
 **validation UX** (**React Hook Form + Zod** : `FormField`/`FormLabel`/`FormError`/`TextInputField` token-driven,
 erreurs **accessibles** ; helpers agnostiques `validateWith` + `zodErrorToFieldErrors` — **client = UX uniquement,
@@ -1120,13 +1125,13 @@ persistance, **sans** rejeu auto, **sans** NetInfo/MMKV/AsyncStorage/SQLite, **s
 spec §37). `mobile-react-native` → **`FORMS_OFFLINE_PRIMITIVES_READY`**. **44 tests `node --test`** (21 RN 2 + 23
 nouveaux) ; **typecheck + lint + test 44/44 + expo-doctor 19/19 verts**. **Dette doc corrigée** : ADR-015
 `DECIDE_NON_IMPLEMENTE` → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-010/011/012 reflètent l'avancement mobile réel ;
-ADR-003 note la validation cliente mobile. **Aucun fichier `cores/cloud`/`api-nestjs`/`web-nextjs`/`ui-kit`/
+ADR-003 note la validation cliente mobile. **Aucun fichier `deployment/core`/`api-nestjs`/`web-nextjs`/`ui-kit`/
 `packages` modifié** ; **aucun autre core démarré** ; Cloud reste **`PAUSE_CONTROLEE`**, staging
 **`EXECUTION_LOCALE_CONTROLEE`**. Commit `feat(mobile): add forms validation and offline-ready primitives`.
 **Prochaine action : Mobile Core React Native 4 — intégration réelle de `@enistere/api-client-fetch`** (workspace
 racine + Metro monorepo).
 
-**Étape précédente — Cloud Core 9 — exécution staging contrôlée** (`cores/cloud/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
+**Étape précédente — Cloud Core 9 — exécution staging contrôlée** (`deployment/core/docs/STAGING_EXECUTION_REPORT.md`) : **exécution
 réelle des conteneurs** (API+Web+PostgreSQL+MinIO) à partir des **images GHCR corrigées** (`sha-d1e6242`), en
 environnement **Type D : local, sans exposition publique**. **Aucun serveur distant/Hetzner/VM/SSH/DNS/HTTPS
 identifié** → mission **requalifiée honnêtement** en exécution **locale** (consigne §6 : ne pas prétendre à un
@@ -1152,9 +1157,9 @@ pare-feu, puis validation URL signée Option A + Auth/Files **en réel**).
 crash-loop) et **ferme l'angle mort CI** (image buildée mais jamais exécutée). **Cause** : le query engine
 Prisma de `node_modules/.prisma/client` était compilé pour **OpenSSL 1.1.x** (détection `native` ambiguë au
 stage build, sans openssl) alors que la base runtime est **Debian 12 bookworm / OpenSSL 3.0.x** → moteur
-introuvable → crash-loop. **Correctif** : `cores/api-nestjs/prisma/schema.prisma` generator
+introuvable → crash-loop. **Correctif** : `starters/nestjs/prisma/schema.prisma` generator
 `binaryTargets = ["native", "debian-openssl-3.0.x"]` (force l'émission du moteur 3.0.x, copié depuis
-`@prisma/engines` **sans réseau**) **+** `cores/api-nestjs/Dockerfile` installe `openssl`/`ca-certificates`
+`@prisma/engines` **sans réseau**) **+** `starters/nestjs/Dockerfile` installe `openssl`/`ca-certificates`
 **aussi au stage build**. **Re-validation réelle** (image publiée + moteur 3.0.x monté = sortie du fix ;
 `STAGING_DRY_RUN_REPORT.md` §8) : **migrations depuis l'image** (`prisma migrate deploy`, **offline**, 5
 appliquées), API **`Up (healthy)`** `/health/live` & `/health/ready` **200**, Web **200**, **stack staging
@@ -1165,7 +1170,7 @@ chargement du moteur Prisma **sans DB** : erreur de connexion = OK / « engine c
 **Stratégie migrations** tranchée = **Option A (depuis l'image)** (CLI Prisma 6.19.3 + `schema-engine-debian-
 openssl-3.0.x` embarqués). **Validation locale réduite justifiée** : `docker build`/`npm ci` **bloqués** (egress
 sandbox npm) → fix prouvé par (a) `prisma validate` OK, (b) dry-run réel ci-dessus, (c) `api-smoke` qui validera
-en CI ; **aucune** modif de logique métier ; `cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy`
+en CI ; **aucune** modif de logique métier ; `starters/nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy`
 **non modifiés** ; **aucun secret/`latest`/déploiement**. Statuts **inchangés** (Cloud Core
 `IMPLEMENTATION_PARTIELLE` ; ADR-013/014 partiels) ; **déploiement staging = `DRY_RUN_API_IMAGE_FIXED`**. Commit
 `fix(api): make docker runtime prisma engine compatible` **mergé via PR #7** (`d1e6242`). **CC8B (post-merge)
@@ -1175,7 +1180,7 @@ validé — observation réelle** : registry CI sur `main` **`api-smoke` = succe
 post-merge** : API/Web `healthy`, `/health/live`+`/health/ready`+`/`=200). Tags ≤ `sha-7b07e5e` restent cassés
 (ne pas utiliser). **Prochaine action : Cloud Core 9 — exécution staging réelle contrôlée sur serveur.**
 
-**Étape précédente — Cloud Core 7 — préparation serveur staging & dry-run contrôlé** (`cores/cloud/docs/STAGING_DRY_RUN_REPORT.md`) :
+**Étape précédente — Cloud Core 7 — préparation serveur staging & dry-run contrôlé** (`deployment/core/docs/STAGING_DRY_RUN_REPORT.md`) :
 **dry-run local réel** exécuté à partir des **images GHCR immuables** (`sha-7b07e5e`, commit `main` `7b07e5e`) avec
 un `.env.staging` **réel généré hors dépôt** (`/tmp`, `chmod 600`, secrets jetables `openssl rand -base64`,
 **shred** après) — **aucun déploiement réel, aucun secret committé, aucun `latest`, aucun workflow deploy**. Type
@@ -1203,10 +1208,10 @@ Prisma)** pour qu'elle démarre, puis re-jouer le dry-run + trancher la stratég
 
 **Étape précédente — Cloud Core 6 — déploiement staging manuel** (cadrage `CADRE_MANUEL_DOCUMENTE`) : **aucun déploiement réel,
 aucun secret, aucune production, aucun `latest`, aucune automatisation/workflow deploy**. Livrables :
-`cores/cloud/staging/docker-compose.staging.example.yml` (**api+web+postgres+minio**, réseau interne,
+`deployment/core/staging/docker-compose.staging.example.yml` (**api+web+postgres+minio**, réseau interne,
 healthchecks node/pg_isready, **migrations hors démarrage**, PostgreSQL **non exposé**, MinIO API exposé pour
-les **URL signées**), `cores/cloud/staging/.env.staging.example` (**placeholders `CHANGE_ME`**, secrets API
-injectés **uniquement** dans le conteneur API — **pas** dans le Web), `cores/cloud/staging/README.md`, et les
+les **URL signées**), `deployment/core/staging/.env.staging.example` (**placeholders `CHANGE_ME`**, secrets API
+injectés **uniquement** dans le conteneur API — **pas** dans le Web), `deployment/core/staging/README.md`, et les
 runbooks **`STAGING_DEPLOYMENT_RUNBOOK.md`** (tag immuable `sha-*`, secrets hors dépôt `openssl rand -base64 48`,
 bucket MinIO privé, **migrations Prisma découplées de l'image** — runtime sans CLI → `npx prisma migrate deploy`
 depuis les sources au commit déployé —, health checks, données de test éphémères, contrainte **URL signée =
@@ -1226,10 +1231,10 @@ staging** (si serveur+secrets prêts) ; **sinon dry-run / préparation serveur /
 
 **Étape précédente — Cloud Core 5 — Registry GHCR sans déploiement** (niveau 4 partiel) : début d'**ADR-014** (registry
 **uniquement**), **sans déploiement, sans staging/production, sans rollback, sans secret applicatif, sans PAT**.
-**Dockerfiles** : `cores/api-nestjs/Dockerfile` (contexte `cores/api-nestjs/` — multi-stage : build = `npm ci`
+**Dockerfiles** : `starters/nestjs/Dockerfile` (contexte `starters/nestjs/` — multi-stage : build = `npm ci`
 + `prisma generate` + `nest build` ; runtime = deps prod + `.prisma` copié + openssl + **`USER node`**) et
-`cores/web-nextjs/Dockerfile` (contexte **racine** — build des paquets + Web ; runtime = Next.js **standalone**,
-`node cores/web-nextjs/server.js`, **`USER node`**) + `.dockerignore` (API + racine ; **aucun `.env`/secret
+`starters/nextjs/Dockerfile` (contexte **racine** — build des paquets + Web ; runtime = Next.js **standalone**,
+`node starters/nextjs/server.js`, **`USER node`**) + `.dockerignore` (API + racine ; **aucun `.env`/secret
 copié**). `next.config.ts` : ajout **`output: 'standalone'`** + `outputFileTracingRoot` (racine) — **testé**,
 niveau 1 **inchangé** (307 tests, typecheck/lint/build verts). **Workflow** `.github/workflows/registry-ci.yml`
 (job `images`, matrice api/web) : `permissions: contents:read + packages:write` ; **PR → build SANS push** ;
@@ -1240,7 +1245,7 @@ metadata,build-push}-action` (majeure). **Images** `ghcr.io/<owner>/<repo>/{api-
 locale** : `docker build` **API OK + Web OK** + smoke (`node --version`, exécution **non-root**, **aucun `.env`**
 dans l'image) ; non-régression niveau 1 verte (307) + `npm audit` 0 vuln. **Workflows existants (1–3)
 inchangés.** Docs : `REGISTRY_POLICY.md` (→ partiel), **`GHCR_REGISTRY_GUIDE.md`** (nouveau), `.github/workflows/
-README.md`, baseline, `cores/cloud/README.md`. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 partiel
+README.md`, baseline, `deployment/core/README.md`. ADR-014 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-013 partiel
 (niveaux 1–4 partiel) ; Cloud Core reste `IMPLEMENTATION_PARTIELLE`. `cores/*/src`/`packages`/`docs/adr`/
 `strategy` **non modifiés** (hors `next.config.ts`, config build testée). **Repo public** + **flux PR observé**
 (la PR a été exigée ; protection formelle de branche ensuite documentée par Quality Core 3). Commit `ci(cloud): add ghcr registry workflow` (`cf7873c`)
@@ -1269,7 +1274,7 @@ upload-`if:failure()` rétention courte sans logs/`.state.json`/cookies/URL sign
 **exécutée, non publiée** (UI Kit 100 %, Web ≈ 87,8 % ; aucun Codecov/gate) ; **pinning** = `@v4` conservé (SHA
 = durcissement futur avec politique de MAJ) ; **`actionlint`** = futur (non installé ; validation = parse YAML +
 simulations CC2/CC3). Docs mis à jour : `.github/workflows/README.md` (checks requis + politiques),
-`API_RUNTIME_CI_PLAN.md`/`WEB_E2E_CI_PLAN.md` (check requis), `cores/cloud/README.md`. **Validation réduite
+`API_RUNTIME_CI_PLAN.md`/`WEB_E2E_CI_PLAN.md` (check requis), `deployment/core/README.md`. **Validation réduite
 justifiée** (doc-only) : web `check` (**307** tests) + `npm audit` **0 vuln** + parse YAML des 3 workflows +
 `git diff --check`. **Workflows existants intacts** (`ci.yml`/`api-runtime-ci.yml`/`web-e2e-ci.yml` non
 modifiés). Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` ; ADR-013 **partiel** (niveaux 1–3 + protection de
@@ -1278,7 +1283,7 @@ branche **documentée non appliquée**) ; ADR-014 **`NON_IMPLEMENTE`**. `cores/*
 appliquer la protection de branche `main` ; **prochaine mission** : **Cloud Core 5 — Registry GHCR sans
 déploiement**. **Note actuelle** : depuis Governance 3, la protection `main` est active via GitHub Rulesets.
 
-**Étape précédente — Cloud Core 3 — CI E2E navigateur (niveau 3)** (`.github/workflows/web-e2e-ci.yml` + `cores/web-nextjs/e2e/`) :
+**Étape précédente — Cloud Core 3 — CI E2E navigateur (niveau 3)** (`.github/workflows/web-e2e-ci.yml` + `starters/nextjs/e2e/`) :
 implémente le **niveau 3** — un workflow démarrant une **stack réelle et éphémère** (PostgreSQL `services:` +
 MinIO `docker run` + **API NestJS** + **Web Next.js**) et rejouant les **parcours navigateur** critiques avec
 **Playwright/Chromium** headless, **sans déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni
@@ -1302,22 +1307,22 @@ artefact poussé**. **`ci.yml`/`api-runtime-ci.yml` inchangés.** **Validation**
 verts** (anonyme→/login, invalide→erreur, login+logout, métadonnées+téléchargement, introuvable, accès refusé,
 Health). Cloud Core **reste** `IMPLEMENTATION_PARTIELLE` (trois workflows CI niveaux 1–3 ; **pas** de registry/
 déploiement/environnements/monitoring/rollback). ADR-013 **partiel** (niveaux 1–3) ; **ADR-014 `NON_IMPLEMENTE`**.
-`cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** (hors `tsconfig`/`eslint`/
+`starters/nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** (hors `tsconfig`/`eslint`/
 `.gitignore`/`package.json` du Web pour isoler l'E2E). Commit `ci(web): add browser e2e validation workflow`.
 **Prochaine action : Cloud Core 4 — durcissement CI & protection de branche** (humain).
 
 **Étape précédente — Cloud Core 2 — CI runtime API NestJS (niveau 2)** (`.github/workflows/api-runtime-ci.yml`) : implémente le
 **niveau 2** de la politique CI cadrée — un workflow rejouant l'**API Core NestJS** contre ses dépendances
 runtime **jetables**, **sans déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement
-protégé**. `cores/api-nestjs/` est un projet npm **autonome** (lockfile propre, **hors workspaces racine**) →
-`working-directory: cores/api-nestjs` + **`npm ci`** ; Node 24 ; `permissions: contents: read` ; concurrence ;
+protégé**. `starters/nestjs/` est un projet npm **autonome** (lockfile propre, **hors workspaces racine**) →
+`working-directory: starters/nestjs` + **`npm ci`** ; Node 24 ; `permissions: contents: read` ; concurrence ;
 **pas de `pull_request_target`**. **Services** : **PostgreSQL** (`postgres:16`, conteneur `services:`,
 healthcheck `pg_isready`) ; **MinIO** (`minio/minio` via **`docker run`** — un `services:` **ne peut pas**
 porter la commande `server /data` requise — + attente santé + **bucket `enistere-test-files`** créé via
 `@aws-sdk/client-s3`, l'API ne le créant pas). **Variables = valeurs de test jetables** définies dans le
 workflow (jamais `secrets.*`, jamais en `.env` versionné ; noms alignés sur `.env.example` : `DATABASE_URL`,
 `JWT_*`, `REFRESH_TOKEN_HASH_SECRET`, `ARGON2_*`, `S3_*`, rate limits élargis, `LOG_LEVEL=warn`). **Étapes**
-(scripts **réels** de `cores/api-nestjs/package.json`) : `prisma:generate` → `prisma:validate` →
+(scripts **réels** de `starters/nestjs/package.json`) : `prisma:generate` → `prisma:validate` →
 **`prisma:migrate:deploy`** (migrations sur base jetable) → `lint` → **`npm test`** (unitaires) →
 **`test:e2e`** (PostgreSQL + MinIO réels) → **`openapi:check`** (snapshot canonique) → `build` (nest build) →
 `npm audit`. *(Pas de script `typecheck` côté API ; `nest build` couvre la compilation.)* **Aucun artefact
@@ -1327,13 +1332,13 @@ du workflow** (mêmes services `postgres:16`/`minio`, même env, mêmes étapes 
 openapi:check + build) ; **`npm ci` API validé séparément** (exit 0, 802 paquets, 0 vuln, ~3 min). **Non-
 régression monorepo** (niveau 1) **verte** (contracts 11, client 29, ui-kit 78, web 307+build, audit 0 vuln).
 Cloud Core → **`IMPLEMENTATION_PARTIELLE`** ; ADR-013 **partiel** (niveaux 1–2) ; **ADR-014 `NON_IMPLEMENTE`**.
-`cores/web-nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** ; logique applicative API
+`starters/nextjs/src`/`ui-kit/src`/`packages`/`docs/adr`/`strategy` **non modifiés** ; logique applicative API
 **non modifiée**. Docs Cloud + checkpoint mis à jour. Commit `ci(api): add runtime validation workflow`.
 **Prochaine action : Cloud Core 3 — E2E navigateur (niveau 3)** + protection de branche (manuel).
 
-**Étape précédente — Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (`cores/cloud/`) : transforme la CI
+**Étape précédente — Cloud Core 1 — cadrage minimal d'exécution CI/CD & environnements** (`deployment/core/`) : transforme la CI
 minimale en **socle gouverné**, **sans déploiement, Docker, registry, secret ni infra réelle**. Documents
-créés (`cores/cloud/docs/`) : **`CLOUD_CORE_V1_EXECUTION_BASELINE.md`** (17 sections : objectif, état,
+créés (`deployment/core/docs/`) : **`CLOUD_CORE_V1_EXECUTION_BASELINE.md`** (17 sections : objectif, état,
 environnements, politiques CI/secrets/registry/runtime/E2E/observabilité/rollback, limites, étapes) ;
 **`GITHUB_BRANCH_PROTECTION_CHECKLIST.md`** (application **manuelle** : PR obligatoire, **5 checks CI
 bloquants**, force-push/suppression interdits, linear history à décider, CODEOWNERS plus tard) ;
@@ -1342,12 +1347,12 @@ GitHub Environments futurs ; procédure d'exposition) ; **`REGISTRY_POLICY.md`**
 sha court, pas de `latest` prod — **ADR-014 `NON_IMPLEMENTE`**) ; **`API_RUNTIME_CI_PLAN.md`** (niveau 2 futur :
 PostgreSQL/MinIO en services, prisma migrate, unit+e2e, openapi:check, logs sans secret) ;
 **`WEB_E2E_CI_PLAN.md`** (niveau 3 futur : Playwright à décider, parcours Health/Auth/Files, données
-éphémères). **`cores/cloud/README.md`** créé ; `.github/workflows/README.md` enrichi (politique CI 4 niveaux).
+éphémères). **`deployment/core/README.md`** créé ; `.github/workflows/README.md` enrichi (politique CI 4 niveaux).
 **Environnements logiques** : `local`/`ci` (réels) + `preview`/`staging`/`production` (théoriques). **Politique
 CI à 4 niveaux** : 1=présent, 2=runtime API, 3=E2E Web, 4=registry/déploiement. **Non-régression** : baseline
 locale **14/14** (contracts 11, client 29, ui-kit 78, web 307+build, audit 0 vuln) — **aucun code/CI modifié**.
 Cloud Core → **`CADRAGE_OPERATIONNEL`** (non augmenté en `IMPLEMENTATION_PARTIELLE`) ; ADR-013 reste
-**partiel**, ADR-014 **non implémenté**. `cores/api-nestjs/src`/`web-nextjs/src`/`ui-kit/src`/`packages`/
+**partiel**, ADR-014 **non implémenté**. `starters/nestjs/src`/`web-nextjs/src`/`ui-kit/src`/`packages`/
 `docs/adr`/`strategy` **non modifiés** ; `ci.yml` **non modifié**. Commit `docs(cloud): define v1 execution
 baseline`. **Prochaine action : Cloud Core 2 — CI runtime API (niveau 2)** + protection de branche (manuel).
 
@@ -1365,7 +1370,7 @@ versionnés) — **validé par simulation runner neuf** (dist effacés → chaî
 Non-régression locale (Node 24.14, `npm ci`) **verte** : api-contracts 11, api-client-fetch 29, ui-kit 78
 (+tokens/pack), web-nextjs 307 + build, **`npm audit` 0 vuln**, Axios/Zustand absents. **Corrections** : aucune
 au code applicatif ; aucun script modifié. ADR-013 → **`PARTIELLEMENT_IMPLEMENTE`** ; ADR-014 **non
-implémenté**. Docs : `.github/workflows/README.md` + checkpoint. `cores/api-nestjs/src/`/`mobile`/`cloud`/
+implémenté**. Docs : `.github/workflows/README.md` + checkpoint. `starters/nestjs/src/`/`mobile`/`cloud`/
 `docs/adr`/`strategy` **non modifiés**. Commit `ci: add minimal monorepo validation`. **Prochaine action :
 Cloud Core 1 — cadrage CI/CD & environnements.**
 
@@ -1396,7 +1401,7 @@ JWT**→403, quarantaine→409, objet absent→503) ; **pannes** (MinIO arrêté
 E2E navigateur ; mineures : CSP/HSTS, 429, contrastes, cache Files au logout). **Corrections documentaires
 seules** (zéro comportement) : `.env.example` (+`WEB_ALLOWED_ORIGINS`), `SECURITY.md` (routes protégées
 implémentées + posture Files). Statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE`. Rapport permanent :
-`cores/web-nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`. `packages/`/`api-nestjs/`/`ui-kit` **non modifiés**.
+`starters/nextjs/docs/WEB_CORE_V1_INCREMENT_REVIEW.md`. `packages/`/`api-nestjs/`/`ui-kit` **non modifiés**.
 Commit `docs(web-nextjs): review web core v1 increment`. **Prochaine action : CI minimale (ADR-013).**
 
 **Étape précédente — Web Core Files 1 — métadonnées & téléchargement sécurisé (lecture seule)** (`@enistere/web-nextjs`) :
@@ -1426,7 +1431,7 @@ image/png) → sans permission **403** → **non-propriétaire (avec permission)
 supprimé **503** → logout **401** + page → `/login` ; **aucun** `storageKey`/`bucket`/`X-Amz-Signature`/credentials
 en métadonnées, logs ou bundle. **Non-régression** : Web 307 + couverture + build ; UI Kit 78 ; api-contracts 11 ;
 api-client-fetch 29 ; **0 vuln** ; Axios/Zustand absents. **Aucun nouveau composant UI Kit, aucun middleware,
-aucun proxy.** API NestJS / `packages/` / `ui-kit` **non modifiés**. Docs : `cores/web-nextjs/docs/files-read-download.md`
+aucun proxy.** API NestJS / `packages/` / `ui-kit` **non modifiés**. Docs : `starters/nextjs/docs/files-read-download.md`
 (+ `api-integration.md`/`tanstack-query.md`). Commit `feat(web-nextjs): add secure file read access`.
 
 **Étape précédente — Web Core UI 1 — états UI & composants structurels génériques** (`@enistere/ui-kit` + `@enistere/web-nextjs`) :
@@ -1442,7 +1447,7 @@ permission non révélée)**, `ServiceUnavailableState` (≠ session anonyme), `
 `service-unavailable-view` **délègue** à `ServiceUnavailableState` (dé-duplication ; flux Auth inchangés).
 **270 tests** Web (+40). Non-régression : UI Kit (tokens/typecheck/build/lint/test/coverage 100 %/pack) ; Web
 check+couverture+build ; packages 11+29 ; **0 vuln** ; Axios/Zustand absents. **Aucun framework UI lourd
-(Tailwind/Radix/shadcn) ajouté.** Docs : `cores/ui-kit/docs/components.md`, `cores/web-nextjs/docs/ui-states.md`.
+(Tailwind/Radix/shadcn) ajouté.** Docs : `packages/ui-kit/docs/components.md`, `starters/nextjs/docs/ui-states.md`.
 Commit `feat(web-ui): add standard interface states`.
 
 **Étape précédente — Revue globale Auth Web (1 → 5)** (`@enistere/web-nextjs`) : revue **transverse de stabilisation** du socle
@@ -1460,7 +1465,7 @@ nouveau JWT** + erreurs (401 sans énumération, 403 CSRF, 403 Origin) + API dow
 bundle sans secret. **Verdict : `AUTH_WEB_V1_STABLE_WITH_RESERVATIONS`** (aucun défaut bloquant ; réserves
 opérationnelles : CI, E2E navigateur, streaming-redirect, multi-onglets, CSP/HSTS). **Aucune correction de code
 applicatif** ; statut Web Core **maintenu** `IMPLEMENTATION_PARTIELLE`. Rapport permanent :
-`cores/web-nextjs/docs/WEB_AUTH_V1_REVIEW.md`. `packages/`/`api-nestjs/` non modifiés. Commit
+`starters/nextjs/docs/WEB_AUTH_V1_REVIEW.md`. `packages/`/`api-nestjs/` non modifiés. Commit
 `docs(web-nextjs): review web auth v1`.
 
 **Étape précédente — Web Auth 5 — page de connexion & navigation Auth contrôlée** (`@enistere/web-nextjs`) : page **publique
@@ -1478,7 +1483,7 @@ same-origin, **aucun token lu**). `features/auth` : `login-validation` (UX, mot 
 `/login`→redirection hors login ; **`returnTo` externe→`/protected`, aucun open redirect** ; logout→`/login` ;
 401 sans énumération ; 403 CSRF ; bundle/HTML sans secret/mot de passe). **Sans middleware, sans Server Action.**
 **0 vuln**, Axios/Zustand absents. API NestJS / packages **non modifiés**. Détail :
-`cores/web-nextjs/docs/login-flow.md`. Commit `feat(web-nextjs): add secure login experience`.
+`starters/nextjs/docs/login-flow.md`. Commit `feat(web-nextjs): add secure login experience`.
 
 **Étape précédente — Web Auth 4 — résolution Auth serveur + premier layout protégé** (`@enistere/web-nextjs`) : premier
 **espace privé** dont la session est **résolue côté serveur** (lecture seule) puis **hydratée**. Modules
@@ -1496,7 +1501,7 @@ aucun token HTML/RSC, X-Request-Id propagé ; cookie access retiré→redirectio
 logout→redirection ; **API arrêtée→« Service indisponible »** ≠ anonyme ; bundle sans secret). Note : sous le
 **streaming** App Router, `redirect()` est délivré en HTTP 200 (RSC `NEXT_REDIRECT` + meta-refresh) — honoré
 par le navigateur, **aucune donnée privée** exposée. **0 vuln**, Axios/Zustand absents, React 19.2.7. API
-NestJS / packages **non modifiés**. Détail : `cores/web-nextjs/docs/protected-routes.md`. Commit
+NestJS / packages **non modifiés**. Détail : `starters/nextjs/docs/protected-routes.md`. Commit
 `feat(web-nextjs): add server-resolved protected layout`.
 
 **Étape précédente — Checkpoint de gouvernance Web Core** (revue de socle — `@enistere/web-nextjs`) : mission de
@@ -1513,7 +1518,7 @@ client-only pour le public) — **pas de nouvel ADR** (couvert par ADR-004/005/0
 versionnés ; aucune CI — ADR-013). **Corrections documentaires/factuelles + 1 export mort** (zéro
 comportement) : `package.json`, `cookie-config.ts` (CSRF actif ; `CSRF_HEADER_NAME` supprimé),
 `query-client.ts`, `README.md`, `docs/SECURITY.md`, `docs/ARCHITECTURE.md`. **Rapport permanent** :
-`cores/web-nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`. Statut **inchangé** `IMPLEMENTATION_PARTIELLE`.
+`starters/nextjs/docs/WEB_CORE_GOVERNANCE_REVIEW.md`. Statut **inchangé** `IMPLEMENTATION_PARTIELLE`.
 `packages/` et autres cores **non modifiés**. Commit `docs(web-nextjs): review web core governance`.
 
 **Étape précédente — Web Auth 3 — profil, autorisations et état de session avec TanStack Query** (`@enistere/web-nextjs`) :
@@ -1627,7 +1632,7 @@ Flutter, pas l'identité visuelle autonome. Aucun starter Flutter, aucune dépen
 Prochaine action unique : **Mobile Core Flutter 1 — Core specification**.
 
 **✅ Mobile Core Flutter 1 — Core specification : RÉALISÉ** (2026-07-14) :
-`cores/mobile-flutter/CORE_SPECIFICATION.md` (32 sections : modules obligatoires V1, go_router, Riverpod,
+`starters/flutter/CORE_SPECIFICATION.md` (32 sections : modules obligatoires V1, go_router, Riverpod,
 Dio, Freezed, flutter_secure_storage, Material 3 + tokens Enistere ADR-034, logger/redaction, préférences seam,
 accessibilité, i18n, tests, missions ordonnées Flutter 1→V1, décisions pendantes) + `README.md`.
 Statut `mobile-flutter` : **`SPECIFICATION_DOCUMENTAIRE`**. Aucun code Dart, `pubspec.yaml`, dépendance ou CI.
@@ -1682,24 +1687,24 @@ et `QUALITY_WEB_ANGULAR_CI_GATE_REPORT.md` mis à jour. La réserve Angular R2 e
 Le check `web-angular` reste **promotion recommandée, non appliquée** dans le ruleset `protect-main`.
 Prochaine action recommandée : **AI Core 9 — Prompt execution runner (fake provider only)**.
 
-**✅ AI Core 1 — Core specification : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 1 — Core specification : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` passe **`DOSSIER_SEULEMENT` → `SPECIFICATION_DOCUMENTAIRE`**. Livrables :
-`cores/ai-core/CORE_SPECIFICATION.md` (24 sections : objectif, architecture cible Prompt Registry /
+`factory/ai/core/CORE_SPECIFICATION.md` (24 sections : objectif, architecture cible Prompt Registry /
 Context Builder / Redaction / RAG / Agent Orchestrator / Evaluation Harness / Provider Adapters / Audit Trail,
-sécurité, modèles conceptuels, readiness, missions futures) + `cores/ai-core/README.md`. Aucun runtime,
+sécurité, modèles conceptuels, readiness, missions futures) + `factory/ai/core/README.md`. Aucun runtime,
 provider, SDK IA, RAG runtime, base vectorielle, endpoint, workflow, dépendance ou secret. Prochaine action :
 **AI Core 2 — Prompt registry model + validator local**.
 
-**✅ AI Core 2 — Prompt registry model + validator local : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 2 — Prompt registry model + validator local : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` passe **`SPECIFICATION_DOCUMENTAIRE` → `PREUVE_TECHNIQUE`**. Livrables :
-`cores/ai-core/prompt-registry.json` (8 prompts gouvernés), `src/prompt-registry/model.mjs`,
+`factory/ai/core/prompt-registry.json` (8 prompts gouvernés), `src/prompt-registry/model.mjs`,
 `src/prompt-registry/validator.mjs`, `scripts/validate-prompt-registry.mjs`,
 `test/prompt-registry.test.mjs`. Le validateur contrôle forme, rôles, niveaux de risque, gates autorisés,
 chemins sûrs, doublons et références locales. Aucun provider, SDK IA, RAG runtime, base vectorielle, endpoint,
 workflow, dépendance, secret ou appel réseau. Prochaine action :
 **AI Core 3 — Redaction layer pure + tests**.
 
-**✅ AI Core 3 — Redaction layer pure + tests : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 3 — Redaction layer pure + tests : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` reste **`PREUVE_TECHNIQUE`**. Livrables : `src/redaction/redaction.mjs`,
 `src/redaction/index.mjs`, `test/redaction.test.mjs`. Couverture : clés sensibles, credentials
 `Bearer`/`Basic`, JWT, paramètres d'URL signée, secrets `.env`, blocs de clé privée, emails, chemins
@@ -1707,7 +1712,7 @@ locaux, erreurs sans stack, cycles, fonctions/symboles/bigints et profondeur max
 SDK IA, appel réseau, RAG runtime, base vectorielle, endpoint, workflow, dépendance, secret ou stockage
 de traces. Prochaine action : **AI Core 4 — Context builder allow-list**.
 
-**✅ AI Core 4 — Context builder allow-list : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 4 — Context builder allow-list : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` reste **`PREUVE_TECHNIQUE`**. Livrables : `src/context/context-builder.mjs`,
 `src/context/index.mjs`, `test/context-builder.test.mjs`. Le builder lit uniquement une allow-list explicite,
 refuse `.env`, chemins absolus, `..`, `node_modules`, `dist`, `build`, `.git` et assimilés, applique la redaction
@@ -1715,7 +1720,7 @@ AI Core 3 avant sortie, signale `includedFiles` / `skippedFiles` / `missingFiles
 et globalement. Aucun provider, SDK IA, appel réseau, RAG runtime, base vectorielle, endpoint, workflow, dépendance,
 secret, indexation globale ou stockage de traces. Prochaine action : **AI Core 5 — Provider adapter seam + fake provider**.
 
-**✅ AI Core 5 — Provider adapter seam + fake provider : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 5 — Provider adapter seam + fake provider : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` passe **`PREUVE_TECHNIQUE` → `IMPLEMENTATION_PARTIELLE`**. Livrables :
 `src/provider/provider-model.mjs`, `src/provider/fake-provider.mjs`, `src/provider/provider-adapter.mjs`,
 `src/provider/index.mjs`, `test/provider.test.mjs`. Couverture : validation de requête, capabilities,
@@ -1724,7 +1729,7 @@ metadonnées provider non sensibles. Aucun provider réel, SDK IA, clé API, app
 embeddings, RAG runtime, base vectorielle, endpoint, workflow, dépendance, secret ou stockage de traces.
 Action suivante réalisée : **AI Core 6 — Evaluation harness initial**.
 
-**✅ AI Core 6 — Evaluation harness initial : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 6 — Evaluation harness initial : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` reste **`IMPLEMENTATION_PARTIELLE`**. Livrables : `src/evaluation/evaluation-harness.mjs`,
 `src/evaluation/index.mjs`, `test/evaluation-harness.test.mjs`. Harness local déterministe :
 périmètre modifié, fichiers interdits, documents requis, gates attendus, format de rapport, preuve de
@@ -1734,7 +1739,7 @@ provider réel, SDK IA, clé API, appel réseau, modèle réel, embeddings, RAG 
 endpoint, workflow CI automatique, dépendance, secret ou stockage de traces.
 Action suivante réalisée : **AI Core 7 — Retrieval/RAG design decision**.
 
-**✅ AI Core 7 — Retrieval/RAG design decision : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 7 — Retrieval/RAG design decision : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` reste **`IMPLEMENTATION_PARTIELLE`**. Rapport :
 `docs/project-status/AI_CORE7_RETRIEVAL_RAG_DECISION.md`. Décision : Retrieval/RAG V1 = corpus documentaire
 Foundation versionné + allow-list explicite + Context Builder AI Core 4 + redaction AI Core 3 +
@@ -1744,7 +1749,7 @@ stockage de traces. Tout choix futur d'embedding/vector store/provider/service R
 une décision dédiée, potentiellement un ADR.
 Action suivante réalisée : **AI Core 8 — Governance/execution report schema**.
 
-**✅ AI Core 8 — Governance/execution report schema : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 8 — Governance/execution report schema : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 `ai-core` reste **`IMPLEMENTATION_PARTIELLE`**. Livrables : `src/reports/execution-report.mjs`,
 `src/reports/index.mjs`, `test/report-schema.test.mjs`. Schema local `ai-execution-report/v1` :
 mission, prompt id/version/role, documents lus, fichiers modifiés, gates, limites, evaluation et prochaine
@@ -1755,7 +1760,7 @@ Tests Node reports + evaluation + provider + context + redaction + Prompt Regist
 workflow CI automatique, trace sensible, prompt complet non rédigé ou donnée client.
 Action suivante réalisée : **AI Core V1 Readiness Review**.
 
-**✅ AI Core V1 Readiness Review : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core V1 Readiness Review : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 rapport `docs/project-status/AI_CORE_V1_READINESS_REVIEW.md`. Décision :
 **`IMPLEMENTATION_PARTIELLE` → `IMPLEMENTATION_AVANCEE`**. §18 : **7/7 satisfaits**.
 §19 futur : **5/8 satisfaits + 3/8 partiels + 0 non satisfaits**. `VALIDE_V1` reste différé par
@@ -1763,7 +1768,7 @@ B1 prompt runner gouverné, B2 retrieval source citation helper et B3 runbook d'
 Vérifications : tests Node AI Core + validation registry + `quality-gates docs` + `git diff --check`.
 Action suivante réalisée : **AI Core 9 — Prompt execution runner (fake provider only)**.
 
-**✅ AI Core 9 — Prompt execution runner (fake provider only) : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-16) :
+**✅ AI Core 9 — Prompt execution runner (fake provider only) : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-16) :
 rapport `docs/project-status/AI_CORE9_PROMPT_RUNNER_REPORT.md`. Livrables :
 `src/runner/prompt-runner.mjs`, `src/runner/index.mjs`, `test/prompt-runner.test.mjs`.
 B1 fermé : le runner résout un prompt `active`, construit un contexte strict depuis
@@ -1773,7 +1778,7 @@ B1 fermé : le runner résout un prompt `active`, construit un contexte strict d
 Aucun provider réel, SDK IA, clé API, appel réseau, embedding, vector DB, service RAG, endpoint, workflow CI
 automatique ou stockage de traces. Action suivante réalisée : **AI Core 10 — Retrieval source citation helper**.
 
-**✅ AI Core 10 — Retrieval source citation helper : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-17) :
+**✅ AI Core 10 — Retrieval source citation helper : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-17) :
 rapport `docs/project-status/AI_CORE10_RETRIEVAL_CITATIONS_REPORT.md`. Livrables :
 `src/retrieval/source-citations.mjs`, `src/retrieval/index.mjs`, `test/retrieval-citations.test.mjs`.
 B2 fermé : citations sûres depuis sources déjà incluses dans le contexte, redaction des extraits, refus
@@ -1782,15 +1787,15 @@ des chemins non sûrs, déduplication, bornes, formatage sans extrait et logs pa
 Aucun RAG runtime, embedding, vector DB, provider réel, SDK IA, appel réseau, lecture disque dans le module,
 stockage d'index ou trace persistée. Action suivante réalisée : **AI Core 11 — AI Core usage runbook**.
 
-**✅ AI Core 11 — AI Core usage runbook : RÉALISÉ** (`cores/ai-core/`, `docs/project-status/`) (2026-07-17) :
+**✅ AI Core 11 — AI Core usage runbook : RÉALISÉ** (`factory/ai/core/`, `docs/project-status/`) (2026-07-17) :
 rapport `docs/project-status/AI_CORE11_USAGE_RUNBOOK_REPORT.md`. Livrable :
-`cores/ai-core/AI_CORE_USAGE_RUNBOOK.md`. B3 fermé : le runbook couvre préparation mission, registry,
+`factory/ai/core/AI_CORE_USAGE_RUNBOOK.md`. B3 fermé : le runbook couvre préparation mission, registry,
 context builder, runner, citations, evaluation, reports, gates, responsabilités humaines, checklists et
 escalades obligatoires. `ai-core` reste **`IMPLEMENTATION_AVANCEE`** jusqu'à décision finale dédiée.
 Aucun provider réel, SDK IA, clé API, appel réseau, RAG runtime, embedding, vector DB, endpoint, workflow CI
 automatique ou stockage de traces. Action suivante réalisée : **AI Core V1 Final Readiness Decision**.
 
-**✅ AI Core V1 Final Readiness Decision : RÉALISÉE** (`cores/ai-core/`, `docs/project-status/`) (2026-07-17) :
+**✅ AI Core V1 Final Readiness Decision : RÉALISÉE** (`factory/ai/core/`, `docs/project-status/`) (2026-07-17) :
 rapport `docs/project-status/AI_CORE_V1_FINAL_READINESS_DECISION.md`. Décision :
 **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. §19 : **8/8 satisfaits**. B1 prompt runner, B2 citations
 retrieval et B3 runbook sont fermés. Limites maintenues : aucun provider réel, SDK IA, clé API, appel
@@ -1862,7 +1867,7 @@ C15 fermé — `CorsConfig @ConfigurationProperties(prefix="enistere.security.co
 `SecurityConfig` utilise `getAllowedOriginsList()` jamais `*` ; `CorsIntegrationTest` 2 tests ✅.
 `FlywayMigrationTest` +3 tests (V3 table + colonnes + index). Total : **90/90 ✅ BUILD SUCCESS**. §30 : **14/15 ✅ / 1 ⚠️ / 0 ✗**.
 Décision : **`IMPLEMENTATION_AVANCEE` → `VALIDE_V1`**. Statuts mis à jour : `API_SPRING_V1_READINESS_REVIEW.md`, `FOUNDATION_CURRENT_STATE.md`,
-`IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md`, `cores/api-spring/README.md`.
+`IMPLEMENTATION_MATRIX.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md`, `starters/spring/README.md`.
 
 **Action unique suivante** : **API Core Spring Boot 8 — Redis cache + rate limiting + MinIO TC** (non bloquant V1, différé) :
 Spring Data Redis + `health/redis` ; rate limiting Bucket4j ; MinIO Testcontainers e2e réel. Fermerait C10, R3, R5, R1.
@@ -1883,7 +1888,7 @@ Spring Data Redis + `health/redis` ; rate limiting Bucket4j ; MinIO Testcontaine
 3. `docs/project-status/IMPLEMENTATION_MATRIX.md`
 4. `docs/project-status/NEXT_ACTIONS.md`
 5. `docs/project-status/DECISIONS_REGISTER.md`
-6. Pour le API Core : `cores/api-nestjs/docs/API_CORE_V1_IMPLEMENTATION_STATUS.md`
+6. Pour le API Core : `starters/nestjs/docs/API_CORE_V1_IMPLEMENTATION_STATUS.md`
 
 ## 12. Commandes utiles
 
@@ -1893,16 +1898,16 @@ git status --short
 find cores -maxdepth 2 -type f | sort
 ls packages/*/
 
-# API Core (cores/api-nestjs/) — nécessite PostgreSQL + MinIO jetables pour e2e
+# API Core (starters/nestjs/) — nécessite PostgreSQL + MinIO jetables pour e2e
 npm run build && npm run lint && npm run test
 npm run openapi:check
 
 # Packages (racine)
 npm install && npm run build && npm test && npm run generate:check
 
-# UI Kit (cores/ui-kit/)
+# UI Kit (packages/ui-kit/)
 npm run test --workspace=@enistere/ui-kit
 
-# Web Core (cores/web-nextjs/) — port 3100
+# Web Core (starters/nextjs/) — port 3100
 npm run check --workspace=@enistere/web-nextjs   # typecheck + lint + test + build
 ```

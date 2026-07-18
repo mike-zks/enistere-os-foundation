@@ -1,0 +1,55 @@
+{
+  "name": "@enistere/mobile-react-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Enistere Mobile Core React Native — starter foundation (Expo Router). Socle générique réutilisable : navigation publique/authentifiée, shell auth sans backend, secure storage abstrait (SecureStore, ADR-015), transport fetch générique (ADR-011), TanStack Query (ADR-012), bridge tokens + ThemeProvider (ADR-008/010), états standards. AUCUNE logique métier.",
+  "license": "UNLICENSED",
+  "main": "expo-router/entry",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
+    "test": "node -e \"require('node:fs').rmSync('build-test',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test build-test/test/*.test.js",
+    "doctor": "npx expo-doctor",
+    "smoke:android": "node scripts/smoke-android.js",
+    "smoke:ios": "node scripts/smoke-ios.js"
+  },
+  "dependencies": {
+    "@enistere/api-client-fetch": "file:../../packages/api-client-fetch",
+    "@enistere/api-contracts": "file:../../packages/api-contracts",
+    "@hookform/resolvers": "^3.10.0",
+    "@tanstack/react-query": "^5.62.0",
+    "babel-preset-expo": "~55.0.8",
+    "expo": "~55.0.28",
+    "expo-constants": "~55.0.17",
+    "expo-linking": "~55.0.16",
+    "expo-router": "~55.0.17",
+    "expo-secure-store": "~55.0.16",
+    "expo-status-bar": "~55.0.6",
+    "openapi-fetch": "^0.13.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.78.0",
+    "react-native": "0.83.6",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "~19.2.10",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~55.0.1",
+    "typescript": "~5.9.0"
+  },
+  "overrides": {
+    "expo-font": "55.0.8"
+  }
+}

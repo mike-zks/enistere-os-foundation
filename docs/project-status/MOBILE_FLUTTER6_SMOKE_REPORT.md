@@ -103,7 +103,7 @@ Procédure documentée : exécuter `bash scripts/smoke.sh --ios` depuis un hôte
 
 ## 4. Script de smoke (`scripts/smoke.sh`)
 
-Disponible à `cores/mobile-flutter/scripts/smoke.sh`.
+Disponible à `starters/flutter/scripts/smoke.sh`.
 
 ```bash
 # Tests headless (flutter test) — aucun device requis

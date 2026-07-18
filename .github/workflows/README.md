@@ -66,8 +66,8 @@ job aval **rebuild ses dépendances** avant de se valider (`needs` garantit l'or
 
 ## `api-runtime-ci.yml` — CI runtime API (niveau 2, Cloud Core 2)
 
-Valide l'**API Core NestJS** contre ses dépendances runtime **minimales et jetables**. `cores/api-nestjs/`
-est un projet npm **autonome** (lockfile propre, hors workspaces racine) : `working-directory: cores/api-nestjs`
+Valide l'**API Core NestJS** contre ses dépendances runtime **minimales et jetables**. `starters/nestjs/`
+est un projet npm **autonome** (lockfile propre, hors workspaces racine) : `working-directory: starters/nestjs`
 + `npm ci`. **Lecture seule, aucun secret GitHub, aucun registre, aucun déploiement.**
 
 ### Services
@@ -81,9 +81,9 @@ est un projet npm **autonome** (lockfile propre, hors workspaces racine) : `work
 
 Uniquement des **valeurs de test jetables** définies dans le workflow (jamais `secrets.*`, jamais committées
 en `.env`) : `DATABASE_URL`, `JWT_*`, `REFRESH_TOKEN_HASH_SECRET`, `ARGON2_*`, `S3_*`, rate limits élargis,
-`CORS_ORIGINS`, `LOG_LEVEL=warn`. Ces noms suivent `cores/api-nestjs/.env.example`.
+`CORS_ORIGINS`, `LOG_LEVEL=warn`. Ces noms suivent `starters/nestjs/.env.example`.
 
-### Étapes (scripts réels de `cores/api-nestjs/package.json`)
+### Étapes (scripts réels de `starters/nestjs/package.json`)
 
 `npm ci` → bucket → `prisma:generate` → `prisma:validate` → **`prisma:migrate:deploy`** (migrations sur base
 jetable) → `lint` → `npm test` (unitaires) → **`test:e2e`** (PostgreSQL + MinIO réels) → **`openapi:check`**
@@ -150,29 +150,29 @@ Construit les **images Docker** API/Web et les **pousse vers GHCR sur `main` uni
   *(Recommandé : rendre `api-smoke` un check requis sur `main` — action humaine.)*
 - **`permissions: contents: read` + `packages: write`** ; login GHCR **conditionnel** (`push` + `main`).
 - **PR → build SANS push** (vérifie la constructibilité) ; **push `main` → build + push** (gate `api-smoke`).
-- **Images** : `ghcr.io/<owner>/<repo>/api-nestjs` (Dockerfile `cores/api-nestjs/`, contexte `cores/api-nestjs/`)
-  et `/web-nextjs` (Dockerfile `cores/web-nextjs/`, contexte **racine**, Next.js **standalone**). Multi-stage,
+- **Images** : `ghcr.io/<owner>/<repo>/api-nestjs` (Dockerfile `starters/nestjs/`, contexte `starters/nestjs/`)
+  et `/web-nextjs` (Dockerfile `starters/nextjs/`, contexte **racine**, Next.js **standalone**). Multi-stage,
   **non-root**, **aucun `.env` copié**.
 - **Tags immuables** (`docker/metadata-action`, `flavor: latest=false`) : `sha-<short>`, `main-<short>` (sur
   `main`), `pr-<n>` (build PR, non poussé). **`latest` jamais généré.** Labels OCI (source/revision/created/
   title/description).
 - Actions Docker officielles (`setup-buildx`/`login`/`metadata`/`build-push`), épinglées par **majeure** (SHA
-  futur). Détail : [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md) · guide :
-  [`GHCR_REGISTRY_GUIDE.md`](../../cores/cloud/docs/GHCR_REGISTRY_GUIDE.md).
+  futur). Détail : [`REGISTRY_POLICY.md`](../../deployment/core/docs/REGISTRY_POLICY.md) · guide :
+  [`GHCR_REGISTRY_GUIDE.md`](../../deployment/core/docs/GHCR_REGISTRY_GUIDE.md).
 
 ### Niveau CI actuel & progression (Cloud Core 1 → 5)
 
 Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
-[`cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../cores/cloud/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
+[`deployment/core/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../deployment/core/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
 
 - **Niveau 1 (présent — `ci.yml`)** : contrats, client API, UI Kit, Web Core (build sans API), audit,
   gardes Axios/Zustand.
 - **Niveau 2 (présent — `api-runtime-ci.yml`)** : CI runtime API NestJS (PostgreSQL + MinIO jetables) +
-  migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../cores/cloud/docs/API_RUNTIME_CI_PLAN.md).
+  migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../deployment/core/docs/API_RUNTIME_CI_PLAN.md).
 - **Niveau 3 (présent — `web-e2e-ci.yml`)** : E2E navigateur Web (Health/Auth/Files) sur stack réelle —
-  [`WEB_E2E_CI_PLAN.md`](../../cores/cloud/docs/WEB_E2E_CI_PLAN.md).
+  [`WEB_E2E_CI_PLAN.md`](../../deployment/core/docs/WEB_E2E_CI_PLAN.md).
 - **Niveau 4 (partiel — `registry-ci.yml`)** : **registry GHCR** (build + push images, sans déploiement) —
-  [`REGISTRY_POLICY.md`](../../cores/cloud/docs/REGISTRY_POLICY.md). **Reste** : déploiement par environnement
+  [`REGISTRY_POLICY.md`](../../deployment/core/docs/REGISTRY_POLICY.md). **Reste** : déploiement par environnement
   protégé + rollback (futur).
 
 ### Checks requis pour la protection de `main` (Cloud Core 4 / Quality Core 3)
@@ -192,8 +192,8 @@ appliquée via GitHub Rulesets (`protect-main`, enforcement `active`) :
 | 6 | `api-runtime` | `api-runtime-ci.yml` | ✅ oui |
 | 7 | `web-e2e` | `web-e2e-ci.yml` | ✅ oui |
 | 8 | `api-smoke` | `registry-ci.yml` | ✅ oui |
-| 9 | `images (api-nestjs, ./cores/api-nestjs, ./cores/api-nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
-| 10 | `images (web-nextjs, ., ./cores/web-nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
+| 9 | `images (api-nestjs, ./starters/nestjs, ./starters/nestjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
+| 10 | `images (web-nextjs, ., ./starters/nextjs/Dockerfile)` | `registry-ci.yml` (matrix) | promotion recommandée, non appliquée |
 
 > **Renommer un job casse l'exigence** (nouveau check, ancien plus produit) → tenir cette liste à jour.
 > Les noms actuels sont **stables**. Voir le runbook pour la procédure complète, les options

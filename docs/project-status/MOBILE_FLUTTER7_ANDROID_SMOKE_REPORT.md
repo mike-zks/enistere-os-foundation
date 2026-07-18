@@ -21,7 +21,7 @@ pas comme application installable sur device.
 ### Commande utilisée
 
 ```bash
-cd cores/mobile-flutter
+cd starters/flutter
 flutter create --platforms=android --org com.enistere .
 ```
 

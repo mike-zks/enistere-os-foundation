@@ -1,5 +1,9 @@
 # Backlog ADR — Revue globale des 5 cores prioritaires
 
+> Architecture active : ADR-042 valide la Project Factory AI-native et remplace la taxonomie historique
+> des cores. Les references `cloud`, `quality-core`, `docs-core`, `ai-core` et `ui-kit` ci-dessous sont
+> conservees pour l'historique des decisions V1.
+
 ## 1. Introduction
 
 Ce backlog ADR consolide les décisions structurantes identifiées après la revue globale des cinq cores prioritaires d'Enistere OS Foundation :

@@ -7,8 +7,8 @@
 ## 1. Contexte lu
 
 - `strategy/04_ROADMAP_GLOBAL.md` §9 — Mobile Core React Native V1.
-- `cores/mobile-react-native/CORE_SPECIFICATION.md` §5, §9, §12, §13.
-- `cores/mobile-react-native/ARCHITECTURE.md` §35→§40.
+- `starters/react-native/CORE_SPECIFICATION.md` §5, §9, §12, §13.
+- `starters/react-native/ARCHITECTURE.md` §35→§40.
 - `docs/project-status/FOUNDATION_CURRENT_STATE.md`.
 - `docs/project-status/IMPLEMENTATION_MATRIX.md`.
 - `docs/project-status/NEXT_ACTIONS.md`.

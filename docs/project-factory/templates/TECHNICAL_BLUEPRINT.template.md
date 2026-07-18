@@ -96,7 +96,7 @@ Ne jamais mettre de secret réel dans ce document.
 
 | Gate | Obligatoire V1 | Commande / preuve |
 |---|---:|---|
-| Docs | oui | `node cores/quality-core/scripts/quality-gates.mjs run docs` |
+| Docs | oui | `node factory/quality/core/scripts/quality-gates.mjs run docs` |
 | API | `<oui/non>` | `<commande>` |
 | Web | `<oui/non>` | `<commande>` |
 | Mobile | `<oui/non>` | `<commande>` |

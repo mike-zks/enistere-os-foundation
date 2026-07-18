@@ -14,9 +14,9 @@ sur snapshots de rapports.
 ## 2. Documents lus
 
 - `strategy/10_AI_STRATEGY.md` ;
-- `cores/quality-core/AI_PROMPT_GOVERNANCE.md` ;
-- `cores/ai-core/CORE_SPECIFICATION.md` §15–§21 ;
-- `cores/ai-core/README.md` ;
+- `factory/quality/core/AI_PROMPT_GOVERNANCE.md` ;
+- `factory/ai/core/CORE_SPECIFICATION.md` §15–§21 ;
+- `factory/ai/core/README.md` ;
 - `docs/project-status/NEXT_ACTIONS.md` ;
 - `docs/project-status/FOUNDATION_CURRENT_STATE.md` ;
 - `docs/project-status/IMPLEMENTATION_MATRIX.md` ;
@@ -89,9 +89,9 @@ Ces réserves ne bloquent pas `IMPLEMENTATION_AVANCEE`, mais bloquent `VALIDE_V1
 
 ## 8. Vérifications
 
-- `node --test cores/ai-core/test/report-schema.test.mjs cores/ai-core/test/evaluation-harness.test.mjs cores/ai-core/test/provider.test.mjs cores/ai-core/test/context-builder.test.mjs cores/ai-core/test/redaction.test.mjs cores/ai-core/test/prompt-registry.test.mjs` ✅
-- `node cores/ai-core/scripts/validate-prompt-registry.mjs` ✅
-- `node cores/quality-core/scripts/quality-gates.mjs run docs` ✅
+- `node --test factory/ai/core/test/report-schema.test.mjs factory/ai/core/test/evaluation-harness.test.mjs factory/ai/core/test/provider.test.mjs factory/ai/core/test/context-builder.test.mjs factory/ai/core/test/redaction.test.mjs factory/ai/core/test/prompt-registry.test.mjs` ✅
+- `node factory/ai/core/scripts/validate-prompt-registry.mjs` ✅
+- `node factory/quality/core/scripts/quality-gates.mjs run docs` ✅
 - `git diff --check` ✅
 
 ## 9. Prochaine action

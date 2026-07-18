@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "project": { "name": "Enistere Backoffice", "slug": "enistere-backoffice" },
+  "topology": "monorepo",
+  "designSystem": true,
+  "stack": { "api": "spring", "web": "angular", "mobile": null },
+  "domain": {
+    "entities": [
+      { "name": "Project", "fields": [
+        { "name": "id", "type": "uuid", "required": true },
+        { "name": "name", "type": "string", "required": true, "maxLength": 120 }
+      ] }
+    ]
+  },
+  "capabilities": ["base", "auth", "rbac", "files"],
+  "deployment": { "environments": ["local", "staging"] }
+}
