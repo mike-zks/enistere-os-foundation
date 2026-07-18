@@ -3,20 +3,20 @@
 import { Button, Text } from "@enistere/ui-kit";
 import type { ReactElement } from "react";
 
-import { AuthorizationStatusView } from "./authorization-status-view.js";
 import { SessionStatusView } from "./session-status-view.js";
-import { useAuthorization } from "./use-authorization.js";
 import { useLogout } from "./use-logout.js";
 import { useSession } from "./use-session.js";
 
 /**
- * Panneau technique de session (Client Component) : consomme `useSession`/`useAuthorization`/`useLogout`.
+ * Panneau technique de session (Client Component) : consomme `useSession`/`useLogout`.
  * Le bouton de déconnexion prouve l'appel BFF + CSRF + **purge du cache** + retour à l'état anonyme — ce
  * n'est pas encore une navigation utilisateur complète.
+ *
+ * Le résumé d'autorisation (rôles/permissions) relève de la capability RBAC composée par-dessus Auth ;
+ * il n'est pas affiché ici pour ne pas coupler Auth à RBAC.
  */
 export function SessionPanel(): ReactElement {
   const session = useSession();
-  const authorization = useAuthorization();
   const logout = useLogout();
 
   return (
@@ -27,11 +27,6 @@ export function SessionPanel(): ReactElement {
         userStatus={session.user?.status}
         errorMessage={session.error?.message}
         onRetry={session.refetch}
-      />
-      <AuthorizationStatusView
-        visible={session.isAuthenticated}
-        roleCount={authorization.roles.length}
-        permissionCount={authorization.permissions.length}
       />
       {session.isAuthenticated ? (
         <div className="session-panel__actions">

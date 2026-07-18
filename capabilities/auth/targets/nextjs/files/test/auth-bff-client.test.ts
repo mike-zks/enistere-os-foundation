@@ -3,12 +3,11 @@ import "./helpers/dom-setup.js";
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { fetchAuthorization, fetchSessionProfile } from "../src/core/auth/client/auth-bff-client.js";
+import { fetchSessionProfile } from "../src/core/auth/client/auth-bff-client.js";
 import { BffAuthError } from "../src/core/auth/client/bff-error.js";
 import { createBrowserFetch } from "./helpers/browser-fetch.js";
 
 const PROFILE = { id: "u1", email: "user@example.test", status: "ACTIVE", createdAt: "t", updatedAt: "t" };
-const AUTHZ = { roles: ["administrator"], permissions: ["files.read"] };
 
 const ORIG_FETCH = globalThis.fetch;
 afterEach(() => {
@@ -28,13 +27,6 @@ test("GET /api/auth/me : same-origin, credentials include, sans Authorization", 
   assert.ok(!mock.calls[0]?.url.includes("://"), "chemin relatif same-origin (aucune URL API externe)");
   assert.equal(mock.calls[0]?.credentials, "include");
   assert.equal(mock.calls[0]?.headers["authorization"], undefined);
-});
-
-test("GET /api/auth/authorization", async () => {
-  const mock = createBrowserFetch({ body: { success: true, data: AUTHZ } });
-  useFetch(mock);
-  assert.deepEqual(await fetchAuthorization(), AUTHZ);
-  assert.ok(mock.calls[0]?.url.includes("/api/auth/authorization"));
 });
 
 test("401 → BffAuthError status 401", async () => {

@@ -7,7 +7,6 @@ import { healthKeys } from "../src/core/query/keys/health-keys.js";
 test("clés Auth stables", () => {
   assert.deepEqual(authKeys.all, ["auth"]);
   assert.deepEqual(authKeys.session(), ["auth", "session"]);
-  assert.deepEqual(authKeys.authorization(), ["auth", "authorization"]);
 });
 
 test("séparation Health / Auth (aucun chevauchement)", () => {
@@ -16,7 +15,7 @@ test("séparation Health / Auth (aucun chevauchement)", () => {
 });
 
 test("sérialisables, sans donnée sensible (ni URL, ni token, ni userId)", () => {
-  for (const key of [authKeys.all, authKeys.session(), authKeys.authorization()]) {
+  for (const key of [authKeys.all, authKeys.session()]) {
     const s = JSON.stringify(key);
     assert.ok(!s.includes("://"));
     // « authorization » est un nom de domaine de clé légitime, pas un secret.

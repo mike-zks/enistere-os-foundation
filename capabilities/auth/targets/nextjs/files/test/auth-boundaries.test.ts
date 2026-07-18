@@ -21,7 +21,6 @@ const CLIENT_REACHABLE = [
   // Surface Auth navigateur (Web Auth 3/4) : hooks, panneau, vues présentationnelles, état, client BFF.
   "features/auth/auth-queries.ts",
   "features/auth/use-session.ts",
-  "features/auth/use-authorization.ts",
   "features/auth/use-logout.ts",
   "features/auth/session-panel.tsx",
   "features/auth/service-unavailable-view.tsx",
@@ -29,16 +28,6 @@ const CLIENT_REACHABLE = [
   "core/auth/session-state.ts",
   "core/auth/client/auth-bff-client.ts",
   "core/auth/client/bff-error.ts",
-  // Surface Files navigateur (Files 1).
-  "core/files/uuid.ts",
-  "core/files/format.ts",
-  "core/files/download.ts",
-  "core/files/client/files-bff-client.ts",
-  "features/files/file-error.ts",
-  "features/files/file-queries.ts",
-  "features/files/use-create-download-url.ts",
-  "features/files/file-metadata-view.tsx",
-  "features/files/file-details.tsx",
   // Surface login navigateur (Web Auth 5). NB : `login-client.ts` est exclu de cette liste car sa
   // docstring cite `/api/auth/csrf` (faux positif du filtre par sous-chaîne) ; il est couvert par
   // `login-client.test.ts` (same-origin, aucun appel direct API).
@@ -69,9 +58,6 @@ const FORBIDDEN_IN_CLIENT = [
   // Résolution Auth serveur (Web Auth 4) : jamais atteignable depuis un module client.
   "resolve-server-session",
   "protected-session",
-  // Handlers/HTTP serveur Files (Files 1) : jamais atteignables depuis un module client.
-  "files/handlers",
-  "files/http",
 ];
 
 test("aucun module atteignable côté client n'importe un module serveur/sensible", () => {

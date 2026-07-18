@@ -14,7 +14,7 @@ export interface UseLogoutResult {
 
 /**
  * Déconnexion : récupère un CSRF, appelle `POST /api/auth/logout`, puis **purge le cache Auth**
- * (`authKeys.all` → session + authorization) — les queries **Health restent intactes**. En cas
+ * (`authKeys.all` → toutes les queries Auth) — les queries **Health restent intactes**. En cas
  * d'échec réseau navigateur↔BFF : **ne purge pas** (ne prétend pas la session supprimée) et permet un
  * retry. Aucune redirection (hors périmètre). Aucun token réinjecté.
  */

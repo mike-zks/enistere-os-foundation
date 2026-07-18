@@ -7,7 +7,6 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { axe } from "jest-axe";
 
-import { AuthorizationStatusView } from "../src/features/auth/authorization-status-view.js";
 import { SessionStatusView, type SessionViewState } from "../src/features/auth/session-status-view.js";
 
 afterEach(() => {
@@ -40,17 +39,6 @@ test("SessionStatusView — erreur + Réessayer appelle onRetry", async () => {
   assert.ok(screen.getByText("Service indisponible."));
   await userEvent.setup().click(screen.getByRole("button", { name: "Réessayer" }));
   assert.equal(retried, 1);
-});
-
-test("AuthorizationStatusView — masqué si non visible", () => {
-  render(<AuthorizationStatusView visible={false} roleCount={3} permissionCount={5} />);
-  assert.equal(screen.queryByText(/Autorisations/), null);
-});
-
-test("AuthorizationStatusView — compte rôles/permissions", () => {
-  render(<AuthorizationStatusView visible roleCount={2} permissionCount={5} />);
-  assert.ok(screen.getByText(/2 rôle\(s\)/));
-  assert.ok(screen.getByText(/5 permission\(s\)/));
 });
 
 test("a11y — états de session", async () => {

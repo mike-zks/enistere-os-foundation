@@ -1,10 +1,6 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
-import {
-  fetchAuthorization,
-  fetchSessionProfile,
-  type UserProfile,
-} from "../../core/auth/client/auth-bff-client.js";
+import { fetchSessionProfile, type UserProfile } from "../../core/auth/client/auth-bff-client.js";
 import { BffAuthError } from "../../core/auth/client/bff-error.js";
 import { authKeys } from "../../core/query/keys/auth-keys.js";
 
@@ -49,18 +45,6 @@ export function sessionQueryOptions() {
   return queryOptions({
     queryKey: authKeys.session(),
     queryFn: ({ signal }) => loadSession(signal),
-    retry: false,
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
-  });
-}
-
-/** Options de la query d'autorisation — **activée uniquement** si la session est authentifiée. */
-export function authorizationQueryOptions(enabled: boolean) {
-  return queryOptions({
-    queryKey: authKeys.authorization(),
-    queryFn: ({ signal }) => fetchAuthorization(signal),
-    enabled,
     retry: false,
     staleTime: 30_000,
     gcTime: 5 * 60_000,

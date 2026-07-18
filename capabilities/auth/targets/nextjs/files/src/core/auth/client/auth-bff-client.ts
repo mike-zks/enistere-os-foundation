@@ -4,7 +4,6 @@ import { BffAuthError, isRecord } from "./bff-error.js";
 
 // Types dérivés des contrats générés (ADR-016) — aucun DTO recopié.
 export type UserProfile = SchemaOf<"UserProfileResponseDto">;
-export type AuthorizationSummary = SchemaOf<"AuthorizationSummaryResponseDto">;
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -56,7 +55,3 @@ export function fetchSessionProfile(signal?: AbortSignal): Promise<UserProfile> 
   return bffGet<UserProfile>("/api/auth/me", signal);
 }
 
-/** `GET /api/auth/authorization` → rôles/permissions. */
-export function fetchAuthorization(signal?: AbortSignal): Promise<AuthorizationSummary> {
-  return bffGet<AuthorizationSummary>("/api/auth/authorization", signal);
-}

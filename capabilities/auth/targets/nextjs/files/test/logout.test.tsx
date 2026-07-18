@@ -30,7 +30,6 @@ afterEach(() => {
 test("logout : CSRF récupéré, en-tête posé, cache Auth purgé, Health conservé", async () => {
   const queryClient = trackClient();
   queryClient.setQueryData(authKeys.session(), { status: "authenticated", user: PROFILE });
-  queryClient.setQueryData(authKeys.authorization(), { roles: ["administrator"], permissions: [] });
   queryClient.setQueryData(healthKeys.status(), { status: "ok" });
 
   const mock = createBrowserFetch((url) =>
@@ -49,7 +48,6 @@ test("logout : CSRF récupéré, en-tête posé, cache Auth purgé, Health conse
   assert.equal(logoutCall.headers["x-csrf-token"], "TOK-123");
 
   assert.equal(queryClient.getQueryData(authKeys.session()), undefined, "session purgée");
-  assert.equal(queryClient.getQueryData(authKeys.authorization()), undefined, "authorization purgée");
   assert.notEqual(queryClient.getQueryData(healthKeys.status()), undefined, "Health conservé");
   assert.equal(result.current.error, undefined);
 });
