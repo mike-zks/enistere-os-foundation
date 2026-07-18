@@ -1819,6 +1819,16 @@ Livrable : `docs/onboarding/DEVELOPER_QUICKSTART.md`, relie depuis `docs/README.
 dependance, workflow, publication package ou test serveur reel. Prochaine action : arbitrage pilote entre
 **Packages Release 1** (si canal explicitement decide) et **Examples Core 2** (si l'on continue sans publication).
 
+**✅ Packages Release 1 — GitHub Release tarballs : RÉALISÉ** (`packages/`, `docs/project-status/`)
+(2026-07-18) : rapport `docs/project-status/PACKAGES_RELEASE_1_TARBALLS_REPORT.md`. Canal exécuté :
+repli gouverné GitHub Release tarballs, tag `packages-api-typescript-v0.1.0`. Assets :
+`enistere-api-contracts-0.1.0.tgz` + `enistere-api-client-fetch-0.1.0.tgz`, avec SHA-256 documentés.
+Vérifications : `quality-gates packages` 7/7, `npm pack`, contenu tarballs, installation consommateur
+externe temporaire, smoke import `@enistere/api-client-fetch`. Aucun `npm publish`, token, `.npmrc`,
+workflow, changement OpenAPI/runtime ou artefact `.tgz` versionné. Prochaine action recommandée :
+**Examples Core 2 — mini-stack local documenté** ; alternative : **Packages Release 2 — GitHub Packages npm
+registry** si le canal principal doit être activé.
+
 **✅ API Core Spring Boot 5 — CI Java + Quality Gate : RÉALISÉ** (2026-07-15) :
 `api-spring-ci.yml` créé (Java 21 Temurin + Maven Wrapper + Testcontainers PostgreSQL). Scope `api-spring`
 ajouté dans `quality-gates.mjs` (8e scope, exclu `all-safe`, Docker requis). Tests `quality-gates` : **42/42 ✅**.

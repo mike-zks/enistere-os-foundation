@@ -6,6 +6,15 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Packages Release 1 — GitHub Release tarballs
+
+- `@enistere/api-contracts@0.1.0` et `@enistere/api-client-fetch@0.1.0` : première distribution par artefacts GitHub Release tarballs.
+- Tag cible : `packages-api-typescript-v0.1.0`.
+- Assets : `enistere-api-contracts-0.1.0.tgz`, `enistere-api-client-fetch-0.1.0.tgz`.
+- `packages/*/README.md` : instructions d'installation depuis GitHub Release tarballs.
+- `docs/project-status/PACKAGES_RELEASE_1_TARBALLS_REPORT.md` : rapport de release, checksums SHA-256, gates et smoke consommateur externe.
+- Aucun `npm publish`, token, `.npmrc`, workflow, changement OpenAPI/runtime ou artefact `.tgz` versionné.
+
 ### Developer Quickstart 1 — parcours d'onboarding 15 minutes
 
 - `docs/onboarding/DEVELOPER_QUICKSTART.md` : parcours court pour verifier un clone, lire les sources de verite minimales, lancer `quality-gates docs`, executer `npm run example:api-client-node` et choisir une mission via `NEXT_ACTIONS.md`.
