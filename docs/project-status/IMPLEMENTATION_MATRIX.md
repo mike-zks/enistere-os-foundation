@@ -8,6 +8,13 @@
 
 ## 1. Cores et packages
 
+> **Mise à jour Project Factory 1 — Stack Profiles Matrix (2026-07-18)** :
+> `docs/project-factory/DERIVED_PROJECT_PROCESS.md` et `docs/project-factory/STACK_PROFILES_MATRIX.md`
+> cadrent les projets derives flexibles. Statut : **SPECIFICATION_DOCUMENTAIRE**.
+> Les profils couverts incluent `nestjs-next`, `spring-angular`, les profils API + mobile
+> (`nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`) et les profils
+> hybrides web+mobile. Aucun generateur, runtime, dependance, workflow ou exemple derive bout-en-bout.
+
 > **Mise à jour AI Core 1 — Core specification (2026-07-16)** :
 > `cores/ai-core/CORE_SPECIFICATION.md` (24 sections : objectif, rôle dans la Foundation,
 > périmètre V1/VF, Prompt Registry, Context Builder, Redaction Layer, Retrieval/RAG Layer,

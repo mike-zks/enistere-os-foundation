@@ -1,7 +1,7 @@
 # SESSION_HANDOFF.md — Transfert de session (compact)
 
 > Document court et exploitable pour démarrer une nouvelle conversation / un autre agent.
-> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-17.
+> **Source de vérité = le repository**, résumé par `docs/project-status/`. Vérifié le 2026-07-18.
 
 ## Bloc de démarrage (à copier en début de session)
 
@@ -21,12 +21,20 @@ Enistere OS Foundation — monorepo de socles (cores) techniques + packages part
 Faire progresser les cores V1 **un par un**, en s'appuyant sur le API Core et les packages déjà
 disponibles, sans régression et sans confondre spécification et implémentation.
 
+Le prochain axe post-V1 est **Project Factory** : transformer la Foundation en socle de projets derives
+flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique avant tout generateur.
+
 ## 3. État réel (résumé)
 
 - **VALIDE_V1** : **API Core NestJS** (auth, sessions, refresh, RBAC, permissions, audit, files
   S3/MinIO dont `GET /files` paginé, logging Pino, OpenAPI canonique) — **386 tests unitaires**
   + e2e CI runtime + rapports permanents. Promotion réalisée le 2026-07-12 :
   `API_CORE_V1_READINESS_REVIEW.md`.
+- **Project Factory** : **SPECIFICATION_DOCUMENTAIRE** (2026-07-18) —
+  `docs/project-factory/DERIVED_PROJECT_PROCESS.md` + `docs/project-factory/STACK_PROFILES_MATRIX.md`.
+  La Foundation reconnait les compositions flexibles, y compris les profils **API + mobile** :
+  `nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`.
+  Aucun generateur CLI, template de bootstrap, runtime, dependance ou workflow.
 - **Foundation baseline** : **FOUNDATION_V1_RELEASED** (2026-07-12) — tag `foundation-v1.0.0`,
   commit `2981f2c`, GitHub Release publiée.
 - **Release notes** : **FOUNDATION_V1_RELEASED** — `FOUNDATION_V1_RELEASE_NOTES.md` publié.
