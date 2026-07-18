@@ -3,7 +3,7 @@
 > **Client Fetch typé Enistere** au-dessus d'[`openapi-fetch`](https://openapi-ts.dev/openapi-fetch/)
 > + [`@enistere/api-contracts`](../api-contracts). Fournit le wrapper validé (auth, erreurs, timeout,
 > refresh) — **indépendant de TanStack Query, React, React Native, Angular et Axios**.
-> **Publish-ready / non publié** (version `0.1.0`, phase pré-publication).
+> **Distribué en tarball GitHub Release** (version `0.1.0`, tag `packages-api-typescript-v0.1.0`).
 
 ## Création du client
 
@@ -89,8 +89,16 @@ d'en-tête Authorization, d'URL signée ni de réponse brute. Helpers : `isUnaut
 `0.1.0` (pré-1.0). Dépend de `@enistere/api-contracts` (lien workspace en développement ; une plage
 SemVer `0.1.0` est figée pour la première publication coordonnée). Distribution cible décidée :
 **GitHub Packages npm registry** pour le scope `@enistere/*`, avec repli gouverné par artefacts
-**GitHub Release** (`npm pack` tarballs). Ce package **n'est pas publié** dans cette phase ; aucun hook
-TanStack Query, aucun adaptateur Next.js/SecureStore concret n'y est ajouté.
+**GitHub Release** (`npm pack` tarballs). La première distribution utilise le repli GitHub Release :
+
+```bash
+npm install \
+  https://github.com/mike-zks/enistere-os-foundation/releases/download/packages-api-typescript-v0.1.0/enistere-api-contracts-0.1.0.tgz \
+  https://github.com/mike-zks/enistere-os-foundation/releases/download/packages-api-typescript-v0.1.0/enistere-api-client-fetch-0.1.0.tgz
+```
+
+La publication GitHub Packages npm registry reste différée ; aucun hook TanStack Query, aucun adaptateur
+Next.js/SecureStore concret n'est ajouté dans ce package.
 
 Dry-run de packaging :
 

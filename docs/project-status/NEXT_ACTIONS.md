@@ -1370,6 +1370,20 @@ release tarballs**.
 Option sans publication : **Examples Core 2 — mini-stack local documente** pour montrer un flux API/Web local
 avec services jetables, sans secrets ni staging reel.
 
+> ✅ **Packages Release 1 — GitHub Release tarballs : RÉALISÉ** (2026-07-18).
+> Rapport : `docs/project-status/PACKAGES_RELEASE_1_TARBALLS_REPORT.md`.
+> Canal exécuté : repli gouverné GitHub Release tarballs, tag `packages-api-typescript-v0.1.0`.
+> Assets : `enistere-api-contracts-0.1.0.tgz`, `enistere-api-client-fetch-0.1.0.tgz`.
+> Vérifications : `quality-gates packages` 7/7, `npm pack`, SHA-256, contenu tarballs, installation
+> consommateur externe temporaire, smoke import `@enistere/api-client-fetch`.
+> Aucun `npm publish`, token, `.npmrc`, workflow, changement OpenAPI/runtime ou artefact `.tgz` versionné.
+
+**Prochaine action UNIQUE recommandée** : **Examples Core 2 — mini-stack local documenté**.
+
+Objectif : montrer un flux API/Web local reproductible avec services jetables ou mock gouverné, sans secrets,
+sans staging réel et sans nouveau core. Alternative : **Packages Release 2 — GitHub Packages npm registry**
+si l'on veut basculer du repli tarballs vers le canal principal.
+
 ## 4. Prérequis
 
 - Commit Git de référence (gouvernance) — **avant tout**.

@@ -2,7 +2,7 @@
 
 > **Types OpenAPI canoniques Enistere** — runtime-indépendant. Générés depuis le contrat du API Core
 > (ADR-016). Aucune logique HTTP/auth, aucune dépendance React/Next.js/React Native/Angular.
-> **Publish-ready / non publié** (version `0.1.0`, phase pré-publication).
+> **Distribué en tarball GitHub Release** (version `0.1.0`, tag `packages-api-typescript-v0.1.0`).
 
 ## Rôle
 
@@ -56,8 +56,16 @@ suppression de champ, etc.) entraînera une montée de version coordonnée avec 
 La détection de breaking changes (oasdiff) relèvera de la CI (ADR-013), hors de ce package.
 
 Distribution cible décidée : **GitHub Packages npm registry** pour le scope `@enistere/*`, avec repli
-gouverné par artefacts **GitHub Release** (`npm pack` tarballs). Le package reste non publié tant que la
-publication contrôlée n'est pas livrée.
+gouverné par artefacts **GitHub Release** (`npm pack` tarballs). La première distribution utilise le
+repli GitHub Release :
+
+```bash
+npm install \
+  https://github.com/mike-zks/enistere-os-foundation/releases/download/packages-api-typescript-v0.1.0/enistere-api-contracts-0.1.0.tgz
+```
+
+Pour consommer le client Fetch, installer les deux tarballs dans la même commande afin de satisfaire la
+dépendance `@enistere/api-contracts@0.1.0`.
 
 En environnement restreint où le cache npm utilisateur est en lecture seule, exécuter le dry-run avec un
 cache temporaire :
@@ -69,4 +77,5 @@ npm_config_cache=/tmp/enistere-npm-cache npm run pack:dry-run --workspace=@enist
 ## Interdiction
 
 Ne pas modifier `src/generated/schema.ts` à la main. Toute évolution passe par le contrat + `npm run
-generate`. Ce package **n'est pas publié** dans cette phase.
+generate`. La publication GitHub Packages npm registry reste différée ; la distribution actuelle est le
+tarball GitHub Release.
