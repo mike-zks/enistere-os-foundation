@@ -55,6 +55,7 @@ Le dossier [`project-factory/`](project-factory/) cadre les projets derives Enis
 |---|---|
 | [`project-factory/DERIVED_PROJECT_PROCESS.md`](project-factory/DERIVED_PROJECT_PROCESS.md) | Processus idee -> brief fonctionnel -> blueprint technique -> profil stack -> bootstrap |
 | [`project-factory/STACK_PROFILES_MATRIX.md`](project-factory/STACK_PROFILES_MATRIX.md) | Matrice de compatibilite des profils API/Web/Mobile/Cloud et gates associes |
+| [`project-factory/templates/`](project-factory/templates/) | Templates de projet derive : brief fonctionnel, blueprint technique, decision stack, securite, release |
 
 ## Decisions d'architecture
 

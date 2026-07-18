@@ -152,6 +152,16 @@ docs/
 .env.example
 ```
 
+Les templates de depart sont fournis dans [`templates/`](./templates/) :
+
+| Template | Usage |
+|---|---|
+| [`FUNCTIONAL_BRIEF.template.md`](./templates/FUNCTIONAL_BRIEF.template.md) | cadrer besoin, utilisateurs, parcours, roles, entites, contraintes et criteres V1 |
+| [`TECHNICAL_BLUEPRINT.template.md`](./templates/TECHNICAL_BLUEPRINT.template.md) | formaliser composition de cores, contrats API, auth, stockage, environnements, gates et ecarts |
+| [`STACK_DECISION.template.md`](./templates/STACK_DECISION.template.md) | justifier le profil stack retenu et les alternatives rejetees |
+| [`SECURITY_NOTES.template.md`](./templates/SECURITY_NOTES.template.md) | classifier donnees/secrets/auth/RBAC/upload/logs/dependances et gates securite |
+| [`RELEASE_PLAN.template.md`](./templates/RELEASE_PLAN.template.md) | preparer perimetre release, gates, environnements, rollback, versioning et acceptation |
+
 ## 6. Position vis-a-vis de JHipster
 
 Enistere Project Factory peut viser une ergonomie proche de JHipster, mais avec une difference de fond :
@@ -173,4 +183,3 @@ Cette mission ne livre pas encore :
 - adaptation automatique des contrats API entre Spring et TypeScript.
 
 Ces points appartiennent aux missions Project Factory suivantes.
-

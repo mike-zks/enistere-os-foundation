@@ -14,6 +14,12 @@
 > Les profils couverts incluent `nestjs-next`, `spring-angular`, les profils API + mobile
 > (`nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`) et les profils
 > hybrides web+mobile. Aucun generateur, runtime, dependance, workflow ou exemple derive bout-en-bout.
+>
+> **Mise à jour Project Factory 2 — Derived project blueprint templates (2026-07-18)** :
+> `docs/project-factory/templates/` ajoute cinq templates documentaires :
+> `FUNCTIONAL_BRIEF`, `TECHNICAL_BLUEPRINT`, `STACK_DECISION`, `SECURITY_NOTES`, `RELEASE_PLAN`.
+> Ils appliquent la strategy : cadrage avant generation, projets derives separes, secrets exclus du Git,
+> gates et ecarts documentes. Aucun generateur CLI, runtime, workflow, dependance ou exemple derive.
 
 > **Mise à jour AI Core 1 — Core specification (2026-07-16)** :
 > `cores/ai-core/CORE_SPECIFICATION.md` (24 sections : objectif, rôle dans la Foundation,

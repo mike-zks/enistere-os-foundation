@@ -5,6 +5,17 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Project Factory 2 — Derived project blueprint templates : RÉALISÉ** (2026-07-18).
+> Livrables : `docs/project-factory/templates/FUNCTIONAL_BRIEF.template.md`,
+> `TECHNICAL_BLUEPRINT.template.md`, `STACK_DECISION.template.md`, `SECURITY_NOTES.template.md`,
+> `RELEASE_PLAN.template.md` + rapport `PROJECT_FACTORY2_BLUEPRINT_TEMPLATES_REPORT.md`.
+> Alignement strategy vérifié : gouvernance, architecture cible, chaîne d'exécution et standards.
+> Aucun generateur, runtime, workflow, dependance ou exemple derive bout-en-bout.
+>
+> **Prochaine action UNIQUE** : **Project Factory 3 — First derived example skeleton**.
+> Objectif : creer un premier squelette documentaire d'exemple derive sous `examples/derived/`, sans runtime
+> applicatif, en instanciant les templates pour un profil prioritaire (`spring-angular` ou `nestjs-next`).
+
 > ✅ **Project Factory 1 — Stack Profiles Matrix : RÉALISÉ** (2026-07-18).
 > Livrables : `docs/project-factory/DERIVED_PROJECT_PROCESS.md`,
 > `docs/project-factory/STACK_PROFILES_MATRIX.md` et
