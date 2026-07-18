@@ -21,7 +21,7 @@ validés localement, **non publiés, aucun Axios/Orval**).
 - **Livré** : `AppLogger` (Pino), log HTTP unique (route normalisée, requestId, statut, durée),
   redaction centralisée, sérialiseur d'erreur (5xx), contexte de requête (AsyncLocalStorage,
   réutilise `X-Request-Id`), niveaux par environnement, JSON stdout (HTTP)/stderr (CLI),
-  `AuditLog` séparé. Tests unitaires + e2e (incl. redaction). Collecte/Loki = Cloud Core.
+  `AuditLog` séparé. Tests unitaires + e2e (incl. redaction). Collecte/Loki = Deployment.
 
 ## 2. Stabilisation du contrat OpenAPI canonique — ✅ **LIVRÉ (ADR-016, pré-clients)**
 
@@ -57,7 +57,7 @@ validés localement, **non publiés, aucun Axios/Orval**).
 ## 2quater. Publication + intégration cores (ADR-016) — **P1 (hors `starters/nestjs/`)**
 
 - **Objectif** : publier les packages (registry privé, ADR-013/014) avec détection de breaking changes
-  (oasdiff) en CI ; intégrer dans Web Core Next.js et Mobile Core React Native (hooks TanStack Query,
+  (oasdiff) en CI ; intégrer dans starter Next.js et starter React Native (hooks TanStack Query,
   ADR-012 ; adaptateurs de session SecureStore/cookies).
 - **Dépendances** : packages (2ter, **livrés**) ; CI (étape 3).
 - **Acceptation** : publication reproductible ; breaking-change détecté avant merge ; cores consommant
@@ -77,14 +77,14 @@ validés localement, **non publiés, aucun Axios/Orval**).
 
 - **Objectif** : Dockerfile multi-stage + compose de dev (PostgreSQL+MinIO).
 - **Dépendances** : ADR-014 ; CI (étape 3).
-- **Valeur** : parité dev/prod, déploiement Cloud Core.
+- **Valeur** : parité dev/prod, déploiement Deployment.
 - **Risques** : taille d'image, secrets de build, exécution non-root.
 - **Acceptation** : image qui démarre derrière Traefik, health live/ready branchés, non-root.
 
 ## 5. Observabilité (métriques/traces) — **P2 (post-V1)**
 
 - **Objectif** : métriques HTTP/Prisma/auth/upload/S3 ; traces et propagation de contexte.
-- **Dépendances** : logging structuré (étape 1) ; intégration Cloud Core (Prometheus/OTel).
+- **Dépendances** : logging structuré (étape 1) ; intégration Deployment (Prometheus/OTel).
 - **Valeur** : supervision, SLO, diagnostic.
 - **Risques** : surcharge, cardinalité des métriques, couplage à un backend.
 - **Acceptation** : endpoint/format de métriques décidé par ADR ; pas de PII ; opt-in configurable.

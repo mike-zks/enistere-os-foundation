@@ -1,4 +1,4 @@
-# Revue Auth/RBAC — API Core NestJS V1
+# Revue Auth/RBAC — starter NestJS V1
 
 Revue globale et runtime du bloc Auth/RBAC (Auth 1 → Auth 5). Document permanent.
 

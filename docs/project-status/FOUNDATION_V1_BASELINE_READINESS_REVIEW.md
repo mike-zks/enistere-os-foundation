@@ -7,7 +7,7 @@
 **Décision de revue : `READY_FOR_RELEASE_DECISION`.**
 
 Le périmètre `foundation-v1-baseline` défini dans
-`factory/quality/core/RELEASE_PROCESS_RUNBOOK.md` §3.1 est **prêt pour une décision humaine de
+`factory/quality/RELEASE_PROCESS_RUNBOOK.md` §3.1 est **prêt pour une décision humaine de
 release**. Cette revue ne crée pas la release : elle assemble les preuves et confirme que les
 préconditions techniques et documentaires sont satisfaites.
 
@@ -38,7 +38,7 @@ préconditions techniques et documentaires sont satisfaites.
 
 | Gate | Résultat |
 |---|---|
-| `env NODE_ENV=test node factory/quality/core/scripts/quality-gates.mjs run all-safe` | PASS 16/17 jusqu'au gate `npm audit` |
+| `env NODE_ENV=test node factory/quality/scripts/quality-gates.mjs run all-safe` | PASS 16/17 jusqu'au gate `npm audit` |
 | `npm audit` root hors sandbox réseau | PASS — 0 vulnérabilité |
 | `git diff --check` | PASS |
 | `git log origin/main..HEAD --oneline` | vide |

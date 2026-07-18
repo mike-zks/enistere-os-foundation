@@ -23,7 +23,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // Image Docker (Cloud Core 5) : sortie autonome (serveur minimal + dépendances tracées, y compris les
+  // Image Docker (Deployment 5) : sortie autonome (serveur minimal + dépendances tracées, y compris les
   // paquets de workspace `@enistere/*`). `outputFileTracingRoot` = racine du monorepo pour que le tracing
   // inclue `packages/*` et `packages/ui-kit`. N'affecte ni le dev (`next dev`) ni les tests `node:test`.
   output: "standalone",

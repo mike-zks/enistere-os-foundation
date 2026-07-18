@@ -3,7 +3,7 @@ generator client {
   // Cloud Core 8 : moteur de requête généré pour la plateforme RUNTIME de l'image Docker
   // (node:24-slim = Debian bookworm → OpenSSL 3.0.x). Sans cette cible explicite, `prisma generate`
   // dans le stage build (openssl ambigu) repliait sur `debian-openssl-1.1.x` → moteur introuvable au
-  // runtime (crash-loop, cf. deployment/core/docs/STAGING_DRY_RUN_REPORT.md). `native` reste utile en local.
+  // runtime (crash-loop, cf. deployment/docs/STAGING_DRY_RUN_REPORT.md). `native` reste utile en local.
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 

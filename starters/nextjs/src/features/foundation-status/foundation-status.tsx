@@ -57,7 +57,7 @@ export function FoundationStatus({ children }: { readonly children?: ReactNode }
     <main className="foundation" aria-label="Enistère — Web Core">
       <PageHeader
         title="Enistère — Web Core"
-        description="Page technique du Web Core Next.js (App Router) : API publique (Health), TanStack Query, BFF Auth + session, layout protégé et page de connexion. Aucune donnée privée affichée ici."
+        description="Page technique du starter Next.js (App Router) : API publique (Health), TanStack Query, BFF Auth + session, layout protégé et page de connexion. Aucune donnée privée affichée ici."
       />
 
       <section className="foundation__facts" aria-label="Stack du socle">

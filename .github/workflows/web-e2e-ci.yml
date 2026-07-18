@@ -1,6 +1,6 @@
 name: Web E2E CI
 
-# Cloud Core 3 — CI E2E navigateur (niveau 3). Démarre une stack RÉELLE et ÉPHÉMÈRE
+# Deployment 3 — CI E2E navigateur (niveau 3). Démarre une stack RÉELLE et ÉPHÉMÈRE
 # (PostgreSQL + MinIO jetables, API NestJS, Web Next.js) et rejoue les parcours utilisateur critiques
 # (Health, Auth, Files lecture/téléchargement) avec un navigateur headless (Playwright/Chromium).
 # SANS déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement protégé.

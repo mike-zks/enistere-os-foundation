@@ -38,7 +38,7 @@ Il ne tranche aucune décision. Il sert à préparer les ADR individuels nécess
 > Les lignes concernées sont annotées pour éviter de confondre "primitive de
 > fondation" et "décision stratégique".
 >
-> Note de cohérence — 2026-07-16 : **AI Core 7** documente une décision
+> Note de cohérence — 2026-07-16 : **Factory AI 7** documente une décision
 > Retrieval/RAG V1 conservatrice (`AI_CORE7_RETRIEVAL_RAG_DECISION.md`) :
 > corpus Foundation versionné + allow-list explicite + Context Builder +
 > redaction + Evaluation Harness + revue humaine. Cette décision **ne choisit
@@ -114,7 +114,7 @@ Ces ADR peuvent suivre un starter minimal si les fonctionnalités concernées re
 | ADR-023 | Stratégie i18n web/UI | Moyenne | web-nextjs, ui-kit | Non | À rédiger | Activable selon projets publics ou multilingues. |
 | ADR-024 | Librairie d'icônes UI Kit | Moyenne | ui-kit, web-nextjs, mobile-react-native | Non | À rédiger | Structurant pour cohérence web/mobile. |
 | ADR-025 | Documentation et runbooks cores | Moyenne | Tous, docs-core futur | Non | À rédiger | Standardiser README, guides, runbooks et checklists. |
-| ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Recommandé avant release V1 (revue d'étape). Pino moteur officiel ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, collecte/Loki côté Cloud Core ; AuditLog séparé. Le starter fonctionne déjà sans, d'où non bloquant avant génération. |
+| ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Recommandé avant release V1 (revue d'étape). Pino moteur officiel ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, collecte/Loki côté Deployment ; AuditLog séparé. Le starter fonctionne déjà sans, d'où non bloquant avant génération. |
 
 ## 6. ADR futurs
 
@@ -179,7 +179,7 @@ Ces ADR concernent les versions avancées V2, V3 ou VF.
 | ADR-037 | Feature flags | Future | web-nextjs, mobile-react-native, api-nestjs | Non | À rédiger | Rollout progressif ; RN 17 ne décide pas d'un remote-config réel. |
 | ADR-038 | Analytics produit | Future | web-nextjs, mobile-react-native, ui-kit | Non | À rédiger | Confidentialité/consentement/coûts ; RN 13 ne décide pas d'un SDK réel ; RN 21 = gate de consentement générique préparatoire (ne décide pas cet ADR). |
 | ADR-039 | Hachage mots de passe : Argon2id vs bcrypt | Haute | api-nestjs | Oui | Validé | Standard Argon2id ; requis avant Auth 2. |
-| ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Pino (moteur officiel) ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, Loki/Grafana côté Cloud Core ; AuditLog séparé. Recommandé avant release V1. |
+| ADR-040 | Stratégie de logging structuré API Core NestJS | Haute | api-nestjs, cloud | Non | Validé | Pino (moteur officiel) ; `nestjs-pino` sous preuve NestJS 11, repli Pino direct ; JSON stdout/stderr, Loki/Grafana côté Deployment ; AuditLog séparé. Recommandé avant release V1. |
 | ADR-041 | Build system API Spring Boot : Maven vs Gradle | Haute | api-spring | Non (V3) | Validé | **Maven** retenu : `pom.xml`, Spring Boot Parent POM, `mvn verify`, Maven Wrapper. Bloquant avant Spring Boot 2 (starter). Gradle autorisé par exception documentée dans un projet dérivé. |
 
 ## 8. Ordre recommandé de traitement

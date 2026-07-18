@@ -1,6 +1,6 @@
 name: API Runtime CI
 
-# Cloud Core 2 — CI runtime (niveau 2) de l'API Core NestJS.
+# Deployment 2 — CI runtime (niveau 2) de l'API Core NestJS.
 # Valide l'API contre ses dépendances runtime MINIMALES (PostgreSQL + MinIO jetables) :
 # migrations Prisma, tests unitaires + e2e, contrôle du contrat OpenAPI, build, audit.
 # SANS déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement protégé.
@@ -48,7 +48,7 @@ jobs:
           --health-retries 20
 
     # Variables d'environnement de TEST (jetables, non sensibles). Aucune valeur de production.
-    # Aucune référence à secrets.* (cf. deployment/core/docs/SECRETS_POLICY.md).
+    # Aucune référence à secrets.* (cf. deployment/docs/SECRETS_POLICY.md).
     env:
       NODE_ENV: test
       PORT: "3001"

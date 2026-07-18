@@ -10,7 +10,7 @@
  *   npm run files:reconcile -- --apply
  *   npm run files:reconcile -- --apply --max=50
  *
- * Le Cloud Core décidera plus tard comment lancer périodiquement cette commande (cron système,
+ * Le Deployment décidera plus tard comment lancer périodiquement cette commande (cron système,
  * CI, orchestrateur). Aucun scheduler n'est embarqué dans l'API (risque multi-instance).
  */
 import { NestFactory } from '@nestjs/core';

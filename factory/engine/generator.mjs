@@ -5,6 +5,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildGenerationPlan } from './plan.mjs';
 import { generateOpenApi } from './contracts.mjs';
+import { assessCapabilitySupport, loadCapabilityManifests } from './capabilities.mjs';
+import { selectedStarterIds } from './starters.mjs';
 
 async function exists(path) {
   try { await access(path, constants.F_OK); return true; } catch { return false; }
@@ -92,6 +94,12 @@ function verifyScript(plan) {
 
 export async function generateProject(blueprint, output, options = {}) {
   if (await exists(output)) throw new Error(`Output already exists: ${output}`);
+  const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
+  const support = assessCapabilitySupport(selectedStarterIds(blueprint), capabilityManifests);
+  if (!support.ready) {
+    const details = support.blockers.map((item) => `${item.capability} on ${item.starter} is ${item.status}`).join(', ');
+    throw new Error(`Capability composition is not ready: ${details}`);
+  }
   const plan = buildGenerationPlan(blueprint);
   plan.designSystem = blueprint.designSystem;
   for (const directory of plan.directories) await mkdir(join(output, directory), { recursive: true });

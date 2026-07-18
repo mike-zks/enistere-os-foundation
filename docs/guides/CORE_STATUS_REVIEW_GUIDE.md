@@ -1,6 +1,6 @@
 # CORE_STATUS_REVIEW_GUIDE.md — Guide de revue de statut d'un core
 
-> Docs Core 5.
+> Documentation 5.
 > Derniere mise a jour : 2026-07-12.
 
 Ce guide complete la checklist `CORE_STATUS_REVIEW_CHECKLIST.md`. Il decrit comment conduire une revue de
@@ -26,7 +26,7 @@ Lire dans cet ordre :
 3. `docs/project-status/IMPLEMENTATION_MATRIX.md` ;
 4. `docs/project-status/NEXT_ACTIONS.md` ;
 5. `strategy/04_ROADMAP_GLOBAL.md`, section du core ou de la version ;
-6. `cores/<core>/CORE_SPECIFICATION.md` ;
+6. `starters/<starter>/STARTER_SPECIFICATION.md` ;
 7. ADR applicables dans `docs/adr/` et `DECISIONS_REGISTER.md` ;
 8. derniers rapports du core.
 
@@ -93,16 +93,16 @@ Si le statut change ou si une revue officielle est ajoutee :
 Pour une revue documentaire :
 
 ```bash
-node factory/quality/core/scripts/quality-gates.mjs run docs
-node factory/quality/core/scripts/quality-gates.mjs plan docs
+node factory/quality/scripts/quality-gates.mjs run docs
+node factory/quality/scripts/quality-gates.mjs plan docs
 npm audit
 ```
 
-Ajouter les tests de scripts si Docs Core ou Quality Core est modifie :
+Ajouter les tests de scripts si Documentation ou Factory Quality est modifie :
 
 ```bash
-node --test factory/quality/core/scripts/check-doc-links.test.mjs
-node --test factory/quality/core/scripts/quality-gates.test.mjs
+node --test factory/quality/scripts/check-doc-links.test.mjs
+node --test factory/quality/scripts/quality-gates.test.mjs
 ```
 
 Pour une revue runtime, executer les gates du core dans `QUALITY_GATES_MATRIX.md`.

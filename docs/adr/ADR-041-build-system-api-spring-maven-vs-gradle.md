@@ -15,7 +15,7 @@ Validé.
 ## 4. Contexte
 
 Le API Core Spring Boot d'Enistere OS Foundation doit disposer d'un build system défini avant la
-mission Spring Boot 2 (starter minimal). La mission Spring Boot 1 (`CORE_SPECIFICATION.md`,
+mission Spring Boot 2 (starter minimal). La mission Spring Boot 1 (`specification active`,
 `starters/spring/`) a établi la spécification documentaire complète (42 sections) et identifié
 explicitement ce choix comme décision pendante bloquante avant toute génération de fichier de build
 (§40 — `Build system | Maven vs Gradle | Mission Spring Boot 2`).

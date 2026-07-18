@@ -19,7 +19,7 @@ Enistere OS Foundation doit fournir une stratégie générique pour gérer les f
 Cette ADR concerne :
 
 - API Core NestJS ;
-- Cloud Core ;
+- Deployment ;
 - Mobile Core React Native ;
 - Web Core Next.js ;
 - UI Kit ;
@@ -86,7 +86,7 @@ Avantages :
 - URLs signées possibles ;
 - coûts mieux contrôlés ;
 - migration possible vers AWS S3 ou autre provider compatible ;
-- intégration claire avec Cloud Core.
+- intégration claire avec Deployment.
 
 Inconvénients :
 
@@ -170,7 +170,7 @@ Cette décision permet :
 - indépendance vis-à-vis d'un provider propriétaire ;
 - meilleure maintenabilité pour les projets dérivés.
 
-Elle garde l'API Core comme autorité fonctionnelle et le Cloud Core comme fournisseur d'infrastructure.
+Elle garde l'API Core comme autorité fonctionnelle et le Deployment comme fournisseur d'infrastructure.
 
 ## 9. Comparaison des options
 
@@ -180,7 +180,7 @@ Elle garde l'API Core comme autorité fonctionnelle et le Cloud Core comme fourn
 | Sécurité | Fragile si mal exposé | Forte si API contrôle | Risquée sans cadrage strict | Forte mais dépend provider |
 | Scalabilité | Faible à moyenne | Bonne | Bonne | Forte |
 | Coûts | Simples au départ | Maîtrisables | Maîtrisables mais plus complexe | Variables |
-| Compatibilité Cloud Core | Faible | Forte | Moyenne | Moyenne |
+| Compatibilité Deployment | Faible | Forte | Moyenne | Moyenne |
 | Compatibilité Web/Mobile | Moyenne | Forte | Forte mais plus risquée | Forte |
 | Auditabilité | Moyenne | Forte | Moyenne | Variable |
 | Simplicité V1 | Simple mais limitée | Équilibrée | Trop avancée | Trop structurante |
@@ -256,7 +256,7 @@ Principes :
 - le contrat fichier doit rester indépendant du provider ;
 - les credentials restent hors Git ;
 - l'accès direct public aux buckets est interdit par défaut ;
-- les volumes, backups et restore sont cadrés par le Cloud Core.
+- les volumes, backups et restore sont cadrés par le Deployment.
 
 ## 12. Stratégie buckets
 
@@ -493,9 +493,9 @@ L'API Core NestJS doit prévoir un `UploadModule` responsable de :
 
 Les modèles de persistance réels seront définis plus tard, sans exposer directement les détails de stockage comme contrat public non maîtrisé.
 
-## 27. Impact sur Cloud Core
+## 27. Impact sur Deployment
 
-Le Cloud Core fournit le stockage objet.
+Le Deployment fournit le stockage objet.
 
 Il doit cadrer :
 
@@ -605,7 +605,7 @@ L'IA assiste la génération et la revue, mais ne décide pas seule d'assouplir 
 ## 34. Règles d'application
 
 - API Core contrôle l'upload.
-- Cloud Core fournit le stockage objet.
+- Deployment fournit le stockage objet.
 - Les buckets sont privés par défaut.
 - La validation backend est obligatoire.
 - Les clients Web/Mobile ne décident pas seuls de la validité d'un fichier.

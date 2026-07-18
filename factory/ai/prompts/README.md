@@ -1,7 +1,7 @@
 # Prompts IA — Catalogue gouverné
 
 > Références : `strategy/10_AI_STRATEGY.md`, `strategy/05_EXECUTION_CHAIN.md`,
-> `factory/quality/core/AI_PROMPT_GOVERNANCE.md`.
+> `factory/quality/AI_PROMPT_GOVERNANCE.md`.
 
 ## Objectif
 
@@ -11,7 +11,7 @@ Un prompt versionné est un support de travail pour agent IA. Il ne remplace pas
 
 - la décision humaine ;
 - les ADR ;
-- les `CORE_SPECIFICATION.md` ;
+- les `STARTER_SPECIFICATION.md` ;
 - les gates Quality Core ;
 - la revue de PR.
 
@@ -33,9 +33,9 @@ Avant toute mission IA :
 | `global/execution-template.md` | Template générique d'exécution | actif |
 | `global/review-template.md` | Template générique de revue | actif |
 | `global/mission-brief-template.md` | Template gouverné pour missions Claude/Codex/Gemini | actif |
-| `architecture/core-specification-generator.md` | Générer une spécification de core documentaire | actif |
+| `architecture/starter-specification-generator.md` | Générer une spécification de core documentaire | actif |
 | `documentation/readme-generator.md` | Générer ou améliorer un README fidèle au repository | actif |
-| `review/core-specification-review.md` | Relire un `CORE_SPECIFICATION.md` | actif |
+| `review/starter-specification-review.md` | Relire un `STARTER_SPECIFICATION.md` | actif |
 | `security/security-review.md` | Relire sécurité : secrets, auth, tokens, cloud, dépendances | actif |
 
 ## Dossiers à compléter

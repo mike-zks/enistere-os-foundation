@@ -1,4 +1,4 @@
-# Contrat OpenAPI canonique — API Core NestJS V1
+# Contrat OpenAPI canonique — starter NestJS V1
 
 > Source de vérité des **API publiques** (ADR-016). Le fichier [`openapi.json`](./openapi.json) est
 > le **snapshot canonique versionné**, régénéré depuis le code — **jamais édité à la main**.

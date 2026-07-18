@@ -30,7 +30,7 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Mobile Core Flutter', style: textTheme.headlineMedium),
+            Text('starter Flutter', style: textTheme.headlineMedium),
             SizedBox(height: ext.spacingSm),
             Text(
               'Starter minimal — ADR-034',

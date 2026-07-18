@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Configuration E2E navigateur (Cloud Core 3, niveau 3).
+ * Configuration E2E navigateur (Deployment 3, niveau 3).
  *
  * Les serveurs (API NestJS + Web Next.js) et les dépendances jetables (PostgreSQL + MinIO) sont démarrés
  * PAR le workflow `.github/workflows/web-e2e-ci.yml` (et par la simulation locale) AVANT Playwright :
@@ -20,7 +20,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   timeout: 30_000,
   expect: { timeout: 10_000 },
-  // Pas de rapport HTML auto-ouvert ; pas d'upload d'artefact par défaut (cf. mission Cloud Core 3).
+  // Pas de rapport HTML auto-ouvert ; pas d'upload d'artefact par défaut (cf. mission Deployment 3).
   reporter: [["list"]],
   use: {
     baseURL: WEB_URL,

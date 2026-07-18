@@ -39,7 +39,7 @@ avancé (Prometheus/Grafana/Loki/Sentry) et `ADR-036` à l'observabilité distri
 identifiant n'est réservé au **logging structuré applicatif** lui-même. Les identifiants `016`→`038`
 étant déjà réservés et `039` utilisé, le prochain identifiant **réellement disponible** est
 `ADR-040`, retenu ici. Cette ADR décide du **moteur de logs techniques** ; le monitoring/tracing
-(ADR-018/ADR-036) et la collecte côté Cloud Core restent hors de son périmètre de décision.
+(ADR-018/ADR-036) et la collecte côté Deployment restent hors de son périmètre de décision.
 
 ## 5. Problème
 
@@ -53,7 +53,7 @@ Le starter ne possède pas encore :
 - une **préparation explicite** de la collecte (Loki/Grafana) et du tracing (OpenTelemetry).
 
 Le futur système doit rester **générique, performant, testable, sécurisé, indépendant d'un
-fournisseur d'observabilité et compatible avec le Cloud Core**, sans introduire de fuite de secrets
+fournisseur d'observabilité et compatible avec le Deployment**, sans introduire de fuite de secrets
 ni de régression NestJS 11.
 
 ## 6. Objectifs
@@ -63,7 +63,7 @@ ni de régression NestJS 11.
 3. Réutiliser le **request ID existant** comme contexte de corrélation (pas de second système).
 4. Standardiser les **logs HTTP** (méthode, route normalisée, statusCode, durée).
 5. **Séparer** strictement logs techniques et `AuditLog` (sécurité/métier).
-6. Émettre du **JSON sur stdout/stderr** ; déléguer **collecte/Loki/Grafana au Cloud Core**.
+6. Émettre du **JSON sur stdout/stderr** ; déléguer **collecte/Loki/Grafana au Deployment**.
 7. Préparer **OpenTelemetry** (champs `traceId`/`spanId`) sans le rendre obligatoire.
 8. Garantir **compatibilité tests/perf** et **absence de secret** dans toute sortie.
 
@@ -73,7 +73,7 @@ ni de régression NestJS 11.
 - Ne configure ni Pino, ni middleware/interceptor de logging, ni transport.
 - Ne crée ni Loki, ni Grafana, ni Prometheus, ni OpenTelemetry, ni Docker, ni CI/CD.
 - Ne remplace pas `AuditModule` (audit fonctionnel/sécurité persistant).
-- Ne décide pas du backend d'observabilité (relève d'ADR-018 / du Cloud Core).
+- Ne décide pas du backend d'observabilité (relève d'ADR-018 / du Deployment).
 
 ## 8. Options étudiées
 
@@ -122,7 +122,7 @@ sortie : la migration B↔C est faible.
 3. **L'intégration Pino directe** (`pino` + `pino-http`, câblage maison) est la **stratégie de repli
    officielle** si la preuve échoue sur un point structurel non corrigeable proprement (§30).
 4. Les **logs de production sont du JSON envoyé sur stdout/stderr**. **La collecte, Loki et Grafana
-   relèvent du Cloud Core** (l'API n'embarque aucun transport distant).
+   relèvent du Deployment** (l'API n'embarque aucun transport distant).
 5. **`AuditLog` reste séparé des logs techniques** : ni l'un ne remplace l'autre.
 
 Ce **mécanisme de décision est imposé** : un projet dérivé ne choisit pas librement le moteur ni le
@@ -291,7 +291,7 @@ sur stdout). Cette convention est documentée et testée à l'implémentation.
 
 ```text
 L'API écrit des logs JSON sur stdout/stderr.
-Le Cloud Core est responsable de la collecte et de l'expédition.
+Le Deployment est responsable de la collecte et de l'expédition.
 ```
 
 **Aucun envoi direct vers Loki** depuis un module applicatif en V1. Aucun transport **réseau
@@ -302,7 +302,7 @@ d'observabilité dans l'API, résilience, portabilité.
 
 ## 25. Loki
 
-Chaîne cible : `API stdout JSON → agent Cloud Core → Loki → Grafana`. **Labels Loki peu nombreux**
+Chaîne cible : `API stdout JSON → agent Deployment → Loki → Grafana`. **Labels Loki peu nombreux**
 recommandés : `service`, `environment`, `level`. **Ne pas** transformer en labels (cardinalité) :
 `requestId`, `userId`, `sessionId`, `fileId`, route brute, message d'erreur — ces champs restent dans
 le **corps** du log JSON, recherchables sans exploser la cardinalité.
@@ -311,7 +311,7 @@ le **corps** du log JSON, recherchables sans exploser la cardinalité.
 
 Le schéma de log réserve `traceId`/`spanId` afin d'accueillir plus tard une corrélation logs↔traces,
 **sans rendre OpenTelemetry obligatoire** maintenant. Aucune intégration OpenTelemetry n'est créée
-par cette ADR (relève d'ADR-036 / du Cloud Core).
+par cette ADR (relève d'ADR-036 / du Deployment).
 
 ## 27. Performances
 
@@ -319,7 +319,7 @@ par cette ADR (relève d'ADR-036 / du Cloud Core).
 - Sérialisation JSON rapide (Pino) ; redaction native ; pretty-print **dev uniquement**.
 - Attention au **volume HTTP** (un seul log de fin de requête ; bruit health réduit) et aux
   **fichiers multipart** (jamais de buffer loggé). Surveiller la backpressure stdout (le collecteur
-  Cloud Core consomme stdout). Niveau `production` = `info` (pas de `debug`/`trace`).
+  Deployment consomme stdout). Niveau `production` = `info` (pas de `debug`/`trace`).
 
 ## 28. Tests
 
@@ -345,7 +345,7 @@ direct** (§30).
 Repli officiel : **Pino intégré directement** (`pino` + `pino-http`, contexte via
 `AsyncLocalStorage`, logger custom implémentant `LoggerService` de NestJS). Le **format de sortie, le
 schéma de log, la redaction, les niveaux, la séparation Audit/Logs et la convention CLI sont
-identiques** à l'option `nestjs-pino` : la décision (Pino, JSON stdout, Cloud Core) ne change pas, seul
+identiques** à l'option `nestjs-pino` : la décision (Pino, JSON stdout, Deployment) ne change pas, seul
 le **câblage** diffère. La migration C→B (ou inverse) est faible et n'impacte pas les consommateurs.
 
 ## 31. Conséquences positives
@@ -361,7 +361,7 @@ Dépendances supplémentaires (Pino, `pino-http`, +`pino-pretty` dev ; éventuel
 migration du logger NestJS existant ; risque de duplication de logs si mal câblé ; complexité de
 l'`AsyncLocalStorage` (repli) ; nécessité de tests de sécurité (redaction) ; compatibilité
 `nestjs-pino`/NestJS 11 à prouver ; volume de logs à maîtriser ; coût de stockage Loki futur (côté
-Cloud Core).
+Deployment).
 
 ## 33. Risques
 
@@ -395,7 +395,7 @@ chiffrement ou de rétention spécifiques des logs.
 Le API Core NestJS V1 adopte **Pino** comme moteur officiel de logging structuré, avec **`nestjs-pino`
 comme intégration préférée sous réserve d'une preuve de compatibilité NestJS 11** et **l'intégration
 Pino directe comme repli officiel**. Les logs de production sont du **JSON sur stdout/stderr** ; la
-**collecte, Loki et Grafana relèvent du Cloud Core** ; **`AuditLog` reste séparé** des logs
+**collecte, Loki et Grafana relèvent du Deployment** ; **`AuditLog` reste séparé** des logs
 techniques. Cette ADR ne crée aucun code ni dépendance : elle cadre une stratégie de logging sûre,
-performante, testable et compatible Cloud Core, à implémenter dans une mission dédiée guidée par la
+performante, testable et compatible Deployment, à implémenter dans une mission dédiée guidée par la
 checklist de compatibilité (§29) et la stratégie de repli (§30).

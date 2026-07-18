@@ -1,1 +1,12 @@
-{"schemaVersion":"1","id":"rbac","requires":["auth"],"responsibilities":["roles","permissions","authorization"],"targets":["nestjs","spring","nextjs","angular","react-native","flutter"]}
+{
+  "schemaVersion": "2",
+  "id": "rbac",
+  "version": "0.1.0",
+  "requires": ["auth"],
+  "responsibilities": ["roles", "permissions", "authorization"],
+  "targets": {
+    "nestjs": { "status": "planned" }, "spring": { "status": "planned" },
+    "nextjs": { "status": "planned" }, "angular": { "status": "planned" },
+    "react-native": { "status": "planned" }, "flutter": { "status": "planned" }
+  }
+}

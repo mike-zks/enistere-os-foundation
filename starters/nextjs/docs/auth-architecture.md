@@ -44,7 +44,7 @@ Navigateur
    ↓  (same-origin ; cookies HttpOnly Auth + cookie CSRF lisible ; en-tête X-CSRF-Token)
 Route Handlers Next.js  /api/auth/*   (login | refresh | logout | csrf)
    ↓  (client API serveur authentifiable, PAR REQUÊTE — Bearer lu du cookie)
-API Core NestJS  /auth/*
+starter NestJS  /auth/*
 ```
 
 Le navigateur **ne parle jamais directement** aux endpoints Auth NestJS. Les tokens transitent par des

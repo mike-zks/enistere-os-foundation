@@ -1,11 +1,11 @@
-# Mobile Core Flutter
+# starter Flutter
 
 > Statut : **`VALIDE_V1`** (Flutter V1 Final Readiness Decision, 2026-07-14 — §29 9/11 + 2 PARTIAL iOS R1 ; B1→B5 tous fermés ; R1 iOS Linux acceptée comme réserve environnementale non bloquante — identique à RN)
-> Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
+> Spécification cible : [`STARTER_SPECIFICATION.md`](./STARTER_SPECIFICATION.md)
 > Décision UI : [`ADR-034`](../../docs/adr/ADR-034-flutter-ui-material3-vs-custom.md) — Material 3 contrôlé par tokens Enistere
 
 Socle mobile **Flutter / Dart** générique et réutilisable pour les futures applications Enistere.
-Ce core est la déclinaison Flutter du Mobile Core React Native (V1 validé).
+Ce core est la déclinaison Flutter du starter React Native (V1 validé).
 Il ne contient aucune logique métier ni aucun code runtime.
 
 ## Ce que ce core fournira (cible V1)
@@ -34,7 +34,7 @@ Il ne contient aucune logique métier ni aucun code runtime.
 starters/flutter/
 ├── pubspec.yaml                            ← Flutter 6 (+ integration_test: sdk: flutter)
 ├── analysis_options.yaml                   ← Flutter 2
-├── CORE_SPECIFICATION.md                   ← Flutter 1
+├── STARTER_SPECIFICATION.md                   ← Flutter 1
 ├── README.md                               ← Flutter 1
 ├── scripts/
 │   └── smoke.sh                            ← Flutter 6 (smoke runner : headless / --android / --ios)
@@ -125,13 +125,13 @@ La prochaine mission est **Flutter V1 final — V1 Final Readiness Decision** (`
 | Navigation | go_router | Roadmap §15 |
 | Modèles | Freezed + Json Serializable | Roadmap §15 |
 
-## Cohérence avec Mobile Core React Native
+## Cohérence avec starter React Native
 
-Les deux cores mobiles partagent les mêmes **intentions** (tokens, sécurité, états UI, accessibilité) sans dupliquer l'implémentation. Voir `CORE_SPECIFICATION.md §31` pour le tableau de correspondance complet.
+Les deux cores mobiles partagent les mêmes **intentions** (tokens, sécurité, états UI, accessibilité) sans dupliquer l'implémentation. Voir `STARTER_SPECIFICATION.md §31` pour le tableau de correspondance complet.
 
 ## Décisions pendantes
 
-Voir `CORE_SPECIFICATION.md §32` — les principales :
+Voir `STARTER_SPECIFICATION.md §32` — les principales :
 - Client API Dart : Dio hand-written vs openapi_generator Dart vs retrofit.dart
 - Préférences non sensibles : Hive vs SharedPreferences
 - Librairie formulaires : reactive_forms vs flutter_form_builder vs natif
@@ -141,7 +141,7 @@ Voir `CORE_SPECIFICATION.md §32` — les principales :
 
 | # | Mission | Livrable |
 |---|---|---|
-| Flutter 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` ✅ |
+| Flutter 1 | Core specification | `STARTER_SPECIFICATION.md` + `README.md` ✅ |
 | Flutter 2 | Starter minimal | `pubspec.yaml` + structure `lib/` + `ThemeData` Enistere ✅ |
 | Flutter 3 | Auth shell + guards | `AuthController` + `SessionStore` seam + GoRouter guards ✅ |
 | Flutter 4 | Client Dio + providers | `ApiConfig` + `AppApiError` sealed + `createDioClient` + `dioClientProvider` ✅ |

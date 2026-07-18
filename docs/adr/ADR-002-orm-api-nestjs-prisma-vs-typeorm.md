@@ -28,7 +28,7 @@ Le choix de l'ORM impacte directement :
 - conventions backend ;
 - maintenabilité des projets dérivés.
 
-La base relationnelle cible est PostgreSQL. Le Cloud Core prévoit PostgreSQL comme service interne non public, avec utilisateurs applicatifs dédiés, volumes persistants, backups et migrations pilotées par les cores applicatifs.
+La base relationnelle cible est PostgreSQL. Le Deployment prévoit PostgreSQL comme service interne non public, avec utilisateurs applicatifs dédiés, volumes persistants, backups et migrations pilotées par les cores applicatifs.
 
 Cette ADR formalise le choix ORM avant toute génération de code NestJS, schéma, migration ou seed.
 
@@ -251,9 +251,9 @@ Le API Core NestJS devra prévoir :
 
 Les modèles Prisma ne doivent pas devenir les DTO publics de l'API.
 
-## 15. Impact sur Cloud Core
+## 15. Impact sur Deployment
 
-Le Cloud Core reste responsable de l'infrastructure PostgreSQL :
+Le Deployment reste responsable de l'infrastructure PostgreSQL :
 
 - PostgreSQL non public ;
 - utilisateur applicatif non superuser ;
@@ -263,7 +263,7 @@ Le Cloud Core reste responsable de l'infrastructure PostgreSQL :
 - health checks ;
 - sécurité serveur.
 
-Les migrations restent pilotées par l'API Core ou les projets applicatifs, pas par le Cloud Core directement.
+Les migrations restent pilotées par l'API Core ou les projets applicatifs, pas par le Deployment directement.
 
 ## 16. Impact sur migrations et seeds
 
@@ -341,7 +341,7 @@ L'IA assiste la génération et la revue, mais ne décide pas seule d'un changem
 - Les migrations doivent être testées sur environnement contrôlé avant production.
 - TypeORM ne doit être utilisé que par exception documentée.
 - Les secrets et données réelles ne doivent jamais être placés dans des seeds.
-- Les migrations critiques doivent être coordonnées avec les backups et restore Cloud Core.
+- Les migrations critiques doivent être coordonnées avec les backups et restore Deployment.
 
 ## 21. Conditions de révision future
 

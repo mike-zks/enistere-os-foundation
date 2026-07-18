@@ -5,6 +5,8 @@ export function buildGenerationPlan(blueprint) {
   if (blueprint.deployment.environments.includes('staging')) directories.push('infrastructure/staging');
   return {
     project: blueprint.project.slug,
+    generationMode: 'baseline-copy',
+    bundledFeaturesMayExceedSelection: true,
     stack: blueprint.stack,
     capabilities: [...blueprint.capabilities],
     designSystem: blueprint.designSystem,

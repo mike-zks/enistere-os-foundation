@@ -15,7 +15,7 @@
   },
   "scripts": {
     "enistere": "node factory/cli/enistere.mjs",
-    "factory:test": "node --test factory/test/*.test.mjs factory/ai/core/test/*.test.mjs factory/quality/core/scripts/*.test.mjs",
+    "factory:test": "node --test factory/test/*.test.mjs factory/ai/runtime/test/*.test.mjs factory/quality/scripts/*.test.mjs",
     "generate": "npm run generate --workspace=@enistere/api-contracts",
     "generate:check": "npm run generate:check --workspace=@enistere/api-contracts",
     "build": "npm run build --workspace=@enistere/api-contracts && npm run build --workspace=@enistere/api-client-fetch",

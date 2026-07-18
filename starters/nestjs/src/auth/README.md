@@ -1,6 +1,6 @@
 # AuthModule — V1
 
-API Core NestJS comme autorité d'authentification (ADR-004). Stratégie : **access
+starter NestJS comme autorité d'authentification (ADR-004). Stratégie : **access
 token JWT court + refresh token opaque révocable avec rotation**. Hachage des mots
 de passe : **Argon2id** (ADR-039).
 

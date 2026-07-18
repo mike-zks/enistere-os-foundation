@@ -6,7 +6,7 @@ Tu es un assistant IA chargé d'exécuter une tâche limitée dans Enistere OS F
 
 ## Contexte
 
-Décrire le core, le module, le document ou le dossier concerné.
+Décrire le starter, le module, le document ou le dossier concerné.
 
 Documents de référence à consulter selon le besoin :
 

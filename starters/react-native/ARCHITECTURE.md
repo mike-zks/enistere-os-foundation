@@ -1,12 +1,12 @@
-# Mobile Core React Native — Architecture & Décisions (Starter Foundation)
+# starter React Native — Architecture & Décisions (Starter Foundation)
 
 Ce document explique les choix structurants du socle et les **écarts assumés**
-vis-à-vis du `CORE_SPECIFICATION.md`, conformément à la mission
-« Mobile Core React Native 1 — starter foundation ».
+vis-à-vis du `STARTER_SPECIFICATION.md`, conformément à la mission
+« starter React Native 1 — starter foundation ».
 
 ## 1. Layout plat (et non `starter/`)
 
-Le `CORE_SPECIFICATION.md` §8 illustre une arborescence imbriquée sous
+Le `STARTER_SPECIFICATION.md` §8 illustre une arborescence imbriquée sous
 `starters/react-native/starter/`. Le socle adopte plutôt un **layout plat**
 (projet Expo directement à la racine du core).
 
@@ -164,7 +164,7 @@ RN 3 ajoute des **primitives de formulaire génériques** et une couche de
 - **Validation = UX uniquement (ADR-003 §18)** : `src/forms/validation.ts`
   enveloppe **Zod** (`validateWith`, plus des fabriques génériques
   `requiredText`/`emailField`/`minLengthText`/…). **La validation backend reste
-  obligatoire** — l'API Core NestJS est l'autorité (ADR-003 §7/§18). On **ne
+  obligatoire** — l'starter NestJS est l'autorité (ADR-003 §7/§18). On **ne
   recopie aucun DTO API** et on **ne crée aucun schéma métier**
   (Kivvoo/RFashion/Bailo/…).
 - **Mapping d'erreurs agnostique** : `src/forms/form-errors.ts` normalise les
@@ -465,7 +465,7 @@ ADR-015 / 07_SECURITY §9.4/§13.
 - **Non fourni (mission / ADR-040 §24)** : **aucune** persistance de logs,
   **aucun** transport réseau, **aucun** service externe (Sentry/Datadog/Loki),
   **aucun** log de payload automatique. La collecte/observabilité relève d'un
-  ADR/Cloud Core futur (ADR-018/036). Le `console.warn` de `src/storage` n'est
+  ADR/Deployment futur (ADR-018/036). Le `console.warn` de `src/storage` n'est
   **pas** recâblé (hors périmètre RN 8) → aucun changement de comportement.
 - **Tests** (`node --test`) : `logger-redaction` (clés sensibles, variantes de
   casse, cycles, `Error` sans stack, Bearer/Basic/JWT/device-uri/URL signée/email,
@@ -1421,7 +1421,7 @@ délibérément hors circuit.
 
 RN 26 ajoute une route protégée `app/(app)/settings.tsx` et le lien depuis
 `home.tsx` pour aligner le starter avec `strategy/04_ROADMAP_GLOBAL.md` §9
-Mobile Core React Native V1 : la roadmap demande une base réellement exploitable
+starter React Native V1 : la roadmap demande une base réellement exploitable
 avec navigation auth/private, home screen, settings screen, services génériques
 branchables, états UI standards et composants de base. RN 26 ne crée aucune
 logique métier ; il rend simplement les primitives existantes inspectables depuis

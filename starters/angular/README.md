@@ -1,4 +1,4 @@
-# Web Core Angular
+# starter Angular
 
 Socle web Angular de référence pour les backoffices, dashboards administratifs, SI internes et portails opérateurs Enistere.
 
@@ -10,7 +10,7 @@ Socle web Angular de référence pour les backoffices, dashboards administratifs
 
 ## Rôle
 
-Le Web Core Angular cadre la base commune des applications Angular enterprise Enistere :
+Le starter Angular cadre la base commune des applications Angular enterprise Enistere :
 
 - Architecture Angular standalone (feature-first)
 - Angular Router avec guards fonctionnels
@@ -26,7 +26,7 @@ Le Web Core Angular cadre la base commune des applications Angular enterprise En
 
 ## Positionnement
 
-| Aspect | Web Core Next.js | Web Core Angular |
+| Aspect | starter Next.js | starter Angular |
 |---|---|---|
 | Cible | Landing pages, SaaS, portails publics, dashboards légers | Backoffices, SI administratifs, portails opérateurs |
 | Moteur UI | shadcn/ui + Radix UI (React) | Angular Material CDK + M3 (ADR-035) |
@@ -41,7 +41,7 @@ Le Web Core Angular cadre la base commune des applications Angular enterprise En
 
 ## Spécification
 
-Lire [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md) avant toute mission Angular.
+Lire [`STARTER_SPECIFICATION.md`](./STARTER_SPECIFICATION.md) avant toute mission Angular.
 
 Sections clés :
 
@@ -72,7 +72,7 @@ Sections clés :
 
 | # | Mission | Livrable | Statut |
 |---|---|---|---|
-| Angular 1 | Core specification | `CORE_SPECIFICATION.md` + `README.md` | ✅ Réalisé (2026-07-15) |
+| Angular 1 | Core specification | `STARTER_SPECIFICATION.md` + `README.md` | ✅ Réalisé (2026-07-15) |
 | Angular 2 | Starter minimal Angular | `package.json` + structure `src/` + thème Material 3 Enistere | ✅ Réalisé (2026-07-16) |
 | Angular 3 | Auth flow + routing protégé | `AuthService` (Signals) + guards + intercepteurs | ✅ Réalisé (2026-07-16) |
 | Angular 4 | Client HTTP + server state | HttpClient + ErrorInterceptor + services RxJS + modèles typés | ✅ Réalisé (2026-07-16) |

@@ -1,7 +1,7 @@
-# Mobile Core React Native — Usable Starter Shell
+# starter React Native — Usable Starter Shell
 
 > Statut : **`VALIDE_V1`** (Mobile Core V1 final readiness decision, 2026-07-13 ; critères V1 applicables satisfaits ; B2 iOS smoke accepté comme réserve environnementale documentée, sans preuve iOS artificielle)
-> Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
+> Spécification cible : [`STARTER_SPECIFICATION.md`](./STARTER_SPECIFICATION.md)
 > Architecture & décisions : [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
 Socle mobile **Expo / React Native** générique et réutilisable pour les futures
@@ -109,12 +109,12 @@ starters/react-native/
 │   └── upload/               # upload sécurisé : file (pur, agnostique) + useUploadMutation
 ├── test/                     # node --test (… consent-model, consent-service, consent-preference-store, app-environment-model, app-environment-service, clipboard-model, clipboard-service)
 ├── app.json · tsconfig.json · tsconfig.test.json · babel.config.js · metro.config.js · eslint.config.js · .env.example
-└── CORE_SPECIFICATION.md · README.md · ARCHITECTURE.md
+└── STARTER_SPECIFICATION.md · README.md · ARCHITECTURE.md
 ```
 
 > Layout **plat** (projet à la racine du core), cohérent avec `web-nextjs` et
 > `api-nestjs`. C'est un écart **assumé** vis-à-vis du `starter/` du
-> `CORE_SPECIFICATION.md` §8 — voir [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+> `STARTER_SPECIFICATION.md` §8 — voir [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## Gouvernance (ADR appliqués)
 
@@ -256,7 +256,7 @@ puis `lifecycle.subscribe((s) => { if (s === 'active') refresh(); if (s ===
 'Save', state: { disabled } })` puis `<Pressable {...props} />` ; pour annoncer :
 `createA11yService({ adapter }).announce({ message: 'Saved', assertive: false })`.
 
-Présents au `CORE_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
+Présents au `STARTER_SPECIFICATION.md` mais **non livrés** dans ce socle, par choix
 de mission. **L'app lifecycle (RN 15) livre les primitives** (modèle d'état,
 transitions, adapter, service, placeholder) mais **PAS** d'adaptateur RN `AppState`
 réel, de hook/provider, ni de **câblage** des effets concrets (flush analytics /
@@ -290,7 +290,7 @@ service, placeholder, `usePermission`) mais **PAS** d'adaptateurs Expo réels
 contextualisée. **Le logger (RN 8) livre les primitives** (`createLogger`, redaction centrale, `safeErrorFields`) mais **PAS**
 de backend d'observabilité, de transport réseau, de persistance de logs ni de
 recâblage des `console.*` existants ; la collecte/observabilité relève d'un
-ADR/Cloud Core futur (ADR-018/036). **L'upload (RN 7) livre les primitives**
+ADR/Deployment futur (ADR-018/036). **L'upload (RN 7) livre les primitives**
 (`MobileFile`, `useUploadMutation`) mais **PAS** d'écran/picker, de progression,
 de multi-upload ni de suppression/quarantaine/restauration (présents dans le
 package, non câblés).

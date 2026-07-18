@@ -1,14 +1,32 @@
 import { it } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { loadStarterManifests, STARTER_IDS } from '../engine/starters.mjs';
+import { buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
+import { loadStarterManifests, STARTER_IDS, validateManifestConsistency } from '../engine/starters.mjs';
 
-it('loads six independent starters with a uniform responsibility contract', async () => {
-  const manifests = await loadStarterManifests(resolve(import.meta.dirname, '../..'));
+const root = resolve(import.meta.dirname, '../..');
+
+it('loads six independent starters using manifest schema v2', async () => {
+  const manifests = await loadStarterManifests(root);
   assert.deepEqual(manifests.map((item) => item.id), STARTER_IDS);
-  const slots = manifests[0].capabilitySlots;
-  for (const manifest of manifests) assert.deepEqual(manifest.capabilitySlots, slots);
+  assert.ok(manifests.every((item) => item.schemaVersion === '2'));
+  assert.ok(manifests.every((item) => item.composition.base === 'built-in'));
+  assert.ok(manifests.every((item) => item.composition.readyCapabilities.length === 0));
   assert.equal(manifests.filter((item) => item.kind === 'api').length, 2);
   assert.equal(manifests.filter((item) => item.kind === 'web').length, 2);
   assert.equal(manifests.filter((item) => item.kind === 'mobile').length, 2);
+});
+
+it('cross-validates starter and capability declarations', async () => {
+  const starters = await loadStarterManifests(root);
+  const capabilities = await loadCapabilityManifests(root);
+  assert.deepEqual(validateManifestConsistency(starters, capabilities), []);
+});
+
+it('reports a truthful target support matrix', async () => {
+  const matrix = buildCapabilityMatrix(await loadCapabilityManifests(root));
+  assert.equal(matrix.base.nestjs, 'ready');
+  assert.equal(matrix.base.flutter, 'ready');
+  assert.equal(matrix.auth.nextjs, 'planned');
+  assert.equal(matrix.files['react-native'], 'planned');
 });

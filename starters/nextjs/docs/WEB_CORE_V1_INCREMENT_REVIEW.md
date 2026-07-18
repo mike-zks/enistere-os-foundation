@@ -1,6 +1,6 @@
 # Revue globale Web Core — incrément V1
 
-> Revue **transverse de stabilisation** du Web Core Next.js traité comme **un système unique** (Health
+> Revue **transverse de stabilisation** du starter Next.js traité comme **un système unique** (Health
 > public → BFF Auth → session/autorisations → layout protégé → login → états UI → Files lecture/
 > téléchargement), **sans aucune nouvelle fonctionnalité**. Le repository réel prime sur les rapports
 > antérieurs. Date : 2026-06-10.
@@ -18,7 +18,7 @@ Inclus : vérification fichier par fichier, rejeu des validations (×2), rejeu r
 MinIO jetables), analyse des frontières, détection de duplications/contradictions, classement des dettes,
 verdict, rapport permanent, une seule prochaine action. **Exclus** (respecté) : toute nouvelle
 fonctionnalité (Files 2, middleware, upload/suppression Web, nouveau composant UI, CI, Docker). **Non
-modifiés** : `starters/nestjs/`, `starters/react-native/`, `deployment/core/`, `packages/ui-kit/`,
+modifiés** : `starters/nestjs/`, `starters/react-native/`, `deployment/`, `packages/ui-kit/`,
 `packages/`, `docs/adr/`, `strategy/`.
 
 ## 3. Architecture
@@ -328,7 +328,7 @@ absentes (Dialog/Select/Toast) · upload/suppression Files Web absents (volontai
 
 ## 50. Risques post-V1
 
-CSP/HSTS à introduire avec le déploiement (Cloud Core) ; rate limiting/observabilité BFF ; SSR Auth complet ;
+CSP/HSTS à introduire avec le déploiement (Deployment) ; rate limiting/observabilité BFF ; SSR Auth complet ;
 durcissement multi-onglets ; publication des packages (ADR-016) ; primitives UI interactives (UI Kit 4) avant
 features riches.
 
