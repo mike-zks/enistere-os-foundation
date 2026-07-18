@@ -6,6 +6,17 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Project Factory 2 — Derived project blueprint templates
+
+- `docs/project-factory/templates/FUNCTIONAL_BRIEF.template.md` : cadrage besoin, utilisateurs, parcours, roles, entites, contraintes et V1.
+- `docs/project-factory/templates/TECHNICAL_BLUEPRINT.template.md` : composition cores, profils API + mobile, contrats, auth, stockage, environnements et gates.
+- `docs/project-factory/templates/STACK_DECISION.template.md` : justification du profil stack retenu et alternatives rejetees.
+- `docs/project-factory/templates/SECURITY_NOTES.template.md` : classification donnees/secrets/auth/RBAC/upload/logs/dependances.
+- `docs/project-factory/templates/RELEASE_PLAN.template.md` : perimetre release, gates, environnements, rollback, versioning et acceptation.
+- `docs/project-factory/DERIVED_PROJECT_PROCESS.md` reference les templates comme sorties documentaires minimales.
+- `docs/project-status/PROJECT_FACTORY2_BLUEPRINT_TEMPLATES_REPORT.md` : rapport de mission et alignement strategy.
+- Aucun generateur CLI, runtime, workflow, dependance, template applicatif ou exemple derive bout-en-bout.
+
 ### Project Factory 1 — Stack profiles matrix
 
 - `docs/project-factory/DERIVED_PROJECT_PROCESS.md` : processus officiel pour transformer une idee en projet derive gouverne.

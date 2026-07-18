@@ -82,6 +82,12 @@
 > Les adaptations futures comme client Dart généré, compatibilité OpenAPI Spring
 > vers packages TS, publication npm registry ou générateur CLI restent à décider
 > par missions dédiées.
+>
+> **Note Project Factory 2 (templates de blueprint projet derive)** :
+> `docs/project-factory/templates/` applique la gouvernance existante :
+> documentation obligatoire, cadrage avant génération, secrets exclus du Git,
+> gates et écarts Foundation explicites. Ces templates ne décident aucun nouveau
+> runtime, SDK, stockage, registry, workflow ou mode de déploiement.
 
 ## 2. Décisions validées — état d'application
 

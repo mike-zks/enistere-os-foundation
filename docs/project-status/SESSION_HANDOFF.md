@@ -31,10 +31,12 @@ flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique
   + e2e CI runtime + rapports permanents. Promotion réalisée le 2026-07-12 :
   `API_CORE_V1_READINESS_REVIEW.md`.
 - **Project Factory** : **SPECIFICATION_DOCUMENTAIRE** (2026-07-18) —
-  `docs/project-factory/DERIVED_PROJECT_PROCESS.md` + `docs/project-factory/STACK_PROFILES_MATRIX.md`.
+  `docs/project-factory/DERIVED_PROJECT_PROCESS.md` + `docs/project-factory/STACK_PROFILES_MATRIX.md`
+  + `docs/project-factory/templates/`.
   La Foundation reconnait les compositions flexibles, y compris les profils **API + mobile** :
   `nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`.
-  Aucun generateur CLI, template de bootstrap, runtime, dependance ou workflow.
+  Templates documentaires livrés : `FUNCTIONAL_BRIEF`, `TECHNICAL_BLUEPRINT`, `STACK_DECISION`,
+  `SECURITY_NOTES`, `RELEASE_PLAN`. Aucun generateur CLI, runtime applicatif, dependance ou workflow.
 - **Foundation baseline** : **FOUNDATION_V1_RELEASED** (2026-07-12) — tag `foundation-v1.0.0`,
   commit `2981f2c`, GitHub Release publiée.
 - **Release notes** : **FOUNDATION_V1_RELEASED** — `FOUNDATION_V1_RELEASE_NOTES.md` publié.
