@@ -66,11 +66,11 @@ describe('blueprint v1', () => {
   it('rejects generation when a selected capability is only planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));
     const blueprint = createDefaultBlueprint('blocked-app');
-    blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
+    blueprint.stack = { api: 'spring', web: 'angular', mobile: 'flutter' };
     blueprint.capabilities = ['base', 'auth'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on nestjs is planned/,
+      /auth on spring is planned/,
     );
   });
   it('plans every supported stack combination as a golden matrix', () => {
@@ -85,6 +85,7 @@ describe('blueprint v1', () => {
     assert.equal(seen.size, 18);
   });
   it('generates base-only locks for all 18 stack combinations', async () => {
+    const MODULAR = new Set(['nestjs', 'nextjs', 'react-native']);
     for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
       const root = await mkdtemp(join(tmpdir(), 'enistere-golden-'));
       const blueprint = createDefaultBlueprint(`${api}-${web ?? 'none'}-${mobile ?? 'none'}`);
@@ -92,8 +93,9 @@ describe('blueprint v1', () => {
       const output = join(root, 'project');
       await generateProject(blueprint, output, { materialize: false });
       const lock = JSON.parse(await readFile(join(output, 'enistere.lock'), 'utf8'));
-      assert.equal(lock.plan.generationMode, 'baseline-copy');
-      assert.equal(lock.plan.bundledFeaturesMayExceedSelection, true);
+      const allModular = [api, web, mobile].filter(Boolean).every((starter) => MODULAR.has(starter));
+      assert.equal(lock.plan.generationMode, allModular ? 'modular-overlay' : 'baseline-copy');
+      assert.equal(lock.plan.bundledFeaturesMayExceedSelection, !allModular);
     }
   });
 });

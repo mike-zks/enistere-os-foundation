@@ -14,6 +14,9 @@ export function validateStarterManifest(value) {
   for (const command of COMMANDS) if (!Array.isArray(value?.commands?.[command]) || value.commands[command].length === 0) issues.push(`commands.${command} is required`);
   if (value?.composition?.contractVersion !== '1') issues.push('composition.contractVersion must be 1');
   if (value?.composition?.base !== 'built-in') issues.push('composition.base must be built-in');
+  if (value?.composition?.model !== undefined && !['modular', 'bundled'].includes(value.composition.model)) {
+    issues.push('composition.model must be modular or bundled');
+  }
   for (const key of ['readyCapabilities', 'plannedCapabilities']) if (!Array.isArray(value?.composition?.[key])) issues.push(`composition.${key} must be an array`);
   const ready = value?.composition?.readyCapabilities ?? [];
   const planned = value?.composition?.plannedCapabilities ?? [];
@@ -50,4 +53,9 @@ export function validateManifestConsistency(starters, capabilities) {
 
 export function selectedStarterIds(blueprint) {
   return [blueprint.stack.api, blueprint.stack.web, blueprint.stack.mobile].filter(Boolean);
+}
+
+/** Starter ids whose baseline follows the modular composition contract. */
+export function modularStarterIds(starters) {
+  return starters.filter((starter) => starter.composition.model === 'modular').map((starter) => starter.id);
 }

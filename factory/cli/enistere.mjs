@@ -7,7 +7,7 @@ import { assertBlueprint, createDefaultBlueprint, readBlueprint } from '../engin
 import { buildGenerationPlan } from '../engine/plan.mjs';
 import { generateProject } from '../engine/generator.mjs';
 import { assessCapabilitySupport, buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
-import { loadStarterManifests, selectedStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
+import { loadStarterManifests, modularStarterIds, selectedStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
 
 const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
@@ -46,7 +46,8 @@ async function main() {
   if (['plan', 'generate', 'verify'].includes(command)) {
     if (!first) throw new Error(`${command} requires a blueprint path`);
     const blueprint = assertBlueprint(await readBlueprint(resolve(first)));
-    const plan = buildGenerationPlan(blueprint);
+    const starters = await loadStarterManifests(FOUNDATION_ROOT);
+    const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starters) });
     const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
     const support = assessCapabilitySupport(selectedStarterIds(blueprint), capabilities);
     if (command === 'verify') {

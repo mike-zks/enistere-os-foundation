@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enistere.dev/schema/overlay.schema.json",
+  "title": "Enistere Capability Overlay v1",
+  "description": "Declarative overlay applied by the Factory engine to compose a capability onto a starter baseline. Overlays never carry scripts, hooks or free-form commands: every operation is interpreted by the engine through a known, deterministic renderer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "capability", "target", "version", "files", "dependencies", "environment", "integrations", "verification"],
+  "properties": {
+    "schemaVersion": { "const": "1" },
+    "capability": { "type": "string", "description": "Registered capability id (must match the directory)." },
+    "target": { "type": "string", "description": "Registered starter id (must match the directory)." },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "description": { "type": "string" },
+    "files": {
+      "type": "array",
+      "description": "Files or directories copied verbatim from the overlay payload into the generated app. Copying onto an existing file fails unless the entry declares overwrite: true.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "destination"],
+        "properties": {
+          "source": { "type": "string", "description": "Path relative to the overlay directory, under files/." },
+          "destination": { "type": "string", "description": "Path relative to the generated app directory." },
+          "overwrite": { "type": "boolean", "description": "Declared replacement of a baseline file (file entries only)." }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": { "type": "object", "additionalProperties": { "type": "string" } },
+        "devDependencies": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "environment": {
+      "type": "array",
+      "description": "Environment variables appended to the app .env.example.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "example"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "example": { "type": "string" },
+          "comment": { "type": "string" }
+        }
+      }
+    },
+    "integrations": {
+      "type": "array",
+      "description": "Central integration requests rendered by the engine. Unknown kinds are rejected.",
+      "items": {
+        "type": "object",
+        "required": ["kind"],
+        "properties": { "kind": { "type": "string" } }
+      }
+    },
+    "verification": {
+      "type": "array",
+      "description": "Argv arrays executed from the app directory by the generated verify script.",
+      "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+    }
+  }
+}
