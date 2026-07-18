@@ -22,6 +22,8 @@ runbooks, les checklists qualite et les prompts IA.
 | Lire la decision gate docs/CI | [`project-status/DOCS_CORE_CI_GATE_DECISION.md`](project-status/DOCS_CORE_CI_GATE_DECISION.md) |
 | Lire la revue Docs Core V1 | [`project-status/DOCS_CORE_V1_READINESS_REVIEW.md`](project-status/DOCS_CORE_V1_READINESS_REVIEW.md) |
 | Faire un premier tour en 15 minutes | [`onboarding/DEVELOPER_QUICKSTART.md`](onboarding/DEVELOPER_QUICKSTART.md) |
+| Choisir une composition pour un projet derive | [`project-factory/STACK_PROFILES_MATRIX.md`](project-factory/STACK_PROFILES_MATRIX.md) |
+| Transformer une idee en projet derive | [`project-factory/DERIVED_PROJECT_PROCESS.md`](project-factory/DERIVED_PROJECT_PROCESS.md) |
 | Demarrer comme contributeur ou agent | [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) |
 | Maintenir la documentation | [`guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](guides/DOCUMENTATION_MAINTENANCE_GUIDE.md) |
 | Conduire une revue de statut | [`guides/CORE_STATUS_REVIEW_GUIDE.md`](guides/CORE_STATUS_REVIEW_GUIDE.md) |
@@ -44,6 +46,15 @@ Le dossier [`project-status/`](project-status/) est la source de pilotage operat
 | [`project-status/IMPLEMENTATION_MATRIX.md`](project-status/IMPLEMENTATION_MATRIX.md) | Matrice par core/package/module |
 | [`project-status/NEXT_ACTIONS.md`](project-status/NEXT_ACTIONS.md) | Prochaine action unique et historique des missions |
 | [`project-status/DECISIONS_REGISTER.md`](project-status/DECISIONS_REGISTER.md) | Lecture rapide ADR vs implementation |
+
+## Project Factory
+
+Le dossier [`project-factory/`](project-factory/) cadre les projets derives Enistere.
+
+| Fichier | Role |
+|---|---|
+| [`project-factory/DERIVED_PROJECT_PROCESS.md`](project-factory/DERIVED_PROJECT_PROCESS.md) | Processus idee -> brief fonctionnel -> blueprint technique -> profil stack -> bootstrap |
+| [`project-factory/STACK_PROFILES_MATRIX.md`](project-factory/STACK_PROFILES_MATRIX.md) | Matrice de compatibilite des profils API/Web/Mobile/Cloud et gates associes |
 
 ## Decisions d'architecture
 

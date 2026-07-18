@@ -72,6 +72,16 @@
 > iOS artificielle, ne décide aucun framework E2E mobile ou XCTest custom,
 > n'ajoute aucun SDK/adaptateur natif réel, et conserve Android RN28/RN29 comme
 > preuves runtime existantes.
+>
+> **Note Project Factory 1 (projets derives / profils stack)** :
+> `docs/project-factory/DERIVED_PROJECT_PROCESS.md` et
+> `docs/project-factory/STACK_PROFILES_MATRIX.md` ne créent pas de nouvel ADR.
+> Ils composent les décisions existantes (ADR-001, ADR-004, ADR-007, ADR-008,
+> ADR-011, ADR-012, ADR-013, ADR-015, ADR-016, ADR-034, ADR-035, ADR-041) pour
+> cadrer les profils de projets derives, y compris les profils API + mobile.
+> Les adaptations futures comme client Dart généré, compatibilité OpenAPI Spring
+> vers packages TS, publication npm registry ou générateur CLI restent à décider
+> par missions dédiées.
 
 ## 2. Décisions validées — état d'application
 

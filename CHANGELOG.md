@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Project Factory 1 — Stack profiles matrix
+
+- `docs/project-factory/DERIVED_PROJECT_PROCESS.md` : processus officiel pour transformer une idee en projet derive gouverne.
+- `docs/project-factory/STACK_PROFILES_MATRIX.md` : matrice complete des profils de stack, incluant les profils API + mobile (`nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`).
+- `docs/project-status/PROJECT_FACTORY1_STACK_PROFILES_REPORT.md` : rapport de mission et prochaine action Project Factory 2.
+- `docs/README.md` et fichiers `docs/project-status/*` : liens et statut de pilotage mis a jour.
+- Aucun runtime, dependance, workflow, template generateur ou exemple derive bout-en-bout.
+
 ### Packages Release 1 — GitHub Release tarballs
 
 - `@enistere/api-contracts@0.1.0` et `@enistere/api-client-fetch@0.1.0` : première distribution par artefacts GitHub Release tarballs.

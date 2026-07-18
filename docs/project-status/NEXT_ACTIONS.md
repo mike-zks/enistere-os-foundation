@@ -5,6 +5,19 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Project Factory 1 — Stack Profiles Matrix : RÉALISÉ** (2026-07-18).
+> Livrables : `docs/project-factory/DERIVED_PROJECT_PROCESS.md`,
+> `docs/project-factory/STACK_PROFILES_MATRIX.md` et
+> `docs/project-status/PROJECT_FACTORY1_STACK_PROFILES_REPORT.md`.
+> La Foundation reconnait officiellement les projets derives flexibles, y compris les profils
+> **API + mobile** (`nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`).
+> Aucun generateur, runtime, dependance, workflow ou exemple derive bout-en-bout n'est livre dans cette mission.
+>
+> **Prochaine action UNIQUE** : **Project Factory 2 — Derived project blueprint templates**.
+> Objectif : livrer les templates documentaires d'initialisation d'un projet derive :
+> `FUNCTIONAL_BRIEF.md`, `TECHNICAL_BLUEPRINT.md`, `STACK_DECISION.md`, `SECURITY_NOTES.md`,
+> `RELEASE_PLAN.md`.
+
 > ✅ **Quality Core V2 Readiness Review : RÉALISÉ** (2026-07-12).
 > Rapport : `docs/project-status/QUALITY_CORE_V2_READINESS_REVIEW.md`.
 > Décision : **`SPECIFICATION_DOCUMENTAIRE` → `IMPLEMENTATION_PARTIELLE`**.
