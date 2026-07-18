@@ -1,14 +1,14 @@
 name: Web E2E CI
 
-# Deployment 3 — CI E2E navigateur (niveau 3). Démarre une stack RÉELLE et ÉPHÉMÈRE
-# (PostgreSQL + MinIO jetables, API NestJS, Web Next.js) et rejoue les parcours utilisateur critiques
-# (Health, Auth, Files lecture/téléchargement) avec un navigateur headless (Playwright/Chromium).
-# SANS déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement protégé.
+# Deployment 3 — CI E2E navigateur (niveau 3), baseline `base`. Démarre une stack RÉELLE et
+# ÉPHÉMÈRE (PostgreSQL jetable, API NestJS `base`, Web Next.js `base`) et rejoue les parcours
+# navigateur de la baseline (Health / page de statut) avec Chromium headless (Playwright).
+# SANS déploiement, registry/GHCR, secret GitHub ni environnement protégé.
 #
-# Notes :
-# - Valeurs ci-dessous = VALEURS DE TEST JETABLES (jamais des secrets, jamais committées en `.env`).
-# - MinIO via `docker run` (un `services:` ne peut porter la commande `server /data`) ; PostgreSQL en service.
-# - `APP_ENV=development` pour le Web : cookies non-Secure → l'Auth fonctionne en HTTP local (pas de TLS en CI).
+# Depuis Capability Packs 1A, les baselines ne contiennent ni Auth ni Files : plus de MinIO/S3,
+# plus de secrets JWT, plus de seed RBAC ni de provisionnement de fichiers. Les parcours composés
+# (login, files) sont vérifiés par les goldens `base+auth`/`base+files` de la Factory, hors dépôt.
+# Valeurs ci-dessous = VALEURS DE TEST JETABLES (jamais des secrets, jamais committées en `.env`).
 
 on:
   pull_request:
@@ -44,42 +44,16 @@ jobs:
           --health-retries 20
 
     env:
-      # --- API (valeurs de test jetables) ---
+      # --- API baseline (valeurs de test jetables) ---
       DATABASE_URL: postgresql://enistere:enistere_test_password@localhost:5432/enistere_e2e?schema=public
-      JWT_ACCESS_SECRET: ci_test_access_secret_minimum_32_characters_long
-      JWT_REFRESH_SECRET: ci_test_refresh_secret_minimum_32_characters_long
-      JWT_ACCESS_TTL: "900"
-      REFRESH_TOKEN_TTL: "1209600"
-      REFRESH_TOKEN_HASH_SECRET: ci_test_refresh_hash_secret_minimum_32_chars
-      ARGON2_MEMORY_COST: "19456"
-      ARGON2_TIME_COST: "2"
-      ARGON2_PARALLELISM: "1"
-      AUTH_LOGIN_RATE_LIMIT: "1000"
-      AUTH_LOGIN_RATE_TTL: "60"
-      AUTH_REFRESH_RATE_LIMIT: "1000"
-      AUTH_REFRESH_RATE_TTL: "60"
-      FILE_MAX_SIZE_BYTES: "10485760"
-      FILE_ORIGINAL_NAME_MAX_LENGTH: "255"
-      S3_ENDPOINT: http://127.0.0.1:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY_ID: enistere
-      S3_SECRET_ACCESS_KEY: enistere_test_password
-      S3_BUCKET: enistere-test-files
-      S3_FORCE_PATH_STYLE: "true"
-      FILES_UPLOAD_RATE_LIMIT: "1000"
-      FILES_UPLOAD_RATE_TTL: "60"
-      FILES_SIGNED_READ_URL_TTL_SECONDS: "300"
-      FILES_DOWNLOAD_URL_RATE_LIMIT: "1000"
-      FILES_DOWNLOAD_URL_RATE_TTL: "60"
       CORS_ORIGINS: http://127.0.0.1:3100,http://127.0.0.1:3001
       PORT: "3001"
       SERVICE_NAME: api-nestjs-core
       LOG_LEVEL: warn
-      # --- Web (cookies HTTP-friendly en CI) ---
+      # --- Web baseline ---
       APP_ENV: development
       API_INTERNAL_URL: http://127.0.0.1:3001
       NEXT_PUBLIC_API_URL: http://127.0.0.1:3001
-      WEB_ALLOWED_ORIGINS: http://127.0.0.1:3100
       # --- E2E ---
       E2E_API_URL: http://127.0.0.1:3001
       E2E_WEB_URL: http://127.0.0.1:3100
@@ -92,17 +66,6 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Start MinIO (jetable)
-        run: |
-          docker run -d --name minio \
-            -p 9000:9000 -p 9001:9001 \
-            -e MINIO_ROOT_USER=enistere \
-            -e MINIO_ROOT_PASSWORD=enistere_test_password \
-            minio/minio server /data --console-address ":9001"
-          for i in $(seq 1 40); do
-            curl -fsS http://127.0.0.1:9000/minio/health/live >/dev/null 2>&1 && break || sleep 2
-          done
-
       - name: Install workspace + build packages
         run: |
           npm ci
@@ -113,21 +76,13 @@ jobs:
       - name: Install Playwright (chromium)
         run: npm run e2e:install --workspace=@enistere/web-nextjs
 
-      - name: Install + prepare API (autonome)
+      - name: Install + prepare API baseline (autonome)
         working-directory: starters/nestjs
         run: |
           npm ci
-          node -e "const {S3Client,CreateBucketCommand}=require('@aws-sdk/client-s3');const c=new S3Client({endpoint:'http://127.0.0.1:9000',region:'us-east-1',forcePathStyle:true,credentials:{accessKeyId:'enistere',secretAccessKey:'enistere_test_password'}});c.send(new CreateBucketCommand({Bucket:'enistere-test-files'})).then(()=>console.log('bucket ok')).catch(e=>{const s=String(e);if(s.includes('BucketAlready')){console.log('bucket exists')}else{console.error(s);process.exit(1)}})"
           npm run prisma:generate
           npm run prisma:migrate:deploy
-          npm run prisma:seed
           npm run build
-
-      - name: Seed ephemeral users
-        working-directory: starters/nestjs
-        run: |
-          SEED=$(npx ts-node scripts/proof-seed-user.ts | tail -n 1)
-          node -e "const d=JSON.parse(process.argv[1]);require('fs').appendFileSync(process.env.GITHUB_ENV,'E2E_EMAIL='+d.adminEmail+'\nE2E_NOPERM_EMAIL='+d.noPermEmail+'\nE2E_PASSWORD='+d.password+'\n')" "$SEED"
 
       - name: Start API (background) + wait ready
         working-directory: starters/nestjs
@@ -149,7 +104,3 @@ jobs:
 
       - name: Run E2E (Playwright, headless)
         run: npm run test:e2e --workspace=@enistere/web-nextjs
-
-      - name: Stop MinIO
-        if: always()
-        run: docker rm -f minio || true
