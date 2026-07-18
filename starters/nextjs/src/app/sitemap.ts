@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3100";
 
 /**
- * Sitemap public du socle. N'inclut que les pages indexables (`/` et `/status`).
- * Les routes protégées (`/protected/**`, `/api/**`) et l'interface de connexion
- * (`/login`) sont exclues du sitemap.
+ * Sitemap public du socle. N'inclut que les pages indexables de la baseline
+ * (`/` et `/status`). Les routes privées et l'API ne sont jamais listées ;
+ * les capabilities composées n'ajoutent pas de page indexable.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

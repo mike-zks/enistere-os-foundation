@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "nestjs",
+  "version": "0.2.0",
+  "description": "Authentification NestJS : login, refresh (rotation), logout, sessions révocables et utilisateurs techniques (ADR-004, ADR-039). Sans RBAC ni Files.",
+  "files": [
+    { "source": "files/src/auth", "destination": "src/auth" },
+    { "source": "files/src/users", "destination": "src/users" },
+    { "source": "files/prisma/migrations/20260718000100_auth_init", "destination": "prisma/migrations/20260718000100_auth_init" },
+    { "source": "files/scripts/benchmark-argon2.ts", "destination": "scripts/benchmark-argon2.ts" },
+    { "source": "files/test/auth-login.e2e-spec.ts", "destination": "test/auth-login.e2e-spec.ts" },
+    { "source": "files/test/auth-me.e2e-spec.ts", "destination": "test/auth-me.e2e-spec.ts" },
+    { "source": "files/test/auth-refresh.e2e-spec.ts", "destination": "test/auth-refresh.e2e-spec.ts" },
+    { "source": "files/test/setup-e2e.ts", "destination": "test/setup-e2e.ts", "overwrite": true },
+    { "source": "files/test/openapi-contract.e2e-spec.ts", "destination": "test/openapi-contract.e2e-spec.ts", "overwrite": true },
+    { "source": "files/openapi/openapi.json", "destination": "openapi/openapi.json", "overwrite": true }
+  ],
+  "dependencies": {
+    "dependencies": {
+      "@nestjs/jwt": "^11.0.2",
+      "@nestjs/passport": "^11.0.5",
+      "@node-rs/argon2": "^2.0.2",
+      "passport": "^0.7.0",
+      "passport-jwt": "^4.0.1"
+    },
+    "devDependencies": {
+      "@types/passport-jwt": "^4.0.1"
+    }
+  },
+  "environment": [
+    { "name": "JWT_ACCESS_SECRET", "example": "replace-with-access-secret", "comment": "Secret JWT access — valeur de développement non sensible, jamais de secret réel commité" },
+    { "name": "JWT_ACCESS_TTL", "example": "900", "comment": "Durée de vie de l'access token, en SECONDES" },
+    { "name": "REFRESH_TOKEN_TTL", "example": "1209600", "comment": "Durée de vie du refresh token, en SECONDES" },
+    { "name": "REFRESH_TOKEN_HASH_SECRET", "example": "replace-with-refresh-hash-secret", "comment": "Secret dédié à l'empreinte HMAC des refresh tokens (distinct du secret JWT)" },
+    { "name": "ARGON2_MEMORY_COST", "example": "19456", "comment": "Argon2id memoryCost en KiB — valeur indicative, à valider par benchmark (ADR-039)" },
+    { "name": "ARGON2_TIME_COST", "example": "2", "comment": "Argon2id timeCost" },
+    { "name": "ARGON2_PARALLELISM", "example": "1", "comment": "Argon2id parallelism" },
+    { "name": "AUTH_LOGIN_RATE_LIMIT", "example": "5", "comment": "Rate limiting du login : tentatives autorisées par fenêtre" },
+    { "name": "AUTH_LOGIN_RATE_TTL", "example": "60", "comment": "Fenêtre du rate limiting login, en secondes" },
+    { "name": "AUTH_REFRESH_RATE_LIMIT", "example": "30", "comment": "Rate limiting du refresh (fenêtre indépendante du login)" },
+    { "name": "AUTH_REFRESH_RATE_TTL", "example": "60", "comment": "Fenêtre du rate limiting refresh, en secondes" }
+  ],
+  "integrations": [
+    { "kind": "nestjs.module", "importPath": "../auth/auth.module", "symbol": "AuthModule" },
+    { "kind": "nestjs.global-guard", "importPath": "../auth/guards/jwt-auth.guard", "symbol": "JwtAuthGuard" },
+    { "kind": "nestjs.throttler", "name": "login", "limitEnv": "AUTH_LOGIN_RATE_LIMIT", "defaultLimit": 5, "ttlSecondsEnv": "AUTH_LOGIN_RATE_TTL", "defaultTtlSeconds": 60 },
+    { "kind": "nestjs.throttler", "name": "refresh", "limitEnv": "AUTH_REFRESH_RATE_LIMIT", "defaultLimit": 30, "ttlSecondsEnv": "AUTH_REFRESH_RATE_TTL", "defaultTtlSeconds": 60 },
+    { "kind": "nestjs.prisma-fragment", "source": "fragments/auth.prisma" }
+  ],
+  "verification": [
+    ["npm", "run", "test"]
+  ]
+}

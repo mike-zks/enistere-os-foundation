@@ -1,25 +1,76 @@
 /**
- * Entry gate — redirects to the public or authenticated stack based on auth
- * state, showing a loading state while the session is being restored (spec §16).
+ * Écran d'accueil de la baseline `base`. Surface générique du socle : aucun
+ * contenu métier, aucune session, aucun réseau. La capability Auth composée
+ * REMPLACE cet écran par la porte d'entrée (redirection publique/protégée selon
+ * l'état de session) via son overlay.
  */
-import { Redirect } from 'expo-router';
+import { Stack } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
-import { useAuth } from '@/auth';
-import { ROUTES, isAuthBusy } from '@/navigation';
-import { LoadingState } from '@/states';
-import { Screen } from '@/ui';
+import { useTheme } from '@/theme';
+import { Screen, Text } from '@/ui';
 
-export default function Index(): React.JSX.Element {
-  const { status } = useAuth();
+const FOUNDATION_DIAGNOSTICS = [
+  ['theme', 'ready'],
+  ['query', 'ready'],
+  ['logger', 'ready'],
+  ['i18n', 'ready'],
+  ['retry', 'available'],
+  ['consent', 'placeholder'],
+  ['telemetry coordinator', 'opt-in'],
+] as const;
 
-  if (isAuthBusy(status)) {
-    return (
+export default function IndexScreen(): React.JSX.Element {
+  const theme = useTheme();
+
+  return (
+    <>
+      <Stack.Screen options={{ title: 'Foundation' }} />
       <Screen>
-        <LoadingState message="Restoring session…" />
+        <View style={[styles.container, { gap: theme.spacing.md }]}>
+          <Text variant="heading">Enistère — Mobile Core</Text>
+          <Text variant="body" tone="muted">
+            Baseline générique (Expo Router). Les capabilities (Auth, Files) se composent
+            par-dessus via la Factory. Aucun contenu métier ici.
+          </Text>
+          <View
+            style={[
+              styles.card,
+              {
+                gap: theme.spacing.sm,
+                borderColor: theme.colors.border,
+                backgroundColor: theme.colors.surface,
+                borderRadius: theme.radius.md,
+                padding: theme.spacing.md,
+              },
+            ]}
+          >
+            <Text variant="title">Diagnostics du socle</Text>
+            {FOUNDATION_DIAGNOSTICS.map(([label, value]) => (
+              <View key={label} style={styles.row}>
+                <Text variant="body">{label}</Text>
+                <Text variant="body" tone="muted">
+                  {value}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
       </Screen>
-    );
-  }
-
-  // authenticated → app; unauthenticated/expired → public sign-in.
-  return <Redirect href={status === 'authenticated' ? ROUTES.home : ROUTES.signIn} />;
+    </>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: 560,
+    width: '100%',
+  },
+  card: {
+    borderWidth: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+});

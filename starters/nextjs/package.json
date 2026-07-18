@@ -2,7 +2,7 @@
   "name": "@enistere/web-nextjs",
   "version": "0.1.0",
   "private": true,
-  "description": "Web Core Next.js (App Router) — Enistere. Consomme @enistere/ui-kit ; API publique (Health) + TanStack Query (server state) ; BFF Auth (login/refresh/logout/csrf) + état de session/autorisations (me/authorization, useSession/useAuthorization). Aucune route protégée ni middleware.",
+  "description": "Web Core Next.js (App Router) — Enistere, baseline base. API publique (Health) + TanStack Query (server state) + UI Kit. Les capabilities (Auth, Files) se composent via la Factory.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {
@@ -25,13 +25,10 @@
     "@enistere/api-client-fetch": "*",
     "@enistere/api-contracts": "*",
     "@enistere/ui-kit": "*",
-    "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-query": "^5.101.0",
     "next": "^16.2.7",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-hook-form": "^7.81.0",
-    "zod": "^4.4.3"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

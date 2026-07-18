@@ -1,12 +1,12 @@
 /**
- * TanStack Query client factory + default singleton.
+ * TanStack Query client factory + default singleton (baseline `base`).
  *
  * Defaults are conservative and mobile-friendly. No business queries or query
- * keys live here — those belong to feature modules in consuming apps.
+ * keys live here. The baseline has no authenticated transport, so retry is a
+ * simple bounded policy; the capability Auth composée remplace ce fichier via
+ * son overlay pour ne jamais réessayer un 401 (pont 401 possédé par l'AuthEngine).
  */
 import { QueryClient } from '@tanstack/react-query';
-
-import { ApiClientError } from '../api';
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -14,13 +14,7 @@ export function createQueryClient(): QueryClient {
       queries: {
         staleTime: 30_000,
         gcTime: 5 * 60_000,
-        retry: (failureCount, error) => {
-          // Never retry auth failures; they need a re-auth, not another attempt.
-          if (error instanceof ApiClientError && error.isUnauthorized) {
-            return false;
-          }
-          return failureCount < 2;
-        },
+        retry: (failureCount) => failureCount < 2,
         refetchOnWindowFocus: false,
       },
       mutations: {
