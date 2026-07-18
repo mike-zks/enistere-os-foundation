@@ -60,8 +60,10 @@ describe('blueprint v1', () => {
     await access(join(output, 'packages/ui-kit/package.json'));
     await access(join(output, 'capabilities/base/capability.json'));
     const rootPackage = JSON.parse(await readFile(join(output, 'package.json'), 'utf8'));
-    assert.deepEqual(rootPackage.workspaces, ['packages/*']);
+    assert.deepEqual(rootPackage.workspaces, ['packages/*', 'apps/api']);
     assert.match(rootPackage.scripts['build:packages'], /api-contracts/);
+    // Unified workspace: the standalone starter's lockfile is removed (root lock is authoritative).
+    await assert.rejects(access(join(output, 'apps/api/package-lock.json')), /ENOENT/);
   });
   it('rejects generation when a selected capability is only planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));

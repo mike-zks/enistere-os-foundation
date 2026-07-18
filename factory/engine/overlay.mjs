@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join, normalize, sep } from 'node:path';
@@ -199,9 +199,6 @@ async function mergeDependencies(overlay, appDirectory) {
     packageJson[section] = Object.fromEntries(Object.entries(target).sort(([a], [b]) => a.localeCompare(b)));
   }
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
-  // The starter lockfile no longer matches the composed manifest: drop it so the
-  // generated project installs from the merged package.json (npm install).
-  await rm(join(appDirectory, 'package-lock.json'), { force: true });
 }
 
 async function appendEnvironment(overlay, appDirectory) {
