@@ -2,6 +2,31 @@
 
 # Enistere OS Foundation — Roadmap Globale
 
+> **Priorite V2 approuvee le 2026-07-18** : gel de l'expansion fonctionnelle des anciens cores, refonte
+> immediate du repository, kernel `enistere`, adapters d'agents locaux, contrat commun des six starters,
+> capability packs puis projets golden. Voir ADR-042. Les versions historiques ci-dessous restent une
+> trace de construction, pas l'ordre d'execution courant.
+
+## Roadmap V2 active
+
+| Etape | Livrable | Preuve de sortie |
+|---|---|---|
+| R1 | Taxonomie `starters/factory/capabilities/deployment/packages` | aucun chemin operationnel `cores/` |
+| R2 | Blueprint v1 + CLI `enistere` | validation et lock deterministes |
+| R3 | Six manifests de starters | contrat commun install/dev/test/build/verify |
+| R4 | Packs base/auth/rbac/files | dependances et contrats neutres testes |
+| R5 | Agents locaux | worktree + deux approbations humaines |
+| R6 | Packs local/staging | Compose genere, sans secret |
+| R7 | Matrice golden 18 profils | generation hors depot reproductible |
+| R8 | Golden runtimes | deux profils web et un profil mobile demarrent reellement |
+| R9 | Compilateur de domaine | CRUD genere et teste sur les deux APIs |
+| R10 | Cycle de vie | upgrade/migration/SemVer |
+| R11 | Distribution | CLI et packages installables sans lien local |
+| R12 | Adoption | metriques et feedback loop publies |
+
+Les anciennes phases ci-dessous sont conservees comme historique de construction. Elles ne doivent
+plus servir a autoriser une mission V2.
+
 ## 1. Résumé exécutif
 
 Ce document définit la roadmap globale de mise en œuvre d’Enistere OS Foundation.
@@ -197,7 +222,7 @@ Templates GitHub :
 Prompts :
 
 ```txt
-prompts/
+factory/ai/prompts/
 ├── global/
 ├── architecture/
 ├── generation/

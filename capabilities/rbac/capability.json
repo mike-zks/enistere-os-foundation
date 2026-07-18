@@ -1,0 +1,1 @@
+{"schemaVersion":"1","id":"rbac","requires":["auth"],"responsibilities":["roles","permissions","authorization"],"targets":["nestjs","spring","nextjs","angular","react-native","flutter"]}

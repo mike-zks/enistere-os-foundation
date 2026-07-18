@@ -278,7 +278,7 @@ runtime du générateur ne décide pas seul.)
 
 ## 29. Versionnement
 
-**Snapshot canonique versionné** (ex. `cores/api-nestjs/openapi/openapi.json`), **régénéré et
+**Snapshot canonique versionné** (ex. `starters/nestjs/openapi/openapi.json`), **régénéré et
 vérifié par CI** (diff Git, génération sans lancer l'API, base de publication). L'artefact courant
 `openapi.json` reste **gitignoré** jusqu'à la mission d'implémentation. Distinguer explicitement :
 `info.version` OpenAPI, version d'URL `/v1` (non utilisée aujourd'hui — pas de préfixe global),

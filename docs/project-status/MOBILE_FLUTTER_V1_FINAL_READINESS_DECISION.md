@@ -15,8 +15,8 @@
 - `docs/project-status/MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md`
 - `docs/project-status/MOBILE_FLUTTER10_ANDROID_SMOKE_REPORT.md`
 - `docs/project-status/MOBILE_FLUTTER11_ANDROID_SMOKE_REPORT.md`
-- `cores/mobile-flutter/CORE_SPECIFICATION.md` §29, §30
-- `cores/mobile-flutter/README.md`
+- `starters/flutter/CORE_SPECIFICATION.md` §29, §30
+- `starters/flutter/README.md`
 - `strategy/04_ROADMAP_GLOBAL.md`
 - `docs/project-status/FOUNDATION_CURRENT_STATE.md`
 - `docs/project-status/IMPLEMENTATION_MATRIX.md`

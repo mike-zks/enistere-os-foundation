@@ -44,11 +44,11 @@ conformement aux champs `files`.
 ## 4. Verifications executees
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run packages
+node factory/quality/core/scripts/quality-gates.mjs run packages
 npm_config_cache=/tmp/enistere-npm-cache npm run pack:dry-run --workspace=@enistere/api-contracts
 npm_config_cache=/tmp/enistere-npm-cache npm run pack:dry-run --workspace=@enistere/api-client-fetch
 npm_config_cache=/tmp/enistere-npm-cache npm run pack:dry-run
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 git diff --check
 ```
 

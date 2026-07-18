@@ -19,8 +19,8 @@ l'absence de guides principaux et par le caractere encore minimal de l'onboardin
 
 - `strategy/04_ROADMAP_GLOBAL.md` §13 ;
 - `strategy/02_GOVERNANCE.md` ;
-- `cores/docs-core/CORE_SPECIFICATION.md` ;
-- `cores/docs-core/README.md` ;
+- `factory/quality/core/CORE_SPECIFICATION.md` ;
+- `factory/quality/core/README.md` ;
 - `docs/project-status/DOCS_CORE_NAVIGATION_AUDIT.md` ;
 - `docs/project-status/DOCS_CORE_LINK_CHECK_REPORT.md` ;
 - `docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md` ;
@@ -37,7 +37,7 @@ l'absence de guides principaux et par le caractere encore minimal de l'onboardin
 | Les tests peuvent etre lances | Quality Core expose les plans ; Docs Core ajoute `check-doc-links.test.mjs`. | ✅ |
 | Les scripts fonctionnent | `check-doc-links.mjs` passe localement sur 54 fichiers. | ✅ |
 | Les releases sont documentees | Quality Core 5 + release `foundation-v1.0.0` documentee ; Docs Core indexe le statut. | ✅ |
-| Les prompts IA sont versionnes | Quality Core 7 + `prompts/README.md` ; Docs Core indexe les prompts. | ✅ |
+| Les prompts IA sont versionnes | Quality Core 7 + `factory/ai/prompts/README.md` ; Docs Core indexe les prompts. | ✅ |
 | La documentation est structuree | `docs/README.md`, onboarding, glossaire, project-status et rapports Docs Core. | ✅ |
 | Les checklists qualite existent | Checklists Quality Core presentes et referencees. | ✅ |
 
@@ -63,10 +63,10 @@ plus precis.
 Commandes executees pendant Docs Core 4 puis relancees pendant cette revue :
 
 ```bash
-node cores/docs-core/scripts/check-doc-links.mjs
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
-node cores/quality-core/scripts/quality-gates.mjs plan docs
-node --test cores/quality-core/scripts/quality-gates.test.mjs
+node factory/quality/core/scripts/docs-link-check.mjs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs plan docs
+node --test factory/quality/core/scripts/quality-gates.test.mjs
 npm audit
 git diff --check
 ```
@@ -102,5 +102,5 @@ l'onboarding pour que la documentation soit utilisable par un contributeur sans 
 - creer `docs/guides/DOCUMENTATION_MAINTENANCE_GUIDE.md` ;
 - creer `docs/guides/CORE_STATUS_REVIEW_GUIDE.md` ou equivalent ;
 - enrichir `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` avec un parcours de lecture par role ;
-- relier les guides dans `docs/README.md` et `cores/docs-core/README.md` ;
+- relier les guides dans `docs/README.md` et `factory/quality/core/README.md` ;
 - conserver un perimetre documentaire uniquement : aucun runtime, workflow, dependance, RAG ou site docs.

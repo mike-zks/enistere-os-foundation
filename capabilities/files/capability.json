@@ -1,0 +1,1 @@
+{"schemaVersion":"1","id":"files","requires":["auth"],"responsibilities":["upload","metadata","download-url","delete"],"targets":["nestjs","spring","nextjs","angular","react-native","flutter"]}

@@ -2,7 +2,7 @@
 
 > Date : 2026-07-12
 > Decision : **IMPLEMENTATION_PARTIELLE → IMPLEMENTATION_AVANCEE**
-> Perimetre : `cores/quality-core`, checklists, prompts, templates GitHub, ruleset `main`, release process, docs gates
+> Perimetre : `factory/quality/core`, checklists, prompts, templates GitHub, ruleset `main`, release process, docs gates
 
 ## Synthese
 
@@ -31,12 +31,12 @@ publiee, dashboards qualite, CI qualite etendue) restent hors du perimetre coura
 - `strategy/05_EXECUTION_CHAIN.md` ;
 - `strategy/09_GIT_STRATEGY.md` ;
 - `strategy/10_AI_STRATEGY.md` ;
-- `cores/quality-core/CORE_SPECIFICATION.md` ;
-- `cores/quality-core/README.md` ;
-- `cores/quality-core/QUALITY_GATES_MATRIX.md` ;
-- `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md` ;
-- `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` ;
-- `cores/quality-core/AI_PROMPT_GOVERNANCE.md` ;
+- `factory/quality/core/CORE_SPECIFICATION.md` ;
+- `factory/quality/core/README.md` ;
+- `factory/quality/core/QUALITY_GATES_MATRIX.md` ;
+- `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md` ;
+- `factory/quality/core/RELEASE_PROCESS_RUNBOOK.md` ;
+- `factory/quality/core/AI_PROMPT_GOVERNANCE.md` ;
 - `docs/checklists/PR_QUALITY_CHECKLIST.md` ;
 - `docs/checklists/RELEASE_READINESS_CHECKLIST.md` ;
 - `docs/checklists/CORE_STATUS_REVIEW_CHECKLIST.md` ;
@@ -55,7 +55,7 @@ publiee, dashboards qualite, CI qualite etendue) restent hors du perimetre coura
 | Les tests peuvent etre lances | `quality-gates.mjs` expose `docs`, `packages`, `ui-kit`, `web`, `mobile-static`, `all-safe`. | ✅ |
 | Les scripts fonctionnent | `quality-gates.test.mjs` 36/36 ; scopes locaux utilises par Docs Core. | ✅ |
 | Les releases sont documentees | `RELEASE_PROCESS_RUNBOOK.md` + `FOUNDATION_V1_RELEASE_NOTES.md` + release `foundation-v1.0.0`. | ✅ |
-| Les prompts IA sont versionnes | `AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`, templates globaux. | ✅ |
+| Les prompts IA sont versionnes | `AI_PROMPT_GOVERNANCE.md`, `factory/ai/prompts/README.md`, templates globaux. | ✅ |
 | La documentation est structuree | README, matrice, runbooks, checklists, project-status, Docs Core `VALIDE_V1`. | ✅ |
 | Les checklists qualite existent | PR, release readiness, core status review. | ✅ |
 
@@ -93,8 +93,8 @@ Ces reserves ne bloquent pas `IMPLEMENTATION_AVANCEE`, mais elles bloquent une d
 
 | Commande | Resultat |
 |---|---|
-| `node cores/quality-core/scripts/quality-gates.mjs run docs` | ✅ |
-| `node --test cores/quality-core/scripts/quality-gates.test.mjs` | ✅ |
+| `node factory/quality/core/scripts/quality-gates.mjs run docs` | ✅ |
+| `node --test factory/quality/core/scripts/quality-gates.test.mjs` | ✅ |
 | `npm audit` | ✅ 0 vulnerabilite |
 | `git diff --check` | ✅ |
 

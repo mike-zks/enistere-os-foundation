@@ -29,20 +29,20 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: cores/web-angular/package-lock.json
+          cache-dependency-path: starters/angular/package-lock.json
 
       - name: Install dependencies
-        working-directory: cores/web-angular
+        working-directory: starters/angular
         run: npm ci
 
       - name: Angular tests (Karma / ChromeHeadless)
-        working-directory: cores/web-angular
+        working-directory: starters/angular
         run: npm run test:ci
 
       - name: Angular production build
-        working-directory: cores/web-angular
+        working-directory: starters/angular
         run: npm run build
 
       - name: npm audit
-        working-directory: cores/web-angular
+        working-directory: starters/angular
         run: npm audit

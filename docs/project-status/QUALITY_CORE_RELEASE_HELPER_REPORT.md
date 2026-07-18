@@ -9,8 +9,8 @@
 Quality Core ajoute un helper local de préparation de notes de release :
 
 ```bash
-node cores/quality-core/scripts/release-helper.mjs types
-node cores/quality-core/scripts/release-helper.mjs draft --type quality-v2-increment --version quality-v2.8 --since foundation-v1.0.0
+node factory/quality/core/scripts/release-helper.mjs types
+node factory/quality/core/scripts/release-helper.mjs draft --type quality-v2-increment --version quality-v2.8 --since foundation-v1.0.0
 ```
 
 Le script produit un brouillon Markdown sur stdout à partir d'un type de release gouverné et d'une plage
@@ -19,8 +19,8 @@ pousse rien.
 
 ## Livrables
 
-- `cores/quality-core/scripts/release-helper.mjs` ;
-- `cores/quality-core/scripts/release-helper.test.mjs`.
+- `factory/quality/core/scripts/release-helper.mjs` ;
+- `factory/quality/core/scripts/release-helper.test.mjs`.
 
 ## Comportement
 
@@ -55,9 +55,9 @@ Types supportés :
 
 | Commande | Résultat |
 |---|---|
-| `node --test cores/quality-core/scripts/release-helper.test.mjs` | ✅ |
-| `node cores/quality-core/scripts/release-helper.mjs types` | ✅ |
-| `node cores/quality-core/scripts/release-helper.mjs draft --type quality-v2-increment --version quality-v2.8 --since foundation-v1.0.0 --scope "Quality Core"` | ✅ |
+| `node --test factory/quality/core/scripts/release-helper.test.mjs` | ✅ |
+| `node factory/quality/core/scripts/release-helper.mjs types` | ✅ |
+| `node factory/quality/core/scripts/release-helper.mjs draft --type quality-v2-increment --version quality-v2.8 --since foundation-v1.0.0 --scope "Quality Core"` | ✅ |
 
 ## Hors périmètre
 

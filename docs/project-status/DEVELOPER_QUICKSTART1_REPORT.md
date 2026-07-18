@@ -39,7 +39,7 @@ Le quickstart couvre :
 ## Verification
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 npm run example:api-client-node
 git diff --check
 ```

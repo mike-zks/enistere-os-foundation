@@ -7,7 +7,7 @@
 **Décision : `IMPLEMENTATION_AVANCEE` -> `VALIDE_V1`.**
 
 Le API Core NestJS satisfait les critères V1 de `strategy/04_ROADMAP_GLOBAL.md` §8.4 et de
-`cores/api-nestjs/CORE_SPECIFICATION.md` §41. Les réserves restantes sont documentées comme V2/V3
+`starters/nestjs/CORE_SPECIFICATION.md` §41. Les réserves restantes sont documentées comme V2/V3
 ou hors core V1, et ne bloquent pas la validation du socle.
 
 ## 2. Critères Roadmap §8.4
@@ -47,11 +47,11 @@ ou hors core V1, et ne bloquent pas la validation du socle.
 
 | Commande | Résultat |
 |---|---|
-| `npm run lint` (`cores/api-nestjs`) | PASS |
-| `npm run build` (`cores/api-nestjs`) | PASS |
-| `npm run test` (`cores/api-nestjs`) | PASS — 47 suites / 386 tests |
+| `npm run lint` (`starters/nestjs`) | PASS |
+| `npm run build` (`starters/nestjs`) | PASS |
+| `npm run test` (`starters/nestjs`) | PASS — 47 suites / 386 tests |
 | `npm run openapi:check` avec placeholders valides | PASS — `openapi.json` à jour |
-| `npm audit` (`cores/api-nestjs`) | PASS — 0 vulnérabilité |
+| `npm audit` (`starters/nestjs`) | PASS — 0 vulnérabilité |
 
 Note environnement : un premier `npm run test` dans le sandbox a échoué sur `listen EPERM` quand
 Supertest ouvrait un port local. La relance hors sandbox a passé 386/386 tests. Aucun échec

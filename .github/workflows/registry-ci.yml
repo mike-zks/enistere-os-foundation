@@ -39,8 +39,8 @@ jobs:
       - name: Build API image (load local, no push)
         uses: docker/build-push-action@v6
         with:
-          context: ./cores/api-nestjs
-          file: ./cores/api-nestjs/Dockerfile
+          context: ./starters/nestjs
+          file: ./starters/nestjs/Dockerfile
           push: false
           load: true
           tags: enistere-api-smoke:ci
@@ -85,11 +85,11 @@ jobs:
       matrix:
         include:
           - name: api-nestjs
-            context: ./cores/api-nestjs
-            file: ./cores/api-nestjs/Dockerfile
+            context: ./starters/nestjs
+            file: ./starters/nestjs/Dockerfile
           - name: web-nextjs
             context: .
-            file: ./cores/web-nextjs/Dockerfile
+            file: ./starters/nextjs/Dockerfile
     steps:
       - uses: actions/checkout@v4
 

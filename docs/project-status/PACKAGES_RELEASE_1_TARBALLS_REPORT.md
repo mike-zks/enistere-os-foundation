@@ -42,7 +42,7 @@ actif, car `@enistere/api-client-fetch` dépend de `@enistere/api-contracts@0.1.
 ## 4. Vérifications exécutées
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run packages
+node factory/quality/core/scripts/quality-gates.mjs run packages
 npm_config_cache=/tmp/enistere-npm-cache npm pack --workspace=@enistere/api-contracts --pack-destination /tmp/enistere-packages-release-0.1.0
 npm_config_cache=/tmp/enistere-npm-cache npm pack --workspace=@enistere/api-client-fetch --pack-destination /tmp/enistere-packages-release-0.1.0
 sha256sum /tmp/enistere-packages-release-0.1.0/*.tgz

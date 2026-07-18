@@ -114,7 +114,7 @@ jobs:
         run: npm run e2e:install --workspace=@enistere/web-nextjs
 
       - name: Install + prepare API (autonome)
-        working-directory: cores/api-nestjs
+        working-directory: starters/nestjs
         run: |
           npm ci
           node -e "const {S3Client,CreateBucketCommand}=require('@aws-sdk/client-s3');const c=new S3Client({endpoint:'http://127.0.0.1:9000',region:'us-east-1',forcePathStyle:true,credentials:{accessKeyId:'enistere',secretAccessKey:'enistere_test_password'}});c.send(new CreateBucketCommand({Bucket:'enistere-test-files'})).then(()=>console.log('bucket ok')).catch(e=>{const s=String(e);if(s.includes('BucketAlready')){console.log('bucket exists')}else{console.error(s);process.exit(1)}})"
@@ -124,13 +124,13 @@ jobs:
           npm run build
 
       - name: Seed ephemeral users
-        working-directory: cores/api-nestjs
+        working-directory: starters/nestjs
         run: |
           SEED=$(npx ts-node scripts/proof-seed-user.ts | tail -n 1)
           node -e "const d=JSON.parse(process.argv[1]);require('fs').appendFileSync(process.env.GITHUB_ENV,'E2E_EMAIL='+d.adminEmail+'\nE2E_NOPERM_EMAIL='+d.noPermEmail+'\nE2E_PASSWORD='+d.password+'\n')" "$SEED"
 
       - name: Start API (background) + wait ready
-        working-directory: cores/api-nestjs
+        working-directory: starters/nestjs
         run: |
           nohup node dist/main.js > /tmp/api.log 2>&1 &
           for i in $(seq 1 45); do

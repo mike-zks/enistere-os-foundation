@@ -58,7 +58,7 @@ Vérification locale :
 
 | Check | Résultat |
 |---|---|
-| `npm run test:ci` (`cores/web-angular`) | ✅ 248 / 248 |
+| `npm run test:ci` (`starters/angular`) | ✅ 248 / 248 |
 | `git diff --check` | ✅ |
 
 ---

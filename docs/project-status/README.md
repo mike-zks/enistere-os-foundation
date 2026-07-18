@@ -21,7 +21,7 @@
 
 1. `SESSION_HANDOFF.md` → 2. `FOUNDATION_CURRENT_STATE.md` → 3. `IMPLEMENTATION_MATRIX.md` →
 4. `NEXT_ACTIONS.md` → 5. `DECISIONS_REGISTER.md`. Puis, pour le API Core, les rapports natifs sous
-`cores/api-nestjs/docs/`.
+`starters/nestjs/docs/`.
 
 ## Protocole de DÉBUT de mission (obligatoire)
 

@@ -18,15 +18,15 @@ avant une validation V1 formelle.
 - `strategy/04_ROADMAP_GLOBAL.md` §11 ;
 - `strategy/02_GOVERNANCE.md` §10 ;
 - `strategy/07_SECURITY.md` §20.7 / §21.4 ;
-- `cores/cloud/CORE_SPECIFICATION.md` §46→§52 ;
-- `cores/cloud/README.md` ;
-- `cores/cloud/staging/docker-compose.cc10.yml` ;
-- `cores/cloud/staging/docker-compose.staging.example.yml` ;
-- `cores/cloud/staging/.env.staging.example` ;
-- `cores/cloud/docs/CC10_STAGING_DEPLOYMENT_REPORT.md` ;
-- `cores/cloud/docs/CC11_STAGING_OPERATIONAL_REPORT.md` ;
-- `cores/cloud/docs/CC11_OPERATIONAL_RUNBOOK.md` ;
-- `cores/quality-core/QUALITY_GATES_MATRIX.md` §2.8 ;
+- `deployment/core/CORE_SPECIFICATION.md` §46→§52 ;
+- `deployment/core/README.md` ;
+- `deployment/core/staging/docker-compose.cc10.yml` ;
+- `deployment/core/staging/docker-compose.staging.example.yml` ;
+- `deployment/core/staging/.env.staging.example` ;
+- `deployment/core/docs/CC10_STAGING_DEPLOYMENT_REPORT.md` ;
+- `deployment/core/docs/CC11_STAGING_OPERATIONAL_REPORT.md` ;
+- `deployment/core/docs/CC11_OPERATIONAL_RUNBOOK.md` ;
+- `factory/quality/core/QUALITY_GATES_MATRIX.md` §2.8 ;
 - `docs/project-status/FOUNDATION_CURRENT_STATE.md` ;
 - `docs/project-status/IMPLEMENTATION_MATRIX.md` ;
 - `docs/project-status/NEXT_ACTIONS.md`.
@@ -85,7 +85,7 @@ avant une validation V1 formelle.
 ## Verifications locales
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 git diff --check
 npm audit
 ```

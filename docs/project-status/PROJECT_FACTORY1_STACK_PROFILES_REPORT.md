@@ -39,7 +39,7 @@ API/Web/Mobile utilisables a partir des cores V1.
 Les documents sont purement documentaires. Les gates attendus sont :
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 git diff --check
 ```
 

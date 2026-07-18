@@ -95,7 +95,7 @@ Le monorepo `enistere-os-foundation` contient :
 strategy/
 docs/
 cores/
-prompts/
+factory/ai/prompts/
 tools/
 templates/
 examples/
@@ -220,7 +220,7 @@ Ce fichier doit préciser au minimum :
 La stratégie hybride améliore l'utilisation des agents IA :
 
 - le monorepo de fondation fournit un contexte stable ;
-- les prompts IA sont versionnés dans `prompts/` ;
+- les prompts IA sont versionnés dans `factory/ai/prompts/` ;
 - les tâches peuvent être limitées à un core ou un dossier ;
 - les projets dérivés peuvent être analysés séparément ;
 - l'IA ne doit pas propager automatiquement une modification projet vers la fondation ;
@@ -238,7 +238,7 @@ L'IA reste un assistant, pas un décideur.
 - Les changements transverses doivent mettre à jour la documentation et le changelog.
 - Les projets dérivés doivent maintenir un `foundation.md`.
 - Les améliorations génériques découvertes dans un projet doivent être proposées à la fondation.
-- Les prompts IA structurants restent versionnés dans `prompts/`.
+- Les prompts IA structurants restent versionnés dans `factory/ai/prompts/`.
 
 ## 17. Conditions de révision future
 

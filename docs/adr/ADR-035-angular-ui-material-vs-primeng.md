@@ -15,7 +15,7 @@ Validé.
 ## 4. Contexte
 
 La V3 de la roadmap ajoute les cores secondaires multi-framework, dont **Web Core Angular**
-(`cores/web-angular/`). Ce core doit rester cohérent avec le socle déjà validé : UI Kit,
+(`starters/angular/`). Ce core doit rester cohérent avec le socle déjà validé : UI Kit,
 Web Core Next.js, Mobile Core React Native, Mobile Core Flutter, API Cores et Cloud Core.
 
 ADR-008 définit les design tokens Enistere comme source de vérité UI/UX, agnostique et
@@ -301,7 +301,7 @@ Le Web Core Angular peut désormais démarrer :
 
 L'UI Kit Web React (`@enistere/ui-kit`) **n'est pas étendu côté Angular** dans cette ADR.
 
-Les tokens Enistere (`cores/ui-kit/tokens/`) sont la source de vérité partagée : Angular
+Les tokens Enistere (`packages/ui-kit/tokens/`) sont la source de vérité partagée : Angular
 consomme les valeurs hex/rem/ms directement depuis les tokens de la Foundation, exactement
 comme Flutter (ADR-034 §9.3) et React Native (ADR-010).
 

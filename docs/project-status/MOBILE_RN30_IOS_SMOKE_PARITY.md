@@ -1,7 +1,7 @@
 # Mobile RN30 — iOS Runtime Smoke Parity Report
 
 Date : 2026-06-17  
-Core : `cores/mobile-react-native`  
+Core : `starters/react-native`
 Statut : **STARTER_IOS_SMOKE_BLOCKED_BY_ENVIRONMENT**
 
 ## Objectif
@@ -26,7 +26,7 @@ artificielle n'est créée.
 ## Script ajouté
 
 - Commande : `npm run smoke:ios`
-- Fichier : `cores/mobile-react-native/scripts/smoke-ios.js`
+- Fichier : `starters/react-native/scripts/smoke-ios.js`
 - Outils utilisés : Node stdlib uniquement, puis préflight `npx`, `xcrun`,
   `simctl` si l'hôte est macOS
 - Rapport JSON par défaut :
@@ -47,7 +47,7 @@ Sur un hôte macOS avec Xcode command line tools et un iOS Simulator ou device
 iOS avec Expo Go :
 
 ```bash
-cd cores/mobile-react-native
+cd starters/react-native
 npm install
 npm run smoke:ios
 npx expo start --ios --localhost -c

@@ -183,7 +183,7 @@ Invariants respectés Flutter 1→6 :
 | `docs/project-status/SESSION_HANDOFF.md` | mobile-flutter mis à jour : `IMPLEMENTATION_AVANCEE`, B1/B2/B3/B4 fermés Flutter 7/8/9/10 |
 | `docs/project-status/FOUNDATION_CURRENT_STATE.md` | mobile-flutter mis à jour |
 | `docs/project-status/MOBILE_FLUTTER9_ANDROID_SMOKE_REPORT.md` | Rapport smoke Flutter 9 — 7/7 passés, B3 fermé |
-| `cores/mobile-flutter/README.md` | Statut mis à jour ; Flutter 7 ✅ ; Flutter 8 ✅ |
+| `starters/flutter/README.md` | Statut mis à jour ; Flutter 7 ✅ ; Flutter 8 ✅ |
 | `CHANGELOG.md` | Sections V1 Readiness Review, Flutter 7 et Flutter 8 ajoutées |
 | `docs/project-status/MOBILE_FLUTTER8_ANDROID_SMOKE_REPORT.md` | Rapport smoke Flutter 8 — 7/7 passés, B2 fermé |
 | `docs/project-status/MOBILE_FLUTTER7_ANDROID_SMOKE_REPORT.md` | Rapport smoke Flutter 7 — 5/5 passés |

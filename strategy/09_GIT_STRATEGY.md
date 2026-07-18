@@ -2,6 +2,10 @@
 
 # Enistere OS Foundation — Stratégie Git
 
+> **Règle V2 — 2026-07-18** : le monorepo Foundation utilise `starters/`, `factory/`,
+> `capabilities/`, `deployment/` et `packages/` selon ADR-042. Les exemples historiques `cores/`
+> conservés plus bas décrivent la V1 et ne doivent plus guider de nouveaux chemins ou CODEOWNERS.
+
 ## 1. Résumé exécutif
 
 Ce document définit la stratégie Git officielle d’Enistere OS Foundation.
@@ -153,10 +157,11 @@ enistere-os-foundation/
 ├── .github/
 ├── strategy/
 ├── docs/
-├── cores/
-├── prompts/
-├── tools/
-├── templates/
+├── starters/
+├── factory/
+├── capabilities/
+├── deployment/
+├── packages/
 └── examples/
 ```
 
@@ -625,12 +630,12 @@ Associer des zones du repo à des responsables.
 Exemple :
 
 ```txt
-/cores/api-nestjs/        @owner-api
-/cores/mobile-react-native/ @owner-mobile
-/cores/cloud/             @owner-cloud
-/cores/ui-kit/            @owner-ui
+/starters/nestjs/        @owner-api
+/starters/react-native/ @owner-mobile
+/deployment/core/             @owner-cloud
+/packages/ui-kit/            @owner-ui
 /strategy/                @owner-foundation
-/prompts/                 @owner-ai
+/factory/ai/prompts/                 @owner-ai
 ```
 
 Au départ, un seul owner peut tout gérer.
@@ -841,9 +846,9 @@ api-nestjs-v1.0.0
 Chaque core doit avoir son propre changelog :
 
 ```txt
-cores/api-nestjs/CHANGELOG.md
-cores/mobile-react-native/CHANGELOG.md
-cores/cloud/CHANGELOG.md
+starters/nestjs/CHANGELOG.md
+starters/react-native/CHANGELOG.md
+deployment/core/CHANGELOG.md
 ```
 
 Le repository principal doit aussi avoir :
@@ -973,7 +978,7 @@ Les prompts IA doivent être versionnés.
 Structure :
 
 ```txt
-prompts/
+factory/ai/prompts/
 ├── global/
 ├── architecture/
 ├── generation/

@@ -1,7 +1,7 @@
 # Mobile RN28 — rapport de smoke visuel starter
 
 > Date : 2026-06-14  
-> Core : `cores/mobile-react-native`  
+> Core : `starters/react-native`
 > Statut issu du smoke : **`STARTER_VISUAL_SMOKE_READY`**
 
 ## Objectif

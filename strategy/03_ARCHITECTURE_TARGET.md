@@ -2,6 +2,47 @@
 
 # Enistere OS Foundation — Architecture Cible
 
+> **Architecture V2 approuvee le 2026-07-18 — autorite courante.**
+> Les sections historiques qui classent Cloud, UI Kit, IA, Docs et Quality comme des cores de runtime
+> sont conservees pour tracer la vision initiale, mais sont remplacees par la decision ci-dessous et par
+> l'ADR-042.
+
+## Architecture V2 — AI-native Project Factory
+
+Enistere OS Foundation est une usine de projets pilotee par un blueprint neutre. Les seuls starters
+technologiques independants sont NestJS, Spring Boot, Next.js, Angular, React Native et Flutter.
+
+```txt
+strategy/       vision, gouvernance, securite, roadmap
+factory/        CLI, moteur deterministe, orchestration IA, quality gates, templates
+starters/       nestjs, spring, nextjs, angular, react-native, flutter
+capabilities/   base, auth, rbac, files, audit, notifications, observability
+deployment/     profils local, staging, CI et runbooks
+packages/       contrats, clients et design system versionnes
+docs/           ADR, guides, historique et releases
+examples/       projets golden generes
+```
+
+Les fonctions transverses ne sont plus des cores :
+
+- Cloud devient un ensemble de packs de deploiement integres aux projets generes ;
+- IA devient le moteur d'analyse, d'adaptation et de revue de la Factory ;
+- Quality devient le moteur de policies, gates et conformite ;
+- Docs Core disparait au profit d'une seule couche documentaire ;
+- UI Kit devient un package de design system et une source de tokens ;
+- les packages API restent des artefacts runtime versionnes.
+
+Le flux produit officiel est :
+
+```txt
+idee -> analyse IA -> validation humaine -> blueprint -> generation deterministe
+     -> adaptation IA en worktree -> gates -> validation humaine -> projet derive
+```
+
+Un projet derive est un monorepo par defaut avec une API obligatoire, un Web optionnel et un Mobile
+optionnel. Le blueprint active des capability packs ; le socle `base` (securite, configuration, erreurs,
+health) est obligatoire. Les APIs publiques V1 restent compatibles pendant la migration.
+
 ## 1. Résumé exécutif
 
 Ce document décrit l’architecture cible d’Enistere OS Foundation.
@@ -228,7 +269,7 @@ enistere-os-foundation/
 │   ├── docs-core/
 │   └── quality-core/
 │
-├── prompts/
+├── factory/ai/prompts/
 │   ├── global/
 │   ├── architecture/
 │   ├── generation/

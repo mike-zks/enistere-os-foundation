@@ -49,7 +49,7 @@ Pour comprendre la logique globale, lire ensuite :
 ### 3. Lancer le gate documentaire rapide
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 ```
 
 Ce gate verifie les espaces blancs Git et les liens Markdown internes.
@@ -73,8 +73,8 @@ Il ne contacte aucun backend et ne logge aucun token.
 ### 5. Voir les gates disponibles
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs list
-node cores/quality-core/scripts/quality-gates.mjs plan all-safe
+node factory/quality/core/scripts/quality-gates.mjs list
+node factory/quality/core/scripts/quality-gates.mjs plan all-safe
 ```
 
 `all-safe` exclut volontairement les gates qui demandent une infrastructure externe ou un device :
@@ -105,9 +105,9 @@ Un clone est considere pret pour contribuer si les commandes suivantes passent :
 
 ```bash
 git status --short --branch
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 npm run example:api-client-node
 ```
 
 Pour une mission reelle, appliquer ensuite les gates du core cible selon
-[`../../cores/quality-core/QUALITY_GATES_MATRIX.md`](../../cores/quality-core/QUALITY_GATES_MATRIX.md).
+[`../../factory/quality/core/QUALITY_GATES_MATRIX.md`](../../factory/quality/core/QUALITY_GATES_MATRIX.md).

@@ -12,7 +12,7 @@ responsabilités humaines.
 
 ## 2. Livrable
 
-- `cores/ai-core/AI_CORE_USAGE_RUNBOOK.md`
+- `factory/ai/core/AI_CORE_USAGE_RUNBOOK.md`
 
 ## 3. Contenu couvert
 

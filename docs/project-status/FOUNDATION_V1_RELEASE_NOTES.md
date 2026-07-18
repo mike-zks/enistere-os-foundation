@@ -67,11 +67,11 @@ Cette note acte la release `foundation-v1-baseline` après décision humaine exp
 
 | Gate | Résultat |
 |---|---|
-| `env NODE_ENV=test node cores/quality-core/scripts/quality-gates.mjs run all-safe` | PASS jusqu'au gate audit (16/17) |
+| `env NODE_ENV=test node factory/quality/core/scripts/quality-gates.mjs run all-safe` | PASS jusqu'au gate audit (16/17) |
 | `npm audit` root hors sandbox réseau | 0 vulnérabilité |
 | `git diff --check` | 0 erreur |
-| `node --test cores/quality-core/scripts/quality-gates.test.mjs` | PASS |
-| `node cores/quality-core/scripts/quality-gates.mjs plan docs` | PASS |
+| `node --test factory/quality/core/scripts/quality-gates.test.mjs` | PASS |
+| `node factory/quality/core/scripts/quality-gates.mjs plan docs` | PASS |
 | CI `main` après PR #90 | PASS — CI, API Runtime CI, Web E2E CI, Registry CI |
 
 Note : le gate `npm audit` du run local `all-safe` a échoué uniquement sur DNS sandbox

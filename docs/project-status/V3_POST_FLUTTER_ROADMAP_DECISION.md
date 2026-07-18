@@ -65,7 +65,7 @@ La prochaine mission unique est :
 
 **API Core Spring Boot 1 — Core specification.**
 
-Objectif : creer `cores/api-spring/CORE_SPECIFICATION.md` et `cores/api-spring/README.md` en alignement avec :
+Objectif : creer `starters/spring/CORE_SPECIFICATION.md` et `starters/spring/README.md` en alignement avec :
 
 - `strategy/04_ROADMAP_GLOBAL.md` §16 ;
 - `strategy/02_GOVERNANCE.md`, `03_ARCHITECTURE_TARGET.md`, `06_DEPENDENCY_STRATEGY.md`, `07_SECURITY.md`,

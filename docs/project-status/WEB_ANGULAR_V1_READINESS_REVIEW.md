@@ -137,7 +137,7 @@ La réserve post-readiness R2 est fermée par le gate CI `web-angular` dédié.
 
 - `.github/workflows/web-angular-ci.yml` existe.
 - Le job `web-angular` exécute `npm run test:ci`, `npm run build`, puis `npm audit`.
-- Le scope local `node cores/quality-core/scripts/quality-gates.mjs run web-angular` existe.
+- Le scope local `node factory/quality/core/scripts/quality-gates.mjs run web-angular` existe.
 - Rapport : `QUALITY_WEB_ANGULAR_CI_GATE_REPORT.md`.
 - **Limite gouvernance** : le check n'est pas automatiquement requis dans le ruleset `protect-main` ; sa promotion reste une action humaine/admin documentée dans le Quality Core.
 

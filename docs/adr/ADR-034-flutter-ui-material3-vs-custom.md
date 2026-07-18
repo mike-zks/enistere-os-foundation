@@ -312,7 +312,7 @@ Un futur Mobile Core Flutter sera conforme à ADR-034 si :
 
 À la date de cette ADR :
 
-- `cores/mobile-flutter/` reste un dossier vide ;
+- `starters/flutter/` reste un dossier vide ;
 - aucune spécification Mobile Core Flutter n'existe encore ;
 - aucun starter Flutter n'est généré ;
 - aucune dépendance Flutter n'est ajoutée.

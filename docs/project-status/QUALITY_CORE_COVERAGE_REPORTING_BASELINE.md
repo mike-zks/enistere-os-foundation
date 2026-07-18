@@ -9,8 +9,8 @@
 Quality Core ajoute un helper local de reporting :
 
 ```bash
-node cores/quality-core/scripts/quality-report.mjs list
-node cores/quality-core/scripts/quality-report.mjs markdown
+node factory/quality/core/scripts/quality-report.mjs list
+node factory/quality/core/scripts/quality-report.mjs markdown
 ```
 
 Le script produit une synthèse déterministe sur stdout. Il ne lance aucun test, ne lit aucun secret, ne
@@ -18,8 +18,8 @@ publie aucun artefact, ne modifie aucun workflow et ne calcule pas de pourcentag
 
 ## Livrables
 
-- `cores/quality-core/scripts/quality-report.mjs` ;
-- `cores/quality-core/scripts/quality-report.test.mjs`.
+- `factory/quality/core/scripts/quality-report.mjs` ;
+- `factory/quality/core/scripts/quality-report.test.mjs`.
 
 ## Résultat baseline
 
@@ -33,15 +33,15 @@ Scopes avec coverage locale disponible :
 
 - `@enistere/ui-kit` : `npm run test:coverage --workspace=@enistere/ui-kit` ;
 - `@enistere/web-nextjs` : `npm run test:coverage --workspace=@enistere/web-nextjs` ;
-- `cores/api-nestjs` : `cd cores/api-nestjs && npm run test:cov`.
+- `starters/nestjs` : `cd starters/nestjs && npm run test:cov`.
 
 Scopes sans coverage standardisée :
 
 - `@enistere/api-contracts` ;
 - `@enistere/api-client-fetch` ;
-- `cores/mobile-react-native` ;
-- `cores/quality-core` ;
-- `cores/docs-core`.
+- `starters/react-native` ;
+- `factory/quality/core` ;
+- `factory/quality/core`.
 
 ## Décision
 
@@ -64,9 +64,9 @@ tests mobiles locaux, scripts documentaires). Un pourcentage global serait tromp
 
 | Commande | Résultat |
 |---|---|
-| `node --test cores/quality-core/scripts/quality-report.test.mjs` | ✅ |
-| `node cores/quality-core/scripts/quality-report.mjs list` | ✅ |
-| `node cores/quality-core/scripts/quality-report.mjs markdown` | ✅ |
+| `node --test factory/quality/core/scripts/quality-report.test.mjs` | ✅ |
+| `node factory/quality/core/scripts/quality-report.mjs list` | ✅ |
+| `node factory/quality/core/scripts/quality-report.mjs markdown` | ✅ |
 
 ## Hors périmètre
 

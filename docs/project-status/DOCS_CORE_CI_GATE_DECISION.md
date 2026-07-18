@@ -10,13 +10,13 @@
 Il devient en revanche un gate local officiel du scope Quality Core `docs` :
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
 ```
 
 Le scope `docs` execute maintenant :
 
 1. `git diff --check` ;
-2. `node cores/docs-core/scripts/check-doc-links.mjs`.
+2. `node factory/quality/core/scripts/docs-link-check.mjs`.
 
 ## Justification
 
@@ -33,8 +33,8 @@ documente, testable et utilisable avant PR.
 
 ## Livrables
 
-- `cores/quality-core/scripts/quality-gates.mjs` : scope `docs` etendu au link check ;
-- `cores/quality-core/scripts/quality-gates.test.mjs` : tests mis a jour ;
+- `factory/quality/core/scripts/quality-gates.mjs` : scope `docs` etendu au link check ;
+- `factory/quality/core/scripts/quality-gates.test.mjs` : tests mis a jour ;
 - project-status et docs de pilotage alignes.
 
 ## Hors perimetre confirme
@@ -49,10 +49,10 @@ documente, testable et utilisable avant PR.
 ## Verifications
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs plan docs
-node cores/quality-core/scripts/quality-gates.mjs run docs
-node --test cores/quality-core/scripts/quality-gates.test.mjs
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs plan docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
+node --test factory/quality/core/scripts/quality-gates.test.mjs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
 npm audit
 git diff --check
 ```

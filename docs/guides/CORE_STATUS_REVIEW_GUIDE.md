@@ -93,16 +93,16 @@ Si le statut change ou si une revue officielle est ajoutee :
 Pour une revue documentaire :
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
-node cores/quality-core/scripts/quality-gates.mjs plan docs
+node factory/quality/core/scripts/quality-gates.mjs run docs
+node factory/quality/core/scripts/quality-gates.mjs plan docs
 npm audit
 ```
 
 Ajouter les tests de scripts si Docs Core ou Quality Core est modifie :
 
 ```bash
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
-node --test cores/quality-core/scripts/quality-gates.test.mjs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
+node --test factory/quality/core/scripts/quality-gates.test.mjs
 ```
 
 Pour une revue runtime, executer les gates du core dans `QUALITY_GATES_MATRIX.md`.

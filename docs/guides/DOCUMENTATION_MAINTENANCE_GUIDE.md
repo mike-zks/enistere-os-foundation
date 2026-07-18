@@ -38,8 +38,8 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 | Nouveau statut de core | `IMPLEMENTATION_MATRIX.md`, `FOUNDATION_CURRENT_STATE.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md` |
 | Nouvelle preuve ou rapport | `docs/README.md`, rapport dans `docs/project-status/`, fichier statut concerne |
 | Nouvelle decision ADR | `docs/project-status/DECISIONS_REGISTER.md`, `docs/adr/ADR_BACKLOG.md` si besoin |
-| Nouvelle mission IA recurrente | `prompts/README.md`, `cores/quality-core/AI_PROMPT_GOVERNANCE.md` si le cadre change |
-| Nouveau guide ou onboarding | `docs/README.md`, `cores/docs-core/README.md`, `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` |
+| Nouvelle mission IA recurrente | `factory/ai/prompts/README.md`, `factory/quality/core/AI_PROMPT_GOVERNANCE.md` si le cadre change |
+| Nouveau guide ou onboarding | `docs/README.md`, `factory/quality/core/README.md`, `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` |
 
 ## 4. Regles de redaction
 
@@ -65,10 +65,10 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 Pour une mission Docs Core ou documentation centrale :
 
 ```bash
-node cores/quality-core/scripts/quality-gates.mjs run docs
-node --test cores/docs-core/scripts/check-doc-links.test.mjs
-node cores/quality-core/scripts/quality-gates.mjs plan docs
-node --test cores/quality-core/scripts/quality-gates.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs run docs
+node --test factory/quality/core/scripts/check-doc-links.test.mjs
+node factory/quality/core/scripts/quality-gates.mjs plan docs
+node --test factory/quality/core/scripts/quality-gates.test.mjs
 npm audit
 ```
 

@@ -15,9 +15,9 @@ le fake provider déterministe, l'evaluation harness et le schema de rapport d'e
 
 ## 2. Livrables
 
-- `cores/ai-core/src/runner/prompt-runner.mjs` : runner local gouverné.
-- `cores/ai-core/src/runner/index.mjs` : exports publics.
-- `cores/ai-core/test/prompt-runner.test.mjs` : tests Node purs.
+- `factory/ai/core/src/runner/prompt-runner.mjs` : runner local gouverné.
+- `factory/ai/core/src/runner/index.mjs` : exports publics.
+- `factory/ai/core/test/prompt-runner.test.mjs` : tests Node purs.
 
 ## 3. Architecture
 

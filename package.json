@@ -2,12 +2,11 @@
   "name": "enistere-os-foundation",
   "version": "0.0.0",
   "private": true,
-  "description": "Enistere OS Foundation — monorepo. Workspaces limités aux packages clients officiels (les cores restent autonomes).",
+  "description": "Enistere OS Foundation — AI-native project factory and independent technology starters.",
   "license": "UNLICENSED",
   "workspaces": [
     "packages/*",
-    "cores/ui-kit",
-    "cores/web-nextjs"
+    "starters/nextjs"
   ],
   "overrides": {
     "form-data": "^4.0.6",
@@ -15,6 +14,8 @@
     "postcss": "^8.5.15"
   },
   "scripts": {
+    "enistere": "node factory/cli/enistere.mjs",
+    "factory:test": "node --test factory/test/*.test.mjs factory/ai/core/test/*.test.mjs factory/quality/core/scripts/*.test.mjs",
     "generate": "npm run generate --workspace=@enistere/api-contracts",
     "generate:check": "npm run generate:check --workspace=@enistere/api-contracts",
     "build": "npm run build --workspace=@enistere/api-contracts && npm run build --workspace=@enistere/api-client-fetch",

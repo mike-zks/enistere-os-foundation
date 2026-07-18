@@ -1,8 +1,8 @@
 # RELEASE_READINESS_CHECKLIST.md — Checklist avant release / promotion de statut
 
-> Référence : `cores/quality-core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`,
-> `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`,
-> `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md`.
+> Référence : `factory/quality/core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`,
+> `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md`,
+> `factory/quality/core/RELEASE_PROCESS_RUNBOOK.md`.
 > Dernière mise à jour : 2026-07-11 (Quality Core 5).
 
 ## Quand utiliser cette checklist
@@ -41,7 +41,7 @@
 
 - [ ] Vérifier que la protection de branche est active via GitHub Rulesets (`protect-main`, enforcement `active`)
 - [ ] Vérifier que les 8 checks requis sont présents : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`
-- [ ] Si non activée : appliquer selon `cores/quality-core/BRANCH_PROTECTION_RUNBOOK.md`
+- [ ] Si non activée : appliquer selon `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md`
 - [ ] Si les checks `images` deviennent obligatoires : documenter la décision dans `IMPLEMENTATION_MATRIX.md` et `QUALITY_GATES_MATRIX.md`
 
 ---
@@ -66,7 +66,7 @@
 #### Web Core → VALIDE_V1
 - [ ] typecheck ✅ | lint ✅ | test 450/450 ✅ | build ✅ | audit 0 vuln ✅
 - [ ] E2E Playwright 15/15 ✅ (stack réelle API+PG+MinIO)
-- [ ] §56 critères vérifiés (voir `cores/web-nextjs/CORE_SPECIFICATION.md`)
+- [ ] §56 critères vérifiés (voir `starters/nextjs/CORE_SPECIFICATION.md`)
 
 #### API Core → VALIDE_V1
 - [ ] typecheck ✅ | lint ✅ | test 386/386 ✅ | test:e2e 101/101 ✅ (PG+MinIO)
@@ -131,7 +131,7 @@
 ## Partie 5 — Release Foundation
 
 > Utiliser pour une release de type `foundation-v1-baseline`, `core-v1-validation`, `quality-v2-increment`,
-> `staging-candidate` ou `hotfix`. Voir `cores/quality-core/RELEASE_PROCESS_RUNBOOK.md` §3 pour les critères.
+> `staging-candidate` ou `hotfix`. Voir `factory/quality/core/RELEASE_PROCESS_RUNBOOK.md` §3 pour les critères.
 
 ### Prérequis Foundation Release
 
@@ -142,7 +142,7 @@
 
 ### Gates Foundation Release
 
-- [ ] `node cores/quality-core/scripts/quality-gates.mjs run all-safe` — 17/17 ✓ (selon scope)
+- [ ] `node factory/quality/core/scripts/quality-gates.mjs run all-safe` — 17/17 ✓ (selon scope)
 - [ ] CI L1 verte sur `main` (`api-contracts` / `api-client-fetch` / `ui-kit` / `web-nextjs` / `audit`)
 - [ ] CI L2 verte (`api-runtime`) — si API Core inclus
 - [ ] CI L3 verte (`web-e2e`) — si Web Core inclus

@@ -2,7 +2,7 @@
 
 > Date : 2026-07-12
 > Décision : **SPECIFICATION_DOCUMENTAIRE → IMPLEMENTATION_PARTIELLE**
-> Périmètre : `cores/quality-core`, checklists, templates GitHub, ruleset `main`, release process
+> Périmètre : `factory/quality/core`, checklists, templates GitHub, ruleset `main`, release process
 
 ## Synthèse
 
@@ -29,7 +29,7 @@ couvre pas encore tous les livrables V2 du roadmap §13.
 | Les tests peuvent être lancés | ✅ | `quality-gates.mjs`, scopes `docs/packages/ui-kit/web/mobile-static/all-safe` |
 | Les scripts fonctionnent | ✅ | `quality-gates.test.mjs`, `plan docs`, `list` |
 | Les releases sont documentées | ✅ | `RELEASE_PROCESS_RUNBOOK.md`, `FOUNDATION_V1_RELEASE_NOTES.md`, release `foundation-v1.0.0` |
-| Les prompts IA sont versionnés | ✅ | Quality Core 7 : `AI_PROMPT_GOVERNANCE.md`, `prompts/README.md`, `mission-brief-template.md` |
+| Les prompts IA sont versionnés | ✅ | Quality Core 7 : `AI_PROMPT_GOVERNANCE.md`, `factory/ai/prompts/README.md`, `mission-brief-template.md` |
 | La documentation est structurée | ✅ | README, matrice, runbooks, checklists, project-status |
 | Les checklists qualité existent | ✅ | PR, release readiness, core status review |
 
@@ -50,8 +50,8 @@ Score après Quality Core 7 : **7/7 satisfaits** sur le périmètre V2 documenta
 | Commande | Résultat |
 |---|---|
 | `git diff --check` | ✅ |
-| `node --test cores/quality-core/scripts/quality-gates.test.mjs` | ✅ |
-| `node cores/quality-core/scripts/quality-gates.mjs plan docs` | ✅ |
+| `node --test factory/quality/core/scripts/quality-gates.test.mjs` | ✅ |
+| `node factory/quality/core/scripts/quality-gates.mjs plan docs` | ✅ |
 | `npm audit` root | ✅ 0 vulnérabilité |
 
 ## Décision

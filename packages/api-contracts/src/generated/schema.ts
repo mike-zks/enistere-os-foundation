@@ -1,7 +1,7 @@
 /**
  * ENISTERE — Types OpenAPI GÉNÉRÉS. NE PAS MODIFIER À LA MAIN.
  *
- * Source de vérité : cores/api-nestjs/openapi/openapi.json (contrat canonique, ADR-016).
+ * Source de vérité : starters/nestjs/openapi/openapi.json (contrat canonique, ADR-016).
  * Régénérer : npm run generate   ·   Vérifier la fraîcheur : npm run generate:check
  *
  * Fichier types-only (aucun runtime). Outil : openapi-typescript.

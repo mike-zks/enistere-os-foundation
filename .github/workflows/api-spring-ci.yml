@@ -36,8 +36,8 @@ jobs:
           cache: maven
 
       - name: Make Maven Wrapper executable
-        run: chmod +x cores/api-spring/mvnw
+        run: chmod +x starters/spring/mvnw
 
       - name: api-spring verify (71 tests — unit + Testcontainers PostgreSQL)
-        working-directory: cores/api-spring
+        working-directory: starters/spring
         run: ./mvnw verify --no-transfer-progress

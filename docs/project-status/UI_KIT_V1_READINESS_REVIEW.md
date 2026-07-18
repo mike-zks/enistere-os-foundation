@@ -120,7 +120,7 @@ L'ADR-009 retient Tailwind CSS + Radix UI + shadcn/ui comme stack web **du Web C
 
 ADR-010 retient tokens Enistere + ThemeProvider + composants maison. Le UI Kit fournit les tokens.
 RN35 (2026-07-11) a aligné les valeurs hex/typographie/radius de `src/theme/tokens.ts` sur les valeurs
-verbatim de `cores/ui-kit/generated/typescript/tokens.ts`. Le ThemeProvider mobile + composants maison
+verbatim de `packages/ui-kit/generated/typescript/tokens.ts`. Le ThemeProvider mobile + composants maison
 (`Screen`, `Text`, `Button`) + primitives d'état (`LoadingState`/`EmptyState`/`ErrorState` avec aliases
 `LoadingView`/`EmptyView`/`ErrorView`) sont opérationnels et vérifiés par 13 tests `node --test`.
 Ce gap est **fermé**.
@@ -275,7 +275,7 @@ manquant n'est **pas un critère §12.4** et ne bloque pas VALIDE_V1.
 ## 9. ~~Prochaine mission : Mobile RN35~~ — RÉALISÉ (2026-07-11)
 
 > RN35 a été réalisé avant cette revue VALIDE_V1. Il a fermé le dernier gap bloquant.
-> Voir `cores/mobile-react-native/ARCHITECTURE.md §40` et le rapport de mission associé.
+> Voir `starters/react-native/ARCHITECTURE.md §40` et le rapport de mission associé.
 
 ---
 
@@ -320,9 +320,9 @@ npm audit                                        ✅ 0 vulnérabilité
 git diff --check                                 ✅ propre
 ```
 
-Fichiers lus : `strategy/04_ROADMAP_GLOBAL.md` §12, `cores/ui-kit/CORE_SPECIFICATION.md` §§59/60,
-`cores/mobile-react-native/ARCHITECTURE.md` §40, `cores/web-nextjs/CORE_SPECIFICATION.md` §56,
+Fichiers lus : `strategy/04_ROADMAP_GLOBAL.md` §12, `packages/ui-kit/CORE_SPECIFICATION.md` §§59/60,
+`starters/react-native/ARCHITECTURE.md` §40, `starters/nextjs/CORE_SPECIFICATION.md` §56,
 `docs/project-status/UI_KIT_V1_READINESS_REVIEW.md`, `docs/project-status/IMPLEMENTATION_MATRIX.md`,
 `docs/project-status/FOUNDATION_CURRENT_STATE.md`, `docs/project-status/NEXT_ACTIONS.md`,
 `docs/project-status/SESSION_HANDOFF.md`.
-Note : `cores/ui-kit/ARCHITECTURE.md` absent du repository (non bloquant — contenu couvert par README).
+Note : `packages/ui-kit/ARCHITECTURE.md` absent du repository (non bloquant — contenu couvert par README).
