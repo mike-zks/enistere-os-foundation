@@ -10,9 +10,9 @@ import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
  * et les tests contractuels. Déterministe : aucun serveur en dur, aucune URL locale, aucun
  * timestamp dynamique ; `info.version` provient de la version du package.
  */
-export const OPENAPI_TITLE = 'Enistere starter NestJS';
+export const OPENAPI_TITLE = 'Enistere API Core NestJS';
 export const OPENAPI_DESCRIPTION =
-  'Contrat OpenAPI canonique du starter NestJS V1 — source de vérité des API publiques (ADR-016).';
+  'Contrat OpenAPI canonique du API Core NestJS V1 — source de vérité des API publiques (ADR-016).';
 
 export function getPackageVersion(): string {
   const raw = readFileSync(join(process.cwd(), 'package.json'), 'utf8');
