@@ -6,6 +6,14 @@ Le format suit une approche simple inspirée de Keep a Changelog, avec des secti
 
 ## [Unreleased]
 
+### Project Factory 3 — Core composition, use cases and post-V1 roadmap
+
+- `CORE_COMPOSITION_MODEL.md` distingue cores applicatifs, infrastructure, UI, packages et capacites de gouvernance ; les cores sont composes par package/bootstrap/reference/adapter/deploy profile, pas fusionnes.
+- `USE_CASE_SCENARIOS.md` definit cinq scenarios de preuve : `nestjs-next`, `spring-angular`, `nestjs-react-native`, `spring-flutter`, `nestjs-next-react-native`.
+- `POST_V1_ADOPTION_ROADMAP.md` reoriente la suite vers exemples derives, preuves hors monorepo, projet pilote puis automatisation mesuree.
+- `strategy/04_ROADMAP_GLOBAL.md` conserve l'historique et reference l'addendum post-V1.
+- Aucun runtime, package, dependance, workflow, generateur ou secret modifie.
+
 ### Project Factory 2 — Derived project blueprint templates
 
 - `docs/project-factory/templates/FUNCTIONAL_BRIEF.template.md` : cadrage besoin, utilisateurs, parcours, roles, entites, contraintes et V1.

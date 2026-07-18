@@ -88,6 +88,12 @@
 > documentation obligatoire, cadrage avant génération, secrets exclus du Git,
 > gates et écarts Foundation explicites. Ces templates ne décident aucun nouveau
 > runtime, SDK, stockage, registry, workflow ou mode de déploiement.
+>
+> **Note Project Factory 3 (composition et scenarios)** :
+> `CORE_COMPOSITION_MODEL.md`, `USE_CASE_SCENARIOS.md` et `POST_V1_ADOPTION_ROADMAP.md` appliquent
+> l'architecture cible existante : projets derives independants, cores modulaires et couches transverses.
+> Aucun nouvel ADR n'est requis : la mission ne choisit aucun runtime, provider, stockage, registry ou
+> mode de production. Une divergence future dans un projet derive reste soumise a ADR projet.
 
 ## 2. Décisions validées — état d'application
 

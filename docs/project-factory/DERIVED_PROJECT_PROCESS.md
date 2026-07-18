@@ -112,6 +112,10 @@ Un projet derive V1 ne doit pas etre declare pret sans :
 
 ## 4. Regles de composition
 
+Le mode de composition detaille est defini dans
+[`CORE_COMPOSITION_MODEL.md`](./CORE_COMPOSITION_MODEL.md). Les cores ne sont pas fusionnes physiquement :
+ils sont consommes comme package, bootstrap, reference, adapter ou profil de deploiement selon leur nature.
+
 ### 4.1 Ce qui peut etre combine
 
 Les cores peuvent etre combines tant que le contrat entre eux est explicite :
@@ -183,3 +187,16 @@ Cette mission ne livre pas encore :
 - adaptation automatique des contrats API entre Spring et TypeScript.
 
 Ces points appartiennent aux missions Project Factory suivantes.
+
+## 8. Scenarios de reference
+
+[`USE_CASE_SCENARIOS.md`](./USE_CASE_SCENARIOS.md) definit cinq scenarios prioritaires et leurs preuves :
+
+- portail SaaS `nestjs-next` ;
+- back-office `spring-angular` ;
+- mobile TypeScript `nestjs-react-native` ;
+- mobile Java/Flutter `spring-flutter` ;
+- produit omnicanal `nestjs-next-react-native`.
+
+Une nouvelle capacite Foundation doit etre rattachee a l'un de ces scenarios, a un projet derive reel ou a
+un risque explicite. Cette regle evite de completer les cores sur des besoins uniquement hypothetiques.

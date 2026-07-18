@@ -20,6 +20,13 @@
 > `FUNCTIONAL_BRIEF`, `TECHNICAL_BLUEPRINT`, `STACK_DECISION`, `SECURITY_NOTES`, `RELEASE_PLAN`.
 > Ils appliquent la strategy : cadrage avant generation, projets derives separes, secrets exclus du Git,
 > gates et ecarts documentes. Aucun generateur CLI, runtime, workflow, dependance ou exemple derive.
+>
+> **Mise à jour Project Factory 3 — Core composition and use cases (2026-07-18)** :
+> `CORE_COMPOSITION_MODEL.md` definit les modes `PACKAGE`/`BOOTSTRAP`/`REFERENCE`/`ADAPTER`/
+> `DEPLOY_PROFILE` et clarifie l'utilite de UI Kit, Docs, Quality, AI et packages.
+> `USE_CASE_SCENARIOS.md` definit cinq profils de preuve et leurs parcours transverses.
+> `POST_V1_ADOPTION_ROADMAP.md` fait passer la priorite de l'expansion des cores a leur consommation
+> dans des projets derives. Aucun runtime, generateur, dependance ou workflow.
 
 > **Mise à jour AI Core 1 — Core specification (2026-07-16)** :
 > `cores/ai-core/CORE_SPECIFICATION.md` (24 sections : objectif, rôle dans la Foundation,

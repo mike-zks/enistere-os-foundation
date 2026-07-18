@@ -21,6 +21,12 @@ Elle couvre :
 
 Enistere OS Foundation doit être cadrée dans sa version finale dès le départ, mais implémentée progressivement afin d’éviter la dispersion, la dette technique et la complexité inutile.
 
+> **Addendum post-V1 (2026-07-18)** : les principaux cores V1/V2/V3 ayant atteint un starter
+> `VALIDE_V1`, l'execution courante est desormais pilotee par
+> [`docs/project-status/POST_V1_ADOPTION_ROADMAP.md`](../docs/project-status/POST_V1_ADOPTION_ROADMAP.md).
+> La presente roadmap conserve la vision et l'historique des versions ; l'addendum organise la phase
+> composition -> projet derive -> pilote -> industrialisation.
+
 ---
 
 ## 2. Objectif de la roadmap

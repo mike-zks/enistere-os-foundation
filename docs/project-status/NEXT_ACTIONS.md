@@ -5,6 +5,20 @@
 
 ## 1. Prochaine action UNIQUE
 
+> ✅ **Project Factory 3 — Core composition, use cases and post-V1 roadmap : RÉALISÉ** (2026-07-18).
+> Livrables : `docs/project-factory/CORE_COMPOSITION_MODEL.md`,
+> `docs/project-factory/USE_CASE_SCENARIOS.md`,
+> `docs/project-status/POST_V1_ADOPTION_ROADMAP.md` et rapport
+> `PROJECT_FACTORY3_COMPOSITION_USE_CASES_REPORT.md`.
+> Décision : les cores sont composés par package/bootstrap/reference/adapter/deploy profile, pas
+> fusionnés physiquement. `VALIDE_V1` signifie starter gouverné, pas vision finale complète. Toute
+> nouvelle capacité doit répondre à un scénario, un projet ou un risque explicite.
+>
+> **Prochaine action UNIQUE** : **Project Factory 4 — premier squelette dérivé `nestjs-next`**.
+> Objectif : instancier les templates dans une structure exportable sous `examples/derived/`, fixer une
+> référence Foundation immuable et définir les commandes/gates, sans copie massive de runtime ni
+> générateur CLI.
+
 > ✅ **Project Factory 2 — Derived project blueprint templates : RÉALISÉ** (2026-07-18).
 > Livrables : `docs/project-factory/templates/FUNCTIONAL_BRIEF.template.md`,
 > `TECHNICAL_BLUEPRINT.template.md`, `STACK_DECISION.template.md`, `SECURITY_NOTES.template.md`,

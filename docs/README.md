@@ -1,7 +1,7 @@
 # Documentation Enistere OS Foundation
 
 > Index central Docs Core.
-> Derniere mise a jour : 2026-07-12.
+> Derniere mise a jour : 2026-07-18.
 
 Cette page est la porte d'entree documentaire du repository.
 
@@ -24,6 +24,9 @@ runbooks, les checklists qualite et les prompts IA.
 | Faire un premier tour en 15 minutes | [`onboarding/DEVELOPER_QUICKSTART.md`](onboarding/DEVELOPER_QUICKSTART.md) |
 | Choisir une composition pour un projet derive | [`project-factory/STACK_PROFILES_MATRIX.md`](project-factory/STACK_PROFILES_MATRIX.md) |
 | Transformer une idee en projet derive | [`project-factory/DERIVED_PROJECT_PROCESS.md`](project-factory/DERIVED_PROJECT_PROCESS.md) |
+| Comprendre comment les cores sont composes | [`project-factory/CORE_COMPOSITION_MODEL.md`](project-factory/CORE_COMPOSITION_MODEL.md) |
+| Choisir un scenario de preuve | [`project-factory/USE_CASE_SCENARIOS.md`](project-factory/USE_CASE_SCENARIOS.md) |
+| Lire la roadmap d'adoption post-V1 | [`project-status/POST_V1_ADOPTION_ROADMAP.md`](project-status/POST_V1_ADOPTION_ROADMAP.md) |
 | Demarrer comme contributeur ou agent | [`onboarding/CONTRIBUTOR_ONBOARDING.md`](onboarding/CONTRIBUTOR_ONBOARDING.md) |
 | Maintenir la documentation | [`guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](guides/DOCUMENTATION_MAINTENANCE_GUIDE.md) |
 | Conduire une revue de statut | [`guides/CORE_STATUS_REVIEW_GUIDE.md`](guides/CORE_STATUS_REVIEW_GUIDE.md) |
@@ -55,6 +58,8 @@ Le dossier [`project-factory/`](project-factory/) cadre les projets derives Enis
 |---|---|
 | [`project-factory/DERIVED_PROJECT_PROCESS.md`](project-factory/DERIVED_PROJECT_PROCESS.md) | Processus idee -> brief fonctionnel -> blueprint technique -> profil stack -> bootstrap |
 | [`project-factory/STACK_PROFILES_MATRIX.md`](project-factory/STACK_PROFILES_MATRIX.md) | Matrice de compatibilite des profils API/Web/Mobile/Cloud et gates associes |
+| [`project-factory/CORE_COMPOSITION_MODEL.md`](project-factory/CORE_COMPOSITION_MODEL.md) | Roles, modes de consommation et definition de completude des cores |
+| [`project-factory/USE_CASE_SCENARIOS.md`](project-factory/USE_CASE_SCENARIOS.md) | Scenarios derives prioritaires, parcours de preuve et metriques d'adoption |
 | [`project-factory/templates/`](project-factory/templates/) | Templates de projet derive : brief fonctionnel, blueprint technique, decision stack, securite, release |
 
 ## Decisions d'architecture

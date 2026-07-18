@@ -18,11 +18,11 @@ Enistere OS Foundation — monorepo de socles (cores) techniques + packages part
 
 ## 2. Objectif courant
 
-Faire progresser les cores V1 **un par un**, en s'appuyant sur le API Core et les packages déjà
-disponibles, sans régression et sans confondre spécification et implémentation.
+Prouver l'adoption des cores V1 dans des projets derives, sans regresser sur les cores et sans confondre
+starter `VALIDE_V1`, vision finale et fonctionnalite metier.
 
-Le prochain axe post-V1 est **Project Factory** : transformer la Foundation en socle de projets derives
-flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique avant tout generateur.
+Le prochain axe post-V1 est **Project Factory** : composer les cores par profil, mesurer leur utilite sur
+des scenarios concrets, puis automatiser uniquement les operations repetitives prouvees.
 
 ## 3. État réel (résumé)
 
@@ -32,11 +32,13 @@ flexibles, avec profils stack gouvernes et documentation fonctionnelle/technique
   `API_CORE_V1_READINESS_REVIEW.md`.
 - **Project Factory** : **SPECIFICATION_DOCUMENTAIRE** (2026-07-18) —
   `docs/project-factory/DERIVED_PROJECT_PROCESS.md` + `docs/project-factory/STACK_PROFILES_MATRIX.md`
-  + `docs/project-factory/templates/`.
+  + `docs/project-factory/templates/` + `CORE_COMPOSITION_MODEL.md` + `USE_CASE_SCENARIOS.md` +
+  `docs/project-status/POST_V1_ADOPTION_ROADMAP.md`.
   La Foundation reconnait les compositions flexibles, y compris les profils **API + mobile** :
   `nestjs-react-native`, `spring-flutter`, `spring-react-native`, `nestjs-flutter`.
   Templates documentaires livrés : `FUNCTIONAL_BRIEF`, `TECHNICAL_BLUEPRINT`, `STACK_DECISION`,
-  `SECURITY_NOTES`, `RELEASE_PLAN`. Aucun generateur CLI, runtime applicatif, dependance ou workflow.
+  `SECURITY_NOTES`, `RELEASE_PLAN`. Les cores sont composes, pas fusionnes ; cinq scenarios de preuve
+  cadrent leur finalite. Aucun generateur CLI, runtime applicatif, dependance ou workflow.
 - **Foundation baseline** : **FOUNDATION_V1_RELEASED** (2026-07-12) — tag `foundation-v1.0.0`,
   commit `2981f2c`, GitHub Release publiée.
 - **Release notes** : **FOUNDATION_V1_RELEASED** — `FOUNDATION_V1_RELEASE_NOTES.md` publié.
@@ -1539,6 +1541,13 @@ React 19.2.7 ; non-régression complète ; API NestJS/packages non modifiés. Co
 `feat(web-nextjs): add session and authorization state`.
 
 ## 9. Prochaine étape
+
+**Action unique courante : Project Factory 4 — premier squelette derive `nestjs-next`.**
+
+Instancier les cinq templates sous `examples/derived/`, fixer une reference Foundation immuable et definir
+la structure exportable ainsi que les gates. Ne pas copier massivement les runtimes et ne pas creer de CLI
+avant une premiere preuve de bootstrap. Roadmap courante :
+`docs/project-status/POST_V1_ADOPTION_ROADMAP.md`.
 
 **Décision roadmap (revue stratégique 2026-06-11 — [`ROADMAP_ALIGNMENT_REVIEW.md`](./ROADMAP_ALIGNMENT_REVIEW.md))** :
 **Cloud Core mis en PAUSE contrôlée** après CC1–9 (CI + GHCR + staging local) ; **Cloud Core 10** (serveur réel)
