@@ -12,8 +12,9 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Blueprint/lock | Implémentés | schéma v1, génération déterministe |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
-| Capabilities | Contrat en consolidation | seuls les manifests existent encore ; overlays réels non livrés |
-| Packages | Implémentés | contracts, client Fetch, UI Kit |
+| Capabilities | `auth` livrée en overlay (NestJS/Next.js/RN) | RBAC/Files parqués ; Spring/Angular/Flutter planifiés |
+| Overlays déclaratifs | Moteur + overlay `auth` livrés | seul `auth` a un `overlay.json` |
+| Packages | Implémentés | contracts (contrat complet figé), client Fetch, UI Kit |
 | Deployment | Local/staging disponibles | Compose, CI, runbooks et preuve staging V1 |
 | Distribution | Partielle | artefacts historiques ; CLI V2 non publiée |
 
@@ -21,18 +22,20 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 
 | Starter | Baseline historique | Composition V2 |
 |---|---|---|
-| NestJS | V1 vérifiée | extraction overlays en cours |
+| NestJS | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
 | Spring Boot | V1 vérifiée | planifiée après verticale TypeScript |
-| Next.js | V1 vérifiée | extraction overlays en cours |
+| Next.js | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
 | Angular | V1 vérifiée | planifiée après verticale TypeScript |
-| React Native | V1 vérifiée, Android prouvé | extraction overlays en cours |
+| React Native | V1 vérifiée, Android prouvé | baseline `base` extraite ; Auth en overlay `ready` |
 | Flutter | V1 vérifiée, Android prouvé | planifiée après verticale TypeScript |
 
-## Risque actif
+## Composition modulaire (Capability Packs 1A)
 
-La sélection `capabilities` du blueprint ne retire pas encore les fonctionnalités non choisies : les
-starters copiés restent les baselines V1 complètes. La Factory doit bloquer toute déclaration de
-composition modulaire tant que les overlays correspondants ne sont pas `ready`.
+Pour les trois starters modulaires, la sélection `capabilities` du blueprint retire effectivement les
+surfaces non choisies : une génération `base` ne contient aucune surface Auth, et Auth n'est ajoutée
+que via son overlay déclaratif. `generationMode` devient `modular-overlay` (et
+`bundledFeaturesMayExceedSelection=false`) lorsque toutes les targets sélectionnées sont modulaires.
+Spring, Angular et Flutter restent en baseline-copy jusqu'à leur extraction.
 
 ## Références
 
