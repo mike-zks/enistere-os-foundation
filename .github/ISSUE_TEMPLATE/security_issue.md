@@ -32,7 +32,7 @@ Scopes sensibles de ce monorepo :
 - [ ] URL signées MinIO (ne jamais loguer ni mettre en cache)
 - [ ] PII (données personnelles utilisateurs)
 - [ ] Secrets / clés / variables d'environnement
-- [ ] Accès staging / SSH / infrastructure (`deployment/core/`)
+- [ ] Accès staging / SSH / infrastructure (`deployment/`)
 - [ ] RBAC / permissions / rôles (api-nestjs)
 - [ ] Dépendances npm (`npm audit`)
 - [ ] Templates, scripts, CI (exposition involontaire)

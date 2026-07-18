@@ -438,9 +438,9 @@ Le Mobile Core React Native devra prévoir :
 
 Le choix précis du stockage sécurisé mobile sera traité dans ADR-015.
 
-## 26. Impact sur Cloud Core
+## 26. Impact sur Deployment
 
-Le Cloud Core devra soutenir cette stratégie par :
+Le Deployment devra soutenir cette stratégie par :
 
 - HTTPS obligatoire en production ;
 - CORS strict côté exposition API ;

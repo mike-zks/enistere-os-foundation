@@ -1,6 +1,6 @@
 # Contributor Onboarding
 
-> Docs Core 5.
+> Documentation 5.
 > Derniere mise a jour : 2026-07-12.
 
 Ce guide aide un contributeur ou un agent IA a demarrer une mission dans Enistere OS Foundation sans
@@ -23,7 +23,7 @@ Le code, les tests et les fichiers de statut courant priment.
 3. [`../project-status/IMPLEMENTATION_MATRIX.md`](../project-status/IMPLEMENTATION_MATRIX.md)
 4. [`../project-status/NEXT_ACTIONS.md`](../project-status/NEXT_ACTIONS.md)
 5. [`../project-status/DECISIONS_REGISTER.md`](../project-status/DECISIONS_REGISTER.md)
-6. Le `CORE_SPECIFICATION.md` du core concerne
+6. Le `specification active` du core concerne
 7. Les ADR applicables dans [`../adr/`](../adr/)
 
 Guides transverses utiles :
@@ -33,7 +33,7 @@ Guides transverses utiles :
 
 Pour une mission IA, lire aussi :
 
-- [`../../factory/quality/core/AI_PROMPT_GOVERNANCE.md`](../../factory/quality/core/AI_PROMPT_GOVERNANCE.md)
+- [`../../factory/quality/AI_PROMPT_GOVERNANCE.md`](../../factory/quality/AI_PROMPT_GOVERNANCE.md)
 - [`../../factory/ai/prompts/README.md`](../../factory/ai/prompts/README.md)
 - [`../../factory/ai/prompts/global/mission-brief-template.md`](../../factory/ai/prompts/global/mission-brief-template.md)
 
@@ -48,7 +48,7 @@ Lire :
 1. `NEXT_ACTIONS.md` ;
 2. `IMPLEMENTATION_MATRIX.md` ;
 3. `strategy/04_ROADMAP_GLOBAL.md` ;
-4. `CORE_SPECIFICATION.md` du core vise ;
+4. `specification active` du core vise ;
 5. ADR applicables ;
 6. derniers rapports du core.
 
@@ -64,7 +64,7 @@ Lire :
 1. la mission fournie ;
 2. les fichiers de statut cites par la mission ;
 3. le core spec et les ADR cites ;
-4. la matrice Quality Core pour les gates.
+4. la matrice Factory Quality pour les gates.
 
 Livrable attendu : code ou documentation implementes, tests/gates executes, rapport final factuel.
 
@@ -76,7 +76,7 @@ Lire :
 
 1. diff de la PR ;
 2. tests ajoutes ou modifies ;
-3. `CORE_SPECIFICATION.md` ;
+3. `specification active` ;
 4. ADR applicables ;
 5. `PR_QUALITY_CHECKLIST.md`.
 
@@ -101,7 +101,7 @@ Objectif : decider une promotion ou une release sans confondre merge et publicat
 
 Lire :
 
-1. [`../../factory/quality/core/RELEASE_PROCESS_RUNBOOK.md`](../../factory/quality/core/RELEASE_PROCESS_RUNBOOK.md)
+1. [`../../factory/quality/RELEASE_PROCESS_RUNBOOK.md`](../../factory/quality/RELEASE_PROCESS_RUNBOOK.md)
 2. [`../guides/CORE_STATUS_REVIEW_GUIDE.md`](../guides/CORE_STATUS_REVIEW_GUIDE.md)
 3. [`../checklists/RELEASE_READINESS_CHECKLIST.md`](../checklists/RELEASE_READINESS_CHECKLIST.md)
 4. rapport de readiness du core concerne.
@@ -141,16 +141,16 @@ git status --short --branch
 Pour une mission documentaire Docs/Quality :
 
 ```bash
-node factory/quality/core/scripts/quality-gates.mjs run docs
-node --test factory/quality/core/scripts/check-doc-links.test.mjs
-node factory/quality/core/scripts/quality-gates.mjs plan docs
-node --test factory/quality/core/scripts/quality-gates.test.mjs
+node factory/quality/scripts/quality-gates.mjs run docs
+node --test factory/quality/scripts/check-doc-links.test.mjs
+node factory/quality/scripts/quality-gates.mjs plan docs
+node --test factory/quality/scripts/quality-gates.test.mjs
 npm audit
 ```
 
 Pour une mission runtime, utiliser la matrice :
 
-- [`../../factory/quality/core/QUALITY_GATES_MATRIX.md`](../../factory/quality/core/QUALITY_GATES_MATRIX.md)
+- [`../../factory/quality/QUALITY_GATES_MATRIX.md`](../../factory/quality/QUALITY_GATES_MATRIX.md)
 - [`../checklists/PR_QUALITY_CHECKLIST.md`](../checklists/PR_QUALITY_CHECKLIST.md)
 
 ## 7. Rapport final attendu

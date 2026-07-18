@@ -33,7 +33,7 @@ Décrire brièvement le changement.
 ## Quality gates
 
 > Référence : [`docs/checklists/PR_QUALITY_CHECKLIST.md`](../docs/checklists/PR_QUALITY_CHECKLIST.md)
-> Script : `node factory/quality/core/scripts/quality-gates.mjs plan <scope>`
+> Script : `node factory/quality/scripts/quality-gates.mjs plan <scope>`
 
 ### Scope applicable
 
@@ -51,7 +51,7 @@ Décrire brièvement le changement.
 ```
 # Indiquer les commandes réellement exécutées et leurs résultats
 # Exemple :
-# node factory/quality/core/scripts/quality-gates.mjs run all-safe  → 17/17 ✓
+# node factory/quality/scripts/quality-gates.mjs run all-safe  → 17/17 ✓
 # git diff --check                                                  → 0 whitespace error
 # npm audit                                                         → 0 vulnérabilité
 ```

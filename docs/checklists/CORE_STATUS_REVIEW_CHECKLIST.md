@@ -1,7 +1,7 @@
 # CORE_STATUS_REVIEW_CHECKLIST.md — Checklist revue de statut d'un core
 
-> Référence : `factory/quality/core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`.
-> Dernière mise à jour : 2026-07-11 (Quality Core 1).
+> Référence : `factory/quality/QUALITY_GATES_MATRIX.md`, `specification active`.
+> Dernière mise à jour : 2026-07-11 (Factory Quality 1).
 
 ## Quand utiliser cette checklist
 
@@ -14,7 +14,7 @@ de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`, ou de `SPECIFICATION_DOCUMENTAIRE` �
 ## Étape 1 — Contexte obligatoire à lire avant la revue
 
 - [ ] `strategy/04_ROADMAP_GLOBAL.md` — section dédiée au core
-- [ ] `cores/<nom>/CORE_SPECIFICATION.md` — critères de validation V1 (section §XX)
+- [ ] `cores/<nom>/specification active` — critères de validation V1 (section §XX)
 - [ ] `docs/project-status/IMPLEMENTATION_MATRIX.md` — statut courant + dernière preuve
 - [ ] `docs/project-status/FOUNDATION_CURRENT_STATE.md` — état global
 - [ ] `docs/project-status/NEXT_ACTIONS.md` — dépendances et actions en cours
@@ -26,7 +26,7 @@ de `IMPLEMENTATION_AVANCEE` à `VALIDE_V1`, ou de `SPECIFICATION_DOCUMENTAIRE` �
 
 ## Étape 2 — Vérification des critères de la spécification
 
-Pour chaque critère de validation défini dans la `CORE_SPECIFICATION.md` du core :
+Pour chaque critère de validation défini dans la `specification active` du core :
 
 - [ ] Critère 1 : __________________________________________________ ✅ / ❌ / ⚠️
 - [ ] Critère 2 : __________________________________________________ ✅ / ❌ / ⚠️

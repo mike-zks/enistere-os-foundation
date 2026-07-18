@@ -16,7 +16,7 @@ Validé.
 
 La V3 de la roadmap ajoute les cores secondaires multi-framework, dont **Mobile Core Flutter**.
 Ce core doit rester cohérent avec le socle V1 déjà validé : UI Kit, Web Core Next.js,
-Mobile Core React Native, API Core et Cloud Core.
+Mobile Core React Native, API Core et Deployment.
 
 ADR-008 définit les design tokens Enistere comme source de vérité UI/UX, agnostique et
 adaptable par plateforme. ADR-010 retient, côté React Native, une approche contrôlée :

@@ -1,4 +1,4 @@
-# FILES_REVIEW.md — Revue permanente du bloc Files (API Core NestJS V1)
+# FILES_REVIEW.md — Revue permanente du bloc Files (starter NestJS V1)
 
 > Rapport de validation du domaine fichier (ADR-007), Upload 1 → 5. Document **permanent** :
 > mis à jour à chaque évolution structurante du bloc. Dernière revue : durcissement Upload 5
@@ -260,7 +260,7 @@ bornés, **finalisation API**, scan, contrôle d'ownership, **aucune credential 
 - **Fichiers validés non garantis sans malware** (pas d'antivirus V1).
 - Cohérence DB/S3 **compensatoire** (pas de transaction distribuée) ; fenêtre résiduelle réconciliée.
 - Réception **en mémoire** (gros fichiers hors V1).
-- Réconciliation/purge **manuelles** (déclenchement par le Cloud Core ; verrou empêche le
+- Réconciliation/purge **manuelles** (déclenchement par le Deployment ; verrou empêche le
   chevauchement intra-base, pas un verrou inter-cluster distribué — acceptable car advisory PG est
   cluster-wide sur la même base).
 - Quotas **simples** (nombre + octets), pas de facturation ni de quota par catégorie.

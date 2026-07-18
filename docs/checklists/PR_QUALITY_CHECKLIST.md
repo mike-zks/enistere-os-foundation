@@ -1,13 +1,13 @@
 # PR_QUALITY_CHECKLIST.md — Checklist qualité par type de PR
 
-> Référence : `factory/quality/core/QUALITY_GATES_MATRIX.md`.
-> Dernière mise à jour : 2026-07-12 (Docs Core 6).
-> Script optionnel : `node factory/quality/core/scripts/quality-gates.mjs plan <scope>` pour voir les gates d'un scope sans les exécuter.
+> Référence : `factory/quality/QUALITY_GATES_MATRIX.md`.
+> Dernière mise à jour : 2026-07-12 (Documentation 6).
+> Script optionnel : `node factory/quality/scripts/quality-gates.mjs plan <scope>` pour voir les gates d'un scope sans les exécuter.
 
 ## Comment utiliser cette checklist
 
 1. Identifier le type de la PR dans la table ci-dessous.
-2. Optionnel : visualiser le plan avant d'exécuter — `node factory/quality/core/scripts/quality-gates.mjs plan <scope>`.
+2. Optionnel : visualiser le plan avant d'exécuter — `node factory/quality/scripts/quality-gates.mjs plan <scope>`.
 3. Exécuter les gates minimaux **avant d'ouvrir la PR** (manuellement ou via `run <scope>`).
 4. Exécuter les gates recommandés si le type de PR le justifie.
 5. Cocher les cases dans la description de la PR ou dans la revue.
@@ -18,7 +18,7 @@
 
 ### docs-only (project-status, ADR, checklists, stratégie)
 
-- [ ] `node factory/quality/core/scripts/quality-gates.mjs run docs` — whitespace + liens internes
+- [ ] `node factory/quality/scripts/quality-gates.mjs run docs` — whitespace + liens internes
 - [ ] Liens internes cohérents (fichiers référencés existent)
 - [ ] Statuts dans `IMPLEMENTATION_MATRIX.md` cohérents avec les preuves documentées
 - [ ] `SESSION_HANDOFF.md` mis à jour si l'état courant change

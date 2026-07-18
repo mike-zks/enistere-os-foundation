@@ -2,7 +2,7 @@
  * Public sign-in screen — generic email/password form (RN 32).
  *
  * Uses RHF + Zod via existing RN 3 primitives for UX validation. Client
- * validation is for UX only — the API Core NestJS remains the validation
+ * validation is for UX only — the starter NestJS remains the validation
  * authority (ADR-003 §18). No credentials stored or logged. No business
  * onboarding or registration logic (spec §17).
  */

@@ -1,11 +1,11 @@
 import { readFile } from 'node:fs/promises';
-import { validateCapabilityDependencies } from './capabilities.mjs';
+import { CAPABILITY_IDS, validateCapabilityDependencies } from './capabilities.mjs';
 import { validateEntities } from './contracts.mjs';
 
 const APIS = new Set(['nestjs', 'spring']);
 const WEBS = new Set([null, 'nextjs', 'angular']);
 const MOBILES = new Set([null, 'react-native', 'flutter']);
-const CAPABILITIES = new Set(['base', 'auth', 'rbac', 'files', 'audit', 'notifications', 'observability']);
+const CAPABILITIES = new Set(CAPABILITY_IDS);
 const ENVIRONMENTS = new Set(['local', 'staging']);
 const SLUG = /^[a-z][a-z0-9-]{1,62}$/;
 
@@ -63,7 +63,7 @@ export function createDefaultBlueprint(slug = 'enistere-app') {
     designSystem: true,
     stack: { api: 'spring', web: 'angular', mobile: null },
     domain: { entities: [] },
-    capabilities: ['base', 'auth', 'rbac'],
+    capabilities: ['base'],
     deployment: { environments: ['local', 'staging'] },
   };
 }

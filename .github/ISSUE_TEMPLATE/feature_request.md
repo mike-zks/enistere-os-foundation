@@ -20,7 +20,7 @@ Décrire le besoin ou l'opportunité.
 
 - **Roadmap §** : (ex. §13, §22 — ou "non référencé" — voir `strategy/04_ROADMAP_GLOBAL.md`)
 - **ADR lié** : (ex. ADR-013 — ou "ADR à rédiger")
-- **Section CORE_SPECIFICATION.md** : (si applicable)
+- **Section specification active** : (si applicable)
 
 ## Proposition
 

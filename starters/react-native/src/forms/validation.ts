@@ -5,7 +5,7 @@
  * validation). They provide reusable building blocks and a uniform result
  * shape — they are NOT business schemas and NOT a copy of any API DTO.
  *
- * ⚠️ Client validation is for UX only. The API Core NestJS remains the
+ * ⚠️ Client validation is for UX only. The starter NestJS remains the
  * authority (ADR-003 §7/§18): every input is re-validated server-side, and
  * server validation errors must still be surfaced. Do not treat these schemas
  * as a security boundary, and do not put domain-specific (Kivvoo/RFashion/

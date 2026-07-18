@@ -1,1 +1,12 @@
-{"schemaVersion":"1","id":"files","requires":["auth"],"responsibilities":["upload","metadata","download-url","delete"],"targets":["nestjs","spring","nextjs","angular","react-native","flutter"]}
+{
+  "schemaVersion": "2",
+  "id": "files",
+  "version": "0.1.0",
+  "requires": ["auth"],
+  "responsibilities": ["upload", "metadata", "download-url", "delete"],
+  "targets": {
+    "nestjs": { "status": "planned" }, "spring": { "status": "planned" },
+    "nextjs": { "status": "planned" }, "angular": { "status": "planned" },
+    "react-native": { "status": "planned" }, "flutter": { "status": "planned" }
+  }
+}

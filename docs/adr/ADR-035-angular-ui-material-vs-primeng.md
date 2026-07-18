@@ -16,7 +16,7 @@ Validé.
 
 La V3 de la roadmap ajoute les cores secondaires multi-framework, dont **Web Core Angular**
 (`starters/angular/`). Ce core doit rester cohérent avec le socle déjà validé : UI Kit,
-Web Core Next.js, Mobile Core React Native, Mobile Core Flutter, API Cores et Cloud Core.
+Web Core Next.js, Mobile Core React Native, Mobile Core Flutter, API Cores et Deployment.
 
 ADR-008 définit les design tokens Enistere comme source de vérité UI/UX, agnostique et
 adaptable par plateforme (web, React Native, Flutter). ADR-009 retient, côté Web Next.js,
@@ -184,7 +184,7 @@ Inconvénients :
 Cette ADR ne crée aucun projet Angular, aucun starter, aucun fichier Angular, aucune
 dépendance npm, aucun composant implémenté, aucun workflow CI. Elle ne modifie pas l'UI Kit
 Web React, le Web Core Next.js, le Mobile Core React Native, le Mobile Core Flutter, les
-API Cores ou le Cloud Core.
+API Cores ou le Deployment.
 
 Cette ADR ne tranche pas le choix d'adaptateur client HTTP Angular (Orval Angular vs OpenAPI
 Generator `typescript-angular`) — cette décision est réservée à l'évaluation par preuve dans

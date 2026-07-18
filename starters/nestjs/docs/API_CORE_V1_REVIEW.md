@@ -1,4 +1,4 @@
-# API_CORE_V1_REVIEW.md — Revue d'étape globale du starter API Core NestJS V1
+# API_CORE_V1_REVIEW.md — Revue d'étape globale du starter starter NestJS V1
 
 > Photographie transverse du starter à l'issue des blocs socle, Auth/RBAC et Files (Upload 1→5),
 > avec les durcissements transverses appliqués. Compléments permanents :
@@ -105,7 +105,7 @@ domaine élevée (deletion/quota/lifecycle/maintenance/reconciliation ≈ 95–1
 Logger NestJS standard + `AuditModule` (sécurité/métier, persistant, non bloquant). **L'audit n'est
 pas un substitut au logging technique** (constat respecté : il ne journalise pas les erreurs
 techniques). **Aucun logger structuré (Pino/Winston) n'est ajouté** : ce choix mérite un ADR (volume,
-redaction, format JSON, intégration Cloud Core). Contrat de logging V1 défini (timestamp, level,
+redaction, format JSON, intégration Deployment). Contrat de logging V1 défini (timestamp, level,
 context, requestId, méthode, route normalisée, statusCode, durée ; jamais de body sensible ni de
 token ; redaction des headers). `X-Request-Id` est désormais disponible (`req.requestId`) pour un
 futur intercepteur de logging.

@@ -92,7 +92,7 @@ Endpoints :
 - **Commandes** (CLI contrôlées, **dry-run par défaut**, jamais au démarrage de l'API) :
   - `npm run files:reconcile -- --dry-run | --apply [--max=N]`
   - `npm run files:cleanup-pending -- --dry-run | --apply [--max=N]`
-  Le Cloud Core décidera du déclenchement périodique (cron système/CI/orchestrateur). **Aucun
+  Le Deployment décidera du déclenchement périodique (cron système/CI/orchestrateur). **Aucun
   scheduler n'est embarqué** (`@nestjs/schedule` non ajouté : risque d'exécution multi-instance).
 - **Rétention** (conceptuelle, configurable) : `FILES_PENDING_EXPIRATION_SECONDS`,
   `FILES_REJECTED_RETENTION_SECONDS`, `FILES_DELETED_METADATA_RETENTION_SECONDS`,
@@ -317,7 +317,7 @@ Pas d'antivirus/scan malware réel (la quarantaine est manuelle ; détection de 
 antivirus), pas de traitement média (thumbnail/transcodage/vidéo/OCR), pas d'upload présigné ni
 d'upload direct client→S3, pas de fichier public/anonyme, pas de partage entre utilisateurs, pas de
 **proxy/streaming du contenu par l'API**, pas de queue (BullMQ)/Redis, **pas de scheduler embarqué**
-(commandes CLI déclenchées par le Cloud Core, sérialisées par verrou advisory), pas de CDN. URL
+(commandes CLI déclenchées par le Deployment, sérialisées par verrou advisory), pas de CDN. URL
 signée **non révocable** avant expiration. Cohérence DB/S3 **compensatoire** (pas de transaction
 distribuée). Purge physique **possible mais prudente** (rétention + objet absent + verrou) ; les
 `AuditLog` ne sont jamais purgés. Réception en `memoryStorage` bornée → gros fichiers = streaming/URL

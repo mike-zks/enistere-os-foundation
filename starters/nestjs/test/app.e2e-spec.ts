@@ -6,7 +6,7 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
 
-describe('API Core NestJS (e2e)', () => {
+describe('starter NestJS (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {

@@ -1,6 +1,6 @@
 # API_CORE_V1_IMPLEMENTATION_STATUS.md — Matrice d'implémentation
 
-> Statut par fonctionnalité du starter API Core NestJS V1. Légende statut :
+> Statut par fonctionnalité du starter starter NestJS V1. Légende statut :
 > **OK** = implémenté et validé · **PARTIEL** = partiellement implémenté · **DOC** = documenté
 > seulement · **TODO** = non commencé · **V2/V3** = reporté · **ADR** = nécessite une décision.
 
@@ -17,8 +17,8 @@
 | Sécurité HTTP | HSTS / CSP servie | DOC | — | revue | — | V1 (reverse proxy) | responsabilité Traefik |
 | Observabilité | Request ID (`X-Request-Id`) | OK | unit+e2e | revue | — | V1 | — |
 | Observabilité | Logging structuré (Pino) | OK | unit+e2e | `common/logging/README` | **ADR-040** | V1 | preuve nestjs-pino → Pino direct |
-| Observabilité | Métriques (Prometheus) | DOC | — | revue | — | V2 | Cloud Core |
-| Observabilité | Traces (OpenTelemetry) | DOC | — | revue | — | V2/V3 | Cloud Core |
+| Observabilité | Métriques (Prometheus) | DOC | — | revue | — | V2 | Deployment |
+| Observabilité | Traces (OpenTelemetry) | DOC | — | revue | — | V2/V3 | Deployment |
 | Health | liveness/readiness | OK | e2e (app) | revue | — | V1 | — |
 | Auth | Argon2id + PasswordHasher | OK | unit+e2e | `auth/README` + ADR-039 | ADR-039 | V1 | — |
 | Auth | login / access JWT / refresh opaque | OK | unit+e2e | `AUTH_RBAC_REVIEW` | ADR-004 | V1 | — |

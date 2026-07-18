@@ -257,7 +257,7 @@ correction/sécurité.
 
 **Web Core — cadrage et implémentation des états UI et composants structurels manquants** (états
 `loading`/`empty`/`error`/`success` standardisés, système de formulaires, composants réutilisables — cf.
-`CORE_SPECIFICATION.md` §3/§4). La connexion et l'espace protégé fournissent désormais une **surface réelle**
+`STARTER_SPECIFICATION.md` §3/§4). La connexion et l'espace protégé fournissent désormais une **surface réelle**
 à standardiser. **Alternative** (selon priorité produit) : intégration **Files** minimale. **Recommandé en
 parallèle (réserve V1)** : **CI minimale** (ADR-013) + amorce **E2E navigateur**. **Ne pas** poursuivre l'Auth
 avec des fonctionnalités post-V1 (register/reset/OAuth/MFA).

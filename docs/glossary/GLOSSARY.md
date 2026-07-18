@@ -1,6 +1,6 @@
 # Glossary
 
-> Docs Core 3.
+> Documentation 3.
 > Derniere mise a jour : 2026-07-12.
 
 Ce glossaire definit les termes utilises dans les statuts, rapports, missions et PR du repository.
@@ -40,9 +40,9 @@ Ce glossaire definit les termes utilises dans les statuts, rapports, missions et
 | Web Core | Socle Next.js BFF/UI/session/files, consommateur API et UI Kit. |
 | Mobile Core | Socle React Native/Expo, auth/session, primitives transverses et starter runtime. |
 | UI Kit | Design tokens et primitives UI reutilisables. |
-| Cloud Core | CI, registry, staging, runbooks operationnels et deploiement gouverne. |
-| Quality Core | Gates, checklists, templates, release process et gouvernance qualite. |
-| Docs Core | Index, navigation documentaire, onboarding, glossaire et dette documentaire. |
+| Deployment | CI, registry, staging, runbooks operationnels et deploiement gouverne. |
+| Factory Quality | Gates, checklists, templates, release process et gouvernance qualite. |
+| Documentation | Index, navigation documentaire, onboarding, glossaire et dette documentaire. |
 
 ## Securite et donnees
 
@@ -63,7 +63,7 @@ Ce glossaire definit les termes utilises dans les statuts, rapports, missions et
 | L2 | Validation runtime API avec PostgreSQL/MinIO jetables. |
 | L3 | E2E navigateur Web sur stack reelle jetable. |
 | L4 | Registry/images, smoke image, publication GHCR selon scope. |
-| `all-safe` | Scope Quality Core local combinant packages, UI Kit, Web et audit racine, sans Cloud/device. |
+| `all-safe` | Scope Factory Quality local combinant packages, UI Kit, Web et audit racine, sans Cloud/device. |
 | Smoke | Verification courte qu'un runtime demarre et repond comme attendu. |
 
 ## Documents

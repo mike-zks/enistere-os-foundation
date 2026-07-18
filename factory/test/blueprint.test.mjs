@@ -26,6 +26,8 @@ describe('blueprint v1', () => {
   it('builds an explicit source plan', () => {
     const plan = buildGenerationPlan(createDefaultBlueprint());
     assert.deepEqual(plan.starterSources, { api: 'starters/spring', web: 'starters/angular' });
+    assert.equal(plan.generationMode, 'baseline-copy');
+    assert.equal(plan.bundledFeaturesMayExceedSelection, true);
   });
   it('generates a deterministic project manifest and lock', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));
@@ -61,6 +63,16 @@ describe('blueprint v1', () => {
     assert.deepEqual(rootPackage.workspaces, ['packages/*']);
     assert.match(rootPackage.scripts['build:packages'], /api-contracts/);
   });
+  it('rejects generation when a selected capability is only planned', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));
+    const blueprint = createDefaultBlueprint('blocked-app');
+    blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
+    blueprint.capabilities = ['base', 'auth'];
+    await assert.rejects(
+      generateProject(blueprint, join(root, 'project'), { materialize: false }),
+      /auth on nestjs is planned/,
+    );
+  });
   it('plans every supported stack combination as a golden matrix', () => {
     const seen = new Set();
     for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
@@ -71,5 +83,17 @@ describe('blueprint v1', () => {
       assert.equal(plan.starterSources.api, `starters/${api}`);
     }
     assert.equal(seen.size, 18);
+  });
+  it('generates base-only locks for all 18 stack combinations', async () => {
+    for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
+      const root = await mkdtemp(join(tmpdir(), 'enistere-golden-'));
+      const blueprint = createDefaultBlueprint(`${api}-${web ?? 'none'}-${mobile ?? 'none'}`);
+      blueprint.stack = { api, web, mobile };
+      const output = join(root, 'project');
+      await generateProject(blueprint, output, { materialize: false });
+      const lock = JSON.parse(await readFile(join(output, 'enistere.lock'), 'utf8'));
+      assert.equal(lock.plan.generationMode, 'baseline-copy');
+      assert.equal(lock.plan.bundledFeaturesMayExceedSelection, true);
+    }
   });
 });

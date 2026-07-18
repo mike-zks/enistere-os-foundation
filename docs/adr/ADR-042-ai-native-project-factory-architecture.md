@@ -7,7 +7,7 @@
 ## Contexte
 
 La structure historique mélange starters applicatifs et fonctions transverses sous `cores/`. Elle crée
-des recouvrements entre `docs/` et Docs Core, entre prompts/AI/Quality, et traite le Cloud ou le design
+des recouvrements entre `docs/` et Documentation, entre prompts/AI/Quality, et traite le Cloud ou le design
 system comme des applications indépendantes. Elle ne fournit aucun générateur dans `tools/` et ne prouve
 pas encore la finalité industrielle de la Foundation.
 

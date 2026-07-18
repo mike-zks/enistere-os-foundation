@@ -26,7 +26,7 @@ Cette ADR formalise la stratégie cookies web et CSRF pour :
 - routes protégées ;
 - actions sensibles ;
 - logout ;
-- déploiement Cloud Core ;
+- déploiement Deployment ;
 - documentation sécurité.
 
 Cette ADR ne crée aucun code Next.js, middleware, guard, module CSRF, composant, package ou dépendance.
@@ -398,9 +398,9 @@ L'API Core NestJS devra prévoir :
 - audit logs sur actions sensibles ;
 - logs sans cookies ni tokens.
 
-## 24. Impact sur Cloud Core
+## 24. Impact sur Deployment
 
-Le Cloud Core devra soutenir cette stratégie par :
+Le Deployment devra soutenir cette stratégie par :
 
 - HTTPS obligatoire en production ;
 - reverse proxy correctement configuré ;

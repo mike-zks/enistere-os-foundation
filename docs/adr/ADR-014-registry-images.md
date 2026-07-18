@@ -18,7 +18,7 @@ Enistere OS Foundation doit définir une stratégie standard pour publier, versi
 
 Cette ADR impacte :
 
-- Cloud Core ;
+- Deployment ;
 - API Core NestJS ;
 - Web Core Next.js ;
 - futurs workers et jobs ;
@@ -44,7 +44,7 @@ Sans décision registry, les futurs projets peuvent diverger sur :
 - rétention des images ;
 - sécurité des secrets ;
 - séparation fondation / projets dérivés ;
-- compatibilité avec CI/CD et Cloud Core.
+- compatibilité avec CI/CD et Deployment.
 
 Une registry mal cadrée peut provoquer des images non traçables, des secrets exposés, des tokens trop permissifs ou un déploiement d'image non validée.
 
@@ -74,7 +74,7 @@ Inconvénients :
 
 ### Option B — Registry privée auto-hébergée
 
-Déployer une registry privée dans le Cloud Core.
+Déployer une registry privée dans le Deployment.
 
 Avantages :
 
@@ -145,7 +145,7 @@ Inconvénients :
 - déploiements moins traçables ;
 - rollback plus difficile ;
 - images non versionnées ;
-- incompatible avec CI/CD et Cloud Core dès que les starters existent.
+- incompatible avec CI/CD et Deployment dès que les starters existent.
 
 ## 7. Décision
 
@@ -362,9 +362,9 @@ Une registry cloud provider est rejetée comme standard V1 car elle introduit un
 
 L'absence de registry est rejetée car elle empêcherait la traçabilité, la reproductibilité et le rollback des images.
 
-## 21. Impact sur Cloud Core
+## 21. Impact sur Deployment
 
-Le Cloud Core doit consommer des images traçables.
+Le Deployment doit consommer des images traçables.
 
 À prévoir plus tard :
 

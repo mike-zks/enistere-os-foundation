@@ -1,6 +1,6 @@
 # DOCUMENTATION_MAINTENANCE_GUIDE.md — Guide de maintenance documentaire
 
-> Docs Core 5.
+> Documentation 5.
 > Derniere mise a jour : 2026-07-12.
 
 Ce guide explique comment maintenir la documentation d'Enistere OS Foundation sans dupliquer l'etat du
@@ -24,7 +24,7 @@ Quand deux documents divergent, appliquer cet ordre :
 
 1. code, tests, scripts et configurations reels ;
 2. ADR valides ;
-3. `CORE_SPECIFICATION.md` du core concerne ;
+3. `specification active` du core concerne ;
 4. `strategy/` ;
 5. README, rapports, changelog et notes historiques.
 
@@ -38,8 +38,8 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 | Nouveau statut de core | `IMPLEMENTATION_MATRIX.md`, `FOUNDATION_CURRENT_STATE.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md` |
 | Nouvelle preuve ou rapport | `docs/README.md`, rapport dans `docs/project-status/`, fichier statut concerne |
 | Nouvelle decision ADR | `docs/project-status/DECISIONS_REGISTER.md`, `docs/adr/ADR_BACKLOG.md` si besoin |
-| Nouvelle mission IA recurrente | `factory/ai/prompts/README.md`, `factory/quality/core/AI_PROMPT_GOVERNANCE.md` si le cadre change |
-| Nouveau guide ou onboarding | `docs/README.md`, `factory/quality/core/README.md`, `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` |
+| Nouvelle mission IA recurrente | `factory/ai/prompts/README.md`, `factory/quality/AI_PROMPT_GOVERNANCE.md` si le cadre change |
+| Nouveau guide ou onboarding | `docs/README.md`, `factory/quality/README.md`, `docs/onboarding/CONTRIBUTOR_ONBOARDING.md` |
 
 ## 4. Regles de redaction
 
@@ -54,7 +54,7 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 
 1. Lire `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md` et `NEXT_ACTIONS.md`.
 2. Identifier si le changement modifie un statut, une preuve, une prochaine action ou seulement un lien.
-3. Lire le `CORE_SPECIFICATION.md` du core concerne.
+3. Lire le `specification active` du core concerne.
 4. Modifier les documents sources les plus proches du changement.
 5. Mettre a jour les index seulement apres avoir ajoute ou deplace un document.
 6. Executer les gates documentaires.
@@ -62,18 +62,18 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 
 ## 6. Gates documentaires
 
-Pour une mission Docs Core ou documentation centrale :
+Pour une mission Documentation ou documentation centrale :
 
 ```bash
-node factory/quality/core/scripts/quality-gates.mjs run docs
-node --test factory/quality/core/scripts/check-doc-links.test.mjs
-node factory/quality/core/scripts/quality-gates.mjs plan docs
-node --test factory/quality/core/scripts/quality-gates.test.mjs
+node factory/quality/scripts/quality-gates.mjs run docs
+node --test factory/quality/scripts/check-doc-links.test.mjs
+node factory/quality/scripts/quality-gates.mjs plan docs
+node --test factory/quality/scripts/quality-gates.test.mjs
 npm audit
 ```
 
 Ces gates n'executent pas les tests runtime applicatifs. Si une mission touche un core runtime, utiliser la
-matrice Quality Core.
+matrice Factory Quality.
 
 ## 7. Anti-patterns
 
@@ -83,7 +83,7 @@ matrice Quality Core.
 | Promouvoir un core parce qu'une mission est terminee. | Statut gonfle sans preuve. | Faire une readiness review. |
 | Corriger tous les rapports historiques. | Churn et perte de trace. | Marquer les rapports comme historiques si necessaire. |
 | Ajouter un guide sans lien depuis l'index. | Document introuvable. | Mettre a jour `docs/README.md`. |
-| Ignorer `strategy/` et `CORE_SPECIFICATION.md`. | Mission incoherente. | Les lire au cadrage. |
+| Ignorer `strategy/` et `specification active`. | Mission incoherente. | Les lire au cadrage. |
 
 ## 8. Fin de mission
 

@@ -1,15 +1,15 @@
 # RELEASE_READINESS_CHECKLIST.md — Checklist avant release / promotion de statut
 
-> Référence : `factory/quality/core/QUALITY_GATES_MATRIX.md`, `CORE_SPECIFICATION.md`,
-> `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md`,
-> `factory/quality/core/RELEASE_PROCESS_RUNBOOK.md`.
-> Dernière mise à jour : 2026-07-11 (Quality Core 5).
+> Référence : `factory/quality/QUALITY_GATES_MATRIX.md`, `specification active`,
+> `factory/quality/BRANCH_PROTECTION_RUNBOOK.md`,
+> `factory/quality/RELEASE_PROCESS_RUNBOOK.md`.
+> Dernière mise à jour : 2026-07-11 (Factory Quality 5).
 
 ## Quand utiliser cette checklist
 
 - Avant de promouvoir un core à un nouveau statut (ex. `IMPLEMENTATION_AVANCEE` → `VALIDE_V1`).
 - Avant une release de package (`@enistere/ui-kit`, `@enistere/api-contracts`, etc.).
-- Avant un déploiement staging majeur (Cloud Core).
+- Avant un déploiement staging majeur (Deployment).
 - Avant une release Foundation (`foundation-v1-baseline`, `core-v1-validation`, etc.).
 
 > **Rappel** : un merge ≠ une release. Voir `RELEASE_PROCESS_RUNBOOK.md` §1 pour les définitions.
@@ -20,7 +20,7 @@
 
 ### Documentation
 
-- [ ] `CORE_SPECIFICATION.md` du core est à jour et reflète l'état réel
+- [ ] `specification active` du core est à jour et reflète l'état réel
 - [ ] `IMPLEMENTATION_MATRIX.md` reflète le nouveau statut avec preuve
 - [ ] `FOUNDATION_CURRENT_STATE.md` mis à jour
 - [ ] `NEXT_ACTIONS.md` mis à jour (action réalisée cochée, prochaine action identifiée)
@@ -41,7 +41,7 @@
 
 - [ ] Vérifier que la protection de branche est active via GitHub Rulesets (`protect-main`, enforcement `active`)
 - [ ] Vérifier que les 8 checks requis sont présents : `api-contracts`, `api-client-fetch`, `ui-kit`, `web-nextjs`, `audit`, `api-runtime`, `web-e2e`, `api-smoke`
-- [ ] Si non activée : appliquer selon `factory/quality/core/BRANCH_PROTECTION_RUNBOOK.md`
+- [ ] Si non activée : appliquer selon `factory/quality/BRANCH_PROTECTION_RUNBOOK.md`
 - [ ] Si les checks `images` deviennent obligatoires : documenter la décision dans `IMPLEMENTATION_MATRIX.md` et `QUALITY_GATES_MATRIX.md`
 
 ---
@@ -51,7 +51,7 @@
 ### Pré-conditions
 
 - [ ] Rapport de revue rédigé dans `docs/project-status/` (ex. `UI_KIT_V1_READINESS_REVIEW.md`)
-- [ ] Critères de validation de la `CORE_SPECIFICATION.md` vérifiés un par un
+- [ ] Critères de validation de la `specification active` vérifiés un par un
 - [ ] Preuves d'exécution documentées (commandes + résultats)
 - [ ] Les cores dépendants ont été notifiés / ne régressent pas
 
@@ -66,7 +66,7 @@
 #### Web Core → VALIDE_V1
 - [ ] typecheck ✅ | lint ✅ | test 450/450 ✅ | build ✅ | audit 0 vuln ✅
 - [ ] E2E Playwright 15/15 ✅ (stack réelle API+PG+MinIO)
-- [ ] §56 critères vérifiés (voir `starters/nextjs/CORE_SPECIFICATION.md`)
+- [ ] §56 critères vérifiés (voir `starters/nextjs/STARTER_SPECIFICATION.md`)
 
 #### API Core → VALIDE_V1
 - [ ] typecheck ✅ | lint ✅ | test 386/386 ✅ | test:e2e 101/101 ✅ (PG+MinIO)
@@ -78,8 +78,8 @@
 - [ ] smoke:android ✅ | smoke:ios ✅ (macOS requis — RN31 en attente)
 - [ ] audit 0 vuln ✅
 
-#### Quality Core → SPECIFICATION_DOCUMENTAIRE
-- [ ] CORE_SPECIFICATION.md présent et complet
+#### Factory Quality → SPECIFICATION_DOCUMENTAIRE
+- [ ] specification active présent et complet
 - [ ] README.md présent
 - [ ] QUALITY_GATES_MATRIX.md présente et à jour
 - [ ] Checklists docs/checklists/ présentes
@@ -110,7 +110,7 @@
 
 ---
 
-## Partie 4 — Déploiement staging (Cloud Core)
+## Partie 4 — Déploiement staging (Deployment)
 
 - [ ] Images GHCR disponibles avec tags `sha-` immutables
 - [ ] `docker-compose.cc10.yml` mis à jour avec les nouveaux tags
@@ -131,7 +131,7 @@
 ## Partie 5 — Release Foundation
 
 > Utiliser pour une release de type `foundation-v1-baseline`, `core-v1-validation`, `quality-v2-increment`,
-> `staging-candidate` ou `hotfix`. Voir `factory/quality/core/RELEASE_PROCESS_RUNBOOK.md` §3 pour les critères.
+> `staging-candidate` ou `hotfix`. Voir `factory/quality/RELEASE_PROCESS_RUNBOOK.md` §3 pour les critères.
 
 ### Prérequis Foundation Release
 
@@ -142,7 +142,7 @@
 
 ### Gates Foundation Release
 
-- [ ] `node factory/quality/core/scripts/quality-gates.mjs run all-safe` — 17/17 ✓ (selon scope)
+- [ ] `node factory/quality/scripts/quality-gates.mjs run all-safe` — 17/17 ✓ (selon scope)
 - [ ] CI L1 verte sur `main` (`api-contracts` / `api-client-fetch` / `ui-kit` / `web-nextjs` / `audit`)
 - [ ] CI L2 verte (`api-runtime`) — si API Core inclus
 - [ ] CI L3 verte (`web-e2e`) — si Web Core inclus

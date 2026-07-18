@@ -10,14 +10,14 @@ Les décisions couvrent les domaines critiques suivants :
 - API Core NestJS ;
 - Web Core Next.js ;
 - Mobile Core React Native ;
-- Cloud Core ;
+- Deployment ;
 - UI Kit ;
 - sécurité transversale ;
 - CI/CD ;
 - registry images ;
 - usage futur de l'IA.
 
-Aucune contradiction bloquante n'a été détectée entre les ADR. Les décisions sont alignées avec les 5 `CORE_SPECIFICATION.md` prioritaires et avec les documents `strategy/`.
+Aucune contradiction bloquante n'a été détectée entre les ADR. Les décisions sont alignées avec les 5 `specification active` prioritaires et avec les documents `strategy/`.
 
 Recommandation : **le démarrage des starters V1 peut commencer**, sous réserve de respecter la checklist avant génération de code et de conserver les ADR non bloquants comme backlog de stabilisation.
 
@@ -33,7 +33,7 @@ Cette revue a pour objectifs :
 - clarifier les risques restants ;
 - déterminer si les starters V1 peuvent être générés.
 
-Cette revue ne modifie aucun ADR existant, aucun `CORE_SPECIFICATION.md`, aucun document `strategy/` et ne crée aucun code.
+Cette revue ne modifie aucun ADR existant, aucun `specification active`, aucun document `strategy/` et ne crée aucun code.
 
 ## 3. Documents analysés
 
@@ -52,11 +52,11 @@ Documents stratégiques :
 
 Cores prioritaires :
 
-- `starters/nestjs/CORE_SPECIFICATION.md`
-- `deployment/core/CORE_SPECIFICATION.md`
-- `starters/react-native/CORE_SPECIFICATION.md`
-- `starters/nextjs/CORE_SPECIFICATION.md`
-- `packages/ui-kit/CORE_SPECIFICATION.md`
+- `starters/nestjs/STARTER_SPECIFICATION.md`
+- `deployment/DEPLOYMENT_SPECIFICATION.md`
+- `starters/react-native/STARTER_SPECIFICATION.md`
+- `starters/nextjs/STARTER_SPECIFICATION.md`
+- `packages/ui-kit/PACKAGE_SPECIFICATION.md`
 
 Backlog ADR :
 
@@ -179,7 +179,7 @@ Points validés :
 - upload mobile avec `fetch + FormData` sans forcer le header multipart si cela casse le boundary ;
 - offline avancé non activé sans ADR futur.
 
-### Cloud Core
+### Deployment
 
 Décisions cohérentes :
 
@@ -187,7 +187,7 @@ Décisions cohérentes :
 - ADR-013 retient GitHub Actions pour CI/CD V1.
 - ADR-014 retient GHCR pour les images Docker.
 - ADR-005 impose HTTPS, CORS strict et cookies sécurisés côté web si applicable.
-- La spécification Cloud Core prévoit Traefik, environnements, secrets, MinIO, registry et CI/CD de manière progressive.
+- La spécification Deployment prévoit Traefik, environnements, secrets, MinIO, registry et CI/CD de manière progressive.
 
 Points validés :
 
@@ -328,7 +328,7 @@ Ordre recommandé :
 2. **UI Kit minimal**
 3. **Web Core Next.js**
 4. **Mobile Core React Native**
-5. **Cloud Core minimal**
+5. **Deployment minimal**
 
 Justification :
 
@@ -336,7 +336,7 @@ Justification :
 - UI Kit minimal fixe les tokens et composants de base nécessaires aux clients.
 - Web Core Next.js peut consommer API et UI Kit rapidement.
 - Mobile Core React Native peut ensuite appliquer auth mobile, stockage sécurisé et upload.
-- Cloud Core minimal doit être généré avant déploiement réel, mais peut rester local/documenté tant que les starters ne sont pas stabilisés.
+- Deployment minimal doit être généré avant déploiement réel, mais peut rester local/documenté tant que les starters ne sont pas stabilisés.
 
 Variante acceptable : démarrer UI Kit minimal en parallèle de l'API si les missions restent strictement séparées et sans dépendance circulaire.
 
@@ -345,7 +345,7 @@ Variante acceptable : démarrer UI Kit minimal en parallèle de l'API si les mis
 Avant chaque génération de starter :
 
 - [ ] Identifier le core ciblé.
-- [ ] Relire son `CORE_SPECIFICATION.md`.
+- [ ] Relire son `specification active`.
 - [ ] Relire les ADR applicables.
 - [ ] Définir le périmètre autorisé de la mission.
 - [ ] Interdire explicitement les fichiers hors périmètre.

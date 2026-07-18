@@ -58,4 +58,4 @@ Coller ici les logs pertinents, en masquant tout contenu sensible.
 
 ## Contexte supplémentaire
 
-Ajouter tout contexte utile (ADR concerné, section de `CORE_SPECIFICATION.md`, numéro de PR, etc.).
+Ajouter tout contexte utile (ADR concerné, section de `specification active`, numéro de PR, etc.).

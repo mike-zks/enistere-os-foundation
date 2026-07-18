@@ -1,6 +1,6 @@
-# API Core NestJS V1 minimal
+# starter NestJS V1 minimal
 
-Ce dossier contient le starter minimal du **API Core NestJS** pour Enistere OS Foundation.
+Ce dossier contient le starter minimal du **starter NestJS** pour Enistere OS Foundation.
 
 Il initialise une base technique saine, générique et limitée volontairement au socle V1 :
 
@@ -117,7 +117,7 @@ npm run openapi:check          # échoue (RC=1) si le snapshot diverge du code (
 npm run benchmark:argon2       # mesure hash/verify Argon2id (à exécuter sur la cible)
 
 # Cycle de vie fichiers (Upload 4) — commandes CONTRÔLÉES, dry-run par DÉFAUT, jamais au boot de l'API.
-# Nécessitent PostgreSQL + S3/MinIO. Le Cloud Core décidera du déclenchement périodique (cron/CI).
+# Nécessitent PostgreSQL + S3/MinIO. Le Deployment décidera du déclenchement périodique (cron/CI).
 npm run files:reconcile -- --dry-run            # rapport DB↔S3 sans mutation (défaut)
 npm run files:reconcile -- --apply [--max=N]    # applique les actions (rejet/suppression objet/orphelins)
 npm run files:cleanup-pending -- --dry-run      # PENDING expirés (rapport)
@@ -336,7 +336,7 @@ GET /health/ready  # readiness (PostgreSQL ; 503 générique si indisponible)
 > CSP désactivée car API JSON / Swagger dev), `X-Powered-By` désactivé, limites de body parsers
 > (`JSON_BODY_LIMIT`/`URL_ENCODED_BODY_LIMIT`), `trust proxy` explicite (`TRUST_PROXY_HOPS`, 0 par
 > défaut), CORS strict (rejet de `*`+credentials), identifiant de corrélation `X-Request-Id`
-> (validé-ou-généré). HSTS/CSP des pages servies relèvent du reverse proxy (Traefik/Cloud Core).
+> (validé-ou-généré). HSTS/CSP des pages servies relèvent du reverse proxy (Traefik/Deployment).
 > Revue d'étape : [`docs/API_CORE_V1_REVIEW.md`](docs/API_CORE_V1_REVIEW.md),
 > [`docs/API_CORE_V1_IMPLEMENTATION_STATUS.md`](docs/API_CORE_V1_IMPLEMENTATION_STATUS.md),
 > [`docs/API_CORE_V1_NEXT_ROADMAP.md`](docs/API_CORE_V1_NEXT_ROADMAP.md).
@@ -346,7 +346,7 @@ GET /health/ready  # readiness (PostgreSQL ; 503 générique si indisponible)
 > [`docs/STRUCTURED_LOGGING_COMPATIBILITY_PROOF.md`](docs/STRUCTURED_LOGGING_COMPATIBILITY_PROOF.md)).
 > JSON sur **stdout** (HTTP) / **stderr** (CLI) ; un log HTTP unique (route normalisée, `requestId`,
 > statut, durée) ; redaction centralisée (jamais token/mot de passe/URL signée/buffer) ; `AuditLog`
-> séparé ; collecte/Loki/Grafana = Cloud Core.
+> séparé ; collecte/Loki/Grafana = Deployment.
 
 ### Documentation OpenAPI — contrat canonique stabilisé (ADR-016)
 
@@ -356,7 +356,7 @@ Swagger/OpenAPI est exposé sur :
 GET /docs
 ```
 
-Il est désactivé automatiquement lorsque `NODE_ENV=production`, conformément au cadrage du `CORE_SPECIFICATION.md` (Swagger non public en production).
+Il est désactivé automatiquement lorsque `NODE_ENV=production`, conformément au cadrage du `STARTER_SPECIFICATION.md` (Swagger non public en production).
 
 Le **contrat OpenAPI est désormais stabilisé** comme **source de vérité des API publiques** (ADR-016),
 **avant** toute génération de client. Voir [`openapi/README.md`](openapi/README.md). En résumé :
@@ -440,7 +440,7 @@ Le starter n'implémente pas encore la suppression physique/quarantaine (Upload 
   **administrative** (sans ownership) ; purge physique **contrôlée** (rétention + objet absent +
   verrou ; `AuditLog` jamais purgés) ; réconciliation/cleanup/purge **bornées/dry-run par défaut**,
   **mutuellement exclusives** (verrou advisory), déclenchées par CLI (**aucun scheduler embarqué** :
-  risque multi-instance laissé au Cloud Core).
+  risque multi-instance laissé au Deployment).
 - Quotas par propriétaire (nombre + octets, `0` = illimité) vérifiés **atomiquement** ; pas de
   facturation. Détection de signatures **≠ antivirus** : la V1 ne garantit pas l'absence de malware
   (architecture antivirus/média/streaming documentée dans `docs/FILES_REVIEW.md`).
@@ -460,7 +460,7 @@ Le starter n'implémente pas encore la suppression physique/quarantaine (Upload 
 
 > Le bloc **Files est validé V1** (revue Upload 5 : quotas, verrou de maintenance, purge ;
 > voir `docs/FILES_REVIEW.md`). Les éléments ci-dessous sont **post-V1** et relèvent de workers
-> externes / du Cloud Core — pas du core API seul.
+> externes / du Deployment — pas du core API seul.
 
 1. **Worker antivirus externe** (ClamAV / service managé) alimentant la quarantaine : scan
    hors requête HTTP, fail-closed pour les catégories sensibles. Voir `docs/FILES_REVIEW.md §21`.
@@ -468,6 +468,6 @@ Le starter n'implémente pas encore la suppression physique/quarantaine (Upload 
    Voir `docs/FILES_REVIEW.md §22`.
 3. **Gros fichiers** : streaming / multipart S3 / **URL signée d'upload** (intention + clé API,
    finalisation API, aucune credential côté client). Voir `docs/FILES_REVIEW.md §23`.
-4. Planification (cron/CI/orchestrateur Cloud Core) des commandes `files:reconcile` /
+4. Planification (cron/CI/orchestrateur Deployment) des commandes `files:reconcile` /
    `files:cleanup-pending` / `files:purge-metadata` (sérialisées par verrou, sans scheduler embarqué).
 5. Administration RBAC (gestion rôles/permissions) et cache Redis optionnel (sessions + autorisation).

@@ -2,7 +2,7 @@
 
 Workflows CI, **lecture seule** (`permissions: contents: read`), **sans secret GitHub, sans déploiement** :
 
-| Workflow | Rôle | Niveau (Cloud Core) |
+| Workflow | Rôle | Niveau (Deployment) |
 |---|---|---|
 | [`ci.yml`](ci.yml) | Non-régression du monorepo (contrats, client, UI Kit, Web, audit) — **sans** base/stockage | Niveau 1 |
 | [`api-runtime-ci.yml`](api-runtime-ci.yml) | Runtime de l'**API NestJS** : PostgreSQL + MinIO **jetables**, migrations Prisma, unit + e2e, OpenAPI check, build, audit | Niveau 2 |
@@ -64,7 +64,7 @@ job aval **rebuild ses dépendances** avant de se valider (`needs` garantit l'or
 
 > Le **runtime de l'API NestJS** (e2e + PostgreSQL/MinIO) est couvert par `api-runtime-ci.yml` (ci-dessous).
 
-## `api-runtime-ci.yml` — CI runtime API (niveau 2, Cloud Core 2)
+## `api-runtime-ci.yml` — CI runtime API (niveau 2, Deployment 2)
 
 Valide l'**API Core NestJS** contre ses dépendances runtime **minimales et jetables**. `starters/nestjs/`
 est un projet npm **autonome** (lockfile propre, hors workspaces racine) : `working-directory: starters/nestjs`
@@ -104,7 +104,7 @@ monitoring · E2E **navigateur** (niveau 3).
 > **Contrainte GitHub Actions documentée** : MinIO via `docker run` (pas `services:`) car un service ne peut
 > pas porter la commande `server /data`. PostgreSQL reste un service idiomatique.
 
-## `web-e2e-ci.yml` — CI E2E navigateur (niveau 3, Cloud Core 3)
+## `web-e2e-ci.yml` — CI E2E navigateur (niveau 3, Deployment 3)
 
 Démarre une **stack réelle et éphémère** et rejoue les **parcours navigateur** critiques avec **Playwright/
 Chromium** (headless). **Lecture seule, aucun secret GitHub, aucun registre, aucun déploiement.**
@@ -138,12 +138,12 @@ Déploiement · registre/GHCR (couvert par `registry-ci.yml`) · environnements 
 **upload/suppression Files côté Web** (hors périmètre). Les tests E2E sont **isolés** du niveau 1 (exclus de
 `typecheck`/`lint`/`build` via `tsconfig.json`/`eslint.config.mjs` ; compilés par Playwright).
 
-## `registry-ci.yml` — Registry GHCR (niveau 4 partiel, Cloud Core 5 + **smoke-run CC8**)
+## `registry-ci.yml` — Registry GHCR (niveau 4 partiel, Deployment 5 + **smoke-run CC8**)
 
 Construit les **images Docker** API/Web et les **pousse vers GHCR sur `main` uniquement**. **Début d'ADR-014
 (registry seulement) — AUCUN déploiement, AUCUN secret applicatif, AUCUN PAT** (auth `GITHUB_TOKEN`).
 
-- **Job `api-smoke` (Cloud Core 8 — ferme l'angle mort « image jamais exécutée »)** : build l'image API, la
+- **Job `api-smoke` (Deployment 8 — ferme l'angle mort « image jamais exécutée »)** : build l'image API, la
   **lance**, et vérifie **sans base** que le **moteur de requête Prisma se charge** au runtime (une erreur de
   connexion = moteur chargé = OK ; « query engine could not be located » = **FAIL**) + non-root + openssl +
   moteur présent. Le job **`images` est `needs: api-smoke`** → **le push GHCR n'a lieu que si le smoke est vert**.
@@ -157,25 +157,25 @@ Construit les **images Docker** API/Web et les **pousse vers GHCR sur `main` uni
   `main`), `pr-<n>` (build PR, non poussé). **`latest` jamais généré.** Labels OCI (source/revision/created/
   title/description).
 - Actions Docker officielles (`setup-buildx`/`login`/`metadata`/`build-push`), épinglées par **majeure** (SHA
-  futur). Détail : [`REGISTRY_POLICY.md`](../../deployment/core/docs/REGISTRY_POLICY.md) · guide :
-  [`GHCR_REGISTRY_GUIDE.md`](../../deployment/core/docs/GHCR_REGISTRY_GUIDE.md).
+  futur). Détail : [`REGISTRY_POLICY.md`](../../deployment/docs/REGISTRY_POLICY.md) · guide :
+  [`GHCR_REGISTRY_GUIDE.md`](../../deployment/docs/GHCR_REGISTRY_GUIDE.md).
 
-### Niveau CI actuel & progression (Cloud Core 1 → 5)
+### Niveau CI actuel & progression (Deployment 1 → 5)
 
-Le **Cloud Core 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
-[`deployment/core/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../deployment/core/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
+Le **Deployment 1** gouverne cette CI sans l'étendre vers le déploiement. La progression est cadrée dans
+[`deployment/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md`](../../deployment/docs/CLOUD_CORE_V1_EXECUTION_BASELINE.md) :
 
 - **Niveau 1 (présent — `ci.yml`)** : contrats, client API, UI Kit, Web Core (build sans API), audit,
   gardes Axios/Zustand.
 - **Niveau 2 (présent — `api-runtime-ci.yml`)** : CI runtime API NestJS (PostgreSQL + MinIO jetables) +
-  migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../deployment/core/docs/API_RUNTIME_CI_PLAN.md).
+  migrations + unit + e2e + OpenAPI check — [`API_RUNTIME_CI_PLAN.md`](../../deployment/docs/API_RUNTIME_CI_PLAN.md).
 - **Niveau 3 (présent — `web-e2e-ci.yml`)** : E2E navigateur Web (Health/Auth/Files) sur stack réelle —
-  [`WEB_E2E_CI_PLAN.md`](../../deployment/core/docs/WEB_E2E_CI_PLAN.md).
+  [`WEB_E2E_CI_PLAN.md`](../../deployment/docs/WEB_E2E_CI_PLAN.md).
 - **Niveau 4 (partiel — `registry-ci.yml`)** : **registry GHCR** (build + push images, sans déploiement) —
-  [`REGISTRY_POLICY.md`](../../deployment/core/docs/REGISTRY_POLICY.md). **Reste** : déploiement par environnement
+  [`REGISTRY_POLICY.md`](../../deployment/docs/REGISTRY_POLICY.md). **Reste** : déploiement par environnement
   protégé + rollback (futur).
 
-### Checks requis pour la protection de `main` (Cloud Core 4 / Quality Core 3)
+### Checks requis pour la protection de `main` (Deployment 4 / Factory Quality 3)
 
 Le nom d'un status check **est le `name:` du job** (jamais le nom du workflow). Protection `main`
 appliquée via GitHub Rulesets (`protect-main`, enforcement `active`) :
@@ -199,7 +199,7 @@ appliquée via GitHub Rulesets (`protect-main`, enforcement `active`) :
 > Les noms actuels sont **stables**. Voir le runbook pour la procédure complète, les options
 > recommandées et la checklist de vérification post-activation.
 
-### Politiques de durcissement (Cloud Core 4)
+### Politiques de durcissement (Deployment 4)
 
 - **Artefacts** : **aucun upload** (Option A). Traces Playwright `retain-on-failure` **locales au runner**
   (jetées) — pas de fuite cookie/`.state.json`/URL signée. Upload conditionnel (Option B) = évolution future.
@@ -207,7 +207,7 @@ appliquée via GitHub Rulesets (`protect-main`, enforcement `active`) :
 - **Pinning** : `@v4` (majeure) conservé ; **SHA pinning** = durcissement futur (requiert une politique de MAJ).
 - **Lint workflows** : `actionlint` **futur** (non installé) ; validation actuelle = parse YAML + simulations.
 
-**Aucun déploiement** dans ces workflows (Cloud Core 4 n'ajoutait pas le registre). ADR-013 reste
+**Aucun déploiement** dans ces workflows (Deployment 4 n'ajoutait pas le registre). ADR-013 reste
 **`PARTIELLEMENT_IMPLEMENTE`** (niveaux 1–3 + niveau 4 partiel [`registry-ci.yml`] + ruleset
 `protect-main` actif ; restent couverture/release/déploiement/environnements) ; ADR-014 **`PARTIELLEMENT_IMPLEMENTE`** (registry
-GHCR — `registry-ci.yml`, Cloud Core 5).
+GHCR — `registry-ci.yml`, Deployment 5).

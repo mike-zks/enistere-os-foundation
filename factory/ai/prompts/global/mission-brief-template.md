@@ -25,11 +25,11 @@ Statut attendu après mission :
 - `docs/project-status/IMPLEMENTATION_MATRIX.md`
 - `docs/project-status/NEXT_ACTIONS.md`
 - `docs/project-status/SESSION_HANDOFF.md`
-- `factory/quality/core/AI_PROMPT_GOVERNANCE.md`
+- `factory/quality/AI_PROMPT_GOVERNANCE.md`
 
-Ajouter selon le core :
+Ajouter selon le starter :
 
-- `starters/<starter>/CORE_SPECIFICATION.md`
+- `starters/<starter>/STARTER_SPECIFICATION.md`
 - ADR concernés dans `docs/adr/`
 - README/ARCHITECTURE/docs du core concerné
 
@@ -61,10 +61,10 @@ Décrire les livrables concrets :
 
 ## Standards à respecter
 
-- Respecter les `CORE_SPECIFICATION.md`.
+- Respecter les `STARTER_SPECIFICATION.md`.
 - Respecter `strategy/07_SECURITY.md` pour secrets, auth, tokens, logs, données sensibles.
 - Respecter `strategy/08_STANDARDS.md` pour structure, nommage, documentation.
-- Respecter `factory/quality/core/QUALITY_GATES_MATRIX.md` pour les checks.
+- Respecter `factory/quality/QUALITY_GATES_MATRIX.md` pour les checks.
 - Ne pas inventer d'état non implémenté.
 
 ## Gates attendus
@@ -73,12 +73,12 @@ Lister les commandes exactes :
 
 ```bash
 git diff --check
-node --test factory/quality/core/scripts/quality-gates.test.mjs
-node factory/quality/core/scripts/quality-gates.mjs plan docs
+node --test factory/quality/scripts/quality-gates.test.mjs
+node factory/quality/scripts/quality-gates.mjs plan docs
 npm audit
 ```
 
-Adapter selon le core modifié.
+Adapter selon le starter modifié.
 
 ## Rapport final attendu
 

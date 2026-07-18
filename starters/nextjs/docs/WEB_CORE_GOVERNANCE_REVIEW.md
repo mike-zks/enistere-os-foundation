@@ -1,4 +1,4 @@
-# WEB_CORE_GOVERNANCE_REVIEW.md — Revue de gouvernance du Web Core Next.js
+# WEB_CORE_GOVERNANCE_REVIEW.md — Revue de gouvernance du starter Next.js
 
 > Rapport **permanent** de revue de socle (checkpoint de gouvernance). Mission de **revue,
 > vérification, consolidation, arbitrage architectural et mise à jour documentaire** — **pas**

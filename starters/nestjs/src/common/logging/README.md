@@ -1,6 +1,6 @@
 # Logging structuré — V1 (ADR-040)
 
-Logging technique **structuré JSON** du API Core NestJS V1. Décision : **ADR-040** (Pino moteur
+Logging technique **structuré JSON** du starter NestJS V1. Décision : **ADR-040** (Pino moteur
 officiel). Après preuve de compatibilité (`docs/STRUCTURED_LOGGING_COMPATIBILITY_PROOF.md`), la
 solution retenue est **Pino direct** (le repli officiel) — `nestjs-pino` étant compatible NestJS 11
 mais structurellement inadapté (auto-log d'URL brute, request id propre, destination globale).
@@ -9,7 +9,7 @@ mais structurellement inadapté (auto-log d'URL brute, request id propre, destin
 
 - **Moteur** : Pino (`AppLogger`, `LoggerService` NestJS) ; aucune dépendance `nestjs-pino`.
 - **Destination** : JSON par ligne sur **stdout** (HTTP) / **stderr** (CLI, drapeau interne
-  `LOG_STDERR`). **Aucun transport distant** ; **collecte = Cloud Core**.
+  `LOG_STDERR`). **Aucun transport distant** ; **collecte = Deployment**.
 - **AuditLog ≠ logs techniques** : l'audit (sécurité/métier, persistant) reste séparé. Un événement
   critique peut produire un audit **et** un log technique minimal, sans duplication ni secret.
 
@@ -73,6 +73,6 @@ inchangée. `stack` **uniquement** en logs techniques, jamais dans la réponse.
 
 ## Préparation Loki / OpenTelemetry
 
-Loki (Cloud Core) : labels **peu nombreux** (`service`, `environment`, `level`) ; `requestId`/
+Loki (Deployment) : labels **peu nombreux** (`service`, `environment`, `level`) ; `requestId`/
 `userId`/`fileId`/route restent dans le **corps** JSON (cardinalité maîtrisée). OpenTelemetry : champs
 `traceId`/`spanId` réservés ; non implémenté en V1.

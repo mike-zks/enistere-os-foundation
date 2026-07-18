@@ -1,1 +1,9 @@
-{"schemaVersion":"1","id":"react-native","kind":"mobile","framework":"React Native / Expo","commands":{"install":["npm","ci"],"dev":["npm","run","start"],"test":["npm","test"],"build":["npx","expo","export","-p","ios"],"verify":["npm","run","doctor"]},"capabilitySlots":["base","auth","rbac","files","audit","notifications","observability"],"deployment":{"dockerfile":null,"healthPath":null}}
+{
+  "schemaVersion": "2",
+  "id": "react-native",
+  "kind": "mobile",
+  "framework": "React Native / Expo",
+  "commands": { "install": ["npm", "ci"], "dev": ["npm", "run", "start"], "test": ["npm", "test"], "build": ["npx", "expo", "export", "-p", "ios"], "verify": ["npm", "run", "doctor"] },
+  "composition": { "contractVersion": "1", "base": "built-in", "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files", "notifications", "observability"] },
+  "deployment": { "dockerfile": null, "healthPath": null }
+}

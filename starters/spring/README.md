@@ -1,7 +1,7 @@
-# API Core Spring Boot
+# starter Spring Boot
 
 > Statut : **`VALIDE_V1`** (Spring Boot 8, 2026-07-15 — §30 15/15 ✅)
-> Spécification cible : [`CORE_SPECIFICATION.md`](./CORE_SPECIFICATION.md)
+> Spécification cible : [`STARTER_SPECIFICATION.md`](./STARTER_SPECIFICATION.md)
 > Stack : Spring Boot 4.1.0 + Spring Security 7.1.0 + JJWT 0.12.6 + PostgreSQL + Flyway 11 + MinIO SDK 8.5.17 + Spring Data Redis (Lettuce) + Java 21 (Maven — ADR-041)
 
 Socle backend **Java / Spring Boot** générique et réutilisable pour les futures applications Enistere orientées enterprise, finance, administration et systèmes d'information.

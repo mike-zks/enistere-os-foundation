@@ -21,11 +21,11 @@ Widget _appWithSession({String userId = 'test-user'}) {
 
 void main() {
   group('HomeScreen', () {
-    testWidgets('shows Mobile Core Flutter heading', (tester) async {
+    testWidgets('shows starter Flutter heading', (tester) async {
       await tester.pumpWidget(_appWithSession());
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
-      expect(find.text('Mobile Core Flutter'), findsOneWidget);
+      expect(find.text('starter Flutter'), findsOneWidget);
     });
 
     testWidgets("shows 'Enistere' AppBar title", (tester) async {

@@ -210,7 +210,7 @@ La CD V1 est volontairement limitée.
 Principes :
 
 - aucun déploiement automatique pendant la phase documentaire ;
-- déploiement uniquement quand Cloud Core et projets dérivés seront prêts ;
+- déploiement uniquement quand Deployment et projets dérivés seront prêts ;
 - environnements protégés ;
 - secrets CI/CD hors Git ;
 - approbation humaine pour production ;
@@ -493,9 +493,9 @@ Le futur starter mobile devra prévoir :
 
 Les builds mobiles sensibles devront protéger secrets, signing credentials et environnements.
 
-## 28. Impact sur Cloud Core
+## 28. Impact sur Deployment
 
-Le Cloud Core doit rester aligné avec une CI/CD progressive.
+Le Deployment doit rester aligné avec une CI/CD progressive.
 
 À prévoir plus tard :
 
@@ -600,4 +600,4 @@ Cette ADR devra être révisée si :
 
 Enistere OS Foundation adopte GitHub Actions comme standard CI/CD V1.
 
-La stratégie reste progressive : documentation d'abord, starters ensuite, sécurité et release à mesure que les cores deviennent exécutables, puis déploiement uniquement lorsque Cloud Core, registry et environnements protégés seront cadrés.
+La stratégie reste progressive : documentation d'abord, starters ensuite, sécurité et release à mesure que les cores deviennent exécutables, puis déploiement uniquement lorsque Deployment, registry et environnements protégés seront cadrés.

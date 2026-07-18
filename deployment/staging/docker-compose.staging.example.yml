@@ -1,0 +1,113 @@
+# Deployment 6 — STAGING (EXEMPLE, manuel). NE PAS utiliser tel quel en production.
+# Images GHCR IMMUABLES (jamais `latest`). Aucune valeur réelle ici : tout vient de `.env.staging`
+# (copie de `.env.staging.example`, hors dépôt). Lancer :
+#   docker compose --env-file .env.staging -f docker-compose.staging.example.yml up -d
+# Les MIGRATIONS NE SONT PAS exécutées au démarrage — voir STAGING_DEPLOYMENT_RUNBOOK.md.
+
+name: enistere-staging
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [internal]
+    # PostgreSQL NON exposé sur l'hôte (réseau interne uniquement).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - miniodata:/data
+    networks: [internal]
+    # API S3 (9000) doit être joignable par le NAVIGATEUR (URLs signées) ; console (9001) à protéger.
+    ports:
+      - "${MINIO_HOST_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+
+  api:
+    image: ${GHCR_API_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: "3000"
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL}
+      REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL}
+      REFRESH_TOKEN_HASH_SECRET: ${REFRESH_TOKEN_HASH_SECRET}
+      ARGON2_MEMORY_COST: ${ARGON2_MEMORY_COST}
+      ARGON2_TIME_COST: ${ARGON2_TIME_COST}
+      ARGON2_PARALLELISM: ${ARGON2_PARALLELISM}
+      FILE_MAX_SIZE_BYTES: ${FILE_MAX_SIZE_BYTES}
+      FILE_ORIGINAL_NAME_MAX_LENGTH: ${FILE_ORIGINAL_NAME_MAX_LENGTH}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_REGION: ${S3_REGION}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE}
+      FILES_SIGNED_READ_URL_TTL_SECONDS: ${FILES_SIGNED_READ_URL_TTL_SECONDS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_PRETTY: ${LOG_PRETTY}
+      SERVICE_NAME: ${SERVICE_NAME}
+    networks: [internal]
+    ports:
+      - "${API_HOST_PORT}:3000"   # health/debug ; le Web parle à l'API en interne
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health/ready',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  web:
+    image: ${GHCR_WEB_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      APP_ENV: ${APP_ENV}
+      API_INTERNAL_URL: ${API_INTERNAL_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      WEB_ALLOWED_ORIGINS: ${WEB_ALLOWED_ORIGINS}
+    networks: [internal]
+    ports:
+      - "${WEB_HOST_PORT}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pgdata:
+  miniodata:
