@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
 
 @Component
 public class JwtTokenProvider {
@@ -23,12 +22,11 @@ public class JwtTokenProvider {
         this.expirationSeconds = config.getExpiration();
     }
 
-    public String generateAccessToken(String email, String userId, List<String> permissions) {
+    public String generateAccessToken(String email, String userId) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
             .subject(email)
             .claim("userId", userId)
-            .claim("permissions", permissions)
             .issuedAt(new Date(now))
             .expiration(new Date(now + expirationSeconds * 1000L))
             .signWith(signingKey)
@@ -49,15 +47,6 @@ public class JwtTokenProvider {
 
     public String extractUserId(String token) {
         return extractAllClaims(token).get("userId", String.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<String> extractPermissions(String token) {
-        Object perms = extractAllClaims(token).get("permissions");
-        if (perms instanceof List<?> list) {
-            return list.stream().map(Object::toString).toList();
-        }
-        return List.of();
     }
 
     public boolean validateToken(String token) {

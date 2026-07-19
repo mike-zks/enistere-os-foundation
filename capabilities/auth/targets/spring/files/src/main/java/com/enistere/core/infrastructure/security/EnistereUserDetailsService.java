@@ -1,26 +1,20 @@
 package com.enistere.core.infrastructure.security;
 
-import com.enistere.core.modules.permissions.PermissionRepository;
 import com.enistere.core.modules.users.User;
 import com.enistere.core.modules.users.UserRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 public class EnistereUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final PermissionRepository permissionRepository;
-
-    public EnistereUserDetailsService(UserRepository userRepository, PermissionRepository permissionRepository) {
+    public EnistereUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.permissionRepository = permissionRepository;
     }
 
     @Override
@@ -29,16 +23,9 @@ public class EnistereUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        List<SimpleGrantedAuthority> authorities = permissionRepository
-            .findPermissionNamesByUserId(user.getId())
-            .stream()
-            .map(SimpleGrantedAuthority::new)
-            .toList();
-
         return org.springframework.security.core.userdetails.User.builder()
             .username(user.getEmail())
             .password(user.getPasswordHash())
-            .authorities(authorities)
             .disabled(!user.isActive())
             .build();
     }

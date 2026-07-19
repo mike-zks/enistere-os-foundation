@@ -72,7 +72,7 @@ describe('blueprint v1', () => {
     blueprint.capabilities = ['base', 'auth'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on spring is planned/,
+      /auth on (angular|flutter) is planned/,
     );
   });
   it('plans every supported stack combination as a golden matrix', () => {

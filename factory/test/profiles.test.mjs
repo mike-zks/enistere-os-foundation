@@ -327,12 +327,14 @@ describe('the plan reports capabilities and gates', () => {
     assert.equal(plan.bundledFeaturesMayExceedSelection, false);
   });
 
-  it('marks a profile with no golden as unproven', async () => {
+  it('reports the Spring Auth golden after capability promotion', async () => {
     const starters = await loadStarterManifests(root);
-    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-auth')), { starters });
-    assert.equal(plan.profile.status, 'planned');
-    assert.equal(plan.profile.runtimeProven, false);
-    assert.equal(plan.profile.golden, null);
+    const modularStarters = modularStarterIds(starters);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-auth')), { starters, modularStarters });
+    assert.equal(plan.profile.status, 'ready');
+    assert.equal(plan.profile.runtimeProven, true);
+    assert.equal(plan.profile.golden, 'spring-auth');
+    assert.equal(plan.profile.compositionExact, true);
   });
 
   it('reports the gates each generated app will run', async () => {

@@ -56,7 +56,7 @@ Deux champs distincts portent cette nuance :
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (19)
+### `ready` — composables, prouvés et exacts (20)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -73,6 +73,7 @@ Deux champs distincts portent cette nuance :
 | `nestjs-next-base` | nestjs | nextjs | — | base | `nestjs-next-base` |
 | `nestjs-react-native-base` | nestjs | — | react-native | base | `nestjs-react-native-base` |
 | `spring-base` | spring | — | — | base | `spring-base` |
+| `spring-auth` | spring | — | — | base + auth | `spring-auth` |
 | `spring-next-base` | spring | nextjs | — | base | `spring-next-base` |
 | `spring-react-native-base` | spring | — | react-native | base | `spring-react-native-base` |
 | `nestjs-angular-base` | nestjs | angular | — | base | `nestjs-angular-base` |
@@ -99,11 +100,10 @@ la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: f
 Les overlays Auth/RBAC/Files restent une mission distincte : la base exacte ne prouve pas encore
 la parité métier de ces capabilities sur Angular et Flutter.
 
-### `planned` — cibles de parité, génération refusée (7)
+### `planned` — cibles de parité, génération refusée (6)
 
 | Profil | API | Web | Mobile | Capabilities | Bloqué par |
 |---|---|---|---|---|---|
-| `spring-auth` | spring | — | — | base + auth | auth/spring |
 | `spring-rbac` | spring | — | — | base + auth + rbac | auth+rbac/spring |
 | `spring-files` | spring | — | — | base + auth + rbac + files | auth+rbac+files/spring |
 | `spring-angular-auth` | spring | angular | — | base + auth | auth/spring, auth/angular |
@@ -128,8 +128,8 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 
 ## Couverture des goldens
 
-R8A porte le golden runtime de 10 à **19 compositions** : les 10 compositions NestJS des capability
-packs, plus les 9 compositions `base` seul (Spring, Angular et Flutter compris).
+R8A puis Capability Packs 2 portent le golden runtime à **20 compositions** : les 10 compositions
+NestJS des capability packs, les 9 compositions `base` seul et `spring-auth`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
