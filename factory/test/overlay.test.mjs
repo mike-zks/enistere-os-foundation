@@ -13,6 +13,7 @@ import { validateCapabilityDependencies } from '../engine/capabilities.mjs';
 import { buildGenerationPlan } from '../engine/plan.mjs';
 import { createDefaultBlueprint } from '../engine/blueprint.mjs';
 import { generateProject } from '../engine/generator.mjs';
+import { renderSpringComposition } from '../engine/overlay-renderers.mjs';
 
 function validManifest(extra = {}) {
   return {
@@ -81,6 +82,26 @@ describe('overlay manifest validation', () => {
     }), { capability: 'auth', target: 'nestjs' }), []);
     const issues = validateOverlayManifest(validManifest({ operations: ['spring.security'] }), { capability: 'auth', target: 'nestjs' });
     assert.ok(issues.some((issue) => /unsupported operations/.test(issue)));
+  });
+
+  it('accepts the Spring module integration contract', () => {
+    const manifest = validManifest({
+      target: 'spring',
+      files: [],
+      integrations: [{ kind: 'spring.module', importPath: 'com.example.AuthConfiguration', symbol: 'AuthConfiguration' }],
+    });
+    assert.deepEqual(validateOverlayManifest(manifest, { capability: 'auth', target: 'spring' }), []);
+  });
+
+  it('renders Spring modules without patching the application entrypoint', () => {
+    const output = renderSpringComposition([
+      { kind: 'spring.module', importPath: 'com.example.AuthConfiguration', symbol: 'AuthConfiguration' },
+      { kind: 'spring.module', importPath: 'com.example.SecurityConfiguration', symbol: 'SecurityConfiguration' },
+    ]);
+    assert.match(output, /@Import\(\{/);
+    assert.match(output, /AuthConfiguration\.class/);
+    assert.match(output, /SecurityConfiguration\.class/);
+    assert.match(output, /CapabilityConfiguration/);
   });
   it('rejects a malformed overlay', () => {
     const issues = validateOverlayManifest({ schemaVersion: '2', capability: 'nope', files: 'x' });

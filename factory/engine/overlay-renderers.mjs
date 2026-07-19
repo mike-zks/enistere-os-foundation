@@ -83,6 +83,29 @@ export function renderNestjsComposition(integrations) {
   ].join('\n');
 }
 
+/** src/main/java/com/enistere/core/composition/CapabilityConfiguration.java. */
+export function renderSpringComposition(modules) {
+  assertKnown(modules, ['spring.module']);
+  const imports = [...new Set(modules.map((item) => `import ${item.importPath};`))];
+  const symbols = modules.map((item) => `    ${item.symbol}.class,`);
+  return [
+    BANNER,
+    'package com.enistere.core.composition;',
+    '',
+    'import org.springframework.context.annotation.Configuration;',
+    'import org.springframework.context.annotation.Import;',
+    ...imports,
+    '',
+    '@Configuration',
+    '@Import({',
+    ...symbols,
+    '})',
+    'public class CapabilityConfiguration {',
+    '}',
+    '',
+  ].join('\n');
+}
+
 /** src/app/providers/capability-providers.tsx of the Next.js app. */
 export function renderNextjsCapabilityProviders(providers) {
   assertKnown(providers, ['nextjs.provider']);

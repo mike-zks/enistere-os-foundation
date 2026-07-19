@@ -78,6 +78,10 @@ dotée d'un overlay factice. `assessCapabilitySupport` retourne ces cas dans `no
 - **react-native** : `expo.provider` (→ `src/composition/capability-providers.tsx`) et
   `expo.home-action` (→ `src/composition/home-actions.ts`). Le shell Home reste stable ; une
   destination ou un rang dupliqué est refusé.
+- **spring** : `spring.module` (→ `src/main/java/com/enistere/core/composition/CapabilityConfiguration.java`).
+  Les classes Java sont importées par une configuration `@Import` générée ; l'entrypoint Spring
+  n'est jamais patché. Les opérations Spring supplémentaires seront ajoutées par l'adapter avec
+  un schéma et un renderer dédiés.
 
 Les renderers déterministes vivent dans `factory/engine/overlay-renderers.mjs` : une même entrée
 produit toujours la même sortie.
