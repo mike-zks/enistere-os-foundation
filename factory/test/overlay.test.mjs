@@ -88,9 +88,21 @@ describe('overlay manifest validation', () => {
     const manifest = validManifest({
       target: 'spring',
       files: [],
+      dependencies: { maven: [] },
       integrations: [{ kind: 'spring.module', importPath: 'com.example.AuthConfiguration', symbol: 'AuthConfiguration' }],
     });
     assert.deepEqual(validateOverlayManifest(manifest, { capability: 'auth', target: 'spring' }), []);
+  });
+
+  it('accepts Maven dependency declarations for Spring without accepting npm sections', () => {
+    const spring = validManifest({
+      target: 'spring', files: [],
+      dependencies: { maven: [{ groupId: 'org.springframework.boot', artifactId: 'spring-boot-starter-security' }] },
+      integrations: [],
+    });
+    assert.deepEqual(validateOverlayManifest(spring, { capability: 'auth', target: 'spring' }), []);
+    const npm = validateOverlayManifest(validManifest({ target: 'spring', dependencies: { dependencies: { evil: '1.0.0' } } }), { capability: 'auth', target: 'spring' });
+    assert.ok(npm.some((issue) => /not supported for maven/.test(issue)));
   });
 
   it('renders Spring modules without patching the application entrypoint', () => {

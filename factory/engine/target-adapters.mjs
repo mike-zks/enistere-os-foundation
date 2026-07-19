@@ -37,7 +37,7 @@ const BUILT_IN = [
       'expo.home-action': { href: STRING, label: STRING, order: INTEGER },
     },
   },
-  { id: 'spring', version: '1.0.0', integrationKinds: {
+  { id: 'spring', version: '1.0.0', dependencyManager: 'maven', integrationKinds: {
     'spring.module': { importPath: STRING, symbol: STRING },
   } },
   { id: 'angular', version: '1.0.0', integrationKinds: {} },
@@ -67,6 +67,7 @@ export function registerTargetAdapter(adapter) {
   const frozen = Object.freeze({
     id: adapter.id,
     version: adapter.version,
+    dependencyManager: adapter.dependencyManager ?? 'npm',
     integrationKinds: Object.freeze({ ...adapter.integrationKinds }),
     operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),
   });

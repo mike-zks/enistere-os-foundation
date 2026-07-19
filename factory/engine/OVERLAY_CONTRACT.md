@@ -22,7 +22,7 @@ mais non câblé) : la capability reste `planned` et `generate` la refuse.
 |---|---|
 | `operations` | Liste optionnelle et unique des opérations utilisées par l'overlay. Chaque valeur doit être déclarée par l'adapter versionné de la target. |
 | `files` | Copies `source` (sous `files/`) → `destination`. Un conflit non déclaré échoue. Les fichiers centraux gouvernés ne peuvent jamais être fournis par cette opération ; les rares remplacements autorisés sont recensés et justifiés dans `overwrite-policy.mjs`. |
-| `dependencies` | Fusion contrôlée dans `package.json` (`dependencies`/`devDependencies`). Un conflit de version échoue. Chemins locaux (`file:`/`link:`) interdits. |
+| `dependencies` | Fusion contrôlée par l'adapter : `package.json` pour les targets npm, `pom.xml` via `dependencies.maven` pour Spring. Les conflits échouent; les chemins locaux (`file:`/`link:`) sont interdits. |
 | `environment` | Variables ajoutées à `.env.example` (section générée commentée). |
 | `integrations` | Intégrations **centrales connues** rendues par le moteur (voir ci-dessous). Une intégration inconnue échoue. |
 | `verification` | Tableaux d'arguments exécutés depuis le répertoire de l'app par le script `verify` généré. |
