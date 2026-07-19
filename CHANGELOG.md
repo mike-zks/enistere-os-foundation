@@ -11,6 +11,12 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 - Les 19 profils générables base-only sont exacts et golden-proven ; aucun profil `supported`
   ne masque encore une copie baseline excessive.
 
+### Factory Composition Engine 2A — contrat d’adapters et opérations déclaratives
+
+- Les targets utilisent un registre d’adapters versionnés ; leurs versions sont verrouillées dans
+  le plan de génération.
+- Les overlays peuvent déclarer leurs opérations et sont refusés si l’adapter ne les supporte pas.
+
 ### Project Factory R8A-2 — Spring base modulaire
 
 - Extraction de `starters/spring/base` : le profil `spring-base` ne copie plus les modules Auth,
