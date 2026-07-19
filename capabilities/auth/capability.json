@@ -1,12 +1,15 @@
 {
   "schemaVersion": "2",
   "id": "auth",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "requires": ["base"],
   "responsibilities": ["login", "refresh", "logout", "session"],
   "targets": {
-    "nestjs": { "status": "planned" }, "spring": { "status": "planned" },
-    "nextjs": { "status": "planned" }, "angular": { "status": "planned" },
-    "react-native": { "status": "planned" }, "flutter": { "status": "planned" }
+    "nestjs": { "status": "ready", "mode": "overlay" },
+    "spring": { "status": "planned" },
+    "nextjs": { "status": "ready", "mode": "overlay" },
+    "angular": { "status": "planned" },
+    "react-native": { "status": "ready", "mode": "overlay" },
+    "flutter": { "status": "planned" }
   }
 }

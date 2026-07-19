@@ -2,6 +2,16 @@
 
 Ce dossier contient le starter minimal du **starter NestJS** pour Enistere OS Foundation.
 
+Depuis la mission Capability Packs 1A, ce starter est la **baseline `base`** du
+modèle de composition modulaire : il compile, démarre et se teste sans aucune
+capability composée. L'authentification vit dans
+`capabilities/auth/targets/nestjs/` (overlay déclaratif appliqué par la
+Factory) ; RBAC et Files sont des payloads parqués non câblés
+(`capabilities/{rbac,files}/targets/nestjs/`). Les points d'intégration
+générables par la Factory sont `src/composition/capabilities.ts` (modules,
+guards globaux, throttlers nommés), le fragment Prisma ajouté à
+`prisma/schema.prisma` et la section générée de `.env.example`.
+
 Il initialise une base technique saine, générique et limitée volontairement au socle V1 :
 
 - NestJS ;

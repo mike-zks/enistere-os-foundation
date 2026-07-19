@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "nextjs",
+  "version": "0.2.0",
+  "description": "Authentification Next.js : BFF (login/refresh/logout/csrf), cookies HttpOnly, CSRF/Origin, session, layout protégé et page de connexion (ADR-004, ADR-005). Sans Files ni RBAC.",
+  "files": [
+    { "source": "files/src/core/auth", "destination": "src/core/auth" },
+    { "source": "files/src/core/api/server/create-authenticated-server-api-client.ts", "destination": "src/core/api/server/create-authenticated-server-api-client.ts" },
+    { "source": "files/src/core/query/keys/auth-keys.ts", "destination": "src/core/query/keys/auth-keys.ts" },
+    { "source": "files/src/features/auth", "destination": "src/features/auth" },
+    { "source": "files/src/features/dashboard", "destination": "src/features/dashboard" },
+    { "source": "files/src/app/login", "destination": "src/app/login" },
+    { "source": "files/src/app/api/auth", "destination": "src/app/api/auth" },
+    { "source": "files/src/app/(protected)", "destination": "src/app/(protected)" },
+    { "source": "files/src/app/(public)/status/page.tsx", "destination": "src/app/(public)/status/page.tsx", "overwrite": true },
+    { "source": "files/src/app/robots.ts", "destination": "src/app/robots.ts", "overwrite": true },
+    { "source": "files/test", "destination": "test" },
+    { "source": "files/tsconfig.test.json", "destination": "tsconfig.test.json", "overwrite": true },
+    { "source": "files/e2e/auth.spec.ts", "destination": "e2e/auth.spec.ts" },
+    { "source": "files/e2e/global-setup.ts", "destination": "e2e/global-setup.ts" },
+    { "source": "files/e2e/helpers.ts", "destination": "e2e/helpers.ts", "overwrite": true },
+    { "source": "files/e2e/playwright.config.ts", "destination": "playwright.config.ts", "overwrite": true }
+  ],
+  "dependencies": {},
+  "environment": [
+    { "name": "WEB_ALLOWED_ORIGINS", "example": "http://localhost:3100", "comment": "Origines autorisées (anti-CSRF, complément du double-submit) pour les mutations BFF Auth. Liste d'origines EXACTES séparées par des virgules, sans wildcard ni credentials. Requise dès qu'un flux Auth mutatif est utilisé (sinon fail-closed → 403). cf. docs/csrf.md" }
+  ],
+  "integrations": [
+    { "kind": "nextjs.public-nav-link", "href": "/login", "label": "Se connecter" }
+  ],
+  "verification": []
+}

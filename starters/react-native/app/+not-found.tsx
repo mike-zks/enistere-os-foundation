@@ -1,10 +1,9 @@
 /**
- * Fallback screen for unknown routes (spec §16).
+ * Écran de repli pour les routes inconnues (baseline `base`).
  */
 import { Link, Stack } from 'expo-router';
 import { View } from 'react-native';
 
-import { ROUTES } from '@/navigation';
 import { useTheme } from '@/theme';
 import { Screen, Text } from '@/ui';
 
@@ -16,7 +15,7 @@ export default function NotFoundScreen(): React.JSX.Element {
       <Screen centered>
         <View style={{ gap: theme.spacing.md, alignItems: 'center' }}>
           <Text variant="heading">Page not found</Text>
-          <Link href={ROUTES.signIn}>
+          <Link href="/">
             <Text variant="body" tone="primary">
               Go to the start screen
             </Text>

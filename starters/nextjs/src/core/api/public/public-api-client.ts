@@ -23,8 +23,8 @@ export interface PublicApiClientOptions {
  * - corrélation **X-Request-Id** (`crypto.randomUUID()` via la fabrique du paquet) ;
  * - destiné aux endpoints **publics** (Health) côté navigateur.
  *
- * ⚠️ Ce client public **ne doit pas** devenir le futur client authentifié (qui passera par un BFF +
- * cookies `HttpOnly`). Voir `src/core/auth/README.md`.
+ * ⚠️ Ce client public **ne doit pas** devenir un client authentifié : la capability Auth composée
+ * apporte son propre client authentifié (BFF + cookies `HttpOnly`), sans modifier ce client public.
  */
 export function createPublicApiClient(options: PublicApiClientOptions): EnistereApiClient {
   return createEnistereApiClient({

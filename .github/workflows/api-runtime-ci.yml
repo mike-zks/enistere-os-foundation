@@ -1,7 +1,7 @@
 name: API Runtime CI
 
-# Deployment 2 — CI runtime (niveau 2) de l'API Core NestJS.
-# Valide l'API contre ses dépendances runtime MINIMALES (PostgreSQL + MinIO jetables) :
+# Deployment 2 — CI runtime (niveau 2) de l'API Core NestJS (baseline `base`).
+# Valide la baseline contre sa dépendance runtime MINIMALE (PostgreSQL jetable) :
 # migrations Prisma, tests unitaires + e2e, contrôle du contrat OpenAPI, build, audit.
 # SANS déploiement, registry/GHCR, Dockerfile applicatif, secret GitHub ni environnement protégé.
 #
@@ -9,8 +9,9 @@ name: API Runtime CI
 # - `starters/nestjs/` est un projet npm AUTONOME (lockfile propre, hors workspaces racine) :
 #   on installe et exécute via `working-directory: starters/nestjs` + `npm ci`.
 # - PostgreSQL : conteneur `services:` (aucune commande custom requise).
-# - MinIO : démarré via `docker run` (un conteneur `services:` ne peut PAS recevoir la commande
-#   `server /data` ; cette commande est obligatoire pour MinIO) puis bucket de test créé.
+# - Depuis Capability Packs 1A, la baseline ne contient ni Auth ni Files : plus de
+#   MinIO ni de variables JWT/S3 ici. Les compositions `base + auth` sont vérifiées
+#   par les goldens de la Factory, hors dépôt.
 # - Toutes les valeurs ci-dessous sont des VALEURS DE TEST JETABLES de CI, jamais des secrets.
 
 on:
@@ -53,31 +54,6 @@ jobs:
       NODE_ENV: test
       PORT: "3001"
       DATABASE_URL: postgresql://enistere:enistere_test_password@localhost:5432/enistere_api_test?schema=public
-      JWT_ACCESS_SECRET: ci_test_access_secret_minimum_32_characters_long
-      JWT_REFRESH_SECRET: ci_test_refresh_secret_minimum_32_characters_long
-      JWT_ACCESS_TTL: "900"
-      REFRESH_TOKEN_TTL: "1209600"
-      REFRESH_TOKEN_HASH_SECRET: ci_test_refresh_hash_secret_minimum_32_chars
-      ARGON2_MEMORY_COST: "19456"
-      ARGON2_TIME_COST: "2"
-      ARGON2_PARALLELISM: "1"
-      AUTH_LOGIN_RATE_LIMIT: "1000"
-      AUTH_LOGIN_RATE_TTL: "60"
-      AUTH_REFRESH_RATE_LIMIT: "1000"
-      AUTH_REFRESH_RATE_TTL: "60"
-      FILE_MAX_SIZE_BYTES: "10485760"
-      FILE_ORIGINAL_NAME_MAX_LENGTH: "255"
-      S3_ENDPOINT: http://localhost:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY_ID: enistere
-      S3_SECRET_ACCESS_KEY: enistere_test_password
-      S3_BUCKET: enistere-test-files
-      S3_FORCE_PATH_STYLE: "true"
-      FILES_UPLOAD_RATE_LIMIT: "1000"
-      FILES_UPLOAD_RATE_TTL: "60"
-      FILES_SIGNED_READ_URL_TTL_SECONDS: "300"
-      FILES_DOWNLOAD_URL_RATE_LIMIT: "1000"
-      FILES_DOWNLOAD_URL_RATE_TTL: "60"
       CORS_ORIGINS: http://localhost:3000,http://localhost:3001
       SERVICE_NAME: api-nestjs-core
       LOG_LEVEL: warn
@@ -96,29 +72,8 @@ jobs:
           cache: npm
           cache-dependency-path: starters/nestjs/package-lock.json
 
-      # MinIO jetable : démarrage via docker run (commande `server` obligatoire) + attente santé.
-      - name: Start MinIO (jetable)
-        working-directory: .
-        run: |
-          docker run -d --name minio \
-            -p 9000:9000 -p 9001:9001 \
-            -e MINIO_ROOT_USER=enistere \
-            -e MINIO_ROOT_PASSWORD=enistere_test_password \
-            minio/minio server /data --console-address ":9001"
-          for i in $(seq 1 40); do
-            if curl -fsS http://localhost:9000/minio/health/live >/dev/null 2>&1; then
-              echo "MinIO prêt"; break
-            fi
-            sleep 2
-          done
-
       - name: Install (npm ci — projet API autonome)
         run: npm ci
-
-      # Bucket de test (l'API ne le crée pas automatiquement). @aws-sdk/client-s3 est une dép de l'API.
-      - name: Create test bucket
-        run: |
-          node -e "const {S3Client,CreateBucketCommand}=require('@aws-sdk/client-s3');const c=new S3Client({endpoint:'http://localhost:9000',region:'us-east-1',forcePathStyle:true,credentials:{accessKeyId:'enistere',secretAccessKey:'enistere_test_password'}});c.send(new CreateBucketCommand({Bucket:'enistere-test-files'})).then(()=>console.log('bucket ok')).catch(e=>{const s=String(e);if(s.includes('BucketAlready')){console.log('bucket exists')}else{console.error(s);process.exit(1)}})"
 
       - name: Prisma generate
         run: npm run prisma:generate
@@ -135,7 +90,7 @@ jobs:
       - name: Tests unitaires
         run: npm test
 
-      - name: Tests e2e (PostgreSQL + MinIO jetables)
+      - name: Tests e2e (PostgreSQL jetable)
         run: npm run test:e2e
 
       - name: OpenAPI — snapshot canonique à jour
@@ -146,8 +101,3 @@ jobs:
 
       - name: npm audit
         run: npm audit
-
-      - name: Stop MinIO
-        if: always()
-        working-directory: .
-        run: docker rm -f minio || true

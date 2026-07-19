@@ -1,19 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Configuration E2E navigateur (Deployment 3, niveau 3).
+ * Configuration E2E navigateur (Deployment 3, niveau 3) — baseline `base`.
  *
- * Les serveurs (API NestJS + Web Next.js) et les dépendances jetables (PostgreSQL + MinIO) sont démarrés
+ * Les serveurs (API NestJS + Web Next.js) et les dépendances jetables (PostgreSQL) sont démarrés
  * PAR le workflow `.github/workflows/web-e2e-ci.yml` (et par la simulation locale) AVANT Playwright :
  * cette config se contente de piloter le navigateur contre `E2E_WEB_URL` (aucun `webServer` interne, aucun
- * secret ici). `e2e/global-setup.ts` provisionne un fichier VALIDATED éphémère via l'API.
+ * secret ici). Les capabilities composées remplacent ce fichier via leur overlay (remplacement déclaré)
+ * pour ajouter leur provisionnement (`globalSetup`).
  */
 const WEB_URL = process.env.E2E_WEB_URL ?? "http://127.0.0.1:3100";
 
 export default defineConfig({
   testDir: "./e2e",
-  globalSetup: "./e2e/global-setup.ts",
-  // Sérialisé : les parcours partagent un utilisateur/fichier éphémères ; on évite les courses.
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,

@@ -1,0 +1,96 @@
+{
+  "$comment": "Exceptions d'audit npm pour les projets GÉNÉRÉS (goldens). Aucune désactivation globale : le gate échoue sur toute vulnérabilité non listée ici, sur une sévérité supérieure à celle documentée, et sur une exception dont l'échéance est dépassée (revue forcée). Chaque entrée porte package, portée, justification et échéance.",
+  "schemaVersion": "1",
+  "exceptions": [
+    {
+      "package": "uuid",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Missing buffer bounds check in v3/v5/v6 when buf is provided",
+      "scope": "Outillage de build Expo uniquement (chaîne xcode → @expo/config-plugins). Non atteignable depuis le bundle applicatif : aucun code applicatif n'appelle uuid v3/v5/v6 avec un buffer fourni.",
+      "justification": "Advisory PRÉEXISTANT sur main, transitif via la dépendance `xcode` d'Expo. Aucune correction disponible sans upgrade majeur d'Expo (hors périmètre Capability Packs 1A/1A-R). Sévérité modérée, aucune high/critical. Le retrait de dépendances par l'extraction Auth n'a pas introduit cet advisory.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer lors de la prochaine mission d'upgrade Expo (matrice de compatibilité + preuve golden)."
+    },
+    {
+      "package": "xcode",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid",
+      "scope": "Outillage de build Expo (prebuild iOS). Jamais exécuté au runtime de l'application.",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "@expo/config-plugins",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via xcode)",
+      "scope": "Outillage Expo (config plugins, build-time).",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "@expo/config",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via @expo/config-plugins)",
+      "scope": "Outillage Expo (résolution de configuration, build-time).",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "@expo/cli",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via @expo/config)",
+      "scope": "CLI Expo (build-time uniquement).",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "@expo/metro-config",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via @expo/config)",
+      "scope": "Configuration Metro (build-time).",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "@expo/prebuild-config",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via @expo/config)",
+      "scope": "Prebuild natif (build-time).",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "@expo/local-build-cache-provider",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via @expo/config)",
+      "scope": "Cache de build local (build-time).",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "expo",
+      "maxSeverity": "moderate",
+      "appliesTo": ["react-native"],
+      "advisory": "Propagation de l'advisory uuid (via @expo/cli, @expo/config)",
+      "scope": "Métapaquet Expo ; la chaîne vulnérable reste l'outillage de build.",
+      "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Expo."
+    }
+  ]
+}

@@ -11,40 +11,16 @@ import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { buildOpenApiDocument, serializeOpenApiDocument } from '../src/common/openapi/openapi-document';
 
-const EXPECTED_OPERATION_IDS = [
-  'health_get',
-  'health_live',
-  'health_ready',
-  'auth_login',
-  'auth_refresh',
-  'auth_logout',
-  'auth_getProfile',
-  'auth_getAuthorization',
-  'files_list',
-  'files_upload',
-  'files_getMetadata',
-  'files_createDownloadUrl',
-  'files_delete',
-  'files_quarantine',
-  'files_restore',
-];
+// Contrat OpenAPI de la baseline `base` : uniquement les sondes de santé.
+// Les capabilities composées (Auth, ...) livrent leur propre variante de ce
+// spec via leur overlay (remplacement déclaré).
+const EXPECTED_OPERATION_IDS = ['health_get', 'health_live', 'health_ready'];
 
 const FORBIDDEN_TOKENS = [
   'passwordHash',
   'tokenHash',
-  'storageKey',
-  'checksum',
-  'X-Amz-Signature',
-  'minioadmin',
-  'RefreshSession',
-  'UserUnchecked',
-  'StoredFileCreate',
-  'RolePermission',
-  'UserRole',
   'DATABASE_URL',
-  'JWT_ACCESS_SECRET',
-  'REFRESH_TOKEN_HASH_SECRET',
-  'S3_ACCESS_KEY',
+  'AuditLogCreate',
 ];
 
 describe('OpenAPI contract (e2e)', () => {
@@ -83,33 +59,19 @@ describe('OpenAPI contract (e2e)', () => {
     expect([...ids].sort()).toEqual([...EXPECTED_OPERATION_IDS].sort());
     for (const id of ids) {
       expect(id).not.toContain('Controller');
-      expect(id).toMatch(/^(health|auth|files)_[a-zA-Z]+$/);
+      expect(id).toMatch(/^health_[a-zA-Z]+$/);
     }
   });
 
   it('uses only the canonical tags', () => {
     const tags = new Set(operations.flatMap((o) => (o.op.tags as string[]) ?? []));
-    expect([...tags].sort()).toEqual(['Auth', 'Files', 'Health']);
+    expect([...tags].sort()).toEqual(['Health']);
   });
 
-  it('defines a Bearer security scheme; private routes require it, public routes do not', () => {
-    expect(document.components?.securitySchemes?.bearer).toBeDefined();
-    const find = (id: string): Record<string, unknown> => operations.find((o) => o.op.operationId === id)!.op;
-    expect(find('auth_getProfile').security).toEqual([{ bearer: [] }]);
-    expect(find('files_upload').security).toEqual([{ bearer: [] }]);
-    expect(find('auth_login').security).toBeUndefined();
-    expect(find('health_live').security).toBeUndefined();
-  });
-
-  it('schematizes the success envelope with a typed data ref', () => {
-    const login = operations.find((o) => o.op.operationId === 'auth_login')!.op as {
-      responses: Record<string, { content?: Record<string, { schema?: { properties?: Record<string, unknown> } }> }>;
-    };
-    const schema = login.responses['200'].content!['application/json'].schema!;
-    expect(schema.properties).toHaveProperty('success');
-    expect(schema.properties).toHaveProperty('data');
-    expect(schema.properties).toHaveProperty('timestamp');
-    expect((schema.properties!.data as { $ref: string }).$ref).toContain('LoginResponseDto');
+  it('declares no security requirement on the public health probes', () => {
+    for (const { op } of operations) {
+      expect(op.security).toBeUndefined();
+    }
   });
 
   it('schematizes the common error envelope (with requestId)', () => {
@@ -118,26 +80,6 @@ describe('OpenAPI contract (e2e)', () => {
     for (const field of ['success', 'statusCode', 'message', 'errorCode', 'path', 'timestamp', 'requestId']) {
       expect(err.properties).toHaveProperty(field);
     }
-  });
-
-  it('declares correct formats (uuid, date-time, BigInt size as decimal string)', () => {
-    const file = document.components?.schemas?.PublicStoredFileDto as {
-      properties: Record<string, { type?: string; format?: string; pattern?: string }>;
-    };
-    expect(file.properties.id.format).toBe('uuid');
-    expect(file.properties.createdAt.format).toBe('date-time');
-    expect(file.properties.size.type).toBe('string');
-    expect(file.properties.size.pattern).toBe('^[0-9]+$');
-  });
-
-  it('describes the multipart upload with a binary file field and an enum category', () => {
-    const upload = operations.find((o) => o.op.operationId === 'files_upload')!.op as {
-      requestBody: { content: Record<string, { schema: { properties: Record<string, { type?: string; format?: string; enum?: string[] }>; required?: string[] } }> };
-    };
-    const schema = upload.requestBody.content['multipart/form-data'].schema;
-    expect(schema.properties.file.format).toBe('binary');
-    expect(schema.properties.category.enum).toContain('IMAGE');
-    expect(schema.required).toEqual(expect.arrayContaining(['file', 'category']));
   });
 
   it('never exposes Prisma models, internal fields or secrets', () => {
@@ -158,11 +100,8 @@ describe('OpenAPI contract (e2e)', () => {
   });
 
   it('returns a runtime error envelope with requestId (aligned with the schema)', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/files/00000000-0000-4000-8000-000000000000')
-      .expect(401);
+    const res = await request(app.getHttpServer()).get('/unknown-route').expect(404);
     expect(res.body.success).toBe(false);
-    expect(typeof res.body.errorCode).toBe('string');
     expect(typeof res.body.requestId).toBe('string');
     expect(res.headers['x-request-id']).toBe(res.body.requestId);
   });

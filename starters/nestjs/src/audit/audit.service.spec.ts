@@ -1,7 +1,6 @@
 import { AppLogger } from '../common/logging/logging.service';
 import { AuditRepository } from './audit.repository';
 import { AuditService } from './audit.service';
-import { AUDIT_EVENT_TYPES } from './audit.types';
 
 describe('AuditService', () => {
   let repository: { create: jest.Mock };
@@ -16,14 +15,14 @@ describe('AuditService', () => {
 
   it('persists an event with mapped, non-sensitive fields', async () => {
     await service.record({
-      eventType: AUDIT_EVENT_TYPES.AUTH_LOGOUT,
+      eventType: 'AUDIT_EVENT_RECORDED',
       actorId: 'user-1',
       metadata: { familyId: 'family-1', reason: 'LOGOUT' },
       ipAddress: '203.0.113.7',
     });
 
     const data = repository.create.mock.calls[0][0];
-    expect(data.eventType).toBe('AUTH_LOGOUT');
+    expect(data.eventType).toBe('AUDIT_EVENT_RECORDED');
     expect(data.actorId).toBe('user-1');
     expect(data.metadata).toEqual({ familyId: 'family-1', reason: 'LOGOUT' });
     expect(data.ipAddress).toBe('203.0.113.7');
@@ -34,7 +33,7 @@ describe('AuditService', () => {
   });
 
   it('omits metadata when not provided', async () => {
-    await service.record({ eventType: AUDIT_EVENT_TYPES.AUTH_REFRESH_SUCCEEDED, actorId: 'user-1' });
+    await service.record({ eventType: 'AUDIT_EVENT_WITHOUT_METADATA', actorId: 'user-1' });
 
     const data = repository.create.mock.calls[0][0];
     expect(data.metadata).toBeUndefined();
@@ -44,7 +43,7 @@ describe('AuditService', () => {
     repository.create.mockRejectedValue(new Error('db down'));
 
     await expect(
-      service.record({ eventType: AUDIT_EVENT_TYPES.AUTH_REFRESH_FAILED }),
+      service.record({ eventType: 'AUDIT_EVENT_PERSISTENCE_FAILURE' }),
     ).resolves.toBeUndefined();
   });
 });

@@ -8,6 +8,18 @@ Socle mobile **Expo / React Native** générique et réutilisable pour les futur
 applications Enistere/Kivvoo/RFashion/Bailo/etc. Ce starter pose une fondation
 standardisée et gouvernée. **Il ne contient aucune logique métier.**
 
+> **Modèle de composition (Capability Packs 1A).** Ce dossier est désormais la
+> **baseline `base`** du modèle modulaire : il compile, démarre et se teste sans
+> aucune capability composée (aucun `AuthProvider`/`AuthEngine`, aucune route
+> `(app)`/`(public)`, aucun écran sign-in, aucune dépendance `expo-secure-store`).
+> L'authentification vit dans `capabilities/auth/targets/react-native/` (overlay
+> déclaratif appliqué par la Factory) ; Files est un payload parqué non câblé. Le
+> point d'intégration généré est `src/composition/capability-providers.tsx`
+> (providers) ; l'overlay ajoute les routes et remplace `app/index.tsx` (gate),
+> `src/query/index.ts` et `src/query/query-client.ts`. Le tableau historique
+> ci-dessous décrit la **composition de démonstration complète**, obtenue en
+> composant Auth par-dessus cette baseline.
+
 ## Ce que ce socle fournit (périmètre de la mission)
 
 | Brique | Module | Notes |

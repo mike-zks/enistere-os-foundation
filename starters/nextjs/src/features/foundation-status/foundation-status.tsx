@@ -39,10 +39,10 @@ export const FOUNDATION_CONNECTIONS: readonly FoundationConnection[] = [
   { label: "Fichiers (Files)", state: "not-configured" },
 ];
 
-/** Hors périmètre de cet incrément (cadrage explicite). */
+/** Hors baseline `base` : composé séparément par la Factory ou hors périmètre V1 (cadrage explicite). */
 export const FOUNDATION_OUT_OF_SCOPE: readonly string[] = [
-  "Auth · BFF · cookies HttpOnly · CSRF · login/refresh/logout",
-  "Endpoints authentifiés · Files · upload",
+  "Auth · BFF · cookies HttpOnly · CSRF · login/refresh/logout (capability composée)",
+  "Files · upload · téléchargement (capability composée)",
   "État global (Zustand) · Axios · Orval",
   "i18n complet · monitoring · CI/CD · Dockerfile",
 ];
@@ -57,7 +57,7 @@ export function FoundationStatus({ children }: { readonly children?: ReactNode }
     <main className="foundation" aria-label="Enistère — Web Core">
       <PageHeader
         title="Enistère — Web Core"
-        description="Page technique du starter Next.js (App Router) : API publique (Health), TanStack Query, BFF Auth + session, layout protégé et page de connexion. Aucune donnée privée affichée ici."
+        description="Page technique de la baseline Next.js (App Router) : API publique (Health), TanStack Query et UI Kit. Les capabilities (Auth, Files) se composent par-dessus via la Factory. Aucune donnée privée affichée ici."
       />
 
       <section className="foundation__facts" aria-label="Stack du socle">

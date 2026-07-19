@@ -12,9 +12,12 @@ ultérieurement, par les cores Web/Mobile (via les hooks TanStack Query qu'ils m
 
 ## Source
 
-Contrat canonique : `starters/nestjs/openapi/openapi.json` (jamais un serveur HTTP, jamais `/docs`,
-jamais une URL de production). Le fichier `src/generated/schema.ts` est **généré** et **ne doit jamais
-être édité à la main**.
+Contrat canonique complet : [`contract/openapi.json`](contract/openapi.json) (jamais un serveur HTTP,
+jamais `/docs`, jamais une URL de production). Ce contrat décrit la surface **composée**
+(base + auth + rbac + files) : les clients restent typés contre l'ensemble de la Foundation,
+indépendamment de la baseline `base` générée pour un projet donné (dont le starter NestJS ne
+publie plus que les sondes de santé depuis Capability Packs 1A). Le fichier `src/generated/schema.ts`
+est **généré** et **ne doit jamais être édité à la main**.
 
 ## Commandes
 

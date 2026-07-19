@@ -4,7 +4,6 @@ import type { ReactElement } from "react";
 import { createServerApiClient } from "../../../core/api/server/create-server-api-client.js";
 import { isServerApiConfigured } from "../../../core/config/server-config.js";
 import { createQueryClient } from "../../../core/query/query-client.js";
-import { SessionPanel } from "../../../features/auth/session-panel.js";
 import { FoundationStatus } from "../../../features/foundation-status/foundation-status.js";
 import { StatesShowcase } from "../../../features/foundation-status/states-showcase.js";
 import { healthQueryOptions } from "../../../features/health/health-queries.js";
@@ -29,7 +28,6 @@ export default async function StatusPage(): Promise<ReactElement> {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <FoundationStatus>
         <HealthPanel />
-        <SessionPanel />
         <StatesShowcase />
       </FoundationStatus>
     </HydrationBoundary>

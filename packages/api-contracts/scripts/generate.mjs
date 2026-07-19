@@ -5,9 +5,14 @@
  *   node scripts/generate.mjs           → (ré)écrit src/generated/schema.ts
  *   node scripts/generate.mjs --check   → échoue (code 1) si l'artefact suivi diverge du contrat
  *
- * Source UNIQUE : starters/nestjs/openapi/openapi.json (contrat canonique, ADR-016), lu en `file://`
+ * Source UNIQUE : contract/openapi.json (contrat canonique complet, ADR-016), lu en `file://`
  * (jamais un serveur HTTP, jamais /docs, jamais une URL de production). En-tête statique (aucun
  * timestamp) ⇒ deux générations successives produisent un fichier identique (reproductibilité).
+ *
+ * Depuis Capability Packs 1A, le contrat vit DANS ce package (composition complète
+ * base + auth + rbac + files) plutôt que dans le snapshot du starter NestJS, dont la
+ * baseline `base` ne décrit plus que les sondes de santé. Les clients (`api-client-fetch`)
+ * restent typés contre la surface complète, indépendamment de la baseline générée.
  *
  * Le mode --check génère dans un fichier temporaire, le compare à l'artefact suivi, puis le nettoie.
  */
@@ -20,15 +25,14 @@ import openapiTS, { astToString } from 'openapi-typescript';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = resolve(SCRIPT_DIR, '..');
-const REPO_ROOT = resolve(PACKAGE_ROOT, '..', '..');
-const CONTRACT_PATH = resolve(REPO_ROOT, 'starters', 'nestjs', 'openapi', 'openapi.json');
+const CONTRACT_PATH = resolve(PACKAGE_ROOT, 'contract', 'openapi.json');
 const OUTPUT_PATH = join(PACKAGE_ROOT, 'src', 'generated', 'schema.ts');
 
 const HEADER = [
   '/**',
   ' * ENISTERE — Types OpenAPI GÉNÉRÉS. NE PAS MODIFIER À LA MAIN.',
   ' *',
-  ' * Source de vérité : starters/nestjs/openapi/openapi.json (contrat canonique, ADR-016).',
+  ' * Source de vérité : packages/api-contracts/contract/openapi.json (contrat canonique complet, ADR-016).',
   ' * Régénérer : npm run generate   ·   Vérifier la fraîcheur : npm run generate:check',
   ' *',
   ' * Fichier types-only (aucun runtime). Outil : openapi-typescript.',

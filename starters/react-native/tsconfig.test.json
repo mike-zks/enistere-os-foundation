@@ -1,5 +1,5 @@
 {
-  "//": "Isolated config to compile the FRAMEWORK-AGNOSTIC auth/session/forms/offline modules + tests to CommonJS for `node --test`. RN/Expo/React files and the ESM `@enistere/api-client-fetch` adapters are intentionally NOT included (they can't run under plain Node). zod is resolved here via classic node resolution, hence zod 3.x (root main/types).",
+  "//": "Baseline `base` : compile les modules FRAMEWORK-AGNOSTIQUES du socle + leurs tests en CommonJS pour `node --test`. Les fichiers RN/Expo/React ne sont pas inclus (non exécutables sous Node). Les modules des capabilities composées (Auth : auth/session/forms/storage/api ; Files : upload) sont ajoutés par la variante que leur overlay substitue à ce fichier.",
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
@@ -18,17 +18,6 @@
   "include": [
     "src/types/**/*.ts",
     "src/config/**/*.ts",
-    "src/api/with-auth-retry.ts",
-    "src/storage/secure-storage.ts",
-    "src/storage/keys.ts",
-    "src/storage/session-store.ts",
-    "src/storage/memory-secure-storage.ts",
-    "src/auth/session.ts",
-    "src/auth/auth-api.ts",
-    "src/auth/auth-engine.ts",
-    "src/auth/token-mapping.ts",
-    "src/forms/form-errors.ts",
-    "src/forms/validation.ts",
     "src/offline/network-state.ts",
     "src/offline/mutation.ts",
     "src/offline/queue.ts",
