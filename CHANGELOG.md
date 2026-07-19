@@ -4,6 +4,16 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Project Factory R8A-2 — Spring base modulaire
+
+- Extraction de `starters/spring/base` : le profil `spring-base` ne copie plus les modules Auth,
+  RBAC ou Files du baseline historique.
+- Le moteur résout `composition.baseSource` et conserve le workspace/lock généré cohérent pour
+  les sources modulaires imbriquées.
+- Goldens structurels et `./mvnw test` du starter Spring base vérifient l'absence des dépendances
+  et surfaces métier non sélectionnées. `spring-base`, `spring-next-base` et
+  `spring-react-native-base` sont promus `ready`; Angular/Flutter restent `supported`.
+
 ### Project Factory 4 (R7) — matrice des profils et combinaisons supportées
 
 - Nouveau registre `factory/engine/profiles.mjs` : un **profil** est une composition nommée

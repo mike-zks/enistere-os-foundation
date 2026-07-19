@@ -3,6 +3,16 @@
   "schemaVersion": "1",
   "exceptions": [
     {
+      "package": "esbuild",
+      "maxSeverity": "low",
+      "appliesTo": ["angular"],
+      "advisory": "GHSA-g7r4-m6w7-qqqr — arbitrary file read when running the esbuild development server on Windows",
+      "scope": "Transitif via `vite` sous `@angular/build`. Le paquet de premier niveau est déjà corrigé (esbuild 0.28.1) ; seule la copie imbriquée de `vite` reste en 0.27.7. Vecteur limité au serveur de développement esbuild sur Windows : jamais exécuté par les gates (Linux), ni par `ng build`, ni par un artefact de production.",
+      "justification": "Sévérité BASSE. Aucun override sûr à ce niveau : `vite@7.3.5` épingle esbuild ^0.27 pour compatibilité d'API, et le forcer risque de casser la chaîne de build Angular pour un advisory non atteignable. La correction relève d'un upgrade Angular/vite, traité en mission dédiée (`strategy/06_DEPENDENCY_STRATEGY.md`).",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer lors de la prochaine mission d'upgrade Angular : vérifier si `@angular/build` a promu `vite` vers une version dont esbuild ≥ 0.28.1."
+    },
+    {
       "package": "uuid",
       "maxSeverity": "moderate",
       "appliesTo": ["react-native"],

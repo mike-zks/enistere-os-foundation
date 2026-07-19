@@ -199,11 +199,20 @@ describe('npm audit by documented exception', () => {
 
 describe('golden runtime audit wiring', () => {
   it('applies the audit gate to every golden composition', () => {
-    assert.deepEqual(Object.keys(COMPOSITIONS), [
+    // The capability-pack compositions and the R8A `base`-only ones must all be
+    // wired. The list is asserted by containment, not by equality: freezing it
+    // would break on every legitimate extension without catching a real defect.
+    for (const composition of [
       'nestjs-base', 'nestjs-auth', 'nest-next-auth', 'triple-auth',
       'nestjs-auth-rbac', 'nest-next-auth-rbac', 'triple-auth-rbac',
       'nestjs-files', 'nest-next-files', 'triple-files',
-    ]);
+      'spring-base', 'spring-next-base', 'spring-react-native-base',
+      'spring-angular-base', 'spring-flutter-base',
+      'nestjs-next-base', 'nestjs-react-native-base',
+      'nestjs-angular-base', 'nestjs-flutter-base',
+    ]) {
+      assert.ok(COMPOSITIONS[composition], `${composition} must be a golden composition`);
+    }
     for (const composition of Object.keys(COMPOSITIONS)) {
       const spec = COMPOSITIONS[composition];
       const kinds = Object.values(spec.stack).filter(Boolean);

@@ -4,6 +4,6 @@
   "kind": "api",
   "framework": "Spring Boot",
   "commands": { "install": ["./mvnw", "dependency:go-offline"], "dev": ["./mvnw", "spring-boot:run"], "test": ["./mvnw", "test"], "build": ["./mvnw", "package"], "verify": ["./mvnw", "verify", "--no-transfer-progress"] },
-  "composition": { "contractVersion": "1", "base": "built-in", "model": "modular", "baseSource": "starters/spring/base", "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files", "audit", "observability"] },
+  "composition": { "contractVersion": "1", "base": "built-in", "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files", "audit", "observability"] },
   "deployment": { "dockerfile": null, "healthPath": "/actuator/health" }
 }

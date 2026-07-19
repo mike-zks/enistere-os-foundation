@@ -56,6 +56,20 @@ describe('auth golden compositions', () => {
     assert.deepEqual(lock.overlays, []);
   });
 
+  it('Spring base carries only the minimal base API surface', async () => {
+    const out = await gen('spring-base', { api: 'spring', web: null, mobile: null }, ['base']);
+    const pom = await readFile(join(out, 'apps/api/pom.xml'), 'utf8');
+    for (const dependency of ['spring-boot-starter-security', 'spring-boot-starter-data-jpa', 'flyway-core', 'minio', 'jjwt']) {
+      assert.ok(!pom.includes(dependency), `${dependency} must not be a base dependency`);
+    }
+    assert.equal(await exists(join(out, 'apps/api/src/main/modules')), false, 'feature modules must be absent');
+    assert.equal(await exists(join(out, 'apps/api/src/main/resources/db')), false, 'database migrations must be absent');
+    const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+    assert.equal(lock.plan.generationMode, 'modular-overlay');
+    assert.equal(lock.plan.bundledFeaturesMayExceedSelection, false);
+    assert.deepEqual(lock.overlays, []);
+  });
+
   it('NestJS base+auth composes Auth without RBAC or Files', async () => {
     const out = await gen('nestjs-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'auth']);
     assert.ok(await exists(join(out, 'apps/api/src/auth/auth.module.ts')));

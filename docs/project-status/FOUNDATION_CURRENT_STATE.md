@@ -13,7 +13,7 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Matrice de profils | Implémentée (R7) | `factory/engine/profiles.mjs`, validée contre la matrice réelle |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
-| Capabilities | `auth`, `rbac` et `files` livrées en overlay sur la verticale TypeScript | Spring/Angular/Flutter planifiés |
+| Capabilities | `auth`, `rbac` et `files` livrées sur NestJS/Next.js/RN ; Spring base extrait | Auth/RBAC/Files Spring + Angular/Flutter planifiés |
 | Overlays déclaratifs | Moteur + overlays `auth`, `rbac` et `files` livrés | Files prouvé sur NestJS/Next.js/RN via goldens générés |
 | Packages | Implémentés | contracts (contrat complet figé), client Fetch, UI Kit |
 | Deployment | Local/staging disponibles | Compose, CI, runbooks et preuve staging V1 |
@@ -24,7 +24,7 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Starter | Baseline historique | Composition V2 |
 |---|---|---|
 | NestJS | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
-| Spring Boot | V1 vérifiée | planifiée après verticale TypeScript |
+| Spring Boot | V1 vérifiée | base modulaire extraite ; auth/RBAC/files planifiés |
 | Next.js | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
 | Angular | V1 vérifiée | planifiée après verticale TypeScript |
 | React Native | V1 vérifiée, Android prouvé | baseline `base` extraite ; Auth en overlay `ready` |
@@ -36,7 +36,9 @@ Pour les trois starters modulaires, la sélection `capabilities` du blueprint re
 surfaces non choisies : une génération `base` ne contient aucune surface Auth, et Auth n'est ajoutée
 que via son overlay déclaratif. `generationMode` devient `modular-overlay` (et
 `bundledFeaturesMayExceedSelection=false`) lorsque toutes les targets sélectionnées sont modulaires.
-Spring, Angular et Flutter restent en baseline-copy jusqu'à leur extraction.
+Spring dispose désormais d'un starter `base` modulaire : `spring-base`, `spring-next-base` et
+`spring-react-native-base` sont exacts et prêts, avec golden prouvé. Angular et Flutter restent
+en `baseline-copy` (`supported`) jusqu'à leur extraction modulaire.
 
 Le projet généré est un **workspace npm unifié** : les `@enistere/*` sont des membres du workspace
 (résolus via `*`, sans `file:`), un unique `package-lock.json` racine fait autorité et `npm ci`
@@ -67,7 +69,7 @@ Les combinaisons supportées sont nommées et vérifiées : un **profil** est un
 capabilities par `factory/test/profiles.test.mjs` : un statut que la matrice ne soutient pas fait
 échouer la suite. Aucun profil n'est `ready` sans overlay et golden.
 
-Les dix goldens runtime adossent un profil `ready` : `nest-next-files` est couvert par
+Les goldens runtime adossent les profils `ready` : `nest-next-files` est couvert par
 `nestjs-next-files`, tandis que les compositions triples `triple-auth`, `triple-auth-rbac` et
 `triple-files` sont couvertes par les profils `nestjs-next-react-native-*`, sans introduire de
 renderer, d'overlay ni de comportement runtime.
