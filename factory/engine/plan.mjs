@@ -1,5 +1,6 @@
 import { matchProfile } from './profiles.mjs';
 import { selectedStarterIds } from './starters.mjs';
+import { adapterVersionsFor } from './target-adapters.mjs';
 
 /** Gates a generated app runs, in the order a verification pass applies them. */
 const GATE_COMMANDS = Object.freeze(['install', 'test', 'build', 'verify']);
@@ -44,11 +45,13 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
   const matched = matchProfile(blueprint);
   const starterById = new Map(starters.map((starter) => [starter.id, starter]));
   const sourceFor = (starterId) => starterById.get(starterId)?.composition?.baseSource ?? `starters/${starterId}`;
+  const selectedTargets = selectedStarterIds(blueprint);
   return {
     project: blueprint.project.slug,
     generationMode: allModular ? 'modular-overlay' : 'baseline-copy',
     bundledFeaturesMayExceedSelection: !allModular,
     stack: blueprint.stack,
+    targetAdapters: adapterVersionsFor(selectedTargets),
     capabilities: [...blueprint.capabilities],
     // `runtimeProven` says a golden exercises this selection; `compositionExact`
     // says the generated project carries nothing beyond it. A profile is `ready`
