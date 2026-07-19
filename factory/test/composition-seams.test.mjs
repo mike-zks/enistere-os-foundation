@@ -72,6 +72,33 @@ describe('composable seed', () => {
   });
 });
 
+describe('composed e2e test environment', () => {
+  // `test/setup-e2e.ts` is allowlisted for overwrite: exactly one variant exists per
+  // composition, so the last capability composed must supply a strict superset.
+  it('supplies the Files test variables when Files is composed', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-env-files-'));
+    const out = join(root, 'p');
+    await generateProject(blueprint('env-files', ['base', 'auth', 'rbac', 'files']), out);
+    const setup = await readFile(join(out, 'apps/api/test/setup-e2e.ts'), 'utf8');
+    // Production default (86400 s) would make reconciliation untestable.
+    assert.match(setup, /FILES_ORPHAN_MIN_AGE_SECONDS \?\?= '1'/);
+    assert.match(setup, /S3_BUCKET \?\?=/);
+    // Superset: the Auth and baseline variables survive the replacement.
+    assert.match(setup, /JWT_ACCESS_SECRET \?\?=/);
+    assert.match(setup, /ARGON2_MEMORY_COST \?\?= '512'/);
+    assert.match(setup, /DATABASE_URL \?\?=/);
+  });
+
+  it('leaves the Auth variant untouched without Files', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-env-auth-'));
+    const out = join(root, 'p');
+    await generateProject(blueprint('env-auth', ['base', 'auth']), out);
+    const setup = await readFile(join(out, 'apps/api/test/setup-e2e.ts'), 'utf8');
+    assert.match(setup, /JWT_ACCESS_SECRET \?\?=/);
+    assert.ok(!/FILES_ORPHAN_MIN_AGE_SECONDS/.test(setup), 'no Files surface without Files');
+  });
+});
+
 describe('composable Next.js status sections', () => {
   it('orders sections and rejects duplicates or ambiguous ranks', () => {
     const rendered = renderNextjsStatusSections([section('B', 20, 'rbac'), section('A', 10, 'auth')]);

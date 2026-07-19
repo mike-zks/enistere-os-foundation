@@ -16,6 +16,9 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
   `not-applicable` et aucune surface d'autorisation n'est injectée sur mobile.
 - Contrat OpenAPI généré depuis l'application composée ; snapshots centraux interdits, registres
   de navigation ordonnés et validés.
+- Environnement e2e composé : l'overlay Files remplace `test/setup-e2e.ts` par un sur-ensemble
+  strict de la variante Auth, ajoutant les variables S3 et `FILES_ORPHAN_MIN_AGE_SECONDS=1`
+  (la valeur de production, 86400 s, rendait la réconciliation intestable).
 - Goldens runtime ajoutés : `nestjs-files`, `nest-next-files`, `triple-files`.
 - Non-régression Files V1 documentée dans `docs/project-status/FILES_V1_NON_REGRESSION.md`.
 

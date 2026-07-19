@@ -11,7 +11,8 @@
     { "source": "files/src/audit/files-audit-events.ts", "destination": "src/audit/files-audit-events.ts" },
     { "source": "files/prisma/migrations/20260719000300_files_init", "destination": "prisma/migrations/20260719000300_files_init" },
     { "source": "files/scripts", "destination": "scripts" },
-    { "source": "files/test", "destination": "test" }
+    { "source": "files/test", "destination": "test" },
+    { "source": "files/test-setup/setup-e2e.ts", "destination": "test/setup-e2e.ts", "overwrite": true }
   ],
   "dependencies": {
     "dependencies": {
