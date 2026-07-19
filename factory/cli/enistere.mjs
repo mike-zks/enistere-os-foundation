@@ -7,6 +7,7 @@ import { assertBlueprint, createDefaultBlueprint, readBlueprint } from '../engin
 import { buildGenerationPlan } from '../engine/plan.mjs';
 import { generateProject } from '../engine/generator.mjs';
 import { assessCapabilitySupport, buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
+import { assessProfile, getProfile, listProfiles, profileStarterIds } from '../engine/profiles.mjs';
 import { loadStarterManifests, modularStarterIds, selectedStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../engine/dependencies.mjs';
 
@@ -14,9 +15,11 @@ const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
 function help() {
   console.log([
-    'Usage: enistere <doctor|init|plan|generate|install|verify> [arguments]',
+    'Usage: enistere <doctor|profiles|profile|init|plan|generate|install|verify> [arguments]',
     '',
     '  doctor                              environment and manifest matrix',
+    '  profiles                            supported named compositions',
+    '  profile <name>                      detail one profile and its proof',
     '  init [path] [slug]                  write a default blueprint',
     '  plan <blueprint>                    print the generation plan',
     '  generate <blueprint> <out> [--install|--no-install]',
@@ -77,6 +80,38 @@ async function main() {
     return;
   }
 
+  if (command === 'profiles') {
+    const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT);
+    console.log(JSON.stringify({
+      profiles: listProfiles().map((entry) => ({
+        id: entry.id,
+        status: entry.status,
+        stack: entry.stack,
+        capabilities: entry.capabilities,
+        runtimeProven: Boolean(entry.golden),
+        generatable: assessProfile(entry, capabilities).composable,
+      })),
+    }, null, 2));
+    return;
+  }
+
+  if (command === 'profile') {
+    if (!first) throw new Error('profile requires a name');
+    // Throws with the API-mandatory invariant for web-only and mobile-only names.
+    const entry = getProfile(first);
+    const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT, entry.capabilities);
+    const assessment = assessProfile(entry, capabilities);
+    console.log(JSON.stringify({
+      ...entry,
+      starters: profileStarterIds(entry),
+      runtimeProven: Boolean(entry.golden),
+      generatable: assessment.composable,
+      assessment,
+    }, null, 2));
+    if (!assessment.composable) process.exitCode = 1;
+    return;
+  }
+
   if (command === 'init') {
     const target = resolve(first ?? 'enistere.yaml');
     await mkdir(resolve(target, '..'), { recursive: true });
@@ -107,7 +142,7 @@ async function main() {
     if (!first) throw new Error(`${command} requires a blueprint path`);
     const blueprint = assertBlueprint(await readBlueprint(resolve(first)));
     const starters = await loadStarterManifests(FOUNDATION_ROOT);
-    const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starters) });
+    const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starters), starters });
     const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
     const support = assessCapabilitySupport(selectedStarterIds(blueprint), capabilities);
     if (command === 'verify') {

@@ -10,6 +10,7 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 |---|---|---|
 | Factory CLI | Implémentée, pré-release | `factory/cli`, tests Factory |
 | Blueprint/lock | Implémentés | schéma v1, génération déterministe |
+| Matrice de profils | Implémentée (R7) | `factory/engine/profiles.mjs`, validée contre la matrice réelle |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
 | Capabilities | `auth`, `rbac` et `files` livrées en overlay sur la verticale TypeScript | Spring/Angular/Flutter planifiés |
@@ -57,9 +58,25 @@ BFF et les écrans protégés sur Next.js ; et la surface d'upload/navigation su
 contrats OpenAPI et les migrations sont générés depuis les overlays. La non-régression est suivie
 dans `docs/project-status/FILES_V1_NON_REGRESSION.md`.
 
+## Matrice de profils (R7)
+
+Les combinaisons supportées sont nommées et vérifiées : un **profil** est une composition
+`{api, web?, mobile?, capabilities}` déclarée dans `factory/engine/profiles.mjs`. Trois statuts —
+`ready` (composable **et** prouvé par un golden), `supported` (composable, sans preuve runtime) et
+`planned` (non composable, génération refusée) — sont recalculés depuis la matrice réelle des
+capabilities par `factory/test/profiles.test.mjs` : un statut que la matrice ne soutient pas fait
+échouer la suite. Aucun profil n'est `ready` sans overlay et golden.
+
+L'API est un invariant : `stack.api` reste obligatoire et toute demande « web-only » ou
+« mobile-only » est refusée en nommant les profils API correspondants. `enistere profiles` et
+`enistere profile <name>` exposent le registre ; `enistere plan` nomme le profil correspondant à un
+blueprint et affiche les capabilities et les gates attendus. Détail :
+`docs/project-status/PROFILE_MATRIX.md`.
+
 ## Références
 
 - Roadmap : `strategy/04_ROADMAP_GLOBAL.md`
+- Matrice des profils : `docs/project-status/PROFILE_MATRIX.md`
 - Décision d'architecture : `docs/adr/ADR-042-ai-native-project-factory-architecture.md`
 - Prochaine action : `docs/project-status/NEXT_ACTIONS.md`
 - Baseline historique : `docs/project-status/FOUNDATION_V1_BASELINE_READINESS_REVIEW.md`

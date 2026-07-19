@@ -1,0 +1,249 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { resolve } from 'node:path';
+import { loadCapabilityManifests } from '../engine/capabilities.mjs';
+import { loadStarterManifests, STARTER_IDS } from '../engine/starters.mjs';
+import { validateBlueprint } from '../engine/blueprint.mjs';
+import { buildGenerationPlan } from '../engine/plan.mjs';
+import { COMPOSITIONS } from '../quality/scripts/golden-runtime.mjs';
+import {
+  API_STARTER_IDS,
+  GENERATABLE_PROFILE_STATUSES,
+  PROFILE_STATUSES,
+  apiLessStarterFor,
+  assessProfile,
+  getProfile,
+  listProfiles,
+  matchProfile,
+  profileStarterIds,
+  validateBlueprintProfile,
+  validateProfileRegistry,
+} from '../engine/profiles.mjs';
+
+const root = resolve(import.meta.dirname, '../..');
+const manifests = () => loadCapabilityManifests(root);
+
+function blueprintFor(entry, extra = {}) {
+  return {
+    version: '1',
+    project: { name: 'Demo', slug: 'demo' },
+    topology: 'monorepo',
+    designSystem: true,
+    stack: { ...entry.stack },
+    domain: { entities: [] },
+    capabilities: [...entry.capabilities],
+    deployment: { environments: ['local'] },
+    ...extra,
+  };
+}
+
+describe('profile registry', () => {
+  it('declares every status against the real capability matrix', async () => {
+    assert.deepEqual(validateProfileRegistry(await manifests()), []);
+  });
+
+  it('uses only known statuses and unique ids', () => {
+    const ids = listProfiles().map((entry) => entry.id);
+    assert.equal(new Set(ids).size, ids.length);
+    assert.ok(listProfiles().every((entry) => PROFILE_STATUSES.includes(entry.status)));
+  });
+
+  it('gives each profile a distinct selection so matching stays unambiguous', () => {
+    const selections = listProfiles().map((entry) => (
+      `${entry.stack.api}|${entry.stack.web}|${entry.stack.mobile}|${[...entry.capabilities].sort().join(',')}`
+    ));
+    assert.equal(new Set(selections).size, selections.length);
+  });
+
+  it('never declares a profile without an API', () => {
+    for (const entry of listProfiles()) {
+      assert.ok(API_STARTER_IDS.includes(entry.stack.api), `${entry.id} must pin an API`);
+    }
+  });
+
+  it('composes only registered starters', () => {
+    for (const entry of listProfiles()) {
+      for (const starterId of profileStarterIds(entry)) assert.ok(STARTER_IDS.includes(starterId));
+    }
+  });
+
+  it('treats API_STARTER_IDS as the starters whose manifest kind is api', async () => {
+    const starters = await loadStarterManifests(root);
+    const apis = starters.filter((starter) => starter.kind === 'api').map((starter) => starter.id);
+    assert.deepEqual([...API_STARTER_IDS].sort(), apis.sort());
+  });
+});
+
+describe('ready is never granted without proof', () => {
+  it('backs every ready profile with a golden runtime that matches it', () => {
+    for (const entry of listProfiles().filter((item) => item.status === 'ready')) {
+      const golden = COMPOSITIONS[entry.golden];
+      assert.ok(golden, `${entry.id} claims unknown golden ${entry.golden}`);
+      assert.deepEqual(golden.stack, entry.stack, `${entry.id} golden stack mismatch`);
+      assert.deepEqual([...golden.capabilities].sort(), [...entry.capabilities].sort(), `${entry.id} golden capability mismatch`);
+    }
+  });
+
+  it('leaves supported profiles explicitly unproven', () => {
+    for (const entry of listProfiles().filter((item) => item.status === 'supported')) {
+      assert.equal(entry.golden, null, `${entry.id} is supported and must not claim a golden`);
+    }
+  });
+
+  it('never lets a planned profile claim a golden', () => {
+    for (const entry of listProfiles().filter((item) => item.status === 'planned')) {
+      assert.equal(entry.golden, null);
+    }
+  });
+});
+
+describe('the API is mandatory', () => {
+  // The table from the mission: an API-less name is refused, its API-bearing
+  // counterparts are accepted.
+  const refused = ['angular-only-base', 'flutter-only-base', 'nextjs-only-base', 'react-native-only-base'];
+  const accepted = ['spring-angular-base', 'spring-flutter-base', 'nestjs-next-base', 'nestjs-react-native-base'];
+
+  for (const name of refused) {
+    it(`refuses ${name} because an API is mandatory`, () => {
+      assert.throws(() => getProfile(name), (error) => {
+        assert.match(error.message, /An API is mandatory/);
+        assert.match(error.message, new RegExp(`Unsupported profile: ${name}`));
+        return true;
+      });
+    });
+  }
+
+  for (const name of accepted) {
+    it(`accepts ${name}`, async () => {
+      const entry = getProfile(name);
+      assert.ok(API_STARTER_IDS.includes(entry.stack.api));
+      assert.ok(GENERATABLE_PROFILE_STATUSES.includes(entry.status));
+      assert.ok(assessProfile(entry, await manifests()).composable);
+    });
+  }
+
+  it('suggests only registered profiles that actually compose the starter', () => {
+    const known = new Set(listProfiles().map((entry) => entry.id));
+    for (const name of refused) {
+      let message = '';
+      try { getProfile(name); assert.fail(`${name} must be refused`); } catch (error) { message = error.message; }
+      const line = message.split('\n').find((item) => item.startsWith('Profiles composing '));
+      assert.ok(line, `${name} must suggest alternatives`);
+      const [, starterId] = line.match(/^Profiles composing ([^:]+):/);
+      const suggestions = line.split(': ')[1].split(', ');
+      assert.ok(suggestions.length > 0);
+      for (const suggestion of suggestions) {
+        assert.ok(known.has(suggestion), `${suggestion} is suggested but not registered`);
+        assert.ok(profileStarterIds(getProfile(suggestion)).includes(starterId));
+      }
+    }
+  });
+
+  it('recognises any name led by a web or mobile starter', () => {
+    for (const name of ['angular-base', 'flutter-auth', 'nextjs-anything', 'rn-only-base', 'next-only-base']) {
+      assert.ok(apiLessStarterFor(name), `${name} must be recognised as API-less`);
+    }
+    for (const name of ['nestjs-next-base', 'spring-angular-base']) {
+      assert.equal(apiLessStarterFor(name), null);
+    }
+  });
+
+  it('reports an unknown name as unknown, not as API-less', () => {
+    assert.throws(() => getProfile('nestjs-quantum'), /Unknown profile: nestjs-quantum/);
+  });
+});
+
+describe('valid and invalid combinations', () => {
+  it('accepts every generatable profile as a blueprint claiming itself', () => {
+    for (const entry of listProfiles().filter((item) => GENERATABLE_PROFILE_STATUSES.includes(item.status))) {
+      assert.deepEqual(validateBlueprint(blueprintFor(entry, { profile: entry.id })), [], `${entry.id} must validate`);
+    }
+  });
+
+  it('refuses every planned profile with an explicit reason', () => {
+    for (const entry of listProfiles().filter((item) => item.status === 'planned')) {
+      const issues = validateBlueprint(blueprintFor(entry, { profile: entry.id }));
+      assert.ok(issues.some((issue) => issue.includes('is planned and cannot be generated')), `${entry.id} must be refused`);
+    }
+  });
+
+  it('refuses a blueprint whose capabilities drift from its profile', () => {
+    const blueprint = blueprintFor(getProfile('nestjs-next-auth'), { profile: 'nestjs-next-auth' });
+    blueprint.capabilities = ['base', 'auth', 'rbac'];
+    assert.ok(validateBlueprint(blueprint).some((issue) => /pins capabilities/.test(issue)));
+  });
+
+  it('refuses a blueprint whose stack drifts from its profile', () => {
+    const blueprint = blueprintFor(getProfile('nestjs-next-auth'), { profile: 'nestjs-next-auth' });
+    blueprint.stack = { api: 'nestjs', web: null, mobile: null };
+    assert.ok(validateBlueprint(blueprint).some((issue) => /pins stack\.web/.test(issue)));
+  });
+
+  it('refuses an API-less profile name inside a blueprint', () => {
+    const blueprint = blueprintFor(getProfile('nestjs-next-base'), { profile: 'angular-only-base' });
+    assert.ok(validateBlueprint(blueprint).some((issue) => /An API is mandatory/.test(issue)));
+  });
+
+  it('keeps the profile optional', () => {
+    assert.deepEqual(validateBlueprint(blueprintFor(getProfile('nestjs-next-auth'))), []);
+    assert.deepEqual(validateBlueprintProfile(blueprintFor(getProfile('nestjs-next-auth'))), []);
+  });
+
+  it('refuses a capability selection that breaks its dependencies', () => {
+    // rbac without auth is not a profile question: the dependency contract refuses it.
+    const blueprint = blueprintFor(getProfile('nestjs-next-base'));
+    blueprint.capabilities = ['base', 'rbac'];
+    assert.ok(validateBlueprint(blueprint).some((issue) => /rbac requires auth/.test(issue)));
+  });
+});
+
+describe('profiles stay distinct from the 18 stack combinations', () => {
+  it('counts 18 stack combinations, which the registry does not enumerate', () => {
+    const apis = STARTER_IDS.filter((id) => API_STARTER_IDS.includes(id));
+    const webs = [null, 'nextjs', 'angular'];
+    const mobiles = [null, 'react-native', 'flutter'];
+    assert.equal(apis.length * webs.length * mobiles.length, 18);
+    // A profile is a functional composition, not a stack cell: several profiles
+    // share one stack combination, and some combinations carry none.
+    const stacks = listProfiles().map((entry) => `${entry.stack.api}|${entry.stack.web}|${entry.stack.mobile}`);
+    assert.ok(new Set(stacks).size < listProfiles().length, 'profiles must not be one-per-stack');
+    assert.ok(new Set(stacks).size <= 18);
+  });
+
+  it('names the profile a blueprint matches, and none when it matches nothing', () => {
+    assert.equal(matchProfile(blueprintFor(getProfile('nestjs-next-rbac')))?.id, 'nestjs-next-rbac');
+    const unmatched = blueprintFor(getProfile('nestjs-next-rbac'));
+    unmatched.stack = { api: 'nestjs', web: 'angular', mobile: 'flutter' };
+    assert.equal(matchProfile(unmatched), null);
+  });
+});
+
+describe('the plan reports capabilities and gates', () => {
+  it('reports the selected capabilities, the matched profile and its proof', async () => {
+    const starters = await loadStarterManifests(root);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-auth')), { starters });
+    assert.deepEqual(plan.capabilities, ['base', 'auth']);
+    assert.equal(plan.profile.id, 'nestjs-next-auth');
+    assert.equal(plan.profile.status, 'ready');
+    assert.equal(plan.profile.runtimeProven, true);
+  });
+
+  it('marks a supported profile as not runtime-proven', async () => {
+    const starters = await loadStarterManifests(root);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-angular-base')), { starters });
+    assert.equal(plan.profile.status, 'supported');
+    assert.equal(plan.profile.runtimeProven, false);
+    assert.equal(plan.profile.golden, null);
+  });
+
+  it('reports the gates each generated app will run', async () => {
+    const starters = await loadStarterManifests(root);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-rn-files')), { starters });
+    assert.deepEqual(Object.keys(plan.gates), ['api', 'web', 'mobile']);
+    assert.deepEqual(plan.gates.api.map((gate) => gate.gate), ['install', 'test', 'build', 'verify']);
+    assert.equal(plan.gates.api.find((gate) => gate.gate === 'verify').command, 'npm run openapi:check');
+    // Slots the blueprint does not select carry no gates.
+    const apiOnly = buildGenerationPlan(blueprintFor(getProfile('nestjs-auth')), { starters });
+    assert.deepEqual(Object.keys(apiOnly.gates), ['api']);
+  });
+});

@@ -4,6 +4,28 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Project Factory 4 (R7) — matrice des profils et combinaisons supportées
+
+- Nouveau registre `factory/engine/profiles.mjs` : un **profil** est une composition nommée
+  `{api, web?, mobile?, capabilities}`. 23 profils déclarés, dont 16 générables.
+- Trois statuts explicites : `ready` (composable **et** prouvé par un golden runtime), `supported`
+  (composable selon la matrice, sans preuve runtime) et `planned` (non composable, génération
+  refusée). Aucun `ready` n'est attribué sans overlay et golden.
+- Chaque statut déclaré est **recalculé depuis la matrice réelle** des capabilities et comparé par
+  `factory/test/profiles.test.mjs` : un profil qui surestime la réalité fait échouer la suite.
+- **L'API est un invariant**, pas un paramètre : `stack.api` reste obligatoire et aucun profil sans
+  API n'existe. Toute demande « web-only » ou « mobile-only » (`angular-only-base`,
+  `flutter-only-base`, `nextjs-only-base`, `react-native-only-base`, et tout nom introduit par un
+  starter Web ou Mobile) est refusée avec un message rappelant l'invariant et proposant les profils
+  API correspondants — toujours des profils réellement enregistrés.
+- Blueprint : champ optionnel `profile`. Le blueprint est validé contre le profil déclaré (dérive de
+  stack, dérive de capabilities, profil `planned`) avec un message explicite.
+- CLI : `enistere profiles` et `enistere profile <name>` ; `enistere plan` nomme le profil
+  correspondant et affiche les capabilities et les gates attendus par application générée.
+- Les 18 combinaisons de stacks restent une grandeur distincte des profils : plusieurs profils
+  partagent une combinaison, et de nombreuses combinaisons n'en portent aucun.
+- Documentation : `docs/project-status/PROFILE_MATRIX.md`, matrice et séquence R7 mises à jour.
+
 ### Capability Packs 1C — extraction Files (NestJS + Next.js + React Native)
 
 - `files` passe à `ready`/`overlay` sur la verticale TypeScript, avec dépendance explicite

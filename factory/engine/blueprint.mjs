@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { CAPABILITY_IDS, validateCapabilityDependencies } from './capabilities.mjs';
 import { validateEntities } from './contracts.mjs';
+import { validateBlueprintProfile } from './profiles.mjs';
 
 const APIS = new Set(['nestjs', 'spring']);
 const WEBS = new Set([null, 'nextjs', 'angular']);
@@ -45,6 +46,17 @@ export function validateBlueprint(value) {
     if (!environments.includes('local')) issues.push('deployment.environments must include local');
     if (new Set(environments).size !== environments.length) issues.push('deployment.environments must be unique');
     for (const item of environments) if (!ENVIRONMENTS.has(item)) issues.push(`unsupported environment: ${item}`);
+  }
+  // The profile is checked last: it compares against the stack and the
+  // capabilities, so it is only meaningful once both are structurally sound.
+  if (value.profile !== undefined) {
+    if (typeof value.profile !== 'string') issues.push('profile must be a string');
+    else if (issues.length === 0) {
+      // `getProfile` refuses unknown and API-less names by throwing; its message
+      // already carries the invariant and the alternatives.
+      try { issues.push(...validateBlueprintProfile(value)); }
+      catch (error) { issues.push(...error.message.split('\n')); }
+    }
   }
   return issues;
 }

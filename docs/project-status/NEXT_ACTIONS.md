@@ -13,10 +13,16 @@ dupliquer le contrat public ni contourner les seams de la Factory :
 4. conserver `files` indépendant des capacités futures d'admin, sync et offline ;
 5. documenter la parité et les écarts avant de passer chaque target à `ready`.
 
+La matrice de profils (R7) donne la cible mesurable de cette action : faire passer les sept profils
+`planned` de `factory/engine/profiles.mjs` à `supported`, puis à `ready` lorsqu'un golden les prouve.
+`enistere profiles` mesure l'avancement, et `factory/test/profiles.test.mjs` refuse tout statut que
+la matrice réelle ne soutient pas.
+
 ## Ensuite
 
-1. Capability Packs 2 — parité Spring + Angular + Flutter.
-2. R8 — golden runtimes étendus (démarrage applicatif complet) sur les deux verticales.
+1. Capability Packs 2 — parité Spring + Angular + Flutter (profils `planned` → `supported` → `ready`).
+2. R8 — golden runtimes étendus (démarrage applicatif complet) sur les deux verticales, à commencer
+   par les neuf profils `supported` qui restent sans preuve runtime.
 3. R9 — compilateur de domaine CRUD NestJS/Spring.
 4. R10 — upgrades et migrations blueprint.
 5. R11 — distribution CLI/packages.
