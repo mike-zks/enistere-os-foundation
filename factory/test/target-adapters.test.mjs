@@ -15,7 +15,7 @@ describe('target adapter registry', () => {
       'nestjs', 'nextjs', 'react-native', 'spring', 'angular', 'flutter',
     ]);
     assert.ok(integrationKindsFor('spring'));
-    assert.deepEqual(integrationKindsFor('spring'), {});
+    assert.deepEqual(integrationKindsFor('spring'), { 'spring.module': { importPath: 'string', symbol: 'string' } });
     assert.deepEqual(getTargetAdapter('spring').operations, [
       'files', 'dependencies', 'environment', 'integrations', 'contract', 'verification',
     ]);

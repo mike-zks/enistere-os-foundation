@@ -14,6 +14,7 @@ import {
   renderNextjsStatusSections,
   renderExpoHomeActions,
   renderPrismaCompositionBanner,
+  renderSpringComposition,
   renderPrismaSeedRegistry,
 } from './overlay-renderers.mjs';
 import { validateOverwriteUsage } from './overwrite-policy.mjs';
@@ -367,6 +368,12 @@ async function renderCompositionFiles(starterId, appDirectory, integrations) {
     if (navLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/public-nav.ts'), renderNextjsPublicNav(navLinks));
     if (dashboardLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/dashboard-nav.ts'), renderNextjsDashboardNav(dashboardLinks));
     if (sections.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/status-sections.tsx'), renderNextjsStatusSections(sections));
+    return;
+  }
+  if (starterId === 'spring') {
+    const modules = integrations.filter((item) => item.kind === 'spring.module');
+    if (modules.length > 0) await writeGenerated(join(appDirectory, 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java'), renderSpringComposition(modules));
+    if (integrations.some((item) => item.kind !== 'spring.module')) throw new Error(`Unsupported Spring composition integration: ${integrations.find((item) => item.kind !== 'spring.module').kind}`);
     return;
   }
   if (starterId === 'react-native') {

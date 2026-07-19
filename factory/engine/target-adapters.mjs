@@ -37,7 +37,9 @@ const BUILT_IN = [
       'expo.home-action': { href: STRING, label: STRING, order: INTEGER },
     },
   },
-  { id: 'spring', version: '1.0.0', integrationKinds: {} },
+  { id: 'spring', version: '1.0.0', integrationKinds: {
+    'spring.module': { importPath: STRING, symbol: STRING },
+  } },
   { id: 'angular', version: '1.0.0', integrationKinds: {} },
   { id: 'flutter', version: '1.0.0', integrationKinds: {} },
 ].map((adapter) => Object.freeze({
