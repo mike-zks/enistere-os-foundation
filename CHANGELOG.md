@@ -6,6 +6,21 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ### Capability Packs 1A-R — reproductibilité et preuve runtime des compositions Auth
 
+- **Finalisation explicite des dépendances** : `enistere generate <blueprint> <out> --install` et
+  `enistere install <projet>` résolvent le lock racine **sans script lifecycle**
+  (`npm install --package-lock-only --ignore-scripts`), installent via `npm ci`, puis enregistrent
+  `dependenciesLocked`, `lockDigest` (sha256) et `lockfileVersion` dans `enistere.lock`. Une génération
+  sans finalisation est explicitement marquée `dependenciesLocked: false`.
+- **`enistere verify <projet>`** (chemin de répertoire) recalcule le digest du lock et détecte toute
+  modification, absence ou incohérence de l'état déclaré.
+- **`npm audit` sur les quatre goldens**, par exceptions documentées et scopées
+  (`factory/quality/audit-exceptions.json` : package, portée, justification, échéance). Aucune
+  désactivation globale : les advisories Expo/RN préexistants (cause racine unique `uuid`, modérés,
+  outillage de build) sont tolérés uniquement pour les compositions React Native et expirent le
+  2026-10-31 ; toute autre vulnérabilité fait échouer le gate.
+- **Déterminisme du lock** vérifié par golden (même blueprint + même Foundation → même digest) et par
+  la suite de tests réseau `dependencies-install.test.mjs` (lockfiles byte-identiques).
+
 - **Stratégie de lockfile déterministe** : le projet généré devient un workspace npm unifié. Le
   `package.json` racine déclare toutes les applications npm (`apps/api`, `apps/web`, `apps/mobile`) et
   `packages/*` comme membres ; les `@enistere/*` sont résolus via la portée `*` (jamais `file:`/`link:`).

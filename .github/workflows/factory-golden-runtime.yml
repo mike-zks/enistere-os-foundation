@@ -22,6 +22,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Contrat de dépendances (moitié réseau) : `generate --install` produit réellement le lock,
+  # `npm ci` fonctionne immédiatement, et une même Foundation + un même blueprint résolvent
+  # au même lock et au même digest. Opt-in via ENISTERE_NETWORK_TESTS — jamais silencieusement ignoré ici.
+  dependency-contract:
+    name: dependency-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Dependency finalization tests (network)
+        env:
+          ENISTERE_NETWORK_TESTS: "1"
+        run: node --test factory/test/dependencies-install.test.mjs
+
   golden-runtime:
     name: golden-runtime (${{ matrix.composition }})
     runs-on: ubuntu-latest

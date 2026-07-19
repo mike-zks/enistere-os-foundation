@@ -177,16 +177,23 @@ function projectReadme(blueprint, plan, overlays) {
     'workspace (`packages/*`), résolus sans `file:` ni registre. Un seul `package-lock.json` racine',
     'verrouille tout l\'arbre.',
     '',
-    '```bash',
-    '# Première installation : résout et écrit package-lock.json (racine).',
-    'npm install',
+    'L\'état de verrouillage est déclaré dans `enistere.lock` (`dependenciesLocked`). S\'il vaut `false`,',
+    'le projet a été généré **sans** finalisation des dépendances : lancez-la depuis la Foundation',
+    '(`enistere install <ce-projet>`), ou de façon équivalente :',
     '',
-    '# Installations suivantes / CI : réinstallation reproductible depuis le lock.',
+    '```bash',
+    '# 1) Résolution déterministe du lock racine, sans script lifecycle.',
+    'npm install --package-lock-only --ignore-scripts',
+    '',
+    '# 2) Installation reproductible strictement depuis le lock.',
     'npm ci',
     '',
-    '# Build des packages partagés (contracts, client, UI Kit).',
+    '# 3) Build des packages partagés (contracts, client, UI Kit).',
     'npm run build:packages',
     '```',
+    '',
+    'Une fois verrouillé, `enistere verify <ce-projet>` recalcule le digest du lock et détecte toute',
+    'modification par rapport à celui enregistré dans `enistere.lock`.',
     '',
     '## Variables d\'environnement',
     '',
@@ -236,7 +243,7 @@ function projectReadme(blueprint, plan, overlays) {
     '## Limites connues',
     '',
     '- Les capabilities non sélectionnées ne sont pas présentes ; régénérez le projet pour en ajouter.',
-    '- Le premier `npm install` requiert un accès réseau au registre npm ; ensuite `npm ci` suffit.',
+    '- La finalisation des dépendances requiert un accès réseau au registre npm ; ensuite `npm ci` suffit.',
     ...(blueprint.stack.mobile === 'react-native' ? ['- Le build mobile natif (iOS) requiert macOS/Xcode ; `npm run doctor --workspace=apps/mobile` et `expo export` restent disponibles hors simulateur.'] : []),
     '',
     '## Provenance Foundation',
@@ -275,9 +282,16 @@ export async function generateProject(blueprint, output, options = {}) {
   }
   await mkdir(join(output, 'scripts'), { recursive: true });
   await writeFile(join(output, 'enistere.yaml'), stable(blueprint));
+  // Generation is offline and cannot resolve the registry: the project starts
+  // explicitly UNLOCKED. `enistere install` (or `generate --install`) produces the
+  // root lock, installs from it and flips these fields.
   await writeFile(join(output, 'enistere.lock'), stable({
     schemaVersion: '1', foundationVersion: '2.0.0-dev', blueprintDigest: digest(blueprint), plan,
     overlays: overlays.applied,
+    dependenciesLocked: false,
+    lockfile: 'package-lock.json',
+    lockDigest: null,
+    lockfileVersion: null,
   }));
   await writeFile(join(output, 'README.md'), projectReadme(blueprint, plan, overlays.applied));
   await writeFile(join(output, 'package.json'), stable(rootPackage(blueprint, plan)));

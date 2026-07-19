@@ -17,14 +17,16 @@
  * défini. Aucun secret réel : la CI fournit des valeurs jetables via l'env.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateProject } from '../../engine/generator.mjs';
 import { createDefaultBlueprint } from '../../engine/blueprint.mjs';
+import { finalizeDependencies, verifyProjectDependencies } from '../../engine/dependencies.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const AUDIT_CHECK = resolve(REPO_ROOT, 'factory/quality/scripts/audit-check.mjs');
 
 // Safe, non-secret test placeholders so schema-only gates (prisma
 // generate/validate, openapi:check booting AppModule) run without a real DB or
@@ -42,12 +44,29 @@ for (const [key, value] of Object.entries(TEST_ENV_DEFAULTS)) {
   if (!process.env[key]) process.env[key] = value;
 }
 
-const COMPOSITIONS = {
+export const COMPOSITIONS = {
   'nestjs-base': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base'] },
   'nestjs-auth': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth'] },
   'nest-next-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth'] },
   'triple-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth'] },
 };
+
+/** argv of the npm-audit-by-exception gate applied to every golden. */
+export function auditGate(projectDir, kinds) {
+  return ['node', [AUDIT_CHECK, projectDir, '--targets', kinds.join(',')]];
+}
+
+/** Blueprint for a composition (shared by the driver and its tests). */
+export function compositionBlueprint(composition, slug = `golden-${composition}`) {
+  const spec = COMPOSITIONS[composition];
+  if (!spec) throw new Error(`Unknown composition: ${composition}`);
+  const blueprint = createDefaultBlueprint(slug);
+  blueprint.stack = spec.stack;
+  blueprint.capabilities = spec.capabilities;
+  blueprint.designSystem = true;
+  blueprint.deployment = { environments: ['local'] };
+  return blueprint;
+}
 
 function run(label, cmd, args, cwd) {
   process.stdout.write(`\n── ${label}\n   $ ${cmd} ${args.join(' ')}  (cwd: ${cwd})\n`);
@@ -104,11 +123,7 @@ async function main() {
 
   const root = await mkdtemp(join(tmpdir(), `enistere-golden-${composition}-`));
   const out = join(root, 'project');
-  const blueprint = createDefaultBlueprint(`golden-${composition}`);
-  blueprint.stack = spec.stack;
-  blueprint.capabilities = spec.capabilities;
-  blueprint.designSystem = true;
-  blueprint.deployment = { environments: ['local'] };
+  const blueprint = compositionBlueprint(composition);
 
   console.log(`Golden runtime: ${composition}\n  output: ${out}`);
   await generateProject(blueprint, out);
@@ -119,12 +134,29 @@ async function main() {
   const kinds = Object.entries(blueprint.stack).filter(([, v]) => v).map(([, v]) => v);
 
   let ok = true;
-  // 1) Reproducible install: npm install (writes root lock) then npm ci (reinstall from lock).
-  ok = run('npm install (writes root lock)', 'npm', ['install', '--no-audit', '--no-fund'], out) && ok;
-  if (ok) ok = run('npm ci (reproducible reinstall)', 'npm', ['ci', '--no-audit', '--no-fund'], out) && ok;
-  // 2) Shared packages build.
+  // 1) Dependency finalization through the engine used by `enistere install`:
+  //    resolve the root lock WITHOUT lifecycle scripts, then install from it (npm ci).
+  try {
+    console.log('\n── dependency finalization (lock without lifecycle scripts, then npm ci)');
+    const dependencies = await finalizeDependencies(out);
+    console.log(`✓ dependenciesLocked=${dependencies.dependenciesLocked} lockDigest=${dependencies.lockDigest.slice(0, 12)}…`);
+  } catch (error) {
+    console.log(`\n❌ FAILED: dependency finalization — ${error.message}`);
+    ok = false;
+  }
+  // 2) The generated project must verify its own recorded lock digest.
+  if (ok) {
+    const verified = await verifyProjectDependencies(out);
+    if (!verified.valid || !verified.dependenciesLocked) {
+      console.log(`\n❌ FAILED: enistere verify <project> — ${verified.issues.join('; ')}`);
+      ok = false;
+    } else {
+      console.log('✓ enistere verify <project>: lock digest matches enistere.lock');
+    }
+  }
+  // 3) Shared packages build.
   if (ok) ok = run('build:packages', 'npm', ['run', 'build:packages'], out) && ok;
-  // 3) Per-application gates.
+  // 4) Per-application gates.
   if (ok) {
     for (const kind of kinds) {
       for (const [label, cmd, args, cwd] of gatesFor(kind, hasDb)) {
@@ -132,6 +164,31 @@ async function main() {
         if (!ok) break;
       }
       if (!ok) break;
+    }
+  }
+  // 5) npm audit by documented exception (no global disabling).
+  if (ok) {
+    const [cmd, args] = auditGate(out, kinds);
+    ok = run('npm audit (documented exceptions only)', cmd, args, REPO_ROOT) && ok;
+  }
+  // 6) Lock determinism: the same blueprint on the same Foundation must resolve to
+  //    the same lock digest. Re-generates a twin and re-resolves the lock only.
+  if (ok) {
+    console.log('\n── lock determinism (same blueprint + same Foundation → same digest)');
+    const twin = join(root, 'twin');
+    await generateProject(compositionBlueprint(composition), twin);
+    try {
+      const twinDeps = await finalizeDependencies(twin, { install: false });
+      const first = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8')).lockDigest;
+      if (twinDeps.lockDigest !== first) {
+        console.log(`\n❌ FAILED: lock digest differs (${first?.slice(0, 12)}… vs ${twinDeps.lockDigest?.slice(0, 12)}…)`);
+        ok = false;
+      } else {
+        console.log(`✓ lock digest reproducible: ${first.slice(0, 12)}…`);
+      }
+    } catch (error) {
+      console.log(`\n❌ FAILED: lock determinism — ${error.message}`);
+      ok = false;
     }
   }
 
@@ -142,4 +199,7 @@ async function main() {
   process.exit(ok ? 0 : 1);
 }
 
-main().catch((error) => { console.error(error); process.exit(1); });
+// Only run when invoked as a program (the exports above are unit-tested).
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => { console.error(error); process.exit(1); });
+}

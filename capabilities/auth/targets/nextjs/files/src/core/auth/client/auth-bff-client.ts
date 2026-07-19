@@ -54,4 +54,3 @@ async function bffGet<T>(path: string, externalSignal?: AbortSignal): Promise<T>
 export function fetchSessionProfile(signal?: AbortSignal): Promise<UserProfile> {
   return bffGet<UserProfile>("/api/auth/me", signal);
 }
-
