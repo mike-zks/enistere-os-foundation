@@ -90,7 +90,8 @@ describe('rbac dependency contract', () => {
     assert.equal(value.targets.nestjs.status, 'ready');
     assert.equal(value.targets.nextjs.status, 'ready');
     assert.equal(value.targets['react-native'].status, 'not-applicable');
-    for (const planned of ['spring', 'angular', 'flutter']) assert.equal(value.targets[planned].status, 'planned');
+    assert.equal(value.targets.spring.status, 'ready');
+    for (const planned of ['angular', 'flutter']) assert.equal(value.targets[planned].status, 'planned');
   });
 
   it('rejects generating base + rbac without auth', async () => {

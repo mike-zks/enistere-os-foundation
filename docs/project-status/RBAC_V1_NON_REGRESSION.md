@@ -81,4 +81,6 @@ Aucune garantie RBAC V1 n'est perdue. Deux améliorations : l'ordre des guards g
 **explicite, validé et déterministe**. Le schéma Prisma est rendu depuis un modèle intermédiaire
 strict, le seed et la page de statut utilisent des registres ordonnés, et OpenAPI provient de
 l'application composée : aucun fichier central n'est possédé par le dernier overlay appliqué.
-`base` et `base + auth` restent exempts de toute surface RBAC, et Files reste `planned`.
+`base` et `base + auth` restent exempts de toute surface RBAC. Depuis Capability Packs 2, cette
+garantie couvre aussi Spring : RBAC n'apparaît qu'avec `base + auth + rbac`, et Files Spring reste
+`planned`.

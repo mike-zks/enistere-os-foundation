@@ -58,6 +58,7 @@ jobs:
           - triple-files
           - spring-base
           - spring-auth
+          - spring-auth-rbac
           - spring-next-base
           - spring-react-native-base
           - spring-angular-base

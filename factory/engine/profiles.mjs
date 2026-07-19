@@ -144,7 +144,7 @@ export const PROFILES = Object.freeze([
 
   // ── Parity targets : declared, never presented as usable ───────────────────
   profile('spring-auth', 'ready', { api: 'spring' }, ['base', 'auth'], { golden: 'spring-auth' }),
-  profile('spring-rbac', 'planned', { api: 'spring' }, ['base', 'auth', 'rbac']),
+  profile('spring-rbac', 'ready', { api: 'spring' }, ['base', 'auth', 'rbac'], { golden: 'spring-auth-rbac' }),
   profile('spring-files', 'planned', { api: 'spring' }, ['base', 'auth', 'rbac', 'files']),
   profile('spring-angular-auth', 'planned', { api: 'spring', web: 'angular' }, ['base', 'auth']),
   profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['base', 'auth', 'rbac']),

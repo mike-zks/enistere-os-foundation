@@ -246,15 +246,12 @@ describe('capability refusals', () => {
     blueprint.capabilities = ['base', 'auth', 'rbac', 'files'];
     await generateProject(blueprint, join(root, 'project'), { materialize: false });
   });
-  it('refuses rbac on a target where it is only planned', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
-    const blueprint = createDefaultBlueprint('rbac-planned-app');
+  it('composes rbac on Spring when auth is selected', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-spring-rbac-'));
+    const blueprint = createDefaultBlueprint('rbac-spring-app');
     blueprint.stack = { api: 'spring', web: null, mobile: null };
     blueprint.capabilities = ['base', 'auth', 'rbac'];
-    await assert.rejects(
-      generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /(auth|rbac) on spring is planned/,
-    );
+    await generateProject(blueprint, join(root, 'project'), { materialize: false });
   });
   it('refuses auth on Angular while that target is planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));

@@ -10,9 +10,10 @@ autorité d'autorisation** : le Web ne fait que conditionner l'affichage (UX), i
 | Target | Statut | Mode |
 |---|---|---|
 | NestJS | `ready` | overlay |
+| Spring | `ready` | overlay |
 | Next.js | `ready` | overlay |
 | React Native | `not-applicable` | — |
-| Spring / Angular / Flutter | `planned` | — |
+| Angular / Flutter | `planned` | — |
 
 `not-applicable` (React Native) : l'autorisation fine est une préoccupation **serveur**. L'app mobile
 reçoit les décisions de l'API (401/403) et ne possède aucune surface RBAC. Ce statut **ne bloque pas**
@@ -49,9 +50,21 @@ aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §
 - `AuthorizationPanel` est enregistré via `nextjs.status-section` ; le shell `/status` reste stable
   et n'est jamais remplacé par RBAC.
 
+## Spring (`targets/spring`)
+
+- Migration Flyway V2 additive : `roles`, `permissions`, `user_roles`, `role_permissions`, sans
+  seed ni attribution implicite.
+- `AuthorizationService` calcule les droits depuis PostgreSQL à chaque décision ; aucun rôle ou
+  permission n'entre dans le JWT.
+- `GET /api/v1/auth/me/authorization` expose uniquement les codes triés nécessaires à l'UX.
+- Le bean `rbacAuthorization` s'utilise avec Method Security :
+  `@PreAuthorize("@rbacAuthorization.hasPermission(authentication, 'files.read')")`.
+- L'identifiant utilisateur provient exclusivement de `Authentication.details`, renseigné par
+  Auth après validation du JWT ; une valeur absente ou malformée refuse l'accès.
+
 ## Preuves
 
-- Goldens runtime : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`
+- Goldens runtime : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`, `spring-auth-rbac`
   (`factory/quality/scripts/golden-runtime.mjs`).
 - Non-régression V1 : `docs/project-status/RBAC_V1_NON_REGRESSION.md`.
 - Tests de composition : `factory/test/rbac-composition.test.mjs` et

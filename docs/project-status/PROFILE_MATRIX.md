@@ -56,7 +56,7 @@ Deux champs distincts portent cette nuance :
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (20)
+### `ready` — composables, prouvés et exacts (21)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -74,6 +74,7 @@ Deux champs distincts portent cette nuance :
 | `nestjs-react-native-base` | nestjs | — | react-native | base | `nestjs-react-native-base` |
 | `spring-base` | spring | — | — | base | `spring-base` |
 | `spring-auth` | spring | — | — | base + auth | `spring-auth` |
+| `spring-rbac` | spring | — | — | base + auth + rbac | `spring-auth-rbac` |
 | `spring-next-base` | spring | nextjs | — | base | `spring-next-base` |
 | `spring-react-native-base` | spring | — | react-native | base | `spring-react-native-base` |
 | `nestjs-angular-base` | nestjs | angular | — | base | `nestjs-angular-base` |
@@ -98,13 +99,13 @@ que leurs gates passent réellement. Angular et Flutter suivent désormais le co
 la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: false`).
 
 Les overlays Auth/RBAC/Files restent une mission distincte : la base exacte ne prouve pas encore
-la parité métier de ces capabilities sur Angular et Flutter.
+la parité métier de ces capabilities sur Angular et Flutter. Sur Spring, Auth et RBAC sont prêts ;
+Files reste planifié.
 
-### `planned` — cibles de parité, génération refusée (6)
+### `planned` — cibles de parité, génération refusée (5)
 
 | Profil | API | Web | Mobile | Capabilities | Bloqué par |
 |---|---|---|---|---|---|
-| `spring-rbac` | spring | — | — | base + auth + rbac | auth+rbac/spring |
 | `spring-files` | spring | — | — | base + auth + rbac + files | auth+rbac+files/spring |
 | `spring-angular-auth` | spring | angular | — | base + auth | auth/spring, auth/angular |
 | `spring-angular-rbac` | spring | angular | — | base + auth + rbac | auth+rbac/spring, auth+rbac/angular |
@@ -128,14 +129,14 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 
 ## Couverture des goldens
 
-R8A puis Capability Packs 2 portent le golden runtime à **20 compositions** : les 10 compositions
-NestJS des capability packs, les 9 compositions `base` seul et `spring-auth`.
+R8A puis Capability Packs 2 portent le golden runtime à **21 compositions** : les 10 compositions
+NestJS des capability packs, les 9 compositions `base` seul, `spring-auth` et `spring-auth-rbac`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
 le golden est bien celle que le profil épingle.
 
-En revanche, **un golden n'est pas une promotion** : les dix-neuf profils `ready` combinent golden
+En revanche, **un golden n'est pas une promotion** : les 21 profils `ready` combinent golden
 vert et composition exacte. Aucun profil `supported` baseline-copy ni profil `planned` n'a été
 promu par cette extraction.
 
