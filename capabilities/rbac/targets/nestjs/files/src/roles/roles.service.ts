@@ -2,8 +2,8 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Role } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service';
-import { AUDIT_EVENT_TYPES } from '../audit/audit.types';
-import { ERROR_CODES } from '../common/errors/error-codes';
+import { RBAC_AUDIT_EVENTS } from '../rbac/rbac-audit-events';
+import { RBAC_ERROR_CODES } from '../rbac/rbac-error-codes';
 import { normalizeRoleCode } from '../permissions/permissions.constants';
 import { CreateRoleInput } from './dto/create-role.input';
 import { RoleView } from './models/role.model';
@@ -25,7 +25,7 @@ export class RolesService {
 
     if (await this.repository.findByCode(code)) {
       throw new ConflictException({
-        code: ERROR_CODES.ROLE_CODE_ALREADY_EXISTS,
+        code: RBAC_ERROR_CODES.ROLE_CODE_ALREADY_EXISTS,
         message: 'Role code already exists.',
       });
     }
@@ -53,7 +53,7 @@ export class RolesService {
     const role = await this.requireByCode(roleCode);
     await this.repository.assignToUser(userId, role.id, actorId);
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.ROLE_ASSIGNED,
+      eventType: RBAC_AUDIT_EVENTS.ROLE_ASSIGNED,
       actorId: actorId ?? null,
       subjectId: userId,
       resourceType: 'user_role',
@@ -65,7 +65,7 @@ export class RolesService {
     const role = await this.requireByCode(roleCode);
     await this.repository.removeFromUser(userId, role.id);
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.ROLE_REMOVED,
+      eventType: RBAC_AUDIT_EVENTS.ROLE_REMOVED,
       actorId: actorId ?? null,
       subjectId: userId,
       resourceType: 'user_role',
@@ -91,7 +91,7 @@ export class RolesService {
     const role = await this.repository.findByCode(normalizeRoleCode(roleCode));
     if (!role) {
       throw new NotFoundException({
-        code: ERROR_CODES.ROLE_NOT_FOUND,
+        code: RBAC_ERROR_CODES.ROLE_NOT_FOUND,
         message: 'Role not found.',
       });
     }

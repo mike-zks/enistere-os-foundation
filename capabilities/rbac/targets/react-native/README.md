@@ -1,6 +1,12 @@
-# RBAC — non applicable au starter React Native (V1)
+# RBAC — non applicable au starter React Native
 
-Le starter React Native n'embarque pas de surface RBAC : l'autorisation fine est
-une préoccupation serveur (NestJS). La capability `rbac` reste `planned` sur
-`react-native` et n'a pas de payload à extraire ici. Ce fichier documente
-l'absence volontaire pour la cohérence de l'arborescence des capabilities.
+Statut déclaré : **`not-applicable`** (et non `planned`).
+
+L'autorisation fine est une préoccupation **serveur** : l'application mobile consomme les décisions
+de l'API (401/403) et ne possède aucune surface RBAC propre. Aucun overlay n'est créé ici — un
+overlay vide serait une surface factice.
+
+Conséquence pour la Factory : une composition `base + auth + rbac` incluant React Native reste
+**générable**. Le mobile reste sur `base + auth` et ne reçoit rien de RBAC. Cette sémantique est
+implémentée dans `assessCapabilitySupport` et documentée dans
+`factory/engine/OVERLAY_CONTRACT.md`.

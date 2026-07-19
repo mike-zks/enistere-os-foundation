@@ -1,4 +1,4 @@
-import { handleGetAuthorization } from "../src/core/auth/handlers/get-authorization-handler.js";
+import { handleGetAuthorization } from "../src/core/authorization/get-authorization-handler.js";
 import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
 import assert from "node:assert/strict";
 import { test } from "node:test";

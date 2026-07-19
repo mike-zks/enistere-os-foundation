@@ -45,7 +45,11 @@ export function validateManifestConsistency(starters, capabilities) {
       const declaredPlanned = starter.composition.plannedCapabilities.includes(capability.id);
       if (target.status === 'ready' && !declaredReady) issues.push(`${starterId}/${capability.id}: target ready but starter does not declare ready`);
       if (target.status === 'planned' && !declaredPlanned) issues.push(`${starterId}/${capability.id}: target planned but starter does not declare planned`);
-      if (target.status === 'unsupported' && (declaredReady || declaredPlanned)) issues.push(`${starterId}/${capability.id}: unsupported target declared by starter`);
+      // `unsupported` and `not-applicable` targets own no surface: a starter must
+      // not advertise them as ready or planned.
+      if (['unsupported', 'not-applicable'].includes(target.status) && (declaredReady || declaredPlanned)) {
+        issues.push(`${starterId}/${capability.id}: ${target.status} target declared by starter`);
+      }
     }
   }
   return issues;

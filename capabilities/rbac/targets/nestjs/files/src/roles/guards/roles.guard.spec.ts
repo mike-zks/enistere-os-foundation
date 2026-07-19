@@ -2,7 +2,7 @@ import { ExecutionContext, ForbiddenException, InternalServerErrorException } fr
 import { Reflector } from '@nestjs/core';
 
 import { AuditService } from '../../audit/audit.service';
-import { AuthorizationContextService } from '../../auth/authorization/authorization-context.service';
+import { AuthorizationContextService } from '../../authorization/authorization-context.service';
 import { RolesGuard } from './roles.guard';
 
 function buildContext(request: unknown): ExecutionContext {

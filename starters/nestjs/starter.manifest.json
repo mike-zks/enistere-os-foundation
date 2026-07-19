@@ -3,7 +3,47 @@
   "id": "nestjs",
   "kind": "api",
   "framework": "NestJS",
-  "commands": { "install": ["npm", "ci"], "dev": ["npm", "run", "start:dev"], "test": ["npm", "test"], "build": ["npm", "run", "build"], "verify": ["npm", "run", "openapi:check"] },
-  "composition": { "contractVersion": "1", "base": "built-in", "model": "modular", "readyCapabilities": ["auth"], "plannedCapabilities": ["rbac", "files", "audit", "observability"] },
-  "deployment": { "dockerfile": "Dockerfile", "healthPath": "/health" }
+  "commands": {
+    "install": [
+      "npm",
+      "ci"
+    ],
+    "dev": [
+      "npm",
+      "run",
+      "start:dev"
+    ],
+    "test": [
+      "npm",
+      "test"
+    ],
+    "build": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "verify": [
+      "npm",
+      "run",
+      "openapi:check"
+    ]
+  },
+  "composition": {
+    "contractVersion": "1",
+    "base": "built-in",
+    "model": "modular",
+    "readyCapabilities": [
+      "auth",
+      "rbac"
+    ],
+    "plannedCapabilities": [
+      "files",
+      "audit",
+      "observability"
+    ]
+  },
+  "deployment": {
+    "dockerfile": "Dockerfile",
+    "healthPath": "/health"
+  }
 }

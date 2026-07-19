@@ -12,8 +12,8 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Blueprint/lock | Implémentés | schéma v1, génération déterministe |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
-| Capabilities | `auth` livrée en overlay (NestJS/Next.js/RN) | RBAC/Files parqués ; Spring/Angular/Flutter planifiés |
-| Overlays déclaratifs | Moteur + overlay `auth` livrés | seul `auth` a un `overlay.json` |
+| Capabilities | `auth` (NestJS/Next.js/RN) et `rbac` (NestJS/Next.js) livrées en overlay | Files parqué ; Spring/Angular/Flutter planifiés |
+| Overlays déclaratifs | Moteur + overlays `auth` et `rbac` livrés | `files` n'a pas d'`overlay.json` |
 | Packages | Implémentés | contracts (contrat complet figé), client Fetch, UI Kit |
 | Deployment | Local/staging disponibles | Compose, CI, runbooks et preuve staging V1 |
 | Distribution | Partielle | artefacts historiques ; CLI V2 non publiée |
@@ -41,7 +41,13 @@ Le projet généré est un **workspace npm unifié** : les `@enistere/*` sont de
 (résolus via `*`, sans `file:`), un unique `package-lock.json` racine fait autorité et `npm ci`
 réinstalle de façon reproductible. La CI `Factory Golden Runtime` génère `base+auth` pour les trois
 verticales, prouve l'installation reproductible et exécute les gates réels de chaque application.
-La non-régression Auth V1 est documentée dans `docs/project-status/AUTH_V1_NON_REGRESSION.md`.
+Les non-régressions V1 sont documentées : `docs/project-status/AUTH_V1_NON_REGRESSION.md` et
+`docs/project-status/RBAC_V1_NON_REGRESSION.md`.
+
+RBAC (1B) dépend explicitement de `base + auth`, ordonne ses guards globaux de façon déterministe
+(authentification → rôles → permissions) et compose son schéma Prisma sans dupliquer `User`. Sur
+React Native, `rbac` est `not-applicable` : la composition triple reste générable et le mobile ne
+reçoit aucune surface RBAC.
 
 ## Références
 

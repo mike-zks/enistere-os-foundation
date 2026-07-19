@@ -1,7 +1,7 @@
-import { createAuthenticatedServerApiClient } from "../../api/server/create-authenticated-server-api-client.js";
-import { errorResponse, jsonError, jsonOk } from "../http/web-response.js";
-import { resolveRequestId } from "./security.js";
-import type { AuthHandlerDeps } from "./types.js";
+import { createAuthenticatedServerApiClient } from "../api/server/create-authenticated-server-api-client.js";
+import { errorResponse, jsonError, jsonOk } from "../auth/http/web-response.js";
+import { resolveRequestId } from "../auth/handlers/security.js";
+import type { AuthHandlerDeps } from "../auth/handlers/types.js";
 
 /**
  * `GET /api/auth/authorization` — **rôles et permissions** de l'utilisateur courant (codes canoniques

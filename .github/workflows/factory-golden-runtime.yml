@@ -49,6 +49,9 @@ jobs:
           - nestjs-auth
           - nest-next-auth
           - triple-auth
+          - nestjs-auth-rbac
+          - nest-next-auth-rbac
+          - triple-auth-rbac
 
     services:
       postgres:

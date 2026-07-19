@@ -12,8 +12,11 @@ const DEFAULT_TIMEOUT_MS = 10_000;
  * (cookies `HttpOnly` envoyés par le navigateur — jamais lus par le JS). N'appelle **jamais** l'API
  * NestJS directement, n'utilise **pas** `NEXT_PUBLIC_API_URL`, ne lit aucun token/cookie. Valide
  * l'enveloppe (`{ success, data }`) ; lève `BffAuthError` (HTTP / réseau / réponse invalide).
+ *
+ * Exporté comme primitive réutilisable par les capabilities composées au-dessus d'Auth
+ * (ex. RBAC pour `/api/auth/authorization`) : même politique same-origin, mêmes garanties.
  */
-async function bffGet<T>(path: string, externalSignal?: AbortSignal): Promise<T> {
+export async function bffGet<T>(path: string, externalSignal?: AbortSignal): Promise<T> {
   // `AbortSignal.timeout` utilise un timer **unref** (ne maintient pas l'event loop en vie),
   // combiné à l'annulation externe éventuelle (TanStack Query) via `AbortSignal.any`.
   const timeoutSignal = AbortSignal.timeout(DEFAULT_TIMEOUT_MS);

@@ -127,7 +127,8 @@
     {
       "kind": "nestjs.global-guard",
       "importPath": "../auth/guards/jwt-auth.guard",
-      "symbol": "JwtAuthGuard"
+      "symbol": "JwtAuthGuard",
+      "order": 10
     },
     {
       "kind": "nestjs.throttler",

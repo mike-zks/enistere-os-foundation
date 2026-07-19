@@ -12,6 +12,9 @@
  *   nestjs-auth           nestjs, base+auth
  *   nest-next-auth        nestjs + nextjs, base+auth
  *   triple-auth           nestjs + nextjs + react-native, base+auth
+ *   nestjs-auth-rbac      nestjs, base+auth+rbac
+ *   nest-next-auth-rbac   nestjs + nextjs, base+auth+rbac
+ *   triple-auth-rbac      nestjs + nextjs + react-native, base+auth+rbac (RBAC non applicable au mobile)
  *
  * Gates DB (prisma migrate, e2e NestJS) exécutés uniquement si DATABASE_URL est
  * défini. Aucun secret réel : la CI fournit des valeurs jetables via l'env.
@@ -49,6 +52,11 @@ export const COMPOSITIONS = {
   'nestjs-auth': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth'] },
   'nest-next-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth'] },
   'triple-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth'] },
+  // RBAC (1B) : NestJS + Next.js consomment RBAC ; React Native reste sur base + auth
+  // (`not-applicable`) sans recevoir la moindre surface RBAC.
+  'nestjs-auth-rbac': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
+  'nest-next-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
+  'triple-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth', 'rbac'] },
 };
 
 /** argv of the npm-audit-by-exception gate applied to every golden. */
@@ -79,12 +87,16 @@ function run(label, cmd, args, cwd) {
   return true;
 }
 
-function gatesFor(kind, hasDb) {
+function gatesFor(kind, hasDb, capabilities = []) {
   if (kind === 'nestjs') {
     return [
       ['api: prisma generate', 'npm', ['run', 'prisma:generate', '--workspace=apps/api']],
       ['api: prisma validate', 'npm', ['run', 'prisma:validate', '--workspace=apps/api']],
       ...(hasDb ? [['api: prisma migrate deploy', 'npm', ['run', 'prisma:migrate:deploy', '--workspace=apps/api']]] : []),
+      // Seed structurel gouverné (RBAC) : idempotent, sans identité ni donnée métier.
+      ...(hasDb && capabilities.includes('rbac')
+        ? [['api: prisma seed (RBAC structural, idempotent)', 'npm', ['run', 'prisma:seed', '--workspace=apps/api']]]
+        : []),
       ['api: lint', 'npm', ['run', 'lint', '--workspace=apps/api']],
       ['api: unit tests', 'npm', ['run', 'test', '--workspace=apps/api']],
       ...(hasDb ? [['api: e2e (Auth)', 'npm', ['run', 'test:e2e', '--workspace=apps/api']]] : []),
@@ -159,7 +171,7 @@ async function main() {
   // 4) Per-application gates.
   if (ok) {
     for (const kind of kinds) {
-      for (const [label, cmd, args, cwd] of gatesFor(kind, hasDb)) {
+      for (const [label, cmd, args, cwd] of gatesFor(kind, hasDb, blueprint.capabilities)) {
         ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
         if (!ok) break;
       }

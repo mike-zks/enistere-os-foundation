@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildGenerationPlan } from './plan.mjs';
 import { generateOpenApi } from './contracts.mjs';
-import { assessCapabilitySupport, loadCapabilityManifests } from './capabilities.mjs';
+import { assessCapabilitySupport, loadCapabilityManifests, validateCapabilityDependencies } from './capabilities.mjs';
 import { loadStarterManifests, modularStarterIds, selectedStarterIds } from './starters.mjs';
 import { applyCapabilityOverlays } from './overlay.mjs';
 
@@ -257,6 +257,12 @@ function projectReadme(blueprint, plan, overlays) {
 
 export async function generateProject(blueprint, output, options = {}) {
   if (await exists(output)) throw new Error(`Output already exists: ${output}`);
+  // The capability dependency contract is enforced by the engine itself, not only
+  // by the CLI blueprint validation: `rbac` requires `auth`, everything requires `base`.
+  const dependencyIssues = validateCapabilityDependencies(blueprint.capabilities);
+  if (dependencyIssues.length) {
+    throw new Error(`Capability selection is invalid:\n- ${dependencyIssues.join('\n- ')}`);
+  }
   const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
   const support = assessCapabilitySupport(selectedStarterIds(blueprint), capabilityManifests);
   if (!support.ready) {

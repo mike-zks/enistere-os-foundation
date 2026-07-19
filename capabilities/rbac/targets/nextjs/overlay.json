@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "nextjs",
+  "version": "0.2.0",
+  "description": "Surface RBAC web : BFF d'autorisation (/api/auth/authorization), client same-origin, hook et vue d'état d'autorisation pour l'affichage conditionnel UX. L'API reste l'unique autorité ; aucun token ni permission n'est traité comme autorité côté navigateur.",
+  "files": [
+    { "source": "files/src/core/authorization", "destination": "src/core/authorization" },
+    { "source": "files/src/core/query/keys/authorization-keys.ts", "destination": "src/core/query/keys/authorization-keys.ts" },
+    { "source": "files/src/features/authorization", "destination": "src/features/authorization" },
+    { "source": "files/src/app/api/auth/authorization", "destination": "src/app/api/auth/authorization" },
+    { "source": "files/src/app/(public)/status/page.tsx", "destination": "src/app/(public)/status/page.tsx", "overwrite": true },
+    { "source": "files/test", "destination": "test" }
+  ],
+  "dependencies": {},
+  "environment": [],
+  "integrations": [],
+  "verification": []
+}

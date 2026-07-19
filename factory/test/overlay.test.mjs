@@ -188,17 +188,25 @@ describe('modular generation plan', () => {
 });
 
 describe('capability refusals', () => {
-  it('still refuses rbac and files on every target', async () => {
-    for (const capability of ['rbac', 'files']) {
-      const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
-      const blueprint = createDefaultBlueprint('refused-app');
-      blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
-      blueprint.capabilities = ['base', 'auth', capability];
-      await assert.rejects(
-        generateProject(blueprint, join(root, 'project'), { materialize: false }),
-        new RegExp(`${capability} on nestjs is planned`),
-      );
-    }
+  it('still refuses files on every target', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
+    const blueprint = createDefaultBlueprint('refused-app');
+    blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
+    blueprint.capabilities = ['base', 'auth', 'files'];
+    await assert.rejects(
+      generateProject(blueprint, join(root, 'project'), { materialize: false }),
+      /files on nestjs is planned/,
+    );
+  });
+  it('refuses rbac on a target where it is only planned', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
+    const blueprint = createDefaultBlueprint('rbac-planned-app');
+    blueprint.stack = { api: 'spring', web: null, mobile: null };
+    blueprint.capabilities = ['base', 'auth', 'rbac'];
+    await assert.rejects(
+      generateProject(blueprint, join(root, 'project'), { materialize: false }),
+      /(auth|rbac) on spring is planned/,
+    );
   });
   it('refuses auth on a planned target', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));

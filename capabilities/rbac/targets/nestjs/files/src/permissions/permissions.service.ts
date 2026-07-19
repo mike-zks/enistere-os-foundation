@@ -2,8 +2,8 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Permission } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service';
-import { AUDIT_EVENT_TYPES } from '../audit/audit.types';
-import { ERROR_CODES } from '../common/errors/error-codes';
+import { RBAC_AUDIT_EVENTS } from '../rbac/rbac-audit-events';
+import { RBAC_ERROR_CODES } from '../rbac/rbac-error-codes';
 import { CreatePermissionInput } from './dto/create-permission.input';
 import { PermissionView } from './models/permission.model';
 import { PermissionsRepository } from './permissions.repository';
@@ -28,14 +28,14 @@ export class PermissionsService {
 
     if (!parsed) {
       throw new BadRequestException({
-        code: ERROR_CODES.INVALID_PERMISSION_CODE,
+        code: RBAC_ERROR_CODES.INVALID_PERMISSION_CODE,
         message: 'Invalid permission code.',
       });
     }
 
     if (await this.repository.findByCode(code)) {
       throw new ConflictException({
-        code: ERROR_CODES.PERMISSION_CODE_ALREADY_EXISTS,
+        code: RBAC_ERROR_CODES.PERMISSION_CODE_ALREADY_EXISTS,
         message: 'Permission code already exists.',
       });
     }
@@ -55,7 +55,7 @@ export class PermissionsService {
     const permission = await this.requireByCode(permissionCode);
     await this.repository.assignToRole(roleId, permission.id, actorId);
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.PERMISSION_ASSIGNED_TO_ROLE,
+      eventType: RBAC_AUDIT_EVENTS.PERMISSION_ASSIGNED_TO_ROLE,
       actorId: actorId ?? null,
       resourceType: 'role_permission',
       resourceId: roleId,
@@ -67,7 +67,7 @@ export class PermissionsService {
     const permission = await this.requireByCode(permissionCode);
     await this.repository.removeFromRole(roleId, permission.id);
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.PERMISSION_REMOVED_FROM_ROLE,
+      eventType: RBAC_AUDIT_EVENTS.PERMISSION_REMOVED_FROM_ROLE,
       actorId: actorId ?? null,
       resourceType: 'role_permission',
       resourceId: roleId,
@@ -98,14 +98,14 @@ export class PermissionsService {
     const code = permissionCode.trim();
     if (!isValidPermissionCode(code)) {
       throw new BadRequestException({
-        code: ERROR_CODES.INVALID_PERMISSION_CODE,
+        code: RBAC_ERROR_CODES.INVALID_PERMISSION_CODE,
         message: 'Invalid permission code.',
       });
     }
     const permission = await this.repository.findByCode(code);
     if (!permission) {
       throw new NotFoundException({
-        code: ERROR_CODES.PERMISSION_NOT_FOUND,
+        code: RBAC_ERROR_CODES.PERMISSION_NOT_FOUND,
         message: 'Permission not found.',
       });
     }

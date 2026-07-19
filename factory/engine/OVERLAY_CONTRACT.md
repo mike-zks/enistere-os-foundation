@@ -26,11 +26,33 @@ mais non câblé) : la capability reste `planned` et `generate` la refuse.
 | `integrations` | Intégrations **centrales connues** rendues par le moteur (voir ci-dessous). Une intégration inconnue échoue. |
 | `verification` | Tableaux d'arguments exécutés depuis le répertoire de l'app par le script `verify` généré. |
 
+## Statuts de support d'une capability sur une target
+
+| Statut | Sens | Bloque la génération ? |
+|---|---|---|
+| `ready` | composable aujourd'hui (`mode`: `built-in` ou `overlay`) | non |
+| `planned` | prévue mais non livrée | **oui** |
+| `unsupported` | ne sera pas livrée pour cette target | **oui** |
+| `not-applicable` | la capability n'a **par conception** aucune surface sur cette target, qui en consomme les décisions ailleurs (ex. RBAC sur mobile : l'autorisation est serveur) | non — et **rien n'est injecté** |
+
+`not-applicable` permet à une composition mixte (`base + auth + rbac` sur NestJS + Next.js + React
+Native) de rester générable : la target concernée est ignorée par l'application d'overlays, jamais
+dotée d'un overlay factice. `assessCapabilitySupport` retourne ces cas dans `notApplicable`.
+
 ## Intégrations connues (par target)
 
-- **nestjs** : `nestjs.module`, `nestjs.global-guard`, `nestjs.throttler`, `nestjs.prisma-fragment`.
-  Rendues dans `src/composition/capabilities.ts` (modules, guards globaux, throttlers nommés) et par
-  ajout de fragment à `prisma/schema.prisma`.
+- **nestjs** : `nestjs.module`, `nestjs.global-guard`, `nestjs.throttler`, `nestjs.prisma-fragment`,
+  `nestjs.prisma-model-field`. Rendues dans `src/composition/capabilities.ts` (modules, guards
+  globaux, throttlers nommés) et par composition du schéma `prisma/schema.prisma`.
+  - `nestjs.global-guard` porte un `order` entier **obligatoire** : la chaîne globale est triée par
+    `order`, indépendamment de l'ordre de composition (authentification 10 → rôles 20 → permissions
+    30). Un symbole déclaré deux fois ou deux guards réclamant le même rang sont **refusés** (chaîne
+    ambiguë jamais rendue).
+  - `nestjs.prisma-model-field` étend un modèle déjà défini par un fragment antérieur (ex. RBAC
+    ajoutant `roles UserRole[]` au `User` d'Auth). L'insertion est **consciente des blocs** : le
+    modèle est localisé par son en-tête, sa accolade fermante par profondeur, et le champ inséré
+    avec les autres champs (avant les attributs `@@`). Modèle inconnu ou champ déjà déclaré →
+    erreur. **Jamais de substitution textuelle/regex non gouvernée, jamais de duplication de modèle.**
 - **nextjs** : `nextjs.provider` (→ `src/app/providers/capability-providers.tsx`),
   `nextjs.public-nav-link` (→ `src/core/composition/public-nav.ts`).
 - **react-native** : `expo.provider` (→ `src/composition/capability-providers.tsx`).
