@@ -5,7 +5,7 @@ import { afterEach, test } from "node:test";
 
 import { cleanup, render, screen } from "@testing-library/react";
 
-import { AuthorizationStatusView } from "../src/features/auth/authorization-status-view.js";
+import { AuthorizationStatusView } from "../src/features/authorization/authorization-status-view.js";
 
 afterEach(() => {
   cleanup();

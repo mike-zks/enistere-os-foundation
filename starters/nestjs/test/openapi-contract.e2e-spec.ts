@@ -11,16 +11,27 @@ import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { buildOpenApiDocument, serializeOpenApiDocument } from '../src/common/openapi/openapi-document';
 
-// Contrat OpenAPI de la baseline `base` : uniquement les sondes de santé.
-// Les capabilities composées (Auth, ...) livrent leur propre variante de ce
-// spec via leur overlay (remplacement déclaré).
-const EXPECTED_OPERATION_IDS = ['health_get', 'health_live', 'health_ready'];
+/**
+ * Invariants du contrat OpenAPI, valables pour **toute composition** (base seule ou
+ * avec des capabilities). La surface exacte attendue (jeu d'`operationId` par
+ * capability) n'est PAS figée ici : elle est déclarée par chaque overlay
+ * (`contract.openapiOperations`) et vérifiée sur le document RÉELLEMENT généré par
+ * l'application composée (Factory Golden Runtime) — aucun snapshot n'est recopié.
+ */
 
+// Jamais exposés, quelle que soit la composition : secrets et modèles de persistance.
 const FORBIDDEN_TOKENS = [
   'passwordHash',
   'tokenHash',
   'DATABASE_URL',
-  'AuditLogCreate',
+  'JWT_ACCESS_SECRET',
+  'REFRESH_TOKEN_HASH_SECRET',
+  'S3_SECRET_ACCESS_KEY',
+  'UserUnchecked',
+  'RefreshSession',
+  'UserRole',
+  'RolePermission',
+  'StoredFileCreate',
 ];
 
 describe('OpenAPI contract (e2e)', () => {
@@ -52,25 +63,23 @@ describe('OpenAPI contract (e2e)', () => {
     expect(document.info.version).not.toBe('');
   });
 
-  it('exposes exactly the expected operationIds, unique and not controller-derived', () => {
+  it('always publishes the baseline health probes', () => {
     const ids = operations.map((o) => o.op.operationId as string);
-    expect(ids.length).toBe(EXPECTED_OPERATION_IDS.length);
+    for (const id of ['health_get', 'health_live', 'health_ready']) expect(ids).toContain(id);
+  });
+
+  it('uses unique, explicit operationIds (never controller-derived)', () => {
+    const ids = operations.map((o) => o.op.operationId as string);
     expect(new Set(ids).size).toBe(ids.length);
-    expect([...ids].sort()).toEqual([...EXPECTED_OPERATION_IDS].sort());
     for (const id of ids) {
       expect(id).not.toContain('Controller');
-      expect(id).toMatch(/^health_[a-zA-Z]+$/);
+      expect(id).toMatch(/^[a-z][a-zA-Z0-9]*_[a-zA-Z]+$/);
     }
   });
 
-  it('uses only the canonical tags', () => {
-    const tags = new Set(operations.flatMap((o) => (o.op.tags as string[]) ?? []));
-    expect([...tags].sort()).toEqual(['Health']);
-  });
-
-  it('declares no security requirement on the public health probes', () => {
+  it('leaves the public health probes unauthenticated', () => {
     for (const { op } of operations) {
-      expect(op.security).toBeUndefined();
+      if ((op.operationId as string).startsWith('health_')) expect(op.security).toBeUndefined();
     }
   });
 
@@ -91,7 +100,7 @@ describe('OpenAPI contract (e2e)', () => {
     expect(raw).not.toContain('"data":{"type":"object"}');
   });
 
-  it('matches the committed canonical snapshot (freshness) and the check detects divergence', () => {
+  it('matches the committed canonical snapshot of this composition', () => {
     const serialized = serializeOpenApiDocument(document);
     const snapshot = readFileSync(join(process.cwd(), 'openapi', 'openapi.json'), 'utf8');
     expect(serialized).toBe(snapshot);
@@ -100,7 +109,7 @@ describe('OpenAPI contract (e2e)', () => {
   });
 
   it('returns a runtime error envelope with requestId (aligned with the schema)', async () => {
-    const res = await request(app.getHttpServer()).get('/unknown-route').expect(404);
+    const res = await request(app.getHttpServer()).get('/definitely-unknown-route').expect(404);
     expect(res.body.success).toBe(false);
     expect(typeof res.body.requestId).toBe('string');
     expect(res.headers['x-request-id']).toBe(res.body.requestId);

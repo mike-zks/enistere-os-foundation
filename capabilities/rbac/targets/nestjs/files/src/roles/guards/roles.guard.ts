@@ -8,13 +8,13 @@ import {
 import { Reflector } from '@nestjs/core';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES } from '../../audit/audit.types';
+import { RBAC_AUDIT_EVENTS } from '../../rbac/rbac-audit-events';
 import {
   AuthorizationCarrier,
   AuthorizationContextService,
-} from '../../auth/authorization/authorization-context.service';
+} from '../../authorization/authorization-context.service';
 import { AuthenticatedPrincipal } from '../../auth/contracts/authenticated-principal';
-import { ERROR_CODES } from '../../common/errors/error-codes';
+import { RBAC_ERROR_CODES } from '../../rbac/rbac-error-codes';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 type GuardRequest = AuthorizationCarrier & { user?: AuthenticatedPrincipal; ip?: string };
@@ -58,12 +58,12 @@ export class RolesGuard implements CanActivate {
 
     if (!allowed) {
       await this.auditService.record({
-        eventType: AUDIT_EVENT_TYPES.AUTHORIZATION_ROLE_DENIED,
+        eventType: RBAC_AUDIT_EVENTS.AUTHORIZATION_ROLE_DENIED,
         subjectId: principal.userId,
         ipAddress: request.ip ?? null,
         metadata: { requiredRoles: required.join(',') },
       });
-      throw new ForbiddenException({ code: ERROR_CODES.AUTH_FORBIDDEN, message: 'Forbidden.' });
+      throw new ForbiddenException({ code: RBAC_ERROR_CODES.AUTH_FORBIDDEN, message: 'Forbidden.' });
     }
 
     return true;

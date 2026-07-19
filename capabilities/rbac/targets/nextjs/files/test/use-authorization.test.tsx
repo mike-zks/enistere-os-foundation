@@ -6,7 +6,7 @@ import { afterEach, test } from "node:test";
 import type { QueryClient } from "@tanstack/react-query";
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 
-import { useAuthorization } from "../src/features/auth/use-authorization.js";
+import { useAuthorization } from "../src/features/authorization/use-authorization.js";
 import { createTestQueryClient, createWrapper } from "./helpers/api-test-kit.js";
 import { createBrowserFetch } from "./helpers/browser-fetch.js";
 

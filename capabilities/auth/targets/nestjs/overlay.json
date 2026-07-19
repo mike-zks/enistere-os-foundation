@@ -37,16 +37,6 @@
       "source": "files/test/setup-e2e.ts",
       "destination": "test/setup-e2e.ts",
       "overwrite": true
-    },
-    {
-      "source": "files/test/openapi-contract.e2e-spec.ts",
-      "destination": "test/openapi-contract.e2e-spec.ts",
-      "overwrite": true
-    },
-    {
-      "source": "files/openapi/openapi.json",
-      "destination": "openapi/openapi.json",
-      "overwrite": true
     }
   ],
   "dependencies": {
@@ -127,7 +117,8 @@
     {
       "kind": "nestjs.global-guard",
       "importPath": "../auth/guards/jwt-auth.guard",
-      "symbol": "JwtAuthGuard"
+      "symbol": "JwtAuthGuard",
+      "order": 10
     },
     {
       "kind": "nestjs.throttler",
@@ -146,8 +137,8 @@
       "defaultTtlSeconds": 60
     },
     {
-      "kind": "nestjs.prisma-fragment",
-      "source": "fragments/auth.prisma"
+      "kind": "nestjs.prisma-schema",
+      "source": "fragments/auth.prisma.json"
     }
   ],
   "verification": [
@@ -156,5 +147,13 @@
       "run",
       "test"
     ]
-  ]
+  ],
+  "contract": {
+    "openapiOperations": [
+      "auth_login",
+      "auth_refresh",
+      "auth_logout",
+      "auth_getProfile"
+    ]
+  }
 }

@@ -3,7 +3,23 @@ import { join } from 'node:path';
 import { STARTER_IDS } from './starters.mjs';
 
 export const CAPABILITY_IDS = Object.freeze(['base', 'auth', 'rbac', 'files']);
-const STATUSES = new Set(['ready', 'planned', 'unsupported']);
+
+/**
+ * Support status of a capability on a target, with explicit semantics:
+ *
+ * - `ready`          : composable today (see `mode`: built-in or overlay).
+ * - `planned`        : intended but not delivered — **blocks** generation.
+ * - `unsupported`    : will not be delivered for this target — **blocks** generation.
+ * - `not-applicable` : the capability has no surface on this target by design and
+ *                      the target consumes it from another one (e.g. RBAC is a
+ *                      server-side authorization concern: a mobile app receives
+ *                      decisions from the API and owns no RBAC surface). It does
+ *                      **not** block generation and injects nothing.
+ */
+export const CAPABILITY_STATUSES = Object.freeze(['ready', 'planned', 'unsupported', 'not-applicable']);
+/** Statuses that do not prevent composing a selection on a target. */
+export const NON_BLOCKING_STATUSES = Object.freeze(['ready', 'not-applicable']);
+const STATUSES = new Set(CAPABILITY_STATUSES);
 
 export function validateCapabilityManifest(value) {
   const issues = [];
@@ -41,15 +57,25 @@ export function validateCapabilityDependencies(selected) {
   return [...new Set(issues)];
 }
 
+/**
+ * A selection is composable when every selected capability is, on every selected
+ * target, either `ready` or `not-applicable`. `not-applicable` targets are
+ * reported separately: they compose nothing and must never receive a surface.
+ */
 export function assessCapabilitySupport(starterIds, manifests) {
   const blockers = [];
+  const notApplicable = [];
   for (const manifest of manifests) {
     for (const starterId of starterIds) {
       const target = manifest.targets[starterId];
-      if (target.status !== 'ready') blockers.push({ capability: manifest.id, starter: starterId, status: target.status });
+      if (target.status === 'not-applicable') {
+        notApplicable.push({ capability: manifest.id, starter: starterId });
+      } else if (!NON_BLOCKING_STATUSES.includes(target.status)) {
+        blockers.push({ capability: manifest.id, starter: starterId, status: target.status });
+      }
     }
   }
-  return { ready: blockers.length === 0, blockers };
+  return { ready: blockers.length === 0, blockers, notApplicable };
 }
 
 export function buildCapabilityMatrix(manifests) {

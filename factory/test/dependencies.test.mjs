@@ -198,8 +198,11 @@ describe('npm audit by documented exception', () => {
 });
 
 describe('golden runtime audit wiring', () => {
-  it('applies the audit gate to each of the four goldens', () => {
-    assert.deepEqual(Object.keys(COMPOSITIONS), ['nestjs-base', 'nestjs-auth', 'nest-next-auth', 'triple-auth']);
+  it('applies the audit gate to every golden composition', () => {
+    assert.deepEqual(Object.keys(COMPOSITIONS), [
+      'nestjs-base', 'nestjs-auth', 'nest-next-auth', 'triple-auth',
+      'nestjs-auth-rbac', 'nest-next-auth-rbac', 'triple-auth-rbac',
+    ]);
     for (const composition of Object.keys(COMPOSITIONS)) {
       const spec = COMPOSITIONS[composition];
       const kinds = Object.values(spec.stack).filter(Boolean);

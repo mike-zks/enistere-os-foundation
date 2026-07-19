@@ -1,30 +1,29 @@
 /* eslint-disable */
 /**
- * Seed structurel RBAC idempotent (ADR-006, Auth 5).
+ * Seed structurel RBAC — **composable et idempotent** (ADR-006).
  *
- * Crée/maintient les permissions et rôles STRUCTURELS du core (isSystem = true) et
+ * Contribué par la capability RBAC via l'intégration `nestjs.prisma-seed` ; il est
+ * exécuté par l'orchestrateur stable `prisma/seed.ts` dans l'ordre déclaré. Il ne
+ * remplace aucun fichier central.
+ *
+ * Crée/maintient les permissions et rôles STRUCTURELS du core (`isSystem = true`) et
  * affecte les permissions structurelles au rôle `administrator`.
  *
  * Garanties :
  * - aucun utilisateur, aucun mot de passe, aucune affectation rôle→utilisateur ;
  * - aucun rôle/permission métier ;
- * - upsert idempotent (réexécutable sans effet de bord) ;
- * - NON exécuté par `prisma migrate deploy` (production) ; lancer explicitement
- *   `npm run prisma:seed` (ou `prisma db seed`).
- *
- * Optionnel pour les projets dérivés, qui peuvent définir leurs propres rôles/permissions.
+ * - aucune permission accordée implicitement à tous les utilisateurs ;
+ * - upsert idempotent (réexécutable sans effet de bord).
  */
-import { PrismaClient } from '@prisma/client';
+import type { SeedContext } from './capability-seeds';
 
 import {
   SYSTEM_PERMISSION_CODES,
   SYSTEM_ROLE_CODES,
   parsePermissionCode,
-} from '../src/permissions/permissions.constants';
+} from '../../src/permissions/permissions.constants';
 
-const prisma = new PrismaClient();
-
-async function main(): Promise<void> {
+export async function seedRbac({ prisma }: SeedContext): Promise<void> {
   for (const code of SYSTEM_PERMISSION_CODES) {
     const parsed = parsePermissionCode(code);
     if (!parsed) {
@@ -43,6 +42,8 @@ async function main(): Promise<void> {
     update: { isSystem: true },
   });
 
+  // Rôle `user` structurel, volontairement SANS permission : aucune capacité n'est
+  // accordée implicitement à tous les utilisateurs.
   await prisma.role.upsert({
     where: { code: SYSTEM_ROLE_CODES.USER },
     create: { code: SYSTEM_ROLE_CODES.USER, name: 'User', isSystem: true },
@@ -60,14 +61,4 @@ async function main(): Promise<void> {
       update: {},
     });
   }
-
-  console.log('RBAC structural seed applied (idempotent).');
 }
-
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (error) => {
-    console.error(error);
-    await prisma.$disconnect();
-    process.exit(1);
-  });

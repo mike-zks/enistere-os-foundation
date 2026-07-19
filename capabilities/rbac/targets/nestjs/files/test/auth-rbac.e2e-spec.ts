@@ -258,4 +258,71 @@ describe('Auth RBAC (e2e)', () => {
     expect(raw).not.toContain('passwordHash');
     expect(raw).not.toContain('tokenHash');
   });
+
+  it('never trusts a role or permission supplied by the client', async () => {
+    // Un client qui prétend détenir un rôle/permission (en-têtes ou corps) ne doit
+    // rien obtenir : l'autorisation est calculée depuis l'état serveur uniquement.
+    await request(app.getHttpServer())
+      .get('/test-authz/auditor')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('X-Roles', 'auditor')
+      .set('X-Permissions', 'permissions.manage')
+      .send({ roles: ['auditor'], permissions: ['permissions.manage'] })
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .get('/test-authz/needs-perms-manage')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('X-Permissions', 'permissions.manage')
+      .expect(403);
+
+    // Le résumé reste celui de l'état serveur (aucun rôle injecté par le client).
+    const res = await authGet('/auth/me/authorization').expect(200);
+    expect(res.body.data.roles).not.toContain('auditor');
+    expect(res.body.data.permissions).not.toContain('permissions.manage');
+  });
+
+  it('isolates authorization between users', async () => {
+    const otherEmail = 'auth-rbac-e2e-other@example.test';
+    const hasher = app.get<PasswordHasher>(PASSWORD_HASHER);
+    await prisma.user.deleteMany({ where: { email: otherEmail } });
+    const passwordHash = await hasher.hash(PASSWORD);
+    await prisma.user.create({ data: { email: otherEmail, passwordHash } });
+
+    try {
+      const res = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: otherEmail, password: PASSWORD })
+        .expect(200);
+      const otherToken = res.body.data.accessToken as string;
+
+      // L'autre utilisateur n'a aucun rôle : son résumé est vide et l'accès est refusé.
+      const summary = await authGet('/auth/me/authorization', otherToken).expect(200);
+      expect(summary.body.data.roles).toEqual([]);
+      expect(summary.body.data.permissions).toEqual([]);
+      await authGet('/test-authz/admin', otherToken).expect(403);
+
+      // L'utilisateur d'origine conserve ses droits (aucune fuite croisée).
+      await authGet('/test-authz/admin').expect(200);
+    } finally {
+      await prisma.user.deleteMany({ where: { email: otherEmail } });
+    }
+  });
+
+  it('keeps authorization consistent across a refresh rotation', async () => {
+    const first = await login();
+    const before = await authGet('/auth/me/authorization', first.accessToken).expect(200);
+
+    const rotated = await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refreshToken: first.refreshToken })
+      .expect(200);
+    const rotatedToken = rotated.body.data.accessToken as string;
+
+    const after = await authGet('/auth/me/authorization', rotatedToken).expect(200);
+    expect(after.body.data).toEqual(before.body.data);
+    // Les droits restent applicables avec le token tourné.
+    await authGet('/test-authz/admin', rotatedToken).expect(200);
+    await authGet('/test-authz/auditor', rotatedToken).expect(403);
+  });
 });

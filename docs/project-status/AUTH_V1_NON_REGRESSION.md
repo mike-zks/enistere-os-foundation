@@ -17,7 +17,7 @@ réels. NestJS `base+auth` : 144 tests unitaires + 37 e2e contre PostgreSQL.
 | Endpoint `GET /auth/me/authorization` | présent (rôles/permissions) | **RBAC** → payload parqué (hors Auth) | ➖ RBAC, pas Auth |
 | DTO/contrats | `LoginDto`, `LoginResponseDto`, `RefreshTokenDto`, `RefreshResponseDto`, `LogoutResponseDto`, `UserProfileResponseDto` | identiques | ✅ préservé |
 | `AuthorizationSummaryResponseDto` | présent | **RBAC** → parqué | ➖ RBAC |
-| Modèle Prisma | `User`, `RefreshSession`, enums `UserStatus`/`SessionRevocationReason` | identiques (fragment `auth.prisma`) ; relations `roles`/`files` retirées de `User` | ✅ Auth préservé (relations = RBAC/Files) |
+| Modèle Prisma | `User`, `RefreshSession`, enums `UserStatus`/`SessionRevocationReason` | identiques (fragment déclaratif `auth.prisma.json`) ; relations `roles`/`files` retirées de `User` | ✅ Auth préservé (relations = RBAC/Files) |
 | Migrations | 5 migrations enchevêtrées (auth + rbac + files) | `base_init` (audit_logs) + `auth_init` (users, refresh_sessions avec colonnes rotation/révocation) | ✅ schéma Auth équivalent, désenchevêtré |
 | Argon2id (ADR-039) | `PASSWORD_HASHER` + params configurables | identique | ✅ préservé |
 | Rotation refresh + détection de réutilisation + révocation de famille | présent | identique (`refresh-session.service`, `auth.service` inchangés) | ✅ préservé |

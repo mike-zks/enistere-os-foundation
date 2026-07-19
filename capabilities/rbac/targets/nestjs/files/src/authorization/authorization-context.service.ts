@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { PermissionsService } from '../../permissions/permissions.service';
-import { RolesService } from '../../roles/roles.service';
+import { PermissionsService } from '../permissions/permissions.service';
+import { RolesService } from '../roles/roles.service';
 
 /** Codes de rôles et permissions effectifs de l'utilisateur (jamais persistés ni dans le JWT). */
 export interface AuthorizationContext {

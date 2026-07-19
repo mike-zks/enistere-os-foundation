@@ -3,7 +3,46 @@
   "id": "nextjs",
   "kind": "web",
   "framework": "Next.js",
-  "commands": { "install": ["npm", "ci"], "dev": ["npm", "run", "dev"], "test": ["npm", "test"], "build": ["npm", "run", "build"], "verify": ["npm", "run", "check"] },
-  "composition": { "contractVersion": "1", "base": "built-in", "model": "modular", "readyCapabilities": ["auth"], "plannedCapabilities": ["rbac", "files", "observability"] },
-  "deployment": { "dockerfile": "Dockerfile", "healthPath": "/status" }
+  "commands": {
+    "install": [
+      "npm",
+      "ci"
+    ],
+    "dev": [
+      "npm",
+      "run",
+      "dev"
+    ],
+    "test": [
+      "npm",
+      "test"
+    ],
+    "build": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "verify": [
+      "npm",
+      "run",
+      "check"
+    ]
+  },
+  "composition": {
+    "contractVersion": "1",
+    "base": "built-in",
+    "model": "modular",
+    "readyCapabilities": [
+      "auth",
+      "rbac"
+    ],
+    "plannedCapabilities": [
+      "files",
+      "observability"
+    ]
+  },
+  "deployment": {
+    "dockerfile": "Dockerfile",
+    "healthPath": "/status"
+  }
 }
