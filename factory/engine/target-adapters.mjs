@@ -10,7 +10,7 @@ const STRING = 'string';
 const INTEGER = 'integer';
 
 export const COMMON_OPERATIONS = Object.freeze([
-  'files', 'dependencies', 'environment', 'contract', 'verification',
+  'files', 'dependencies', 'environment', 'integrations', 'contract', 'verification',
 ]);
 
 const BUILT_IN = [

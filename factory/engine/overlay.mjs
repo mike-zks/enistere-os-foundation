@@ -48,7 +48,7 @@ function isSafeRelativePath(value) {
 export function validateOverlayManifest(value, { capability, target } = {}) {
   const issues = [];
   if (!value || typeof value !== 'object' || Array.isArray(value)) return ['overlay must be an object'];
-  const allowedKeys = new Set(['schemaVersion', 'capability', 'target', 'version', 'description', 'files', 'dependencies', 'environment', 'integrations', 'verification', 'contract']);
+  const allowedKeys = new Set(['schemaVersion', 'capability', 'target', 'version', 'description', 'operations', 'files', 'dependencies', 'environment', 'integrations', 'verification', 'contract']);
   for (const key of Object.keys(value)) if (!allowedKeys.has(key)) issues.push(`unknown property: ${key}`);
   if (value.schemaVersion !== '1') issues.push('schemaVersion must be "1"');
   if (!CAPABILITY_IDS.includes(value.capability)) issues.push('capability is not registered');
@@ -91,6 +91,16 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
 
   const adapter = getTargetAdapter(value.target);
   if (!adapter) issues.push(`target adapter is not registered: ${value.target}`);
+  if (value.operations !== undefined) {
+    if (!Array.isArray(value.operations) || value.operations.length === 0 || value.operations.some((operation) => typeof operation !== 'string' || operation === '')) {
+      issues.push('operations must be a non-empty array of strings');
+    } else if (new Set(value.operations).size !== value.operations.length) {
+      issues.push('operations must not contain duplicates');
+    } else if (adapter && value.operations.some((operation) => !adapter.operations.includes(operation))) {
+      const unsupported = value.operations.filter((operation) => !adapter.operations.includes(operation));
+      issues.push(`unsupported operations for ${value.target}: ${unsupported.join(', ')}`);
+    }
+  }
   const knownKinds = adapter?.integrationKinds ?? {};
   if (!Array.isArray(value.integrations)) issues.push('integrations must be an array');
   else value.integrations.forEach((entry, index) => {
