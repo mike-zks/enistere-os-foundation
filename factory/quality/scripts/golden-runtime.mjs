@@ -19,8 +19,24 @@
  *   nest-next-files       nestjs + nextjs, base+auth+rbac+files
  *   triple-files          nestjs + nextjs + react-native, base+auth+rbac+files
  *
+ * R8A — compositions `base` seul, nommées d'après leur profil :
+ *   spring-base                 spring
+ *   spring-auth                 spring, base+auth
+ *   spring-next-base            spring + nextjs
+ *   spring-react-native-base    spring + react-native
+ *   spring-angular-base         spring + angular
+ *   spring-flutter-base         spring + flutter
+ *   nestjs-next-base            nestjs + nextjs
+ *   nestjs-react-native-base    nestjs + react-native
+ *   nestjs-angular-base         nestjs + angular
+ *   nestjs-flutter-base         nestjs + flutter
+ *
  * Gates DB (prisma migrate, e2e NestJS) exécutés uniquement si DATABASE_URL est
  * défini. Aucun secret réel : la CI fournit des valeurs jetables via l'env.
+ *
+ * `GOLDEN_RUNTIME_START=1` ajoute la preuve de démarrage réel : l'application est
+ * lancée et son endpoint de santé interrogé. Les cibles mobiles n'ont pas de
+ * démarrage vérifiable sans émulateur et sont explicitement déclarées comme telles.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -57,6 +73,16 @@ for (const [key, value] of Object.entries(TEST_ENV_DEFAULTS)) {
   if (!process.env[key]) process.env[key] = value;
 }
 
+// Karma (Angular) resolves its browser through CHROME_BIN. The CI provides it;
+// locally we point at whichever Chrome/Chromium is installed rather than letting
+// the gate fail for a reason unrelated to the generated project.
+if (!process.env.CHROME_BIN) {
+  for (const candidate of ['google-chrome', 'chromium', 'chromium-browser']) {
+    const found = spawnSync('command', ['-v', candidate], { encoding: 'utf8', shell: true });
+    if (found.status === 0 && found.stdout.trim()) { process.env.CHROME_BIN = found.stdout.trim(); break; }
+  }
+}
+
 export const COMPOSITIONS = {
   'nestjs-base': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base'] },
   'nestjs-auth': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth'] },
@@ -70,6 +96,22 @@ export const COMPOSITIONS = {
   'nestjs-files': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
   'nest-next-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
   'triple-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth', 'rbac', 'files'] },
+  // R8A : compositions `base` seul. Nommées d'après leur profil, de sorte que le
+  // lien golden ↔ profil soit une identité vérifiable et non une convention.
+  // Spring, Angular et Flutter ne suivent pas le contrat modulaire : leur baseline
+  // est copiée telle quelle et embarque des fonctionnalités au-delà de `base`
+  // (`bundledFeaturesMayExceedSelection`). Le golden prouve le projet généré, pas
+  // une composition minimale.
+  'spring-base': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base'] },
+  'spring-auth': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base', 'auth'] },
+  'spring-next-base': { stack: { api: 'spring', web: 'nextjs', mobile: null }, capabilities: ['base'] },
+  'spring-react-native-base': { stack: { api: 'spring', web: null, mobile: 'react-native' }, capabilities: ['base'] },
+  'spring-angular-base': { stack: { api: 'spring', web: 'angular', mobile: null }, capabilities: ['base'] },
+  'spring-flutter-base': { stack: { api: 'spring', web: null, mobile: 'flutter' }, capabilities: ['base'] },
+  'nestjs-next-base': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base'] },
+  'nestjs-react-native-base': { stack: { api: 'nestjs', web: null, mobile: 'react-native' }, capabilities: ['base'] },
+  'nestjs-angular-base': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['base'] },
+  'nestjs-flutter-base': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['base'] },
 };
 
 /** argv of the npm-audit-by-exception gate applied to every golden. */
@@ -105,6 +147,8 @@ function run(label, cmd, args, cwd) {
  * generation (which needs the Prisma client) and before the verification gates.
  */
 function prepareGatesFor(kind, hasDb, capabilities = []) {
+  // Flutter resolves its own dependencies through pub, outside the npm workspace.
+  if (kind === 'flutter') return [['mobile: flutter pub get', 'flutter', ['pub', 'get'], 'apps/mobile']];
   if (kind !== 'nestjs') return [];
   return [
     ['api: prisma generate', 'npm', ['run', 'prisma:generate', '--workspace=apps/api']],
@@ -144,7 +188,49 @@ function gatesFor(kind, hasDb, capabilities = []) {
       ['mobile: expo export (ios, no simulator)', 'npx', ['expo', 'export', '-p', 'ios'], 'apps/mobile'],
     ];
   }
+  if (kind === 'spring') {
+    // `verify` covers compile, unit tests and Testcontainers integration tests.
+    // Docker must be reachable; the driver refuses to claim a pass without it.
+    return [['api: mvnw verify', './mvnw', ['verify', '--no-transfer-progress', '-B'], 'apps/api']];
+  }
+  if (kind === 'angular') {
+    // Angular publishes no `typecheck` script: `build` is the compilation gate.
+    return [
+      ['web: tests (Karma, ChromeHeadless)', 'npm', ['run', 'test:ci', '--workspace=apps/web']],
+      ['web: build', 'npm', ['run', 'build', '--workspace=apps/web']],
+    ];
+  }
+  if (kind === 'flutter') {
+    return [
+      ['mobile: flutter analyze', 'flutter', ['analyze'], 'apps/mobile'],
+      ['mobile: flutter test', 'flutter', ['test'], 'apps/mobile'],
+      ['mobile: dart format', 'dart', ['format', '--output=none', '--set-exit-if-changed', '.'], 'apps/mobile'],
+    ];
+  }
   return [];
+}
+
+/**
+ * Startup proof: the generated application is actually launched and its health
+ * endpoint polled. Returns `null` when a target has no verifiable headless
+ * startup — a mobile app needs an emulator, so its absence is declared, never
+ * silently counted as a pass.
+ */
+export function startupProbeFor(kind) {
+  if (kind === 'spring') {
+    return { slot: 'api', cwd: 'apps/api', cmd: './mvnw', args: ['spring-boot:run', '-q'], url: 'http://127.0.0.1:8080/actuator/health', needsDb: true };
+  }
+  if (kind === 'nestjs') {
+    return { slot: 'api', cwd: 'apps/api', cmd: 'npm', args: ['run', 'start:prod'], url: 'http://127.0.0.1:3000/health', needsDb: true };
+  }
+  if (kind === 'nextjs') {
+    return { slot: 'web', cwd: 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3000/', needsDb: false };
+  }
+  if (kind === 'angular') {
+    return { slot: 'web', cwd: 'apps/web', cmd: 'npm', args: ['start', '--', '--port', '4200'], url: 'http://127.0.0.1:4200/', needsDb: false };
+  }
+  // react-native / flutter: no headless startup without an emulator.
+  return null;
 }
 
 /** Operations always published by the NestJS baseline (`base`). */
@@ -194,6 +280,49 @@ async function verifyComposedOpenApi(out, blueprint) {
   console.log(`✓ OpenAPI operations: ${actual.join(', ')}`);
   console.log(`✓ OpenAPI reproducible, digest ${digest.slice(0, 12)}…`);
   return true;
+}
+
+/** Polls `url` until it answers or the deadline passes. */
+async function waitForHttp(url, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
+      if (response.status < 500) return response.status;
+    } catch { /* not up yet */ }
+    await new Promise((done) => setTimeout(done, 1000));
+  }
+  return null;
+}
+
+/**
+ * Launches a generated application and proves it answers on its health endpoint.
+ * The process is always terminated, including on failure.
+ */
+async function verifyStartup(out, probe, timeoutMs = 180000) {
+  const { spawn } = await import('node:child_process');
+  console.log(`\n── startup: ${probe.slot} (${probe.cmd} ${probe.args.join(' ')}) → ${probe.url}`);
+  const child = spawn(probe.cmd, probe.args, {
+    cwd: join(out, probe.cwd), env: process.env, shell: false, stdio: ['ignore', 'pipe', 'pipe'],
+    detached: true,
+  });
+  let output = '';
+  child.stdout.on('data', (chunk) => { output += chunk; });
+  child.stderr.on('data', (chunk) => { output += chunk; });
+  try {
+    const status = await waitForHttp(probe.url, timeoutMs);
+    if (status === null) {
+      console.log(`\n❌ FAILED: ${probe.slot} did not answer on ${probe.url} within ${timeoutMs / 1000}s`);
+      console.log(output.split('\n').slice(-25).join('\n'));
+      return false;
+    }
+    console.log(`✓ ${probe.slot} started and answered ${status} on ${probe.url}`);
+    return true;
+  } finally {
+    try { process.kill(-child.pid, 'SIGTERM'); } catch { /* already gone */ }
+    await new Promise((done) => setTimeout(done, 1500));
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already gone */ }
+  }
 }
 
 async function main() {
@@ -264,6 +393,25 @@ async function main() {
         ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
         if (!ok) break;
       }
+      if (!ok) break;
+    }
+  }
+  // 6b) Startup proof (R8): the generated application is actually launched and
+  //     answers on its health endpoint. Opt-in, because it needs a reachable
+  //     database for the API and real ports. Targets without a headless startup
+  //     (mobile) are declared as such — never counted as a silent pass.
+  if (ok && process.env.GOLDEN_RUNTIME_START === '1') {
+    for (const kind of kinds) {
+      const probe = startupProbeFor(kind);
+      if (!probe) {
+        console.log(`\n── startup: ${kind} has no headless startup proof (emulator required) — not claimed`);
+        continue;
+      }
+      if (probe.needsDb && !hasDb) {
+        console.log(`\n── startup: ${kind} needs a database (GOLDEN_RUNTIME_DB=1) — not claimed`);
+        continue;
+      }
+      ok = await verifyStartup(out, probe) && ok;
       if (!ok) break;
     }
   }

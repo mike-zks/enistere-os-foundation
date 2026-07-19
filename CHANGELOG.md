@@ -4,6 +4,12 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Capability Packs 2 — Auth Spring autonome
+
+- Ajout de l'overlay Maven Auth Spring : session persistée, refresh rotatif, JWT, configuration par environnement et migration Auth dédiée.
+- Suppression des dépendances implicites vers RBAC et Audit ; `/me` reste limité à l'identité Auth.
+- Ajout du golden `spring-auth`, de sa matrice CI et des assertions d'absence RBAC/Audit/Files.
+
 ### Project Factory R8A-3 — baselines Angular et Flutter modulaires
 
 - Extraction des bases Angular et Flutter sans Auth, RBAC, Files ni session métier.

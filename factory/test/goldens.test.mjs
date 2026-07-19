@@ -70,6 +70,30 @@ describe('auth golden compositions', () => {
     assert.deepEqual(lock.overlays, []);
   });
 
+  it('Spring base+auth composes Auth without RBAC, Audit or Files', async () => {
+    const out = await gen('spring-auth', { api: 'spring', web: null, mobile: null }, ['base', 'auth']);
+    const javaRoot = join(out, 'apps/api/src/main/java/com/enistere/core');
+    assert.ok(await exists(join(javaRoot, 'modules/auth/AuthController.java')));
+    assert.ok(await exists(join(javaRoot, 'modules/users/User.java')));
+    assert.equal(await exists(join(javaRoot, 'modules/roles')), false, 'no RBAC roles');
+    assert.equal(await exists(join(javaRoot, 'modules/permissions')), false, 'no RBAC permissions');
+    assert.equal(await exists(join(javaRoot, 'modules/audit')), false, 'no implicit Audit capability');
+    assert.equal(await exists(join(javaRoot, 'modules/files')), false, 'no Files');
+    const authService = await readFile(join(javaRoot, 'modules/auth/AuthService.java'), 'utf8');
+    assert.ok(!/PermissionRepository|AuditService|modules\.roles/.test(authService));
+    const migration = await readFile(join(out, 'apps/api/src/main/resources/db/migration/V1__init_schema.sql'), 'utf8');
+    assert.match(migration, /CREATE TABLE users/);
+    assert.match(migration, /CREATE TABLE refresh_tokens/);
+    assert.ok(!/CREATE TABLE (roles|permissions|user_roles|role_permissions)/.test(migration));
+    const application = await readFile(join(out, 'apps/api/src/main/resources/application.properties'), 'utf8');
+    assert.match(application, /JWT_ACCESS_SECRET/);
+    assert.match(application, /SPRING_DATASOURCE_URL/);
+    const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+    assert.equal(lock.overlays.length, 1);
+    assert.equal(lock.overlays[0].capability, 'auth');
+    assert.equal(lock.overlays[0].target, 'spring');
+  });
+
   it('NestJS base+auth composes Auth without RBAC or Files', async () => {
     const out = await gen('nestjs-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'auth']);
     assert.ok(await exists(join(out, 'apps/api/src/auth/auth.module.ts')));

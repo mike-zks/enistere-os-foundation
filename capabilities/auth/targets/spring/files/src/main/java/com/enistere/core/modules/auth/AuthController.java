@@ -5,7 +5,6 @@ import com.enistere.core.modules.auth.dto.LoginResponseDto;
 import com.enistere.core.modules.auth.dto.LogoutRequestDto;
 import com.enistere.core.modules.auth.dto.MeResponseDto;
 import com.enistere.core.modules.auth.dto.RefreshRequestDto;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -28,11 +26,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto request,
-                                                   HttpServletRequest httpRequest) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(
-            request.email(), request.password(),
-            httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")
+            request.email(), request.password()
         ));
     }
 
@@ -42,32 +38,16 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody(required = false) LogoutRequestDto request,
-                                        Authentication auth, HttpServletRequest httpRequest) {
+    public ResponseEntity<Void> logout(@RequestBody(required = false) LogoutRequestDto request) {
         String refreshToken = request != null ? request.refreshToken() : null;
-        authService.logout(
-            refreshToken, extractUserId(auth),
-            httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")
-        );
+        authService.logout(refreshToken);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDto> refresh(@RequestBody @Valid RefreshRequestDto request,
-                                                     HttpServletRequest httpRequest) {
+    public ResponseEntity<LoginResponseDto> refresh(@RequestBody @Valid RefreshRequestDto request) {
         return ResponseEntity.ok(authService.refresh(
-            request.refreshToken(),
-            httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")
+            request.refreshToken()
         ));
-    }
-
-    private UUID extractUserId(Authentication auth) {
-        if (auth != null && auth.getDetails() instanceof String s && !s.isEmpty()) {
-            try {
-                return UUID.fromString(s);
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-        return null;
     }
 }

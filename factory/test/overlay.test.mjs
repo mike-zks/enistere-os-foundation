@@ -256,14 +256,14 @@ describe('capability refusals', () => {
       /(auth|rbac) on spring is planned/,
     );
   });
-  it('refuses auth on a planned target', async () => {
+  it('refuses auth on Angular while that target is planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
     const blueprint = createDefaultBlueprint('blocked-app');
-    blueprint.stack = { api: 'spring', web: null, mobile: null };
+    blueprint.stack = { api: 'nestjs', web: 'angular', mobile: null };
     blueprint.capabilities = ['base', 'auth'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on spring is planned/,
+      /auth on angular is planned/,
     );
   });
 });

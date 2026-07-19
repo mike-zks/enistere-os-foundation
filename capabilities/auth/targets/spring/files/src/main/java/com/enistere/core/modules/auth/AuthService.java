@@ -2,12 +2,8 @@ package com.enistere.core.modules.auth;
 
 import com.enistere.core.config.JwtConfig;
 import com.enistere.core.infrastructure.security.JwtTokenProvider;
-import com.enistere.core.modules.audit.AuditEventType;
-import com.enistere.core.modules.audit.AuditService;
 import com.enistere.core.modules.auth.dto.LoginResponseDto;
 import com.enistere.core.modules.auth.dto.MeResponseDto;
-import com.enistere.core.modules.permissions.PermissionRepository;
-import com.enistere.core.modules.roles.Role;
 import com.enistere.core.modules.users.User;
 import com.enistere.core.modules.users.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -23,8 +19,6 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -34,38 +28,30 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtConfig jwtConfig;
-    private final AuditService auditService;
 
     public AuthService(
             UserRepository userRepository,
             RefreshTokenRepository refreshTokenRepository,
-            PermissionRepository permissionRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenProvider jwtTokenProvider,
-            JwtConfig jwtConfig,
-            AuditService auditService) {
+            JwtConfig jwtConfig) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
-        this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.jwtConfig = jwtConfig;
-        this.auditService = auditService;
     }
 
-    public LoginResponseDto login(String email, String rawPassword, String ipAddress, String userAgent) {
+    public LoginResponseDto login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            auditService.record(AuditEventType.LOGIN_FAILURE, null, "auth", null, ipAddress, userAgent);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         if (!user.isActive()) {
-            auditService.record(AuditEventType.LOGIN_FAILURE, null, "auth", null, ipAddress, userAgent);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account disabled");
         }
 
@@ -73,7 +59,6 @@ public class AuthService {
         userRepository.save(user);
 
         LoginResponseDto response = buildTokenResponse(user);
-        auditService.record(AuditEventType.LOGIN_SUCCESS, user.getId(), "auth", null, ipAddress, userAgent);
         return response;
     }
 
@@ -82,13 +67,10 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        List<String> roleNames = user.getRoles().stream().map(Role::getName).toList();
-        List<String> permNames = permissionRepository.findPermissionNamesByUserId(user.getId());
-
-        return new MeResponseDto(user.getId().toString(), user.getEmail(), roleNames, permNames);
+        return new MeResponseDto(user.getId().toString(), user.getEmail());
     }
 
-    public LoginResponseDto refresh(String rawRefreshToken, String ipAddress, String userAgent) {
+    public LoginResponseDto refresh(String rawRefreshToken) {
         String hash = hashToken(rawRefreshToken);
         RefreshToken token = refreshTokenRepository.findByTokenHash(hash)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
@@ -97,17 +79,14 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expired or revoked");
         }
 
-        UUID userId = token.getUser().getId();
         token.revoke();
         refreshTokenRepository.save(token);
 
         LoginResponseDto response = buildTokenResponse(token.getUser());
-        auditService.record(AuditEventType.TOKEN_REFRESH, userId, "auth", null, ipAddress, userAgent);
         return response;
     }
 
-    public void logout(String rawRefreshToken, UUID callerUserId, String ipAddress, String userAgent) {
-        auditService.record(AuditEventType.LOGOUT, callerUserId, "auth", null, ipAddress, userAgent);
+    public void logout(String rawRefreshToken) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             return;
         }
@@ -119,9 +98,8 @@ public class AuthService {
     }
 
     private LoginResponseDto buildTokenResponse(User user) {
-        List<String> permissions = permissionRepository.findPermissionNamesByUserId(user.getId());
         String accessToken = jwtTokenProvider.generateAccessToken(
-            user.getEmail(), user.getId().toString(), permissions
+            user.getEmail(), user.getId().toString()
         );
         String rawRefresh = generateRawToken();
         refreshTokenRepository.save(

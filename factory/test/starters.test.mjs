@@ -31,7 +31,7 @@ it('reports a truthful target support matrix', async () => {
   assert.equal(matrix.base.nestjs, 'ready');
   assert.equal(matrix.base.flutter, 'ready');
   assert.equal(matrix.auth.nextjs, 'ready');
-  assert.equal(matrix.auth.spring, 'planned');
+  assert.equal(matrix.auth.spring, 'ready');
   assert.equal(matrix.rbac.nestjs, 'ready');
   assert.equal(matrix.rbac.nextjs, 'ready');
   assert.equal(matrix.rbac['react-native'], 'not-applicable');

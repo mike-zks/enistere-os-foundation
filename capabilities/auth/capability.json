@@ -6,7 +6,7 @@
   "responsibilities": ["login", "refresh", "logout", "session"],
   "targets": {
     "nestjs": { "status": "ready", "mode": "overlay" },
-    "spring": { "status": "planned" },
+    "spring": { "status": "ready", "mode": "overlay" },
     "nextjs": { "status": "ready", "mode": "overlay" },
     "angular": { "status": "planned" },
     "react-native": { "status": "ready", "mode": "overlay" },
