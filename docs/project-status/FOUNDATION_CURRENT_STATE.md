@@ -67,6 +67,11 @@ Les combinaisons supportées sont nommées et vérifiées : un **profil** est un
 capabilities par `factory/test/profiles.test.mjs` : un statut que la matrice ne soutient pas fait
 échouer la suite. Aucun profil n'est `ready` sans overlay et golden.
 
+Les dix goldens runtime adossent un profil `ready` : `nest-next-files` est couvert par
+`nestjs-next-files`, tandis que les compositions triples `triple-auth`, `triple-auth-rbac` et
+`triple-files` sont couvertes par les profils `nestjs-next-react-native-*`, sans introduire de
+renderer, d'overlay ni de comportement runtime.
+
 L'API est un invariant : `stack.api` reste obligatoire et toute demande « web-only » ou
 « mobile-only » est refusée en nommant les profils API correspondants. `enistere profiles` et
 `enistere profile <name>` exposent le registre ; `enistere plan` nomme le profil correspondant à un

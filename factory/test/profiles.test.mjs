@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { loadCapabilityManifests } from '../engine/capabilities.mjs';
 import { loadStarterManifests, STARTER_IDS } from '../engine/starters.mjs';
@@ -101,7 +102,11 @@ describe('the API is mandatory', () => {
   // The table from the mission: an API-less name is refused, its API-bearing
   // counterparts are accepted.
   const refused = ['angular-only-base', 'flutter-only-base', 'nextjs-only-base', 'react-native-only-base'];
-  const accepted = ['spring-angular-base', 'spring-flutter-base', 'nestjs-next-base', 'nestjs-react-native-base'];
+  const accepted = [
+    'spring-angular-base', 'spring-flutter-base', 'nestjs-next-base', 'nestjs-react-native-base',
+    'nestjs-angular-base', 'nestjs-flutter-base',
+    'nestjs-next-files', 'nestjs-next-react-native-auth', 'nestjs-next-react-native-rbac',
+  ];
 
   for (const name of refused) {
     it(`refuses ${name} because an API is mandatory`, () => {
@@ -124,7 +129,9 @@ describe('the API is mandatory', () => {
 
   it('suggests only registered profiles that actually compose the starter', () => {
     const known = new Set(listProfiles().map((entry) => entry.id));
-    for (const name of refused) {
+    // Every API-less name the CLI can meet, not only the four canonical ones.
+    const probes = [...refused, 'angular-base', 'flutter-auth', 'nextjs-anything', 'rn-only-base', 'next-only-base'];
+    for (const name of probes) {
       let message = '';
       try { getProfile(name); assert.fail(`${name} must be refused`); } catch (error) { message = error.message; }
       const line = message.split('\n').find((item) => item.startsWith('Profiles composing '));
@@ -218,6 +225,63 @@ describe('profiles stay distinct from the 18 stack combinations', () => {
   });
 });
 
+describe('documentation matches the registry', () => {
+  const matrixPath = resolve(root, 'docs/project-status/PROFILE_MATRIX.md');
+
+  // Profile ids appear as the first cell of a table row: `| \`<id>\` | ...`.
+  async function documentedProfileIds() {
+    const doc = await readFile(matrixPath, 'utf8');
+    const ids = [...doc.matchAll(/^\| `([a-z0-9-]+)` \|/gm)].map((match) => match[1]);
+    const statuses = new Set(PROFILE_STATUSES);
+    return new Set(ids.filter((id) => !statuses.has(id)));
+  }
+
+  it('documents every registered profile', async () => {
+    const documented = await documentedProfileIds();
+    const missing = listProfiles().map((entry) => entry.id).filter((id) => !documented.has(id));
+    assert.deepEqual(missing, [], 'these profiles are registered but undocumented');
+  });
+
+  it('registers every documented profile', async () => {
+    const registered = new Set(listProfiles().map((entry) => entry.id));
+    const extra = [...await documentedProfileIds()].filter((id) => !registered.has(id));
+    assert.deepEqual(extra, [], 'these profiles are documented but not registered');
+  });
+
+  it('states the counts the registry actually holds', async () => {
+    const doc = await readFile(matrixPath, 'utf8');
+    for (const status of PROFILE_STATUSES) {
+      const count = listProfiles().filter((entry) => entry.status === status).length;
+      assert.match(doc, new RegExp(`### \`${status}\`[^\\n]*\\(${count}\\)`), `${status} count must read ${count}`);
+    }
+  });
+});
+
+describe('golden coverage is reported honestly', () => {
+  it('claims a distinct, existing golden per ready profile', () => {
+    const claimed = listProfiles().map((entry) => entry.golden).filter(Boolean);
+    assert.equal(new Set(claimed).size, claimed.length, 'two profiles must not claim the same golden');
+    for (const golden of claimed) assert.ok(COMPOSITIONS[golden], `unknown golden ${golden}`);
+  });
+
+  it('covers the triple auth and rbac goldens', () => {
+    const byGolden = new Map(listProfiles().filter((entry) => entry.golden).map((entry) => [entry.golden, entry.id]));
+    assert.equal(byGolden.get('triple-auth'), 'nestjs-next-react-native-auth');
+    assert.equal(byGolden.get('triple-auth-rbac'), 'nestjs-next-react-native-rbac');
+  });
+
+  it('documents the goldens that still carry no named profile', async () => {
+    const claimed = new Set(listProfiles().map((entry) => entry.golden).filter(Boolean));
+    const uncovered = Object.keys(COMPOSITIONS).filter((golden) => !claimed.has(golden));
+    // Not a failure: a golden may be tested without being offered as a supported
+    // combination. It must however be named in the matrix rather than hidden.
+    const doc = await readFile(resolve(root, 'docs/project-status/PROFILE_MATRIX.md'), 'utf8');
+    for (const golden of uncovered) {
+      assert.match(doc, new RegExp(`\`${golden}\``), `uncovered golden ${golden} must be documented`);
+    }
+  });
+});
+
 describe('the plan reports capabilities and gates', () => {
   it('reports the selected capabilities, the matched profile and its proof', async () => {
     const starters = await loadStarterManifests(root);
@@ -238,7 +302,7 @@ describe('the plan reports capabilities and gates', () => {
 
   it('reports the gates each generated app will run', async () => {
     const starters = await loadStarterManifests(root);
-    const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-rn-files')), { starters });
+    const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-react-native-files')), { starters });
     assert.deepEqual(Object.keys(plan.gates), ['api', 'web', 'mobile']);
     assert.deepEqual(plan.gates.api.map((gate) => gate.gate), ['install', 'test', 'build', 'verify']);
     assert.equal(plan.gates.api.find((gate) => gate.gate === 'verify').command, 'npm run openapi:check');
