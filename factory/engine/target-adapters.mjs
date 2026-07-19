@@ -9,6 +9,10 @@
 const STRING = 'string';
 const INTEGER = 'integer';
 
+export const COMMON_OPERATIONS = Object.freeze([
+  'files', 'dependencies', 'environment', 'contract', 'verification',
+]);
+
 const BUILT_IN = [
   {
     id: 'nestjs', version: '1.0.0', integrationKinds: {
@@ -38,6 +42,7 @@ const BUILT_IN = [
   { id: 'flutter', version: '1.0.0', integrationKinds: {} },
 ].map((adapter) => Object.freeze({
   ...adapter,
+  operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),
   integrationKinds: Object.freeze(Object.fromEntries(
     Object.entries(adapter.integrationKinds).map(([kind, fields]) => [kind, Object.freeze({ ...fields })]),
   )),
@@ -49,6 +54,9 @@ function assertAdapter(adapter) {
   if (!adapter || !/^[a-z][a-z0-9-]*$/.test(adapter.id ?? '')) throw new Error('target adapter id is invalid');
   if (!/^\d+\.\d+\.\d+$/.test(adapter.version ?? '')) throw new Error(`${adapter.id}: adapter version must be SemVer`);
   if (!adapter.integrationKinds || typeof adapter.integrationKinds !== 'object') throw new Error(`${adapter.id}: integrationKinds must be an object`);
+  if (adapter.operations !== undefined && (!Array.isArray(adapter.operations) || adapter.operations.some((operation) => typeof operation !== 'string' || operation === ''))) {
+    throw new Error(`${adapter.id}: operations must be non-empty strings`);
+  }
 }
 
 export function registerTargetAdapter(adapter) {
@@ -58,6 +66,7 @@ export function registerTargetAdapter(adapter) {
     id: adapter.id,
     version: adapter.version,
     integrationKinds: Object.freeze({ ...adapter.integrationKinds }),
+    operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),
   });
   adapters.set(frozen.id, frozen);
   return frozen;
@@ -73,6 +82,10 @@ export function listTargetAdapters() {
 
 export function integrationKindsFor(id) {
   return getTargetAdapter(id)?.integrationKinds ?? null;
+}
+
+export function adapterVersionsFor(ids) {
+  return Object.fromEntries(ids.map((id) => [id, getTargetAdapter(id)?.version ?? null]));
 }
 
 export function resetTargetAdaptersForTests() {

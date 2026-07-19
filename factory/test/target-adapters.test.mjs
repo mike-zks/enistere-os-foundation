@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   getTargetAdapter,
   integrationKindsFor,
+  adapterVersionsFor,
   listTargetAdapters,
   registerTargetAdapter,
   resetTargetAdaptersForTests,
@@ -15,6 +16,9 @@ describe('target adapter registry', () => {
     ]);
     assert.ok(integrationKindsFor('spring'));
     assert.deepEqual(integrationKindsFor('spring'), {});
+    assert.deepEqual(getTargetAdapter('spring').operations, [
+      'files', 'dependencies', 'environment', 'contract', 'verification',
+    ]);
   });
 
   it('accepts a future declarative adapter without changing the registry module', () => {
@@ -26,6 +30,13 @@ describe('target adapter registry', () => {
     assert.deepEqual(integrationKindsFor('future-target'), { 'future.provider': { symbol: 'string' } });
     resetTargetAdaptersForTests();
     assert.equal(getTargetAdapter('future-target'), null);
+  });
+
+  it('returns adapter versions as lockable generation metadata', () => {
+    assert.deepEqual(adapterVersionsFor(['spring', 'angular']), {
+      spring: '1.0.0', angular: '1.0.0',
+    });
+    assert.equal(adapterVersionsFor(['unknown']).unknown, null);
   });
 
   it('rejects duplicate, malformed and unversioned adapters', () => {
