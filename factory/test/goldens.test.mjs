@@ -94,6 +94,25 @@ describe('auth golden compositions', () => {
     assert.equal(lock.overlays[0].target, 'spring');
   });
 
+  it('Spring base+auth+rbac composes RBAC without Audit or Files', async () => {
+    const out = await gen('spring-auth-rbac', { api: 'spring', web: null, mobile: null }, ['base', 'auth', 'rbac']);
+    const javaRoot = join(out, 'apps/api/src/main/java/com/enistere/core');
+    assert.ok(await exists(join(javaRoot, 'modules/authorization/AuthorizationController.java')));
+    assert.ok(await exists(join(javaRoot, 'modules/roles/Role.java')));
+    assert.ok(await exists(join(javaRoot, 'modules/permissions/Permission.java')));
+    assert.equal(await exists(join(javaRoot, 'modules/audit')), false, 'no implicit Audit capability');
+    assert.equal(await exists(join(javaRoot, 'modules/files')), false, 'no Files capability');
+    const migration = await readFile(join(out, 'apps/api/src/main/resources/db/migration/V2__add_rbac.sql'), 'utf8');
+    for (const table of ['roles', 'permissions', 'user_roles', 'role_permissions']) {
+      assert.match(migration, new RegExp(`CREATE TABLE ${table}`));
+    }
+    assert.ok(!/INSERT INTO/.test(migration), 'RBAC must not grant roles or permissions implicitly');
+    const jwtFilter = await readFile(join(javaRoot, 'infrastructure/security/JwtAuthenticationFilter.java'), 'utf8');
+    assert.ok(!/PermissionRepository|RoleRepository|extractPermissions/.test(jwtFilter), 'JWT filter stays Auth-only');
+    const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+    assert.deepEqual(lock.overlays.map((item) => item.capability), ['auth', 'rbac']);
+  });
+
   it('NestJS base+auth composes Auth without RBAC or Files', async () => {
     const out = await gen('nestjs-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'auth']);
     assert.ok(await exists(join(out, 'apps/api/src/auth/auth.module.ts')));

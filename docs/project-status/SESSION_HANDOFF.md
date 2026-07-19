@@ -37,13 +37,15 @@ Angular + Flutter), Spring base étant déjà extrait et prouvé.
 Project Factory 4B livré : les compositions triples déjà prouvées reçoivent un profil nommé —
 `nestjs-next-react-native-auth` (`triple-auth`) et `nestjs-next-react-native-rbac`
 (`triple-auth-rbac`) — en réutilisant exactement ces compositions, sans renderer, overlay ni
-comportement runtime nouveau. Le registre compte 26 profils dont 20 générables (20 `ready`,
-0 `supported`, 6 `planned`). Les six baselines sont désormais modulaires et les goldens adossent les profils exacts. La documentation ne peut plus dériver du registre :
+comportement runtime nouveau. Les six baselines sont désormais modulaires et les goldens adossent
+les profils exacts. La documentation ne peut plus dériver du registre :
 `PROFILE_MATRIX.md` et `profiles.mjs` sont croisés dans les deux sens, compteurs inclus.
 
 Capability Packs 2 démarré : Auth Spring est découplé de RBAC et Audit, porte sa migration
 `users`/`refresh_tokens`, sa configuration environnementale et son overlay Maven. Le profil
-`spring-auth` est adossé au golden CI homonyme.
+`spring-auth` est adossé au golden CI homonyme. RBAC Spring est un second overlay autonome : Flyway
+V2 sans seed implicite, décisions depuis PostgreSQL, résumé public, Method Security default-deny et
+golden `spring-auth-rbac`. Le registre compte 26 profils : 21 `ready`, 0 `supported`, 5 `planned`.
 
 ## Invariants
 
