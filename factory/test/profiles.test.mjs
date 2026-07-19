@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { loadCapabilityManifests } from '../engine/capabilities.mjs';
-import { loadStarterManifests, STARTER_IDS } from '../engine/starters.mjs';
+import { loadStarterManifests, modularStarterIds, STARTER_IDS } from '../engine/starters.mjs';
 import { validateBlueprint } from '../engine/blueprint.mjs';
 import { buildGenerationPlan } from '../engine/plan.mjs';
 import { COMPOSITIONS } from '../quality/scripts/golden-runtime.mjs';
@@ -23,6 +23,7 @@ import {
 
 const root = resolve(import.meta.dirname, '../..');
 const manifests = () => loadCapabilityManifests(root);
+const starterManifests = () => loadStarterManifests(root);
 
 function blueprintFor(entry, extra = {}) {
   return {
@@ -40,7 +41,7 @@ function blueprintFor(entry, extra = {}) {
 
 describe('profile registry', () => {
   it('declares every status against the real capability matrix', async () => {
-    assert.deepEqual(validateProfileRegistry(await manifests()), []);
+    assert.deepEqual(validateProfileRegistry(await manifests(), await starterManifests()), []);
   });
 
   it('uses only known statuses and unique ids', () => {
@@ -76,8 +77,10 @@ describe('profile registry', () => {
 });
 
 describe('ready is never granted without proof', () => {
-  it('backs every ready profile with a golden runtime that matches it', () => {
-    for (const entry of listProfiles().filter((item) => item.status === 'ready')) {
+  // Requirement R8A-7: every golden is wired to the right profile — the selection
+  // it generates must be the selection the profile pins, not merely a similar one.
+  it('wires every claimed golden to the profile it actually generates', () => {
+    for (const entry of listProfiles().filter((item) => item.golden)) {
       const golden = COMPOSITIONS[entry.golden];
       assert.ok(golden, `${entry.id} claims unknown golden ${entry.golden}`);
       assert.deepEqual(golden.stack, entry.stack, `${entry.id} golden stack mismatch`);
@@ -85,10 +88,31 @@ describe('ready is never granted without proof', () => {
     }
   });
 
-  it('leaves supported profiles explicitly unproven', () => {
-    for (const entry of listProfiles().filter((item) => item.status === 'supported')) {
-      assert.equal(entry.golden, null, `${entry.id} is supported and must not claim a golden`);
+  // R8A: a golden proves gates, not that the delivery matches the profile.
+  it('requires an exact composition for every ready profile', async () => {
+    const [capabilities, starters] = [await manifests(), await starterManifests()];
+    for (const entry of listProfiles().filter((item) => item.status === 'ready')) {
+      assert.ok(assessProfile(entry, capabilities, starters).compositionExact, `${entry.id} is ready and must compose exactly`);
     }
+  });
+
+  it('keeps green-gated baseline-copy profiles at supported', async () => {
+    const [capabilities, starters] = [await manifests(), await starterManifests()];
+    for (const entry of listProfiles().filter((item) => item.status === 'supported' && item.golden)) {
+      const assessment = assessProfile(entry, capabilities, starters);
+      assert.equal(assessment.compositionExact, false, `${entry.id} is exact and should be ready`);
+      assert.ok(entry.note, `${entry.id} must state why green gates do not earn ready`);
+    }
+  });
+
+  it('never lets green gates alone promote a profile', async () => {
+    const [capabilities, starters] = [await manifests(), await starterManifests()];
+    // The seven baseline-copy base profiles: golden green, still supported.
+    const baselineCopy = listProfiles().filter((item) => (
+      item.golden && !assessProfile(item, capabilities, starters).compositionExact
+    ));
+    assert.ok(baselineCopy.length > 0, 'the guard must exercise real profiles');
+    for (const entry of baselineCopy) assert.equal(entry.status, 'supported');
   });
 
   it('never lets a planned profile claim a golden', () => {
@@ -123,7 +147,7 @@ describe('the API is mandatory', () => {
       const entry = getProfile(name);
       assert.ok(API_STARTER_IDS.includes(entry.stack.api));
       assert.ok(GENERATABLE_PROFILE_STATUSES.includes(entry.status));
-      assert.ok(assessProfile(entry, await manifests()).composable);
+      assert.ok(assessProfile(entry, await manifests(), await starterManifests()).composable);
     });
   }
 
@@ -292,10 +316,23 @@ describe('the plan reports capabilities and gates', () => {
     assert.equal(plan.profile.runtimeProven, true);
   });
 
-  it('marks a supported profile as not runtime-proven', async () => {
+  it('shows why a green-gated baseline-copy profile is not ready', async () => {
     const starters = await loadStarterManifests(root);
-    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-angular-base')), { starters });
+    const modularStarters = modularStarterIds(starters);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-angular-base')), { starters, modularStarters });
     assert.equal(plan.profile.status, 'supported');
+    // Its golden is green — the gates really pass…
+    assert.equal(plan.profile.runtimeProven, true);
+    assert.equal(plan.profile.golden, 'spring-angular-base');
+    // …but the delivery exceeds the selection, so `ready` is withheld.
+    assert.equal(plan.profile.compositionExact, false);
+    assert.equal(plan.bundledFeaturesMayExceedSelection, true);
+  });
+
+  it('marks a profile with no golden as unproven', async () => {
+    const starters = await loadStarterManifests(root);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-auth')), { starters });
+    assert.equal(plan.profile.status, 'planned');
     assert.equal(plan.profile.runtimeProven, false);
     assert.equal(plan.profile.golden, null);
   });

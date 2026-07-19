@@ -12,7 +12,7 @@
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
-| CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C) | 10 goldens : base/auth (×4) + RBAC (×3) + Files (×3) |
+| CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C/R8A) | goldens base/auth/RBAC/Files et profils base |
 | Statuts de support (`not-applicable`) | Implémenté (1B) | permet les compositions mixtes sans surface factice |
 | Composition Prisma structurée | Implémentée (1B-R) | modèle intermédiaire strict, sans parsing de texte |
 | Registres seed/statut composables | Implémentés (1B-R) | ordre explicite, doublons/rangs ambigus refusés |
@@ -46,14 +46,15 @@ planifiées.
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 10 | autorisée | composables **et** prouvés par un golden runtime |
-| `supported` | 9 | autorisée | composables, sans preuve golden (`runtimeProven: false`) |
-| `planned` | 7 | **refusée** | cibles de parité Spring/Angular/Flutter |
+| `ready` | 15 | autorisée | composables, exacts et prouvés par un golden runtime |
+| `supported` | 4 | autorisée | composables avec baseline-copy sur Angular/Flutter |
+| `planned` | 7 | **refusée** | cibles de parité auth/RBAC/files sur Spring/Angular/Flutter |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
 et golden ; aucun profil ne compose sans API.
 
-Les dix goldens runtime adossent un profil `ready`, chacun sur un golden distinct.
+Les goldens runtime adossent les profils `ready`, chacun sur une composition distincte ; les profils
+Angular/Flutter restent `supported` tant que leurs baselines ne sont pas extraites.
 
 ## Qualité et exploitation
 

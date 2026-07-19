@@ -42,22 +42,34 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
   // A blueprint need not claim a profile; when its selection matches one, the
   // plan names it so the composition is traceable to a supported combination.
   const matched = matchProfile(blueprint);
+  const starterById = new Map(starters.map((starter) => [starter.id, starter]));
+  const sourceFor = (starterId) => starterById.get(starterId)?.composition?.baseSource ?? `starters/${starterId}`;
   return {
     project: blueprint.project.slug,
     generationMode: allModular ? 'modular-overlay' : 'baseline-copy',
     bundledFeaturesMayExceedSelection: !allModular,
     stack: blueprint.stack,
     capabilities: [...blueprint.capabilities],
+    // `runtimeProven` says a golden exercises this selection; `compositionExact`
+    // says the generated project carries nothing beyond it. A profile is `ready`
+    // only when both hold — a baseline-copy profile can be proven yet deliver
+    // capabilities that were never selected.
     profile: matched
-      ? { id: matched.id, status: matched.status, golden: matched.golden, runtimeProven: Boolean(matched.golden) }
+      ? {
+        id: matched.id,
+        status: matched.status,
+        golden: matched.golden,
+        runtimeProven: Boolean(matched.golden),
+        compositionExact: allModular,
+      }
       : null,
     gates: expectedGates(blueprint, starters),
     designSystem: blueprint.designSystem,
     directories,
     starterSources: {
-      api: `starters/${blueprint.stack.api}`,
-      ...(blueprint.stack.web ? { web: `starters/${blueprint.stack.web}` } : {}),
-      ...(blueprint.stack.mobile ? { mobile: `starters/${blueprint.stack.mobile}` } : {}),
+      api: sourceFor(blueprint.stack.api),
+      ...(blueprint.stack.web ? { web: sourceFor(blueprint.stack.web) } : {}),
+      ...(blueprint.stack.mobile ? { mobile: sourceFor(blueprint.stack.mobile) } : {}),
     },
   };
 }

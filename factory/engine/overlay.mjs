@@ -286,7 +286,10 @@ async function writePrismaComposition(appDirectory, composition, capabilities) {
 export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, output, capabilityManifests }) {
   const byId = new Map(capabilityManifests.map((manifest) => [manifest.id, manifest]));
   const orderedCapabilities = CAPABILITY_IDS.filter((id) => blueprint.capabilities.includes(id));
-  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({ kind, starterId: source.split('/').at(-1) }));
+  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({
+    kind,
+    starterId: source.split('/')[1] ?? source.split('/').at(-1),
+  }));
   const applied = [];
   const verification = {};
   const integrationsByApp = new Map();

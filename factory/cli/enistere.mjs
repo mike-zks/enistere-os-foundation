@@ -82,15 +82,20 @@ async function main() {
 
   if (command === 'profiles') {
     const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT);
+    const starters = await loadStarterManifests(FOUNDATION_ROOT);
     console.log(JSON.stringify({
-      profiles: listProfiles().map((entry) => ({
-        id: entry.id,
-        status: entry.status,
-        stack: entry.stack,
-        capabilities: entry.capabilities,
-        runtimeProven: Boolean(entry.golden),
-        generatable: assessProfile(entry, capabilities).composable,
-      })),
+      profiles: listProfiles().map((entry) => {
+        const assessment = assessProfile(entry, capabilities, starters);
+        return {
+          id: entry.id,
+          status: entry.status,
+          stack: entry.stack,
+          capabilities: entry.capabilities,
+          runtimeProven: Boolean(entry.golden),
+          compositionExact: assessment.compositionExact,
+          generatable: assessment.composable,
+        };
+      }),
     }, null, 2));
     return;
   }
@@ -100,7 +105,8 @@ async function main() {
     // Throws with the API-mandatory invariant for web-only and mobile-only names.
     const entry = getProfile(first);
     const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT, entry.capabilities);
-    const assessment = assessProfile(entry, capabilities);
+    const starters = await loadStarterManifests(FOUNDATION_ROOT);
+    const assessment = assessProfile(entry, capabilities, starters);
     console.log(JSON.stringify({
       ...entry,
       starters: profileStarterIds(entry),

@@ -32,13 +32,13 @@ dépassent. L'API est un invariant : aucun profil sans API, et toute demande « 
 « mobile-only » est refusée en nommant les profils API correspondants. Le CLI expose `profiles` et
 `profile <name>` ; `plan` nomme le profil et affiche capabilities et gates attendus. Documentation :
 `docs/project-status/PROFILE_MATRIX.md`. Prochaine étape : Capability Packs 2 (parité
-Spring + Angular + Flutter), mesurée par le passage des sept profils `planned` à `supported`.
+Angular + Flutter), Spring base étant déjà extrait et prouvé.
 
 Project Factory 4B livré : les compositions triples déjà prouvées reçoivent un profil nommé —
 `nestjs-next-react-native-auth` (`triple-auth`) et `nestjs-next-react-native-rbac`
 (`triple-auth-rbac`) — en réutilisant exactement ces compositions, sans renderer, overlay ni
-comportement runtime nouveau. Le registre compte 26 profils dont 19 générables (10 `ready`,
-9 `supported`, 7 `planned`). Les dix goldens adossent désormais un profil. La documentation ne peut plus dériver du registre :
+comportement runtime nouveau. Le registre compte 26 profils dont 19 générables (15 `ready`,
+4 `supported`, 7 `planned`). Les goldens adossent désormais les profils exacts. La documentation ne peut plus dériver du registre :
 `PROFILE_MATRIX.md` et `profiles.mjs` sont croisés dans les deux sens, compteurs inclus.
 
 ## Invariants
@@ -51,7 +51,7 @@ comportement runtime nouveau. Le registre compte 26 profils dont 19 générables
 - aucun nouveau rapport de micro-mission ;
 - aucun profil sans API : `stack.api` reste obligatoire dans le Blueprint v1 ;
 - aucun profil `ready` sans overlay **et** golden ; un profil `planned` n'est jamais générable ;
-- Spring + Angular + Flutter doivent obtenir le même contrat après la verticale TypeScript ;
+- Angular et Flutter doivent obtenir le même contrat après l'extraction modulaire ; Spring base est déjà exact ;
 - R8 reste bloqué jusqu'à composition honnête.
 
 ## Gates attendus

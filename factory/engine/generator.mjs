@@ -52,7 +52,7 @@ const NPM_STARTERS = new Set(['nestjs', 'nextjs', 'angular', 'react-native']);
 
 function npmAppWorkspaces(plan) {
   return Object.entries(plan.starterSources)
-    .filter(([, source]) => NPM_STARTERS.has(source.split('/').at(-1)))
+    .filter(([, source]) => NPM_STARTERS.has(source.split('/')[1] ?? source.split('/').at(-1)))
     .map(([kind]) => `apps/${kind}`);
 }
 
@@ -108,7 +108,7 @@ function verifyScript(plan, overlayVerification = {}) {
     flutter: ['flutter', 'analyze'],
   };
   const steps = Object.entries(plan.starterSources).flatMap(([kind, source]) => [
-    { cwd: `apps/${kind}`, argv: commands[source.split('/').at(-1)] },
+    { cwd: `apps/${kind}`, argv: commands[source.split('/')[1] ?? source.split('/').at(-1)] },
     ...(overlayVerification[kind] ?? []).map((argv) => ({ cwd: `apps/${kind}`, argv })),
   ]);
   return `import { spawnSync } from 'node:child_process';\n\nconst rootBuild = spawnSync('npm', ['run', 'build:packages'], { stdio: 'inherit', shell: false });\nif (rootBuild.status !== 0) process.exit(rootBuild.status ?? 1);\nconst steps = ${JSON.stringify(steps, null, 2)};\nfor (const step of steps) {\n  const [command, ...args] = step.argv;\n  const result = spawnSync(command, args, { cwd: step.cwd, stdio: 'inherit', shell: false });\n  if (result.status !== 0) process.exit(result.status ?? 1);\n}\n`;
@@ -129,7 +129,10 @@ const RUN_COMMANDS = {
 
 /** README derived from the blueprint and plan — no hand-written divergence. */
 function projectReadme(blueprint, plan, overlays) {
-  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({ kind, id: source.split('/').at(-1) }));
+  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({
+    kind,
+    id: source.split('/')[1] ?? source.split('/').at(-1),
+  }));
   const stackLines = kinds.map(({ kind, id }) => `- \`apps/${kind}\` — ${STARTER_LABELS[id] ?? id}`);
   const hasApi = kinds.some((k) => k.kind === 'api');
   const hasNestjs = kinds.some((k) => k.id === 'nestjs');
@@ -270,7 +273,10 @@ export async function generateProject(blueprint, output, options = {}) {
     throw new Error(`Capability composition is not ready: ${details}`);
   }
   const starterManifests = await loadStarterManifests(FOUNDATION_ROOT);
-  const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starterManifests) });
+  const plan = buildGenerationPlan(blueprint, {
+    modularStarters: modularStarterIds(starterManifests),
+    starters: starterManifests,
+  });
   plan.designSystem = blueprint.designSystem;
   for (const directory of plan.directories) await mkdir(join(output, directory), { recursive: true });
   let overlays = { applied: [], verification: {} };

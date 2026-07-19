@@ -17,17 +17,22 @@ import { STARTER_IDS } from './starters.mjs';
 /**
  * Support status of a profile, with explicit semantics:
  *
- * - `ready`     : composable against the capability matrix **and** proven by a
- *                 golden runtime. The only status that claims runtime proof.
- * - `supported` : composable against the capability matrix today, but not
- *                 proven by a golden runtime. Generation is allowed; the
- *                 absence of proof is reported, never hidden.
+ * - `ready`     : composable, proven by a golden runtime, **and** composed
+ *                 exactly — the generated project contains the selected
+ *                 capabilities and nothing beyond them. The only status that
+ *                 promises the delivery matches the profile.
+ * - `supported` : generatable, but the promise is weaker. Either no golden
+ *                 proves it, or its gates are green while a selected starter is
+ *                 baseline-copy and ships capabilities the profile never
+ *                 selected. The shortfall is reported, never hidden.
  * - `planned`   : not composable — at least one selected capability is
  *                 `planned` or `unsupported` on a selected target. Generation
  *                 is refused. Declaring the profile documents the parity target
  *                 without ever presenting it as usable.
  *
- * `ready` is never granted without both an overlay composition and a golden.
+ * Green gates alone never earn `ready` (R8A): a baseline-copy profile can pass
+ * every gate while delivering Auth, RBAC and Files that were never asked for.
+ * Calling it `ready` would promise a `base` project and hand over a full one.
  */
 export const PROFILE_STATUSES = Object.freeze(['ready', 'supported', 'planned']);
 
@@ -81,23 +86,43 @@ export const PROFILES = Object.freeze([
   profile('nestjs-auth', 'ready', { api: 'nestjs' }, ['base', 'auth'], { golden: 'nestjs-auth' }),
   profile('nestjs-rbac', 'ready', { api: 'nestjs' }, ['base', 'auth', 'rbac'], { golden: 'nestjs-auth-rbac' }),
   profile('nestjs-files', 'ready', { api: 'nestjs' }, ['base', 'auth', 'rbac', 'files'], { golden: 'nestjs-files' }),
-  profile('spring-base', 'supported', { api: 'spring' }, ['base'], {
-    note: 'Spring baseline copy: no capability overlay and no golden runtime yet.',
+  // Spring now has a minimal modular base. Its base golden therefore proves
+  // the selected composition without importing Auth/RBAC/Files by accident.
+  profile('spring-base', 'ready', { api: 'spring' }, ['base'], {
+    golden: 'spring-base',
   }),
 
   // ── Base compositions with a web or mobile surface ─────────────────────────
-  profile('nestjs-next-base', 'supported', { api: 'nestjs', web: 'nextjs' }, ['base']),
-  profile('nestjs-react-native-base', 'supported', { api: 'nestjs', mobile: 'react-native' }, ['base']),
+  // Composition exacte (NestJS + Next.js / React Native sont modulaires) : R8A
+  // prouve les gates ET l'absence de surface non sélectionnée.
+  profile('nestjs-next-base', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base'], {
+    golden: 'nestjs-next-base',
+  }),
+  profile('nestjs-react-native-base', 'ready', { api: 'nestjs', mobile: 'react-native' }, ['base'], {
+    golden: 'nestjs-react-native-base',
+  }),
   profile('nestjs-angular-base', 'supported', { api: 'nestjs', web: 'angular' }, ['base'], {
-    note: 'Angular baseline copy: bundled features may exceed the selection.',
+    golden: 'nestjs-angular-base',
+    note: 'Angular baseline copy: gates are green but the web app ships an auth surface base never selected.',
   }),
   profile('nestjs-flutter-base', 'supported', { api: 'nestjs', mobile: 'flutter' }, ['base'], {
-    note: 'Flutter baseline copy: bundled features may exceed the selection.',
+    golden: 'nestjs-flutter-base',
+    note: 'Flutter baseline copy: gates are green but the mobile app ships a sign-in surface base never selected.',
   }),
-  profile('spring-next-base', 'supported', { api: 'spring', web: 'nextjs' }, ['base']),
-  profile('spring-react-native-base', 'supported', { api: 'spring', mobile: 'react-native' }, ['base']),
-  profile('spring-angular-base', 'supported', { api: 'spring', web: 'angular' }, ['base']),
-  profile('spring-flutter-base', 'supported', { api: 'spring', mobile: 'flutter' }, ['base']),
+  profile('spring-next-base', 'ready', { api: 'spring', web: 'nextjs' }, ['base'], {
+    golden: 'spring-next-base',
+  }),
+  profile('spring-react-native-base', 'ready', { api: 'spring', mobile: 'react-native' }, ['base'], {
+    golden: 'spring-react-native-base',
+  }),
+  profile('spring-angular-base', 'supported', { api: 'spring', web: 'angular' }, ['base'], {
+    golden: 'spring-angular-base',
+    note: 'Both starters are baseline copies: the project ships well beyond base.',
+  }),
+  profile('spring-flutter-base', 'supported', { api: 'spring', mobile: 'flutter' }, ['base'], {
+    golden: 'spring-flutter-base',
+    note: 'Both starters are baseline copies: the project ships well beyond base.',
+  }),
 
   // ── Proven TypeScript vertical ─────────────────────────────────────────────
   profile('nestjs-next-auth', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base', 'auth'], {
@@ -192,14 +217,20 @@ export function getProfile(name) {
  * selected capability is `ready` or `not-applicable` on every selected target.
  * A composable profile is `ready` only when a golden runtime backs it.
  */
-export function assessProfile(entry, manifests) {
+export function assessProfile(entry, manifests, starters) {
   const dependencyIssues = validateCapabilityDependencies([...entry.capabilities]);
   const selected = manifests.filter((manifest) => entry.capabilities.includes(manifest.id));
   const support = assessCapabilitySupport(profileStarterIds(entry), selected);
   const composable = dependencyIssues.length === 0 && support.ready;
+  // A profile composes exactly when every starter it selects follows the modular
+  // contract. A baseline-copy starter ships its whole baseline, so the generated
+  // project carries capabilities the profile never selected.
+  const modular = new Set(starters.filter((starter) => starter.composition?.model === 'modular').map((starter) => starter.id));
+  const compositionExact = profileStarterIds(entry).every((starterId) => modular.has(starterId));
   return {
     composable,
-    status: composable ? (entry.golden ? 'ready' : 'supported') : 'planned',
+    compositionExact,
+    status: composable ? (entry.golden && compositionExact ? 'ready' : 'supported') : 'planned',
     dependencyIssues,
     blockers: support.blockers,
     notApplicable: support.notApplicable,
@@ -210,7 +241,7 @@ export function assessProfile(entry, manifests) {
  * Cross-validates the whole registry against the matrix. Any profile whose
  * declared status overstates (or understates) reality is reported.
  */
-export function validateProfileRegistry(manifests) {
+export function validateProfileRegistry(manifests, starters) {
   const issues = [];
   const seen = new Set();
   // Two profiles sharing one selection would make `matchProfile` ambiguous.
@@ -227,9 +258,14 @@ export function validateProfileRegistry(manifests) {
       if (!STARTER_IDS.includes(starterId)) issues.push(`${entry.id}: unknown starter ${starterId}`);
     }
     if (entry.status === 'planned' && entry.golden) issues.push(`${entry.id}: a planned profile cannot claim a golden`);
-    const assessment = assessProfile(entry, manifests);
+    const assessment = assessProfile(entry, manifests, starters);
     if (assessment.status !== entry.status) {
       issues.push(`${entry.id}: declared ${entry.status} but the matrix supports ${assessment.status}`);
+    }
+    // `ready` is the only status that promises the delivered project matches the
+    // profile. It therefore requires an exact composition, never a baseline copy.
+    if (entry.status === 'ready' && !assessment.compositionExact) {
+      issues.push(`${entry.id}: ready requires an exact composition, but a selected starter is baseline-copy`);
     }
   }
   return issues;
