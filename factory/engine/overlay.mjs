@@ -17,6 +17,7 @@ import {
   renderPrismaSeedRegistry,
 } from './overlay-renderers.mjs';
 import { validateOverwriteUsage } from './overwrite-policy.mjs';
+import { getTargetAdapter, integrationKindsFor } from './target-adapters.mjs';
 import {
   applyPrismaFragment,
   createPrismaComposition,
@@ -32,35 +33,10 @@ const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
  * rejected: the engine is the only interpreter of overlay operations and only
  * renders integrations it fully understands (no scripts, no hooks, no patches).
  */
-const S = 'string';
-const I = 'integer';
-
-export const INTEGRATION_KINDS = Object.freeze({
-  nestjs: Object.freeze({
-    'nestjs.module': { importPath: S, symbol: S },
-    // `order` makes the global guard chain deterministic regardless of the order
-    // in which capabilities are composed (authentication before authorization).
-    'nestjs.global-guard': { importPath: S, symbol: S, order: I },
-    'nestjs.throttler': { name: S, limitEnv: S, defaultLimit: I, ttlSecondsEnv: S, defaultTtlSeconds: I },
-    // Declarative Prisma contribution (enums, models, model-field extensions).
-    // Assembled into a typed intermediate model and rendered once — never a patch.
-    'nestjs.prisma-schema': { source: S },
-    // Composable seed: the capability contributes an idempotent function; the
-    // engine renders the registry consumed by the app's stable seed orchestrator.
-    'nestjs.prisma-seed': { importPath: S, symbol: S, order: I },
-  }),
-  nextjs: Object.freeze({
-    'nextjs.provider': { importPath: S, symbol: S },
-    'nextjs.public-nav-link': { href: S, label: S },
-    'nextjs.dashboard-nav-link': { href: S, label: S, order: I },
-    // Composable section of the shared status page (no overwrite of the shell).
-    'nextjs.status-section': { importPath: S, symbol: S, order: I },
-  }),
-  'react-native': Object.freeze({
-    'expo.provider': { importPath: S, symbol: S },
-    'expo.home-action': { href: S, label: S, order: I },
-  }),
-});
+export const INTEGRATION_KINDS = Object.freeze(Object.fromEntries(
+  ['nestjs', 'nextjs', 'react-native', 'spring', 'angular', 'flutter']
+    .map((id) => [id, integrationKindsFor(id) ?? {}]),
+));
 
 function isSafeRelativePath(value) {
   if (typeof value !== 'string' || value === '' || value.startsWith('/') || value.includes('\\')) return false;
@@ -113,7 +89,9 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
     if (typeof entry.example !== 'string') issues.push(`environment[${index}].example is required`);
   });
 
-  const knownKinds = INTEGRATION_KINDS[value.target] ?? {};
+  const adapter = getTargetAdapter(value.target);
+  if (!adapter) issues.push(`target adapter is not registered: ${value.target}`);
+  const knownKinds = adapter?.integrationKinds ?? {};
   if (!Array.isArray(value.integrations)) issues.push('integrations must be an array');
   else value.integrations.forEach((entry, index) => {
     if (!entry || typeof entry !== 'object') { issues.push(`integrations[${index}] must be an object`); return; }
