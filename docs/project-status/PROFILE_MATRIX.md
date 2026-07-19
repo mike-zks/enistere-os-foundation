@@ -56,7 +56,7 @@ Deux champs distincts portent cette nuance :
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (15)
+### `ready` — composables, prouvés et exacts (19)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -75,29 +75,29 @@ Deux champs distincts portent cette nuance :
 | `spring-base` | spring | — | — | base | `spring-base` |
 | `spring-next-base` | spring | nextjs | — | base | `spring-next-base` |
 | `spring-react-native-base` | spring | — | react-native | base | `spring-react-native-base` |
+| `nestjs-angular-base` | nestjs | angular | — | base | `nestjs-angular-base` |
+| `nestjs-flutter-base` | nestjs | — | flutter | base | `nestjs-flutter-base` |
+| `spring-angular-base` | spring | angular | — | base | `spring-angular-base` |
+| `spring-flutter-base` | spring | — | flutter | base | `spring-flutter-base` |
 
 Sur `nestjs-next-react-native-rbac` et `nestjs-next-react-native-files`, `rbac` est `not-applicable` sur React
 Native : l'autorisation fine reste côté serveur et **aucune surface RBAC n'est injectée** sur le
 mobile. Les deux profils triples réutilisent exactement les compositions golden existantes
 (`triple-auth`, `triple-auth-rbac`) : aucun renderer, overlay ou comportement runtime nouveau.
 
-### `supported` — générables, gates vertes, mais composition inexacte (4)
+### `supported` — aucun profil après extraction modulaire (0)
 
 | Profil | API | Web | Mobile | Capabilities | Golden | Dépassement constaté |
 |---|---|---|---|---|---|---|
-| `spring-angular-base` | spring | angular | — | base | `spring-angular-base` | API **et** Web |
-| `spring-flutter-base` | spring | — | flutter | base | `spring-flutter-base` | API **et** Mobile |
-| `nestjs-angular-base` | nestjs | angular | — | base | `nestjs-angular-base` | 15 fichiers d'authentification côté Angular |
-| `nestjs-flutter-base` | nestjs | — | flutter | base | `nestjs-flutter-base` | écran de connexion côté Flutter |
+Les quatre profils Angular/Flutter ont été promus `ready` après extraction de leurs baselines et
+goldens structurels/runtime. Aucun profil `supported` ne subsiste pour un dépassement de baseline.
 
-Ces quatre profils sont valides **parce que `base` est disponible sur les six starters**, et R8A prouve
-que leurs gates passent réellement. Ils restent néanmoins `supported` : Angular et Flutter ne
-suivent pas le contrat de composition modulaire, donc la génération retombe sur `baseline-copy`
-(`bundledFeaturesMayExceedSelection: true`) et le projet livré dépasse la sélection.
+Ces profils sont valides **parce que `base` est disponible sur les six starters**, et R8A prouve
+que leurs gates passent réellement. Angular et Flutter suivent désormais le contrat modulaire :
+la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: false`).
 
-**Aucun de ces profils ne sera promu par des gates vertes seules.** La promotion passe par
-l'extraction modulaire des starters secondaires — mission dédiée, préalable à tout travail
-Auth/RBAC/Files sur ces stacks.
+Les overlays Auth/RBAC/Files restent une mission distincte : la base exacte ne prouve pas encore
+la parité métier de ces capabilities sur Angular et Flutter.
 
 ### `planned` — cibles de parité, génération refusée (7)
 
@@ -135,9 +135,9 @@ Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pa
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
 le golden est bien celle que le profil épingle.
 
-En revanche, **un golden n'est pas une promotion**. Quinze profils sont `ready` (golden vert +
-composition exacte) ; quatre sont `supported` avec un golden tout aussi vert, retenus par leur
-composition inexacte. Aucun profil `planned` n'a de golden.
+En revanche, **un golden n'est pas une promotion** : les dix-neuf profils `ready` combinent golden
+vert et composition exacte. Aucun profil `supported` baseline-copy ni profil `planned` n'a été
+promu par cette extraction.
 
 ## CLI
 

@@ -46,8 +46,8 @@ planifiées.
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 15 | autorisée | composables, exacts et prouvés par un golden runtime |
-| `supported` | 4 | autorisée | composables avec baseline-copy sur Angular/Flutter |
+| `ready` | 19 | autorisée | composables, exacts et prouvés par un golden runtime |
+| `supported` | 0 | autorisée | aucun dépassement de baseline après R8A-3 |
 | `planned` | 7 | **refusée** | cibles de parité auth/RBAC/files sur Spring/Angular/Flutter |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
