@@ -22,7 +22,8 @@ la matrice réelle ne soutient pas.
 
 1. Capability Packs 2 — parité Spring + Angular + Flutter (profils `planned` → `supported` → `ready`).
 2. R8 — golden runtimes étendus (démarrage applicatif complet) sur les deux verticales, à commencer
-   par les neuf profils `supported` qui restent sans preuve runtime.
+   par les neuf profils `supported` qui restent sans preuve runtime. Un profil ne passe `supported`
+   → `ready` que lorsqu'un golden le prouve : aucune promotion automatique.
 3. R9 — compilateur de domaine CRUD NestJS/Spring.
 4. R10 — upgrades et migrations blueprint.
 5. R11 — distribution CLI/packages.

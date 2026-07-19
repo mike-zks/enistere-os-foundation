@@ -5,7 +5,7 @@
 | Capacité | État | Limite actuelle |
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
-| `profiles` / `profile <name>` | Implémenté (R7) | 23 profils déclarés, 16 générables |
+| `profiles` / `profile <name>` | Implémenté (R7) | 25 profils déclarés, 18 générables |
 | Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
 | 18 combinaisons de stacks | Planifiées/testées | distinctes des profils ; pas toutes démarrées en golden |
@@ -46,12 +46,15 @@ planifiées.
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 7 | autorisée | composables **et** prouvés par un golden runtime |
+| `ready` | 9 | autorisée | composables **et** prouvés par un golden runtime |
 | `supported` | 9 | autorisée | composables, sans preuve golden (`runtimeProven: false`) |
 | `planned` | 7 | **refusée** | cibles de parité Spring/Angular/Flutter |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
 et golden ; aucun profil ne compose sans API.
+
+Neuf des dix goldens runtime adossent un profil `ready`, chacun sur un golden distinct. Le golden
+`nest-next-files` reste sans profil nommé : l'écart est documenté et vérifié par test, jamais masqué.
 
 ## Qualité et exploitation
 

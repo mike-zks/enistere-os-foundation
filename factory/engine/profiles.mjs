@@ -106,6 +106,13 @@ export const PROFILES = Object.freeze([
   profile('nestjs-next-rbac', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base', 'auth', 'rbac'], {
     golden: 'nest-next-auth-rbac',
   }),
+  profile('nestjs-next-react-native-auth', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth'], {
+    golden: 'triple-auth',
+  }),
+  profile('nestjs-next-react-native-rbac', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth', 'rbac'], {
+    golden: 'triple-auth-rbac',
+    note: 'RBAC is not-applicable on React Native: the mobile app receives decisions from the API.',
+  }),
   profile('nestjs-next-rn-files', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth', 'rbac', 'files'], {
     golden: 'triple-files',
     note: 'RBAC is not-applicable on React Native: the mobile app receives decisions from the API.',

@@ -7,7 +7,7 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 ### Project Factory 4 (R7) — matrice des profils et combinaisons supportées
 
 - Nouveau registre `factory/engine/profiles.mjs` : un **profil** est une composition nommée
-  `{api, web?, mobile?, capabilities}`. 23 profils déclarés, dont 16 générables.
+  `{api, web?, mobile?, capabilities}`. 25 profils déclarés, dont 18 générables.
 - Trois statuts explicites : `ready` (composable **et** prouvé par un golden runtime), `supported`
   (composable selon la matrice, sans preuve runtime) et `planned` (non composable, génération
   refusée). Aucun `ready` n'est attribué sans overlay et golden.
@@ -25,6 +25,23 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 - Les 18 combinaisons de stacks restent une grandeur distincte des profils : plusieurs profils
   partagent une combinaison, et de nombreuses combinaisons n'en portent aucun.
 - Documentation : `docs/project-status/PROFILE_MATRIX.md`, matrice et séquence R7 mises à jour.
+
+#### 4B — couverture des goldens triples
+
+- Deux profils `ready` ajoutés pour les compositions triples déjà prouvées :
+  `nestjs-next-react-native-auth` (golden `triple-auth`) et `nestjs-next-react-native-rbac`
+  (golden `triple-auth-rbac`). Ils **réutilisent exactement** ces compositions : aucun renderer,
+  overlay, capability ni comportement runtime nouveau.
+- Neuf des dix goldens adossent désormais un profil `ready`, chacun sur un golden distinct. Le
+  golden `nest-next-files` reste **sans profil nommé** : l'écart est documenté dans
+  `PROFILE_MATRIX.md` et un test vérifie que tout golden non couvert y figure.
+- La documentation ne peut plus dériver du registre : trois tests croisent `PROFILE_MATRIX.md` et
+  `profiles.mjs` (tout profil enregistré est documenté, tout profil documenté est enregistré, et les
+  compteurs annoncés sont ceux du registre).
+- La vérification « une suggestion pointe toujours vers un profil enregistré » couvre désormais tous
+  les noms sans API que la CLI peut rencontrer, pas seulement les quatre noms canoniques.
+- Aucune promotion automatique : les profils `supported` le restent tant qu'aucun golden ne les
+  prouve.
 
 ### Capability Packs 1C — extraction Files (NestJS + Next.js + React Native)
 

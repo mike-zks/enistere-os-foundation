@@ -34,6 +34,14 @@ dépassent. L'API est un invariant : aucun profil sans API, et toute demande « 
 `docs/project-status/PROFILE_MATRIX.md`. Prochaine étape : Capability Packs 2 (parité
 Spring + Angular + Flutter), mesurée par le passage des sept profils `planned` à `supported`.
 
+Project Factory 4B livré : les compositions triples déjà prouvées reçoivent un profil nommé —
+`nestjs-next-react-native-auth` (`triple-auth`) et `nestjs-next-react-native-rbac`
+(`triple-auth-rbac`) — en réutilisant exactement ces compositions, sans renderer, overlay ni
+comportement runtime nouveau. Le registre compte 25 profils dont 18 générables (9 `ready`,
+9 `supported`, 7 `planned`). Neuf des dix goldens adossent un profil ; `nest-next-files` reste sans
+profil nommé, écart documenté et vérifié par test. La documentation ne peut plus dériver du registre :
+`PROFILE_MATRIX.md` et `profiles.mjs` sont croisés dans les deux sens, compteurs inclus.
+
 ## Invariants
 
 - aucun retour du répertoire `cores/` ;

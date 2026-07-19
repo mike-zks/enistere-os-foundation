@@ -24,7 +24,9 @@
    toute combinaison non supportée. Voir `docs/project-status/PROFILE_MATRIX.md`.
 4. Atteindre la parité Spring + Angular + Flutter : chaque profil `planned` du registre devient
    `supported`, puis `ready` lorsqu'un golden le prouve.
-5. Exécuter les golden runtimes R8 : un profil ne passe `ready` qu'avec overlay **et** golden.
+5. Exécuter les golden runtimes R8 : un profil ne passe `ready` qu'avec overlay **et** golden. La
+   promotion `supported` → `ready` n'est jamais automatique ; réciproquement, tout golden prouvé
+   doit recevoir un profil nommé ou voir son absence documentée.
 6. Ouvrir R9 uniquement après preuve de composition sur les deux verticales.
 
 L'API est un invariant de la Foundation, pas un paramètre : un profil sans API n'existe pas, et une
