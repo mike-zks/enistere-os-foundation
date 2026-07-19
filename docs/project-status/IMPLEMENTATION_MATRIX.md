@@ -5,7 +5,10 @@
 | Capacité | État | Limite actuelle |
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
-| 18 combinaisons de stacks | Planifiées/testées | pas toutes démarrées en golden runtime |
+| `profiles` / `profile <name>` | Implémenté (R7) | 23 profils déclarés, 16 générables |
+| Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |
+| Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
+| 18 combinaisons de stacks | Planifiées/testées | distinctes des profils ; pas toutes démarrées en golden |
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
@@ -38,6 +41,17 @@ surface correspondante, tests d'absence et goldens runtime vérifiés. `rbac` re
 ce statut ne bloque pas la composition triple et n'injecte aucune surface mobile. Le payload parqué
 `files` exige explicitement `base + auth + rbac` et n'injecte aucune surface sur les targets
 planifiées.
+
+## Profils
+
+| Statut | Nombre | Génération | Détail |
+|---|---|---|---|
+| `ready` | 7 | autorisée | composables **et** prouvés par un golden runtime |
+| `supported` | 9 | autorisée | composables, sans preuve golden (`runtimeProven: false`) |
+| `planned` | 7 | **refusée** | cibles de parité Spring/Angular/Flutter |
+
+Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
+et golden ; aucun profil ne compose sans API.
 
 ## Qualité et exploitation
 

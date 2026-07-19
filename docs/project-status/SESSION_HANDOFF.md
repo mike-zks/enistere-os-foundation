@@ -22,8 +22,17 @@ Capability Packs 1C livré : extraction Files en overlays `ready` sur NestJS, Ne
 avec dépendance explicite à `base + auth + rbac`, composition Prisma/migrations, contrat OpenAPI
 généré, navigation composable, tests d'absence et goldens `nestjs-files`, `nest-next-files` et
 `triple-files`. La non-régression Files V1 est documentée dans
-`docs/project-status/FILES_V1_NON_REGRESSION.md`. Prochaine étape : Capability Packs 2 (parité
-Spring + Angular + Flutter).
+`docs/project-status/FILES_V1_NON_REGRESSION.md`.
+
+Project Factory 4 (R7) livré : la matrice théorique des combinaisons devient un registre de profils
+explicites (`factory/engine/profiles.mjs`). Un profil est une composition nommée
+`{api, web?, mobile?, capabilities}` portant l'un des trois statuts `ready` / `supported` /
+`planned`, recalculés depuis la matrice réelle des capabilities et refusés par les tests s'ils la
+dépassent. L'API est un invariant : aucun profil sans API, et toute demande « web-only » ou
+« mobile-only » est refusée en nommant les profils API correspondants. Le CLI expose `profiles` et
+`profile <name>` ; `plan` nomme le profil et affiche capabilities et gates attendus. Documentation :
+`docs/project-status/PROFILE_MATRIX.md`. Prochaine étape : Capability Packs 2 (parité
+Spring + Angular + Flutter), mesurée par le passage des sept profils `planned` à `supported`.
 
 ## Invariants
 
@@ -33,6 +42,8 @@ Spring + Angular + Flutter).
   Next.js et React Native ;
 - aucun script arbitraire exécuté depuis un pack (le moteur Factory est l'unique interpréteur) ;
 - aucun nouveau rapport de micro-mission ;
+- aucun profil sans API : `stack.api` reste obligatoire dans le Blueprint v1 ;
+- aucun profil `ready` sans overlay **et** golden ; un profil `planned` n'est jamais générable ;
 - Spring + Angular + Flutter doivent obtenir le même contrat après la verticale TypeScript ;
 - R8 reste bloqué jusqu'à composition honnête.
 

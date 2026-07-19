@@ -6,6 +6,11 @@
   "required": ["version", "project", "topology", "stack", "designSystem", "domain", "capabilities", "deployment"],
   "properties": {
     "version": { "const": "1" },
+    "profile": {
+      "description": "Optional named composition this blueprint claims. When present, the blueprint's stack and capabilities must match the profile exactly, and a planned profile is refused. Profiles always include an API: web-only and mobile-only names are rejected.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,62}$"
+    },
     "project": {
       "type": "object",
       "required": ["name", "slug"],
