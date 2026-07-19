@@ -34,10 +34,10 @@
     "model": "modular",
     "readyCapabilities": [
       "auth",
-      "rbac"
+      "rbac",
+      "files"
     ],
     "plannedCapabilities": [
-      "files",
       "observability"
     ]
   },

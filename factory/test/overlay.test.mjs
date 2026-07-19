@@ -188,15 +188,22 @@ describe('modular generation plan', () => {
 });
 
 describe('capability refusals', () => {
-  it('still refuses files on every target', async () => {
+  it('requires RBAC before composing the full Files capability', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
     const blueprint = createDefaultBlueprint('refused-app');
     blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
     blueprint.capabilities = ['base', 'auth', 'files'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /files on nestjs is planned/,
+      /files requires rbac/,
     );
+  });
+  it('composes Files on the TypeScript vertical when RBAC is selected', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-files-ready-'));
+    const blueprint = createDefaultBlueprint('files-ready-app');
+    blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
+    blueprint.capabilities = ['base', 'auth', 'rbac', 'files'];
+    await generateProject(blueprint, join(root, 'project'), { materialize: false });
   });
   it('refuses rbac on a target where it is only planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));

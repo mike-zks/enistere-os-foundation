@@ -202,6 +202,7 @@ describe('golden runtime audit wiring', () => {
     assert.deepEqual(Object.keys(COMPOSITIONS), [
       'nestjs-base', 'nestjs-auth', 'nest-next-auth', 'triple-auth',
       'nestjs-auth-rbac', 'nest-next-auth-rbac', 'triple-auth-rbac',
+      'nestjs-files', 'nest-next-files', 'triple-files',
     ]);
     for (const composition of Object.keys(COMPOSITIONS)) {
       const spec = COMPOSITIONS[composition];

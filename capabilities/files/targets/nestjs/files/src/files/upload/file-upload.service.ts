@@ -8,8 +8,8 @@ import {
 import { FileCategory } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES, AuditEventType } from '../../audit/audit.types';
-import { ERROR_CODES } from '../../common/errors/error-codes';
+import { FILES_AUDIT_EVENTS, AuditEventType } from '../../audit/files-audit-events';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
 import { PublicStoredFile } from '../contracts/public-stored-file';
 import { UploadFileDto } from '../dto/upload-file.dto';
 import { ALLOWED_MIME_BY_CATEGORY, EXTENSIONS_BY_MIME } from '../files.constants';
@@ -60,7 +60,7 @@ export class FileUploadService {
     if (!detected) {
       await this.auditAttemptFailure(ownerId, dto.category, 'content_type_undetected');
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_CONTENT_TYPE_UNDETECTED,
+        code: FILE_ERROR_CODES.FILE_CONTENT_TYPE_UNDETECTED,
         message: 'Unsupported or unrecognized file content.',
       });
     }
@@ -68,7 +68,7 @@ export class FileUploadService {
     if (!ALLOWED_MIME_BY_CATEGORY[dto.category].includes(detected.mimeType)) {
       await this.auditAttemptFailure(ownerId, dto.category, 'content_type_mismatch');
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_CONTENT_TYPE_MISMATCH,
+        code: FILE_ERROR_CODES.FILE_CONTENT_TYPE_MISMATCH,
         message: 'File content does not match the declared category.',
       });
     }
@@ -79,7 +79,7 @@ export class FileUploadService {
     if (declared.length > 0 && !allowedExtensions.includes(declared)) {
       await this.auditAttemptFailure(ownerId, dto.category, 'extension_mismatch');
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_INVALID_EXTENSION,
+        code: FILE_ERROR_CODES.FILE_INVALID_EXTENSION,
         message: 'File extension does not match its content.',
       });
     }
@@ -108,9 +108,9 @@ export class FileUploadService {
       });
     } catch {
       await this.safeReject(pending.id);
-      await this.audit(AUDIT_EVENT_TYPES.FILE_UPLOAD_FAILED, pending.id, dto.category, 'storage_unavailable', size);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_UPLOAD_FAILED, pending.id, dto.category, 'storage_unavailable', size);
       throw new ServiceUnavailableException({
-        code: ERROR_CODES.FILE_STORAGE_UNAVAILABLE,
+        code: FILE_ERROR_CODES.FILE_STORAGE_UNAVAILABLE,
         message: 'File storage is unavailable.',
       });
     }
@@ -118,12 +118,12 @@ export class FileUploadService {
     // 4. Finalisation DB ; compensation de l'objet si elle échoue.
     try {
       const finalized = await this.filesRepository.finalize(pending.id, { checksum, size });
-      await this.audit(AUDIT_EVENT_TYPES.FILE_UPLOADED, finalized.id, dto.category, undefined, size);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_UPLOADED, finalized.id, dto.category, undefined, size);
       return toPublicStoredFile(finalized);
     } catch {
       await this.compensateOrphan(pending.id, pending.bucket, pending.storageKey, dto.category, size);
       throw new InternalServerErrorException({
-        code: ERROR_CODES.FILE_FINALIZATION_FAILED,
+        code: FILE_ERROR_CODES.FILE_FINALIZATION_FAILED,
         message: 'File could not be finalized.',
       });
     }
@@ -139,11 +139,11 @@ export class FileUploadService {
     try {
       await this.objectStorage.deleteObject(bucket, storageKey);
       await this.safeReject(fileId);
-      await this.audit(AUDIT_EVENT_TYPES.FILE_UPLOAD_FAILED, fileId, category, 'finalization_failed', size);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_UPLOAD_FAILED, fileId, category, 'finalization_failed', size);
     } catch {
       // L'objet écrit n'a pas pu être supprimé : on signale un orphelin pour réconciliation future.
-      await this.audit(AUDIT_EVENT_TYPES.FILE_STORAGE_COMPENSATION_FAILED, fileId, category, 'compensation_failed', size);
-      await this.audit(AUDIT_EVENT_TYPES.FILE_ORPHANED_OBJECT_DETECTED, fileId, category, 'orphaned_object', size);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_STORAGE_COMPENSATION_FAILED, fileId, category, 'compensation_failed', size);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_ORPHANED_OBJECT_DETECTED, fileId, category, 'orphaned_object', size);
     }
   }
 
@@ -162,7 +162,7 @@ export class FileUploadService {
   ): Promise<void> {
     // Tentative invalide AVANT création : aucun StoredFile, audit sans fileId.
     return this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.FILE_UPLOAD_FAILED,
+      eventType: FILES_AUDIT_EVENTS.FILE_UPLOAD_FAILED,
       actorId: ownerId,
       subjectId: ownerId,
       resourceType: 'stored_file',

@@ -24,11 +24,13 @@ export const GOVERNED_FILES = Object.freeze([
   { path: 'src/app/providers/capability-providers.tsx', use: "the `nextjs.provider` integration" },
   { path: 'src/app/providers/app-providers.tsx', use: "the `nextjs.provider` integration" },
   { path: 'src/core/composition/public-nav.ts', use: "the `nextjs.public-nav-link` integration" },
+  { path: 'src/core/composition/dashboard-nav.ts', use: "the `nextjs.dashboard-nav-link` integration" },
   { path: 'src/core/composition/status-sections.tsx', use: "the `nextjs.status-section` integration" },
   { path: 'src/app/(public)/status/page.tsx', use: "the `nextjs.status-section` integration" },
   { path: 'src/app/(public)/layout.tsx', use: "the `nextjs.public-nav-link` integration" },
   { path: 'src/app/layout.tsx', use: "the `nextjs.provider` integration" },
   { path: 'app/_layout.tsx', use: "the `expo.provider` integration" },
+  { path: 'src/composition/home-actions.ts', use: "the `expo.home-action` integration" },
 ]);
 
 /**

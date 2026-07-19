@@ -2,13 +2,13 @@ import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileCategory } from '@prisma/client';
 
-import { AppConfig } from '../../config/configuration';
+import { FilesConfig } from '../../config/files.configuration';
 import { StorageKeyGenerator } from './storage-key-generator';
 
 function buildGenerator(environment = 'test'): StorageKeyGenerator {
   const configService = {
     get: () => environment,
-  } as unknown as ConfigService<AppConfig, true>;
+  } as unknown as ConfigService<FilesConfig, true>;
   return new StorageKeyGenerator(configService);
 }
 

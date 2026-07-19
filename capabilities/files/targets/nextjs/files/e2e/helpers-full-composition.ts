@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 import { expect, type Page } from "@playwright/test";
 
 export interface E2eState {
@@ -9,10 +6,12 @@ export interface E2eState {
   readonly size: number;
 }
 
-/** Lit l'état provisionné par `global-setup.ts` (fichier VALIDATED éphémère). */
+let state: E2eState | undefined;
+
+/** Lit l'état provisionné dans le worker Playwright courant. */
 export function readState(): E2eState {
-  const dir = dirname(fileURLToPath(import.meta.url));
-  return JSON.parse(readFileSync(join(dir, ".state.json"), "utf8")) as E2eState;
+  if (!state) throw new Error("Files E2E state not provisioned");
+  return state;
 }
 
 export const OWNER_EMAIL = process.env.E2E_EMAIL ?? "";
@@ -83,4 +82,14 @@ export async function uploadFileViaApi(name = "e2e-fixture-temp.png"): Promise<s
     throw new Error(`fichier non VALIDATED (id=${String(fileId)}, status=${String(upBody.data?.status)})`);
   }
   return fileId;
+}
+
+/** Provisions one isolated Files fixture per Playwright worker, without central global-setup overwrite. */
+export async function provisionFilesState(): Promise<void> {
+  const originalName = "e2e-fixture.png";
+  state = {
+    fileId: await uploadFileViaApi(originalName),
+    originalName,
+    size: Buffer.from(TEST_PNG_B64, "base64").length,
+  };
 }

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "react-native",
+  "version": "0.2.0",
+  "description": "Files V1 React Native : descripteur sûr, mutation upload authentifiée et écran protégé de diagnostic.",
+  "files": [
+    { "source": "files/src/upload", "destination": "src/upload" },
+    { "source": "files/app/(app)/upload.tsx", "destination": "app/(app)/upload.tsx" },
+    { "source": "files/test/upload-file.test.ts", "destination": "test/upload-file.test.ts" }
+  ],
+  "dependencies": {
+    "dependencies": {
+      "@enistere/api-client-fetch": "*",
+      "@hookform/resolvers": "^3.10.0",
+      "react-hook-form": "^7.78.0",
+      "zod": "^3.25.76"
+    }
+  },
+  "environment": [],
+  "integrations": [
+    { "kind": "expo.home-action", "href": "/upload", "label": "Open upload diagnostics", "order": 20 }
+  ],
+  "verification": [["npm", "run", "test"]]
+}

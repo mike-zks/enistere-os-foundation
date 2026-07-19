@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 
 import { Alert, Button } from "@enistere/ui-kit";
 
-import { useAuthorization } from "../auth/use-authorization.js";
+import { useAuthorization } from "../authorization/use-authorization.js";
 import { useQuarantineFile } from "./use-quarantine-file.js";
 import { useRestoreFile } from "./use-restore-file.js";
 

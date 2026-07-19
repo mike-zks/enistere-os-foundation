@@ -2,9 +2,9 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES } from '../../audit/audit.types';
-import { ERROR_CODES } from '../../common/errors/error-codes';
-import { AppConfig } from '../../config/configuration';
+import { FILES_AUDIT_EVENTS } from '../../audit/files-audit-events';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
+import { FilesConfig } from '../../config/files.configuration';
 import { OwnerUsage } from '../contracts/owner-usage';
 import { FilesRepository } from '../files.repository';
 
@@ -32,7 +32,7 @@ export class FileQuotaService {
   constructor(
     private readonly repository: FilesRepository,
     private readonly auditService: AuditService,
-    configService: ConfigService<AppConfig, true>,
+    configService: ConfigService<FilesConfig, true>,
   ) {
     this.maxActiveFiles = configService.get('filesOwnerMaxActiveFiles', { infer: true });
     this.maxTotalBytes = BigInt(configService.get('filesOwnerMaxTotalBytes', { infer: true }));
@@ -62,7 +62,7 @@ export class FileQuotaService {
   ): Promise<never> {
     const quotaType = outcome === 'count_exceeded' ? 'count' : 'storage';
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.FILE_QUOTA_EXCEEDED,
+      eventType: FILES_AUDIT_EVENTS.FILE_QUOTA_EXCEEDED,
       actorId: ownerId,
       subjectId: ownerId,
       resourceType: 'stored_file',
@@ -71,12 +71,12 @@ export class FileQuotaService {
 
     if (outcome === 'count_exceeded') {
       throw new ConflictException({
-        code: ERROR_CODES.FILE_COUNT_QUOTA_EXCEEDED,
+        code: FILE_ERROR_CODES.FILE_COUNT_QUOTA_EXCEEDED,
         message: 'Active file count quota exceeded.',
       });
     }
     throw new ConflictException({
-      code: ERROR_CODES.FILE_STORAGE_QUOTA_EXCEEDED,
+      code: FILE_ERROR_CODES.FILE_STORAGE_QUOTA_EXCEEDED,
       message: 'Storage quota exceeded.',
     });
   }

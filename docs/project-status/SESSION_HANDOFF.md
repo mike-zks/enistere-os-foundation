@@ -18,13 +18,19 @@ déterministe, composition Prisma structurée sans duplication, seed gouverné, 
 non-régression RBAC V1 documentée. Le durcissement 1B-R remplace les mutations textuelles et les
 overwrites centraux par un modèle Prisma déclaratif strict, des registres seed/statut ordonnés, une
 politique d'overwrite fermée et un contrat OpenAPI généré depuis l'application composée. Prochaine
-étape : Capability Packs 1C (extraction Files).
+Capability Packs 1C livré : extraction Files en overlays `ready` sur NestJS, Next.js et React Native,
+avec dépendance explicite à `base + auth + rbac`, composition Prisma/migrations, contrat OpenAPI
+généré, navigation composable, tests d'absence et goldens `nestjs-files`, `nest-next-files` et
+`triple-files`. La non-régression Files V1 est documentée dans
+`docs/project-status/FILES_V1_NON_REGRESSION.md`. Prochaine étape : Capability Packs 2 (parité
+Spring + Angular + Flutter).
 
 ## Invariants
 
 - aucun retour du répertoire `cores/` ;
 - aucun faux Core pour AI, Quality, Docs ou Deployment ;
-- aucune capability annoncée sans overlay et preuve (`files` reste parqué `planned`) ;
+- aucune capability annoncée sans overlay et preuve ; `files` est `ready` uniquement sur NestJS,
+  Next.js et React Native ;
 - aucun script arbitraire exécuté depuis un pack (le moteur Factory est l'unique interpréteur) ;
 - aucun nouveau rapport de micro-mission ;
 - Spring + Angular + Flutter doivent obtenir le même contrat après la verticale TypeScript ;

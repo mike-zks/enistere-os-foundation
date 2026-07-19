@@ -21,7 +21,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nes
 import { SkipThrottle } from '@nestjs/throttler';
 import { memoryStorage } from 'multer';
 
-import { ERROR_CODES } from '../common/errors/error-codes';
+import { FILE_ERROR_CODES } from '../common/errors/files-error-codes';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthThrottlerGuard } from '../auth/guards/auth-throttler.guard';
 import {
@@ -143,7 +143,7 @@ export class FilesController {
     @CurrentUser('userId') userId: string,
   ): Promise<PublicStoredFile> {
     if (!file) {
-      throw new BadRequestException({ code: ERROR_CODES.FILE_REQUIRED, message: 'File is required.' });
+      throw new BadRequestException({ code: FILE_ERROR_CODES.FILE_REQUIRED, message: 'File is required.' });
     }
     return this.fileUploadService.upload(userId, file.buffer, file.originalname, dto);
   }

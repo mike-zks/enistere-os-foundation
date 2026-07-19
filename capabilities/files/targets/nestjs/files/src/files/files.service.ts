@@ -8,9 +8,9 @@ import { ConfigService } from '@nestjs/config';
 import { FileStatus, FileVisibility, Prisma, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service';
-import { AUDIT_EVENT_TYPES, AuditEventType } from '../audit/audit.types';
-import { ERROR_CODES } from '../common/errors/error-codes';
-import { AppConfig } from '../config/configuration';
+import { FILES_AUDIT_EVENTS, AuditEventType } from '../audit/files-audit-events';
+import { FILE_ERROR_CODES } from '../common/errors/files-error-codes';
+import { FilesConfig } from '../config/files.configuration';
 import { PublicStoredFile } from './contracts/public-stored-file';
 import { StoredFileView } from './contracts/stored-file-view';
 import { CreatePendingFileInput } from './dto/create-pending-file.input';
@@ -37,7 +37,7 @@ export class FilesService {
     private readonly validationPolicy: FileValidationPolicy,
     private readonly auditService: AuditService,
     private readonly quotaService: FileQuotaService,
-    configService: ConfigService<AppConfig, true>,
+    configService: ConfigService<FilesConfig, true>,
   ) {
     this.bucket = configService.get('s3Bucket', { infer: true });
   }
@@ -76,7 +76,7 @@ export class FilesService {
         ? await this.createUnowned(storageKey, data)
         : await this.createOwnedWithinQuota(ownerId, storageKey, size, data);
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_PENDING_CREATED, file);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_PENDING_CREATED, file);
     return toStoredFileView(file);
   }
 
@@ -86,7 +86,7 @@ export class FilesService {
   ): Promise<StoredFile> {
     if (await this.repository.existsByStorageKey(storageKey)) {
       throw new ConflictException({
-        code: ERROR_CODES.FILE_STORAGE_KEY_CONFLICT,
+        code: FILE_ERROR_CODES.FILE_STORAGE_KEY_CONFLICT,
         message: 'Storage key conflict.',
       });
     }
@@ -94,7 +94,7 @@ export class FilesService {
       return await this.repository.create(data);
     } catch {
       throw new InternalServerErrorException({
-        code: ERROR_CODES.FILE_CREATION_FAILED,
+        code: FILE_ERROR_CODES.FILE_CREATION_FAILED,
         message: 'Could not create file.',
       });
     }
@@ -119,7 +119,7 @@ export class FilesService {
       });
     } catch {
       throw new InternalServerErrorException({
-        code: ERROR_CODES.FILE_CREATION_FAILED,
+        code: FILE_ERROR_CODES.FILE_CREATION_FAILED,
         message: 'Could not create file.',
       });
     }
@@ -129,7 +129,7 @@ export class FilesService {
         return result.file;
       case 'key_conflict':
         throw new ConflictException({
-          code: ERROR_CODES.FILE_STORAGE_KEY_CONFLICT,
+          code: FILE_ERROR_CODES.FILE_STORAGE_KEY_CONFLICT,
           message: 'Storage key conflict.',
         });
       default:
@@ -168,11 +168,11 @@ export class FilesService {
   async rejectFile(fileId: string, reasonCode: string): Promise<StoredFileView> {
     const file = await this.repository.findById(fileId);
     if (!file || file.status === FileStatus.DELETED) {
-      throw new NotFoundException({ code: ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
+      throw new NotFoundException({ code: FILE_ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
     }
 
     const updated = await this.repository.reject(fileId);
-    await this.audit(AUDIT_EVENT_TYPES.FILE_REJECTED, updated, { reasonCode });
+    await this.audit(FILES_AUDIT_EVENTS.FILE_REJECTED, updated, { reasonCode });
     return toStoredFileView(updated);
   }
 
@@ -180,13 +180,13 @@ export class FilesService {
   async markFileDeleted(fileId: string, userId: string): Promise<void> {
     const file = await this.requireOwnedFile(fileId, userId);
     await this.repository.markDeleted(fileId);
-    await this.audit(AUDIT_EVENT_TYPES.FILE_MARKED_DELETED, file);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_MARKED_DELETED, file);
   }
 
   private async requireOwnedFile(fileId: string, userId: string): Promise<StoredFile> {
     const file = await this.repository.findByIdAndOwner(fileId, userId);
     if (!file) {
-      throw new NotFoundException({ code: ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
+      throw new NotFoundException({ code: FILE_ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
     }
     return file;
   }

@@ -10,7 +10,9 @@ import {
   renderNestjsComposition,
   renderNextjsCapabilityProviders,
   renderNextjsPublicNav,
+  renderNextjsDashboardNav,
   renderNextjsStatusSections,
+  renderExpoHomeActions,
   renderPrismaCompositionBanner,
   renderPrismaSeedRegistry,
 } from './overlay-renderers.mjs';
@@ -50,11 +52,13 @@ export const INTEGRATION_KINDS = Object.freeze({
   nextjs: Object.freeze({
     'nextjs.provider': { importPath: S, symbol: S },
     'nextjs.public-nav-link': { href: S, label: S },
+    'nextjs.dashboard-nav-link': { href: S, label: S, order: I },
     // Composable section of the shared status page (no overwrite of the shell).
     'nextjs.status-section': { importPath: S, symbol: S, order: I },
   }),
   'react-native': Object.freeze({
     'expo.provider': { importPath: S, symbol: S },
+    'expo.home-action': { href: S, label: S, order: I },
   }),
 });
 
@@ -366,15 +370,19 @@ async function renderCompositionFiles(starterId, appDirectory, integrations) {
   if (starterId === 'nextjs') {
     const providers = integrations.filter((item) => item.kind === 'nextjs.provider');
     const navLinks = integrations.filter((item) => item.kind === 'nextjs.public-nav-link');
+    const dashboardLinks = integrations.filter((item) => item.kind === 'nextjs.dashboard-nav-link');
     const sections = integrations.filter((item) => item.kind === 'nextjs.status-section');
     if (providers.length > 0) await writeGenerated(join(appDirectory, 'src/app/providers/capability-providers.tsx'), renderNextjsCapabilityProviders(providers));
     if (navLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/public-nav.ts'), renderNextjsPublicNav(navLinks));
+    if (dashboardLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/dashboard-nav.ts'), renderNextjsDashboardNav(dashboardLinks));
     if (sections.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/status-sections.tsx'), renderNextjsStatusSections(sections));
     return;
   }
   if (starterId === 'react-native') {
     const providers = integrations.filter((item) => item.kind === 'expo.provider');
+    const homeActions = integrations.filter((item) => item.kind === 'expo.home-action');
     if (providers.length > 0) await writeGenerated(join(appDirectory, 'src/composition/capability-providers.tsx'), renderExpoCapabilityProviders(providers));
+    if (homeActions.length > 0) await writeGenerated(join(appDirectory, 'src/composition/home-actions.ts'), renderExpoHomeActions(homeActions));
     return;
   }
   if (integrations.length > 0) throw new Error(`No composition renderer for starter: ${starterId}`);

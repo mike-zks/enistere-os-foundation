@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/commo
 import { Request, Response } from 'express';
 import { MulterError } from 'multer';
 
-import { ERROR_CODES } from '../../common/errors/error-codes';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
 
 /**
  * Mappe les erreurs Multer (multipart) vers l'enveloppe d'erreur standard, sans exposer le
@@ -18,7 +18,7 @@ export class MulterExceptionFilter implements ExceptionFilter {
 
     const tooLarge = exception.code === 'LIMIT_FILE_SIZE';
     const statusCode = tooLarge ? HttpStatus.PAYLOAD_TOO_LARGE : HttpStatus.BAD_REQUEST;
-    const errorCode = tooLarge ? ERROR_CODES.FILE_SIZE_EXCEEDED : ERROR_CODES.FILE_MULTIPART_INVALID;
+    const errorCode = tooLarge ? FILE_ERROR_CODES.FILE_SIZE_EXCEEDED : FILE_ERROR_CODES.FILE_MULTIPART_INVALID;
 
     response.status(statusCode).json({
       success: false,

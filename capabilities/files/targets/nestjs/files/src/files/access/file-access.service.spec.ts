@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { FileCategory, FileStatus, FileVisibility } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AppConfig } from '../../config/configuration';
+import { FilesConfig } from '../../config/files.configuration';
 import { StoredFileView } from '../contracts/stored-file-view';
 import { FilesService } from '../files.service';
 import { ObjectStorage } from '../storage/object-storage';
@@ -57,7 +57,7 @@ describe('FileAccessService', () => {
       filesService as unknown as FilesService,
       auditService as unknown as AuditService,
       objectStorage as unknown as ObjectStorage,
-      configService as unknown as ConfigService<AppConfig, true>,
+      configService as unknown as ConfigService<FilesConfig, true>,
     );
   });
 

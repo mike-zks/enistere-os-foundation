@@ -21,7 +21,7 @@ import { ForbiddenState } from "../../shared/components/forbidden-state.js";
 import { LoadingState } from "../../shared/components/loading-state.js";
 import { ServiceUnavailableState } from "../../shared/components/service-unavailable-state.js";
 import { UnauthorizedState } from "../../shared/components/unauthorized-state.js";
-import { useAuthorization } from "../auth/use-authorization.js";
+import { useAuthorization } from "../authorization/use-authorization.js";
 import { classifyFileError } from "./file-error.js";
 import { FileMetadataView } from "./file-metadata-view.js";
 import { useFileMetadata } from "./file-queries.js";

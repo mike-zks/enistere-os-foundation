@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileCategory } from '@prisma/client';
 
-import { ERROR_CODES } from '../../common/errors/error-codes';
-import { AppConfig } from '../../config/configuration';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
+import { FilesConfig } from '../../config/files.configuration';
 import { ALLOWED_MIME_BY_CATEGORY, EXTENSION_PATTERN, EXTENSIONS_BY_MIME } from '../files.constants';
 
 // Retire les caractères de contrôle ASCII (C0 + DEL) sans regex de contrôle (lint-safe).
@@ -30,7 +30,7 @@ export class FileValidationPolicy {
   private readonly maxSizeBytes: number;
   private readonly originalNameMaxLength: number;
 
-  constructor(configService: ConfigService<AppConfig, true>) {
+  constructor(configService: ConfigService<FilesConfig, true>) {
     this.maxSizeBytes = configService.get('fileMaxSizeBytes', { infer: true });
     this.originalNameMaxLength = configService.get('fileOriginalNameMaxLength', { infer: true });
   }
@@ -41,7 +41,7 @@ export class FileValidationPolicy {
 
     if (cleaned.length === 0 || cleaned.length > this.originalNameMaxLength) {
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_INVALID_NAME,
+        code: FILE_ERROR_CODES.FILE_INVALID_NAME,
         message: 'Invalid file name.',
       });
     }
@@ -52,7 +52,7 @@ export class FileValidationPolicy {
   assertSizeWithinLimit(size: bigint): void {
     if (size <= 0n || size > BigInt(this.maxSizeBytes)) {
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_SIZE_EXCEEDED,
+        code: FILE_ERROR_CODES.FILE_SIZE_EXCEEDED,
         message: 'File size not allowed.',
       });
     }
@@ -63,14 +63,14 @@ export class FileValidationPolicy {
     const allowedMimes = ALLOWED_MIME_BY_CATEGORY[category];
     if (!allowedMimes.includes(mimeType)) {
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_INVALID_MIME_TYPE,
+        code: FILE_ERROR_CODES.FILE_INVALID_MIME_TYPE,
         message: 'File type not allowed.',
       });
     }
 
     if (!EXTENSION_PATTERN.test(extension)) {
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_INVALID_EXTENSION,
+        code: FILE_ERROR_CODES.FILE_INVALID_EXTENSION,
         message: 'Invalid file extension.',
       });
     }
@@ -78,7 +78,7 @@ export class FileValidationPolicy {
     const expectedExtensions = EXTENSIONS_BY_MIME[mimeType] ?? [];
     if (!expectedExtensions.includes(extension)) {
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_INVALID_EXTENSION,
+        code: FILE_ERROR_CODES.FILE_INVALID_EXTENSION,
         message: 'File extension does not match its type.',
       });
     }

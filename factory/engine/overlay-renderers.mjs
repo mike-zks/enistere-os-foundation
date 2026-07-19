@@ -133,6 +133,56 @@ export function renderNextjsPublicNav(links) {
   ].join('\n');
 }
 
+function orderLinks(links, label) {
+  const hrefs = new Set();
+  const orders = new Set();
+  for (const link of links) {
+    if (hrefs.has(link.href)) throw new Error(`Duplicate ${label} href: ${link.href}`);
+    if (orders.has(link.order)) throw new Error(`Ambiguous ${label} order: ${link.order}`);
+    hrefs.add(link.href);
+    orders.add(link.order);
+  }
+  return [...links].sort((a, b) => a.order - b.order);
+}
+
+/** Dashboard navigation entries consumed by Auth's stable protected shell. */
+export function renderNextjsDashboardNav(links) {
+  assertKnown(links, ['nextjs.dashboard-nav-link']);
+  return [
+    BANNER,
+    'export interface CapabilityDashboardLink {',
+    '  readonly href: string;',
+    '  readonly label: string;',
+    '  readonly order: number;',
+    '}',
+    '',
+    'export const CAPABILITY_DASHBOARD_LINKS: readonly CapabilityDashboardLink[] = [',
+    ...orderLinks(links, 'dashboard link').map((item) => `  { href: "${item.href}", label: "${item.label}", order: ${item.order} },`),
+    '];',
+    '',
+  ].join('\n');
+}
+
+/** Mobile Home actions consumed by Auth's stable protected Home screen. */
+export function renderExpoHomeActions(actions) {
+  assertKnown(actions, ['expo.home-action']);
+  return [
+    BANNER,
+    "import type { Href } from 'expo-router';",
+    '',
+    'export interface CapabilityHomeAction {',
+    '  readonly href: Href;',
+    '  readonly label: string;',
+    '  readonly order: number;',
+    '}',
+    '',
+    'export const CAPABILITY_HOME_ACTIONS: readonly CapabilityHomeAction[] = [',
+    ...orderLinks(actions, 'home action').map((item) => `  { href: '${item.href}', label: '${item.label}', order: ${item.order} },`),
+    '];',
+    '',
+  ].join('\n');
+}
+
 /**
  * src/core/composition/status-sections.tsx — registry of status-page sections
  * contributed by capabilities. Replaces overwriting the shared status page:

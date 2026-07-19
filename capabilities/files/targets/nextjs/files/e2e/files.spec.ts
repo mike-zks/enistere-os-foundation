@@ -6,11 +6,16 @@ import {
   TEST_PNG_B64,
   expectNoSensitiveLeak,
   loginViaUi,
+  provisionFilesState,
   readState,
   uploadFileViaApi,
-} from "./helpers.js";
+} from "./files-helpers.js";
 
 const RANDOM_UUID = "00000000-0000-4000-8000-000000000000";
+
+test.beforeAll(async () => {
+  await provisionFilesState();
+});
 
 test.describe("Files (lecture / téléchargement)", () => {
   test("propriétaire : métadonnées publiques, aucun champ interne, téléchargement déclenché", async ({ page }) => {

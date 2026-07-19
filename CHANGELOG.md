@@ -4,6 +4,21 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Capability Packs 1C — extraction Files (NestJS + Next.js + React Native)
+
+- `files` passe à `ready`/`overlay` sur la verticale TypeScript, avec dépendance explicite
+  `base + auth + rbac` et refus de génération si une dépendance manque.
+- Overlay NestJS : modèle Prisma/migration, upload multipart, métadonnées, URL signée, suppression,
+  quarantaine, quotas et réconciliation S3/MinIO.
+- Overlay Next.js : BFF, routes, hooks, vues protégées et navigation ajoutée par registre, sans
+  remplacement du shell Auth/RBAC.
+- Overlay React Native : navigation et action d'upload ajoutées par seam ; RBAC reste
+  `not-applicable` et aucune surface d'autorisation n'est injectée sur mobile.
+- Contrat OpenAPI généré depuis l'application composée ; snapshots centraux interdits, registres
+  de navigation ordonnés et validés.
+- Goldens runtime ajoutés : `nestjs-files`, `nest-next-files`, `triple-files`.
+- Non-régression Files V1 documentée dans `docs/project-status/FILES_V1_NON_REGRESSION.md`.
+
 ### Capability Packs 1B — extraction RBAC (NestJS + Next.js)
 
 - `rbac` passe à `ready`/`overlay` sur **NestJS** et **Next.js**, avec dépendance explicite

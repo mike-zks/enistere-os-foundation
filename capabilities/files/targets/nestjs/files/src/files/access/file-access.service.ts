@@ -8,9 +8,9 @@ import { ConfigService } from '@nestjs/config';
 import { FileStatus, FileVisibility } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES, AuditEventType } from '../../audit/audit.types';
-import { ERROR_CODES } from '../../common/errors/error-codes';
-import { AppConfig } from '../../config/configuration';
+import { FILES_AUDIT_EVENTS, AuditEventType } from '../../audit/files-audit-events';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
+import { FilesConfig } from '../../config/files.configuration';
 import { PublicStoredFile } from '../contracts/public-stored-file';
 import { SignedDownloadResult } from '../contracts/signed-download-result';
 import { StoredFileView } from '../contracts/stored-file-view';
@@ -45,7 +45,7 @@ export class FileAccessService {
     private readonly filesService: FilesService,
     private readonly auditService: AuditService,
     @Inject(OBJECT_STORAGE) private readonly objectStorage: ObjectStorage,
-    configService: ConfigService<AppConfig, true>,
+    configService: ConfigService<FilesConfig, true>,
   ) {
     this.signedReadUrlTtlSeconds = configService.get('filesSignedReadUrlTtlSeconds', {
       infer: true,
@@ -71,9 +71,9 @@ export class FileAccessService {
     // Seuls les fichiers réellement lisibles produisent une URL. Visibilité restreinte
     // (jamais PUBLIC/INTERNAL en V1). On révèle le refus au propriétaire uniquement (409).
     if (file.status !== FileStatus.VALIDATED || !SIGNABLE_VISIBILITIES.has(file.visibility)) {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_DOWNLOAD_URL_DENIED, file, 'not_downloadable');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_DOWNLOAD_URL_DENIED, file, 'not_downloadable');
       throw new ConflictException({
-        code: ERROR_CODES.FILE_NOT_DOWNLOADABLE,
+        code: FILE_ERROR_CODES.FILE_NOT_DOWNLOADABLE,
         message: 'File is not downloadable.',
       });
     }
@@ -81,9 +81,9 @@ export class FileAccessService {
     // Vérifie l'existence réelle de l'objet AVANT de signer (cohérence DB/stockage). Une absence
     // n'est pas exposée : erreur générique + audit technique pour la réconciliation future.
     if (!(await this.objectIsPresent(file))) {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_STORAGE_OBJECT_MISSING, file, 'storage_object_missing');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_STORAGE_OBJECT_MISSING, file, 'storage_object_missing');
       throw new ServiceUnavailableException({
-        code: ERROR_CODES.FILE_SIGNED_URL_GENERATION_FAILED,
+        code: FILE_ERROR_CODES.FILE_SIGNED_URL_GENERATION_FAILED,
         message: 'Could not generate a download URL.',
       });
     }
@@ -99,14 +99,14 @@ export class FileAccessService {
         responseContentDisposition: buildContentDisposition(file.originalName),
       });
     } catch {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_DOWNLOAD_URL_DENIED, file, 'signing_failed');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_DOWNLOAD_URL_DENIED, file, 'signing_failed');
       throw new ServiceUnavailableException({
-        code: ERROR_CODES.FILE_SIGNED_URL_GENERATION_FAILED,
+        code: FILE_ERROR_CODES.FILE_SIGNED_URL_GENERATION_FAILED,
         message: 'Could not generate a download URL.',
       });
     }
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_DOWNLOAD_URL_ISSUED, file);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_DOWNLOAD_URL_ISSUED, file);
     // Réponse strictement minimale : ni bucket, ni clé, ni checksum.
     return { url: signed.url, expiresAt: signed.expiresAt };
   }
@@ -133,7 +133,7 @@ export class FileAccessService {
     if (reasonCode) {
       metadata.reasonCode = reasonCode;
     }
-    if (eventType === AUDIT_EVENT_TYPES.FILE_DOWNLOAD_URL_ISSUED) {
+    if (eventType === FILES_AUDIT_EVENTS.FILE_DOWNLOAD_URL_ISSUED) {
       metadata.expiresInSeconds = this.signedReadUrlTtlSeconds;
     }
     return this.auditService.record({

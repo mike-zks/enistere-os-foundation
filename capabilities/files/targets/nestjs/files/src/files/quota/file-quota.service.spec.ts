@@ -2,7 +2,7 @@ import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuditService } from '../../audit/audit.service';
-import { AppConfig } from '../../config/configuration';
+import { FilesConfig } from '../../config/files.configuration';
 import { FilesRepository } from '../files.repository';
 import { FileQuotaService } from './file-quota.service';
 
@@ -13,14 +13,14 @@ function build(limits: { maxActiveFiles: number; maxTotalBytes: number }) {
   };
   const auditService = { record: jest.fn().mockResolvedValue(undefined) };
   const configService = {
-    get: jest.fn((key: keyof AppConfig) =>
+    get: jest.fn((key: keyof FilesConfig) =>
       key === 'filesOwnerMaxActiveFiles' ? limits.maxActiveFiles : limits.maxTotalBytes,
     ),
   };
   const service = new FileQuotaService(
     repository as unknown as FilesRepository,
     auditService as unknown as AuditService,
-    configService as unknown as ConfigService<AppConfig, true>,
+    configService as unknown as ConfigService<FilesConfig, true>,
   );
   return { service, repository, auditService };
 }
