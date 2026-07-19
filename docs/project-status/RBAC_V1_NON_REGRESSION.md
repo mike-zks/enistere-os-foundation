@@ -6,27 +6,28 @@ comportement historique n'est réduit, et `base` / `base + auth` ne régressent 
 
 Preuve runtime : golden `nestjs-auth-rbac` (`factory/quality/scripts/golden-runtime.mjs`) — projet
 **généré**, lock racine + `npm ci`, prisma generate/validate/migrate/seed, lint, **189 tests
-unitaires**, **55 e2e** contre PostgreSQL, `openapi:check`, build, `npm audit`.
+unitaires**, **55 e2e** contre PostgreSQL, génération/validation OpenAPI composée, build,
+`npm audit`.
 
 ## NestJS (API)
 
 | Aspect | V1 (intégré) | 1B (overlay rbac) | Verdict |
 |---|---|---|---|
-| Modèles Prisma | `Role`, `Permission`, `UserRole`, `RolePermission` | identiques (fragment `rbac.prisma`) | ✅ préservé |
-| Relation `User.roles` | champ du modèle `User` monolithique | ajoutée au `User` d'Auth par `nestjs.prisma-model-field` (extension structurée) | ✅ préservé, sans duplication de `User` |
+| Modèles Prisma | `Role`, `Permission`, `UserRole`, `RolePermission` | identiques, déclarés dans `rbac.prisma.json` | ✅ préservé |
+| Relation `User.roles` | champ du modèle `User` monolithique | contribution `fields` appliquée au modèle intermédiaire possédé par la Factory | ✅ préservé, sans parsing ni duplication de `User` |
 | Contraintes uniques | `roles.code`, `permissions.code` | identiques | ✅ préservé |
 | Clés composites | `user_roles(userId,roleId)`, `role_permissions(roleId,permissionId)` | identiques | ✅ préservé |
 | Clés étrangères / cascade | `ON DELETE CASCADE` vers `users`, `roles`, `permissions` | identiques | ✅ préservé |
 | Index | `user_roles.roleId`, `role_permissions.permissionId` | identiques | ✅ préservé |
 | Migrations | `auth5_rbac` enchevêtrée avec auth/files | `20260719000200_rbac_init` dédiée, ordonnée après `auth_init` | ✅ équivalent, désenchevêtré |
-| Seed structurel | permissions/rôles `isSystem`, associations, idempotent | identique (`prisma/seed.ts` livré par l'overlay) | ✅ préservé |
+| Seed structurel | permissions/rôles `isSystem`, associations, idempotent | `seedRbac` enregistré dans un registre ordonné ; orchestrateur central stable | ✅ préservé et composable |
 | Modules | `RolesModule`, `PermissionsModule`, `AuthorizationModule` | identiques (`AuthorizationModule` importe les deux et est composé via `nestjs.module`) | ✅ préservé |
 | Guards et ordre | `JwtAuthGuard` → `RolesGuard` → `PermissionsGuard` (ordre implicite du tableau `providers`) | ordre **explicite et validé** (`order` 10/20/30), doublons et rangs ambigus refusés | ✅ amélioration (déterminisme prouvé) |
 | Décorateurs | `@Roles`, `@Permissions` | identiques | ✅ préservé |
 | Contexte d'autorisation | mémoïsé par requête, jamais dans le JWT | identique | ✅ préservé |
 | Endpoint | `GET /auth/me/authorization` (`auth_getAuthorization`) porté par `AuthController` | même route, même `operationId`, porté par `AuthorizationController` (RBAC) | ✅ contrat préservé (Auth non modifié) |
 | DTO public | `AuthorizationSummaryResponseDto` (rôles/permissions) | identique | ✅ préservé |
-| Contrat OpenAPI | 8 opérations dont `auth_getAuthorization` | snapshot composé identique pour la surface RBAC | ✅ préservé |
+| Contrat OpenAPI | 8 opérations dont `auth_getAuthorization` | généré depuis l'app composée, jeu d'opérations déclaré et document byte-identique sur deux générations | ✅ préservé sans snapshot d'overlay |
 | Codes d'erreur | `AUTH_FORBIDDEN`, `ROLE_*`, `PERMISSION_*` dans le registre global | registre propre `RBAC_ERROR_CODES` (mêmes valeurs) | ✅ préservé (namespacé) |
 | Événements d'audit | `AUTHORIZATION_*_DENIED`, `ROLE_*`, `PERMISSION_*` | registre propre `RBAC_AUDIT_EVENTS` (mêmes valeurs) | ✅ préservé (namespacé) |
 | 401 vs 403 | 401 avant les guards d'autorisation, 403 sur refus | identique (couvert e2e) | ✅ préservé |
@@ -43,6 +44,7 @@ unitaires**, **55 e2e** contre PostgreSQL, `openapi:check`, build, `npm audit`.
 | Clé de cache | `authKeys.authorization()` | `authorizationKeys.summary()` **dérivée de `authKeys.all`** | ✅ préservé (purge au logout conservée) |
 | Hook | `useAuthorization` | identique | ✅ préservé |
 | Vue d'état | `AuthorizationStatusView` (comptes de rôles/permissions) | identique, rendue par `AuthorizationPanel` | ✅ préservé |
+| Page de statut | Auth/RBAC intégrés dans la page | shell stable + registre `nextjs.status-section` ordonné | ✅ préservé et composable |
 | Cookies / CSRF | `HttpOnly`, `credentials: include`, aucun token JS | inchangés (Auth non modifié) | ✅ préservé |
 | Autorité | API autoritaire, UI conditionnelle uniquement | identique | ✅ préservé |
 
@@ -76,6 +78,7 @@ unitaires**, **55 e2e** contre PostgreSQL, `openapi:check`, build, `npm audit`.
 ## Conclusion
 
 Aucune garantie RBAC V1 n'est perdue. Deux améliorations : l'ordre des guards globaux devient
-**explicite, validé et déterministe**, et le schéma Prisma est **composé sans duplication** de `User`
-par une opération structurée (jamais un patch textuel). `base` et `base + auth` restent exempts de
-toute surface RBAC, et Files reste `planned`.
+**explicite, validé et déterministe**. Le schéma Prisma est rendu depuis un modèle intermédiaire
+strict, le seed et la page de statut utilisent des registres ordonnés, et OpenAPI provient de
+l'application composée : aucun fichier central n'est possédé par le dernier overlay appliqué.
+`base` et `base + auth` restent exempts de toute surface RBAC, et Files reste `planned`.

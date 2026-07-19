@@ -61,6 +61,19 @@
       "type": "array",
       "description": "Argv arrays executed from the app directory by the generated verify script.",
       "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+    },
+    "contract": {
+      "type": "object",
+      "description": "Optional public-contract expectations verified against artifacts generated from the composed application.",
+      "additionalProperties": false,
+      "properties": {
+        "openapiOperations": {
+          "type": "array",
+          "description": "OperationIds contributed by this capability. Supported only by the NestJS target.",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
     }
   }
 }

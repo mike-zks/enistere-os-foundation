@@ -1,4 +1,4 @@
-# Contrat d'overlay de capability (Capability Packs 1A)
+# Contrat d'overlay de capability
 
 Un overlay est la **seule** façon dont une capability se compose sur une baseline `base`. Le moteur
 Factory (`factory/engine/overlay.mjs`) est l'unique interpréteur : il n'exécute jamais de script,
@@ -20,7 +20,7 @@ mais non câblé) : la capability reste `planned` et `generate` la refuse.
 
 | Champ | Rôle |
 |---|---|
-| `files` | Copies `source` (sous `files/`) → `destination`. `overwrite: true` requis pour remplacer un fichier de la baseline ; un conflit non déclaré échoue. |
+| `files` | Copies `source` (sous `files/`) → `destination`. Un conflit non déclaré échoue. Les fichiers centraux gouvernés ne peuvent jamais être fournis par cette opération ; les rares remplacements autorisés sont recensés et justifiés dans `overwrite-policy.mjs`. |
 | `dependencies` | Fusion contrôlée dans `package.json` (`dependencies`/`devDependencies`). Un conflit de version échoue. Chemins locaux (`file:`/`link:`) interdits. |
 | `environment` | Variables ajoutées à `.env.example` (section générée commentée). |
 | `integrations` | Intégrations **centrales connues** rendues par le moteur (voir ci-dessous). Une intégration inconnue échoue. |
@@ -41,24 +41,55 @@ dotée d'un overlay factice. `assessCapabilitySupport` retourne ces cas dans `no
 
 ## Intégrations connues (par target)
 
-- **nestjs** : `nestjs.module`, `nestjs.global-guard`, `nestjs.throttler`, `nestjs.prisma-fragment`,
-  `nestjs.prisma-model-field`. Rendues dans `src/composition/capabilities.ts` (modules, guards
-  globaux, throttlers nommés) et par composition du schéma `prisma/schema.prisma`.
+- **nestjs** : `nestjs.module`, `nestjs.global-guard`, `nestjs.throttler`,
+  `nestjs.prisma-schema`, `nestjs.prisma-seed`. Rendues dans
+  `src/composition/capabilities.ts` (modules, guards globaux, throttlers nommés), dans le schéma
+  Prisma composé et dans le registre de seeds.
   - `nestjs.global-guard` porte un `order` entier **obligatoire** : la chaîne globale est triée par
     `order`, indépendamment de l'ordre de composition (authentification 10 → rôles 20 → permissions
     30). Un symbole déclaré deux fois ou deux guards réclamant le même rang sont **refusés** (chaîne
     ambiguë jamais rendue).
-  - `nestjs.prisma-model-field` étend un modèle déjà défini par un fragment antérieur (ex. RBAC
-    ajoutant `roles UserRole[]` au `User` d'Auth). L'insertion est **consciente des blocs** : le
-    modèle est localisé par son en-tête, sa accolade fermante par profondeur, et le champ inséré
-    avec les autres champs (avant les attributs `@@`). Modèle inconnu ou champ déjà déclaré →
-    erreur. **Jamais de substitution textuelle/regex non gouvernée, jamais de duplication de modèle.**
+  - `nestjs.prisma-schema` référence un fragment JSON déclaratif strict (`enums`, `models`,
+    extensions `fields`). Le moteur valide les propriétés et types, accumule les contributions
+    dans un modèle intermédiaire, refuse modèles/enums/champs dupliqués ou extensions inconnues,
+    puis rend le schéma complet une seule fois. Il ne parse ni ne modifie du texte Prisma.
+  - `nestjs.prisma-seed` enregistre une fonction idempotente avec un `order` explicite. Le moteur
+    génère `prisma/seed/capability-seeds.ts`, consommé par l'orchestrateur stable
+    `prisma/seed.ts`. Symboles et rangs dupliqués sont refusés ; aucune capability ne remplace le
+    seed central.
 - **nextjs** : `nextjs.provider` (→ `src/app/providers/capability-providers.tsx`),
-  `nextjs.public-nav-link` (→ `src/core/composition/public-nav.ts`).
+  `nextjs.public-nav-link` (→ `src/core/composition/public-nav.ts`) et
+  `nextjs.status-section` (→ registre ordonné `src/core/composition/status-sections.tsx`). La page
+  `/status` reste un shell stable ; symboles et rangs ambigus sont refusés.
 - **react-native** : `expo.provider` (→ `src/composition/capability-providers.tsx`).
 
 Les renderers déterministes vivent dans `factory/engine/overlay-renderers.mjs` : une même entrée
 produit toujours la même sortie.
+
+## Politique de fichiers centraux
+
+`factory/engine/overwrite-policy.mjs` distingue :
+
+- les fichiers **gouvernés**, qu'aucun overlay ne peut copier ou remplacer (schéma/seed Prisma,
+  snapshot OpenAPI, shells et registres de composition) ;
+- une allowlist réduite de fichiers exclusifs pouvant porter `overwrite: true`, chaque entrée ayant
+  une justification revue ;
+- tous les autres remplacements, refusés par défaut.
+
+Cette politique évite le modèle « dernière capability appliquée gagne ». Un nouveau besoin central
+doit introduire une intégration déclarative et un renderer, pas élargir l'allowlist par commodité.
+
+## Contrat OpenAPI composé
+
+Un overlay NestJS déclare uniquement ses `contract.openapiOperations`. Il ne livre ni snapshot
+OpenAPI complet ni test central de remplacement. Après composition et génération du client Prisma,
+le golden runtime :
+
+1. génère OpenAPI depuis l'application réellement composée ;
+2. compare les `operationId` aux opérations de `base` et des overlays inscrites dans
+   `enistere.lock` ;
+3. régénère et exige un document byte-identique ;
+4. exécute les invariants transverses du contrat et les gates applicatifs.
 
 ## Résolution et lock
 
@@ -94,7 +125,7 @@ signalé comme non verrouillé.
 
 La CI `Factory Golden Runtime` prouve cette chaîne bout-en-bout (génération → lock sans scripts →
 `npm ci` → `verify` → gates réels par application → `npm audit` par exception → déterminisme du digest)
-sur `nestjs-base`, `nestjs-auth`, `nest-next-auth` et `triple-auth`.
+sur les quatre compositions base/Auth et les trois compositions Auth/RBAC.
 
 ### Audit des dépendances
 
@@ -106,6 +137,7 @@ de la composition auditée, et sur une exception dont l'échéance est dépassé
 
 ## Preuves
 
-`factory/test/overlay.test.mjs` (validation, rejets, conflits, digest déterministe, refus des targets
-`planned` et de RBAC/Files) et `factory/test/goldens.test.mjs` (six compositions `base`/`base+auth`
-avec assertions d'absence et de présence).
+`factory/test/overlay.test.mjs`, `factory/test/goldens.test.mjs`,
+`factory/test/rbac-composition.test.mjs` et `factory/test/composition-seams.test.mjs` couvrent les
+rejets, conflits, digests, compositions, modèle Prisma déclaratif, seeds, sections Web, politique
+de fichiers centraux et contrat OpenAPI.

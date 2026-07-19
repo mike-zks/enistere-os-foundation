@@ -28,12 +28,14 @@ aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §
 - `src/rbac` — registres propres : `RBAC_ERROR_CODES`, `RBAC_AUDIT_EVENTS`.
 - Guards globaux composés dans un ordre **déterministe** via l'intégration `nestjs.global-guard`
   (`order`) : `JwtAuthGuard` (10, Auth) → `RolesGuard` (20) → `PermissionsGuard` (30).
-- Prisma : fragment `fragments/rbac.prisma` (`Role`, `Permission`, `UserRole`, `RolePermission`) +
-  extension structurée du modèle `User` d'Auth (`roles UserRole[]`) via `nestjs.prisma-model-field` —
-  **aucune duplication de `User`, aucun patch regex**. Migration dédiée ordonnée après Auth.
-- Seed structurel gouverné (`prisma/seed.ts`) : permissions et rôles de référence (`isSystem`),
-  associations rôle↔permission, **idempotent**. Aucun utilisateur, aucun mot de passe, aucune donnée
-  métier, aucune permission accordée implicitement à tous les utilisateurs.
+- Prisma : fragment JSON déclaratif `fragments/rbac.prisma.json` (`Role`, `Permission`, `UserRole`,
+  `RolePermission`) + extension `User.roles` dans le modèle intermédiaire de la Factory. Le schéma
+  est rendu une fois, sans parsing de texte ni duplication de `User`. Migration dédiée après Auth.
+- Seed structurel `seedRbac`, idempotent, enregistré via `nestjs.prisma-seed` dans le registre
+  ordonné consommé par l'orchestrateur stable. Aucun utilisateur, mot de passe, donnée métier ou
+  permission implicite pour tous les utilisateurs.
+- Contrat OpenAPI déclaré par `operationId`, généré depuis l'application composée et vérifié
+  reproductible ; aucun snapshot complet n'est livré par l'overlay.
 
 ## Next.js (`targets/nextjs`)
 
@@ -44,10 +46,13 @@ aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §
   l'autorisation. Aucune permission, aucun rôle et aucun secret dans la clé.
 - `useAuthorization`, vue d'état et panneau d'autorisation : **affichage conditionnel uniquement**,
   aucun rôle codé en dur, aucune décision de sécurité côté rendu.
+- `AuthorizationPanel` est enregistré via `nextjs.status-section` ; le shell `/status` reste stable
+  et n'est jamais remplacé par RBAC.
 
 ## Preuves
 
 - Goldens runtime : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`
   (`factory/quality/scripts/golden-runtime.mjs`).
 - Non-régression V1 : `docs/project-status/RBAC_V1_NON_REGRESSION.md`.
-- Tests de composition : `factory/test/rbac-composition.test.mjs`.
+- Tests de composition : `factory/test/rbac-composition.test.mjs` et
+  `factory/test/composition-seams.test.mjs`.

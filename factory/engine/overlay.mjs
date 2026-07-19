@@ -5,14 +5,22 @@ import { dirname, join, normalize, sep } from 'node:path';
 import { CAPABILITY_IDS } from './capabilities.mjs';
 import { STARTER_IDS } from './starters.mjs';
 import {
-  addPrismaModelField,
   renderEnvironmentSection,
   renderExpoCapabilityProviders,
   renderNestjsComposition,
   renderNextjsCapabilityProviders,
   renderNextjsPublicNav,
-  renderPrismaFragmentBanner,
+  renderNextjsStatusSections,
+  renderPrismaCompositionBanner,
+  renderPrismaSeedRegistry,
 } from './overlay-renderers.mjs';
+import { validateOverwriteUsage } from './overwrite-policy.mjs';
+import {
+  applyPrismaFragment,
+  createPrismaComposition,
+  isEmptyPrismaComposition,
+  renderPrismaComposition,
+} from './prisma-schema.mjs';
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
@@ -32,14 +40,18 @@ export const INTEGRATION_KINDS = Object.freeze({
     // in which capabilities are composed (authentication before authorization).
     'nestjs.global-guard': { importPath: S, symbol: S, order: I },
     'nestjs.throttler': { name: S, limitEnv: S, defaultLimit: I, ttlSecondsEnv: S, defaultTtlSeconds: I },
-    'nestjs.prisma-fragment': { source: S },
-    // Structured extension of a model defined by an earlier fragment (e.g. adding
-    // the RBAC back-relation to Auth's `User`) — block-aware, never a regex patch.
-    'nestjs.prisma-model-field': { model: S, field: S, type: S },
+    // Declarative Prisma contribution (enums, models, model-field extensions).
+    // Assembled into a typed intermediate model and rendered once — never a patch.
+    'nestjs.prisma-schema': { source: S },
+    // Composable seed: the capability contributes an idempotent function; the
+    // engine renders the registry consumed by the app's stable seed orchestrator.
+    'nestjs.prisma-seed': { importPath: S, symbol: S, order: I },
   }),
   nextjs: Object.freeze({
     'nextjs.provider': { importPath: S, symbol: S },
     'nextjs.public-nav-link': { href: S, label: S },
+    // Composable section of the shared status page (no overwrite of the shell).
+    'nextjs.status-section': { importPath: S, symbol: S, order: I },
   }),
   'react-native': Object.freeze({
     'expo.provider': { importPath: S, symbol: S },
@@ -56,7 +68,7 @@ function isSafeRelativePath(value) {
 export function validateOverlayManifest(value, { capability, target } = {}) {
   const issues = [];
   if (!value || typeof value !== 'object' || Array.isArray(value)) return ['overlay must be an object'];
-  const allowedKeys = new Set(['schemaVersion', 'capability', 'target', 'version', 'description', 'files', 'dependencies', 'environment', 'integrations', 'verification']);
+  const allowedKeys = new Set(['schemaVersion', 'capability', 'target', 'version', 'description', 'files', 'dependencies', 'environment', 'integrations', 'verification', 'contract']);
   for (const key of Object.keys(value)) if (!allowedKeys.has(key)) issues.push(`unknown property: ${key}`);
   if (value.schemaVersion !== '1') issues.push('schemaVersion must be "1"');
   if (!CAPABILITY_IDS.includes(value.capability)) issues.push('capability is not registered');
@@ -73,6 +85,8 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
     if (!isSafeRelativePath(entry.destination ?? '')) issues.push(`files[${index}].destination must be a safe relative path`);
     if (entry.overwrite !== undefined && typeof entry.overwrite !== 'boolean') issues.push(`files[${index}].overwrite must be a boolean`);
   });
+  // Governed central files must be composed, never replaced (overwrite policy).
+  if (Array.isArray(value.files)) issues.push(...validateOverwriteUsage(value.files));
 
   if (!value.dependencies || typeof value.dependencies !== 'object' || Array.isArray(value.dependencies)) issues.push('dependencies must be an object');
   else {
@@ -111,14 +125,28 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
         : typeof item === 'string' && item !== '';
       if (!valid) issues.push(`integrations[${index}].${field} is required for ${entry.kind} (${type})`);
     }
-    if (entry.kind === 'nestjs.prisma-fragment' && !isSafeRelativePath(entry.source ?? '')) issues.push(`integrations[${index}].source must be a safe relative path`);
-    if (entry.kind === 'nestjs.prisma-model-field' && !/^[A-Z][A-Za-z0-9_]*$/.test(entry.model ?? '')) {
-      issues.push(`integrations[${index}].model must be a Prisma model name`);
-    }
-    if (entry.kind === 'nestjs.prisma-model-field' && !/^[a-z][A-Za-z0-9_]*$/.test(entry.field ?? '')) {
-      issues.push(`integrations[${index}].field must be a Prisma field name`);
-    }
+    if (entry.kind === 'nestjs.prisma-schema' && !isSafeRelativePath(entry.source ?? '')) issues.push(`integrations[${index}].source must be a safe relative path`);
   });
+
+  // Optional published-contract expectations, verified against the OpenAPI actually
+  // generated from the composed application (no snapshot is ever copied).
+  if (value.contract !== undefined) {
+    if (!value.contract || typeof value.contract !== 'object' || Array.isArray(value.contract)) {
+      issues.push('contract must be an object');
+    } else {
+      for (const key of Object.keys(value.contract)) {
+        if (key !== 'openapiOperations') issues.push(`contract.${key} is not supported`);
+      }
+      const operations = value.contract.openapiOperations;
+      if (operations !== undefined && (!Array.isArray(operations) || operations.some((op) => typeof op !== 'string' || op === ''))) {
+        issues.push('contract.openapiOperations must be an array of operationIds');
+      } else if (operations !== undefined && new Set(operations).size !== operations.length) {
+        issues.push('contract.openapiOperations must not contain duplicates');
+      } else if (operations !== undefined && value.target !== 'nestjs') {
+        issues.push('contract.openapiOperations is supported only for the nestjs target');
+      }
+    }
+  }
 
   if (!Array.isArray(value.verification)) issues.push('verification must be an array');
   else value.verification.forEach((argv, index) => {
@@ -225,28 +253,23 @@ async function appendEnvironment(overlay, appDirectory) {
   await writeFile(envPath, renderEnvironmentSection(current, overlay.manifest));
 }
 
-async function appendPrismaFragment(overlay, integration, appDirectory) {
+/** Reads a capability's declarative Prisma fragment. */
+async function readPrismaFragment(overlay, integration) {
   const fragmentPath = join(overlay.directory, integration.source);
-  let fragment;
   try {
-    fragment = await readFile(fragmentPath, 'utf8');
-  } catch {
-    throw new Error(`${overlay.manifest.capability}/${overlay.manifest.target}: missing prisma fragment ${integration.source}`);
+    return JSON.parse(await readFile(fragmentPath, 'utf8'));
+  } catch (error) {
+    throw new Error(`${overlay.manifest.capability}/${overlay.manifest.target}: invalid or missing prisma fragment ${integration.source} (${error.message})`);
   }
-  const schemaPath = join(appDirectory, 'prisma', 'schema.prisma');
-  const schema = await readFile(schemaPath, 'utf8');
-  await writeFile(schemaPath, `${schema}${renderPrismaFragmentBanner(overlay.manifest.capability)}${fragment.trimEnd()}\n`);
 }
 
-/** Structured extension of a model owned by an earlier fragment (back-relations). */
-async function extendPrismaModel(overlay, integration, appDirectory) {
+/** Appends the rendered composition to the baseline schema (single write). */
+async function writePrismaComposition(appDirectory, composition, capabilities) {
+  if (isEmptyPrismaComposition(composition)) return;
   const schemaPath = join(appDirectory, 'prisma', 'schema.prisma');
   const schema = await readFile(schemaPath, 'utf8');
-  try {
-    await writeFile(schemaPath, addPrismaModelField(schema, integration, overlay.manifest.capability));
-  } catch (error) {
-    throw new Error(`${overlay.manifest.capability}/${overlay.manifest.target}: ${error.message}`);
-  }
+  const banner = renderPrismaCompositionBanner(capabilities);
+  await writeFile(schemaPath, `${schema}${banner}${renderPrismaComposition(composition)}`);
 }
 
 /**
@@ -267,6 +290,10 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
   for (const { kind, starterId } of kinds) {
     const appDirectory = join(output, `apps/${kind}`);
     const collected = [];
+    // Typed intermediate Prisma model: capabilities contribute declarative
+    // enums/models/field-extensions; the schema is rendered once, at the end.
+    const prisma = createPrismaComposition();
+    const prismaCapabilities = [];
     for (const capabilityId of orderedCapabilities) {
       const target = byId.get(capabilityId)?.targets?.[starterId];
       if (!target) throw new Error(`Capability ${capabilityId} on ${starterId} is unknown`);
@@ -280,24 +307,36 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
       for (const entry of overlay.manifest.files) await copyOverlayEntry(overlay, entry, appDirectory);
       await mergeDependencies(overlay, appDirectory);
       await appendEnvironment(overlay, appDirectory);
-      // Prisma operations apply immediately and in order (a fragment must exist
-      // before a later capability extends one of its models); the rest is
-      // collected and rendered once per app into the composition files.
+      // Prisma contributions accumulate into the typed model (order matters: a
+      // capability can only extend a model declared by an earlier one); every
+      // other integration is collected and rendered once per app.
       for (const integration of overlay.manifest.integrations) {
-        if (integration.kind === 'nestjs.prisma-fragment') await appendPrismaFragment(overlay, integration, appDirectory);
-        else if (integration.kind === 'nestjs.prisma-model-field') await extendPrismaModel(overlay, integration, appDirectory);
-        else collected.push(integration);
+        if (integration.kind === 'nestjs.prisma-schema') {
+          const fragment = await readPrismaFragment(overlay, integration);
+          try {
+            applyPrismaFragment(prisma, fragment, capabilityId);
+          } catch (error) {
+            throw new Error(`${capabilityId}/${starterId}: ${error.message}`);
+          }
+          if (!prismaCapabilities.includes(capabilityId)) prismaCapabilities.push(capabilityId);
+        } else {
+          collected.push({ ...integration, capability: capabilityId });
+        }
       }
       applied.push({
         capability: capabilityId,
         target: starterId,
         version: overlay.manifest.version,
         digest: await computeOverlayDigest(overlay),
+        ...(overlay.manifest.contract?.openapiOperations
+          ? { openapiOperations: [...overlay.manifest.contract.openapiOperations] }
+          : {}),
       });
       if (overlay.manifest.verification.length > 0) {
         verification[kind] = [...(verification[kind] ?? []), ...overlay.manifest.verification];
       }
     }
+    await writePrismaComposition(appDirectory, prisma, prismaCapabilities);
     integrationsByApp.set(kind, { starterId, appDirectory, integrations: collected });
   }
 
@@ -315,15 +354,22 @@ async function writeGenerated(path, content) {
 
 async function renderCompositionFiles(starterId, appDirectory, integrations) {
   if (starterId === 'nestjs') {
-    if (integrations.length === 0) return;
-    await writeGenerated(join(appDirectory, 'src/composition/capabilities.ts'), renderNestjsComposition(integrations));
+    const seeds = integrations.filter((item) => item.kind === 'nestjs.prisma-seed');
+    const rest = integrations.filter((item) => item.kind !== 'nestjs.prisma-seed');
+    if (seeds.length > 0) {
+      await writeGenerated(join(appDirectory, 'prisma/seed/capability-seeds.ts'), renderPrismaSeedRegistry(seeds));
+    }
+    if (rest.length === 0) return;
+    await writeGenerated(join(appDirectory, 'src/composition/capabilities.ts'), renderNestjsComposition(rest));
     return;
   }
   if (starterId === 'nextjs') {
     const providers = integrations.filter((item) => item.kind === 'nextjs.provider');
     const navLinks = integrations.filter((item) => item.kind === 'nextjs.public-nav-link');
+    const sections = integrations.filter((item) => item.kind === 'nextjs.status-section');
     if (providers.length > 0) await writeGenerated(join(appDirectory, 'src/app/providers/capability-providers.tsx'), renderNextjsCapabilityProviders(providers));
     if (navLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/public-nav.ts'), renderNextjsPublicNav(navLinks));
+    if (sections.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/status-sections.tsx'), renderNextjsStatusSections(sections));
     return;
   }
   if (starterId === 'react-native') {

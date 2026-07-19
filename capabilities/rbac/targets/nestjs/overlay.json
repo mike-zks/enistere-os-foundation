@@ -26,23 +26,12 @@
       "destination": "prisma/migrations/20260719000200_rbac_init"
     },
     {
-      "source": "files/prisma/seed.ts",
-      "destination": "prisma/seed.ts",
-      "overwrite": true
-    },
-    {
       "source": "files/test/auth-rbac.e2e-spec.ts",
       "destination": "test/auth-rbac.e2e-spec.ts"
     },
     {
-      "source": "files/test/openapi-contract.e2e-spec.ts",
-      "destination": "test/openapi-contract.e2e-spec.ts",
-      "overwrite": true
-    },
-    {
-      "source": "files/openapi/openapi.json",
-      "destination": "openapi/openapi.json",
-      "overwrite": true
+      "source": "files/prisma/seed/rbac.seed.ts",
+      "destination": "prisma/seed/rbac.seed.ts"
     }
   ],
   "dependencies": {},
@@ -66,15 +55,20 @@
       "order": 30
     },
     {
-      "kind": "nestjs.prisma-fragment",
-      "source": "fragments/rbac.prisma"
+      "kind": "nestjs.prisma-schema",
+      "source": "fragments/rbac.prisma.json"
     },
     {
-      "kind": "nestjs.prisma-model-field",
-      "model": "User",
-      "field": "roles",
-      "type": "UserRole[]"
+      "kind": "nestjs.prisma-seed",
+      "importPath": "./rbac.seed",
+      "symbol": "seedRbac",
+      "order": 20
     }
   ],
-  "verification": []
+  "verification": [],
+  "contract": {
+    "openapiOperations": [
+      "auth_getAuthorization"
+    ]
+  }
 }

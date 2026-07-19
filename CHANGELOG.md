@@ -13,16 +13,20 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
   mobile reste sur `base + auth`.
 - **Ordre des guards globaux déterministe** : l'intégration `nestjs.global-guard` porte un `order`
   obligatoire (authentification 10 → rôles 20 → permissions 30) ; doublons et rangs ambigus refusés.
-- **Composition Prisma structurée** : nouvelle intégration `nestjs.prisma-model-field` étendant un
-  modèle existant (relation `User.roles`) en conscience de blocs — aucune duplication de `User`,
-  aucun patch regex. Migration RBAC dédiée ordonnée après Auth.
+- **Composition Prisma déclarative stricte** : `nestjs.prisma-schema` accumule enums, modèles et
+  extensions dans un modèle intermédiaire puis rend le schéma une fois ; aucune analyse ou mutation
+  textuelle. Migration RBAC dédiée ordonnée après Auth.
 - Endpoint `GET /auth/me/authorization` restauré à l'identique (`auth_getAuthorization`, DTO public
   inchangé) par un contrôleur **propre à RBAC** : le contrôleur d'Auth n'est pas modifié.
 - Surface web RBAC restaurée (BFF, client same-origin réutilisant `bffGet`, clé de cache dérivée de
   `authKeys.all` donc purgée au logout, hook et vue) : affichage conditionnel uniquement, l'API
   reste l'autorité.
-- Seed structurel gouverné et idempotent (permissions/rôles de référence, associations) — aucun
-  utilisateur, mot de passe ni donnée métier.
+- Seed structurel gouverné via `nestjs.prisma-seed` et registre ordonné ; page de statut Next.js
+  étendue via `nextjs.status-section`. Les orchestrateurs/shells centraux restent stables.
+- Snapshots OpenAPI retirés des overlays : contrat généré depuis l'application composée, opérations
+  attendues déclarées par capability et reproductibilité byte-identique vérifiée en golden runtime.
+- Politique d'overwrite fermée : fichiers centraux impossibles à copier/remplacer, allowlist réduite
+  et justifiée pour les variantes exclusives.
 - Goldens runtime étendus : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`.
 - Non-régression RBAC V1 documentée (`docs/project-status/RBAC_V1_NON_REGRESSION.md`).
 

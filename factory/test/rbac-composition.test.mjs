@@ -11,7 +11,15 @@ import {
   CAPABILITY_STATUSES,
   NON_BLOCKING_STATUSES,
 } from '../engine/capabilities.mjs';
-import { addPrismaModelField, orderGlobalGuards, renderNestjsComposition } from '../engine/overlay-renderers.mjs';
+import { orderGlobalGuards, renderNestjsComposition } from '../engine/overlay-renderers.mjs';
+import {
+  addPrismaModelField,
+  addPrismaModel,
+  applyPrismaFragment,
+  createPrismaComposition,
+  renderPrismaComposition,
+  validatePrismaFragment,
+} from '../engine/prisma-schema.mjs';
 import { validateOverlayManifest } from '../engine/overlay.mjs';
 import { createDefaultBlueprint } from '../engine/blueprint.mjs';
 import { generateProject } from '../engine/generator.mjs';
@@ -130,60 +138,125 @@ describe('deterministic global guard order', () => {
   });
 });
 
-describe('structured prisma model extension', () => {
-  const schema = [
-    'model User {',
-    '  id String @id',
-    '  refreshSessions RefreshSession[]',
-    '',
-    '  @@map("users")',
-    '}',
-    '',
-    'model Other {',
-    '  id String @id',
-    '}',
-    '',
-  ].join('\n');
+describe('typed Prisma composition', () => {
+  // A fragment whose comments/docs contain braces and irregular spacing: the typed
+  // model never parses text, so these are carried through verbatim and harmlessly.
+  const authFragment = {
+    enums: [{ name: 'UserStatus', values: ['ACTIVE', 'INACTIVE'] }],
+    models: [{
+      name: 'User',
+      doc: 'Utilisateur { avec accolades } dans le commentaire',
+      fields: [
+        { name: 'id', type: 'String', attributes: ['@id', '@default(uuid())', '@db.Uuid'] },
+        { name: 'email', type: 'String', attributes: ['@unique'] },
+        { name: 'refreshSessions', type: 'RefreshSession[]' },
+      ],
+      blockAttributes: ['@@map("users")'],
+    }],
+  };
+  const rbacFragment = {
+    models: [{
+      name: 'UserRole',
+      fields: [
+        { name: 'userId', type: 'String', attributes: ['@db.Uuid'] },
+        { name: 'user', type: 'User', attributes: ['@relation(fields: [userId], references: [id])'] },
+      ],
+      blockAttributes: ['@@id([userId])'],
+    }],
+    fields: [{ model: 'User', field: 'roles', type: 'UserRole[]' }],
+  };
 
-  it('inserts the field with the other fields, before block attributes', () => {
-    const out = addPrismaModelField(schema, { model: 'User', field: 'roles', type: 'UserRole[]' }, 'rbac');
-    const body = out.slice(out.indexOf('model User {'), out.indexOf('model Other {'));
-    assert.match(body, /roles UserRole\[\]/);
-    assert.ok(body.indexOf('roles UserRole[]') < body.indexOf('@@map("users")'), 'field precedes block attributes');
-    assert.match(body, /rbac capability relation/);
-    // The model is extended, never duplicated.
-    assert.equal(out.match(/^model User \{/gm).length, 1);
+  function composed() {
+    const composition = createPrismaComposition();
+    applyPrismaFragment(composition, authFragment, 'auth');
+    applyPrismaFragment(composition, rbacFragment, 'rbac');
+    return composition;
+  }
+
+  it('extends a model owned by an earlier capability without duplicating it', () => {
+    const out = renderPrismaComposition(composed());
+    assert.equal(out.match(/^model User \{/gm).length, 1, 'User declared once');
+    assert.match(out, /roles\s+UserRole\[\]/);
+    // Braces inside a doc comment never confuse the composition (no parsing at all).
+    assert.match(out, /Utilisateur \{ avec accolades \}/);
   });
 
-  it('appends before the closing brace when the model has no block attribute', () => {
-    const out = addPrismaModelField(schema, { model: 'Other', field: 'tags', type: 'String[]' }, 'rbac');
-    assert.match(out.slice(out.indexOf('model Other {')), /tags String\[\]/);
+  it('renders byte-identically for the same composition', () => {
+    assert.equal(renderPrismaComposition(composed()), renderPrismaComposition(composed()));
   });
 
-  it('refuses an unknown model', () => {
-    assert.throws(() => addPrismaModelField(schema, { model: 'Ghost', field: 'x', type: 'String' }, 'rbac'), /model not found: Ghost/);
-  });
-
-  it('refuses to declare an existing field twice', () => {
+  it('rejects unknown fragment properties instead of silently dropping typos', () => {
     assert.throws(
-      () => addPrismaModelField(schema, { model: 'User', field: 'refreshSessions', type: 'RefreshSession[]' }, 'rbac'),
-      /already declared/,
+      () => validatePrismaFragment({ modelz: [] }),
+      /unknown property: modelz/,
+    );
+    assert.throws(
+      () => validatePrismaFragment({ models: [{ name: 'User', fields: [{ name: 'id', type: 'String', typo: true }] }] }),
+      /unknown property: typo/,
     );
   });
 
-  it('validates the integration declaration', () => {
+  it('rejects malformed collections and duplicate enum values', () => {
+    assert.throws(() => validatePrismaFragment({ models: {} }), /models must be an array/);
+    assert.throws(
+      () => validatePrismaFragment({ enums: [{ name: 'State', values: ['READY', 'READY'] }] }),
+      /duplicate values/,
+    );
+    assert.throws(
+      () => validatePrismaFragment({ models: [{ name: 'User', fields: [{ name: 'id', type: 'String', attributes: '@id' }] }] }),
+      /attributes must be an array/,
+    );
+  });
+
+  it('keeps block attributes after the fields', () => {
+    const out = renderPrismaComposition(composed());
+    const model = out.slice(out.indexOf('model User {'), out.indexOf('model UserRole {'));
+    assert.ok(model.indexOf('roles') < model.indexOf('@@map("users")'));
+  });
+
+  it('supports several extensions of the same model', () => {
+    const composition = composed();
+    addPrismaModelField(composition, { model: 'User', field: 'files', type: 'StoredFile[]' }, 'files');
+    const out = renderPrismaComposition(composition);
+    assert.match(out, /roles\s+UserRole\[\]/);
+    assert.match(out, /files\s+StoredFile\[\]/);
+    assert.equal(out.match(/^model User \{/gm).length, 1);
+  });
+
+  it('refuses an unknown model', () => {
+    assert.throws(
+      () => addPrismaModelField(composed(), { model: 'Ghost', field: 'x', type: 'String' }, 'rbac'),
+      /model not found: Ghost/,
+    );
+  });
+
+  it('refuses a duplicated model', () => {
+    const composition = composed();
+    assert.throws(
+      () => addPrismaModel(composition, { name: 'User', fields: [{ name: 'id', type: 'String' }] }, 'files'),
+      /model already declared by auth: User/,
+    );
+  });
+
+  it('refuses a duplicated field', () => {
+    assert.throws(
+      () => addPrismaModelField(composed(), { model: 'User', field: 'email', type: 'String' }, 'files'),
+      /field already declared on User by auth: email/,
+    );
+  });
+
+  it('validates the declarative fragment integration', () => {
     const base = {
       schemaVersion: '1', capability: 'rbac', target: 'nestjs', version: '0.2.0',
       files: [], dependencies: {}, environment: [], verification: [],
     };
     assert.deepEqual(validateOverlayManifest({
-      ...base, integrations: [{ kind: 'nestjs.prisma-model-field', model: 'User', field: 'roles', type: 'UserRole[]' }],
+      ...base, integrations: [{ kind: 'nestjs.prisma-schema', source: 'fragments/rbac.prisma.json' }],
     }), []);
     const bad = validateOverlayManifest({
-      ...base, integrations: [{ kind: 'nestjs.prisma-model-field', model: 'user', field: 'Roles', type: 'UserRole[]' }],
+      ...base, integrations: [{ kind: 'nestjs.prisma-schema', source: '../escape.json' }],
     });
-    assert.ok(bad.some((i) => /model must be a Prisma model name/.test(i)));
-    assert.ok(bad.some((i) => /field must be a Prisma field name/.test(i)));
+    assert.ok(bad.some((i) => /safe relative path/.test(i)));
   });
 });
 
@@ -201,7 +274,7 @@ describe('rbac golden compositions (structural)', () => {
 
     const schema = await readFile(join(out, 'apps/api/prisma/schema.prisma'), 'utf8');
     assert.equal(schema.match(/^model User \{/gm).length, 1, 'User must not be duplicated');
-    assert.match(schema, /roles UserRole\[\]/);
+    assert.match(schema, /roles\s+UserRole\[\]/);
     for (const model of ['Role', 'Permission', 'UserRole', 'RolePermission']) {
       assert.ok(new RegExp(`^model ${model} \\{`, 'm').test(schema), `${model} present`);
     }
@@ -249,6 +322,6 @@ describe('rbac golden compositions (structural)', () => {
     }
     const schema = await readFile(join(withAuth, 'apps/api/prisma/schema.prisma'), 'utf8');
     assert.ok(!/model Role \{/.test(schema), 'base+auth prisma has no Role');
-    assert.ok(!/roles UserRole\[\]/.test(schema), 'base+auth User has no RBAC relation');
+    assert.ok(!/roles\s+UserRole\[\]/.test(schema), 'base+auth User has no RBAC relation');
   });
 });

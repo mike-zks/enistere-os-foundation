@@ -1,14 +1,37 @@
 /* eslint-disable */
 /**
- * Seed de la baseline `base` : volontairement vide.
+ * Orchestrateur de seed — **fichier stable, jamais remplacé par une capability**.
  *
- * La baseline ne définit aucune donnée structurelle. Les capabilities composées
- * qui nécessitent un seed (RBAC : rôles/permissions structurels) apportent le
- * leur via leur overlay. Ce fichier reste le point d'entrée `prisma db seed`
- * pour conserver un comportement stable des commandes npm.
+ * Il ne contient aucune donnée : il exécute, dans l'ordre déclaré, les seeds
+ * apportés par les capabilities composées (registre généré par la Factory dans
+ * `prisma/seed/capability-seeds.ts`). La baseline `base` n'a rien à semer.
+ *
+ * Garanties attendues de chaque seed : idempotent (réexécutable sans effet de
+ * bord), aucune identité ni mot de passe, aucune donnée métier.
+ *
+ * NON exécuté par `prisma migrate deploy` : lancer explicitement `npm run prisma:seed`.
  */
+import { PrismaClient } from '@prisma/client';
+
+import { CAPABILITY_SEEDS } from './seed/capability-seeds';
+
+const prisma = new PrismaClient();
+
 async function main(): Promise<void> {
-  console.log(JSON.stringify({ seed: 'base', status: 'nothing-to-seed' }));
+  if (CAPABILITY_SEEDS.length === 0) {
+    console.log(JSON.stringify({ seed: 'base', status: 'nothing-to-seed' }));
+    return;
+  }
+  for (const seed of CAPABILITY_SEEDS) {
+    await seed.run({ prisma });
+    console.log(JSON.stringify({ seed: seed.capability, order: seed.order, status: 'applied' }));
+  }
 }
 
-void main();
+main()
+  .then(() => prisma.$disconnect())
+  .catch(async (error) => {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

@@ -6,12 +6,15 @@
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
 | 18 combinaisons de stacks | Planifiées/testées | pas toutes démarrées en golden runtime |
-| Moteur d'overlays déclaratifs | Implémenté (1A) | seule `auth` livrée ; RBAC/Files à venir |
+| Moteur d'overlays déclaratifs | Implémenté (1A/1B) | Auth et RBAC livrés ; Files à venir |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
 | CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B) | 7 goldens : base/auth (×4) + auth+rbac (×3) |
 | Statuts de support (`not-applicable`) | Implémenté (1B) | permet les compositions mixtes sans surface factice |
-| Composition Prisma structurée | Implémentée (1B) | extension de modèle sans duplication ni regex |
+| Composition Prisma structurée | Implémentée (1B-R) | modèle intermédiaire strict, sans parsing de texte |
+| Registres seed/statut composables | Implémentés (1B-R) | ordre explicite, doublons/rangs ambigus refusés |
+| OpenAPI composé | Implémenté (1B-R) | généré et vérifié par jeu d'opérations + digest runtime |
+| Politique d'overwrite | Implémentée (1B-R) | fichiers centraux interdits, allowlist justifiée |
 | Lock déterministe + digests d'overlays | Implémenté | upgrade non livré |
 | Contrat de domaine neutre | Initial | pas de génération CRUD framework |
 | Agents locaux | Implémenté | exécution volontairement sous approbation |

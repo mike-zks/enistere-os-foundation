@@ -1,0 +1,79 @@
+{
+  "$comment": "Fragment Prisma DÉCLARATIF de la capability Auth (ADR-004). Assemblé par la Factory dans un modèle intermédiaire typé puis rendu — jamais un patch textuel. Les modèles Prisma ne sont pas exposés comme DTO publics (ADR-002 §20).",
+  "enums": [
+    {
+      "name": "UserStatus",
+      "doc": "Statut générique d'un utilisateur. Reste volontairement minimal et non métier.",
+      "values": ["ACTIVE", "INACTIVE", "SUSPENDED"]
+    },
+    {
+      "name": "SessionRevocationReason",
+      "doc": "Raison de révocation d'une RefreshSession (Auth 3). Interne, jamais exposée telle quelle au client.",
+      "values": ["ROTATED", "LOGOUT", "REUSE_DETECTED", "SECURITY_ACTION", "USER_DISABLED"]
+    }
+  ],
+  "models": [
+    {
+      "name": "User",
+      "doc": "Utilisateur minimal et générique, limité aux besoins de l'authentification.\nL'email est stocké normalisé (trim + minuscule) par la couche applicative ;\nl'unicité est garantie au niveau base. Aucun champ de profil métier.",
+      "fields": [
+        { "name": "id", "type": "String", "attributes": ["@id", "@default(uuid())", "@db.Uuid"] },
+        { "name": "email", "type": "String", "attributes": ["@unique"] },
+        { "name": "passwordHash", "type": "String" },
+        { "name": "status", "type": "UserStatus", "attributes": ["@default(ACTIVE)"] },
+        { "name": "createdAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "updatedAt", "type": "DateTime", "attributes": ["@updatedAt"] },
+        {
+          "name": "deactivatedAt",
+          "type": "DateTime?",
+          "doc": "Désactivation logique : neutralise un compte sans suppression physique (ADR-004 §15)."
+        },
+        { "name": "refreshSessions", "type": "RefreshSession[]" }
+      ],
+      "blockAttributes": ["@@map(\"users\")"]
+    },
+    {
+      "name": "RefreshSession",
+      "doc": "Session de refresh révocable, support de la rotation (ADR-004 §11/§15/§16).\nNe stocke jamais le refresh token brut, uniquement son empreinte (hash).",
+      "fields": [
+        { "name": "id", "type": "String", "attributes": ["@id", "@default(uuid())", "@db.Uuid"] },
+        { "name": "userId", "type": "String", "attributes": ["@db.Uuid"] },
+        { "name": "user", "type": "User", "attributes": ["@relation(fields: [userId], references: [id], onDelete: Cascade)"] },
+        {
+          "name": "tokenHash",
+          "type": "String",
+          "attributes": ["@unique"],
+          "doc": "Empreinte du refresh token (jamais le token brut). Unique pour la détection de réutilisation."
+        },
+        {
+          "name": "familyId",
+          "type": "String",
+          "attributes": ["@db.Uuid"],
+          "doc": "Identifiant de famille de tokens : rotation et détection de réutilisation (ADR-004 §16)."
+        },
+        { "name": "expiresAt", "type": "DateTime" },
+        {
+          "name": "revokedAt",
+          "type": "DateTime?",
+          "doc": "Révocation : logout, changement de mot de passe, compromission... (ADR-004 §15)."
+        },
+        { "name": "revocationReason", "type": "SessionRevocationReason?" },
+        {
+          "name": "replacedBySessionId",
+          "type": "String?",
+          "attributes": ["@db.Uuid"],
+          "doc": "Session ayant remplacé celle-ci lors d'une rotation (traçabilité de la chaîne)."
+        },
+        { "name": "createdAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "lastUsedAt", "type": "DateTime?" },
+        {
+          "name": "userAgent",
+          "type": "String?",
+          "doc": "Métadonnées techniques limitées et facultatives (ADR-004 §18). Aucune donnée personnelle superflue."
+        },
+        { "name": "ipAddress", "type": "String?" }
+      ],
+      "blockAttributes": ["@@index([userId])", "@@index([familyId])", "@@map(\"refresh_sessions\")"]
+    }
+  ]
+}

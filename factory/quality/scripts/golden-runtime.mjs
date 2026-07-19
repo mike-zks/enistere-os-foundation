@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { generateProject } from '../../engine/generator.mjs';
 import { createDefaultBlueprint } from '../../engine/blueprint.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../../engine/dependencies.mjs';
+import { createHash } from 'node:crypto';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const AUDIT_CHECK = resolve(REPO_ROOT, 'factory/quality/scripts/audit-check.mjs');
@@ -87,20 +88,30 @@ function run(label, cmd, args, cwd) {
   return true;
 }
 
+/**
+ * Database/schema preparation for the NestJS app. Runs BEFORE the OpenAPI
+ * generation (which needs the Prisma client) and before the verification gates.
+ */
+function prepareGatesFor(kind, hasDb, capabilities = []) {
+  if (kind !== 'nestjs') return [];
+  return [
+    ['api: prisma generate', 'npm', ['run', 'prisma:generate', '--workspace=apps/api']],
+    ['api: prisma validate', 'npm', ['run', 'prisma:validate', '--workspace=apps/api']],
+    ...(hasDb ? [['api: prisma migrate deploy', 'npm', ['run', 'prisma:migrate:deploy', '--workspace=apps/api']]] : []),
+    // Seed structurel gouverné : composé via `nestjs.prisma-seed`, idempotent,
+    // sans identité ni donnée métier.
+    ...(hasDb && capabilities.includes('rbac')
+      ? [['api: prisma seed (composed, idempotent)', 'npm', ['run', 'prisma:seed', '--workspace=apps/api']]]
+      : []),
+  ];
+}
+
 function gatesFor(kind, hasDb, capabilities = []) {
   if (kind === 'nestjs') {
     return [
-      ['api: prisma generate', 'npm', ['run', 'prisma:generate', '--workspace=apps/api']],
-      ['api: prisma validate', 'npm', ['run', 'prisma:validate', '--workspace=apps/api']],
-      ...(hasDb ? [['api: prisma migrate deploy', 'npm', ['run', 'prisma:migrate:deploy', '--workspace=apps/api']]] : []),
-      // Seed structurel gouverné (RBAC) : idempotent, sans identité ni donnée métier.
-      ...(hasDb && capabilities.includes('rbac')
-        ? [['api: prisma seed (RBAC structural, idempotent)', 'npm', ['run', 'prisma:seed', '--workspace=apps/api']]]
-        : []),
       ['api: lint', 'npm', ['run', 'lint', '--workspace=apps/api']],
       ['api: unit tests', 'npm', ['run', 'test', '--workspace=apps/api']],
       ...(hasDb ? [['api: e2e (Auth)', 'npm', ['run', 'test:e2e', '--workspace=apps/api']]] : []),
-      ['api: openapi:check', 'npm', ['run', 'openapi:check', '--workspace=apps/api']],
       ['api: build', 'npm', ['run', 'build', '--workspace=apps/api']],
     ];
   }
@@ -122,6 +133,55 @@ function gatesFor(kind, hasDb, capabilities = []) {
     ];
   }
   return [];
+}
+
+/** Operations always published by the NestJS baseline (`base`). */
+export const BASE_NESTJS_OPERATIONS = ['health_get', 'health_live', 'health_ready'];
+
+/** Reads the operationIds of an OpenAPI document. */
+function operationIds(document) {
+  return Object.values(document.paths ?? {})
+    .flatMap((methods) => Object.values(methods).map((operation) => operation.operationId))
+    .filter(Boolean)
+    .sort();
+}
+
+/**
+ * Generates OpenAPI from the composed app, asserts the operation set expected for
+ * the composed capabilities (declared by each overlay in `contract.openapiOperations`)
+ * and proves reproducibility by regenerating and comparing digests.
+ */
+async function verifyComposedOpenApi(out, blueprint) {
+  console.log('\n── OpenAPI generated from the composed application');
+  const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+  const expected = [...new Set([
+    ...BASE_NESTJS_OPERATIONS,
+    ...lock.overlays.filter((o) => o.target === 'nestjs').flatMap((o) => o.openapiOperations ?? []),
+  ])].sort();
+
+  const snapshot = join(out, 'apps/api/openapi/openapi.json');
+  const generate = () => spawnSync('npm', ['run', 'openapi:generate', '--workspace=apps/api'], {
+    cwd: out, stdio: 'inherit', shell: false, env: process.env,
+  });
+  if (generate().status !== 0) { console.log('\n❌ FAILED: openapi:generate'); return false; }
+
+  const first = await readFile(snapshot, 'utf8');
+  const document = JSON.parse(first);
+  const actual = operationIds(document);
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    console.log(`\n❌ FAILED: OpenAPI operations mismatch\n   expected: ${expected.join(', ')}\n   actual:   ${actual.join(', ')}`);
+    return false;
+  }
+
+  // Reproducibility: regenerating must yield a byte-identical document.
+  if (generate().status !== 0) { console.log('\n❌ FAILED: openapi:generate (second run)'); return false; }
+  const second = await readFile(snapshot, 'utf8');
+  if (first !== second) { console.log('\n❌ FAILED: generated OpenAPI is not reproducible'); return false; }
+
+  const digest = createHash('sha256').update(second).digest('hex');
+  console.log(`✓ OpenAPI operations: ${actual.join(', ')}`);
+  console.log(`✓ OpenAPI reproducible, digest ${digest.slice(0, 12)}…`);
+  return true;
 }
 
 async function main() {
@@ -168,7 +228,24 @@ async function main() {
   }
   // 3) Shared packages build.
   if (ok) ok = run('build:packages', 'npm', ['run', 'build:packages'], out) && ok;
-  // 4) Per-application gates.
+  // 4) Schema/database preparation (Prisma client needed by the OpenAPI generation).
+  if (ok) {
+    for (const kind of kinds) {
+      for (const [label, cmd, args, cwd] of prepareGatesFor(kind, hasDb, blueprint.capabilities)) {
+        ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
+        if (!ok) break;
+      }
+      if (!ok) break;
+    }
+  }
+  // 5) OpenAPI is GENERATED from the composed application before the verification
+  //     gates, so the e2e freshness invariant checks THIS composition's contract
+  //     (never a copied snapshot). Also asserts the declared operation set and
+  //     proves the generated contract is reproducible.
+  if (ok && kinds.includes('nestjs')) {
+    ok = await verifyComposedOpenApi(out, blueprint) && ok;
+  }
+  // 6) Per-application verification gates.
   if (ok) {
     for (const kind of kinds) {
       for (const [label, cmd, args, cwd] of gatesFor(kind, hasDb, blueprint.capabilities)) {
@@ -178,12 +255,12 @@ async function main() {
       if (!ok) break;
     }
   }
-  // 5) npm audit by documented exception (no global disabling).
+  // 7) npm audit by documented exception (no global disabling).
   if (ok) {
     const [cmd, args] = auditGate(out, kinds);
     ok = run('npm audit (documented exceptions only)', cmd, args, REPO_ROOT) && ok;
   }
-  // 6) Lock determinism: the same blueprint on the same Foundation must resolve to
+  // 8) Lock determinism: the same blueprint on the same Foundation must resolve to
   //    the same lock digest. Re-generates a twin and re-resolves the lock only.
   if (ok) {
     console.log('\n── lock determinism (same blueprint + same Foundation → same digest)');

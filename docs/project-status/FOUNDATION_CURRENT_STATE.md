@@ -1,6 +1,6 @@
 # État courant de la Foundation
 
-> Mise à jour : 2026-07-18. Source opérationnelle V2.
+> Mise à jour : 2026-07-19. Source opérationnelle V2.
 
 ## Architecture
 
@@ -45,7 +45,9 @@ Les non-régressions V1 sont documentées : `docs/project-status/AUTH_V1_NON_REG
 `docs/project-status/RBAC_V1_NON_REGRESSION.md`.
 
 RBAC (1B) dépend explicitement de `base + auth`, ordonne ses guards globaux de façon déterministe
-(authentification → rôles → permissions) et compose son schéma Prisma sans dupliquer `User`. Sur
+(authentification → rôles → permissions) et compose son schéma Prisma depuis des fragments JSON
+stricts, sans parser ni modifier du texte. Les seeds Prisma et sections de statut Next.js sont des
+registres ordonnés ; OpenAPI est généré depuis l'application composée. Sur
 React Native, `rbac` est `not-applicable` : la composition triple reste générable et le mobile ne
 reçoit aucune surface RBAC.
 

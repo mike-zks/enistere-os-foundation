@@ -1,0 +1,86 @@
+{
+  "$comment": "Fragment Prisma DÉCLARATIF de la capability RBAC (ADR-006). `fields` étend le modèle `User` déclaré par Auth dans le modèle intermédiaire typé — aucune redéfinition de `User`, aucun patch textuel.",
+  "models": [
+    {
+      "name": "Role",
+      "doc": "Rôle RBAC générique (ADR-006). Regroupe des permissions. Aucun rôle métier imposé.",
+      "fields": [
+        { "name": "id", "type": "String", "attributes": ["@id", "@default(uuid())", "@db.Uuid"] },
+        {
+          "name": "code",
+          "type": "String",
+          "attributes": ["@unique"],
+          "doc": "Code stable, normalisé (minuscules), identifiant logique du rôle."
+        },
+        { "name": "name", "type": "String" },
+        { "name": "description", "type": "String?" },
+        {
+          "name": "isSystem",
+          "type": "Boolean",
+          "attributes": ["@default(false)"],
+          "doc": "Protège les rôles structurels du core."
+        },
+        { "name": "createdAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "updatedAt", "type": "DateTime", "attributes": ["@updatedAt"] },
+        { "name": "users", "type": "UserRole[]" },
+        { "name": "permissions", "type": "RolePermission[]" }
+      ],
+      "blockAttributes": ["@@map(\"roles\")"]
+    },
+    {
+      "name": "Permission",
+      "doc": "Permission fine (ADR-006), convention `resource.action`. Aucune permission métier.",
+      "fields": [
+        { "name": "id", "type": "String", "attributes": ["@id", "@default(uuid())", "@db.Uuid"] },
+        {
+          "name": "code",
+          "type": "String",
+          "attributes": ["@unique"],
+          "doc": "Code unique stable au format `resource.action` (minuscules)."
+        },
+        { "name": "resource", "type": "String" },
+        { "name": "action", "type": "String" },
+        { "name": "description", "type": "String?" },
+        { "name": "isSystem", "type": "Boolean", "attributes": ["@default(false)"] },
+        { "name": "createdAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "updatedAt", "type": "DateTime", "attributes": ["@updatedAt"] },
+        { "name": "roles", "type": "RolePermission[]" }
+      ],
+      "blockAttributes": ["@@map(\"permissions\")"]
+    },
+    {
+      "name": "UserRole",
+      "doc": "Association explicite utilisateur ↔ rôle (many-to-many).",
+      "fields": [
+        { "name": "userId", "type": "String", "attributes": ["@db.Uuid"] },
+        { "name": "roleId", "type": "String", "attributes": ["@db.Uuid"] },
+        { "name": "assignedAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "assignedBy", "type": "String?", "attributes": ["@db.Uuid"] },
+        { "name": "user", "type": "User", "attributes": ["@relation(fields: [userId], references: [id], onDelete: Cascade)"] },
+        { "name": "role", "type": "Role", "attributes": ["@relation(fields: [roleId], references: [id], onDelete: Cascade)"] }
+      ],
+      "blockAttributes": ["@@id([userId, roleId])", "@@index([roleId])", "@@map(\"user_roles\")"]
+    },
+    {
+      "name": "RolePermission",
+      "doc": "Association explicite rôle ↔ permission (many-to-many).",
+      "fields": [
+        { "name": "roleId", "type": "String", "attributes": ["@db.Uuid"] },
+        { "name": "permissionId", "type": "String", "attributes": ["@db.Uuid"] },
+        { "name": "assignedAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "assignedBy", "type": "String?", "attributes": ["@db.Uuid"] },
+        { "name": "role", "type": "Role", "attributes": ["@relation(fields: [roleId], references: [id], onDelete: Cascade)"] },
+        { "name": "permission", "type": "Permission", "attributes": ["@relation(fields: [permissionId], references: [id], onDelete: Cascade)"] }
+      ],
+      "blockAttributes": ["@@id([roleId, permissionId])", "@@index([permissionId])", "@@map(\"role_permissions\")"]
+    }
+  ],
+  "fields": [
+    {
+      "model": "User",
+      "field": "roles",
+      "type": "UserRole[]",
+      "doc": "Rôles de l'utilisateur (relation apportée par la capability RBAC)."
+    }
+  ]
+}
