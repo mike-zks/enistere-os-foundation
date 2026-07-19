@@ -38,7 +38,21 @@
       "additionalProperties": false,
       "properties": {
         "dependencies": { "type": "object", "additionalProperties": { "type": "string" } },
-        "devDependencies": { "type": "object", "additionalProperties": { "type": "string" } }
+        "devDependencies": { "type": "object", "additionalProperties": { "type": "string" } },
+        "maven": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["groupId", "artifactId"],
+            "properties": {
+              "groupId": { "type": "string", "minLength": 1 },
+              "artifactId": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 },
+              "scope": { "enum": ["compile", "runtime", "test", "provided"] }
+            }
+          }
+        }
       }
     },
     "environment": {
