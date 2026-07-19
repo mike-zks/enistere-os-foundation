@@ -41,7 +41,7 @@ son absence de preuve runtime est explicite (`runtimeProven: false`) — elle n'
 
 ## Profils enregistrés
 
-### `ready` — composables et prouvés (9)
+### `ready` — composables et prouvés (10)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -51,11 +51,12 @@ son absence de preuve runtime est explicite (`runtimeProven: false`) — elle n'
 | `nestjs-files` | nestjs | — | — | base + auth + rbac + files | `nestjs-files` |
 | `nestjs-next-auth` | nestjs | nextjs | — | base + auth | `nest-next-auth` |
 | `nestjs-next-rbac` | nestjs | nextjs | — | base + auth + rbac | `nest-next-auth-rbac` |
+| `nestjs-next-files` | nestjs | nextjs | — | base + auth + rbac + files | `nest-next-files` |
 | `nestjs-next-react-native-auth` | nestjs | nextjs | react-native | base + auth | `triple-auth` |
 | `nestjs-next-react-native-rbac` | nestjs | nextjs | react-native | base + auth + rbac | `triple-auth-rbac` |
-| `nestjs-next-rn-files` | nestjs | nextjs | react-native | base + auth + rbac + files | `triple-files` |
+| `nestjs-next-react-native-files` | nestjs | nextjs | react-native | base + auth + rbac + files | `triple-files` |
 
-Sur `nestjs-next-react-native-rbac` et `nestjs-next-rn-files`, `rbac` est `not-applicable` sur React
+Sur `nestjs-next-react-native-rbac` et `nestjs-next-react-native-files`, `rbac` est `not-applicable` sur React
 Native : l'autorisation fine reste côté serveur et **aucune surface RBAC n'est injectée** sur le
 mobile. Les deux profils triples réutilisent exactement les compositions golden existantes
 (`triple-auth`, `triple-auth-rbac`) : aucun renderer, overlay ou comportement runtime nouveau.
@@ -108,14 +109,9 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 
 ## Couverture des goldens
 
-Les 10 goldens runtime sont tous NestJS. **Neuf d'entre eux adossent désormais un profil `ready`**,
-chacun sur un golden distinct : `triple-auth` et `triple-auth-rbac`, jusqu'ici testés sans profil
-nommé, sont couverts par `nestjs-next-react-native-auth` et `nestjs-next-react-native-rbac`.
-
-Un golden reste **sans profil nommé** : `nest-next-files` (`nestjs + nextjs`, `base + auth + rbac +
-files`). Il est couvert par la CI mais n'est pas proposé comme combinaison supportée. Ce n'est pas un
-échec — un golden peut être testé sans être offert — mais l'écart est nommé ici plutôt que masqué, et
-un test vérifie que tout golden non couvert figure dans ce document.
+Les 10 goldens runtime sont tous NestJS. **Les 10 adossent désormais un profil `ready`** :
+`nest-next-files` est couvert par `nestjs-next-files`, et les compositions triples sont couvertes
+par leurs profils `nestjs-next-react-native-*`.
 
 Aucun profil `supported` ou `planned` n'est adossé à un golden, et deux profils ne peuvent pas
 revendiquer le même golden.

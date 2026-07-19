@@ -7,7 +7,7 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 ### Project Factory 4 (R7) — matrice des profils et combinaisons supportées
 
 - Nouveau registre `factory/engine/profiles.mjs` : un **profil** est une composition nommée
-  `{api, web?, mobile?, capabilities}`. 25 profils déclarés, dont 18 générables.
+  `{api, web?, mobile?, capabilities}`. 26 profils déclarés, dont 19 générables.
 - Trois statuts explicites : `ready` (composable **et** prouvé par un golden runtime), `supported`
   (composable selon la matrice, sans preuve runtime) et `planned` (non composable, génération
   refusée). Aucun `ready` n'est attribué sans overlay et golden.
@@ -32,9 +32,8 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
   `nestjs-next-react-native-auth` (golden `triple-auth`) et `nestjs-next-react-native-rbac`
   (golden `triple-auth-rbac`). Ils **réutilisent exactement** ces compositions : aucun renderer,
   overlay, capability ni comportement runtime nouveau.
-- Neuf des dix goldens adossent désormais un profil `ready`, chacun sur un golden distinct. Le
-  golden `nest-next-files` reste **sans profil nommé** : l'écart est documenté dans
-  `PROFILE_MATRIX.md` et un test vérifie que tout golden non couvert y figure.
+- Les dix goldens adossent désormais un profil `ready`, chacun sur un golden distinct, dont
+  `nestjs-next-files` pour `nest-next-files` et `nestjs-next-react-native-files` pour `triple-files`.
 - La documentation ne peut plus dériver du registre : trois tests croisent `PROFILE_MATRIX.md` et
   `profiles.mjs` (tout profil enregistré est documenté, tout profil documenté est enregistré, et les
   compteurs annoncés sont ceux du registre).

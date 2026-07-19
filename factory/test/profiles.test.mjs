@@ -105,7 +105,7 @@ describe('the API is mandatory', () => {
   const accepted = [
     'spring-angular-base', 'spring-flutter-base', 'nestjs-next-base', 'nestjs-react-native-base',
     'nestjs-angular-base', 'nestjs-flutter-base',
-    'nestjs-next-react-native-auth', 'nestjs-next-react-native-rbac',
+    'nestjs-next-files', 'nestjs-next-react-native-auth', 'nestjs-next-react-native-rbac',
   ];
 
   for (const name of refused) {
@@ -302,7 +302,7 @@ describe('the plan reports capabilities and gates', () => {
 
   it('reports the gates each generated app will run', async () => {
     const starters = await loadStarterManifests(root);
-    const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-rn-files')), { starters });
+    const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-react-native-files')), { starters });
     assert.deepEqual(Object.keys(plan.gates), ['api', 'web', 'mobile']);
     assert.deepEqual(plan.gates.api.map((gate) => gate.gate), ['install', 'test', 'build', 'verify']);
     assert.equal(plan.gates.api.find((gate) => gate.gate === 'verify').command, 'npm run openapi:check');
