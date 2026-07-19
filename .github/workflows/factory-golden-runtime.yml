@@ -1,0 +1,77 @@
+name: Factory Golden Runtime
+
+# Capability Packs 1A-R — preuve runtime des compositions générées.
+# Pour chaque golden, la Factory GÉNÈRE le projet dans un répertoire temporaire, prouve
+# l'installation reproductible (`npm install` puis `npm ci` depuis le lock racine unique) et
+# exécute les gates RÉELS de chaque application générée (voir factory/quality/scripts/golden-runtime.mjs).
+#
+# Aucune infrastructure persistante : PostgreSQL jetable en service. Aucune valeur ci-dessous
+# n'est un secret réel — ce sont des VALEURS DE TEST JETABLES. Aucun déploiement, registry ni publication.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: factory-golden-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  golden-runtime:
+    name: golden-runtime (${{ matrix.composition }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        composition:
+          - nestjs-base
+          - nestjs-auth
+          - nest-next-auth
+          - triple-auth
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: enistere_golden
+          POSTGRES_USER: enistere
+          POSTGRES_PASSWORD: enistere_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U enistere -d enistere_golden"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      # Valeurs de test JETABLES (jamais des secrets réels ; cf. deployment/docs/SECRETS_POLICY.md).
+      GOLDEN_RUNTIME_DB: "1"
+      DATABASE_URL: postgresql://enistere:enistere_test_password@localhost:5432/enistere_golden?schema=public
+      JWT_ACCESS_SECRET: golden_ci_access_secret_minimum_32_characters
+      JWT_REFRESH_SECRET: golden_ci_refresh_secret_minimum_32_characters
+      REFRESH_TOKEN_HASH_SECRET: golden_ci_refresh_hash_secret_minimum_32_chars
+      # Rate limits généreux pour ne pas faire échouer les e2e fonctionnels.
+      AUTH_LOGIN_RATE_LIMIT: "1000"
+      AUTH_REFRESH_RATE_LIMIT: "1000"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Reset the disposable schema between reruns (deterministic migrate deploy).
+      - name: Reset PostgreSQL schema
+        run: |
+          PGPASSWORD=enistere_test_password psql -h localhost -U enistere -d enistere_golden \
+            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+      - name: Golden runtime — generate, reproducible install, gates
+        run: node factory/quality/scripts/golden-runtime.mjs ${{ matrix.composition }}
