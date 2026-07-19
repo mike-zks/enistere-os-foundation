@@ -101,13 +101,11 @@ export const PROFILES = Object.freeze([
   profile('nestjs-react-native-base', 'ready', { api: 'nestjs', mobile: 'react-native' }, ['base'], {
     golden: 'nestjs-react-native-base',
   }),
-  profile('nestjs-angular-base', 'supported', { api: 'nestjs', web: 'angular' }, ['base'], {
+  profile('nestjs-angular-base', 'ready', { api: 'nestjs', web: 'angular' }, ['base'], {
     golden: 'nestjs-angular-base',
-    note: 'Angular baseline copy: gates are green but the web app ships an auth surface base never selected.',
   }),
-  profile('nestjs-flutter-base', 'supported', { api: 'nestjs', mobile: 'flutter' }, ['base'], {
+  profile('nestjs-flutter-base', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['base'], {
     golden: 'nestjs-flutter-base',
-    note: 'Flutter baseline copy: gates are green but the mobile app ships a sign-in surface base never selected.',
   }),
   profile('spring-next-base', 'ready', { api: 'spring', web: 'nextjs' }, ['base'], {
     golden: 'spring-next-base',
@@ -115,13 +113,11 @@ export const PROFILES = Object.freeze([
   profile('spring-react-native-base', 'ready', { api: 'spring', mobile: 'react-native' }, ['base'], {
     golden: 'spring-react-native-base',
   }),
-  profile('spring-angular-base', 'supported', { api: 'spring', web: 'angular' }, ['base'], {
+  profile('spring-angular-base', 'ready', { api: 'spring', web: 'angular' }, ['base'], {
     golden: 'spring-angular-base',
-    note: 'Both starters are baseline copies: the project ships well beyond base.',
   }),
-  profile('spring-flutter-base', 'supported', { api: 'spring', mobile: 'flutter' }, ['base'], {
+  profile('spring-flutter-base', 'ready', { api: 'spring', mobile: 'flutter' }, ['base'], {
     golden: 'spring-flutter-base',
-    note: 'Both starters are baseline copies: the project ships well beyond base.',
   }),
 
   // ── Proven TypeScript vertical ─────────────────────────────────────────────

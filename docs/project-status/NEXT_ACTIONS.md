@@ -2,14 +2,14 @@
 
 ## Action unique
 
-**Capability Packs 2 — parité Auth/RBAC/Files pour Angular et Flutter**
+**Capability Packs 2 — parité Auth/RBAC/Files pour Spring, Angular et Flutter**
 
 Étendre les capabilities `auth`, `rbac` et `files` validées sur la verticale TypeScript aux starters
-Angular et Flutter, sans
+Spring, Angular et Flutter, sans
 dupliquer le contrat public ni contourner les seams de la Factory :
 
 1. choisir séparément l'implémentation de stockage et de multipart par target, sous les ADR existants ;
-2. produire les overlays Angular et Flutter avec les mêmes DTO/opérations publiques ; Spring base est déjà extrait ;
+2. produire les overlays Spring, Angular et Flutter avec les mêmes DTO/opérations publiques ; leurs baselines sont maintenant modulaires ;
 3. ajouter les goldens générés et les gates propres à chaque target ;
 4. conserver `files` indépendant des capacités futures d'admin, sync et offline ;
 5. documenter la parité et les écarts avant de passer chaque target à `ready`.

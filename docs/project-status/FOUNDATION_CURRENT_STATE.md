@@ -13,7 +13,7 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Matrice de profils | Implémentée (R7) | `factory/engine/profiles.mjs`, validée contre la matrice réelle |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
-| Capabilities | `auth`, `rbac` et `files` livrées sur NestJS/Next.js/RN ; Spring base extrait | Auth/RBAC/Files Spring + Angular/Flutter planifiés |
+| Capabilities | `auth`, `rbac` et `files` livrées sur NestJS/Next.js/RN ; baselines Spring/Angular/Flutter extraites | Auth/RBAC/Files Spring/Angular/Flutter planifiés |
 | Overlays déclaratifs | Moteur + overlays `auth`, `rbac` et `files` livrés | Files prouvé sur NestJS/Next.js/RN via goldens générés |
 | Packages | Implémentés | contracts (contrat complet figé), client Fetch, UI Kit |
 | Deployment | Local/staging disponibles | Compose, CI, runbooks et preuve staging V1 |
@@ -26,9 +26,9 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | NestJS | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
 | Spring Boot | V1 vérifiée | base modulaire extraite ; auth/RBAC/files planifiés |
 | Next.js | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
-| Angular | V1 vérifiée | planifiée après verticale TypeScript |
+| Angular | V1 vérifiée | base modulaire extraite ; capabilities métier planifiées |
 | React Native | V1 vérifiée, Android prouvé | baseline `base` extraite ; Auth en overlay `ready` |
-| Flutter | V1 vérifiée, Android prouvé | planifiée après verticale TypeScript |
+| Flutter | V1 vérifiée, Android prouvé | base modulaire extraite ; capabilities métier planifiées |
 
 ## Composition modulaire (Capability Packs 1A)
 

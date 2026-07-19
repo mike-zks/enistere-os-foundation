@@ -4,6 +4,13 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Project Factory R8A-3 — baselines Angular et Flutter modulaires
+
+- Extraction des bases Angular et Flutter sans Auth, RBAC, Files ni session métier.
+- Les six starters déclarent désormais `composition.model: modular` avec une `baseSource` explicite.
+- Les 19 profils générables base-only sont exacts et golden-proven ; aucun profil `supported`
+  ne masque encore une copie baseline excessive.
+
 ### Project Factory R8A-2 — Spring base modulaire
 
 - Extraction de `starters/spring/base` : le profil `spring-base` ne copie plus les modules Auth,
