@@ -12,6 +12,13 @@
     "target": { "type": "string", "description": "Registered starter id (must match the directory)." },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "description": { "type": "string" },
+    "operations": {
+      "type": "array",
+      "description": "Declarative operation names supported by the target adapter.",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "minItems": 1
+    },
     "files": {
       "type": "array",
       "description": "Files or directories copied verbatim from the overlay payload into the generated app. Copying onto an existing file fails unless the entry declares overwrite: true.",

@@ -17,7 +17,7 @@ describe('target adapter registry', () => {
     assert.ok(integrationKindsFor('spring'));
     assert.deepEqual(integrationKindsFor('spring'), {});
     assert.deepEqual(getTargetAdapter('spring').operations, [
-      'files', 'dependencies', 'environment', 'contract', 'verification',
+      'files', 'dependencies', 'environment', 'integrations', 'contract', 'verification',
     ]);
   });
 

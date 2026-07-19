@@ -74,6 +74,14 @@ describe('overlay manifest validation', () => {
   it('accepts a nominal overlay', () => {
     assert.deepEqual(validateOverlayManifest(validManifest(), { capability: 'auth', target: 'nestjs' }), []);
   });
+
+  it('validates declared operations against the target adapter', () => {
+    assert.deepEqual(validateOverlayManifest(validManifest({
+      operations: ['files', 'dependencies', 'environment', 'integrations', 'verification'],
+    }), { capability: 'auth', target: 'nestjs' }), []);
+    const issues = validateOverlayManifest(validManifest({ operations: ['spring.security'] }), { capability: 'auth', target: 'nestjs' });
+    assert.ok(issues.some((issue) => /unsupported operations/.test(issue)));
+  });
   it('rejects a malformed overlay', () => {
     const issues = validateOverlayManifest({ schemaVersion: '2', capability: 'nope', files: 'x' });
     assert.ok(issues.some((issue) => /schemaVersion/.test(issue)));
