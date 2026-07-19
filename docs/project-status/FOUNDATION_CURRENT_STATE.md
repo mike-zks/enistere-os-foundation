@@ -37,6 +37,12 @@ que via son overlay déclaratif. `generationMode` devient `modular-overlay` (et
 `bundledFeaturesMayExceedSelection=false`) lorsque toutes les targets sélectionnées sont modulaires.
 Spring, Angular et Flutter restent en baseline-copy jusqu'à leur extraction.
 
+Le projet généré est un **workspace npm unifié** : les `@enistere/*` sont des membres du workspace
+(résolus via `*`, sans `file:`), un unique `package-lock.json` racine fait autorité et `npm ci`
+réinstalle de façon reproductible. La CI `Factory Golden Runtime` génère `base+auth` pour les trois
+verticales, prouve l'installation reproductible et exécute les gates réels de chaque application.
+La non-régression Auth V1 est documentée dans `docs/project-status/AUTH_V1_NON_REGRESSION.md`.
+
 ## Références
 
 - Roadmap : `strategy/04_ROADMAP_GLOBAL.md`

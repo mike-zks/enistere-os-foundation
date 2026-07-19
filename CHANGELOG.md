@@ -4,6 +4,27 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Capability Packs 1A-R — reproductibilité et preuve runtime des compositions Auth
+
+- **Stratégie de lockfile déterministe** : le projet généré devient un workspace npm unifié. Le
+  `package.json` racine déclare toutes les applications npm (`apps/api`, `apps/web`, `apps/mobile`) et
+  `packages/*` comme membres ; les `@enistere/*` sont résolus via la portée `*` (jamais `file:`/`link:`).
+  La fusion de dépendances ne supprime plus aucun lockfile ; un unique `package-lock.json` racine
+  (écrit par `npm install`) fait autorité et `npm ci` réinstalle de façon reproductible. Corrige le
+  bug 1A où la fusion de dépendances supprimait le lockfile, rendant `npm ci` impossible.
+- **CI obligatoire `Factory Golden Runtime`** : pour `nestjs-base`, `nestjs-auth`, `nest-next-auth` et
+  `triple-auth`, génère le projet, prouve l'installation reproductible et exécute les gates réels de
+  chaque application (NestJS : prisma/lint/tests/e2e Auth/openapi/build ; Next.js :
+  typecheck/lint/tests/build ; React Native : typecheck/lint/tests/doctor/`expo export`).
+- **Découplage Auth ↔ RBAC (Next.js)** : la surface d'autorisation (résumé rôles/permissions) est
+  retirée de l'overlay Auth (elle relève de RBAC), rendant `base+auth` propre au typecheck/build.
+- **README de projet généré** dérivé du blueprint et du plan (stack, capabilities, prérequis,
+  installation `npm install`/`npm ci`, variables d'env, infra, migrations, démarrage, tests, limites,
+  provenance/lock).
+- **Non-régression Auth V1** documentée et prouvée (`docs/project-status/AUTH_V1_NON_REGRESSION.md`) :
+  aucune garantie Auth historique perdue ; suppression de la dépendance Auth → RBAC et d'une variable
+  d'environnement requise mais morte (`JWT_REFRESH_SECRET`).
+
 ### Capability Packs 1A — extraction Auth (NestJS + Next.js + React Native)
 
 - Moteur d'overlays déclaratifs (`factory/engine/overlay.mjs`, `overlay.schema.json`) : le

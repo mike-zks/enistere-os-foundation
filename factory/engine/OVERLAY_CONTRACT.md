@@ -46,6 +46,21 @@ fusionne les dépendances sans doublon, génère les fichiers d'intégration cen
 overlay appliqué. `generationMode` devient `modular-overlay` (et `bundledFeaturesMayExceedSelection`
 `false`) uniquement lorsque **toutes** les targets sélectionnées déclarent `composition.model: "modular"`.
 
+## Reproductibilité et lockfiles (workspace unifié)
+
+Le projet généré est un **workspace npm unifié** (strategy/06). Le `package.json` racine déclare comme
+membres `packages/*` et chaque application npm (`apps/api`, `apps/web`, `apps/mobile`). Les packages
+`@enistere/*` sont donc des membres du workspace, résolus par leurs consommateurs via la portée `*`
+(**jamais** `file:`, `npm link` ni un chemin vers la Foundation). La fusion de dépendances d'un overlay
+**ne supprime aucun lockfile** ; le générateur retire les lockfiles par-application (hérités des starters
+autonomes) car un **unique `package-lock.json` racine** fait autorité :
+
+- première installation : `npm install` résout et écrit le lock racine ;
+- installations suivantes / CI : `npm ci` réinstalle depuis ce lock, de façon reproductible.
+
+La CI `Factory Golden Runtime` prouve cette chaîne bout-en-bout (génération → `npm install` → `npm ci` →
+gates réels par application) sur `nestjs-base`, `nestjs-auth`, `nest-next-auth` et `triple-auth`.
+
 ## Preuves
 
 `factory/test/overlay.test.mjs` (validation, rejets, conflits, digest déterministe, refus des targets

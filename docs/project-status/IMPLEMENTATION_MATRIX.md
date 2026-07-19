@@ -8,6 +8,8 @@
 | 18 combinaisons de stacks | Planifiées/testées | pas toutes démarrées en golden runtime |
 | Moteur d'overlays déclaratifs | Implémenté (1A) | seule `auth` livrée ; RBAC/Files à venir |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
+| Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
+| CI `Factory Golden Runtime` | Implémentée (1A-R) | nestjs-base/auth, nest-next-auth, triple-auth |
 | Lock déterministe + digests d'overlays | Implémenté | upgrade non livré |
 | Contrat de domaine neutre | Initial | pas de génération CRUD framework |
 | Agents locaux | Implémenté | exécution volontairement sous approbation |
