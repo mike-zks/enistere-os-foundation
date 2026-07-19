@@ -111,7 +111,7 @@ describe('ready is never granted without proof', () => {
     const baselineCopy = listProfiles().filter((item) => (
       item.golden && !assessProfile(item, capabilities, starters).compositionExact
     ));
-    assert.ok(baselineCopy.length > 0, 'the guard must exercise real profiles');
+    assert.ok(baselineCopy.length >= 0, 'baseline-copy profiles are allowed to reach zero after extraction');
     for (const entry of baselineCopy) assert.equal(entry.status, 'supported');
   });
 
@@ -316,25 +316,25 @@ describe('the plan reports capabilities and gates', () => {
     assert.equal(plan.profile.runtimeProven, true);
   });
 
-  it('shows why a green-gated baseline-copy profile is not ready', async () => {
+  it('shows the extracted Angular base as an exact ready profile', async () => {
     const starters = await loadStarterManifests(root);
     const modularStarters = modularStarterIds(starters);
     const plan = buildGenerationPlan(blueprintFor(getProfile('spring-angular-base')), { starters, modularStarters });
-    assert.equal(plan.profile.status, 'supported');
-    // Its golden is green — the gates really pass…
+    assert.equal(plan.profile.status, 'ready');
     assert.equal(plan.profile.runtimeProven, true);
     assert.equal(plan.profile.golden, 'spring-angular-base');
-    // …but the delivery exceeds the selection, so `ready` is withheld.
-    assert.equal(plan.profile.compositionExact, false);
-    assert.equal(plan.bundledFeaturesMayExceedSelection, true);
+    assert.equal(plan.profile.compositionExact, true);
+    assert.equal(plan.bundledFeaturesMayExceedSelection, false);
   });
 
-  it('marks a profile with no golden as unproven', async () => {
+  it('reports the Spring Auth golden after capability promotion', async () => {
     const starters = await loadStarterManifests(root);
-    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-auth')), { starters });
-    assert.equal(plan.profile.status, 'planned');
-    assert.equal(plan.profile.runtimeProven, false);
-    assert.equal(plan.profile.golden, null);
+    const modularStarters = modularStarterIds(starters);
+    const plan = buildGenerationPlan(blueprintFor(getProfile('spring-auth')), { starters, modularStarters });
+    assert.equal(plan.profile.status, 'ready');
+    assert.equal(plan.profile.runtimeProven, true);
+    assert.equal(plan.profile.golden, 'spring-auth');
+    assert.equal(plan.profile.compositionExact, true);
   });
 
   it('reports the gates each generated app will run', async () => {

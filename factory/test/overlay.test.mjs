@@ -13,6 +13,7 @@ import { validateCapabilityDependencies } from '../engine/capabilities.mjs';
 import { buildGenerationPlan } from '../engine/plan.mjs';
 import { createDefaultBlueprint } from '../engine/blueprint.mjs';
 import { generateProject } from '../engine/generator.mjs';
+import { renderSpringComposition } from '../engine/overlay-renderers.mjs';
 
 function validManifest(extra = {}) {
   return {
@@ -73,6 +74,46 @@ function applyArguments(repoRoot, output) {
 describe('overlay manifest validation', () => {
   it('accepts a nominal overlay', () => {
     assert.deepEqual(validateOverlayManifest(validManifest(), { capability: 'auth', target: 'nestjs' }), []);
+  });
+
+  it('validates declared operations against the target adapter', () => {
+    assert.deepEqual(validateOverlayManifest(validManifest({
+      operations: ['files', 'dependencies', 'environment', 'integrations', 'verification'],
+    }), { capability: 'auth', target: 'nestjs' }), []);
+    const issues = validateOverlayManifest(validManifest({ operations: ['spring.security'] }), { capability: 'auth', target: 'nestjs' });
+    assert.ok(issues.some((issue) => /unsupported operations/.test(issue)));
+  });
+
+  it('accepts the Spring module integration contract', () => {
+    const manifest = validManifest({
+      target: 'spring',
+      files: [],
+      dependencies: { maven: [] },
+      integrations: [{ kind: 'spring.module', importPath: 'com.example.AuthConfiguration', symbol: 'AuthConfiguration' }],
+    });
+    assert.deepEqual(validateOverlayManifest(manifest, { capability: 'auth', target: 'spring' }), []);
+  });
+
+  it('accepts Maven dependency declarations for Spring without accepting npm sections', () => {
+    const spring = validManifest({
+      target: 'spring', files: [],
+      dependencies: { maven: [{ groupId: 'org.springframework.boot', artifactId: 'spring-boot-starter-security' }] },
+      integrations: [],
+    });
+    assert.deepEqual(validateOverlayManifest(spring, { capability: 'auth', target: 'spring' }), []);
+    const npm = validateOverlayManifest(validManifest({ target: 'spring', dependencies: { dependencies: { evil: '1.0.0' } } }), { capability: 'auth', target: 'spring' });
+    assert.ok(npm.some((issue) => /not supported for maven/.test(issue)));
+  });
+
+  it('renders Spring modules without patching the application entrypoint', () => {
+    const output = renderSpringComposition([
+      { kind: 'spring.module', importPath: 'com.example.AuthConfiguration', symbol: 'AuthConfiguration' },
+      { kind: 'spring.module', importPath: 'com.example.SecurityConfiguration', symbol: 'SecurityConfiguration' },
+    ]);
+    assert.match(output, /@Import\(\{/);
+    assert.match(output, /AuthConfiguration\.class/);
+    assert.match(output, /SecurityConfiguration\.class/);
+    assert.match(output, /CapabilityConfiguration/);
   });
   it('rejects a malformed overlay', () => {
     const issues = validateOverlayManifest({ schemaVersion: '2', capability: 'nope', files: 'x' });
@@ -215,14 +256,14 @@ describe('capability refusals', () => {
       /(auth|rbac) on spring is planned/,
     );
   });
-  it('refuses auth on a planned target', async () => {
+  it('refuses auth on Angular while that target is planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
     const blueprint = createDefaultBlueprint('blocked-app');
-    blueprint.stack = { api: 'spring', web: null, mobile: null };
+    blueprint.stack = { api: 'nestjs', web: 'angular', mobile: null };
     blueprint.capabilities = ['base', 'auth'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on spring is planned/,
+      /auth on angular is planned/,
     );
   });
 });

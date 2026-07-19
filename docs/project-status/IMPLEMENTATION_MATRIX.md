@@ -5,7 +5,7 @@
 | Capacité | État | Limite actuelle |
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
-| `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 19 générables |
+| `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 20 générables |
 | Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
 | 18 combinaisons de stacks | Planifiées/testées | distinctes des profils ; pas toutes démarrées en golden |
@@ -28,7 +28,7 @@
 | Capability | Dépendances | Nest | Spring | Next | Angular | RN | Flutter |
 |---|---|---|---|---|---|---|---|
 | base | aucune | intégré | intégré | intégré | intégré | intégré | intégré |
-| auth | base | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
+| auth | base | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
 | rbac | base + auth | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **non applicable** | planifié |
 | files | base + auth + rbac | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
 | audit | à décider | intégré (base) | planifié | non défini | non défini | non défini | non défini |
@@ -46,9 +46,9 @@ planifiées.
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 15 | autorisée | composables, exacts et prouvés par un golden runtime |
-| `supported` | 4 | autorisée | composables avec baseline-copy sur Angular/Flutter |
-| `planned` | 7 | **refusée** | cibles de parité auth/RBAC/files sur Spring/Angular/Flutter |
+| `ready` | 20 | autorisée | composables, exacts et prouvés par un golden runtime |
+| `supported` | 0 | autorisée | aucun dépassement de baseline après R8A-3 |
+| `planned` | 6 | **refusée** | cibles de parité RBAC/Files Spring et auth/RBAC/files Angular/Flutter |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
 et golden ; aucun profil ne compose sans API.

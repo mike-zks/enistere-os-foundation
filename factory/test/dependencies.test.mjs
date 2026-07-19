@@ -207,6 +207,7 @@ describe('golden runtime audit wiring', () => {
       'nestjs-auth-rbac', 'nest-next-auth-rbac', 'triple-auth-rbac',
       'nestjs-files', 'nest-next-files', 'triple-files',
       'spring-base', 'spring-next-base', 'spring-react-native-base',
+      'spring-auth',
       'spring-angular-base', 'spring-flutter-base',
       'nestjs-next-base', 'nestjs-react-native-base',
       'nestjs-angular-base', 'nestjs-flutter-base',

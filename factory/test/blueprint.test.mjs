@@ -72,7 +72,7 @@ describe('blueprint v1', () => {
     blueprint.capabilities = ['base', 'auth'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on spring is planned/,
+      /auth on (angular|flutter) is planned/,
     );
   });
   it('plans every supported stack combination as a golden matrix', () => {
@@ -87,7 +87,7 @@ describe('blueprint v1', () => {
     assert.equal(seen.size, 18);
   });
   it('generates base-only locks for all 18 stack combinations', async () => {
-    const MODULAR = new Set(['nestjs', 'spring', 'nextjs', 'react-native']);
+    const MODULAR = new Set(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
     for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
       const root = await mkdtemp(join(tmpdir(), 'enistere-golden-'));
       const blueprint = createDefaultBlueprint(`${api}-${web ?? 'none'}-${mobile ?? 'none'}`);

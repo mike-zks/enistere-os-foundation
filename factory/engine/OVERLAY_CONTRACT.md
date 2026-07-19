@@ -20,11 +20,24 @@ mais non câblé) : la capability reste `planned` et `generate` la refuse.
 
 | Champ | Rôle |
 |---|---|
+| `operations` | Liste optionnelle et unique des opérations utilisées par l'overlay. Chaque valeur doit être déclarée par l'adapter versionné de la target. |
 | `files` | Copies `source` (sous `files/`) → `destination`. Un conflit non déclaré échoue. Les fichiers centraux gouvernés ne peuvent jamais être fournis par cette opération ; les rares remplacements autorisés sont recensés et justifiés dans `overwrite-policy.mjs`. |
-| `dependencies` | Fusion contrôlée dans `package.json` (`dependencies`/`devDependencies`). Un conflit de version échoue. Chemins locaux (`file:`/`link:`) interdits. |
+| `dependencies` | Fusion contrôlée par l'adapter : `package.json` pour les targets npm, `pom.xml` via `dependencies.maven` pour Spring. Les conflits échouent; les chemins locaux (`file:`/`link:`) sont interdits. |
 | `environment` | Variables ajoutées à `.env.example` (section générée commentée). |
 | `integrations` | Intégrations **centrales connues** rendues par le moteur (voir ci-dessous). Une intégration inconnue échoue. |
 | `verification` | Tableaux d'arguments exécutés depuis le répertoire de l'app par le script `verify` généré. |
+
+## Adapters de target
+
+Le moteur charge un adapter versionné pour chaque target depuis
+`factory/engine/target-adapters.mjs`. L'adapter déclare les opérations communes
+(`files`, `dependencies`, `environment`, `integrations`, `contract`, `verification`) et les
+intégrations spécialisées acceptées par sa target. Une intégration ou une opération non déclarée
+est refusée avant toute écriture.
+
+Le registre est extensible : ajouter une target future ajoute un adapter et ses tests, sans
+modifier le validateur central. La version de chaque adapter sélectionné est inscrite dans le plan
+et le lock générés. Aucun adapter ne peut exécuter une commande, un hook ou du code arbitraire.
 
 ## Statuts de support d'une capability sur une target
 
@@ -65,6 +78,10 @@ dotée d'un overlay factice. `assessCapabilitySupport` retourne ces cas dans `no
 - **react-native** : `expo.provider` (→ `src/composition/capability-providers.tsx`) et
   `expo.home-action` (→ `src/composition/home-actions.ts`). Le shell Home reste stable ; une
   destination ou un rang dupliqué est refusé.
+- **spring** : `spring.module` (→ `src/main/java/com/enistere/core/composition/CapabilityConfiguration.java`).
+  Les classes Java sont importées par une configuration `@Import` générée ; l'entrypoint Spring
+  n'est jamais patché. Les opérations Spring supplémentaires seront ajoutées par l'adapter avec
+  un schéma et un renderer dédiés.
 
 Les renderers déterministes vivent dans `factory/engine/overlay-renderers.mjs` : une même entrée
 produit toujours la même sortie.

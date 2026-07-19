@@ -4,6 +4,25 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Capability Packs 2 — Auth Spring autonome
+
+- Ajout de l'overlay Maven Auth Spring : session persistée, refresh rotatif, JWT, configuration par environnement et migration Auth dédiée.
+- Suppression des dépendances implicites vers RBAC et Audit ; `/me` reste limité à l'identité Auth.
+- Ajout du golden `spring-auth`, de sa matrice CI et des assertions d'absence RBAC/Audit/Files.
+
+### Project Factory R8A-3 — baselines Angular et Flutter modulaires
+
+- Extraction des bases Angular et Flutter sans Auth, RBAC, Files ni session métier.
+- Les six starters déclarent désormais `composition.model: modular` avec une `baseSource` explicite.
+- Les 19 profils générables base-only sont exacts et golden-proven ; aucun profil `supported`
+  ne masque encore une copie baseline excessive.
+
+### Factory Composition Engine 2A — contrat d’adapters et opérations déclaratives
+
+- Les targets utilisent un registre d’adapters versionnés ; leurs versions sont verrouillées dans
+  le plan de génération.
+- Les overlays peuvent déclarer leurs opérations et sont refusés si l’adapter ne les supporte pas.
+
 ### Project Factory R8A-2 — Spring base modulaire
 
 - Extraction de `starters/spring/base` : le profil `spring-base` ne copie plus les modules Auth,

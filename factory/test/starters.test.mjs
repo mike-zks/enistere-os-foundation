@@ -12,9 +12,8 @@ it('loads six independent starters using manifest schema v2', async () => {
   assert.ok(manifests.every((item) => item.schemaVersion === '2'));
   assert.ok(manifests.every((item) => item.composition.base === 'built-in'));
   const modular = manifests.filter((item) => item.composition.model === 'modular');
-  assert.deepEqual(modular.map((item) => item.id), ['nestjs', 'spring', 'nextjs', 'react-native']);
-  assert.ok(modular.filter((item) => item.id !== 'spring').every((item) => item.composition.readyCapabilities.includes('auth')));
-  assert.deepEqual(manifests.find((item) => item.id === 'spring').composition.readyCapabilities, []);
+  assert.deepEqual(modular.map((item) => item.id), ['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
+  assert.ok(modular.every((item) => item.composition.readyCapabilities.length === 0 || item.composition.readyCapabilities.includes('auth')));
   assert.ok(manifests.filter((item) => item.composition.model !== 'modular').every((item) => item.composition.readyCapabilities.length === 0));
   assert.equal(manifests.filter((item) => item.kind === 'api').length, 2);
   assert.equal(manifests.filter((item) => item.kind === 'web').length, 2);
@@ -32,7 +31,7 @@ it('reports a truthful target support matrix', async () => {
   assert.equal(matrix.base.nestjs, 'ready');
   assert.equal(matrix.base.flutter, 'ready');
   assert.equal(matrix.auth.nextjs, 'ready');
-  assert.equal(matrix.auth.spring, 'planned');
+  assert.equal(matrix.auth.spring, 'ready');
   assert.equal(matrix.rbac.nestjs, 'ready');
   assert.equal(matrix.rbac.nextjs, 'ready');
   assert.equal(matrix.rbac['react-native'], 'not-applicable');

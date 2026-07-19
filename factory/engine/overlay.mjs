@@ -14,9 +14,11 @@ import {
   renderNextjsStatusSections,
   renderExpoHomeActions,
   renderPrismaCompositionBanner,
+  renderSpringComposition,
   renderPrismaSeedRegistry,
 } from './overlay-renderers.mjs';
 import { validateOverwriteUsage } from './overwrite-policy.mjs';
+import { getTargetAdapter, integrationKindsFor } from './target-adapters.mjs';
 import {
   applyPrismaFragment,
   createPrismaComposition,
@@ -32,35 +34,10 @@ const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
  * rejected: the engine is the only interpreter of overlay operations and only
  * renders integrations it fully understands (no scripts, no hooks, no patches).
  */
-const S = 'string';
-const I = 'integer';
-
-export const INTEGRATION_KINDS = Object.freeze({
-  nestjs: Object.freeze({
-    'nestjs.module': { importPath: S, symbol: S },
-    // `order` makes the global guard chain deterministic regardless of the order
-    // in which capabilities are composed (authentication before authorization).
-    'nestjs.global-guard': { importPath: S, symbol: S, order: I },
-    'nestjs.throttler': { name: S, limitEnv: S, defaultLimit: I, ttlSecondsEnv: S, defaultTtlSeconds: I },
-    // Declarative Prisma contribution (enums, models, model-field extensions).
-    // Assembled into a typed intermediate model and rendered once — never a patch.
-    'nestjs.prisma-schema': { source: S },
-    // Composable seed: the capability contributes an idempotent function; the
-    // engine renders the registry consumed by the app's stable seed orchestrator.
-    'nestjs.prisma-seed': { importPath: S, symbol: S, order: I },
-  }),
-  nextjs: Object.freeze({
-    'nextjs.provider': { importPath: S, symbol: S },
-    'nextjs.public-nav-link': { href: S, label: S },
-    'nextjs.dashboard-nav-link': { href: S, label: S, order: I },
-    // Composable section of the shared status page (no overwrite of the shell).
-    'nextjs.status-section': { importPath: S, symbol: S, order: I },
-  }),
-  'react-native': Object.freeze({
-    'expo.provider': { importPath: S, symbol: S },
-    'expo.home-action': { href: S, label: S, order: I },
-  }),
-});
+export const INTEGRATION_KINDS = Object.freeze(Object.fromEntries(
+  ['nestjs', 'nextjs', 'react-native', 'spring', 'angular', 'flutter']
+    .map((id) => [id, integrationKindsFor(id) ?? {}]),
+));
 
 function isSafeRelativePath(value) {
   if (typeof value !== 'string' || value === '' || value.startsWith('/') || value.includes('\\')) return false;
@@ -72,7 +49,7 @@ function isSafeRelativePath(value) {
 export function validateOverlayManifest(value, { capability, target } = {}) {
   const issues = [];
   if (!value || typeof value !== 'object' || Array.isArray(value)) return ['overlay must be an object'];
-  const allowedKeys = new Set(['schemaVersion', 'capability', 'target', 'version', 'description', 'files', 'dependencies', 'environment', 'integrations', 'verification', 'contract']);
+  const allowedKeys = new Set(['schemaVersion', 'capability', 'target', 'version', 'description', 'operations', 'files', 'dependencies', 'environment', 'integrations', 'verification', 'contract']);
   for (const key of Object.keys(value)) if (!allowedKeys.has(key)) issues.push(`unknown property: ${key}`);
   if (value.schemaVersion !== '1') issues.push('schemaVersion must be "1"');
   if (!CAPABILITY_IDS.includes(value.capability)) issues.push('capability is not registered');
@@ -92,9 +69,23 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
   // Governed central files must be composed, never replaced (overwrite policy).
   if (Array.isArray(value.files)) issues.push(...validateOverwriteUsage(value.files));
 
+  const adapter = getTargetAdapter(value.target);
   if (!value.dependencies || typeof value.dependencies !== 'object' || Array.isArray(value.dependencies)) issues.push('dependencies must be an object');
   else {
-    for (const key of Object.keys(value.dependencies)) if (!['dependencies', 'devDependencies'].includes(key)) issues.push(`dependencies.${key} is not supported`);
+    const dependencyManager = adapter?.dependencyManager ?? 'npm';
+    const allowedDependencyKeys = dependencyManager === 'maven' ? ['maven'] : ['dependencies', 'devDependencies'];
+    for (const key of Object.keys(value.dependencies)) if (!allowedDependencyKeys.includes(key)) issues.push(`dependencies.${key} is not supported for ${dependencyManager}`);
+    if (dependencyManager === 'maven') {
+      const entries = value.dependencies.maven;
+      if (!Array.isArray(entries)) issues.push('dependencies.maven must be an array for maven targets');
+      else entries.forEach((entry, index) => {
+        if (!entry || typeof entry !== 'object' || typeof entry.groupId !== 'string' || typeof entry.artifactId !== 'string') {
+          issues.push(`dependencies.maven[${index}] requires groupId and artifactId`);
+        }
+        if (entry?.version !== undefined && typeof entry.version !== 'string') issues.push(`dependencies.maven[${index}].version must be a string`);
+        if (entry?.scope !== undefined && !['compile', 'runtime', 'test', 'provided'].includes(entry.scope)) issues.push(`dependencies.maven[${index}].scope is invalid`);
+      });
+    }
     for (const section of ['dependencies', 'devDependencies']) {
       const block = value.dependencies[section];
       if (block === undefined) continue;
@@ -113,7 +104,18 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
     if (typeof entry.example !== 'string') issues.push(`environment[${index}].example is required`);
   });
 
-  const knownKinds = INTEGRATION_KINDS[value.target] ?? {};
+  if (!adapter) issues.push(`target adapter is not registered: ${value.target}`);
+  if (value.operations !== undefined) {
+    if (!Array.isArray(value.operations) || value.operations.length === 0 || value.operations.some((operation) => typeof operation !== 'string' || operation === '')) {
+      issues.push('operations must be a non-empty array of strings');
+    } else if (new Set(value.operations).size !== value.operations.length) {
+      issues.push('operations must not contain duplicates');
+    } else if (adapter && value.operations.some((operation) => !adapter.operations.includes(operation))) {
+      const unsupported = value.operations.filter((operation) => !adapter.operations.includes(operation));
+      issues.push(`unsupported operations for ${value.target}: ${unsupported.join(', ')}`);
+    }
+  }
+  const knownKinds = adapter?.integrationKinds ?? {};
   if (!Array.isArray(value.integrations)) issues.push('integrations must be an array');
   else value.integrations.forEach((entry, index) => {
     if (!entry || typeof entry !== 'object') { issues.push(`integrations[${index}] must be an object`); return; }
@@ -233,6 +235,28 @@ async function copyOverlayEntry(overlay, entry, appDirectory) {
 
 async function mergeDependencies(overlay, appDirectory) {
   const declared = overlay.manifest.dependencies;
+  if (declared.maven !== undefined) {
+    const pomPath = join(appDirectory, 'pom.xml');
+    let pom = await readFile(pomPath, 'utf8');
+    const entries = declared.maven;
+    for (const entry of entries) {
+      const marker = `<artifactId>${entry.artifactId}</artifactId>`;
+      if (pom.includes(marker)) throw new Error(`${overlay.manifest.capability}/${overlay.manifest.target}: dependency conflict on ${entry.groupId}:${entry.artifactId}`);
+      const dependency = [
+        '        <dependency>',
+        `            <groupId>${entry.groupId}</groupId>`,
+        `            <artifactId>${entry.artifactId}</artifactId>`,
+        ...(entry.version ? [`            <version>${entry.version}</version>`] : []),
+        ...(entry.scope ? [`            <scope>${entry.scope}</scope>`] : []),
+        '        </dependency>',
+      ].join('\n');
+      const insertion = pom.lastIndexOf('</dependencies>');
+      if (insertion < 0) throw new Error(`${overlay.manifest.capability}/${overlay.manifest.target}: pom.xml has no dependencies section`);
+      pom = `${pom.slice(0, insertion)}${dependency}\n${pom.slice(insertion)}`;
+    }
+    await writeFile(pomPath, pom);
+    return;
+  }
   const sections = ['dependencies', 'devDependencies'].filter((section) => Object.keys(declared[section] ?? {}).length > 0);
   if (sections.length === 0) return;
   const packagePath = join(appDirectory, 'package.json');
@@ -379,6 +403,12 @@ async function renderCompositionFiles(starterId, appDirectory, integrations) {
     if (navLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/public-nav.ts'), renderNextjsPublicNav(navLinks));
     if (dashboardLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/dashboard-nav.ts'), renderNextjsDashboardNav(dashboardLinks));
     if (sections.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/status-sections.tsx'), renderNextjsStatusSections(sections));
+    return;
+  }
+  if (starterId === 'spring') {
+    const modules = integrations.filter((item) => item.kind === 'spring.module');
+    if (modules.length > 0) await writeGenerated(join(appDirectory, 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java'), renderSpringComposition(modules));
+    if (integrations.some((item) => item.kind !== 'spring.module')) throw new Error(`Unsupported Spring composition integration: ${integrations.find((item) => item.kind !== 'spring.module').kind}`);
     return;
   }
   if (starterId === 'react-native') {

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2",
+  "id": "angular",
+  "kind": "web",
+  "framework": "Angular",
+  "commands": { "install": ["npm", "ci"], "dev": ["npm", "start"], "test": ["npm", "run", "test:ci"], "build": ["npm", "run", "build"], "verify": ["npm", "audit"] },
+  "composition": { "contractVersion": "1", "base": "built-in", "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files", "observability"] },
+  "deployment": { "dockerfile": null, "healthPath": "/" }
+}
