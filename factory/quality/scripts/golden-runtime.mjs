@@ -104,6 +104,7 @@ export const COMPOSITIONS = {
   // une composition minimale.
   'spring-base': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base'] },
   'spring-auth': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base', 'auth'] },
+  'spring-auth-rbac': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
   'spring-next-base': { stack: { api: 'spring', web: 'nextjs', mobile: null }, capabilities: ['base'] },
   'spring-react-native-base': { stack: { api: 'spring', web: null, mobile: 'react-native' }, capabilities: ['base'] },
   'spring-angular-base': { stack: { api: 'spring', web: 'angular', mobile: null }, capabilities: ['base'] },

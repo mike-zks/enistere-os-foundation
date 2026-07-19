@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "spring",
+  "version": "0.1.0",
+  "description": "RBAC Spring autonome : rôles, permissions, décision serveur et résumé d'autorisation, sans donnée RBAC dans le JWT.",
+  "operations": ["files", "dependencies", "environment", "integrations", "verification"],
+  "files": [
+    { "source": "files/src/main/java/com/enistere/core/config/RbacConfiguration.java", "destination": "src/main/java/com/enistere/core/config/RbacConfiguration.java" },
+    { "source": "files/src/main/java/com/enistere/core/modules/authorization", "destination": "src/main/java/com/enistere/core/modules/authorization" },
+    { "source": "files/src/main/java/com/enistere/core/modules/roles", "destination": "src/main/java/com/enistere/core/modules/roles" },
+    { "source": "files/src/main/java/com/enistere/core/modules/permissions", "destination": "src/main/java/com/enistere/core/modules/permissions" },
+    { "source": "files/src/main/resources/db/migration/V2__add_rbac.sql", "destination": "src/main/resources/db/migration/V2__add_rbac.sql" },
+    { "source": "files/src/test/java/com/enistere/core/modules/authorization", "destination": "src/test/java/com/enistere/core/modules/authorization" }
+  ],
+  "dependencies": { "maven": [] },
+  "environment": [],
+  "integrations": [
+    { "kind": "spring.module", "importPath": "com.enistere.core.config.RbacConfiguration", "symbol": "RbacConfiguration" }
+  ],
+  "verification": [["./mvnw", "verify", "--no-transfer-progress"]]
+}

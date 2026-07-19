@@ -4,6 +4,14 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Capability Packs 2 — RBAC Spring autonome
+
+- Ajout de l'overlay RBAC Spring au-dessus de `base + auth`, sans modification du payload Auth.
+- Ajout des rôles, permissions et associations par migration Flyway V2, sans seed ni attribution implicite.
+- Ajout du résumé `/api/v1/auth/me/authorization` et du bean Method Security `rbacAuthorization` ;
+  les décisions consultent PostgreSQL et aucun droit n'est placé dans le JWT.
+- Promotion de `spring-rbac` à `ready` via le golden runtime `spring-auth-rbac`.
+
 ### Capability Packs 2 — Auth Spring autonome
 
 - Ajout de l'overlay Maven Auth Spring : session persistée, refresh rotatif, JWT, configuration par environnement et migration Auth dédiée.

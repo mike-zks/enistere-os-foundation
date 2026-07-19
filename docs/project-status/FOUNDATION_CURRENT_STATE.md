@@ -13,7 +13,7 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Matrice de profils | Implémentée (R7) | `factory/engine/profiles.mjs`, validée contre la matrice réelle |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
-| Capabilities | `auth` livré sur NestJS/Spring/Next.js/RN ; `rbac` et `files` livrés sur NestJS/Next.js/RN | RBAC/Files Spring et Auth/RBAC/Files Angular/Flutter planifiés |
+| Capabilities | `auth` livré sur NestJS/Spring/Next.js/RN ; `rbac` sur NestJS/Spring/Next.js ; `files` sur NestJS/Next.js/RN | Files Spring et Auth/RBAC/Files Angular/Flutter planifiés |
 | Overlays déclaratifs | Moteur + overlays `auth`, `rbac` et `files` livrés | Files prouvé sur NestJS/Next.js/RN via goldens générés |
 | Packages | Implémentés | contracts (contrat complet figé), client Fetch, UI Kit |
 | Deployment | Local/staging disponibles | Compose, CI, runbooks et preuve staging V1 |
@@ -24,7 +24,7 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Starter | Baseline historique | Composition V2 |
 |---|---|---|
 | NestJS | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
-| Spring Boot | V1 vérifiée | base modulaire ; Auth autonome en overlay ; RBAC/Files planifiés |
+| Spring Boot | V1 vérifiée | base modulaire ; Auth et RBAC autonomes en overlays ; Files planifié |
 | Next.js | V1 vérifiée | baseline `base` extraite ; Auth en overlay `ready` |
 | Angular | V1 vérifiée | base modulaire extraite ; capabilities métier planifiées |
 | React Native | V1 vérifiée, Android prouvé | baseline `base` extraite ; Auth en overlay `ready` |
@@ -38,6 +38,8 @@ que via son overlay déclaratif. `generationMode` devient `modular-overlay` (et
 `bundledFeaturesMayExceedSelection=false`) lorsque toutes les targets sélectionnées sont modulaires.
 Spring, Angular et Flutter disposent désormais de starters `base` modulaires. Les profils base sont
 exacts et prêts ; Auth Spring est composé sans RBAC/Audit implicite et adossé au golden `spring-auth`.
+RBAC Spring s'ajoute ensuite sans modifier Auth, sans droit dans le JWT et avec le golden
+`spring-auth-rbac`.
 
 Le projet généré est un **workspace npm unifié** : les `@enistere/*` sont des membres du workspace
 (résolus via `*`, sans `file:`), un unique `package-lock.json` racine fait autorité et `npm ci`
