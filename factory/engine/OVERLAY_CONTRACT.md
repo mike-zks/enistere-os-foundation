@@ -59,9 +59,12 @@ dotée d'un overlay factice. `assessCapabilitySupport` retourne ces cas dans `no
     seed central.
 - **nextjs** : `nextjs.provider` (→ `src/app/providers/capability-providers.tsx`),
   `nextjs.public-nav-link` (→ `src/core/composition/public-nav.ts`) et
-  `nextjs.status-section` (→ registre ordonné `src/core/composition/status-sections.tsx`). La page
-  `/status` reste un shell stable ; symboles et rangs ambigus sont refusés.
-- **react-native** : `expo.provider` (→ `src/composition/capability-providers.tsx`).
+  `nextjs.status-section` (→ registre ordonné `src/core/composition/status-sections.tsx`) ainsi que
+  `nextjs.dashboard-nav-link` (→ `src/core/composition/dashboard-nav.ts`). La page `/status` et le
+  shell dashboard restent stables ; destinations, symboles et rangs ambigus sont refusés.
+- **react-native** : `expo.provider` (→ `src/composition/capability-providers.tsx`) et
+  `expo.home-action` (→ `src/composition/home-actions.ts`). Le shell Home reste stable ; une
+  destination ou un rang dupliqué est refusé.
 
 Les renderers déterministes vivent dans `factory/engine/overlay-renderers.mjs` : une même entrée
 produit toujours la même sortie.

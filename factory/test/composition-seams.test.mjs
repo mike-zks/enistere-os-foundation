@@ -6,6 +6,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   orderCapabilitySeeds,
+  renderExpoHomeActions,
+  renderNextjsDashboardNav,
   renderNextjsStatusSections,
   renderPrismaSeedRegistry,
 } from '../engine/overlay-renderers.mjs';
@@ -27,6 +29,8 @@ function blueprint(slug, capabilities, stack = { api: 'nestjs', web: 'nextjs', m
 
 const seed = (symbol, order, capability = 'x') => ({ kind: 'nestjs.prisma-seed', importPath: `./${symbol}`, symbol, order, capability });
 const section = (symbol, order, capability = 'x') => ({ kind: 'nextjs.status-section', importPath: `@/${symbol}`, symbol, order, capability });
+const dashboardLink = (href, label, order, capability = 'x') => ({ kind: 'nextjs.dashboard-nav-link', href, label, order, capability });
+const homeAction = (href, label, order, capability = 'x') => ({ kind: 'expo.home-action', href, label, order, capability });
 
 describe('composable seed', () => {
   it('orders seeds by declared order', () => {
@@ -68,6 +72,33 @@ describe('composable seed', () => {
   });
 });
 
+describe('composed e2e test environment', () => {
+  // `test/setup-e2e.ts` is allowlisted for overwrite: exactly one variant exists per
+  // composition, so the last capability composed must supply a strict superset.
+  it('supplies the Files test variables when Files is composed', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-env-files-'));
+    const out = join(root, 'p');
+    await generateProject(blueprint('env-files', ['base', 'auth', 'rbac', 'files']), out);
+    const setup = await readFile(join(out, 'apps/api/test/setup-e2e.ts'), 'utf8');
+    // Production default (86400 s) would make reconciliation untestable.
+    assert.match(setup, /FILES_ORPHAN_MIN_AGE_SECONDS \?\?= '1'/);
+    assert.match(setup, /S3_BUCKET \?\?=/);
+    // Superset: the Auth and baseline variables survive the replacement.
+    assert.match(setup, /JWT_ACCESS_SECRET \?\?=/);
+    assert.match(setup, /ARGON2_MEMORY_COST \?\?= '512'/);
+    assert.match(setup, /DATABASE_URL \?\?=/);
+  });
+
+  it('leaves the Auth variant untouched without Files', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-env-auth-'));
+    const out = join(root, 'p');
+    await generateProject(blueprint('env-auth', ['base', 'auth']), out);
+    const setup = await readFile(join(out, 'apps/api/test/setup-e2e.ts'), 'utf8');
+    assert.match(setup, /JWT_ACCESS_SECRET \?\?=/);
+    assert.ok(!/FILES_ORPHAN_MIN_AGE_SECONDS/.test(setup), 'no Files surface without Files');
+  });
+});
+
 describe('composable Next.js status sections', () => {
   it('orders sections and rejects duplicates or ambiguous ranks', () => {
     const rendered = renderNextjsStatusSections([section('B', 20, 'rbac'), section('A', 10, 'auth')]);
@@ -103,6 +134,65 @@ describe('composable Next.js status sections', () => {
     await generateProject(blueprint('sec-base', ['base']), out);
     const registry = await readFile(join(out, 'apps/web/src/core/composition/status-sections.tsx'), 'utf8');
     assert.match(registry, /CAPABILITY_STATUS_SECTIONS: readonly CapabilityStatusSection\[\] = \[\]/);
+  });
+});
+
+describe('composable capability navigation', () => {
+  it('orders Next.js links and rejects duplicate destinations or ranks', () => {
+    const rendered = renderNextjsDashboardNav([
+      dashboardLink('/protected/files', 'Fichiers', 20, 'files'),
+      dashboardLink('/protected', 'Accueil', 10, 'auth'),
+    ]);
+    assert.ok(rendered.indexOf('href: "/protected"') < rendered.indexOf('href: "/protected/files"'));
+    assert.throws(() => renderNextjsDashboardNav([
+      dashboardLink('/protected', 'Accueil', 10), dashboardLink('/protected', 'Autre', 20),
+    ]), /Duplicate dashboard link href/);
+    assert.throws(() => renderNextjsDashboardNav([
+      dashboardLink('/protected', 'Accueil', 10), dashboardLink('/protected/files', 'Fichiers', 10),
+    ]), /Ambiguous dashboard link order/);
+  });
+
+  it('orders Expo actions and rejects duplicate destinations or ranks', () => {
+    const rendered = renderExpoHomeActions([
+      homeAction('/upload', 'Envoyer un fichier', 20, 'files'),
+      homeAction('/settings', 'Parametres', 10, 'auth'),
+    ]);
+    assert.ok(rendered.indexOf("href: '/settings'") < rendered.indexOf("href: '/upload'"));
+    assert.throws(() => renderExpoHomeActions([
+      homeAction('/settings', 'Parametres', 10), homeAction('/settings', 'Autre', 20),
+    ]), /Duplicate home action href/);
+    assert.throws(() => renderExpoHomeActions([
+      homeAction('/settings', 'Parametres', 10), homeAction('/upload', 'Upload', 10),
+    ]), /Ambiguous home action order/);
+  });
+
+  it('generates only Auth navigation without Files', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-nav-auth-'));
+    const out = join(root, 'p');
+    await generateProject(blueprint('nav-auth', ['base', 'auth'], {
+      api: 'nestjs', web: 'nextjs', mobile: 'react-native',
+    }), out);
+    const web = await readFile(join(out, 'apps/web/src/core/composition/dashboard-nav.ts'), 'utf8');
+    const mobile = await readFile(join(out, 'apps/mobile/src/composition/home-actions.ts'), 'utf8');
+    assert.match(web, /\/protected/);
+    assert.ok(!web.includes('/protected/files'));
+    assert.match(mobile, /\/settings/);
+    assert.ok(!mobile.includes('/upload'));
+  });
+
+  it('adds Files navigation without replacing either shell', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-nav-files-'));
+    const out = join(root, 'p');
+    await generateProject(blueprint('nav-files', ['base', 'auth', 'rbac', 'files'], {
+      api: 'nestjs', web: 'nextjs', mobile: 'react-native',
+    }), out);
+    const web = await readFile(join(out, 'apps/web/src/core/composition/dashboard-nav.ts'), 'utf8');
+    const mobile = await readFile(join(out, 'apps/mobile/src/composition/home-actions.ts'), 'utf8');
+    assert.match(web, /\/protected\/files/);
+    assert.match(web, /\/protected\/files\/upload/);
+    assert.match(mobile, /\/upload/);
+    assert.match(await readFile(join(out, 'apps/web/src/features/dashboard/dashboard-shell.tsx'), 'utf8'), /CAPABILITY_DASHBOARD_LINKS/);
+    assert.match(await readFile(join(out, 'apps/mobile/app/(app)/home.tsx'), 'utf8'), /CAPABILITY_HOME_ACTIONS/);
   });
 });
 
@@ -149,7 +239,7 @@ describe('overwrite policy', () => {
   });
 
   it('is respected by every shipped overlay', async () => {
-    for (const capability of ['auth', 'rbac']) {
+    for (const capability of ['auth', 'rbac', 'files']) {
       for (const target of ['nestjs', 'nextjs', 'react-native']) {
         const path = new URL(`../../capabilities/${capability}/targets/${target}/overlay.json`, import.meta.url);
         if (!(await exists(path))) continue;
@@ -169,6 +259,10 @@ describe('composable OpenAPI contract', () => {
     for (const [capability, expected] of [
       ['auth', ['auth_login', 'auth_refresh', 'auth_logout', 'auth_getProfile']],
       ['rbac', ['auth_getAuthorization']],
+      ['files', [
+        'files_list', 'files_upload', 'files_getMetadata', 'files_createDownloadUrl',
+        'files_delete', 'files_quarantine', 'files_restore',
+      ]],
     ]) {
       const manifest = JSON.parse(await readFile(
         new URL(`../../capabilities/${capability}/targets/nestjs/overlay.json`, import.meta.url), 'utf8',

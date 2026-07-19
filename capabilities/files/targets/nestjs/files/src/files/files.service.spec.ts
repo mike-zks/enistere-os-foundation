@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { FileCategory, FileStatus, FileVisibility, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service';
-import { AppConfig } from '../config/configuration';
+import { FilesConfig } from '../config/files.configuration';
 import { FilesRepository } from './files.repository';
 import { FilesService } from './files.service';
 import { FileQuotaService } from './quota/file-quota.service';
@@ -95,7 +95,7 @@ describe('FilesService', () => {
       getLimits: jest.fn().mockReturnValue({ maxActiveFiles: 0, maxTotalBytes: 0n }),
       rejectQuotaOutcome: jest.fn().mockRejectedValue(new ConflictException({ code: 'FILE_STORAGE_QUOTA_EXCEEDED' })),
     };
-    const configService = { get: () => 'test-bucket' } as unknown as ConfigService<AppConfig, true>;
+    const configService = { get: () => 'test-bucket' } as unknown as ConfigService<FilesConfig, true>;
 
     service = new FilesService(
       repository as unknown as FilesRepository,

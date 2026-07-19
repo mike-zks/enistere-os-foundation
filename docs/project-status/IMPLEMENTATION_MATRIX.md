@@ -6,10 +6,10 @@
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
 | 18 combinaisons de stacks | Planifiées/testées | pas toutes démarrées en golden runtime |
-| Moteur d'overlays déclaratifs | Implémenté (1A/1B) | Auth et RBAC livrés ; Files à venir |
+| Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
-| CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B) | 7 goldens : base/auth (×4) + auth+rbac (×3) |
+| CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C) | 10 goldens : base/auth (×4) + RBAC (×3) + Files (×3) |
 | Statuts de support (`not-applicable`) | Implémenté (1B) | permet les compositions mixtes sans surface factice |
 | Composition Prisma structurée | Implémentée (1B-R) | modèle intermédiaire strict, sans parsing de texte |
 | Registres seed/statut composables | Implémentés (1B-R) | ordre explicite, doublons/rangs ambigus refusés |
@@ -27,17 +27,17 @@
 | base | aucune | intégré | intégré | intégré | intégré | intégré | intégré |
 | auth | base | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
 | rbac | base + auth | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **non applicable** | planifié |
-| files | auth | payload parqué | planifié | payload parqué | planifié | payload parqué | planifié |
+| files | base + auth + rbac | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
 | audit | à décider | intégré (base) | planifié | non défini | non défini | non défini | non défini |
 | notifications | à décider | non défini | non défini | non défini | non défini | planifié | planifié |
 | observability | à décider | planifié | planifié | planifié | planifié | planifié | planifié |
 
-`auth` (1A) et `rbac` (1B) sont `ready` en mode overlay : overlays déclaratifs, baselines sans la
+`auth` (1A), `rbac` (1B) et `files` (1C) sont `ready` en mode overlay : overlays déclaratifs, baselines sans la
 surface correspondante, tests d'absence et goldens runtime vérifiés. `rbac` requiert explicitement
 `base + auth`. Sur React Native, `rbac` est **`not-applicable`** (autorisation fine côté serveur) :
 ce statut ne bloque pas la composition triple et n'injecte aucune surface mobile. Le payload parqué
-restant (`capabilities/files/targets/*`) n'a **pas d'`overlay.json`** : `files` reste `planned` et
-`generate` le refuse.
+`files` exige explicitement `base + auth + rbac` et n'injecte aucune surface sur les targets
+planifiées.
 
 ## Qualité et exploitation
 

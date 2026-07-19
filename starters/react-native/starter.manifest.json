@@ -35,10 +35,10 @@
     "base": "built-in",
     "model": "modular",
     "readyCapabilities": [
-      "auth"
+      "auth",
+      "files"
     ],
     "plannedCapabilities": [
-      "files",
       "notifications",
       "observability"
     ]

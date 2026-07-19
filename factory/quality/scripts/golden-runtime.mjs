@@ -15,6 +15,9 @@
  *   nestjs-auth-rbac      nestjs, base+auth+rbac
  *   nest-next-auth-rbac   nestjs + nextjs, base+auth+rbac
  *   triple-auth-rbac      nestjs + nextjs + react-native, base+auth+rbac (RBAC non applicable au mobile)
+ *   nestjs-files          nestjs, base+auth+rbac+files
+ *   nest-next-files       nestjs + nextjs, base+auth+rbac+files
+ *   triple-files          nestjs + nextjs + react-native, base+auth+rbac+files
  *
  * Gates DB (prisma migrate, e2e NestJS) exécutés uniquement si DATABASE_URL est
  * défini. Aucun secret réel : la CI fournit des valeurs jetables via l'env.
@@ -43,6 +46,12 @@ const TEST_ENV_DEFAULTS = {
   JWT_ACCESS_SECRET: 'golden_runtime_test_access_secret_min_32_chars',
   JWT_REFRESH_SECRET: 'golden_runtime_test_refresh_secret_min_32_chars',
   REFRESH_TOKEN_HASH_SECRET: 'golden_runtime_test_hash_secret_min_32_chars',
+  S3_ENDPOINT: 'http://127.0.0.1:9000',
+  S3_REGION: 'us-east-1',
+  S3_ACCESS_KEY_ID: 'golden_runtime_test_access_key',
+  S3_SECRET_ACCESS_KEY: 'golden_runtime_test_secret_key',
+  S3_BUCKET: 'enistere-golden-files',
+  S3_FORCE_PATH_STYLE: 'true',
 };
 for (const [key, value] of Object.entries(TEST_ENV_DEFAULTS)) {
   if (!process.env[key]) process.env[key] = value;
@@ -58,6 +67,9 @@ export const COMPOSITIONS = {
   'nestjs-auth-rbac': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
   'nest-next-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
   'triple-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth', 'rbac'] },
+  'nestjs-files': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
+  'nest-next-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
+  'triple-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth', 'rbac', 'files'] },
 };
 
 /** argv of the npm-audit-by-exception gate applied to every golden. */

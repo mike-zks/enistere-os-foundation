@@ -89,6 +89,12 @@
       "importPath": "../../features/auth/session-panel.js",
       "symbol": "SessionPanel",
       "order": 10
+    },
+    {
+      "kind": "nextjs.dashboard-nav-link",
+      "href": "/protected",
+      "label": "Accueil",
+      "order": 10
     }
   ],
   "verification": []

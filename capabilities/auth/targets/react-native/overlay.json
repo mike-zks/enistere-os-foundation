@@ -39,7 +39,8 @@
   },
   "environment": [],
   "integrations": [
-    { "kind": "expo.provider", "importPath": "@/auth", "symbol": "AuthProvider" }
+    { "kind": "expo.provider", "importPath": "@/auth", "symbol": "AuthProvider" },
+    { "kind": "expo.home-action", "href": "/settings", "label": "Open settings", "order": 10 }
   ],
   "verification": [
     ["npm", "run", "test"]

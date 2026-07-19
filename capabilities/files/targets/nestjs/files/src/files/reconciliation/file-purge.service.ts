@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { FileStatus, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES } from '../../audit/audit.types';
-import { AppConfig } from '../../config/configuration';
+import { FILES_AUDIT_EVENTS } from '../../audit/files-audit-events';
+import { FilesConfig } from '../../config/files.configuration';
 import { FilesRepository } from '../files.repository';
 import { ObjectStorage } from '../storage/object-storage';
 import { OBJECT_STORAGE } from '../storage/object-storage.token';
@@ -29,7 +29,7 @@ export class FilePurgeService {
     private readonly repository: FilesRepository,
     private readonly auditService: AuditService,
     @Inject(OBJECT_STORAGE) private readonly objectStorage: ObjectStorage,
-    configService: ConfigService<AppConfig, true>,
+    configService: ConfigService<FilesConfig, true>,
   ) {
     this.rejectedRetentionSeconds = configService.get('filesRejectedRetentionSeconds', { infer: true });
     this.deletedRetentionSeconds = configService.get('filesDeletedMetadataRetentionSeconds', {
@@ -50,7 +50,7 @@ export class FilePurgeService {
     };
 
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.FILE_RECONCILIATION_STARTED,
+      eventType: FILES_AUDIT_EVENTS.FILE_RECONCILIATION_STARTED,
       resourceType: 'stored_file',
       metadata: { dryRun, mode: 'purge' },
     });
@@ -62,7 +62,7 @@ export class FilePurgeService {
     await this.purge(report, dryRun, await this.repository.findPurgeableRejected(rejectedCutoff, limit), FileStatus.REJECTED, 'purge_rejected');
 
     await this.auditService.record({
-      eventType: AUDIT_EVENT_TYPES.FILE_RECONCILIATION_COMPLETED,
+      eventType: FILES_AUDIT_EVENTS.FILE_RECONCILIATION_COMPLETED,
       resourceType: 'stored_file',
       metadata: { dryRun, mode: 'purge', scannedDb: report.scannedDb, ...report.counts },
     });

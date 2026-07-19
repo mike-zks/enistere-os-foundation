@@ -2,8 +2,8 @@ import { ConflictException, Inject, Injectable, NotFoundException } from '@nestj
 import { FileStatus, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES, AuditEventType } from '../../audit/audit.types';
-import { ERROR_CODES } from '../../common/errors/error-codes';
+import { FILES_AUDIT_EVENTS, AuditEventType } from '../../audit/files-audit-events';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
 import { QuarantineReasonCode } from '../dto/quarantine-file.dto';
 import { FilesRepository } from '../files.repository';
 import { ObjectStorage } from '../storage/object-storage';
@@ -30,7 +30,7 @@ export class FileQuarantineService {
   async quarantine(fileId: string, actorId: string, reasonCode: QuarantineReasonCode): Promise<void> {
     const file = await this.repository.findById(fileId);
     if (!file) {
-      throw new NotFoundException({ code: ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
+      throw new NotFoundException({ code: FILE_ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
     }
     if (file.status === FileStatus.QUARANTINED) {
       return; // idempotent : déjà en quarantaine.
@@ -38,7 +38,7 @@ export class FileQuarantineService {
     if (file.status !== FileStatus.VALIDATED) {
       // Seul VALIDATED → QUARANTINED (un PENDING/REJECTED/DELETED ne se met pas en quarantaine).
       throw new ConflictException({
-        code: ERROR_CODES.FILE_QUARANTINE_INVALID_STATUS,
+        code: FILE_ERROR_CODES.FILE_QUARANTINE_INVALID_STATUS,
         message: 'File cannot be quarantined from its current status.',
       });
     }
@@ -47,25 +47,25 @@ export class FileQuarantineService {
     if (updated === 0) {
       // Le statut a changé entre la lecture et l'update (concurrence) : transition refusée.
       throw new ConflictException({
-        code: ERROR_CODES.FILE_QUARANTINE_INVALID_STATUS,
+        code: FILE_ERROR_CODES.FILE_QUARANTINE_INVALID_STATUS,
         message: 'File cannot be quarantined from its current status.',
       });
     }
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_QUARANTINED, file, actorId, reasonCode);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_QUARANTINED, file, actorId, reasonCode);
   }
 
   async restore(fileId: string, actorId: string): Promise<void> {
     const file = await this.repository.findById(fileId);
     if (!file) {
-      throw new NotFoundException({ code: ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
+      throw new NotFoundException({ code: FILE_ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
     }
     if (file.status === FileStatus.VALIDATED) {
       return; // idempotent : déjà restauré.
     }
     if (file.status !== FileStatus.QUARANTINED) {
       throw new ConflictException({
-        code: ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
+        code: FILE_ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
         message: 'File cannot be restored from its current status.',
       });
     }
@@ -74,7 +74,7 @@ export class FileQuarantineService {
     // Aucune analyse antivirus n'est (re)faite : décision administrative manuelle (V1).
     if (!file.checksum) {
       throw new ConflictException({
-        code: ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
+        code: FILE_ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
         message: 'File cannot be restored.',
       });
     }
@@ -85,9 +85,9 @@ export class FileQuarantineService {
       objectPresent = false;
     }
     if (!objectPresent) {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_STORAGE_OBJECT_MISSING, file, actorId, 'restore_object_missing');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_STORAGE_OBJECT_MISSING, file, actorId, 'restore_object_missing');
       throw new ConflictException({
-        code: ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
+        code: FILE_ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
         message: 'File cannot be restored.',
       });
     }
@@ -95,12 +95,12 @@ export class FileQuarantineService {
     const updated = await this.repository.restoreConditional(fileId);
     if (updated === 0) {
       throw new ConflictException({
-        code: ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
+        code: FILE_ERROR_CODES.FILE_RESTORE_INVALID_STATUS,
         message: 'File cannot be restored from its current status.',
       });
     }
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_QUARANTINE_RELEASED, file, actorId);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_QUARANTINE_RELEASED, file, actorId);
   }
 
   private audit(

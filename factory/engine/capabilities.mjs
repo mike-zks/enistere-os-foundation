@@ -54,6 +54,7 @@ export function validateCapabilityDependencies(selected) {
   if (selected.includes('auth') && !selected.includes('base')) issues.push('auth requires base');
   if (selected.includes('rbac') && !selected.includes('auth')) issues.push('rbac requires auth');
   if (selected.includes('files') && !selected.includes('auth')) issues.push('files requires auth');
+  if (selected.includes('files') && !selected.includes('rbac')) issues.push('files requires rbac');
   return [...new Set(issues)];
 }
 

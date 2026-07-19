@@ -2,12 +2,12 @@ import { ConfigService } from '@nestjs/config';
 import { FileStatus, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AppConfig } from '../../config/configuration';
+import { FilesConfig } from '../../config/files.configuration';
 import { FilesRepository } from '../files.repository';
 import { ObjectStorage } from '../storage/object-storage';
 import { FilePurgeService } from './file-purge.service';
 
-const CONFIG: Partial<Record<keyof AppConfig, unknown>> = {
+const CONFIG: Partial<Record<keyof FilesConfig, unknown>> = {
   filesRejectedRetentionSeconds: 1000,
   filesDeletedMetadataRetentionSeconds: 1000,
   filesReconciliationBatchSize: 100,
@@ -61,13 +61,13 @@ describe('FilePurgeService', () => {
     };
     objectStorage = { objectExists: jest.fn().mockResolvedValue(false) };
     auditService = { record: jest.fn().mockResolvedValue(undefined) };
-    const configService = { get: jest.fn((key: keyof AppConfig) => CONFIG[key]) };
+    const configService = { get: jest.fn((key: keyof FilesConfig) => CONFIG[key]) };
 
     service = new FilePurgeService(
       repository as unknown as FilesRepository,
       auditService as unknown as AuditService,
       objectStorage as unknown as ObjectStorage,
-      configService as unknown as ConfigService<AppConfig, true>,
+      configService as unknown as ConfigService<FilesConfig, true>,
     );
   });
 

@@ -1,12 +1,12 @@
 {
   "schemaVersion": "2",
   "id": "files",
-  "version": "0.1.0",
-  "requires": ["auth"],
-  "responsibilities": ["upload", "metadata", "download-url", "delete"],
+  "version": "0.2.0",
+  "requires": ["base", "auth", "rbac"],
+  "responsibilities": ["upload", "metadata", "download-url", "delete", "quarantine", "reconciliation", "quota"],
   "targets": {
-    "nestjs": { "status": "planned" }, "spring": { "status": "planned" },
-    "nextjs": { "status": "planned" }, "angular": { "status": "planned" },
-    "react-native": { "status": "planned" }, "flutter": { "status": "planned" }
+    "nestjs": { "status": "ready", "mode": "overlay" }, "spring": { "status": "planned" },
+    "nextjs": { "status": "ready", "mode": "overlay" }, "angular": { "status": "planned" },
+    "react-native": { "status": "ready", "mode": "overlay" }, "flutter": { "status": "planned" }
   }
 }

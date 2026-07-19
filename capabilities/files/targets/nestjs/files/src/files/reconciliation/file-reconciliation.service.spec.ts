@@ -2,12 +2,12 @@ import { ConfigService } from '@nestjs/config';
 import { FileStatus, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AppConfig } from '../../config/configuration';
+import { FilesConfig } from '../../config/files.configuration';
 import { FilesRepository } from '../files.repository';
 import { ObjectStorage } from '../storage/object-storage';
 import { FileReconciliationService } from './file-reconciliation.service';
 
-const CONFIG: Partial<Record<keyof AppConfig, unknown>> = {
+const CONFIG: Partial<Record<keyof FilesConfig, unknown>> = {
   s3Bucket: 'test-bucket',
   nodeEnv: 'test',
   filesPendingExpirationSeconds: 1000,
@@ -77,13 +77,13 @@ describe('FileReconciliationService', () => {
       listObjects: jest.fn().mockResolvedValue({ objects: [] }),
     };
     auditService = { record: jest.fn().mockResolvedValue(undefined) };
-    const configService = { get: jest.fn((key: keyof AppConfig) => CONFIG[key]) };
+    const configService = { get: jest.fn((key: keyof FilesConfig) => CONFIG[key]) };
 
     service = new FileReconciliationService(
       repository as unknown as FilesRepository,
       auditService as unknown as AuditService,
       objectStorage as unknown as ObjectStorage,
-      configService as unknown as ConfigService<AppConfig, true>,
+      configService as unknown as ConfigService<FilesConfig, true>,
     );
   });
 

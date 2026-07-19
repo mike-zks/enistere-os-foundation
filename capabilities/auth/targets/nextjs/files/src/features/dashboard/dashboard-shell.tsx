@@ -1,10 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-
-const NAV_LINKS: readonly { readonly href: string; readonly label: string }[] = [
-  { href: "/protected", label: "Accueil" },
-  { href: "/protected/files", label: "Fichiers" },
-  { href: "/protected/files/upload", label: "Envoyer un fichier" },
-];
+import { CAPABILITY_DASHBOARD_LINKS } from "../../core/composition/dashboard-nav.js";
 
 /**
  * Shell du tableau de bord protégé (Server Component). Fournit un header de navigation
@@ -23,7 +18,7 @@ export function DashboardShell({ children }: { readonly children: ReactNode }): 
           <a href="/" className="dashboard-nav__brand">
             Enistère
           </a>
-          {NAV_LINKS.map((link) => (
+          {CAPABILITY_DASHBOARD_LINKS.map((link) => (
             <a key={link.href} href={link.href} className="dashboard-nav__link">
               {link.label}
             </a>

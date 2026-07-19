@@ -8,8 +8,8 @@ import {
 import { FileStatus, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES, AuditEventType } from '../../audit/audit.types';
-import { ERROR_CODES } from '../../common/errors/error-codes';
+import { FILES_AUDIT_EVENTS, AuditEventType } from '../../audit/files-audit-events';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
 import { FilesRepository } from '../files.repository';
 import { ObjectStorage } from '../storage/object-storage';
 import { OBJECT_STORAGE } from '../storage/object-storage.token';
@@ -34,7 +34,7 @@ export class FileDeletionService {
     // Inclut les fichiers supprimés pour garantir l'idempotence (pas un 404 sur re-suppression).
     const file = await this.repository.findByIdAndOwnerIncludingDeleted(fileId, userId);
     if (!file) {
-      throw new NotFoundException({ code: ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
+      throw new NotFoundException({ code: FILE_ERROR_CODES.FILE_NOT_FOUND, message: 'File not found.' });
     }
     if (file.status === FileStatus.DELETED) {
       return; // succès idempotent : suppression déjà effectuée.
@@ -43,7 +43,7 @@ export class FileDeletionService {
     // Marque l'intention AVANT de toucher l'objet : la réconciliation saura qu'une suppression
     // était initiée (→ DELETED) plutôt qu'une simple incohérence (→ REJECTED).
     await this.repository.markDeletionRequested(file.id);
-    await this.audit(AUDIT_EVENT_TYPES.FILE_DELETION_REQUESTED, file);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_DELETION_REQUESTED, file);
 
     let objectWasPresent = true;
     try {
@@ -57,33 +57,33 @@ export class FileDeletionService {
     try {
       await this.objectStorage.deleteObject(file.bucket, file.storageKey);
     } catch {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_DELETION_FAILED, file, 'storage_unavailable');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_DELETION_FAILED, file, 'storage_unavailable');
       throw new ServiceUnavailableException({
-        code: ERROR_CODES.FILE_DELETE_FAILED,
+        code: FILE_ERROR_CODES.FILE_DELETE_FAILED,
         message: 'Could not delete the file.',
       });
     }
 
     if (objectWasPresent) {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_OBJECT_DELETED, file);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_OBJECT_DELETED, file);
     } else {
       // Objet déjà absent : objectif atteint, on audite l'incohérence et on poursuit.
-      await this.audit(AUDIT_EVENT_TYPES.FILE_STORAGE_OBJECT_MISSING, file, 'object_already_missing');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_STORAGE_OBJECT_MISSING, file, 'object_already_missing');
     }
 
     // 2. Marquage DELETED conditionnel (anti-concurrence). Échec DB après suppression S3 = critique.
     try {
       await this.repository.markDeletedConditional(file.id);
     } catch {
-      await this.audit(AUDIT_EVENT_TYPES.FILE_DATABASE_FINALIZATION_FAILED, file);
-      await this.audit(AUDIT_EVENT_TYPES.FILE_STORAGE_OBJECT_MISSING, file, 'db_finalization_failed');
+      await this.audit(FILES_AUDIT_EVENTS.FILE_DATABASE_FINALIZATION_FAILED, file);
+      await this.audit(FILES_AUDIT_EVENTS.FILE_STORAGE_OBJECT_MISSING, file, 'db_finalization_failed');
       throw new InternalServerErrorException({
-        code: ERROR_CODES.FILE_DATABASE_FINALIZATION_FAILED,
+        code: FILE_ERROR_CODES.FILE_DATABASE_FINALIZATION_FAILED,
         message: 'File deletion could not be finalized.',
       });
     }
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_DELETED, file);
+    await this.audit(FILES_AUDIT_EVENTS.FILE_DELETED, file);
   }
 
   private audit(

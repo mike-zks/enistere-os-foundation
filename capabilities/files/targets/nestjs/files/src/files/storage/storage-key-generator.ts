@@ -4,8 +4,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileCategory } from '@prisma/client';
 
-import { ERROR_CODES } from '../../common/errors/error-codes';
-import { AppConfig } from '../../config/configuration';
+import { FILE_ERROR_CODES } from '../../common/errors/files-error-codes';
+import { FilesConfig } from '../../config/files.configuration';
 import { EXTENSION_PATTERN } from '../files.constants';
 
 /**
@@ -19,7 +19,7 @@ import { EXTENSION_PATTERN } from '../files.constants';
 export class StorageKeyGenerator {
   private readonly environment: string;
 
-  constructor(configService: ConfigService<AppConfig, true>) {
+  constructor(configService: ConfigService<FilesConfig, true>) {
     this.environment = configService.get('nodeEnv', { infer: true });
   }
 
@@ -37,7 +37,7 @@ export class StorageKeyGenerator {
 
     if (!EXTENSION_PATTERN.test(cleaned)) {
       throw new BadRequestException({
-        code: ERROR_CODES.FILE_INVALID_EXTENSION,
+        code: FILE_ERROR_CODES.FILE_INVALID_EXTENSION,
         message: 'Invalid file extension.',
       });
     }

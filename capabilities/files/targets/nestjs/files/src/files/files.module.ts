@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { filesConfiguration } from '../config/files.configuration';
 
 import { FileAccessService } from './access/file-access.service';
 import { FileDeletionService } from './deletion/file-deletion.service';
@@ -29,6 +31,7 @@ import { FileValidationPolicy } from './validation/file-validation-policy';
  * et la configuration des throttlers sont fournis globalement.
  */
 @Module({
+  imports: [ConfigModule.forFeature(filesConfiguration)],
   controllers: [FilesController],
   providers: [
     FilesService,

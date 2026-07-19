@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { FileStatus, StoredFile } from '@prisma/client';
 
 import { AuditService } from '../../audit/audit.service';
-import { AUDIT_EVENT_TYPES, AuditEventType } from '../../audit/audit.types';
-import { AppConfig } from '../../config/configuration';
+import { FILES_AUDIT_EVENTS, AuditEventType } from '../../audit/files-audit-events';
+import { FilesConfig } from '../../config/files.configuration';
 import { FilesRepository } from '../files.repository';
 import { ObjectStorage } from '../storage/object-storage';
 import { OBJECT_STORAGE } from '../storage/object-storage.token';
@@ -61,7 +61,7 @@ export class FileReconciliationService {
     private readonly repository: FilesRepository,
     private readonly auditService: AuditService,
     @Inject(OBJECT_STORAGE) private readonly objectStorage: ObjectStorage,
-    configService: ConfigService<AppConfig, true>,
+    configService: ConfigService<FilesConfig, true>,
   ) {
     this.bucket = configService.get('s3Bucket', { infer: true });
     // Même préfixe que `StorageKeyGenerator` (`<environment>/…`) : jamais le bucket entier.
@@ -77,7 +77,7 @@ export class FileReconciliationService {
     const limit = this.resolveLimit(options.maxItems);
     const report = this.emptyReport(dryRun);
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_RECONCILIATION_STARTED, { dryRun, prefix: this.prefix });
+    await this.audit(FILES_AUDIT_EVENTS.FILE_RECONCILIATION_STARTED, { dryRun, prefix: this.prefix });
 
     await this.handleValidatedMissing(report, dryRun, limit);
     await this.handleExpiredPending(report, dryRun, limit);
@@ -85,7 +85,7 @@ export class FileReconciliationService {
     await this.handleObjectPresentForStatus(report, dryRun, limit, FileStatus.DELETED, 'deleted_object_present');
     await this.handleOrphans(report, dryRun, limit);
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_RECONCILIATION_COMPLETED, {
+    await this.audit(FILES_AUDIT_EVENTS.FILE_RECONCILIATION_COMPLETED, {
       dryRun,
       scannedDb: report.scannedDb,
       scannedObjects: report.scannedObjects,
@@ -100,9 +100,9 @@ export class FileReconciliationService {
     const limit = this.resolveLimit(options.maxItems);
     const report = this.emptyReport(dryRun);
 
-    await this.audit(AUDIT_EVENT_TYPES.FILE_RECONCILIATION_STARTED, { dryRun, mode: 'cleanup_pending' });
+    await this.audit(FILES_AUDIT_EVENTS.FILE_RECONCILIATION_STARTED, { dryRun, mode: 'cleanup_pending' });
     await this.handleExpiredPending(report, dryRun, limit);
-    await this.audit(AUDIT_EVENT_TYPES.FILE_RECONCILIATION_COMPLETED, {
+    await this.audit(FILES_AUDIT_EVENTS.FILE_RECONCILIATION_COMPLETED, {
       dryRun,
       mode: 'cleanup_pending',
       scannedDb: report.scannedDb,
@@ -149,7 +149,7 @@ export class FileReconciliationService {
       if (presence === 'missing') {
         if (!dryRun) {
           await this.repository.rejectConditional(file.id, [FileStatus.PENDING]);
-          await this.audit(AUDIT_EVENT_TYPES.FILE_PENDING_EXPIRED, { category: file.category }, file);
+          await this.audit(FILES_AUDIT_EVENTS.FILE_PENDING_EXPIRED, { category: file.category }, file);
         }
         this.addAction(report, 'pending_expired_no_object', file.id, 'mark_rejected', !dryRun);
       } else if (presence === 'present') {
@@ -223,7 +223,7 @@ export class FileReconciliationService {
         }
         if (!dryRun) {
           await this.objectStorage.deleteObject(this.bucket, object.key);
-          await this.audit(AUDIT_EVENT_TYPES.FILE_ORPHAN_DELETED, { category: this.objectCategory(object.key) });
+          await this.audit(FILES_AUDIT_EVENTS.FILE_ORPHAN_DELETED, { category: this.objectCategory(object.key) });
         }
         this.addAction(report, 'orphan', object.key, 'delete_object', !dryRun);
       }
@@ -283,7 +283,7 @@ export class FileReconciliationService {
   private auditAction(file: StoredFile, reasonCode: string, targetStatus: FileStatus): Promise<void> {
     // Jamais de storageKey/bucket/checksum dans l'audit ; identifiants ciblés pour incident.
     return this.audit(
-      AUDIT_EVENT_TYPES.FILE_RECONCILIATION_ACTION,
+      FILES_AUDIT_EVENTS.FILE_RECONCILIATION_ACTION,
       { category: file.category, status: file.status, reasonCode, targetStatus },
       file,
     );

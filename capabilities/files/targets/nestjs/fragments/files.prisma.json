@@ -1,0 +1,45 @@
+{
+  "$comment": "Fragment Prisma déclaratif de Files (ADR-007). StoredFile est autonome ; la relation inverse étend User fourni par Auth.",
+  "enums": [
+    { "name": "FileStatus", "values": ["PENDING", "UPLOADED", "VALIDATED", "REJECTED", "QUARANTINED", "DELETED"] },
+    { "name": "FileVisibility", "values": ["PRIVATE", "PUBLIC", "SIGNED", "INTERNAL"] },
+    { "name": "FileCategory", "values": ["IMAGE", "DOCUMENT", "AVATAR", "MEDIA", "VIDEO", "AUDIO", "IDENTITY_DOCUMENT", "ATTACHMENT", "OTHER"] }
+  ],
+  "models": [
+    {
+      "name": "StoredFile",
+      "doc": "Métadonnées d'un fichier stocké (ADR-007). Les champs de stockage restent internes et ne sont jamais exposés directement.",
+      "fields": [
+        { "name": "id", "type": "String", "attributes": ["@id", "@default(uuid())", "@db.Uuid"] },
+        { "name": "ownerId", "type": "String?", "attributes": ["@db.Uuid"] },
+        { "name": "owner", "type": "User?", "attributes": ["@relation(fields: [ownerId], references: [id], onDelete: SetNull)"] },
+        { "name": "subjectId", "type": "String?" },
+        { "name": "originalName", "type": "String" },
+        { "name": "storageKey", "type": "String", "attributes": ["@unique"] },
+        { "name": "bucket", "type": "String" },
+        { "name": "mimeType", "type": "String" },
+        { "name": "extension", "type": "String" },
+        { "name": "size", "type": "BigInt" },
+        { "name": "checksum", "type": "String?" },
+        { "name": "visibility", "type": "FileVisibility", "attributes": ["@default(PRIVATE)"] },
+        { "name": "status", "type": "FileStatus", "attributes": ["@default(PENDING)"] },
+        { "name": "category", "type": "FileCategory", "attributes": ["@default(OTHER)"] },
+        { "name": "metadata", "type": "Json?" },
+        { "name": "uploadedAt", "type": "DateTime?" },
+        { "name": "validatedAt", "type": "DateTime?" },
+        { "name": "rejectedAt", "type": "DateTime?" },
+        { "name": "quarantinedAt", "type": "DateTime?" },
+        { "name": "quarantineReason", "type": "String?" },
+        { "name": "deletionRequestedAt", "type": "DateTime?" },
+        { "name": "storageDeletedAt", "type": "DateTime?" },
+        { "name": "createdAt", "type": "DateTime", "attributes": ["@default(now())"] },
+        { "name": "updatedAt", "type": "DateTime", "attributes": ["@updatedAt"] },
+        { "name": "deletedAt", "type": "DateTime?" }
+      ],
+      "blockAttributes": ["@@index([ownerId])", "@@index([status])", "@@index([category])", "@@index([createdAt])", "@@index([deletedAt])", "@@map(\"stored_files\")"]
+    }
+  ],
+  "fields": [
+    { "model": "User", "field": "files", "type": "StoredFile[]", "doc": "Fichiers possédés, relation apportée par Files." }
+  ]
+}

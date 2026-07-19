@@ -6,7 +6,7 @@ import { Stack, router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { useAuth } from '@/auth';
-import { ROUTES } from '@/navigation';
+import { CAPABILITY_HOME_ACTIONS } from '@/composition/home-actions';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
@@ -35,11 +35,14 @@ export default function HomeScreen(): React.JSX.Element {
             loading={status === 'refreshing'}
             onPress={() => void refreshSession()}
           />
-          <Button
-            title="Open settings"
-            variant="secondary"
-            onPress={() => router.push(ROUTES.settings)}
-          />
+          {CAPABILITY_HOME_ACTIONS.map((action) => (
+            <Button
+              key={String(action.href)}
+              title={action.label}
+              variant="secondary"
+              onPress={() => router.push(action.href)}
+            />
+          ))}
           <Button title="Sign out" variant="secondary" onPress={() => void signOut()} />
         </View>
       </Screen>

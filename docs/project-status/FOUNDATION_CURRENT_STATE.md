@@ -12,8 +12,8 @@ Enistere OS Foundation est une Project Factory AI-native gouvernée par ADR-042.
 | Blueprint/lock | Implémentés | schéma v1, génération déterministe |
 | Agents locaux | Implémentés | adapters Codex/Claude/Gemini, double approbation |
 | Starters | Six baselines V1 disponibles | gates propres à chaque technologie |
-| Capabilities | `auth` (NestJS/Next.js/RN) et `rbac` (NestJS/Next.js) livrées en overlay | Files parqué ; Spring/Angular/Flutter planifiés |
-| Overlays déclaratifs | Moteur + overlays `auth` et `rbac` livrés | `files` n'a pas d'`overlay.json` |
+| Capabilities | `auth`, `rbac` et `files` livrées en overlay sur la verticale TypeScript | Spring/Angular/Flutter planifiés |
+| Overlays déclaratifs | Moteur + overlays `auth`, `rbac` et `files` livrés | Files prouvé sur NestJS/Next.js/RN via goldens générés |
 | Packages | Implémentés | contracts (contrat complet figé), client Fetch, UI Kit |
 | Deployment | Local/staging disponibles | Compose, CI, runbooks et preuve staging V1 |
 | Distribution | Partielle | artefacts historiques ; CLI V2 non publiée |
@@ -50,6 +50,12 @@ stricts, sans parser ni modifier du texte. Les seeds Prisma et sections de statu
 registres ordonnés ; OpenAPI est généré depuis l'application composée. Sur
 React Native, `rbac` est `not-applicable` : la composition triple reste générable et le mobile ne
 reçoit aucune surface RBAC.
+
+Files (1C) dépend explicitement de `base + auth + rbac`. Il compose le stockage, les métadonnées,
+les URLs signées, la suppression, la quarantaine, les quotas et la réconciliation sur NestJS ; le
+BFF et les écrans protégés sur Next.js ; et la surface d'upload/navigation sur React Native. Les
+contrats OpenAPI et les migrations sont générés depuis les overlays. La non-régression est suivie
+dans `docs/project-status/FILES_V1_NON_REGRESSION.md`.
 
 ## Références
 

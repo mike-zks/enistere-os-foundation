@@ -2,13 +2,13 @@ import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileCategory } from '@prisma/client';
 
-import { AppConfig } from '../../config/configuration';
+import { FilesConfig } from '../../config/files.configuration';
 import { FileValidationPolicy } from './file-validation-policy';
 
 function buildPolicy(maxSize = 10_485_760, nameMax = 255): FileValidationPolicy {
   const configService = {
     get: (key: string) => (key === 'fileMaxSizeBytes' ? maxSize : nameMax),
-  } as unknown as ConfigService<AppConfig, true>;
+  } as unknown as ConfigService<FilesConfig, true>;
   return new FileValidationPolicy(configService);
 }
 
