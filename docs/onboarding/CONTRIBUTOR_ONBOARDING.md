@@ -18,18 +18,18 @@ Le code, les tests et les fichiers de statut courant priment.
 
 ## 2. Lecture obligatoire avant une mission
 
-1. [`../project-status/SESSION_HANDOFF.md`](../project-status/SESSION_HANDOFF.md)
+1. [`../governance/SOURCE_OF_TRUTH.md`](../governance/SOURCE_OF_TRUTH.md)
 2. [`../project-status/FOUNDATION_CURRENT_STATE.md`](../project-status/FOUNDATION_CURRENT_STATE.md)
 3. [`../project-status/IMPLEMENTATION_MATRIX.md`](../project-status/IMPLEMENTATION_MATRIX.md)
 4. [`../project-status/NEXT_ACTIONS.md`](../project-status/NEXT_ACTIONS.md)
 5. [`../project-status/DECISIONS_REGISTER.md`](../project-status/DECISIONS_REGISTER.md)
-6. Le `specification active` du core concerne
+6. La spécification applicable dans [`../specifications/`](../specifications/)
 7. Les ADR applicables dans [`../adr/`](../adr/)
 
 Guides transverses utiles :
 
 - [`../guides/DOCUMENTATION_MAINTENANCE_GUIDE.md`](../guides/DOCUMENTATION_MAINTENANCE_GUIDE.md)
-- [`../guides/CORE_STATUS_REVIEW_GUIDE.md`](../guides/CORE_STATUS_REVIEW_GUIDE.md)
+- [`../governance/ARCHITECTURE_GOVERNANCE.md`](../governance/ARCHITECTURE_GOVERNANCE.md)
 
 Pour une mission IA, lire aussi :
 
@@ -47,10 +47,10 @@ Lire :
 
 1. `NEXT_ACTIONS.md` ;
 2. `IMPLEMENTATION_MATRIX.md` ;
-3. `strategy/04_ROADMAP_GLOBAL.md` ;
-4. `specification active` du core vise ;
+3. `docs/roadmap/ENISTERE_FACTORY_V2_ROADMAP.md` ;
+4. la spécification applicable dans `docs/specifications/` ;
 5. ADR applicables ;
-6. derniers rapports du core.
+6. preuves de conformité et sorties CI.
 
 Livrable attendu : une mission precise avec objectif, contexte obligatoire, perimetre autorise, interdits,
 gates et critere de succes.
@@ -88,7 +88,7 @@ Objectif : verifier secrets, tokens, PII, permissions, CSRF, logs et dependances
 
 Lire :
 
-1. `strategy/07_SECURITY.md` ;
+1. `docs/architecture/SECURITY_ARCHITECTURE.md` ;
 2. ADR securite applicables ;
 3. fichiers qui manipulent auth, fichiers, logs, secrets ou infra ;
 4. resultats `npm audit` et checks CI.
@@ -102,9 +102,9 @@ Objectif : decider une promotion ou une release sans confondre merge et publicat
 Lire :
 
 1. [`../../factory/quality/RELEASE_PROCESS_RUNBOOK.md`](../../factory/quality/RELEASE_PROCESS_RUNBOOK.md)
-2. [`../guides/CORE_STATUS_REVIEW_GUIDE.md`](../guides/CORE_STATUS_REVIEW_GUIDE.md)
+2. [`../specifications/CONFORMANCE_MODEL.md`](../specifications/CONFORMANCE_MODEL.md)
 3. [`../checklists/RELEASE_READINESS_CHECKLIST.md`](../checklists/RELEASE_READINESS_CHECKLIST.md)
-4. rapport de readiness du core concerne.
+4. preuves de conformite du composant concerne.
 
 Livrable attendu : decision de statut/release, notes, tag ou prochaine action.
 

@@ -25,7 +25,7 @@ Quand deux documents divergent, appliquer cet ordre :
 1. code, tests, scripts et configurations reels ;
 2. ADR valides ;
 3. `specification active` du core concerne ;
-4. `strategy/` ;
+4. `docs/governance/SOURCE_OF_TRUTH.md` ;
 5. README, rapports, changelog et notes historiques.
 
 Si un rapport ancien contredit l'etat courant, ne pas le modifier automatiquement. Ajouter plutot une note
@@ -35,7 +35,7 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 
 | Changement | Fichiers a verifier |
 |---|---|
-| Nouveau statut de core | `IMPLEMENTATION_MATRIX.md`, `FOUNDATION_CURRENT_STATE.md`, `NEXT_ACTIONS.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md` |
+| Nouveau statut de conformite | `IMPLEMENTATION_MATRIX.md`, `FOUNDATION_CURRENT_STATE.md`, `NEXT_ACTIONS.md`, `CHANGELOG.md` |
 | Nouvelle preuve ou rapport | `docs/README.md`, rapport dans `docs/project-status/`, fichier statut concerne |
 | Nouvelle decision ADR | `docs/project-status/DECISIONS_REGISTER.md`, `docs/adr/ADR_BACKLOG.md` si besoin |
 | Nouvelle mission IA recurrente | `factory/ai/prompts/README.md`, `factory/quality/AI_PROMPT_GOVERNANCE.md` si le cadre change |
@@ -52,7 +52,7 @@ dans `docs/project-status/` ou corriger le document courant qui porte la synthes
 
 ## 5. Processus de maintenance
 
-1. Lire `SESSION_HANDOFF.md`, `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md` et `NEXT_ACTIONS.md`.
+1. Lire `FOUNDATION_CURRENT_STATE.md`, `IMPLEMENTATION_MATRIX.md` et `NEXT_ACTIONS.md`.
 2. Identifier si le changement modifie un statut, une preuve, une prochaine action ou seulement un lien.
 3. Lire le `specification active` du core concerne.
 4. Modifier les documents sources les plus proches du changement.
@@ -83,7 +83,7 @@ matrice Factory Quality.
 | Promouvoir un core parce qu'une mission est terminee. | Statut gonfle sans preuve. | Faire une readiness review. |
 | Corriger tous les rapports historiques. | Churn et perte de trace. | Marquer les rapports comme historiques si necessaire. |
 | Ajouter un guide sans lien depuis l'index. | Document introuvable. | Mettre a jour `docs/README.md`. |
-| Ignorer `strategy/` et `specification active`. | Mission incoherente. | Les lire au cadrage. |
+| Ignorer `docs/specifications/` et `docs/governance/`. | Mission incoherente. | Les lire au cadrage. |
 
 ## 8. Fin de mission
 

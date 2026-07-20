@@ -37,13 +37,14 @@ Attendu : branche connue, pas de modifications inattendues.
 
 Lire dans cet ordre :
 
-1. [`../project-status/SESSION_HANDOFF.md`](../project-status/SESSION_HANDOFF.md) ;
+1. [`../governance/SOURCE_OF_TRUTH.md`](../governance/SOURCE_OF_TRUTH.md) ;
 2. [`../project-status/FOUNDATION_CURRENT_STATE.md`](../project-status/FOUNDATION_CURRENT_STATE.md) ;
 3. [`../project-status/NEXT_ACTIONS.md`](../project-status/NEXT_ACTIONS.md).
 
 Pour comprendre la logique globale, lire ensuite :
 
-- [`../../strategy/04_ROADMAP_GLOBAL.md`](../../strategy/04_ROADMAP_GLOBAL.md) ;
+- [`../strategy/01_VISION_AND_MISSION.md`](../strategy/01_VISION_AND_MISSION.md) ;
+- [`../roadmap/ENISTERE_FACTORY_V2_ROADMAP.md`](../roadmap/ENISTERE_FACTORY_V2_ROADMAP.md) ;
 - [`CONTRIBUTOR_ONBOARDING.md`](./CONTRIBUTOR_ONBOARDING.md).
 
 ### 3. Lancer le gate documentaire rapide

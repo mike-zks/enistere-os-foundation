@@ -11,4 +11,4 @@ node --test factory/ai/runtime/test/*.test.mjs
 Les agents locaux sont dans `../adapters/`, l'orchestration et les approbations dans
 `../orchestration/`, et les prompts gouvernés dans `../prompts/`.
 
-Voir `AI_RUNTIME_SPECIFICATION.md` et `strategy/10_AI_STRATEGY.md`.
+Voir `AI_RUNTIME_SPECIFICATION.md` et `docs/architecture/AI_GOVERNANCE_AND_AGENT_ARCHITECTURE.md`.

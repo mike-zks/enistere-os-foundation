@@ -24,7 +24,7 @@
 - [ ] `IMPLEMENTATION_MATRIX.md` reflète le nouveau statut avec preuve
 - [ ] `FOUNDATION_CURRENT_STATE.md` mis à jour
 - [ ] `NEXT_ACTIONS.md` mis à jour (action réalisée cochée, prochaine action identifiée)
-- [ ] `SESSION_HANDOFF.md` mis à jour
+- [ ] `FOUNDATION_CURRENT_STATE.md` mis à jour
 - [ ] `CHANGELOG.md` entrée ajoutée dans `[Unreleased]`
 
 ### Git

@@ -82,7 +82,7 @@ Décrire brièvement le changement.
 - [ ] `IMPLEMENTATION_MATRIX.md` mis à jour avec preuve
 - [ ] `FOUNDATION_CURRENT_STATE.md` mis à jour
 - [ ] `NEXT_ACTIONS.md` mis à jour
-- [ ] `SESSION_HANDOFF.md` mis à jour
+- [ ] `FOUNDATION_CURRENT_STATE.md` mis à jour
 - [ ] Rapport de revue versionné dans `docs/project-status/` si promotion de statut
 
 ## Documentation

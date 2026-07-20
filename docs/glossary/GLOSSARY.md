@@ -72,7 +72,7 @@ Ce glossaire definit les termes utilises dans les statuts, rapports, missions et
 |---|---|
 | ADR | Architecture Decision Record : decision d'architecture versionnee. |
 | `project-status` | Dossier source de pilotage operationnelle. |
-| `SESSION_HANDOFF` | Resume compact pour reprendre une session. |
+| `SOURCE_OF_TRUTH` | Hierarchie d'autorite documentaire de la Foundation. |
 | `NEXT_ACTIONS` | Prochaine action autorisee et historique de pilotage. |
 | `IMPLEMENTATION_MATRIX` | Matrice officielle des statuts par core/package/module. |
 | `FOUNDATION_CURRENT_STATE` | Photographie officielle de l'etat courant. |

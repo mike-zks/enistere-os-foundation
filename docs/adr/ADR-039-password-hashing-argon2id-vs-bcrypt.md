@@ -25,7 +25,7 @@ Le API Core NestJS est l'autorité d'authentification d'Enistere OS Foundation (
 
 `UsersService` reçoit volontairement un `passwordHash` **déjà produit** : aucune logique de hachage n'y est implémentée. L'emplacement du futur service de hachage a été fixé dans le domaine Auth (`src/auth/`).
 
-`strategy/07_SECURITY.md` (§5.5) autorise « bcrypt, argon2 ou équivalent robuste » sans imposer l'un des deux. Le `README` de l'AuthModule signale explicitement qu'une décision formelle est requise **avant Auth 2** (implémentation du login et du hachage). Cette ADR tranche ce choix.
+`docs/architecture/SECURITY_ARCHITECTURE.md` autorise « bcrypt, argon2 ou équivalent robuste » sans imposer l'un des deux. Le `README` de l'AuthModule signale explicitement qu'une décision formelle est requise **avant Auth 2** (implémentation du login et du hachage). Cette ADR tranche ce choix.
 
 Le backlog ADR (`docs/adr/ADR_BACKLOG.md`) réserve déjà l'identifiant `ADR-016` à « OpenAPI et génération de clients typés ». Le prochain identifiant disponible est `ADR-039`, retenu pour cette décision.
 
