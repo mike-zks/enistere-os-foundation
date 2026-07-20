@@ -10,6 +10,7 @@ import {
 } from './overlay-renderers.mjs';
 import { validateOverwriteUsage } from './overwrite-policy.mjs';
 import { getTargetAdapter, integrationKindsFor } from './target-adapters.mjs';
+import { buildDomainContribution } from './domain.mjs';
 import {
   applyPrismaFragment,
   createPrismaComposition,
@@ -361,6 +362,22 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
         verification[id] = [...(verification[id] ?? []), ...overlay.manifest.verification];
       }
     }
+    // Domain compiler (R9): entities become a synthetic capability rendered by
+    // the target adapter, composed through the SAME prisma + integration seams.
+    const domain = buildDomainContribution(blueprint.domain?.entities ?? [], getTargetAdapter(starterId));
+    if (domain) {
+      for (const file of domain.files) await writeDomainFile(appDirectory, file);
+      if (domain.prisma) {
+        try {
+          applyPrismaFragment(prisma, domain.prisma, 'domain');
+        } catch (error) {
+          throw new Error(`domain/${starterId}: ${error.message}`);
+        }
+        if (!prismaCapabilities.includes('domain')) prismaCapabilities.push('domain');
+      }
+      for (const integration of domain.integrations) collected.push({ ...integration, capability: 'domain' });
+      applied.push({ capability: 'domain', target: starterId, version: domain.version, digest: domain.digest });
+    }
     await writePrismaComposition(appDirectory, prisma, prismaCapabilities);
     integrationsByApp.set(id, { starterId, appDirectory, integrations: collected });
   }
@@ -375,6 +392,14 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
 async function writeGenerated(path, content) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, content);
+}
+
+/** Writes one generated domain file (in-memory contents), path-safe, no clobber. */
+async function writeDomainFile(appDirectory, file) {
+  if (!isSafeRelativePath(file.destination ?? '')) throw new Error(`domain: unsafe destination ${file.destination}`);
+  const destination = join(appDirectory, file.destination);
+  if (await exists(destination)) throw new Error(`domain: undeclared file conflict at ${file.destination}`);
+  await writeGenerated(destination, file.contents);
 }
 
 /**

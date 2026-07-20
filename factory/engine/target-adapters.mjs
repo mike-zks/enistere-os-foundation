@@ -20,6 +20,7 @@ import {
   renderExpoCapabilityProviders,
   renderExpoHomeActions,
 } from './overlay-renderers.mjs';
+import { renderNestjsDomain } from './domain-renderers/nestjs.mjs';
 
 const STRING = 'string';
 const INTEGER = 'integer';
@@ -51,6 +52,8 @@ const BUILT_IN = [
       { kinds: ['nestjs.prisma-seed'], destination: 'prisma/seed/capability-seeds.ts', render: renderPrismaSeedRegistry },
       { kinds: ['nestjs.module', 'nestjs.global-guard', 'nestjs.throttler'], destination: 'src/composition/capabilities.ts', render: renderNestjsComposition },
     ],
+    // Domain compiler (R9): entities -> Prisma model + CRUD service + module.
+    renderDomain: renderNestjsDomain,
   },
   {
     id: 'nextjs', version: '1.0.0', integrationKinds: {
@@ -113,6 +116,7 @@ export function registerTargetAdapter(adapter) {
     integrationKinds: Object.freeze({ ...adapter.integrationKinds }),
     operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),
     composition: freezeComposition(adapter.composition),
+    renderDomain: adapter.renderDomain ?? null,
   });
   adapters.set(frozen.id, frozen);
   return frozen;

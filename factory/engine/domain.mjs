@@ -15,6 +15,8 @@
  * typed client); other targets stay `planned` and still consume the contract.
  */
 
+import { createHash } from 'node:crypto';
+
 const SEMVER = /^\d+\.\d+\.\d+$/;
 
 /**
@@ -30,10 +32,16 @@ export function domainStatusFor(adapter, entities = []) {
 }
 
 /**
- * Builds the domain's overlay-shaped contribution for one target, or `null` when
- * there is nothing to compose (no entities, or the target has no renderer). The
- * returned shape is identical to a loaded capability overlay so the engine can
- * apply it with the same `copyOverlayEntry`/`mergeDependencies`/integration code.
+ * Builds the domain contribution for one target, or `null` when there is nothing
+ * to compose (no entities, or the target has no renderer). The contribution is
+ * applied through the same composition pipeline as capabilities:
+ * - `files`        : generated in-memory files `{ destination, contents }`;
+ * - `prisma`       : an inline typed fragment `{ enums, models }` merged into the
+ *                    schema composition (nestjs);
+ * - `integrations` : kind-tagged integrations (e.g. `nestjs.module`) rendered
+ *                    into the app's composition file;
+ * - `dependencies` : optional npm dependency additions.
+ * A deterministic `digest` over the rendered contribution is recorded in the lock.
  */
 export function buildDomainContribution(entities, adapter) {
   if (domainStatusFor(adapter, entities) !== 'ready') return null;
@@ -44,15 +52,21 @@ export function buildDomainContribution(entities, adapter) {
   if (!SEMVER.test(rendered.version ?? '')) {
     throw new Error(`${adapter.id}: domain contribution version must use SemVer`);
   }
-  return {
+  const contribution = {
     capability: 'domain',
     target: adapter.id,
     version: rendered.version,
     files: rendered.files ?? [],
-    dependencies: rendered.dependencies ?? {},
-    environment: rendered.environment ?? [],
+    prisma: rendered.prisma ?? null,
     integrations: rendered.integrations ?? [],
-    contract: rendered.contract ?? {},
-    verification: rendered.verification ?? [],
+    dependencies: rendered.dependencies ?? {},
   };
+  const digest = createHash('sha256').update(JSON.stringify({
+    version: contribution.version,
+    files: contribution.files,
+    prisma: contribution.prisma,
+    integrations: contribution.integrations,
+    dependencies: contribution.dependencies,
+  })).digest('hex');
+  return { ...contribution, digest };
 }
