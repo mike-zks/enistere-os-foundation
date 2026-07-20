@@ -2,9 +2,24 @@
  * Versioned target-adapter registry.
  *
  * The composition engine owns ordering, conflicts, files, dependencies and
- * locks. Target adapters only declare the integration operations they accept.
- * No adapter executes arbitrary manifest code.
+ * locks. Target adapters declare the integration operations they accept AND how
+ * their known integration kinds are rendered into composition files
+ * (`composition`): each group binds a set of kinds to a destination path and a
+ * pure renderer. The engine stays framework-agnostic — it iterates adapters and
+ * never switches on a starter id. No adapter executes arbitrary manifest code.
  */
+
+import {
+  renderNestjsComposition,
+  renderPrismaSeedRegistry,
+  renderSpringComposition,
+  renderNextjsCapabilityProviders,
+  renderNextjsPublicNav,
+  renderNextjsDashboardNav,
+  renderNextjsStatusSections,
+  renderExpoCapabilityProviders,
+  renderExpoHomeActions,
+} from './overlay-renderers.mjs';
 
 const STRING = 'string';
 const INTEGER = 'integer';
@@ -12,6 +27,14 @@ const INTEGER = 'integer';
 export const COMMON_OPERATIONS = Object.freeze([
   'files', 'dependencies', 'environment', 'integrations', 'contract', 'verification',
 ]);
+
+/** Deep-freezes a composition descriptor list (kinds bound to a destination + renderer). */
+function freezeComposition(composition) {
+  return Object.freeze((composition ?? []).map((group) => Object.freeze({
+    ...group,
+    kinds: Object.freeze([...group.kinds]),
+  })));
+}
 
 const BUILT_IN = [
   {
@@ -22,6 +45,12 @@ const BUILT_IN = [
       'nestjs.prisma-schema': { source: STRING },
       'nestjs.prisma-seed': { importPath: STRING, symbol: STRING, order: INTEGER },
     },
+    // `nestjs.prisma-schema` is intentionally absent: prisma fragments compose
+    // into the typed schema in the engine's main loop, not as a rendered file.
+    composition: [
+      { kinds: ['nestjs.prisma-seed'], destination: 'prisma/seed/capability-seeds.ts', render: renderPrismaSeedRegistry },
+      { kinds: ['nestjs.module', 'nestjs.global-guard', 'nestjs.throttler'], destination: 'src/composition/capabilities.ts', render: renderNestjsComposition },
+    ],
   },
   {
     id: 'nextjs', version: '1.0.0', integrationKinds: {
@@ -30,24 +59,37 @@ const BUILT_IN = [
       'nextjs.dashboard-nav-link': { href: STRING, label: STRING, order: INTEGER },
       'nextjs.status-section': { importPath: STRING, symbol: STRING, order: INTEGER },
     },
+    composition: [
+      { kinds: ['nextjs.provider'], destination: 'src/app/providers/capability-providers.tsx', render: renderNextjsCapabilityProviders },
+      { kinds: ['nextjs.public-nav-link'], destination: 'src/core/composition/public-nav.ts', render: renderNextjsPublicNav },
+      { kinds: ['nextjs.dashboard-nav-link'], destination: 'src/core/composition/dashboard-nav.ts', render: renderNextjsDashboardNav },
+      { kinds: ['nextjs.status-section'], destination: 'src/core/composition/status-sections.tsx', render: renderNextjsStatusSections },
+    ],
   },
   {
     id: 'react-native', version: '1.0.0', integrationKinds: {
       'expo.provider': { importPath: STRING, symbol: STRING },
       'expo.home-action': { href: STRING, label: STRING, order: INTEGER },
     },
+    composition: [
+      { kinds: ['expo.provider'], destination: 'src/composition/capability-providers.tsx', render: renderExpoCapabilityProviders },
+      { kinds: ['expo.home-action'], destination: 'src/composition/home-actions.ts', render: renderExpoHomeActions },
+    ],
   },
   { id: 'spring', version: '1.0.0', dependencyManager: 'maven', integrationKinds: {
     'spring.module': { importPath: STRING, symbol: STRING },
-  } },
-  { id: 'angular', version: '1.0.0', integrationKinds: {} },
-  { id: 'flutter', version: '1.0.0', integrationKinds: {} },
+  }, composition: [
+    { kinds: ['spring.module'], destination: 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java', render: renderSpringComposition },
+  ] },
+  { id: 'angular', version: '1.0.0', integrationKinds: {}, composition: [] },
+  { id: 'flutter', version: '1.0.0', integrationKinds: {}, composition: [] },
 ].map((adapter) => Object.freeze({
   ...adapter,
   operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),
   integrationKinds: Object.freeze(Object.fromEntries(
     Object.entries(adapter.integrationKinds).map(([kind, fields]) => [kind, Object.freeze({ ...fields })]),
   )),
+  composition: freezeComposition(adapter.composition),
 }));
 
 const adapters = new Map(BUILT_IN.map((adapter) => [adapter.id, adapter]));
@@ -70,6 +112,7 @@ export function registerTargetAdapter(adapter) {
     dependencyManager: adapter.dependencyManager ?? 'npm',
     integrationKinds: Object.freeze({ ...adapter.integrationKinds }),
     operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),
+    composition: freezeComposition(adapter.composition),
   });
   adapters.set(frozen.id, frozen);
   return frozen;
