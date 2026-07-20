@@ -6,7 +6,14 @@
 
 ## Décision
 
-Les développements d’expansion sont suspendus jusqu’à l’adoption de l’architecture cible.
+Le corpus V2 est adopté comme architecture **cible**. Les développements d’expansion sont suspendus
+jusqu’à la convergence du code avec cette cible.
+
+L’adoption documentaire ne vaut pas implémentation : aucune parité produit complète n’est revendiquée,
+les runtimes actuels ne sont pas tous conformes au Platform Contract, et aucune nouvelle capability ne
+doit être ajoutée avant convergence.
+
+Décision de refondation : [`ADR-044`](../adr/ADR-044-enistere-foundation-v2-architecture-reset.md).
 
 ## Actifs existants à migrer
 
@@ -30,6 +37,11 @@ Ces éléments sont des actifs à auditer, non la définition de la cible.
 - lifecycle incomplet ;
 - statuts insuffisamment fondés sur une conformité commune.
 
+Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
+être requalifiés contre le [modèle de conformité](../specifications/CONFORMANCE_MODEL.md) V2.
+
 ## Action
 
-Adopter le corpus V2 et produire l’ADR de refondation avant tout changement de code.
+Auditer les écarts entre l’architecture V2 adoptée et l’implémentation actuelle, sans refondre le code.
+
+Voir [`NEXT_ACTIONS.md`](NEXT_ACTIONS.md).

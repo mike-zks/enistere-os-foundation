@@ -14,6 +14,16 @@
 
 Le code ne redéfinit pas silencieusement la règle. Une divergence rend le composant non conforme jusqu’à correction du code ou modification formelle de la spécification.
 
+## Politiques opérationnelles
+
+Subordonnées à cette hiérarchie, elles fixent les règles d'exécution sans redéfinir l'architecture :
+
+- [`DEPENDENCY_POLICY.md`](DEPENDENCY_POLICY.md) ;
+- [`ENGINEERING_STANDARDS.md`](ENGINEERING_STANDARDS.md) ;
+- [`GIT_STRATEGY.md`](GIT_STRATEGY.md) ;
+- [`ARCHITECTURE_GOVERNANCE.md`](ARCHITECTURE_GOVERNANCE.md) ;
+- [`DEFINITION_OF_READY.md`](DEFINITION_OF_READY.md) et [`DEFINITION_OF_DONE.md`](DEFINITION_OF_DONE.md).
+
 ## Documents non autoritaires
 
 - rapports historiques ;
