@@ -1,8 +1,13 @@
 # ADR-042 — Enistere OS Foundation devient une Project Factory AI-native
 
-- Statut : Validé
+- Statut : Supersédé
+- Supersédé par : [ADR-044](ADR-044-enistere-foundation-v2-architecture-reset.md)
 - Date : 2026-07-18
 - Décideur : Owner Foundation
+
+> Décision historique conservée. La sortie du modèle `cores/` et la gouvernance des agents locaux restent
+> acquises. La définition du starter comme unité centrale et la topologie « une API obligatoire, un Web
+> optionnel, un Mobile optionnel » sont remplacées par ADR-044.
 
 ## Contexte
 
