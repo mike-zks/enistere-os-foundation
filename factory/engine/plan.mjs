@@ -1,6 +1,7 @@
 import { matchProfile } from './profiles.mjs';
 import { selectedStarterIds } from './starters.mjs';
 import { adapterVersionsFor } from './target-adapters.mjs';
+import { resolveStack } from './applications.mjs';
 
 /** Gates a generated app runs, in the order a verification pass applies them. */
 const GATE_COMMANDS = Object.freeze(['install', 'test', 'build', 'verify']);
@@ -11,7 +12,8 @@ const GATE_COMMANDS = Object.freeze(['install', 'test', 'build', 'verify']);
  */
 export function expectedGates(blueprint, starters) {
   const byId = new Map(starters.map((starter) => [starter.id, starter]));
-  const slots = { api: blueprint.stack.api, web: blueprint.stack.web, mobile: blueprint.stack.mobile };
+  const stack = resolveStack(blueprint);
+  const slots = { api: stack.api, web: stack.web, mobile: stack.mobile };
   const gates = {};
   for (const [slot, starterId] of Object.entries(slots)) {
     const starter = starterId ? byId.get(starterId) : null;
@@ -34,9 +36,10 @@ export function expectedGates(blueprint, starters) {
  * `starters` supplies the manifests used to report the expected gates.
  */
 export function buildGenerationPlan(blueprint, { modularStarters = [], starters = [] } = {}) {
+  const stack = resolveStack(blueprint);
   const directories = ['apps/api', 'packages/contracts', 'capabilities', 'infrastructure/local', 'docs'];
-  if (blueprint.stack.web) directories.push('apps/web');
-  if (blueprint.stack.mobile) directories.push('apps/mobile');
+  if (stack.web) directories.push('apps/web');
+  if (stack.mobile) directories.push('apps/mobile');
   if (blueprint.deployment.environments.includes('staging')) directories.push('infrastructure/staging');
   const modular = new Set(modularStarters);
   const allModular = selectedStarterIds(blueprint).every((starterId) => modular.has(starterId));
@@ -50,7 +53,7 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
     project: blueprint.project.slug,
     generationMode: allModular ? 'modular-overlay' : 'baseline-copy',
     bundledFeaturesMayExceedSelection: !allModular,
-    stack: blueprint.stack,
+    stack,
     targetAdapters: adapterVersionsFor(selectedTargets),
     capabilities: [...blueprint.capabilities],
     // `runtimeProven` says a golden exercises this selection; `compositionExact`
@@ -70,9 +73,9 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
     designSystem: blueprint.designSystem,
     directories,
     starterSources: {
-      api: sourceFor(blueprint.stack.api),
-      ...(blueprint.stack.web ? { web: sourceFor(blueprint.stack.web) } : {}),
-      ...(blueprint.stack.mobile ? { mobile: sourceFor(blueprint.stack.mobile) } : {}),
+      api: sourceFor(stack.api),
+      ...(stack.web ? { web: sourceFor(stack.web) } : {}),
+      ...(stack.mobile ? { mobile: sourceFor(stack.mobile) } : {}),
     },
   };
 }

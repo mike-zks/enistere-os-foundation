@@ -8,6 +8,7 @@ import { generateOpenApi } from './contracts.mjs';
 import { assessCapabilitySupport, loadCapabilityManifests, validateCapabilityDependencies } from './capabilities.mjs';
 import { loadStarterManifests, modularStarterIds, selectedStarterIds } from './starters.mjs';
 import { applyCapabilityOverlays } from './overlay.mjs';
+import { resolveStack } from './applications.mjs';
 
 async function exists(path) {
   try { await access(path, constants.F_OK); return true; } catch { return false; }
@@ -247,7 +248,7 @@ function projectReadme(blueprint, plan, overlays) {
     '',
     '- Les capabilities non sélectionnées ne sont pas présentes ; régénérez le projet pour en ajouter.',
     '- La finalisation des dépendances requiert un accès réseau au registre npm ; ensuite `npm ci` suffit.',
-    ...(blueprint.stack.mobile === 'react-native' ? ['- Le build mobile natif (iOS) requiert macOS/Xcode ; `npm run doctor --workspace=apps/mobile` et `expo export` restent disponibles hors simulateur.'] : []),
+    ...(resolveStack(blueprint).mobile === 'react-native' ? ['- Le build mobile natif (iOS) requiert macOS/Xcode ; `npm run doctor --workspace=apps/mobile` et `expo export` restent disponibles hors simulateur.'] : []),
     '',
     '## Provenance Foundation',
     '',
