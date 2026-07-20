@@ -17,13 +17,16 @@ describe('domain seam (R9 plug-in shape)', () => {
     assert.equal(buildDomainContribution(ENTITIES, getTargetAdapter('angular')), null);
   });
 
-  it('is ready on nestjs and renders a real contribution', () => {
+  it('is ready on nestjs and renders a real CRUD contribution', () => {
     assert.equal(domainStatusFor(getTargetAdapter('nestjs'), ENTITIES), 'ready');
     const contribution = buildDomainContribution(ENTITIES, getTargetAdapter('nestjs'));
     assert.equal(contribution.capability, 'domain');
     assert.equal(contribution.prisma.models[0].name, 'Project');
-    assert.ok(contribution.files.some((f) => f.destination === 'src/domain/project/project.service.ts'));
+    for (const suffix of ['dto', 'service', 'controller', 'module']) {
+      assert.ok(contribution.files.some((f) => f.destination === `src/domain/project/project.${suffix}.ts`), `${suffix} file`);
+    }
     assert.ok(contribution.integrations.some((i) => i.kind === 'nestjs.module' && i.symbol === 'ProjectModule'));
+    assert.deepEqual(contribution.contract.openapiOperations, ['listProject', 'createProject', 'getProject', 'updateProject', 'deleteProject']);
     assert.match(contribution.digest, /^[0-9a-f]{64}$/);
   });
 
@@ -81,6 +84,7 @@ describe('domain seam (R9 plug-in shape)', () => {
       await generateProject(bp, out);
 
       await access(join(out, 'apps/api/src/domain/product/product.service.ts'), constants.F_OK);
+      await access(join(out, 'apps/api/src/domain/product/product.controller.ts'), constants.F_OK);
       await access(join(out, 'apps/api/src/domain/category/category.module.ts'), constants.F_OK);
       const schema = await readFile(join(out, 'apps/api/prisma/schema.prisma'), 'utf8');
       assert.match(schema, /model Product \{/);
@@ -89,10 +93,12 @@ describe('domain seam (R9 plug-in shape)', () => {
       const comp = await readFile(join(out, 'apps/api/src/composition/capabilities.ts'), 'utf8');
       assert.match(comp, /ProductModule/);
       assert.match(comp, /CategoryModule/);
-      const service = await readFile(join(out, 'apps/api/src/domain/product/product.service.ts'), 'utf8');
-      assert.match(service, /this\.prisma\.product\.findMany\(\)/);
+      const controller = await readFile(join(out, 'apps/api/src/domain/product/product.controller.ts'), 'utf8');
+      assert.match(controller, /operationId: 'listProduct'/);
       const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
-      assert.ok(lock.overlays.some((o) => o.capability === 'domain' && o.target === 'nestjs'));
+      const domain = lock.overlays.find((o) => o.capability === 'domain' && o.target === 'nestjs');
+      assert.ok(domain, 'domain overlay recorded');
+      assert.ok(domain.openapiOperations.includes('listProduct') && domain.openapiOperations.includes('deleteCategory'));
     } finally {
       await rm(root, { recursive: true, force: true });
     }

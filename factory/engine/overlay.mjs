@@ -376,7 +376,13 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
         if (!prismaCapabilities.includes('domain')) prismaCapabilities.push('domain');
       }
       for (const integration of domain.integrations) collected.push({ ...integration, capability: 'domain' });
-      applied.push({ capability: 'domain', target: starterId, version: domain.version, digest: domain.digest });
+      applied.push({
+        capability: 'domain',
+        target: starterId,
+        version: domain.version,
+        digest: domain.digest,
+        ...(domain.contract?.openapiOperations ? { openapiOperations: [...domain.contract.openapiOperations] } : {}),
+      });
     }
     await writePrismaComposition(appDirectory, prisma, prismaCapabilities);
     integrationsByApp.set(id, { starterId, appDirectory, integrations: collected });

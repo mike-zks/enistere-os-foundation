@@ -60,6 +60,7 @@ export function buildDomainContribution(entities, adapter) {
     prisma: rendered.prisma ?? null,
     integrations: rendered.integrations ?? [],
     dependencies: rendered.dependencies ?? {},
+    contract: rendered.contract ?? null,
   };
   const digest = createHash('sha256').update(JSON.stringify({
     version: contribution.version,
@@ -67,6 +68,7 @@ export function buildDomainContribution(entities, adapter) {
     prisma: contribution.prisma,
     integrations: contribution.integrations,
     dependencies: contribution.dependencies,
+    contract: contribution.contract,
   })).digest('hex');
   return { ...contribution, digest };
 }
