@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enistere.com/schemas/capability/v2",
+  "title": "Enistere Capability Manifest",
+  "description": "Versioned contract of a capability. Required fields describe the capability and its per-target support; the optional rich fields (conflicts, provides, configuration, compatibility, migrations) are part of the frozen v2 contract from day one, so filling them later never breaks the schema.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "version", "requires", "responsibilities", "targets"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "2" },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "requires": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "responsibilities": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "targets": {
+      "type": "object",
+      "required": ["nestjs", "spring", "nextjs", "angular", "react-native", "flutter"],
+      "additionalProperties": false,
+      "properties": {
+        "nestjs": { "$ref": "#/$defs/target" },
+        "spring": { "$ref": "#/$defs/target" },
+        "nextjs": { "$ref": "#/$defs/target" },
+        "angular": { "$ref": "#/$defs/target" },
+        "react-native": { "$ref": "#/$defs/target" },
+        "flutter": { "$ref": "#/$defs/target" }
+      }
+    },
+    "conflicts": {
+      "description": "Capabilities that must not be composed together with this one.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "provides": {
+      "description": "Named public contracts this capability exposes.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contracts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "configuration": {
+      "description": "Typed configuration options (e.g. provider: internal|keycloak|oidc).",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/configOption" }
+    },
+    "compatibility": {
+      "description": "Runtime version ranges this capability supports.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runtimes": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 },
+          "propertyNames": { "enum": ["nestjs", "spring", "nextjs", "angular", "react-native", "flutter"] }
+        }
+      }
+    },
+    "migrations": {
+      "description": "Prior versions this capability can migrate from (consumed by the Evolution Engine).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "array", "items": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }, "uniqueItems": true }
+      }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["ready", "planned", "unsupported", "not-applicable"] },
+        "mode": { "enum": ["built-in", "overlay"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "ready" } } },
+          "then": { "required": ["mode"] },
+          "else": { "not": { "required": ["mode"] } }
+        }
+      ]
+    },
+    "configOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["enum", "string", "boolean", "integer"] },
+        "values": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1, "uniqueItems": true },
+        "default": {}
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "enum" } } },
+          "then": { "required": ["values"] },
+          "else": { "not": { "required": ["values"] } }
+        }
+      ]
+    }
+  }
+}
