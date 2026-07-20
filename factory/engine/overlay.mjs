@@ -301,16 +301,19 @@ async function writePrismaComposition(appDirectory, composition, capabilities) {
 export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, output, capabilityManifests }) {
   const byId = new Map(capabilityManifests.map((manifest) => [manifest.id, manifest]));
   const orderedCapabilities = CAPABILITY_IDS.filter((id) => blueprint.capabilities.includes(id));
-  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({
-    kind,
-    starterId: source.split('/')[1] ?? source.split('/').at(-1),
-  }));
+  // Iterate the canonical per-application plan (keyed by app id). Falls back to
+  // deriving apps from starterSources for callers that only build that map.
+  const apps = plan.applications
+    ? plan.applications.map((app) => ({ id: app.id, appDir: app.appDir, starterId: app.runtime }))
+    : Object.entries(plan.starterSources).map(([id, source]) => ({
+      id, appDir: `apps/${id}`, starterId: source.split('/')[1] ?? source.split('/').at(-1),
+    }));
   const applied = [];
   const verification = {};
   const integrationsByApp = new Map();
 
-  for (const { kind, starterId } of kinds) {
-    const appDirectory = join(output, `apps/${kind}`);
+  for (const { id, appDir, starterId } of apps) {
+    const appDirectory = join(output, appDir);
     const collected = [];
     // Typed intermediate Prisma model: capabilities contribute declarative
     // enums/models/field-extensions; the schema is rendered once, at the end.
@@ -355,11 +358,11 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
           : {}),
       });
       if (overlay.manifest.verification.length > 0) {
-        verification[kind] = [...(verification[kind] ?? []), ...overlay.manifest.verification];
+        verification[id] = [...(verification[id] ?? []), ...overlay.manifest.verification];
       }
     }
     await writePrismaComposition(appDirectory, prisma, prismaCapabilities);
-    integrationsByApp.set(kind, { starterId, appDirectory, integrations: collected });
+    integrationsByApp.set(id, { starterId, appDirectory, integrations: collected });
   }
 
   for (const { starterId, appDirectory, integrations } of integrationsByApp.values()) {

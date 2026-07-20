@@ -67,11 +67,11 @@ export function validateApplications(applications) {
 }
 
 /**
- * The API-invariant and the generation gate: every project composes at least one
- * API, and only `ready` kinds composed one-per-slot are generatable today. A
- * `worker`/`gateway`/`bff` (planned kind) or a second app in a slot (multi-surface
- * / multi-service) is refused with an invariant message — declarable in the
- * model, not yet generatable. Returns issues.
+ * The API-invariant and the generation gate. Every project composes at least one
+ * API. Multiple web/mobile surfaces on a single API (multi-surface) are
+ * generatable. A `worker`/`gateway`/`bff` (planned kind) or a second API
+ * (multi-service) is declarable in the model but refused at generation until its
+ * distributed capability packs are proven (Phase D). Returns issues.
  */
 export function assertGeneratableTopology(blueprint) {
   const issues = [];
@@ -84,13 +84,7 @@ export function assertGeneratableTopology(blueprint) {
       issues.push(`application ${app.id} (kind: ${app.kind}) is planned and not generatable yet`);
     }
   }
-  const bySlot = new Map();
-  for (const app of applications) {
-    if (!app.slot) continue;
-    bySlot.set(app.slot, (bySlot.get(app.slot) ?? 0) + 1);
-  }
-  for (const [slot, count] of bySlot) {
-    if (count > 1) issues.push(`multiple ${slot} applications is planned (multi-surface/multi-service): ${count} declared`);
-  }
+  const apiCount = applications.filter((app) => app.kind === MANDATORY_KIND).length;
+  if (apiCount > 1) issues.push(`multiple API applications is planned (multi-service): ${apiCount} declared`);
   return issues;
 }

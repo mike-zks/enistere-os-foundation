@@ -8,7 +8,6 @@ import { generateOpenApi } from './contracts.mjs';
 import { assessCapabilitySupport, loadCapabilityManifests, validateCapabilityDependencies } from './capabilities.mjs';
 import { loadStarterManifests, modularStarterIds, selectedStarterIds } from './starters.mjs';
 import { applyCapabilityOverlays } from './overlay.mjs';
-import { resolveStack } from './applications.mjs';
 
 async function exists(path) {
   try { await access(path, constants.F_OK); return true; } catch { return false; }
@@ -36,8 +35,8 @@ async function copyTree(source, destination) {
 }
 
 async function materializeFoundation(plan, output) {
-  for (const [kind, source] of Object.entries(plan.starterSources)) {
-    await copyTree(join(FOUNDATION_ROOT, source), join(output, `apps/${kind}`));
+  for (const app of plan.applications) {
+    await copyTree(join(FOUNDATION_ROOT, app.source), join(output, app.appDir));
   }
   for (const packageName of ['api-contracts', 'api-client-fetch', ...(plan.designSystem ? ['ui-kit'] : [])]) {
     await copyTree(join(FOUNDATION_ROOT, 'packages', packageName), join(output, 'packages', packageName));
@@ -52,9 +51,9 @@ async function materializeFoundation(plan, output) {
 const NPM_STARTERS = new Set(['nestjs', 'nextjs', 'angular', 'react-native']);
 
 function npmAppWorkspaces(plan) {
-  return Object.entries(plan.starterSources)
-    .filter(([, source]) => NPM_STARTERS.has(source.split('/')[1] ?? source.split('/').at(-1)))
-    .map(([kind]) => `apps/${kind}`);
+  return plan.applications
+    .filter((app) => NPM_STARTERS.has(app.runtime))
+    .map((app) => app.appDir);
 }
 
 /**
@@ -108,9 +107,9 @@ function verifyScript(plan, overlayVerification = {}) {
     'react-native': ['npm', 'run', 'doctor'],
     flutter: ['flutter', 'analyze'],
   };
-  const steps = Object.entries(plan.starterSources).flatMap(([kind, source]) => [
-    { cwd: `apps/${kind}`, argv: commands[source.split('/')[1] ?? source.split('/').at(-1)] },
-    ...(overlayVerification[kind] ?? []).map((argv) => ({ cwd: `apps/${kind}`, argv })),
+  const steps = plan.applications.flatMap((app) => [
+    { cwd: app.appDir, argv: commands[app.runtime] },
+    ...(overlayVerification[app.id] ?? []).map((argv) => ({ cwd: app.appDir, argv })),
   ]);
   return `import { spawnSync } from 'node:child_process';\n\nconst rootBuild = spawnSync('npm', ['run', 'build:packages'], { stdio: 'inherit', shell: false });\nif (rootBuild.status !== 0) process.exit(rootBuild.status ?? 1);\nconst steps = ${JSON.stringify(steps, null, 2)};\nfor (const step of steps) {\n  const [command, ...args] = step.argv;\n  const result = spawnSync(command, args, { cwd: step.cwd, stdio: 'inherit', shell: false });\n  if (result.status !== 0) process.exit(result.status ?? 1);\n}\n`;
 }
@@ -119,32 +118,36 @@ const STARTER_LABELS = {
   nestjs: 'NestJS (API)', spring: 'Spring Boot (API)', nextjs: 'Next.js (Web)',
   angular: 'Angular (Web)', 'react-native': 'React Native / Expo (Mobile)', flutter: 'Flutter (Mobile)',
 };
-const RUN_COMMANDS = {
-  nestjs: 'npm run start:dev --workspace=apps/api',
-  spring: '(cd apps/api && ./mvnw spring-boot:run)',
-  nextjs: 'npm run dev --workspace=apps/web',
-  angular: 'npm run start --workspace=apps/web',
-  'react-native': 'npm run start --workspace=apps/mobile',
-  flutter: '(cd apps/mobile && flutter run)',
-};
+function runCommand(runtime, appDir) {
+  switch (runtime) {
+    case 'nestjs': return `npm run start:dev --workspace=${appDir}`;
+    case 'spring': return `(cd ${appDir} && ./mvnw spring-boot:run)`;
+    case 'nextjs': return `npm run dev --workspace=${appDir}`;
+    case 'angular': return `npm run start --workspace=${appDir}`;
+    case 'react-native': return `npm run start --workspace=${appDir}`;
+    case 'flutter': return `(cd ${appDir} && flutter run)`;
+    default: return '';
+  }
+}
 
 /** README derived from the blueprint and plan — no hand-written divergence. */
 function projectReadme(blueprint, plan, overlays) {
-  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({
-    kind,
-    id: source.split('/')[1] ?? source.split('/').at(-1),
-  }));
-  const stackLines = kinds.map(({ kind, id }) => `- \`apps/${kind}\` — ${STARTER_LABELS[id] ?? id}`);
-  const hasApi = kinds.some((k) => k.kind === 'api');
-  const hasNestjs = kinds.some((k) => k.id === 'nestjs');
-  const runLines = kinds.map(({ id }) => `- ${STARTER_LABELS[id] ?? id} : \`${RUN_COMMANDS[id]}\``);
+  const apps = plan.applications;
+  const hasApi = apps.some((app) => app.kind === 'api');
+  const hasNestjs = apps.some((app) => app.runtime === 'nestjs');
+  // The NestJS API app dir (for Prisma/example commands); the sugar keeps apps/api.
+  const nestjsApiDir = apps.find((app) => app.runtime === 'nestjs' && app.kind === 'api')?.appDir ?? 'apps/api';
+  const stackLines = apps.map((app) => `- \`${app.appDir}\` — ${STARTER_LABELS[app.runtime] ?? app.runtime}`);
+  const runLines = apps.map((app) => `- ${STARTER_LABELS[app.runtime] ?? app.runtime} : \`${runCommand(app.runtime, app.appDir)}\``);
   const overlayLines = overlays.length
     ? overlays.map((o) => `- \`${o.capability}\` sur \`${o.target}\` — v${o.version} (digest \`${o.digest.slice(0, 12)}…\`)`)
     : ['- aucune (baseline `base` seule)'];
   const envLines = [];
-  if (hasNestjs) envLines.push('- `apps/api/.env` — copier depuis `apps/api/.env.example` (config API, secrets Auth si composé).');
-  if (kinds.some((k) => k.id === 'nextjs')) envLines.push('- `apps/web/.env.local` — copier depuis `apps/web/.env.example`.');
-  if (kinds.some((k) => k.id === 'react-native')) envLines.push('- `apps/mobile/.env` — copier depuis `apps/mobile/.env.example`.');
+  for (const app of apps) {
+    if (app.runtime === 'nestjs') envLines.push(`- \`${app.appDir}/.env\` — copier depuis \`${app.appDir}/.env.example\` (config API, secrets Auth si composé).`);
+    else if (app.runtime === 'nextjs') envLines.push(`- \`${app.appDir}/.env.local\` — copier depuis \`${app.appDir}/.env.example\`.`);
+    else if (app.runtime === 'react-native') envLines.push(`- \`${app.appDir}/.env\` — copier depuis \`${app.appDir}/.env.example\`.`);
+  }
   envLines.push('- `infrastructure/local/.env` — copier depuis `infrastructure/local/.env.example` (mots de passe locaux).');
 
   return [
@@ -216,8 +219,8 @@ function projectReadme(blueprint, plan, overlays) {
       '## Migrations (API NestJS + Prisma)',
       '',
       '```bash',
-      'npm run prisma:generate --workspace=apps/api',
-      'npm run prisma:migrate:deploy --workspace=apps/api',
+      `npm run prisma:generate --workspace=${nestjsApiDir}`,
+      `npm run prisma:migrate:deploy --workspace=${nestjsApiDir}`,
       '```',
       '',
     ] : []),
@@ -236,10 +239,10 @@ function projectReadme(blueprint, plan, overlays) {
       '',
       ...(hasNestjs ? [
         '```bash',
-        'npm run lint --workspace=apps/api',
-        'npm run test --workspace=apps/api',
-        'npm run openapi:check --workspace=apps/api',
-        'npm run build --workspace=apps/api',
+        `npm run lint --workspace=${nestjsApiDir}`,
+        `npm run test --workspace=${nestjsApiDir}`,
+        `npm run openapi:check --workspace=${nestjsApiDir}`,
+        `npm run build --workspace=${nestjsApiDir}`,
         '```',
         '',
       ] : []),
@@ -248,7 +251,7 @@ function projectReadme(blueprint, plan, overlays) {
     '',
     '- Les capabilities non sélectionnées ne sont pas présentes ; régénérez le projet pour en ajouter.',
     '- La finalisation des dépendances requiert un accès réseau au registre npm ; ensuite `npm ci` suffit.',
-    ...(resolveStack(blueprint).mobile === 'react-native' ? ['- Le build mobile natif (iOS) requiert macOS/Xcode ; `npm run doctor --workspace=apps/mobile` et `expo export` restent disponibles hors simulateur.'] : []),
+    ...(plan.applications.some((app) => app.runtime === 'react-native') ? ['- Le build mobile natif (iOS) requiert macOS/Xcode ; `npm run doctor --workspace=apps/mobile` et `expo export` restent disponibles hors simulateur.'] : []),
     '',
     '## Provenance Foundation',
     '',
@@ -289,8 +292,8 @@ export async function generateProject(blueprint, output, options = {}) {
     // Unified workspace: a single root package-lock.json is authoritative. Remove
     // any per-app lockfile copied from a standalone source starter so the composed
     // manifests resolve from the root lock (npm install → npm ci reproducible).
-    for (const kind of Object.keys(plan.starterSources)) {
-      await rm(join(output, `apps/${kind}/package-lock.json`), { force: true });
+    for (const app of plan.applications) {
+      await rm(join(output, `${app.appDir}/package-lock.json`), { force: true });
     }
   }
   await mkdir(join(output, 'scripts'), { recursive: true });

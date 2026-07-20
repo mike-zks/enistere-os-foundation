@@ -1,7 +1,7 @@
 import { matchProfile } from './profiles.mjs';
 import { selectedStarterIds } from './starters.mjs';
 import { adapterVersionsFor } from './target-adapters.mjs';
-import { resolveStack } from './applications.mjs';
+import { resolveApplications, resolveStack } from './applications.mjs';
 
 /** Gates a generated app runs, in the order a verification pass applies them. */
 const GATE_COMMANDS = Object.freeze(['install', 'test', 'build', 'verify']);
@@ -12,13 +12,13 @@ const GATE_COMMANDS = Object.freeze(['install', 'test', 'build', 'verify']);
  */
 export function expectedGates(blueprint, starters) {
   const byId = new Map(starters.map((starter) => [starter.id, starter]));
-  const stack = resolveStack(blueprint);
-  const slots = { api: stack.api, web: stack.web, mobile: stack.mobile };
   const gates = {};
-  for (const [slot, starterId] of Object.entries(slots)) {
-    const starter = starterId ? byId.get(starterId) : null;
+  // Keyed by application id; for the single-surface sugar the id is the slot
+  // (api/web/mobile), so the shape is unchanged.
+  for (const app of resolveApplications(blueprint)) {
+    const starter = byId.get(app.runtime);
     if (!starter) continue;
-    gates[slot] = GATE_COMMANDS
+    gates[app.id] = GATE_COMMANDS
       .filter((command) => starter.commands[command])
       .map((command) => ({ gate: command, command: starter.commands[command].join(' ') }));
   }
@@ -37,10 +37,6 @@ export function expectedGates(blueprint, starters) {
  */
 export function buildGenerationPlan(blueprint, { modularStarters = [], starters = [] } = {}) {
   const stack = resolveStack(blueprint);
-  const directories = ['apps/api', 'packages/contracts', 'capabilities', 'infrastructure/local', 'docs'];
-  if (stack.web) directories.push('apps/web');
-  if (stack.mobile) directories.push('apps/mobile');
-  if (blueprint.deployment.environments.includes('staging')) directories.push('infrastructure/staging');
   const modular = new Set(modularStarters);
   const allModular = selectedStarterIds(blueprint).every((starterId) => modular.has(starterId));
   // A blueprint need not claim a profile; when its selection matches one, the
@@ -49,6 +45,24 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
   const starterById = new Map(starters.map((starter) => [starter.id, starter]));
   const sourceFor = (starterId) => starterById.get(starterId)?.composition?.baseSource ?? `starters/${starterId}`;
   const selectedTargets = selectedStarterIds(blueprint);
+
+  // Canonical per-application plan. For the single-surface sugar each app id IS
+  // its slot (api/web/mobile), so `apps/<id>` and starterSources stay identical.
+  const applications = resolveApplications(blueprint).map((app) => ({
+    id: app.id,
+    kind: app.kind,
+    runtime: app.runtime,
+    source: sourceFor(app.runtime),
+    appDir: `apps/${app.id}`,
+  }));
+
+  // Directory order preserved for byte-identical output: the API app dir(s)
+  // first, then the fixed dirs, then the other app dirs, then optional staging.
+  const apiDirs = applications.filter((app) => app.kind === 'api').map((app) => app.appDir);
+  const otherDirs = applications.filter((app) => app.kind !== 'api').map((app) => app.appDir);
+  const directories = [...apiDirs, 'packages/contracts', 'capabilities', 'infrastructure/local', 'docs', ...otherDirs];
+  if (blueprint.deployment.environments.includes('staging')) directories.push('infrastructure/staging');
+
   return {
     project: blueprint.project.slug,
     generationMode: allModular ? 'modular-overlay' : 'baseline-copy',
@@ -72,10 +86,8 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
     gates: expectedGates(blueprint, starters),
     designSystem: blueprint.designSystem,
     directories,
-    starterSources: {
-      api: sourceFor(stack.api),
-      ...(stack.web ? { web: sourceFor(stack.web) } : {}),
-      ...(stack.mobile ? { mobile: sourceFor(stack.mobile) } : {}),
-    },
+    applications,
+    // Derived from applications (id -> source); byte-identical for the sugar.
+    starterSources: Object.fromEntries(applications.map((app) => [app.id, app.source])),
   };
 }

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { resolveStack } from './applications.mjs';
+import { resolveApplications } from './applications.mjs';
 
 export const STARTER_IDS = Object.freeze(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
 const KINDS = new Set(['api', 'web', 'mobile']);
@@ -57,8 +57,8 @@ export function validateManifestConsistency(starters, capabilities) {
 }
 
 export function selectedStarterIds(blueprint) {
-  const stack = resolveStack(blueprint);
-  return [stack.api, stack.web, stack.mobile].filter(Boolean);
+  // Distinct runtimes across all applications (multi-surface may repeat a runtime).
+  return [...new Set(resolveApplications(blueprint).map((app) => app.runtime))];
 }
 
 /** Starter ids whose baseline follows the modular composition contract. */
