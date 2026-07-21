@@ -2,21 +2,28 @@
 
 ## Action unique
 
-**Auditer les écarts entre l’architecture V2 adoptée et l’implémentation actuelle.**
+**Rendre le Platform Contract exécutable pour la famille API.**
 
-L’adoption documentaire V2 est faite. L’étape suivante est un audit d’écart, sans refonte de code :
+Définir un Canonical System Model minimal et une suite de conformité commune NestJS↔Spring, avec les
+premiers tests de parité observable — sans extraire de nouvel adapter ni modifier les contrats.
 
-1. runtimes (`starters/`) face au [Platform Contract](../specifications/PLATFORM_CONTRACT.md) et à la
-   [Runtime Adapter Specification](../specifications/RUNTIME_ADAPTER_SPECIFICATION.md) ;
-2. capabilities face à la [Capability Specification](../specifications/CAPABILITY_SPECIFICATION.md) ;
-3. contrats face à la [Contract Architecture](../architecture/CONTRACT_ARCHITECTURE.md) ;
-4. Factory et blueprint face à la
-   [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md) et au
-   [Composition Model](../specifications/COMPOSITION_MODEL.md) ;
-5. goldens et gates face au [Conformance Model](../specifications/CONFORMANCE_MODEL.md).
+C'est le levier le plus fort : deux adapters API existent déjà et bootent ; les rendre **prouvablement
+conformes et équivalents** débloque toute la stratégie de parité (voir
+[`docs/audits/`](../audits/README.md)).
 
-Livrable attendu : une matrice d’écarts fondée sur des preuves exécutables, pas sur une déclaration
-documentaire.
+Périmètre :
+
+1. Canonical System Model minimal (cible de compilation du blueprint) ;
+2. suite Platform Contract exécutable pour la catégorie API
+   ([Platform Contract](../specifications/PLATFORM_CONTRACT.md)) ;
+3. premiers tests de parité observable NestJS↔Spring ;
+4. émission de `enistere.conformance.json`.
+
+## Prérequis opérationnel
+
+Bump des CVE transitives (`brace-expansion`, `js-yaml`, `body-parser`) pour rétablir une CI verte, puis
+consolidation de PR #189 (socle) et PR #190 (docs V2) sur `main`. Détail : Phase 0 de la
+[roadmap](../audits/PRIORITIZED_REFACTORING_ROADMAP.md).
 
 ## Interdictions temporaires
 

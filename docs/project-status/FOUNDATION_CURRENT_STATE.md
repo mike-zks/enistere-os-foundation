@@ -28,20 +28,25 @@ Décision de refondation : [`ADR-044`](../adr/ADR-044-enistere-foundation-v2-arc
 
 Ces éléments sont des actifs à auditer, non la définition de la cible.
 
-## Écarts
+## Maturité réelle
 
-- topologie trop limitée ;
-- parité non formalisée ;
-- contrats orientés TypeScript ;
-- starters inégalement alignés ;
-- lifecycle incomplet ;
-- statuts insuffisamment fondés sur une conformité commune.
+Niveau **`Bootable`** du [modèle de conformité](../specifications/CONFORMANCE_MODEL.md) : les
+compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est prouvée `Conformant` ni
+`Product-equivalent`. Audit complet : [`docs/audits/`](../audits/README.md).
+
+## Écarts (mesurés par l'audit)
+
+- **P0** — pas de suite Platform Contract exécutable ni de test de parité ; contrats centrés TypeScript
+  (pas de génération Java/Dart) ; pas de Canonical System Model (blueprint `version:"1"`, capabilities en
+  enum figé).
+- **P1** — Lifecycle Manager absent ; parité Web (Angular base-only) et Mobile (Flutter base-only)
+  rompues ; Files absent côté Spring ; primitives non modélisées ; capabilities cibles manquantes
+  (user-management, audit, events, notifications, observability) ; gate `audit` rouge (CVE transitives).
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
-être requalifiés contre le [modèle de conformité](../specifications/CONFORMANCE_MODEL.md) V2.
+être requalifiés contre le modèle de conformité V2.
 
 ## Action
 
-Auditer les écarts entre l’architecture V2 adoptée et l’implémentation actuelle, sans refondre le code.
-
-Voir [`NEXT_ACTIONS.md`](NEXT_ACTIONS.md).
+Audit d'écart livré ([`docs/audits/`](../audits/README.md)). Prochaine action : voir
+[`NEXT_ACTIONS.md`](NEXT_ACTIONS.md).
