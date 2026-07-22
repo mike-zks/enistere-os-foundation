@@ -41,10 +41,18 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
   enum figé).
 - **P1** — Lifecycle Manager absent ; parité Web (Angular base-only) et Mobile (Flutter base-only)
   rompues ; Files absent côté Spring ; primitives non modélisées ; capabilities cibles manquantes
-  (user-management, audit, events, notifications, observability) ; gate `audit` rouge (CVE transitives).
+  (user-management, audit, events, notifications, observability).
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
 être requalifiés contre le modèle de conformité V2.
+
+## CI et dépendances
+
+La CI de `main` est verte. La vague d'advisories CVE-2026 est traitée sans downgrade ni désactivation
+d'audit : correctifs réels dans les lockfiles, et exceptions **documentées, scopées et datées** pour
+`sharp` / `next` et la chaîne `@hono/node-server` (aucun correctif upstream), via
+`factory/quality/audit-exceptions.json`. Ces exceptions se lèvent par des missions d'upgrade Next et
+Angular CLI suivies dans [`NEXT_ACTIONS.md`](NEXT_ACTIONS.md).
 
 ## Action
 
