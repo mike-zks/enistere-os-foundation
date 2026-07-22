@@ -2,6 +2,9 @@ import { matchProfile } from './profiles.mjs';
 import { selectedStarterIds } from './starters.mjs';
 import { adapterVersionsFor } from './target-adapters.mjs';
 import { resolveApplications, resolveStack } from './applications.mjs';
+import { normalizeBlueprint } from '../blueprint/normalize.mjs';
+import { validateCanonicalSystem } from '../blueprint/validate.mjs';
+import { errors, formatDiagnostics, hasErrors } from '../model/diagnostics.mjs';
 
 /** Gates a generated app runs, in the order a verification pass applies them. */
 const GATE_COMMANDS = Object.freeze(['install', 'test', 'build', 'verify']);
@@ -36,6 +39,16 @@ export function expectedGates(blueprint, starters) {
  * `starters` supplies the manifests used to report the expected gates.
  */
 export function buildGenerationPlan(blueprint, { modularStarters = [], starters = [] } = {}) {
+  // The blueprint is normalized to the Canonical System Model (ADR-045) and the
+  // model is validated before planning: the planner consumes the CSM, never the
+  // raw blueprint's application shape. Output stays byte-identical to the legacy
+  // path (the CSM applications are the resolved blueprint applications).
+  const system = normalizeBlueprint(blueprint);
+  const diagnostics = validateCanonicalSystem(system);
+  if (hasErrors(diagnostics)) {
+    throw new Error(`Invalid canonical system:\n- ${errors(diagnostics).map((d) => formatDiagnostics([d])).join('\n- ')}`);
+  }
+
   const stack = resolveStack(blueprint);
   const modular = new Set(modularStarters);
   const allModular = selectedStarterIds(blueprint).every((starterId) => modular.has(starterId));
@@ -46,9 +59,10 @@ export function buildGenerationPlan(blueprint, { modularStarters = [], starters 
   const sourceFor = (starterId) => starterById.get(starterId)?.composition?.baseSource ?? `starters/${starterId}`;
   const selectedTargets = selectedStarterIds(blueprint);
 
-  // Canonical per-application plan. For the single-surface sugar each app id IS
-  // its slot (api/web/mobile), so `apps/<id>` and starterSources stay identical.
-  const applications = resolveApplications(blueprint).map((app) => ({
+  // Canonical per-application plan, derived from the CSM. For the single-surface
+  // sugar each app id IS its slot (api/web/mobile), so `apps/<id>` and
+  // starterSources stay identical.
+  const applications = system.applications.map((app) => ({
     id: app.id,
     kind: app.kind,
     runtime: app.runtime,

@@ -10,6 +10,7 @@ import { assessCapabilitySupport, buildCapabilityMatrix, loadCapabilityManifests
 import { assessProfile, getProfile, listProfiles, profileStarterIds } from '../engine/profiles.mjs';
 import { loadStarterManifests, modularStarterIds, selectedStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../engine/dependencies.mjs';
+import { normalizeBlueprint } from '../blueprint/normalize.mjs';
 
 const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
@@ -156,7 +157,7 @@ async function main() {
       if (!support.ready) process.exitCode = 1;
       return;
     }
-    if (command === 'plan') { console.log(JSON.stringify({ ...plan, capabilitySupport: support }, null, 2)); return; }
+    if (command === 'plan') { console.log(JSON.stringify({ ...plan, capabilitySupport: support, canonicalSystem: normalizeBlueprint(blueprint) }, null, 2)); return; }
     if (!second) throw new Error('generate requires an output directory');
     const output = resolve(second);
     await generateProject(blueprint, output);
