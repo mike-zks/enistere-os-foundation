@@ -47,8 +47,11 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
 
 ## Statut des chantiers V2
 
-- `Canonical System Model minimal` : **IMPLEMENTED_AND_TESTED** (ADR-045).
-- `Full Blueprint V2` : **NOT_IMPLEMENTED**.
+- `Canonical System Model` : **IMPLEMENTED_AND_USED** (ADR-045).
+- `Resolved System Model` : **IMPLEMENTED_AND_USED** (ADR-046).
+- `Single Factory Pipeline` : **IMPLEMENTED_AND_TESTED** (ADR-046).
+- `Legacy Internal Pipeline` : **REMOVED** (ADR-046).
+- `Full Blueprint V2` : **PARTIAL**.
 - `Platform Contract executable` : **NOT_IMPLEMENTED**.
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent

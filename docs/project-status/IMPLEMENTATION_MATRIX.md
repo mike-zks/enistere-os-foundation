@@ -10,7 +10,10 @@
 | Capacité | État | Limite actuelle |
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
-| Canonical System Model minimal | **Implémenté et testé** (ADR-045) | consommé par le planning ; adapter legacy transitoire pour le reste du plan/générateur |
+| Pipeline canonique unique | **Implémenté et testé** (ADR-046) | blueprint → CSM → ResolvedSystem → Plan → génération ; pipeline legacy supprimé |
+| Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
+| Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
+| Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
 | `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 21 générables |
 | Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |

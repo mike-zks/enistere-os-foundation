@@ -2,12 +2,12 @@
 
 ## Action unique
 
-**Rendre exécutable le Platform Contract minimal de la famille API** — sans encore modifier les
-fonctionnalités Auth, RBAC ou Files.
+**Rendre exécutable le Platform Contract minimal de la famille API sur le pipeline canonique unique** —
+sans encore modifier les fonctionnalités Auth, RBAC ou Files.
 
-Le [Canonical System Model minimal](../../factory/model/CANONICAL_SYSTEM_MODEL.md) est livré
-([ADR-045](../adr/ADR-045-canonical-system-model.md)) et consommé par le planning : la représentation
-interne normalisée existe. L'étape suivante rend la conformité **mesurable** sur la famille API.
+Le pipeline canonique unique est livré ([ADR-046](../adr/ADR-046-single-canonical-factory-pipeline.md)) :
+blueprint → CSM → ResolvedSystem → Plan → génération, le blueprint n'étant plus lu après ingestion.
+L'étape suivante rend la conformité **mesurable** sur la famille API, en consommant ce pipeline.
 
 C'est le levier le plus fort : deux adapters API (NestJS, Spring) existent déjà et bootent ; les rendre
 **prouvablement conformes et équivalents** débloque toute la stratégie de parité (voir
@@ -26,7 +26,7 @@ Cette étape introduit un **nouveau standard de contrat** (Platform Contract ex�
 [`ARCHITECTURE_GOVERNANCE.md`](../governance/ARCHITECTURE_GOVERNANCE.md) et la
 [Definition of Ready](../governance/DEFINITION_OF_READY.md), **avant toute implémentation** :
 
-- produire l'ADR actant le standard (prochain numéro libre : **ADR-046**) ;
+- produire l'ADR actant le standard (prochain numéro libre : **ADR-047**) ;
 - écrire la spécification et les critères de conformité (spécification avant implémentation) ;
 - déclarer targets, dépendances, conflits et migration ;
 - aucune readiness sans preuve exécutable ([Definition of Done](../governance/DEFINITION_OF_DONE.md)).
