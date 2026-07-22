@@ -49,7 +49,7 @@ describe('canonical system — normalizer', () => {
     assert.equal(csm.architecture.style, 'standard');
     assert.deepEqual(csm.applications.map((a) => [a.id, a.kind, a.runtime]), [['api', 'api', 'nestjs']]);
     assert.deepEqual(csm.applications[0].consumes, []);
-    assert.deepEqual(csm.applications[0].capabilities, ['base']);
+    assert.deepEqual(csm.capabilities.map((c) => c.id), ['base']);
     assert.equal(csm.source.blueprintVersion, '1');
     assert.match(csm.source.digest, /^[0-9a-f]{64}$/);
     assert.deepEqual(validateCanonicalSystem(csm), []);
@@ -82,7 +82,7 @@ describe('canonical system — normalizer', () => {
     const csm = normalizeBlueprint(blueprint({ stack: { api: 'nestjs', web: 'nextjs' }, capabilities: ['base', 'auth', 'rbac', 'files'] }));
     assert.deepEqual(csm.capabilities.map((c) => c.id), ['base', 'auth', 'rbac', 'files']);
     const appIds = csm.applications.map((a) => a.id);
-    for (const capability of csm.capabilities) assert.deepEqual(capability.targets, appIds);
+    for (const capability of csm.capabilities) assert.deepEqual(capability.requestedTargets, appIds);
     assert.deepEqual(validateCanonicalSystem(csm), []);
   });
 
@@ -129,7 +129,7 @@ describe('canonical system — invariants', () => {
   it('rejects a capability targeting an unknown application', () => {
     const csm = system({
       applications: [canonicalApplication({ id: 'api', kind: 'api', runtime: 'nestjs' })],
-      capabilities: [canonicalCapability({ id: 'auth', targets: ['ghost'] })],
+      capabilities: [canonicalCapability({ id: 'auth', requestedTargets: ['ghost'] })],
     });
     assert.ok(codes(validateCanonicalSystem(csm)).includes(CSM_DIAGNOSTIC_CODES.INVALID_CAPABILITY_TARGET));
   });
