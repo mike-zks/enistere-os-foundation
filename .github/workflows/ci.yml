@@ -115,8 +115,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: npm audit (posture 0 vulnérabilité)
-        run: npm audit
+      - name: npm audit (exceptions documentées, scopées et datées — sans désactivation globale)
+        run: node factory/quality/scripts/audit-check.mjs . --targets nextjs
       - name: dépendances interdites absentes (Axios, Zustand)
         run: |
           if npm ls axios >/dev/null 2>&1; then

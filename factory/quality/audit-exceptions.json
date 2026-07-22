@@ -101,6 +101,56 @@
       "justification": "Même cause racine que `uuid` ; corrigé par le même upgrade Expo.",
       "deadline": "2026-10-31",
       "review": "Réévaluer avec l'upgrade Expo."
+    },
+    {
+      "package": "sharp",
+      "maxSeverity": "high",
+      "appliesTo": ["nextjs"],
+      "advisory": "GHSA-f88m-g3jw-g9cj — sharp inherited vulnerabilities in libvips (CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591)",
+      "scope": "Dépendance OPTIONNELLE de Next pour l'optimisation d'images (libvips). Advisory de la vague CVE-2026 publiée le 2026-07-21 (racine était à 0 le 2026-07-19). Vecteur : traitement d'images non fiables ; les gates tournent sous Linux CI sans traitement d'image non fiable, et le starter n'expose que l'optimisation next/image.",
+      "justification": "Aucun correctif upstream disponible : le fix est sharp 0.35.0, hors de la plage `sharp ^0.34.5` épinglée par Next ; Next `latest` (16.2.11) épingle toujours `^0.34.5` et il n'existe pas de Next 17. Sous npm 11, un override sur cette dépendance optionnelle est soit ignoré, soit force le retrait de sharp (régression de l'optimisation d'images). La correction relève d'une mission d'upgrade Next dédiée dès qu'une version supportant sharp 0.35 est publiée.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer lors de la prochaine mission d'upgrade Next : vérifier si un Next 16.x/17 promeut sharp ≥ 0.35.0."
+    },
+    {
+      "package": "next",
+      "maxSeverity": "high",
+      "appliesTo": ["nextjs"],
+      "advisory": "Propagation de l'advisory sharp (GHSA-f88m-g3jw-g9cj)",
+      "scope": "Next est signalé high uniquement parce qu'il dépend de la version vulnérable de sharp. Même cause racine et même échéance que `sharp`.",
+      "justification": "Aucun Next publié n'utilise sharp ≥ 0.35.0 (voir exception `sharp`). Corrigé par la même mission d'upgrade Next.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Next (même échéance que `sharp`)."
+    },
+    {
+      "package": "@hono/node-server",
+      "maxSeverity": "moderate",
+      "appliesTo": ["angular"],
+      "advisory": "GHSA-frvp-7c67-39w9 — path traversal dans serve-static sur Windows via backslash encodé (%5C)",
+      "scope": "Transitif via `@angular/cli` → `@modelcontextprotocol/sdk` → `@hono/node-server`. Outillage de développement Angular (serveur MCP), jamais exécuté par `ng build`, ni par un artefact de production, ni par les gates Linux. Vecteur limité à Windows.",
+      "justification": "Aucun correctif compatible : `@modelcontextprotocol/sdk` exige `@hono/node-server ^1.19.9` (v1), et le fix n'existe qu'en v2.0.5+ (majeur, hors plage). Le seul chemin est un upgrade majeur `@angular/cli`, traité en mission dédiée (`docs/governance/DEPENDENCY_POLICY.md`), qui promeut aussi un `@modelcontextprotocol/sdk` supportant hono v2.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer lors de la mission d'upgrade Angular CLI : vérifier que la chaîne @angular/cli → @modelcontextprotocol/sdk tire @hono/node-server ≥ 2.0.5."
+    },
+    {
+      "package": "@modelcontextprotocol/sdk",
+      "maxSeverity": "moderate",
+      "appliesTo": ["angular"],
+      "advisory": "Propagation de l'advisory @hono/node-server (GHSA-frvp-7c67-39w9)",
+      "scope": "Signalé uniquement parce qu'il dépend de `@hono/node-server` v1 vulnérable. Outillage de build Angular.",
+      "justification": "Même cause racine que `@hono/node-server` ; corrigé par le même upgrade Angular CLI.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Angular CLI."
+    },
+    {
+      "package": "@angular/cli",
+      "maxSeverity": "moderate",
+      "appliesTo": ["angular"],
+      "advisory": "Propagation de l'advisory @hono/node-server (via @modelcontextprotocol/sdk)",
+      "scope": "Signalé uniquement par propagation de la chaîne hono. Outillage de build Angular, jamais au runtime de l'application.",
+      "justification": "Même cause racine que `@hono/node-server` ; corrigé par le même upgrade Angular CLI.",
+      "deadline": "2026-10-31",
+      "review": "Réévaluer avec l'upgrade Angular CLI."
     }
   ]
 }

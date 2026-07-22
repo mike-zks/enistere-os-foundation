@@ -1,0 +1,16 @@
+{
+  "version": "1",
+  "project": { "name": "Kivvoo", "slug": "kivvoo" },
+  "topology": "monorepo",
+  "architecture": { "style": "modular-monolith", "evolutionTarget": "microservices" },
+  "designSystem": true,
+  "applications": [
+    { "id": "core-api", "kind": "api", "runtime": "nestjs" },
+    { "id": "shop-web", "kind": "web", "runtime": "nextjs", "audience": "customer", "consumes": ["core-api"] },
+    { "id": "admin-web", "kind": "web", "runtime": "angular", "audience": "internal", "consumes": ["core-api"] },
+    { "id": "buyer-mobile", "kind": "mobile", "runtime": "react-native", "audience": "customer", "consumes": ["core-api"] }
+  ],
+  "domain": { "entities": [] },
+  "capabilities": ["base"],
+  "deployment": { "environments": ["local", "staging"] }
+}
