@@ -11,7 +11,7 @@
 |---|---|
 | Foundation commit/tag | `<commit-or-tag>` |
 | Stack profile | `<profile>` |
-| Matrice | `docs/project-factory/STACK_PROFILES_MATRIX.md` |
+| Matrice | `docs/project-status/PROFILE_MATRIX.md` |
 | Processus | `docs/project-factory/DERIVED_PROJECT_PROCESS.md` |
 
 ## 2. Composition cible

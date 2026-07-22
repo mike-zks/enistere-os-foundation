@@ -1,5 +1,12 @@
 # Matrice des profils (R7)
 
+> **État d'implémentation, pas architecture cible.** Ce document décrit ce que le moteur de composition
+> supporte *aujourd'hui*. La topologie « une API obligatoire, un Web et un Mobile optionnels » est un
+> héritage d'[ADR-042](../adr/ADR-042-ai-native-project-factory-architecture.md), remplacée comme cible
+> par [ADR-044](../adr/ADR-044-enistere-foundation-v2-architecture-reset.md) et la
+> [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md). L'écart entre les
+> deux sera mesuré par l'audit d'écart (voir [`NEXT_ACTIONS.md`](NEXT_ACTIONS.md)).
+
 Un **profil** est une composition *nommée* de `{api, web?, mobile?, capabilities}`.
 
 Il ne remplace pas la matrice des capabilities : celle-ci dit ce qu'une capability vaut sur une

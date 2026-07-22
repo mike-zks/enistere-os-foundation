@@ -18,7 +18,7 @@ Décrire le besoin ou l'opportunité.
 
 ## Lien roadmap / spec / ADR
 
-- **Roadmap §** : (ex. §13, §22 — ou "non référencé" — voir `strategy/04_ROADMAP_GLOBAL.md`)
+- **Roadmap §** : (ex. §13, §22 — ou "non référencé" — voir `docs/roadmap/ENISTERE_FACTORY_V2_ROADMAP.md`)
 - **ADR lié** : (ex. ADR-013 — ou "ADR à rédiger")
 - **Section specification active** : (si applicable)
 

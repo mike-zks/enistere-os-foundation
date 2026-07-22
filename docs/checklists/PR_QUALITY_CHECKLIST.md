@@ -21,7 +21,7 @@
 - [ ] `node factory/quality/scripts/quality-gates.mjs run docs` — whitespace + liens internes
 - [ ] Liens internes cohérents (fichiers référencés existent)
 - [ ] Statuts dans `IMPLEMENTATION_MATRIX.md` cohérents avec les preuves documentées
-- [ ] `SESSION_HANDOFF.md` mis à jour si l'état courant change
+- [ ] `FOUNDATION_CURRENT_STATE.md` mis à jour si l'état courant change
 
 Audit root recommandé mais non bloquant.
 

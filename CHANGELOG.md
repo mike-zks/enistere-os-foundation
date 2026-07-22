@@ -4,6 +4,23 @@ Les changements détaillés sont disponibles dans Git et les GitHub Releases.
 
 ## Unreleased
 
+### Architecture Reset V2 — adoption du corpus documentaire
+
+- Adoption du corpus documentaire Enistere Foundation V2 comme base canonique : `docs/strategy/`,
+  `docs/architecture/`, `docs/specifications/`, `docs/governance/`, `docs/roadmap/`.
+- `docs/governance/SOURCE_OF_TRUTH.md` devient la référence officielle d'autorité documentaire.
+- Ajout d'[ADR-044](docs/adr/ADR-044-enistere-foundation-v2-architecture-reset.md) : l'unité centrale
+  d'Enistere devient le système défini par un blueprint, non le starter autonome. ADR-042 est supersédé.
+- Portage des règles opérationnelles actives sans équivalent dans le corpus vers
+  `docs/governance/{DEPENDENCY_POLICY,ENGINEERING_STANDARDS,GIT_STRATEGY}.md` et la section
+  « Invariants applicables » de `docs/architecture/SECURITY_ARCHITECTURE.md`.
+- Suppression de l'ancienne architecture documentaire concurrente : dossier `strategy/`, matrices de
+  profils dupliquées, guide et checklist de statut de core, rapports V1 et note de session. L'historique
+  reste disponible via Git, le tag `foundation-v1.0.0` et les GitHub Releases.
+- Phase déclarée : `ARCHITECTURE_RESET_V2`. Action unique : auditer les écarts entre l'architecture V2
+  adoptée et l'implémentation actuelle.
+- Aucun changement de code, de schéma, de manifeste, de dépendance ou de workflow.
+
 ### Capability Packs 2 — RBAC Spring autonome
 
 - Ajout de l'overlay RBAC Spring au-dessus de `base + auth`, sans modification du payload Auth.

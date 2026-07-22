@@ -66,6 +66,6 @@ aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §
 
 - Goldens runtime : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`, `spring-auth-rbac`
   (`factory/quality/scripts/golden-runtime.mjs`).
-- Non-régression V1 : `docs/project-status/RBAC_V1_NON_REGRESSION.md`.
+- Non-régression V1 : historique Git et GitHub Releases (tag `foundation-v1.0.0`).
 - Tests de composition : `factory/test/rbac-composition.test.mjs` et
   `factory/test/composition-seams.test.mjs`.

@@ -1,29 +1,28 @@
-# Prochaines actions
+# Prochaine action
 
 ## Action unique
 
-**Capability Packs 2 — Files Spring**
+**Auditer les écarts entre l’architecture V2 adoptée et l’implémentation actuelle.**
 
-Auth et RBAC Spring sont désormais autonomes et composés. Étendre `files` à Spring avant de passer
-à Angular et Flutter, sans
-dupliquer le contrat public ni contourner les seams de la Factory :
+L’adoption documentaire V2 est faite. L’étape suivante est un audit d’écart, sans refonte de code :
 
-1. composer Files Spring au-dessus de `base + auth + rbac` avec les mêmes DTO/opérations publiques ;
-2. ajouter le golden généré et les gates Spring ;
-3. conserver `files` indépendant des capacités futures d'admin, sync et offline ;
-4. documenter la parité et les écarts avant de passer la target à `ready`.
+1. runtimes (`starters/`) face au [Platform Contract](../specifications/PLATFORM_CONTRACT.md) et à la
+   [Runtime Adapter Specification](../specifications/RUNTIME_ADAPTER_SPECIFICATION.md) ;
+2. capabilities face à la [Capability Specification](../specifications/CAPABILITY_SPECIFICATION.md) ;
+3. contrats face à la [Contract Architecture](../architecture/CONTRACT_ARCHITECTURE.md) ;
+4. Factory et blueprint face à la
+   [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md) et au
+   [Composition Model](../specifications/COMPOSITION_MODEL.md) ;
+5. goldens et gates face au [Conformance Model](../specifications/CONFORMANCE_MODEL.md).
 
-La matrice de profils (R7) donne la cible mesurable de cette action : faire passer les profils
-`planned` Angular/Flutter de `factory/engine/profiles.mjs` à `supported`, puis à `ready` lorsqu'un golden les prouve.
-`enistere profiles` mesure l'avancement, et `factory/test/profiles.test.mjs` refuse tout statut que
-la matrice réelle ne soutient pas.
+Livrable attendu : une matrice d’écarts fondée sur des preuves exécutables, pas sur une déclaration
+documentaire.
 
-## Ensuite
+## Interdictions temporaires
 
-1. Capability Packs 2 — parité Angular + Flutter (profils `planned` → `ready` avec overlay et golden).
-2. R8 — golden runtimes étendus avec démarrage applicatif complet sur les verticales prêtes. Un
-   profil ne passe à `ready` que lorsqu'un golden le prouve : aucune promotion automatique.
-3. R9 — compilateur de domaine CRUD NestJS/Spring.
-4. R10 — upgrades et migrations blueprint.
-5. R11 — distribution CLI/packages.
-6. R12 — métriques d'adoption et feedback projets dérivés.
+- nouvelle capability ;
+- nouveau runtime ;
+- nouvelle topologie ;
+- promotion de profil ;
+- extension du Domain Compiler ;
+- microservices.

@@ -16,7 +16,9 @@
 | 039 | Argon2id | APIs |
 | 040 | redaction/observabilité | Factory et starters |
 | 041 | Maven pour Spring | starter Spring |
-| 042 | Project Factory AI-native | architecture active |
+| 042 | Project Factory AI-native | **supersédé par 044** ; sortie de `cores/` et gouvernance des agents acquises |
+| 043 | Versioning et migration des artefacts | politique active, complète le lifecycle V2 |
+| 044 | Refondation d'architecture V2 | architecture cible active |
 
 ## Règles
 

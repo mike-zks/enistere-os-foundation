@@ -76,7 +76,7 @@ La décision doit être revue si :
 
 ## 9. Validation
 
-- [ ] option retenue cohérente avec `STACK_PROFILES_MATRIX.md` ;
+- [ ] option retenue cohérente avec `docs/project-status/PROFILE_MATRIX.md` ;
 - [ ] alternatives principales documentées ;
 - [ ] adaptations explicites ;
 - [ ] risques acceptés ;

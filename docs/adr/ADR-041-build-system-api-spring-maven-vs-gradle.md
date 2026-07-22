@@ -152,7 +152,7 @@ Maven est retenu pour V1 principalement pour :
 - `pom.xml` déterministe — pas de DSL supplémentaire à maîtriser au-delà du XML ;
 - meilleure couverture documentation Spring Security, Spring Data JPA, Flyway ;
 - OWASP Dependency Check — plugin Maven bien documenté pour les audits de sécurité CI ;
-- cohérence avec `strategy/06_DEPENDENCY_STRATEGY.md §5.2` — préférer les standards de
+- cohérence avec `docs/governance/DEPENDENCY_POLICY.md` — préférer les standards de
   l'écosystème.
 
 Cette stratégie réduit la complexité du starter Spring Boot et rend les conventions backend plus
@@ -244,7 +244,7 @@ La mission Spring Boot 5 (Tests + CI) devra prévoir :
 - `pom.xml` gère les versions via Spring Boot Parent POM BOM ;
 - les dépendances gérées par le BOM n'ont pas besoin de version explicite ;
 - les dépendances hors BOM doivent avoir une version explicite et documentée ;
-- `strategy/06_DEPENDENCY_STRATEGY.md §12.2` : `pom.xml` est le lockfile Maven V1 ;
+- `docs/governance/DEPENDENCY_POLICY.md` : `pom.xml` est le lockfile Maven V1 ;
 - les mises à jour de version passent par `mvn versions:display-dependency-updates`.
 
 ## 17. Impact sur les projets dérivés
@@ -281,7 +281,7 @@ Ils doivent :
 - Les dépendances hors BOM ont une version explicite et documentée.
 - Gradle n'est utilisé que par exception documentée dans un projet dérivé.
 - La fondation ne maintient pas Maven et Gradle en parallèle dans V1.
-- Toute dépendance Java ajoutée respecte `strategy/06_DEPENDENCY_STRATEGY.md`.
+- Toute dépendance Java ajoutée respecte `docs/governance/DEPENDENCY_POLICY.md`.
 
 ## 20. Conditions de révision future
 

@@ -1,6 +1,6 @@
 # Prompts IA — Catalogue gouverné
 
-> Références : `strategy/10_AI_STRATEGY.md`, `strategy/05_EXECUTION_CHAIN.md`,
+> Références : `docs/architecture/AI_GOVERNANCE_AND_AGENT_ARCHITECTURE.md`, `docs/governance/`,
 > `factory/quality/AI_PROMPT_GOVERNANCE.md`.
 
 ## Objectif
