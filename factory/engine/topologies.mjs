@@ -13,7 +13,7 @@
  * - `worker` / `gateway` / `bff` : declared, `planned` — refused at generation
  *              until their distributed capability packs are proven (Phase D).
  *
- * `slot` maps a kind to the legacy `stack.{api,web,mobile}` slot for the
+ * `slot` maps a kind to the `stack.{api,web,mobile}` sugar slot for the
  * single-surface sugar; kinds without a slot (worker/gateway/bff) exist only in
  * the canonical `applications[]` form.
  */

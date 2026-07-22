@@ -299,9 +299,9 @@ async function writePrismaComposition(appDirectory, composition, capabilities) {
  * Returns lock entries ({ capability, target, version, digest }) and the
  * verification argv lists per app kind.
  */
-export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, output, capabilityManifests }) {
+export async function applyCapabilityOverlays({ repoRoot, plan, output, capabilityManifests }) {
   const byId = new Map(capabilityManifests.map((manifest) => [manifest.id, manifest]));
-  const orderedCapabilities = CAPABILITY_IDS.filter((id) => blueprint.capabilities.includes(id));
+  const orderedCapabilities = CAPABILITY_IDS.filter((id) => plan.capabilities.includes(id));
   // Iterate the canonical per-application plan (keyed by app id). Falls back to
   // deriving apps from starterSources for callers that only build that map.
   const apps = plan.applications
@@ -364,7 +364,7 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
     }
     // Domain compiler (R9): entities become a synthetic capability rendered by
     // the target adapter, composed through the SAME prisma + integration seams.
-    const domain = buildDomainContribution(blueprint.domain?.entities ?? [], getTargetAdapter(starterId));
+    const domain = buildDomainContribution(plan.domain?.entities ?? [], getTargetAdapter(starterId));
     if (domain) {
       for (const file of domain.files) await writeDomainFile(appDirectory, file);
       if (domain.prisma) {
