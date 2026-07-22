@@ -1,15 +1,12 @@
 /**
- * Blueprint ingestion — normalizes the current blueprint into the Canonical
- * System Model (ADR-045).
+ * Blueprint ingestion — normalizes the current blueprint into the complete
+ * Canonical System Model (ADR-045, ADR-046).
  *
- * This is a PURE translation: it maps the accepted blueprint (either the
- * single-surface `stack` sugar or the canonical `applications[]` form) to the CSM
- * without introducing any new implicit business decision. The two blueprint
- * surfaces resolve to the SAME model. Support/`not-applicable` resolution stays in
- * the existing capability engine (transitional, documented in ADR-045).
- *
- * It reuses `engine/applications.mjs` for the authoritative surface resolution, so
- * a stack blueprint and its `applications[]` equivalent normalize identically.
+ * This is the ONLY layer that reads the raw blueprint. It maps the accepted
+ * blueprint (single-surface `stack` sugar OR canonical `applications[]`) to a
+ * complete CSM — metadata, architecture, applications, capabilities with their
+ * requested targets, domain, environments and policies — so that no downstream
+ * layer needs the blueprint. Pure translation, no new implicit business decision.
  */
 
 import { resolveApplications } from '../engine/applications.mjs';
@@ -21,10 +18,9 @@ import {
 } from '../model/canonical-system.mjs';
 
 /**
- * Maps the blueprint architecture style to a CSM style. The current blueprint
- * declares `monolith | modular-monolith | microservices` (optional). `standard`
- * is the default; `microservices` maps to the reserved CSM style, which the
- * validator refuses — the model never silently downgrades an unsupported style.
+ * Maps the blueprint architecture style to a CSM style. `standard` is the
+ * default; `microservices` maps to the reserved CSM style, which the validator
+ * refuses — the model never silently downgrades an unsupported style.
  */
 function architectureStyle(blueprint) {
   switch (blueprint.architecture?.style) {
@@ -32,14 +28,14 @@ function architectureStyle(blueprint) {
     case 'microservices': return 'microservices';
     case 'monolith':
     case undefined: return 'standard';
-    default: return blueprint.architecture.style; // unknown → validator reports it
+    default: return blueprint.architecture.style;
   }
 }
 
 /**
- * The consumption edges of an application. An explicit `consumes` on the
- * canonical blueprint form is honored; otherwise every non-API application
- * consumes the API application(s) — the only edge the current model expresses.
+ * Requested consumption edges. An explicit `consumes` on the canonical blueprint
+ * form is honored; otherwise every non-API application requests the API(s) — the
+ * only intent the current model expresses. Resolution happens in the resolver.
  */
 function consumesFor(app, declaredById, apiIds) {
   const declared = declaredById.get(app.id)?.consumes;
@@ -47,33 +43,27 @@ function consumesFor(app, declaredById, apiIds) {
   return app.kind === 'api' ? [] : [...apiIds];
 }
 
-/**
- * Normalizes a validated blueprint into a CanonicalSystem. `file` and `profile`
- * are recorded in `source` for traceability; nothing on disk is read.
- */
+/** Normalizes a validated blueprint into a complete CanonicalSystem. */
 export function normalizeBlueprint(blueprint, { file } = {}) {
   const resolved = resolveApplications(blueprint);
   const declaredById = new Map((blueprint.applications ?? []).map((app) => [app.id, app]));
   const apiIds = resolved.filter((app) => app.kind === 'api').map((app) => app.id);
-  const capabilityIds = [...blueprint.capabilities];
+  const applicationIds = resolved.map((app) => app.id);
 
   const applications = resolved.map((app) => canonicalApplication({
     id: app.id,
     kind: app.kind,
     runtime: app.runtime,
     consumes: consumesFor(app, declaredById, apiIds),
-    // Blueprint capabilities are global: every application carries the selection.
-    // Per-target support/not-applicable stays resolved by the capability engine.
-    capabilities: [...capabilityIds],
     options: {},
   }));
 
-  const applicationIds = applications.map((app) => app.id);
-  const capabilities = capabilityIds.map((id) => canonicalCapability({
+  // Global blueprint capabilities → CSM capabilities whose requested targets are
+  // the whole system. The resolver narrows them to the effective per-target
+  // support; this layer only records the user intent.
+  const capabilities = [...blueprint.capabilities].map((id) => canonicalCapability({
     id,
-    // Targets are the applications the capability is requested for (the whole
-    // system today). Version/configuration are absent from the v1 blueprint.
-    targets: [...applicationIds],
+    requestedTargets: [...applicationIds],
     configuration: {},
   }));
 
@@ -85,12 +75,13 @@ export function normalizeBlueprint(blueprint, { file } = {}) {
   if (blueprint.profile !== undefined) source.profile = blueprint.profile;
 
   return canonicalSystem({
-    metadata: { name: blueprint.project.slug, version: '1.0.0' },
+    metadata: { name: blueprint.project.slug, displayName: blueprint.project.name, version: '1.0.0' },
     architecture: { style: architectureStyle(blueprint) },
     applications,
     capabilities,
+    domain: { entities: [...(blueprint.domain?.entities ?? [])] },
     environments,
-    policies: {},
+    policies: { designSystem: Boolean(blueprint.designSystem) },
     source,
   });
 }

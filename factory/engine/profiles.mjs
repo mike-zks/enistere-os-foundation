@@ -208,6 +208,27 @@ export function getProfile(name) {
 }
 
 /**
+ * Materializes a profile PRESET into a blueprint input. A profile is a preset and
+ * a shortcut — never an internal representation. It produces a blueprint that then
+ * flows through the normal canonical pipeline (normalize → CSM → resolve → plan);
+ * neither the planner nor the generator ever reads a profile.
+ */
+export function materializeProfileInput(profileId, { slug = profileId, name } = {}) {
+  const entry = getProfile(profileId);
+  return {
+    version: '1',
+    project: { name: name ?? slug, slug },
+    topology: 'monorepo',
+    designSystem: true,
+    stack: { api: entry.stack.api, web: entry.stack.web, mobile: entry.stack.mobile },
+    domain: { entities: [] },
+    capabilities: [...entry.capabilities],
+    deployment: { environments: ['local', 'staging'] },
+    profile: profileId,
+  };
+}
+
+/**
  * Recomputes a profile's status from the real capability matrix.
  *
  * A profile is composable when its capability dependencies hold and every
@@ -268,15 +289,18 @@ export function validateProfileRegistry(manifests, starters) {
   return issues;
 }
 
-/** Profile whose selection matches a blueprint exactly, or `null`. */
-export function matchProfile(blueprint) {
-  const stack = resolveStack(blueprint);
-  const capabilities = [...blueprint.capabilities].sort().join(',');
+/**
+ * Profile whose selection matches a resolved `{api, web, mobile}` stack and
+ * capability list exactly, or `null`. Descriptive only: a profile is a preset and
+ * a traceability label, never the internal source of the composition.
+ */
+export function matchProfileSelection(stack, capabilities) {
+  const wanted = [...capabilities].sort().join(',');
   return PROFILES.find((entry) => (
-    entry.stack.api === stack.api
+    entry.stack.api === (stack.api ?? null)
     && entry.stack.web === (stack.web ?? null)
     && entry.stack.mobile === (stack.mobile ?? null)
-    && [...entry.capabilities].sort().join(',') === capabilities
+    && [...entry.capabilities].sort().join(',') === wanted
   )) ?? null;
 }
 

@@ -84,13 +84,25 @@ export function validateCanonicalSystem(system) {
     diagnostics.push(diagnostic(CODES.MISSING_API, 'a system must compose at least one API application', { path: 'applications' }));
   }
 
+  // Multi-app strategy (hybrid): multi-surface (several web/mobile on one API) is
+  // generatable; several APIs are not yet. Refuse the non-generatable topology
+  // explicitly rather than accepting it and generating a partial project.
+  const apiCount = applications.filter((app) => app.kind === MANDATORY_KIND).length;
+  if (apiCount > 1) {
+    diagnostics.push(diagnostic(
+      CODES.TOPOLOGY_NOT_GENERATABLE,
+      `multiple API applications are not generatable yet (${apiCount} declared)`,
+      { path: 'applications', details: { apiCount } },
+    ));
+  }
+
   (system?.capabilities ?? []).forEach((capability, index) => {
-    for (const target of capability.targets ?? []) {
+    for (const target of capability.requestedTargets ?? []) {
       if (!ids.has(target)) {
         diagnostics.push(diagnostic(
           CODES.INVALID_CAPABILITY_TARGET,
           `capability ${capability.id} targets unknown application ${target}`,
-          { path: `capabilities[${index}].targets`, details: { capability: capability.id, target } },
+          { path: `capabilities[${index}].requestedTargets`, details: { capability: capability.id, target } },
         ));
       }
     }
