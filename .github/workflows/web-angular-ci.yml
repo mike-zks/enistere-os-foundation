@@ -43,6 +43,5 @@ jobs:
         working-directory: starters/angular
         run: npm run build
 
-      - name: npm audit
-        working-directory: starters/angular
-        run: npm audit
+      - name: npm audit (exceptions documentées, scopées et datées — sans désactivation globale)
+        run: node factory/quality/scripts/audit-check.mjs starters/angular --targets angular
