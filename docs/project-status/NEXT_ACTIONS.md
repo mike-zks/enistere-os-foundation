@@ -2,32 +2,31 @@
 
 ## Action unique
 
-**Rendre le Platform Contract exécutable pour la famille API.**
+**Rendre exécutable le Platform Contract minimal de la famille API** — sans encore modifier les
+fonctionnalités Auth, RBAC ou Files.
 
-Définir un Canonical System Model minimal et une suite de conformité commune NestJS↔Spring, avec les
-premiers tests de parité observable — sans extraire de nouvel adapter ni modifier les contrats.
+Le [Canonical System Model minimal](../../factory/model/CANONICAL_SYSTEM_MODEL.md) est livré
+([ADR-045](../adr/ADR-045-canonical-system-model.md)) et consommé par le planning : la représentation
+interne normalisée existe. L'étape suivante rend la conformité **mesurable** sur la famille API.
 
-C'est le levier le plus fort : deux adapters API existent déjà et bootent ; les rendre **prouvablement
-conformes et équivalents** débloque toute la stratégie de parité (voir [`docs/audits/`](../audits/README.md)).
+C'est le levier le plus fort : deux adapters API (NestJS, Spring) existent déjà et bootent ; les rendre
+**prouvablement conformes et équivalents** débloque toute la stratégie de parité (voir
+[`docs/audits/`](../audits/README.md)).
 
 Périmètre :
 
-1. Canonical System Model minimal (cible de compilation du blueprint) ;
-2. suite Platform Contract exécutable pour la catégorie API
+1. suite Platform Contract exécutable pour la catégorie API, **consommant le CSM**
    ([Platform Contract](../specifications/PLATFORM_CONTRACT.md)) ;
-3. premiers tests de parité observable NestJS↔Spring ;
-4. émission de `enistere.conformance.json`.
+2. premiers tests de parité observable NestJS↔Spring ;
+3. émission de `enistere.conformance.json`.
 
 ## Cadrage gouvernance
 
-La base `main` est propre et la CI verte ; le prérequis opérationnel (remédiation CVE et consolidation V2)
-est **levé**.
+Cette étape introduit un **nouveau standard de contrat** (Platform Contract exécutable). Selon
+[`ARCHITECTURE_GOVERNANCE.md`](../governance/ARCHITECTURE_GOVERNANCE.md) et la
+[Definition of Ready](../governance/DEFINITION_OF_READY.md), **avant toute implémentation** :
 
-Cette mission introduit un **changement de modèle** (Canonical System Model) et un **nouveau standard de
-contrat** (Platform Contract exécutable). Selon [`ARCHITECTURE_GOVERNANCE.md`](../governance/ARCHITECTURE_GOVERNANCE.md)
-et la [Definition of Ready](../governance/DEFINITION_OF_READY.md), **avant toute implémentation** :
-
-- produire l'ADR actant ces deux choix (prochain numéro libre : **ADR-045**) ;
+- produire l'ADR actant le standard (prochain numéro libre : **ADR-046**) ;
 - écrire la spécification et les critères de conformité (spécification avant implémentation) ;
 - déclarer targets, dépendances, conflits et migration ;
 - aucune readiness sans preuve exécutable ([Definition of Done](../governance/DEFINITION_OF_DONE.md)).

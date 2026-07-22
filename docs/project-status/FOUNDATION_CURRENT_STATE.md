@@ -37,11 +37,19 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
 ## Écarts (mesurés par l'audit)
 
 - **P0** — pas de suite Platform Contract exécutable ni de test de parité ; contrats centrés TypeScript
-  (pas de génération Java/Dart) ; pas de Canonical System Model (blueprint `version:"1"`, capabilities en
-  enum figé).
+  (pas de génération Java/Dart). *Partiellement adressé* : un **Canonical System Model minimal**
+  ([ADR-045](../adr/ADR-045-canonical-system-model.md)) fournit désormais la représentation interne
+  normalisée consommée par le planning ; le Blueprint V2 complet (schéma, primitives, communications,
+  capabilities versionnées) reste **non implémenté**.
 - **P1** — Lifecycle Manager absent ; parité Web (Angular base-only) et Mobile (Flutter base-only)
   rompues ; Files absent côté Spring ; primitives non modélisées ; capabilities cibles manquantes
   (user-management, audit, events, notifications, observability).
+
+## Statut des chantiers V2
+
+- `Canonical System Model minimal` : **IMPLEMENTED_AND_TESTED** (ADR-045).
+- `Full Blueprint V2` : **NOT_IMPLEMENTED**.
+- `Platform Contract executable` : **NOT_IMPLEMENTED**.
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
 être requalifiés contre le modèle de conformité V2.
