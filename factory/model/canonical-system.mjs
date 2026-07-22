@@ -1,47 +1,46 @@
 /**
- * Canonical System Model (ADR-045) — the normalized internal representation of an
- * Enistere system.
+ * Canonical System Model (ADR-045, complété ADR-046) — la représentation interne
+ * normalisée de l'intention d'un système Enistere.
  *
- * The CSM is the frontier between the user blueprint and the Factory engine. It is
- * typed, deterministic and independent of the input format (YAML/JSON) and of the
- * templates. This module owns the SHAPE only: registries of allowed values,
- * frozen factories, and a deterministic serialization + digest. It is PURE — it
- * does not import the engine. The kind→runtime rules live in the engine's
- * `topologies.mjs` registry and are applied by the ingestion layer
- * (`factory/blueprint/`), which keeps a single source of truth.
+ * Le CSM est l'UNIQUE modèle d'intention consommé par la Factory après
+ * l'ingestion. Il est complet : tout ce dont le resolver, le planner et le
+ * générateur ont besoin en découle, de sorte qu'aucune couche ne relit le
+ * blueprint brut. Il est typé, profondément immuable et déterministe.
  *
- * Minimal by design (ADR-045 §Périmètre): the shape covers what the current
- * pipeline needs and reserves the V2 extensions without activating them.
+ * Ce module possède la FORME uniquement (registres, fabriques, sérialisation +
+ * digest). Il est PUR (n'importe pas le moteur) : les règles kind→runtime vivent
+ * dans `engine/topologies.mjs` et sont appliquées par l'ingestion
+ * (`factory/blueprint/`).
  */
 
 import { createHash } from 'node:crypto';
+import { deepFreeze } from './immutable.mjs';
 
-/** The CSM's own version (distinct from the blueprint schema version). */
+/** Version propre du CSM (distincte de la version de schéma du blueprint). */
 export const SYSTEM_API_VERSION = 'enistere.io/v1alpha1';
 
-/** Architecture styles the model supports today. */
+/** Styles d'architecture supportés aujourd'hui. */
 export const SUPPORTED_ARCHITECTURE_STYLES = Object.freeze(['standard', 'multi-client', 'modular-monolith']);
 
-/** Styles reserved in the type but explicitly not supported yet (refused by validation). */
+/** Styles réservés dans le type mais explicitement non supportés (refusés par la validation). */
 export const RESERVED_ARCHITECTURE_STYLES = Object.freeze(['service-oriented', 'microservices']);
 
-/** Every style the model can name (supported first, then reserved). */
+/** Tous les styles nommables (supportés puis réservés). */
 export const ARCHITECTURE_STYLES = Object.freeze([...SUPPORTED_ARCHITECTURE_STYLES, ...RESERVED_ARCHITECTURE_STYLES]);
 
-/** Application kinds the minimal CSM models. */
+/** Kinds d'application modélisés par le CSM minimal. */
 export const APPLICATION_KINDS = Object.freeze(['api', 'web', 'mobile']);
 
-/** Runtimes the CSM recognizes (the six Foundation runtimes). */
+/** Runtimes reconnus (les six runtimes Foundation). */
 export const RUNTIMES = Object.freeze(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
 
-/** Environment kinds the CSM recognizes. */
+/** Kinds d'environnement reconnus. */
 export const ENVIRONMENT_KINDS = Object.freeze(['local', 'staging', 'production']);
 
 /**
- * Recursively stringifies a value with object keys sorted, so the same model
- * always serializes to the same string. Array order is preserved (it is semantic
- * and the normalizer builds arrays deterministically). No timestamps, no absolute
- * paths, no randomness.
+ * Sérialisation récursive avec clés d'objet triées : un même modèle se sérialise
+ * toujours à l'identique. L'ordre des tableaux est préservé (sémantique, construit
+ * de façon déterministe). Aucun timestamp, chemin absolu ni aléatoire.
  */
 export function stableStringify(value) {
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
@@ -52,46 +51,50 @@ export function stableStringify(value) {
   return JSON.stringify(value ?? null);
 }
 
-/** A canonical application. Optional fields are omitted when absent. */
-export function canonicalApplication({ id, kind, runtime, sourceProfile, consumes = [], capabilities = [], options = {} }) {
-  const app = { id, kind, runtime, consumes: [...consumes], capabilities: [...capabilities], options: { ...options } };
-  if (sourceProfile !== undefined) app.sourceProfile = sourceProfile;
-  return Object.freeze(app);
+/** sha256 stable d'une valeur via la sérialisation canonique. */
+export function stableDigest(value) {
+  return createHash('sha256').update(stableStringify(value)).digest('hex');
 }
 
-/** A canonical capability with its per-application targets. */
-export function canonicalCapability({ id, version, targets = [], configuration = {} }) {
-  const capability = { id, targets: [...targets], configuration: { ...configuration } };
+/** Une application canonique. L'intention `consumes` est conservée ici (résolue par le resolver). */
+export function canonicalApplication({ id, kind, runtime, consumes = [], options = {} }) {
+  return { id, kind, runtime, consumes: [...consumes], options: { ...options } };
+}
+
+/** Une capability canonique avec ses targets d'INTENTION (résolues par le resolver). */
+export function canonicalCapability({ id, version, requestedTargets = [], configuration = {} }) {
+  const capability = { id, requestedTargets: [...requestedTargets], configuration: { ...configuration } };
   if (version !== undefined) capability.version = version;
-  return Object.freeze(capability);
+  return capability;
 }
 
-/** A canonical environment. */
+/** Un environnement canonique. */
 export function canonicalEnvironment({ id, kind }) {
-  return Object.freeze({ id, kind });
+  return { id, kind };
 }
 
 /**
- * Assembles a frozen CanonicalSystem and stamps `source.digest` with a stable
- * sha256 over the whole model (digest field excluded from its own input).
+ * Assemble un CanonicalSystem profondément immuable et estampille `source.digest`
+ * (sha256 stable du modèle, le champ digest exclu de son propre calcul).
  */
-export function canonicalSystem({ metadata, architecture, applications, capabilities, environments, policies = {}, source }) {
+export function canonicalSystem({ metadata, architecture, applications, capabilities, domain = { entities: [] }, environments, policies = {}, source }) {
   const base = {
     apiVersion: SYSTEM_API_VERSION,
     metadata: { ...metadata },
     architecture: { ...architecture },
-    applications: [...applications],
-    capabilities: [...capabilities],
-    environments: [...environments],
+    applications: applications.map((app) => canonicalApplication(app)),
+    capabilities: capabilities.map((capability) => canonicalCapability(capability)),
+    domain: { entities: [...(domain.entities ?? [])] },
+    environments: environments.map((environment) => canonicalEnvironment(environment)),
     policies: { ...policies },
     source: { ...source },
   };
-  const digest = createHash('sha256').update(stableStringify({ ...base, source: { ...source, digest: undefined } })).digest('hex');
-  base.source = Object.freeze({ ...source, digest });
-  return Object.freeze(base);
+  const digest = stableDigest({ ...base, source: { ...source, digest: undefined } });
+  base.source = { ...source, digest };
+  return deepFreeze(base);
 }
 
-/** Deterministic serialization of a CSM (stable key order). */
+/** Sérialisation déterministe d'un CSM. */
 export function serializeCanonicalSystem(system) {
   return stableStringify(system);
 }
