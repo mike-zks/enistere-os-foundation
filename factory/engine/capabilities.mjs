@@ -21,17 +21,96 @@ export const CAPABILITY_STATUSES = Object.freeze(['ready', 'planned', 'unsupport
 export const NON_BLOCKING_STATUSES = Object.freeze(['ready', 'not-applicable']);
 const STATUSES = new Set(CAPABILITY_STATUSES);
 
+// Capability Contract v2 (factory/schema/capability.schema.json). The manifest is
+// a CLOSED contract: unknown properties are rejected. The rich fields (conflicts,
+// provides, configuration, compatibility, migrations) are OPTIONAL but part of the
+// frozen v2 shape, so filling them later is a field-fill — never a schema break.
+const SEMVER = /^\d+\.\d+\.\d+$/;
+const RUNTIME_IDS = new Set(STARTER_IDS);
+const CONFIG_TYPES = new Set(['enum', 'string', 'boolean', 'integer']);
+const KNOWN_KEYS = new Set([
+  'schemaVersion', 'id', 'version', 'requires', 'responsibilities', 'targets',
+  'conflicts', 'provides', 'configuration', 'compatibility', 'migrations',
+]);
+const TARGET_KEYS = new Set(['status', 'mode']);
+
 export function validateCapabilityManifest(value) {
   const issues = [];
-  if (value?.schemaVersion !== '2') issues.push('schemaVersion must be 2');
-  if (!CAPABILITY_IDS.includes(value?.id)) issues.push('id is not registered');
-  if (!/^\d+\.\d+\.\d+$/.test(value?.version ?? '')) issues.push('version must use SemVer');
-  if (!Array.isArray(value?.requires)) issues.push('requires must be an array');
-  if (!Array.isArray(value?.responsibilities) || value.responsibilities.length === 0) issues.push('responsibilities are required');
-  for (const starterId of STARTER_IDS) {
-    const target = value?.targets?.[starterId];
-    if (!target || !STATUSES.has(target.status)) issues.push(`targets.${starterId}.status is invalid`);
-    if (target?.status === 'ready' && !['built-in', 'overlay'].includes(target.mode)) issues.push(`targets.${starterId}.mode is required when ready`);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return ['capability manifest must be an object'];
+  for (const key of Object.keys(value)) if (!KNOWN_KEYS.has(key)) issues.push(`unknown property: ${key}`);
+  if (value.schemaVersion !== '2') issues.push('schemaVersion must be 2');
+  if (!CAPABILITY_IDS.includes(value.id)) issues.push('id is not registered');
+  if (!SEMVER.test(value.version ?? '')) issues.push('version must use SemVer');
+  if (!Array.isArray(value.requires)) issues.push('requires must be an array');
+  else if (value.requires.some((item) => typeof item !== 'string' || item === '')) issues.push('requires must contain capability ids');
+  if (!Array.isArray(value.responsibilities) || value.responsibilities.length === 0) issues.push('responsibilities are required');
+
+  if (!value.targets || typeof value.targets !== 'object' || Array.isArray(value.targets)) issues.push('targets must be an object');
+  else for (const starterId of STARTER_IDS) {
+    const target = value.targets[starterId];
+    if (!target || typeof target !== 'object' || Array.isArray(target)) { issues.push(`targets.${starterId} is required`); continue; }
+    for (const key of Object.keys(target)) if (!TARGET_KEYS.has(key)) issues.push(`targets.${starterId}.${key} is not a known field`);
+    if (!STATUSES.has(target.status)) issues.push(`targets.${starterId}.status is invalid`);
+    if (target.status === 'ready' && !['built-in', 'overlay'].includes(target.mode)) issues.push(`targets.${starterId}.mode is required when ready`);
+    if (target.status !== 'ready' && target.mode !== undefined) issues.push(`targets.${starterId}.mode is only allowed when ready`);
+  }
+
+  issues.push(...validateOptionalCapabilityFields(value));
+  return issues;
+}
+
+/** Validates the optional v2 fields when present (strict-when-present). */
+function validateOptionalCapabilityFields(value) {
+  const issues = [];
+  if (value.conflicts !== undefined) {
+    if (!Array.isArray(value.conflicts) || value.conflicts.some((item) => typeof item !== 'string' || item === '')) issues.push('conflicts must be an array of capability ids');
+    else if (new Set(value.conflicts).size !== value.conflicts.length) issues.push('conflicts must be unique');
+  }
+  if (value.provides !== undefined) {
+    if (!value.provides || typeof value.provides !== 'object' || Array.isArray(value.provides)) issues.push('provides must be an object');
+    else {
+      for (const key of Object.keys(value.provides)) if (key !== 'contracts') issues.push(`provides.${key} is not supported`);
+      const contracts = value.provides.contracts;
+      if (contracts !== undefined && (!Array.isArray(contracts) || contracts.some((item) => typeof item !== 'string' || item === ''))) issues.push('provides.contracts must be an array of names');
+    }
+  }
+  if (value.configuration !== undefined) {
+    if (!value.configuration || typeof value.configuration !== 'object' || Array.isArray(value.configuration)) issues.push('configuration must be an object');
+    else for (const [name, spec] of Object.entries(value.configuration)) {
+      if (!spec || typeof spec !== 'object' || Array.isArray(spec)) { issues.push(`configuration.${name} must be an object`); continue; }
+      for (const key of Object.keys(spec)) if (!['type', 'values', 'default'].includes(key)) issues.push(`configuration.${name}.${key} is not supported`);
+      if (!CONFIG_TYPES.has(spec.type)) issues.push(`configuration.${name}.type is invalid`);
+      if (spec.type === 'enum') {
+        if (!Array.isArray(spec.values) || spec.values.length === 0 || spec.values.some((item) => typeof item !== 'string' || item === '')) issues.push(`configuration.${name}.values is required for enum`);
+        else if (new Set(spec.values).size !== spec.values.length) issues.push(`configuration.${name}.values must be unique`);
+        else if (spec.default !== undefined && !spec.values.includes(spec.default)) issues.push(`configuration.${name}.default must be one of values`);
+      } else if (spec.values !== undefined) issues.push(`configuration.${name}.values is only allowed for enum`);
+    }
+  }
+  if (value.compatibility !== undefined) {
+    if (!value.compatibility || typeof value.compatibility !== 'object' || Array.isArray(value.compatibility)) issues.push('compatibility must be an object');
+    else {
+      for (const key of Object.keys(value.compatibility)) if (key !== 'runtimes') issues.push(`compatibility.${key} is not supported`);
+      const runtimes = value.compatibility.runtimes;
+      if (runtimes !== undefined) {
+        if (!runtimes || typeof runtimes !== 'object' || Array.isArray(runtimes)) issues.push('compatibility.runtimes must be an object');
+        else for (const [runtimeId, range] of Object.entries(runtimes)) {
+          if (!RUNTIME_IDS.has(runtimeId)) issues.push(`compatibility.runtimes.${runtimeId} is not a known runtime`);
+          if (typeof range !== 'string' || range === '') issues.push(`compatibility.runtimes.${runtimeId} must be a version range`);
+        }
+      }
+    }
+  }
+  if (value.migrations !== undefined) {
+    if (!value.migrations || typeof value.migrations !== 'object' || Array.isArray(value.migrations)) issues.push('migrations must be an object');
+    else {
+      for (const key of Object.keys(value.migrations)) if (key !== 'from') issues.push(`migrations.${key} is not supported`);
+      const from = value.migrations.from;
+      if (from !== undefined) {
+        if (!Array.isArray(from) || from.some((item) => !SEMVER.test(item ?? ''))) issues.push('migrations.from must be an array of SemVer versions');
+        else if (new Set(from).size !== from.length) issues.push('migrations.from must be unique');
+      }
+    }
   }
   return issues;
 }

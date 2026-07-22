@@ -1,5 +1,6 @@
 import { assessCapabilitySupport, validateCapabilityDependencies } from './capabilities.mjs';
 import { STARTER_IDS } from './starters.mjs';
+import { resolveStack } from './applications.mjs';
 
 /**
  * A profile is a **named composition** of `{api, web?, mobile?, capabilities}`.
@@ -269,11 +270,12 @@ export function validateProfileRegistry(manifests, starters) {
 
 /** Profile whose selection matches a blueprint exactly, or `null`. */
 export function matchProfile(blueprint) {
+  const stack = resolveStack(blueprint);
   const capabilities = [...blueprint.capabilities].sort().join(',');
   return PROFILES.find((entry) => (
-    entry.stack.api === blueprint.stack.api
-    && entry.stack.web === (blueprint.stack.web ?? null)
-    && entry.stack.mobile === (blueprint.stack.mobile ?? null)
+    entry.stack.api === stack.api
+    && entry.stack.web === (stack.web ?? null)
+    && entry.stack.mobile === (stack.mobile ?? null)
     && [...entry.capabilities].sort().join(',') === capabilities
   )) ?? null;
 }
@@ -286,8 +288,9 @@ export function validateBlueprintProfile(blueprint) {
   if (blueprint.profile === undefined) return [];
   const entry = getProfile(blueprint.profile);
   const issues = [];
+  const stack = resolveStack(blueprint);
   for (const slot of ['api', 'web', 'mobile']) {
-    const declared = blueprint.stack[slot] ?? null;
+    const declared = stack[slot] ?? null;
     if (declared !== entry.stack[slot]) {
       issues.push(`profile ${entry.id} pins stack.${slot}=${entry.stack[slot] ?? 'null'} but the blueprint declares ${declared ?? 'null'}`);
     }

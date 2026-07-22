@@ -2,10 +2,14 @@ import { readFile } from 'node:fs/promises';
 import { CAPABILITY_IDS, validateCapabilityDependencies } from './capabilities.mjs';
 import { validateEntities } from './contracts.mjs';
 import { validateBlueprintProfile } from './profiles.mjs';
+import { APPLICATION_KINDS, ARCHITECTURE_STYLES } from './topologies.mjs';
+import { assertGeneratableTopology, validateApplications } from './applications.mjs';
 
-const APIS = new Set(['nestjs', 'spring']);
-const WEBS = new Set([null, 'nextjs', 'angular']);
-const MOBILES = new Set([null, 'react-native', 'flutter']);
+// The application-kind registry is the single source of truth for valid runtimes
+// per slot; the stack sugar derives its enums from it.
+const APIS = new Set(APPLICATION_KINDS.api.runtimes);
+const WEBS = new Set([null, ...APPLICATION_KINDS.web.runtimes]);
+const MOBILES = new Set([null, ...APPLICATION_KINDS.mobile.runtimes]);
 const CAPABILITIES = new Set(CAPABILITY_IDS);
 const ENVIRONMENTS = new Set(['local', 'staging']);
 const SLUG = /^[a-z][a-z0-9-]{1,62}$/;
@@ -28,9 +32,35 @@ export function validateBlueprint(value) {
   if (!SLUG.test(value.project?.slug ?? '')) issues.push('project.slug must be lowercase kebab-case (2-63 chars)');
   if (value.topology !== 'monorepo') issues.push('topology must be "monorepo"');
   if (typeof value.designSystem !== 'boolean') issues.push('designSystem must be a boolean');
-  if (!APIS.has(value.stack?.api)) issues.push('stack.api must be nestjs or spring');
-  if (!WEBS.has(value.stack?.web ?? null)) issues.push('stack.web must be nextjs, angular or null');
-  if (!MOBILES.has(value.stack?.mobile ?? null)) issues.push('stack.mobile must be react-native, flutter or null');
+
+  // Surface: exactly one of `stack` (single-surface sugar) or `applications`
+  // (canonical model). Both resolve to the same engine model (see applications.mjs).
+  const hasStack = value.stack !== undefined;
+  const hasApplications = value.applications !== undefined;
+  if (hasStack === hasApplications) {
+    issues.push('exactly one of stack or applications is required');
+  } else if (hasApplications) {
+    const appIssues = validateApplications(value.applications);
+    issues.push(...appIssues);
+    // The generatability gate (API-invariant, planned kinds, multi-surface) only
+    // runs on a structurally sound list.
+    if (appIssues.length === 0) issues.push(...assertGeneratableTopology(value));
+  } else {
+    for (const key of Object.keys(value.stack)) if (!['api', 'web', 'mobile'].includes(key)) issues.push(`stack.${key} is not a known field`);
+    if (!APIS.has(value.stack.api)) issues.push('stack.api must be nestjs or spring');
+    if (!WEBS.has(value.stack.web ?? null)) issues.push('stack.web must be nextjs, angular or null');
+    if (!MOBILES.has(value.stack.mobile ?? null)) issues.push('stack.mobile must be react-native, flutter or null');
+  }
+
+  if (value.architecture !== undefined) {
+    if (!value.architecture || typeof value.architecture !== 'object' || Array.isArray(value.architecture)) issues.push('architecture must be an object');
+    else {
+      for (const key of Object.keys(value.architecture)) if (!['style', 'evolutionTarget'].includes(key)) issues.push(`architecture.${key} is not a known field`);
+      if (!ARCHITECTURE_STYLES.includes(value.architecture.style)) issues.push('architecture.style is invalid');
+      if (value.architecture.evolutionTarget !== undefined && !ARCHITECTURE_STYLES.includes(value.architecture.evolutionTarget)) issues.push('architecture.evolutionTarget is invalid');
+    }
+  }
+
   if (!Array.isArray(value.domain?.entities)) issues.push('domain.entities must be an array');
   else issues.push(...validateEntities(value.domain.entities));
   if (!Array.isArray(value.capabilities)) issues.push('capabilities must be an array');

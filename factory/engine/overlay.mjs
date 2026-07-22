@@ -6,19 +6,11 @@ import { CAPABILITY_IDS } from './capabilities.mjs';
 import { STARTER_IDS } from './starters.mjs';
 import {
   renderEnvironmentSection,
-  renderExpoCapabilityProviders,
-  renderNestjsComposition,
-  renderNextjsCapabilityProviders,
-  renderNextjsPublicNav,
-  renderNextjsDashboardNav,
-  renderNextjsStatusSections,
-  renderExpoHomeActions,
   renderPrismaCompositionBanner,
-  renderSpringComposition,
-  renderPrismaSeedRegistry,
 } from './overlay-renderers.mjs';
 import { validateOverwriteUsage } from './overwrite-policy.mjs';
 import { getTargetAdapter, integrationKindsFor } from './target-adapters.mjs';
+import { buildDomainContribution } from './domain.mjs';
 import {
   applyPrismaFragment,
   createPrismaComposition,
@@ -310,16 +302,19 @@ async function writePrismaComposition(appDirectory, composition, capabilities) {
 export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, output, capabilityManifests }) {
   const byId = new Map(capabilityManifests.map((manifest) => [manifest.id, manifest]));
   const orderedCapabilities = CAPABILITY_IDS.filter((id) => blueprint.capabilities.includes(id));
-  const kinds = Object.entries(plan.starterSources).map(([kind, source]) => ({
-    kind,
-    starterId: source.split('/')[1] ?? source.split('/').at(-1),
-  }));
+  // Iterate the canonical per-application plan (keyed by app id). Falls back to
+  // deriving apps from starterSources for callers that only build that map.
+  const apps = plan.applications
+    ? plan.applications.map((app) => ({ id: app.id, appDir: app.appDir, starterId: app.runtime }))
+    : Object.entries(plan.starterSources).map(([id, source]) => ({
+      id, appDir: `apps/${id}`, starterId: source.split('/')[1] ?? source.split('/').at(-1),
+    }));
   const applied = [];
   const verification = {};
   const integrationsByApp = new Map();
 
-  for (const { kind, starterId } of kinds) {
-    const appDirectory = join(output, `apps/${kind}`);
+  for (const { id, appDir, starterId } of apps) {
+    const appDirectory = join(output, appDir);
     const collected = [];
     // Typed intermediate Prisma model: capabilities contribute declarative
     // enums/models/field-extensions; the schema is rendered once, at the end.
@@ -364,11 +359,33 @@ export async function applyCapabilityOverlays({ repoRoot, blueprint, plan, outpu
           : {}),
       });
       if (overlay.manifest.verification.length > 0) {
-        verification[kind] = [...(verification[kind] ?? []), ...overlay.manifest.verification];
+        verification[id] = [...(verification[id] ?? []), ...overlay.manifest.verification];
       }
     }
+    // Domain compiler (R9): entities become a synthetic capability rendered by
+    // the target adapter, composed through the SAME prisma + integration seams.
+    const domain = buildDomainContribution(blueprint.domain?.entities ?? [], getTargetAdapter(starterId));
+    if (domain) {
+      for (const file of domain.files) await writeDomainFile(appDirectory, file);
+      if (domain.prisma) {
+        try {
+          applyPrismaFragment(prisma, domain.prisma, 'domain');
+        } catch (error) {
+          throw new Error(`domain/${starterId}: ${error.message}`);
+        }
+        if (!prismaCapabilities.includes('domain')) prismaCapabilities.push('domain');
+      }
+      for (const integration of domain.integrations) collected.push({ ...integration, capability: 'domain' });
+      applied.push({
+        capability: 'domain',
+        target: starterId,
+        version: domain.version,
+        digest: domain.digest,
+        ...(domain.contract?.openapiOperations ? { openapiOperations: [...domain.contract.openapiOperations] } : {}),
+      });
+    }
     await writePrismaComposition(appDirectory, prisma, prismaCapabilities);
-    integrationsByApp.set(kind, { starterId, appDirectory, integrations: collected });
+    integrationsByApp.set(id, { starterId, appDirectory, integrations: collected });
   }
 
   for (const { starterId, appDirectory, integrations } of integrationsByApp.values()) {
@@ -383,40 +400,28 @@ async function writeGenerated(path, content) {
   await writeFile(path, content);
 }
 
+/** Writes one generated domain file (in-memory contents), path-safe, no clobber. */
+async function writeDomainFile(appDirectory, file) {
+  if (!isSafeRelativePath(file.destination ?? '')) throw new Error(`domain: unsafe destination ${file.destination}`);
+  const destination = join(appDirectory, file.destination);
+  if (await exists(destination)) throw new Error(`domain: undeclared file conflict at ${file.destination}`);
+  await writeGenerated(destination, file.contents);
+}
+
+/**
+ * Renders the collected integrations into composition files using the target
+ * adapter's declarative `composition` binding. The engine stays agnostic: it
+ * groups integrations by the adapter's declared kinds, writes each group to its
+ * destination with its pure renderer (declaration order preserved), and refuses
+ * any integration kind the adapter does not bind to a renderer.
+ */
 async function renderCompositionFiles(starterId, appDirectory, integrations) {
-  if (starterId === 'nestjs') {
-    const seeds = integrations.filter((item) => item.kind === 'nestjs.prisma-seed');
-    const rest = integrations.filter((item) => item.kind !== 'nestjs.prisma-seed');
-    if (seeds.length > 0) {
-      await writeGenerated(join(appDirectory, 'prisma/seed/capability-seeds.ts'), renderPrismaSeedRegistry(seeds));
-    }
-    if (rest.length === 0) return;
-    await writeGenerated(join(appDirectory, 'src/composition/capabilities.ts'), renderNestjsComposition(rest));
-    return;
+  const groups = getTargetAdapter(starterId)?.composition ?? [];
+  const handled = new Set(groups.flatMap((group) => group.kinds));
+  const unhandled = integrations.find((integration) => !handled.has(integration.kind));
+  if (unhandled) throw new Error(`No composition renderer for starter ${starterId}: ${unhandled.kind}`);
+  for (const group of groups) {
+    const items = integrations.filter((integration) => group.kinds.includes(integration.kind));
+    if (items.length > 0) await writeGenerated(join(appDirectory, group.destination), group.render(items));
   }
-  if (starterId === 'nextjs') {
-    const providers = integrations.filter((item) => item.kind === 'nextjs.provider');
-    const navLinks = integrations.filter((item) => item.kind === 'nextjs.public-nav-link');
-    const dashboardLinks = integrations.filter((item) => item.kind === 'nextjs.dashboard-nav-link');
-    const sections = integrations.filter((item) => item.kind === 'nextjs.status-section');
-    if (providers.length > 0) await writeGenerated(join(appDirectory, 'src/app/providers/capability-providers.tsx'), renderNextjsCapabilityProviders(providers));
-    if (navLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/public-nav.ts'), renderNextjsPublicNav(navLinks));
-    if (dashboardLinks.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/dashboard-nav.ts'), renderNextjsDashboardNav(dashboardLinks));
-    if (sections.length > 0) await writeGenerated(join(appDirectory, 'src/core/composition/status-sections.tsx'), renderNextjsStatusSections(sections));
-    return;
-  }
-  if (starterId === 'spring') {
-    const modules = integrations.filter((item) => item.kind === 'spring.module');
-    if (modules.length > 0) await writeGenerated(join(appDirectory, 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java'), renderSpringComposition(modules));
-    if (integrations.some((item) => item.kind !== 'spring.module')) throw new Error(`Unsupported Spring composition integration: ${integrations.find((item) => item.kind !== 'spring.module').kind}`);
-    return;
-  }
-  if (starterId === 'react-native') {
-    const providers = integrations.filter((item) => item.kind === 'expo.provider');
-    const homeActions = integrations.filter((item) => item.kind === 'expo.home-action');
-    if (providers.length > 0) await writeGenerated(join(appDirectory, 'src/composition/capability-providers.tsx'), renderExpoCapabilityProviders(providers));
-    if (homeActions.length > 0) await writeGenerated(join(appDirectory, 'src/composition/home-actions.ts'), renderExpoHomeActions(homeActions));
-    return;
-  }
-  if (integrations.length > 0) throw new Error(`No composition renderer for starter: ${starterId}`);
 }
