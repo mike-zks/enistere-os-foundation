@@ -3,7 +3,11 @@
   "$id": "https://enistere.com/schemas/blueprint/v1",
   "title": "Enistere Project Blueprint",
   "type": "object",
-  "required": ["version", "project", "topology", "stack", "designSystem", "domain", "capabilities", "deployment"],
+  "required": ["version", "project", "topology", "designSystem", "domain", "capabilities", "deployment"],
+  "oneOf": [
+    { "required": ["stack"], "not": { "required": ["applications"] } },
+    { "required": ["applications"], "not": { "required": ["stack"] } }
+  ],
   "properties": {
     "version": { "const": "1" },
     "profile": {
@@ -23,6 +27,7 @@
     "topology": { "const": "monorepo" },
     "designSystem": { "type": "boolean", "default": true },
     "stack": {
+      "description": "Single-surface sugar: one API and at most one web and one mobile. Desugars to the canonical applications model.",
       "type": "object",
       "required": ["api"],
       "properties": {
@@ -31,6 +36,33 @@
         "mobile": { "enum": ["react-native", "flutter", null] }
       },
       "additionalProperties": false
+    },
+    "applications": {
+      "description": "Canonical model: the deployable applications this project composes. An API (kind: api) is mandatory. worker/gateway/bff and multiple apps per slot are declarable but planned (refused at generation).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "runtime"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$" },
+          "kind": { "enum": ["api", "web", "mobile", "worker", "gateway", "bff"] },
+          "runtime": { "enum": ["nestjs", "spring", "nextjs", "angular", "react-native", "flutter"] },
+          "audience": { "type": "string", "minLength": 1 },
+          "consumes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "architecture": {
+      "description": "Architecture style and evolution target (levels the blueprint can travel).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["style"],
+      "properties": {
+        "style": { "enum": ["monolith", "modular-monolith", "microservices"] },
+        "evolutionTarget": { "enum": ["monolith", "modular-monolith", "microservices"] }
+      }
     },
     "domain": {
       "type": "object",
