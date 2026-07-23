@@ -8,9 +8,9 @@
  * project and adapter source); runtime-level proof (Bootable/Conformant via a
  * live boot) is layered by the runtime runner and is opt-in.
  *
- * The canonical error shape is MEASURED, not converged (ADR-047): the spec
- * mandates RFC 7807 Problem Details, and today neither adapter emits it — this is
- * recorded as `non-conformant`, honestly, rather than hidden.
+ * The canonical error shape is the flat `ApiErrorResponse` envelope (ADR-048),
+ * emitted by both adapters and consumed by the generated client; anything else is
+ * recorded as `non-conformant`.
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -57,8 +57,8 @@ export function findFile(dir, name) {
 }
 
 /**
- * Classifies an error-envelope source against the canonical Problem Details.
- * Returns one of: 'problem-details' | 'flat-envelope' | 'spring-apierror' | 'unknown'.
+ * Classifies an error-envelope source. The canonical target is 'flat-envelope'
+ * (ADR-048). Returns 'problem-details' | 'flat-envelope' | 'spring-apierror' | 'unknown'.
  */
 export function classifyErrorShape(source) {
   const has = (token) => source.includes(token);
@@ -127,12 +127,12 @@ function evaluateSpring(appDir) {
 function result(status, evidence) { return { status, evidence, source: 'structural' }; }
 
 /**
- * The error invariant is measured against the canonical Problem Details: anything
- * that is not Problem Details is `non-conformant` (ADR-047 defers convergence).
+ * The error invariant is measured against the canonical flat `ApiErrorResponse`
+ * envelope (ADR-048): anything that is not the flat envelope is `non-conformant`.
  */
 function errorResult(shape) {
-  const status = shape === 'problem-details' ? STATUS.COMPLIANT : STATUS.NON_CONFORMANT;
-  return { status, evidence: `error shape: ${shape} (canonical target: problem-details)`, source: 'structural' };
+  const status = shape === 'flat-envelope' ? STATUS.COMPLIANT : STATUS.NON_CONFORMANT;
+  return { status, evidence: `error shape: ${shape} (canonical target: flat-envelope)`, source: 'structural' };
 }
 
 function readContains(appDir, name, token) {
