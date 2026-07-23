@@ -6,10 +6,12 @@ import process from 'node:process';
 import { assertBlueprint, createDefaultBlueprint, readBlueprint } from '../engine/blueprint.mjs';
 import { buildGenerationPlan } from '../engine/plan.mjs';
 import { generateProject } from '../engine/generator.mjs';
-import { assessCapabilitySupport, buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
+import { buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
 import { assessProfile, getProfile, listProfiles, profileStarterIds } from '../engine/profiles.mjs';
-import { loadStarterManifests, modularStarterIds, selectedStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
+import { loadStarterManifests, modularStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../engine/dependencies.mjs';
+import { normalizeBlueprint } from '../blueprint/normalize.mjs';
+import { hasErrors } from '../model/diagnostics.mjs';
 
 const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
@@ -148,15 +150,16 @@ async function main() {
     if (!first) throw new Error(`${command} requires a blueprint path`);
     const blueprint = assertBlueprint(await readBlueprint(resolve(first)));
     const starters = await loadStarterManifests(FOUNDATION_ROOT);
-    const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starters), starters });
-    const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
-    const support = assessCapabilitySupport(selectedStarterIds(blueprint), capabilities);
+    const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
+    // The single canonical pipeline: blueprint → CSM → ResolvedSystem → plan.
+    const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starters), starters, capabilityManifests });
+    const generatable = plan.support.level === 'ready' && !hasErrors(plan.diagnostics);
     if (command === 'verify') {
-      console.log(JSON.stringify({ valid: support.ready, project: blueprint.project.slug, capabilitySupport: support }, null, 2));
-      if (!support.ready) process.exitCode = 1;
+      console.log(JSON.stringify({ valid: generatable, project: plan.project, support: plan.support, diagnostics: plan.diagnostics }, null, 2));
+      if (!generatable) process.exitCode = 1;
       return;
     }
-    if (command === 'plan') { console.log(JSON.stringify({ ...plan, capabilitySupport: support }, null, 2)); return; }
+    if (command === 'plan') { console.log(JSON.stringify({ ...plan, canonicalSystem: normalizeBlueprint(blueprint) }, null, 2)); return; }
     if (!second) throw new Error('generate requires an output directory');
     const output = resolve(second);
     await generateProject(blueprint, output);

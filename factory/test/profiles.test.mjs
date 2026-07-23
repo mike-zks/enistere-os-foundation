@@ -15,7 +15,7 @@ import {
   assessProfile,
   getProfile,
   listProfiles,
-  matchProfile,
+  matchProfileSelection,
   profileStarterIds,
   validateBlueprintProfile,
   validateProfileRegistry,
@@ -242,10 +242,10 @@ describe('profiles stay distinct from the 18 stack combinations', () => {
   });
 
   it('names the profile a blueprint matches, and none when it matches nothing', () => {
-    assert.equal(matchProfile(blueprintFor(getProfile('nestjs-next-rbac')))?.id, 'nestjs-next-rbac');
+    assert.equal(matchProfileSelection(getProfile('nestjs-next-rbac').stack, getProfile('nestjs-next-rbac').capabilities)?.id, 'nestjs-next-rbac');
     const unmatched = blueprintFor(getProfile('nestjs-next-rbac'));
     unmatched.stack = { api: 'nestjs', web: 'angular', mobile: 'flutter' };
-    assert.equal(matchProfile(unmatched), null);
+    assert.equal(matchProfileSelection(unmatched.stack, unmatched.capabilities), null);
   });
 });
 

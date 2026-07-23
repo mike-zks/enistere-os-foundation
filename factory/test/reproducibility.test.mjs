@@ -48,7 +48,10 @@ describe('reproducibility and lockfile strategy', () => {
     const lockA = JSON.parse(await readFile(join(rootA, 'p/enistere.lock'), 'utf8'));
     const lockB = JSON.parse(await readFile(join(rootB, 'p/enistere.lock'), 'utf8'));
     assert.deepEqual(lockA, lockB, 'enistere.lock must be deterministic');
-    assert.equal(lockA.blueprintDigest, lockB.blueprintDigest);
+    assert.equal(lockA.systemDigest, lockB.systemDigest);
+    assert.match(lockA.systemDigest, /^[0-9a-f]{64}$/);
+    assert.match(lockA.resolutionDigest, /^[0-9a-f]{64}$/);
+    assert.match(lockA.planDigest, /^[0-9a-f]{64}$/);
     for (const o of lockA.overlays) assert.match(o.digest, /^[0-9a-f]{64}$/);
 
     const pkgsA = await allPackageJsons(join(rootA, 'p'));

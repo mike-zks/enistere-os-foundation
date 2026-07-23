@@ -1,16 +1,17 @@
 /**
- * Canonical application model (Contrat 1).
+ * Blueprint surface resolution — INGESTION primitives (ADR-046).
  *
- * The engine consumes a project as a list of applications, but supports two
- * blueprint surfaces that resolve to the SAME model:
+ * These helpers read the blueprint and belong to the ingestion/input boundary
+ * only (`blueprint/normalize.mjs`, `blueprint/validate` via topologies, and
+ * blueprint schema validation). No planner or generator uses them: after
+ * normalization the pipeline consumes the Canonical System Model.
  *
- * - the single-surface sugar `stack: { api, web?, mobile? }` (today's form), and
- * - the canonical `applications: [{ id, kind, runtime, ... }]` (general form).
+ * The two blueprint surfaces resolve to the SAME application list:
+ * - the single-surface sugar `stack: { api, web?, mobile? }`, and
+ * - the canonical `applications: [{ id, kind, runtime, ... }]`.
  *
- * `resolveApplications` normalizes both into `{ id, kind, runtime, slot }`.
- * `resolveStack` returns the `{ api, web, mobile }` slot view the current
- * generator/plan consume — and for a stack-based blueprint it returns
- * `blueprint.stack` UNCHANGED, so the generated plan/lock stays byte-identical.
+ * `resolveApplications` normalizes both into `{ id, kind, runtime, slot }`;
+ * `resolveStack` returns the `{ api, web, mobile }` slot view for input validation.
  */
 
 import { APPLICATION_KINDS, MANDATORY_KIND, SUGAR_SLOTS, isGeneratableKind } from './topologies.mjs';

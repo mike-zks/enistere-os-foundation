@@ -64,8 +64,7 @@ async function fixtureOutput() {
 function applyArguments(repoRoot, output) {
   return {
     repoRoot,
-    blueprint: { capabilities: ['base', 'auth'] },
-    plan: { starterSources: { api: 'starters/nestjs' } },
+    plan: { capabilities: ['base', 'auth'], starterSources: { api: 'starters/nestjs' } },
     output,
     capabilityManifests: CAPABILITY_MANIFESTS,
   };

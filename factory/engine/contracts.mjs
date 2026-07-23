@@ -34,10 +34,10 @@ export function validateEntities(entities) {
   return issues;
 }
 
-export function generateOpenApi(blueprint) {
+export function generateOpenApi({ name, entities }) {
   const schemas = {};
   const paths = {};
-  for (const entity of blueprint.domain.entities) {
+  for (const entity of entities) {
     schemas[entity.name] = schemaForEntity(entity);
     const segment = entity.name.replace(/[A-Z]/g, (letter, index) => `${index ? '-' : ''}${letter.toLowerCase()}`);
     paths[`/${segment}`] = {
@@ -50,5 +50,5 @@ export function generateOpenApi(blueprint) {
       delete: { operationId: `delete${entity.name}`, responses: { 204: { description: 'Deleted' } } },
     };
   }
-  return { openapi: '3.1.0', info: { title: `${blueprint.project.name} API`, version: '0.1.0' }, paths, components: { schemas } };
+  return { openapi: '3.1.0', info: { title: `${name} API`, version: '0.1.0' }, paths, components: { schemas } };
 }
