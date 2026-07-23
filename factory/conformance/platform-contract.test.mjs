@@ -9,11 +9,13 @@ import { createDefaultBlueprint } from '../engine/blueprint.mjs';
 import {
   classifyErrorShape,
   evaluateApiApp,
-  buildApiConformance,
+  evaluateWebApp,
+  buildConformance,
   STATUS,
   API_CONTRACT_INVARIANTS,
+  WEB_CONTRACT_INVARIANTS,
 } from './platform-contract.mjs';
-import { writeApiConformance } from './run.mjs';
+import { writeConformance } from './run.mjs';
 
 describe('platform-contract — error shape classification', () => {
   it('recognizes the NestJS flat envelope', () => {
@@ -48,12 +50,13 @@ describe('platform-contract — computed API conformance', () => {
   it('measures a generated NestJS API (error canonical, health + correlation compliant)', async () => {
     const { root, out, plan } = await generate('nestjs-base', { api: 'nestjs', web: null, mobile: null });
     roots.push(root);
-    const report = buildApiConformance({ plan, projectDir: out });
+    const report = buildConformance({ plan, projectDir: out });
 
-    assert.equal(report.family, 'api');
+    assert.ok(report.families.includes('api'));
     assert.equal(report.generatedFrom.planDigest, plan.planDigest);
     const api = report.apps.find((a) => a.runtime === 'nestjs');
     assert.ok(api, 'a nestjs api app is present');
+    assert.equal(api.family, 'api');
     assert.deepEqual(Object.keys(api.invariants).sort(), [...API_CONTRACT_INVARIANTS].sort());
 
     // ADR-048: the flat envelope is the canonical error contract → compliant.
@@ -69,7 +72,7 @@ describe('platform-contract — computed API conformance', () => {
   it('measures a generated Spring API (error canonical + correlation + health compliant)', async () => {
     const { root, out, plan } = await generate('spring-base', { api: 'spring', web: null, mobile: null });
     roots.push(root);
-    const api = buildApiConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'spring');
+    const api = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'spring');
     assert.ok(api, 'a spring api app is present');
     assert.deepEqual(Object.keys(api.invariants).sort(), [...API_CONTRACT_INVARIANTS].sort());
     // ADR-048 + ADR-047: Spring converges onto the flat envelope, correlation and health.
@@ -90,11 +93,46 @@ describe('platform-contract — computed API conformance', () => {
   it('writes a computed enistere.conformance.json into a generated project', async () => {
     const { root, out } = await generate('nestjs-base', { api: 'nestjs', web: null, mobile: null });
     roots.push(root);
-    const written = writeApiConformance(out);
+    const written = writeConformance(out);
     const onDisk = JSON.parse(readFileSync(join(out, 'enistere.conformance.json'), 'utf8'));
-    assert.equal(onDisk.family, 'api');
+    assert.ok(onDisk.families.includes('api'));
     assert.equal(onDisk.evaluation, 'structural');
     assert.deepEqual(onDisk, written);
     assert.ok(onDisk.apps.some((a) => a.runtime === 'nestjs'));
+  });
+});
+
+describe('platform-contract — computed Web conformance', () => {
+  const roots = [];
+  after(async () => { for (const r of roots) await rm(r, { recursive: true, force: true }); });
+
+  it('measures a generated Next.js web (mature: generated client + error boundary compliant)', async () => {
+    const { root, out, plan } = await generate('nest-next-base', { api: 'nestjs', web: 'nextjs', mobile: null });
+    roots.push(root);
+    const report = buildConformance({ plan, projectDir: out });
+    assert.ok(report.families.includes('web'));
+    const web = report.apps.find((a) => a.runtime === 'nextjs');
+    assert.ok(web, 'a nextjs web app is present');
+    assert.equal(web.family, 'web');
+    assert.deepEqual(Object.keys(web.invariants).sort(), [...WEB_CONTRACT_INVARIANTS].sort());
+    assert.equal(web.invariants.routing.status, STATUS.COMPLIANT);
+    assert.equal(web.invariants['generated-api-client'].status, STATUS.COMPLIANT);
+    assert.equal(web.invariants['error-boundary'].status, STATUS.COMPLIANT);
+  });
+
+  it('measures a generated Angular web (base-only: no generated client at base)', async () => {
+    const { root, out, plan } = await generate('nestjs-angular-base', { api: 'nestjs', web: 'angular', mobile: null });
+    roots.push(root);
+    const web = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'angular');
+    assert.ok(web, 'an angular web app is present');
+    assert.equal(web.family, 'web');
+    assert.deepEqual(Object.keys(web.invariants).sort(), [...WEB_CONTRACT_INVARIANTS].sort());
+    assert.equal(web.invariants.routing.status, STATUS.COMPLIANT);
+    // Angular base does not consume the generated client → honestly missing.
+    assert.equal(web.invariants['generated-api-client'].status, STATUS.MISSING);
+  });
+
+  it('rejects an unsupported web runtime', () => {
+    assert.throws(() => evaluateWebApp({ appDir: '/nonexistent', runtime: 'svelte' }), /unsupported/);
   });
 });
