@@ -45,7 +45,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Identifiant de corrélation (posé par le middleware request-id) — jamais une donnée de sécurité.
     const requestId = (request as Request & { requestId?: string }).requestId;
 
-    // Enveloppe d'erreur à plat, conforme à strategy/08_STANDARDS.md (§30).
+    // Enveloppe d'erreur à plat, contrat canonique ApiErrorResponse (Platform Contract, ADR-048).
     response.status(status).json({
       success: false,
       statusCode: status,

@@ -1,5 +1,5 @@
 // Codes d'erreur de la capability Auth (format DOMAIN_ERROR_REASON,
-// strategy/08_STANDARDS.md §34). Déclarés dans le périmètre de la capability :
+// Platform Contract, ADR-048). Déclarés dans le périmètre de la capability :
 // le registre de la baseline (`common/errors/error-codes.ts`) reste générique.
 export const AUTH_ERROR_CODES = {
   AUTH_INVALID_CREDENTIALS: 'AUTH_INVALID_CREDENTIALS',

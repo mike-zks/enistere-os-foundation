@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * Enveloppe d'erreur PUBLIQUE (strategy/08_STANDARDS §30, produite par `AllExceptionsFilter`).
+ * Enveloppe d'erreur PUBLIQUE — contrat canonique `ApiErrorResponse` (Platform Contract, ADR-048),
+ * produite par `AllExceptionsFilter`.
  * Schéma-only (Swagger) : jamais instancié au runtime. N'expose jamais de stack ni de détail
  * interne ; `errorCode` est un code applicatif stable (`error-codes.ts`).
  */
