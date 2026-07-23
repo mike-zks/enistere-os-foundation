@@ -15,7 +15,7 @@
 | Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
 | Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
 | Platform Contract exécutable (API) | **Complet** (ADR-047, ADR-048, ADR-049) | `factory/conformance/` émet `enistere.conformance.json` (statut calculé) ; parité Nest↔Spring sur erreur, correlation, health et observabilité (logs structurés) ; metrics/tracing différés |
-| Platform Contract exécutable (Web, mesure) | **Implémenté** (ADR-050) | évaluateur multi-familles ; `enistere.conformance.json` couvre Web ; baseline calculée Next.js (mûr) / Angular (base-only) ; convergence Web différée |
+| Platform Contract exécutable (Web, socle) | **Implémenté** (ADR-050, ADR-051) | évaluateur multi-familles, invariants Web idiomatiques ; socle Angular convergé vers Next.js (`enistere.conformance.json`) ; parité contrats générés + capabilities Web différées |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
 | `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 21 générables |
 | Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |

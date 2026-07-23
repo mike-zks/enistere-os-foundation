@@ -106,7 +106,7 @@ describe('platform-contract — computed Web conformance', () => {
   const roots = [];
   after(async () => { for (const r of roots) await rm(r, { recursive: true, force: true }); });
 
-  it('measures a generated Next.js web (mature: generated client + error boundary compliant)', async () => {
+  it('measures a generated Next.js web (mature: typed client + error handling compliant)', async () => {
     const { root, out, plan } = await generate('nest-next-base', { api: 'nestjs', web: 'nextjs', mobile: null });
     roots.push(root);
     const report = buildConformance({ plan, projectDir: out });
@@ -116,11 +116,11 @@ describe('platform-contract — computed Web conformance', () => {
     assert.equal(web.family, 'web');
     assert.deepEqual(Object.keys(web.invariants).sort(), [...WEB_CONTRACT_INVARIANTS].sort());
     assert.equal(web.invariants.routing.status, STATUS.COMPLIANT);
-    assert.equal(web.invariants['generated-api-client'].status, STATUS.COMPLIANT);
-    assert.equal(web.invariants['error-boundary'].status, STATUS.COMPLIANT);
+    assert.equal(web.invariants['typed-api-access'].status, STATUS.COMPLIANT);
+    assert.equal(web.invariants['error-handling'].status, STATUS.COMPLIANT);
   });
 
-  it('measures a generated Angular web (base-only: no generated client at base)', async () => {
+  it('measures a generated Angular web (base converged idiomatically: typed access, error handling, states)', async () => {
     const { root, out, plan } = await generate('nestjs-angular-base', { api: 'nestjs', web: 'angular', mobile: null });
     roots.push(root);
     const web = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'angular');
@@ -128,8 +128,11 @@ describe('platform-contract — computed Web conformance', () => {
     assert.equal(web.family, 'web');
     assert.deepEqual(Object.keys(web.invariants).sort(), [...WEB_CONTRACT_INVARIANTS].sort());
     assert.equal(web.invariants.routing.status, STATUS.COMPLIANT);
-    // Angular base does not consume the generated client → honestly missing.
-    assert.equal(web.invariants['generated-api-client'].status, STATUS.MISSING);
+    // ADR-051: Angular base converges idiomatically (HttpClient + interceptors + AppApiError).
+    assert.equal(web.invariants['typed-api-access'].status, STATUS.COMPLIANT);
+    assert.equal(web.invariants['error-handling'].status, STATUS.COMPLIANT);
+    assert.equal(web.invariants['ui-states'].status, STATUS.COMPLIANT);
+    assert.equal(web.invariants.observability.status, STATUS.COMPLIANT);
   });
 
   it('rejects an unsupported web runtime', () => {

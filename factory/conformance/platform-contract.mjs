@@ -41,13 +41,18 @@ export const API_CONTRACT_INVARIANTS = Object.freeze([
   'observability',
 ]);
 
-/** The minimal Web base Platform Contract invariants (ADR-050), asserted structurally. */
+/**
+ * The minimal Web base Platform Contract invariants (ADR-050, refined ADR-051),
+ * asserted structurally and measured IDIOMATICALLY per framework: parity means the
+ * same contract (typed API access, canonical error handling, UI states), not the
+ * same library (Next.js: api-client-fetch; Angular: HttpClient + interceptors).
+ */
 export const WEB_CONTRACT_INVARIANTS = Object.freeze([
   'routing',
-  'config-public-private',
-  'generated-api-client',
+  'typed-config',
+  'typed-api-access',
   'ui-states',
-  'error-boundary',
+  'error-handling',
   'accessibility',
   'observability',
   'tests',
@@ -192,10 +197,10 @@ function evaluateNextjsWeb(appDir) {
   const a11y = Boolean(deps['jest-axe'] || deps['eslint-plugin-jsx-a11y']);
   return {
     routing: result(existsSync(app) ? STATUS.COMPLIANT : STATUS.MISSING, 'App Router (src/app)'),
-    'config-public-private': result(findFile(src, 'public-config.ts') && findFile(src, 'server-config.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'public-config.ts + server-config.ts'),
-    'generated-api-client': result(hasClient ? STATUS.COMPLIANT : STATUS.MISSING, hasClient ? '@enistere/api-client-fetch' : 'no generated client dependency'),
+    'typed-config': result(findFile(src, 'public-config.ts') && findFile(src, 'server-config.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'public-config.ts + server-config.ts'),
+    'typed-api-access': result(hasClient ? STATUS.COMPLIANT : STATUS.MISSING, hasClient ? '@enistere/api-client-fetch (generated)' : 'no typed API client'),
     'ui-states': result(findFile(app, 'loading.tsx') && findFile(app, 'error.tsx') && findFile(app, 'not-found.tsx') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'loading.tsx + error.tsx + not-found.tsx'),
-    'error-boundary': result(findFile(app, 'error.tsx') ? STATUS.COMPLIANT : STATUS.MISSING, 'app/error.tsx'),
+    'error-handling': result(findFile(app, 'error.tsx') ? STATUS.COMPLIANT : STATUS.MISSING, 'app/error.tsx (error boundary)'),
     accessibility: result(a11y ? STATUS.COMPLIANT : STATUS.MISSING, a11y ? 'jest-axe / jsx-a11y' : 'no a11y tooling'),
     observability: result(findFile(src, 'logger.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'client logging'),
     tests: result(scripts.test ? STATUS.COMPLIANT : STATUS.MISSING, scripts['test:e2e'] ? 'test + test:e2e' : 'test'),
@@ -208,15 +213,14 @@ function evaluateAngularWeb(appDir) {
   const src = join(appDir, 'src');
   const deps = packageDeps(appDir);
   const scripts = packageScripts(appDir);
-  const hasClient = Boolean(deps['@enistere/api-client-fetch']);
   return {
     routing: result(findFile(src, 'app.routes.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'app.routes.ts'),
-    'config-public-private': result(findFile(src, 'api-config.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'core/config/api-config.ts (no explicit public/private split)'),
-    'generated-api-client': result(hasClient ? STATUS.COMPLIANT : STATUS.MISSING, hasClient ? '@enistere/api-client-fetch' : 'no generated client dependency'),
-    'ui-states': result(findFile(src, 'error.component.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'no loading/error/empty states at base'),
-    'error-boundary': result(findFile(src, 'app-api-error.ts') || findFile(src, 'global-error-handler.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'global ErrorHandler / app-api-error'),
+    'typed-config': result(findFile(src, 'api-config.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'core/config/api-config.ts (SPA config token)'),
+    'typed-api-access': result(findFile(src, 'api-config.ts') && findFile(src, 'app-api-error.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'HttpClient + APP_BASE_URL config + canonical AppApiError'),
+    'ui-states': result(findFile(src, 'enistere-loading-state.component.ts') && findFile(src, 'enistere-error-state.component.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'loading/error/empty state components'),
+    'error-handling': result(findFile(src, 'error.interceptor.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'error.interceptor (canonical AppApiError)'),
     accessibility: result(deps['@angular/cdk'] ? STATUS.PARTIAL : STATUS.MISSING, '@angular/cdk a11y'),
-    observability: result(STATUS.MISSING, 'no client logging'),
+    observability: result(findFile(src, 'log.interceptor.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'log.interceptor (structured request logging)'),
     tests: result(scripts['test:ci'] || scripts.test ? STATUS.COMPLIANT : STATUS.MISSING, 'test:ci (Karma)'),
     build: result(scripts.build ? STATUS.COMPLIANT : STATUS.MISSING, 'build script'),
   };
