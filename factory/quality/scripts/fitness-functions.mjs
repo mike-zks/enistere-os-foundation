@@ -14,7 +14,8 @@
  * Aucune dépendance externe. Compatible Node 24.
  */
 
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { loadStarterManifests, validateManifestConsistency, STARTER_IDS } from '../../engine/starters.mjs';
@@ -65,10 +66,110 @@ export function runFitnessFunctions({ starters, capabilities }) {
   return { passed: findings.length === 0, findings };
 }
 
+// ── Pipeline fitness functions over the SOURCE (ADR-046, ADR-047 FF6+). ──────
+// FF1–FF5 keep the registries honest; FF6–FF8 keep the single canonical pipeline
+// honest, so the ADR-046 boundary cannot silently regress.
+
+/** Modules downstream of ingestion that must NEVER import the blueprint layer. */
+const DOWNSTREAM_PURE_MODULES = [
+  'factory/engine/resolver.mjs',
+  'factory/model/resolved-system.mjs',
+  'factory/model/generation-plan.mjs',
+  'factory/model/canonical-system.mjs',
+];
+
+/** Ingestion symbols a downstream module must not import (frontier-only). */
+const FORBIDDEN_INGESTION_IMPORTS = [
+  'normalizeBlueprint', 'resolveApplications', 'resolveStack',
+  'readBlueprint', 'assertBlueprint', 'createDefaultBlueprint',
+];
+
+/** The single canonical chain `buildGenerationPlan` must wire, in order. */
+const CANONICAL_CHAIN = ['normalizeBlueprint', 'validateCanonicalSystem', 'resolveSystem', 'buildPlan'];
+
+/** The single-definition canonical model factories (no competing internal model). */
+const MODEL_FACTORIES = ['canonicalSystem', 'resolvedSystem', 'buildPlan'];
+
+/** Parses the static imports of an ES module source into `{ names, from }`. */
+export function staticImports(source) {
+  const imports = [];
+  const re = /import\s+(?:([A-Za-z0-9_$]+)\s*,?\s*)?(?:\{([^}]*)\})?\s*from\s*['"]([^'"]+)['"]/g;
+  let match;
+  while ((match = re.exec(source)) !== null) {
+    const names = [];
+    if (match[1]) names.push(match[1]);
+    if (match[2]) for (const part of match[2].split(',')) {
+      const name = part.trim().split(/\s+as\s+/)[0].trim();
+      if (name) names.push(name);
+    }
+    imports.push({ names, from: match[3] });
+  }
+  return imports;
+}
+
+/** FF6 helper: findings if `source` (module `rel`) imports the ingestion layer. */
+export function ingestionBoundaryFindings(rel, source) {
+  const findings = [];
+  for (const imp of staticImports(source)) {
+    if (/blueprint/.test(imp.from)) findings.push({ rule: 'ingestion-boundary', detail: `${rel} imports the ingestion layer (${imp.from})` });
+    for (const name of imp.names) {
+      if (FORBIDDEN_INGESTION_IMPORTS.includes(name)) findings.push({ rule: 'ingestion-boundary', detail: `${rel} imports ingestion symbol ${name} (${imp.from})` });
+    }
+  }
+  return findings;
+}
+
+/** Recursively collects non-test `.mjs` files under a directory. */
+function collectModules(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) { if (entry.name !== 'test') out.push(...collectModules(full)); }
+    else if (entry.name.endsWith('.mjs') && !entry.name.endsWith('.test.mjs')) out.push(full);
+  }
+  return out;
+}
+
+/**
+ * Runs the pipeline fitness functions over the real source (ADR-046). Returns
+ * `{ passed, findings }`; each finding is `{ rule, detail }`.
+ */
+export function runPipelineFitnessFunctions({ repoRoot = REPO_ROOT } = {}) {
+  const findings = [];
+  const fail = (rule, detail) => findings.push({ rule, detail });
+  const read = (rel) => readFileSync(resolve(repoRoot, rel), 'utf8');
+
+  // FF6 — ingestion boundary: the blueprint is read only at the frontier
+  // (normalize); no resolution/planning/model module imports the ingestion layer.
+  for (const rel of DOWNSTREAM_PURE_MODULES) findings.push(...ingestionBoundaryFindings(rel, read(rel)));
+
+  // FF7 — single internal representation: each canonical model factory is defined
+  // exactly once across the engine and model layers (no competing internal model).
+  const modules = [
+    ...collectModules(resolve(repoRoot, 'factory/engine')),
+    ...collectModules(resolve(repoRoot, 'factory/model')),
+  ].map((file) => readFileSync(file, 'utf8'));
+  for (const factory of MODEL_FACTORIES) {
+    const count = modules.filter((source) => new RegExp(`export function ${factory}\\b`).test(source)).length;
+    if (count !== 1) fail('single-internal-model', `${factory} must be defined exactly once, found ${count}`);
+  }
+
+  // FF8 — single canonical chain: the composition entry wires normalize →
+  // validate → resolve → plan (no parallel orchestration).
+  const planImports = staticImports(read('factory/engine/plan.mjs')).flatMap((imp) => imp.names);
+  for (const link of CANONICAL_CHAIN) {
+    if (!planImports.includes(link)) fail('canonical-chain', `plan.mjs (buildGenerationPlan) does not wire ${link}`);
+  }
+
+  return { passed: findings.length === 0, findings };
+}
+
 async function main() {
   const starters = await loadStarterManifests(REPO_ROOT);
   const capabilities = await loadCapabilityManifests(REPO_ROOT);
-  const report = runFitnessFunctions({ starters, capabilities });
+  const registry = runFitnessFunctions({ starters, capabilities });
+  const pipeline = runPipelineFitnessFunctions({ repoRoot: REPO_ROOT });
+  const report = { passed: registry.passed && pipeline.passed, findings: [...registry.findings, ...pipeline.findings] };
   console.log(JSON.stringify(report, null, 2));
   if (!report.passed) process.exitCode = 1;
 }

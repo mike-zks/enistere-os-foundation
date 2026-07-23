@@ -2,33 +2,30 @@
 
 ## Action unique
 
-**Rendre exécutable le Platform Contract minimal de la famille API sur le pipeline canonique unique** —
-sans encore modifier les fonctionnalités Auth, RBAC ou Files.
+**Trancher et converger le contrat d'erreur canonique de la famille API** (Problem Details RFC 7807 vs
+enveloppe plate NestJS), sans encore modifier Auth, RBAC ou Files.
 
-Le pipeline canonique unique est livré ([ADR-046](../adr/ADR-046-single-canonical-factory-pipeline.md)) :
-blueprint → CSM → ResolvedSystem → Plan → génération, le blueprint n'étant plus lu après ingestion.
-L'étape suivante rend la conformité **mesurable** sur la famille API, en consommant ce pipeline.
-
-C'est le levier le plus fort : deux adapters API (NestJS, Spring) existent déjà et bootent ; les rendre
-**prouvablement conformes et équivalents** débloque toute la stratégie de parité (voir
-[`docs/audits/`](../audits/README.md)).
+Le Platform Contract minimal exécutable est livré ([ADR-047](../adr/ADR-047-executable-platform-contract-api.md)) :
+une suite de conformité calcule `enistere.conformance.json` par composition, et le socle Spring a convergé
+avec NestJS sur `correlation-id` + health liveness/readiness. L'audit Phase A a révélé que **ni NestJS ni
+Spring n'émettent** le Problem Details exigé par la spec (NestJS suit une enveloppe plate d'une doc défunte
+`strategy/08_STANDARDS.md`) : la forme d'erreur est aujourd'hui **mesurée non conforme des deux côtés** et sa
+convergence a été explicitement différée. C'est le prochain levier de parité API.
 
 Périmètre :
 
-1. suite Platform Contract exécutable pour la catégorie API, **consommant le CSM**
-   ([Platform Contract](../specifications/PLATFORM_CONTRACT.md)) ;
-2. premiers tests de parité observable NestJS↔Spring ;
-3. émission de `enistere.conformance.json`.
+1. ADR actant la forme d'erreur canonique (Problem Details vs enveloppe plate) ;
+2. convergence NestJS **et** Spring sur cette forme, avec test de contrat côté `@enistere/api-client-fetch` ;
+3. nettoyage des références à la doc défunte `strategy/08_STANDARDS.md` (re-homing dans `PLATFORM_CONTRACT`).
 
 ## Cadrage gouvernance
 
-Cette étape introduit un **nouveau standard de contrat** (Platform Contract exécutable). Selon
+Cette étape modifie un **contrat consommé par les clients** (Web/Mobile, flux auth). Selon
 [`ARCHITECTURE_GOVERNANCE.md`](../governance/ARCHITECTURE_GOVERNANCE.md) et la
 [Definition of Ready](../governance/DEFINITION_OF_READY.md), **avant toute implémentation** :
 
-- produire l'ADR actant le standard (prochain numéro libre : **ADR-047**) ;
-- écrire la spécification et les critères de conformité (spécification avant implémentation) ;
-- déclarer targets, dépendances, conflits et migration ;
+- produire l'ADR actant la forme d'erreur (prochain numéro libre : **ADR-048**) ;
+- déclarer l'impact de migration sur les clients générés et les flux auth ;
 - aucune readiness sans preuve exécutable ([Definition of Done](../governance/DEFINITION_OF_DONE.md)).
 
 ## Dette suivie — missions d'upgrade dédiées
