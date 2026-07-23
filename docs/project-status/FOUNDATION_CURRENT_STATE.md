@@ -53,10 +53,11 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
 - `Single Factory Pipeline` : **IMPLEMENTED_AND_TESTED** (ADR-046).
 - `Legacy Internal Pipeline` : **REMOVED** (ADR-046).
 - `Full Blueprint V2` : **PARTIAL**.
-- `Platform Contract executable (API minimal)` : **IMPLEMENTED** (ADR-047, ADR-048) — suite de conformité
+- `Platform Contract executable (API minimal)` : **COMPLET** (ADR-047, ADR-048, ADR-049) — suite de conformité
   calculée (`factory/conformance/`, émet `enistere.conformance.json`) ; NestJS↔Spring en **parité** sur
-  `error-canonical` (enveloppe plate `ApiErrorResponse`), `correlation-id` et health liveness/readiness ;
-  pipeline gardé par des fitness functions (FF6–FF8). Reste : observabilité (logs/metrics/tracing).
+  `config-validated`, `error-canonical` (enveloppe plate `ApiErrorResponse`), `correlation-id`, health,
+  `openapi`, `base-security` et `observability` (logs structurés corrélés) ; pipeline gardé par des fitness
+  functions (FF6–FF8). Metrics/tracing différés (ADR-018/036). Prochaine famille : Web.
 - `Platform Contract executable (Web/Mobile)` : **NOT_IMPLEMENTED**.
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
