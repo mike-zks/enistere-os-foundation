@@ -38,6 +38,7 @@ export const API_CONTRACT_INVARIANTS = Object.freeze([
   'openapi',
   'migrations',
   'base-security',
+  'observability',
 ]);
 
 /** Recursively finds the first file whose basename equals `name`, or null. */
@@ -102,6 +103,7 @@ function evaluateNestjs(appDir) {
     openapi: result(ops.length ? STATUS.COMPLIANT : STATUS.MISSING, `${ops.length} operations`),
     migrations: result(existsSync(join(appDir, 'prisma', 'migrations')) ? STATUS.COMPLIANT : STATUS.MISSING, 'prisma/migrations'),
     'base-security': result(findFile(join(appDir, 'src'), 'throttling') || readContains(appDir, 'main.ts', 'helmet') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'helmet/throttling'),
+    observability: result(findFile(join(appDir, 'src'), 'logging.config.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'common/logging (structured, ADR-040)'),
   };
 }
 
@@ -113,6 +115,8 @@ function evaluateSpring(appDir) {
   const healthController = findFile(java, 'HealthController.java');
   const correlationFilter = findFile(java, 'CorrelationIdFilter.java');
   const appYml = findFile(join(appDir, 'src', 'main', 'resources'), 'application.yml');
+  const requestLog = findFile(java, 'RequestLoggingFilter.java');
+  const structuredLogs = appYml ? readFileSync(appYml, 'utf8').includes('structured') : false;
   return {
     'config-validated': result(appYml ? STATUS.PARTIAL : STATUS.MISSING, 'application.yml (no typed base config)'),
     'error-canonical': errorResult(shape),
@@ -121,6 +125,7 @@ function evaluateSpring(appDir) {
     openapi: result(findFile(java, 'OpenApiConfig.java') ? STATUS.COMPLIANT : STATUS.MISSING, 'springdoc OpenApiConfig'),
     migrations: result(existsSync(join(appDir, 'src', 'main', 'resources', 'db', 'migration')) ? STATUS.COMPLIANT : STATUS.MISSING, 'flyway db/migration'),
     'base-security': result(findFile(java, 'SecurityConfig.java') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'SecurityConfig.java'),
+    observability: result(structuredLogs && requestLog ? STATUS.COMPLIANT : (structuredLogs || requestLog ? STATUS.PARTIAL : STATUS.MISSING), 'structured logging + RequestLoggingFilter'),
   };
 }
 

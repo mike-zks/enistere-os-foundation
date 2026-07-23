@@ -62,6 +62,7 @@ describe('platform-contract — computed API conformance', () => {
     assert.equal(api.invariants['health-liveness-readiness'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
+    assert.equal(api.invariants.observability.status, STATUS.COMPLIANT);
     assert.ok(!api.nonConformant.includes('error-canonical'));
   });
 
@@ -75,6 +76,7 @@ describe('platform-contract — computed API conformance', () => {
     assert.equal(api.invariants['error-canonical'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants['health-liveness-readiness'].status, STATUS.COMPLIANT);
+    assert.equal(api.invariants.observability.status, STATUS.COMPLIANT);
     // OpenAPI (springdoc) is present on the base; migrations live in the full
     // composition, so the base is honestly reported as missing them.
     assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
