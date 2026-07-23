@@ -160,18 +160,19 @@ describe('platform-contract — computed Mobile conformance', () => {
     assert.equal(mobile.invariants.observability.status, STATUS.COMPLIANT);
   });
 
-  it('measures a generated Flutter mobile (base-only: no core/api at base)', async () => {
+  it('measures a generated Flutter mobile (base converged: dio client, error handling, observability)', async () => {
     const { root, out, plan } = await generate('nestjs-flutter-base', { api: 'nestjs', web: null, mobile: 'flutter' });
     roots.push(root);
     const mobile = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'flutter');
     assert.ok(mobile, 'a flutter mobile app is present');
     assert.equal(mobile.family, 'mobile');
     assert.deepEqual(Object.keys(mobile.invariants).sort(), [...MOBILE_CONTRACT_INVARIANTS].sort());
-    // Base has navigation + config + states, but no core/api → honest gaps.
     assert.equal(mobile.invariants.navigation.status, STATUS.COMPLIANT);
     assert.equal(mobile.invariants['ui-states'].status, STATUS.COMPLIANT);
-    assert.equal(mobile.invariants['typed-api-access'].status, STATUS.MISSING);
-    assert.equal(mobile.invariants['error-handling'].status, STATUS.MISSING);
+    // ADR-053: Flutter base converges on the Dio client + error/logging interceptors.
+    assert.equal(mobile.invariants['typed-api-access'].status, STATUS.COMPLIANT);
+    assert.equal(mobile.invariants['error-handling'].status, STATUS.COMPLIANT);
+    assert.equal(mobile.invariants.observability.status, STATUS.COMPLIANT);
   });
 
   it('rejects an unsupported mobile runtime', () => {
