@@ -412,7 +412,7 @@ Le starter applique déjà :
 - `forbidNonWhitelisted: true` ;
 - transformation contrôlée ;
 - CORS configurable ;
-- erreurs standardisées sans stack trace volontaire, au format `08_STANDARDS.md` (§30) ;
+- erreurs standardisées sans stack trace volontaire, enveloppe canonique `ApiErrorResponse` (ADR-048) ;
 - Swagger désactivé en production ;
 - absence de secret réel ;
 - hachage **Argon2id** des mots de passe, paramètres centralisés (ADR-039) ;

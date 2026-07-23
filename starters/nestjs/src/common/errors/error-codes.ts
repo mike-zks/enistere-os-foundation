@@ -1,4 +1,4 @@
-// Codes d'erreur au format DOMAIN_ERROR_REASON (strategy/08_STANDARDS.md §34).
+// Codes d'erreur au format DOMAIN_ERROR_REASON (Platform Contract, ADR-048).
 //
 // Ce registre ne contient que les codes transverses de la baseline `base`.
 // Chaque capability composée déclare ses propres codes dans son périmètre

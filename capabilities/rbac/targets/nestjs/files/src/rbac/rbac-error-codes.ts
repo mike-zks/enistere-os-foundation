@@ -1,5 +1,5 @@
 // Codes d'erreur de la capability RBAC (format DOMAIN_ERROR_REASON,
-// strategy/08_STANDARDS.md §34). Déclarés dans le périmètre de la capability :
+// Platform Contract, ADR-048). Déclarés dans le périmètre de la capability :
 // le registre de la baseline reste générique et celui d'Auth ne porte que
 // l'authentification. `AUTH_FORBIDDEN` est la réponse publique d'autorisation (403).
 export const RBAC_ERROR_CODES = {

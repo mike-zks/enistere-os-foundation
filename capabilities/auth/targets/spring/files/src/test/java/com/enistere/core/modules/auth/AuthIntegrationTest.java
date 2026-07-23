@@ -52,8 +52,8 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(email, "wrong-password")))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.status").value(401))
-            .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+            .andExpect(jsonPath("$.statusCode").value(401))
+            .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
     }
 
     @Test
@@ -70,7 +70,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"\",\"password\":\"password\"}"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+            .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -104,7 +104,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     void me_withoutToken_returns401() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.status").value(401));
+            .andExpect(jsonPath("$.statusCode").value(401));
     }
 
     // --- refresh ---
@@ -182,8 +182,8 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(email, "bad")))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.status").value(401))
-            .andExpect(jsonPath("$.code").isNotEmpty())
+            .andExpect(jsonPath("$.statusCode").value(401))
+            .andExpect(jsonPath("$.errorCode").isNotEmpty())
             .andExpect(jsonPath("$.timestamp").isNotEmpty())
             .andExpect(jsonPath("$.path").isNotEmpty());
     }

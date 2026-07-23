@@ -15,7 +15,7 @@ import { requestIdMiddleware } from '../common/middleware/request-id.middleware'
  * - durcissement HTTP : Helmet (en-têtes de sécurité), `X-Powered-By` désactivé, limites de body
  *   parsers, `trust proxy` explicite, identifiant de corrélation `X-Request-Id` ;
  * - `ValidationPipe` global (ADR-003) ;
- * - filtre d'exception global (enveloppe d'erreur `08_STANDARDS.md` §30) ;
+ * - filtre d'exception global (enveloppe d'erreur canonique `ApiErrorResponse`, ADR-048) ;
  * - interceptor de réponse global (enveloppe de succès).
  *
  * Les éléments dépendants du runtime (CORS, port) ou exposés différemment
