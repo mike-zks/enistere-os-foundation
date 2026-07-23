@@ -2,21 +2,27 @@
 
 ## Action unique
 
-**Converger le socle Web (Angular) vers la parité Next.js** sur les divergences porteuses mesurées — sans
-encore modifier Auth, RBAC ou Files.
+**Étendre le Platform Contract exécutable à la famille Mobile (React Native ↔ Flutter)** : définir les
+invariants Mobile de base, étendre l'évaluateur à `family: 'mobile'`, mesurer — sans convergence encore
+(mesure d'abord, comme le Web).
 
-La **mesure Web est livrée** ([ADR-050](../adr/ADR-050-web-platform-contract-measurement.md)) : l'évaluateur
-`factory/conformance/` est multi-familles et `enistere.conformance.json` couvre API + Web. La baseline
-**calculée** montre un Angular **base-only** honnêtement non conforme sur : **client API généré**
-(`@enistere/api-client-fetch` absent), **error-boundary** (global ErrorHandler), **états** (loading/error/empty),
-**accessibilité**, config publique/privée (partielle) — Next.js étant largement conforme.
+Les familles **API** (complète) et **Web** (socle en parité) sont couvertes : le Platform Contract API est
+complet (ADR-047/048/049) et le socle Web Angular a convergé **idiomatiquement** vers Next.js
+([ADR-051](../adr/ADR-051-web-angular-base-convergence.md)) — `enistere.conformance.json` montre Angular base
+`compliant` sur typed-config/typed-api-access/ui-states/error-handling/observability (a11y `partial`). Reste la
+famille Mobile : React Native et Flutter, avec Flutter **base-only** (comme Angular l'était) — la mesure
+honnête doit précéder la convergence.
 
 Périmètre (à cadrer en Phase A) :
 
-1. converger le socle Angular sur les cibles tractables (client généré, error-boundary/ErrorHandler, états,
-   config publique/privée) à parité avec Next.js ;
-2. re-mesurer (`enistere.conformance.json` Web) pour prouver la parité de base ;
-3. observabilité Web et parité capabilities Web (auth/rbac/files) restent différées (roadmap Phase 3).
+1. invariants Mobile de base ([Platform Contract](../specifications/PLATFORM_CONTRACT.md) §Mobile : navigation,
+   config par environnement, secure storage, client API, réseau/erreurs, observabilité, tests, build) hors
+   concerns de capability ;
+2. `evaluateMobileApp` (React Native, Flutter) + `enistere.conformance.json` `family: 'mobile'` ;
+3. mesure honnête, sans convergence.
+
+Dette suivie (ADR-051) : parité des contrats **générés** Angular (`@enistere/api-contracts`) et
+approfondissement a11y.
 
 ## Cadrage gouvernance
 
