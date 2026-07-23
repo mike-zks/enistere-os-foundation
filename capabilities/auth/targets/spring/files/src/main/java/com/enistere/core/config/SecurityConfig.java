@@ -1,7 +1,10 @@
 package com.enistere.core.config;
 
+import com.enistere.core.common.web.CorrelationIdFilter;
 import com.enistere.core.infrastructure.security.EnistereUserDetailsService;
 import com.enistere.core.infrastructure.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
@@ -45,23 +49,32 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, e) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write(String.format(
-                        "{\"status\":401,\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication required\",\"errors\":[],\"timestamp\":\"%s\",\"path\":\"%s\"}",
-                        Instant.now(), request.getRequestURI()));
-                })
-                .accessDeniedHandler((request, response, e) -> {
-                    response.setStatus(403);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write(String.format(
-                        "{\"status\":403,\"code\":\"FORBIDDEN\",\"message\":\"Access denied\",\"errors\":[],\"timestamp\":\"%s\",\"path\":\"%s\"}",
-                        Instant.now(), request.getRequestURI()));
-                })
+                .authenticationEntryPoint((request, response, e) ->
+                    writeError(request, response, 401, "UNAUTHORIZED", "Authentication required"))
+                .accessDeniedHandler((request, response, e) ->
+                    writeError(request, response, 403, "FORBIDDEN", "Access denied"))
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    /**
+     * Writes the canonical flat error envelope (ADR-048) for Spring Security 401/403,
+     * matching the {@code GlobalExceptionHandler}. The requestId is the correlation id
+     * set by {@link CorrelationIdFilter}. Built without an injected ObjectMapper: the
+     * security filter chain initializes before Jackson auto-configuration, so injecting
+     * one here fails to resolve a bean.
+     */
+    private static void writeError(HttpServletRequest request, HttpServletResponse response,
+                                   int statusCode, String errorCode, String message) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json;charset=UTF-8");
+        Object id = request.getAttribute(CorrelationIdFilter.REQUEST_ID_ATTRIBUTE);
+        String requestId = id instanceof String value ? "\"" + value + "\"" : "null";
+        response.getWriter().write(String.format(
+            "{\"success\":false,\"statusCode\":%d,\"errorCode\":\"%s\",\"message\":\"%s\","
+                + "\"details\":null,\"path\":\"%s\",\"timestamp\":\"%s\",\"requestId\":%s}",
+            statusCode, errorCode, message, request.getRequestURI(), Instant.now(), requestId));
     }
 
     @Bean
