@@ -14,6 +14,13 @@ management:
     health:
       show-details: never
 
+# Structured JSON logs on stdout (ADR-049), correlated by the requestId MDC
+# (CorrelationIdFilter). Collection is a Deployment concern — no embedded transport.
+logging:
+  structured:
+    format:
+      console: ecs
+
 springdoc:
   api-docs:
     path: /v3/api-docs
