@@ -14,7 +14,7 @@
 | Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
 | Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
 | Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
-| Platform Contract exécutable (API) | **Implémenté** (ADR-047) | `factory/conformance/` émet `enistere.conformance.json` (statut calculé) ; erreur mesurée non conforme (différée) |
+| Platform Contract exécutable (API) | **Implémenté** (ADR-047, ADR-048) | `factory/conformance/` émet `enistere.conformance.json` (statut calculé) ; parité Nest↔Spring sur erreur (enveloppe plate) + correlation + health |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
 | `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 21 générables |
 | Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |

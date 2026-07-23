@@ -36,12 +36,12 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
 
 ## Écarts (mesurés par l'audit)
 
-- **P0** — contrats centrés TypeScript (pas de génération Java/Dart) ; forme d'erreur canonique non
-  convergée. *Partiellement adressé* : le pipeline canonique unique ([ADR-046](../adr/ADR-046-single-canonical-factory-pipeline.md))
-  et une **suite Platform Contract exécutable** minimale pour la famille API ([ADR-047](../adr/ADR-047-executable-platform-contract-api.md))
-  existent ; NestJS↔Spring convergent sur correlation + health, avec preuve calculée (`enistere.conformance.json`).
-  Restent **non implémentés** : Blueprint V2 complet, forme d'erreur canonique, parité observable complète,
-  génération polyglotte des contrats.
+- **P0** — contrats centrés TypeScript (pas de génération Java/Dart). *Partiellement adressé* : le pipeline
+  canonique unique ([ADR-046](../adr/ADR-046-single-canonical-factory-pipeline.md)) et une **suite Platform
+  Contract exécutable** minimale pour la famille API ([ADR-047](../adr/ADR-047-executable-platform-contract-api.md))
+  existent ; NestJS↔Spring convergent sur **erreur canonique** ([ADR-048](../adr/ADR-048-canonical-api-error-contract.md)),
+  correlation et health, avec preuve calculée (`enistere.conformance.json`). Restent **non implémentés** :
+  Blueprint V2 complet, observabilité API, parité observable complète, génération polyglotte des contrats.
 - **P1** — Lifecycle Manager absent ; parité Web (Angular base-only) et Mobile (Flutter base-only)
   rompues ; Files absent côté Spring ; primitives non modélisées ; capabilities cibles manquantes
   (user-management, audit, events, notifications, observability).
@@ -53,10 +53,10 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
 - `Single Factory Pipeline` : **IMPLEMENTED_AND_TESTED** (ADR-046).
 - `Legacy Internal Pipeline` : **REMOVED** (ADR-046).
 - `Full Blueprint V2` : **PARTIAL**.
-- `Platform Contract executable (API minimal)` : **IMPLEMENTED** (ADR-047) — suite de conformité calculée
-  (`factory/conformance/`, émet `enistere.conformance.json`) ; Spring convergé avec NestJS sur
-  `correlation-id` + health liveness/readiness ; **forme d'erreur mesurée non conforme des deux côtés,
-  convergence différée** ; pipeline gardé par des fitness functions (FF6–FF8).
+- `Platform Contract executable (API minimal)` : **IMPLEMENTED** (ADR-047, ADR-048) — suite de conformité
+  calculée (`factory/conformance/`, émet `enistere.conformance.json`) ; NestJS↔Spring en **parité** sur
+  `error-canonical` (enveloppe plate `ApiErrorResponse`), `correlation-id` et health liveness/readiness ;
+  pipeline gardé par des fitness functions (FF6–FF8). Reste : observabilité (logs/metrics/tracing).
 - `Platform Contract executable (Web/Mobile)` : **NOT_IMPLEMENTED**.
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
