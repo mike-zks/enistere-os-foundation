@@ -2,27 +2,25 @@
 
 ## Action unique
 
-**Étendre le Platform Contract exécutable à la famille Mobile (React Native ↔ Flutter)** : définir les
-invariants Mobile de base, étendre l'évaluateur à `family: 'mobile'`, mesurer — sans convergence encore
-(mesure d'abord, comme le Web).
+**Converger le socle Flutter vers la parité React Native** : compléter la base Flutter avec ses features de
+contrat de base présentes dans le full `lib/src/core/api` (client Dio, error/logging interceptors,
+`app_api_error`), en excluant l'auth (refresh interceptor) — sans encore modifier Auth, RBAC ou Files.
 
-Les familles **API** (complète) et **Web** (socle en parité) sont couvertes : le Platform Contract API est
-complet (ADR-047/048/049) et le socle Web Angular a convergé **idiomatiquement** vers Next.js
-([ADR-051](../adr/ADR-051-web-angular-base-convergence.md)) — `enistere.conformance.json` montre Angular base
-`compliant` sur typed-config/typed-api-access/ui-states/error-handling/observability (a11y `partial`). Reste la
-famille Mobile : React Native et Flutter, avec Flutter **base-only** (comme Angular l'était) — la mesure
-honnête doit précéder la convergence.
+La **mesure Mobile est livrée** ([ADR-052](../adr/ADR-052-mobile-platform-contract-measurement.md)) :
+l'évaluateur `factory/conformance/` couvre les **3 familles** (API + Web + Mobile). La baseline **calculée**
+montre React Native `compliant` sur tout le contrat de base, et un Flutter **base-only** honnêtement non
+conforme sur `typed-api-access`, `error-handling`, `observability` (pas de `core/api` au socle) — analogue à
+l'Angular avant convergence.
 
 Périmètre (à cadrer en Phase A) :
 
-1. invariants Mobile de base ([Platform Contract](../specifications/PLATFORM_CONTRACT.md) §Mobile : navigation,
-   config par environnement, secure storage, client API, réseau/erreurs, observabilité, tests, build) hors
-   concerns de capability ;
-2. `evaluateMobileApp` (React Native, Flutter) + `enistere.conformance.json` `family: 'mobile'` ;
-3. mesure honnête, sans convergence.
+1. extraire du full `lib/src/core/api` les features de contrat de base (dio_client, error_interceptor,
+   logging_interceptor, app_api_error) vers la composition base Flutter, câblées dans le provider Dio ;
+2. re-mesurer (`enistere.conformance.json` Mobile) ; golden `nestjs-flutter-base` (flutter analyze/test) vert ;
+3. parité des contrats **générés** + capabilities Mobile (Phase 3) restent différées.
 
-Dette suivie (ADR-051) : parité des contrats **générés** Angular (`@enistere/api-contracts`) et
-approfondissement a11y.
+Après cette convergence, **les 6 runtimes auront la parité de contrat de base** (convergence runtime,
+roadmap Phase 2, mesurable). Dette suivie : contrats générés Angular/Flutter (`@enistere/api-contracts`), a11y.
 
 ## Cadrage gouvernance
 
