@@ -63,10 +63,13 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
   (`enistere.conformance.json` : Angular base `compliant` sur typed-config/typed-api-access/ui-states/
   error-handling/observability ; a11y `partial`). Parité des contrats **générés** Angular + capabilities Web
   (Phase 3) = différées.
-- `Platform Contract executable (Mobile, mesure)` : **IMPLEMENTED** (ADR-052) — évaluateur **3 familles**
-  (API + Web + Mobile) ; `enistere.conformance.json` couvre Mobile ; baseline calculée : React Native
-  `compliant` sur tout le contrat de base, Flutter base-only (typed-api-access/error-handling/observability
-  non conformes — pas de `core/api`). Convergence Flutter = étape suivante.
+- `Platform Contract executable (Mobile, socle)` : **IMPLEMENTED** (ADR-052, ADR-053) — évaluateur **3
+  familles** (API + Web + Mobile) ; React Native `compliant` et **socle Flutter convergé** (ADR-053 : `core/api`
+  Dio + interceptors error/logging) → `enistere.conformance.json` montre Flutter base `compliant` sur les 8
+  invariants Mobile.
+- **Jalon : les 6 runtimes ont la parité de contrat de base, mesurée** (convergence runtime, roadmap Phase 2).
+  Reste, avant la parité **produit** : contrats **générés** Angular/Flutter (`@enistere/api-contracts`) et
+  capabilities Web/Mobile (Phase 3).
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
 être requalifiés contre le modèle de conformité V2.

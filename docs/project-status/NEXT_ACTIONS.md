@@ -2,25 +2,20 @@
 
 ## Action unique
 
-**Converger le socle Flutter vers la parité React Native** : compléter la base Flutter avec ses features de
-contrat de base présentes dans le full `lib/src/core/api` (client Dio, error/logging interceptors,
-`app_api_error`), en excluant l'auth (refresh interceptor) — sans encore modifier Auth, RBAC ou Files.
+**Jalon atteint : les 6 runtimes ont la parité de contrat de base, mesurée.** Le socle Flutter a convergé
+([ADR-053](../adr/ADR-053-flutter-base-convergence.md)) — `enistere.conformance.json` montre Flutter base
+`compliant` sur les 8 invariants Mobile. La **convergence runtime de base** (roadmap Phase 2) est donc couverte
+et mesurée pour NestJS, Spring, Next.js, Angular, React Native et Flutter.
 
-La **mesure Mobile est livrée** ([ADR-052](../adr/ADR-052-mobile-platform-contract-measurement.md)) :
-l'évaluateur `factory/conformance/` couvre les **3 familles** (API + Web + Mobile). La baseline **calculée**
-montre React Native `compliant` sur tout le contrat de base, et un Flutter **base-only** honnêtement non
-conforme sur `typed-api-access`, `error-handling`, `observability` (pas de `core/api` au socle) — analogue à
-l'Angular avant convergence.
+**Prochaine action unique : parité des contrats GÉNÉRÉS (Angular + Flutter)** — faire consommer aux clients
+Angular et Flutter les types dérivés du contrat canonique (`@enistere/api-contracts` / génération polyglotte,
+[`CONTRACT_ARCHITECTURE`](../architecture/CONTRACT_ARCHITECTURE.md)) au lieu de types écrits à la main, comme
+Next.js consomme déjà `@enistere/api-client-fetch`. C'est le dernier écart de contrat de base avant la parité
+**produit** (product-equivalence) et l'audit le classe P0 (« génération Java/Dart absente »).
 
-Périmètre (à cadrer en Phase A) :
-
-1. extraire du full `lib/src/core/api` les features de contrat de base (dio_client, error_interceptor,
-   logging_interceptor, app_api_error) vers la composition base Flutter, câblées dans le provider Dio ;
-2. re-mesurer (`enistere.conformance.json` Mobile) ; golden `nestjs-flutter-base` (flutter analyze/test) vert ;
-3. parité des contrats **générés** + capabilities Mobile (Phase 3) restent différées.
-
-Après cette convergence, **les 6 runtimes auront la parité de contrat de base** (convergence runtime,
-roadmap Phase 2, mesurable). Dette suivie : contrats générés Angular/Flutter (`@enistere/api-contracts`), a11y.
+Point de pilotage : c'est un **checkpoint majeur**. Alternatives légitimes selon la priorité de l'owner :
+convergence des contrats générés (ci-dessus) ; OU parité capabilities Web/Mobile (auth/rbac/files sur
+Angular/Flutter, roadmap Phase 3) ; OU pause de consolidation (rapport de readiness global du Platform Contract).
 
 ## Cadrage gouvernance
 
