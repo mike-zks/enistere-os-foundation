@@ -17,7 +17,7 @@ contracts/
 - OpenAPI pour HTTP ;
 - JSON Schema pour les structures ;
 - AsyncAPI ou schémas versionnés pour les événements ;
-- Problem Details étendu pour les erreurs ;
+- enveloppe d'erreur canonique versionnée (`ApiErrorResponse`) pour les erreurs ([ADR-048](../adr/ADR-048-canonical-api-error-contract.md)) ;
 - identifiants versionnés pour les permissions.
 
 ## Génération polyglotte
