@@ -73,6 +73,9 @@ describe('platform-contract — computed API conformance', () => {
     assert.ok(api, 'a spring api app is present');
     assert.deepEqual(Object.keys(api.invariants).sort(), [...API_CONTRACT_INVARIANTS].sort());
     assert.equal(api.invariants['error-canonical'].status, STATUS.NON_CONFORMANT);
+    // ADR-047 volet 2 convergence: correlation + health reach parity with NestJS.
+    assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
+    assert.equal(api.invariants['health-liveness-readiness'].status, STATUS.COMPLIANT);
     // OpenAPI (springdoc) is present on the base; migrations live in the full
     // composition, so the base is honestly reported as missing them.
     assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
