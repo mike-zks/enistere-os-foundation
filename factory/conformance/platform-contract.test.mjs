@@ -10,10 +10,12 @@ import {
   classifyErrorShape,
   evaluateApiApp,
   evaluateWebApp,
+  evaluateMobileApp,
   buildConformance,
   STATUS,
   API_CONTRACT_INVARIANTS,
   WEB_CONTRACT_INVARIANTS,
+  MOBILE_CONTRACT_INVARIANTS,
 } from './platform-contract.mjs';
 import { writeConformance } from './run.mjs';
 
@@ -137,5 +139,42 @@ describe('platform-contract — computed Web conformance', () => {
 
   it('rejects an unsupported web runtime', () => {
     assert.throws(() => evaluateWebApp({ appDir: '/nonexistent', runtime: 'svelte' }), /unsupported/);
+  });
+});
+
+describe('platform-contract — computed Mobile conformance', () => {
+  const roots = [];
+  after(async () => { for (const r of roots) await rm(r, { recursive: true, force: true }); });
+
+  it('measures a generated React Native mobile (mature: typed access, error handling, observability)', async () => {
+    const { root, out, plan } = await generate('nestjs-react-native-base', { api: 'nestjs', web: null, mobile: 'react-native' });
+    roots.push(root);
+    const report = buildConformance({ plan, projectDir: out });
+    assert.ok(report.families.includes('mobile'));
+    const mobile = report.apps.find((a) => a.runtime === 'react-native');
+    assert.ok(mobile, 'a react-native mobile app is present');
+    assert.equal(mobile.family, 'mobile');
+    assert.deepEqual(Object.keys(mobile.invariants).sort(), [...MOBILE_CONTRACT_INVARIANTS].sort());
+    assert.equal(mobile.invariants.navigation.status, STATUS.COMPLIANT);
+    assert.equal(mobile.invariants['typed-api-access'].status, STATUS.COMPLIANT);
+    assert.equal(mobile.invariants.observability.status, STATUS.COMPLIANT);
+  });
+
+  it('measures a generated Flutter mobile (base-only: no core/api at base)', async () => {
+    const { root, out, plan } = await generate('nestjs-flutter-base', { api: 'nestjs', web: null, mobile: 'flutter' });
+    roots.push(root);
+    const mobile = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'flutter');
+    assert.ok(mobile, 'a flutter mobile app is present');
+    assert.equal(mobile.family, 'mobile');
+    assert.deepEqual(Object.keys(mobile.invariants).sort(), [...MOBILE_CONTRACT_INVARIANTS].sort());
+    // Base has navigation + config + states, but no core/api → honest gaps.
+    assert.equal(mobile.invariants.navigation.status, STATUS.COMPLIANT);
+    assert.equal(mobile.invariants['ui-states'].status, STATUS.COMPLIANT);
+    assert.equal(mobile.invariants['typed-api-access'].status, STATUS.MISSING);
+    assert.equal(mobile.invariants['error-handling'].status, STATUS.MISSING);
+  });
+
+  it('rejects an unsupported mobile runtime', () => {
+    assert.throws(() => evaluateMobileApp({ appDir: '/nonexistent', runtime: 'kotlin-native' }), /unsupported/);
   });
 });

@@ -59,6 +59,18 @@ export const WEB_CONTRACT_INVARIANTS = Object.freeze([
   'build',
 ]);
 
+/** The minimal Mobile base Platform Contract invariants (ADR-052), asserted structurally. */
+export const MOBILE_CONTRACT_INVARIANTS = Object.freeze([
+  'navigation',
+  'typed-config',
+  'typed-api-access',
+  'ui-states',
+  'error-handling',
+  'observability',
+  'tests',
+  'build',
+]);
+
 /** Recursively finds the first file whose basename equals `name`, or null. */
 export function findFile(dir, name) {
   if (!existsSync(dir)) return null;
@@ -235,6 +247,51 @@ export function evaluateWebApp({ appDir, runtime }) {
   return invariants;
 }
 
+/** Evaluates the base Mobile invariants of a generated React Native application. */
+function evaluateReactNative(appDir) {
+  const src = join(appDir, 'src');
+  const deps = packageDeps(appDir);
+  const scripts = packageScripts(appDir);
+  return {
+    navigation: result(existsSync(join(appDir, 'app')) || deps['expo-router'] ? STATUS.COMPLIANT : STATUS.MISSING, 'expo-router (app/)'),
+    'typed-config': result(findFile(src, 'env.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'src/config/env.ts'),
+    'typed-api-access': result(deps['@tanstack/react-query'] && findFile(src, 'query-client.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'react-query + query client'),
+    'ui-states': result(findFile(src, 'ErrorState.tsx') && findFile(src, 'LoadingState.tsx') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'state components'),
+    'error-handling': result(findFile(src, 'query-errors.ts') || findFile(src, 'retryable-error.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'query-errors / retryable-error'),
+    observability: result(findFile(src, 'logger.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'src/logger'),
+    tests: result(scripts.test ? STATUS.COMPLIANT : STATUS.MISSING, 'test script'),
+    build: result(scripts.android || scripts.ios ? STATUS.COMPLIANT : STATUS.MISSING, 'android/ios scripts'),
+  };
+}
+
+/** Evaluates the base Mobile invariants of a generated Flutter application (Dart, lib/, pubspec). */
+function evaluateFlutter(appDir) {
+  const lib = join(appDir, 'lib');
+  const hasTest = existsSync(join(appDir, 'test')) || existsSync(join(appDir, 'integration_test'));
+  // Like Expo prebuild (React Native), Flutter scaffolds android/ios on demand;
+  // build capability is carried by the toolchain (pubspec), not committed platform folders.
+  const buildable = existsSync(join(appDir, 'pubspec.yaml'));
+  return {
+    navigation: result(findFile(lib, 'router.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'go_router (router.dart)'),
+    'typed-config': result(findFile(lib, 'api_config.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'core/config/api_config.dart'),
+    'typed-api-access': result(findFile(lib, 'dio_client.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'core/api/dio_client.dart'),
+    'ui-states': result(findFile(lib, 'error_state.dart') && findFile(lib, 'loading_state.dart') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'core/states/*'),
+    'error-handling': result(findFile(lib, 'error_interceptor.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'core/api/error_interceptor.dart'),
+    observability: result(findFile(lib, 'logging_interceptor.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'core/api/logging_interceptor.dart'),
+    tests: result(hasTest ? STATUS.COMPLIANT : STATUS.MISSING, 'test / integration_test'),
+    build: result(buildable ? STATUS.COMPLIANT : STATUS.MISSING, 'flutter toolchain (pubspec; platforms scaffolded on demand)'),
+  };
+}
+
+/** Evaluates one generated Mobile application by runtime. */
+export function evaluateMobileApp({ appDir, runtime }) {
+  const invariants = runtime === 'react-native' ? evaluateReactNative(appDir)
+    : runtime === 'flutter' ? evaluateFlutter(appDir)
+      : null;
+  if (!invariants) throw new Error(`Platform Contract Mobile evaluation unsupported for runtime: ${runtime}`);
+  return invariants;
+}
+
 /**
  * The structural conformance level: a generated, evaluated app has reached
  * `Generatable`; `Bootable`/`Conformant` require the opt-in runtime runner.
@@ -245,7 +302,8 @@ function structuralLevel() { return 'Generatable'; }
 function evaluateByFamily(app, appDir) {
   if (app.kind === 'api') return { family: 'api', invariants: evaluateApiApp({ appDir, runtime: app.runtime }) };
   if (app.kind === 'web') return { family: 'web', invariants: evaluateWebApp({ appDir, runtime: app.runtime }) };
-  return null; // Mobile is not evaluated yet.
+  if (app.kind === 'mobile') return { family: 'mobile', invariants: evaluateMobileApp({ appDir, runtime: app.runtime }) };
+  return null;
 }
 
 /**
