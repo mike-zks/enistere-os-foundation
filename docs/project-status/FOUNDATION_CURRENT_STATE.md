@@ -58,7 +58,10 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
   `config-validated`, `error-canonical` (enveloppe plate `ApiErrorResponse`), `correlation-id`, health,
   `openapi`, `base-security` et `observability` (logs structurés corrélés) ; pipeline gardé par des fitness
   functions (FF6–FF8). Metrics/tracing différés (ADR-018/036). Prochaine famille : Web.
-- `Platform Contract executable (Web/Mobile)` : **NOT_IMPLEMENTED**.
+- `Platform Contract executable (Web, mesure)` : **IMPLEMENTED** (ADR-050) — évaluateur multi-familles ;
+  `enistere.conformance.json` couvre API + Web ; baseline calculée : Next.js largement conforme, Angular
+  base-only (client généré/error-boundary/états/a11y non conformes). Convergence Web = étape suivante.
+- `Platform Contract executable (Mobile)` : **NOT_IMPLEMENTED**.
 
 Ces éléments existent et fonctionnent, mais leur statut est établi sur l’ancien modèle. Ils doivent
 être requalifiés contre le modèle de conformité V2.

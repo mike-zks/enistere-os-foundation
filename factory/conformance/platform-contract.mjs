@@ -1,7 +1,7 @@
 /**
- * Executable Platform Contract — API family (ADR-047).
+ * Executable Platform Contract — API and Web families (ADR-047, ADR-050).
  *
- * Evaluates a generated API application against the minimal common invariants of
+ * Evaluates a generated application (API, Web) against the minimal common invariants of
  * the [Platform Contract](../../docs/specifications/PLATFORM_CONTRACT.md) and
  * produces a COMPUTED conformance record (never a hand-written Markdown status —
  * see CONFORMANCE_MODEL). The evaluation is structural (it inspects the generated
@@ -39,6 +39,19 @@ export const API_CONTRACT_INVARIANTS = Object.freeze([
   'migrations',
   'base-security',
   'observability',
+]);
+
+/** The minimal Web base Platform Contract invariants (ADR-050), asserted structurally. */
+export const WEB_CONTRACT_INVARIANTS = Object.freeze([
+  'routing',
+  'config-public-private',
+  'generated-api-client',
+  'ui-states',
+  'error-boundary',
+  'accessibility',
+  'observability',
+  'tests',
+  'build',
 ]);
 
 /** Recursively finds the first file whose basename equals `name`, or null. */
@@ -154,31 +167,109 @@ export function evaluateApiApp({ appDir, runtime }) {
   return invariants;
 }
 
+/** Reads the merged dependency map of a generated app's package.json, or {}. */
+function packageDeps(appDir) {
+  try {
+    const pkg = JSON.parse(readFileSync(join(appDir, 'package.json'), 'utf8'));
+    return { ...pkg.dependencies, ...pkg.devDependencies };
+  } catch { return {}; }
+}
+
+/** Reads the scripts of a generated app's package.json, or {}. */
+function packageScripts(appDir) {
+  try {
+    return JSON.parse(readFileSync(join(appDir, 'package.json'), 'utf8')).scripts ?? {};
+  } catch { return {}; }
+}
+
+/** Evaluates the base Web invariants of a generated Next.js application. */
+function evaluateNextjsWeb(appDir) {
+  const src = join(appDir, 'src');
+  const app = join(src, 'app');
+  const deps = packageDeps(appDir);
+  const scripts = packageScripts(appDir);
+  const hasClient = Boolean(deps['@enistere/api-client-fetch']);
+  const a11y = Boolean(deps['jest-axe'] || deps['eslint-plugin-jsx-a11y']);
+  return {
+    routing: result(existsSync(app) ? STATUS.COMPLIANT : STATUS.MISSING, 'App Router (src/app)'),
+    'config-public-private': result(findFile(src, 'public-config.ts') && findFile(src, 'server-config.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'public-config.ts + server-config.ts'),
+    'generated-api-client': result(hasClient ? STATUS.COMPLIANT : STATUS.MISSING, hasClient ? '@enistere/api-client-fetch' : 'no generated client dependency'),
+    'ui-states': result(findFile(app, 'loading.tsx') && findFile(app, 'error.tsx') && findFile(app, 'not-found.tsx') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'loading.tsx + error.tsx + not-found.tsx'),
+    'error-boundary': result(findFile(app, 'error.tsx') ? STATUS.COMPLIANT : STATUS.MISSING, 'app/error.tsx'),
+    accessibility: result(a11y ? STATUS.COMPLIANT : STATUS.MISSING, a11y ? 'jest-axe / jsx-a11y' : 'no a11y tooling'),
+    observability: result(findFile(src, 'logger.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'client logging'),
+    tests: result(scripts.test ? STATUS.COMPLIANT : STATUS.MISSING, scripts['test:e2e'] ? 'test + test:e2e' : 'test'),
+    build: result(scripts.build ? STATUS.COMPLIANT : STATUS.MISSING, 'build script'),
+  };
+}
+
+/** Evaluates the base Web invariants of a generated Angular application. */
+function evaluateAngularWeb(appDir) {
+  const src = join(appDir, 'src');
+  const deps = packageDeps(appDir);
+  const scripts = packageScripts(appDir);
+  const hasClient = Boolean(deps['@enistere/api-client-fetch']);
+  return {
+    routing: result(findFile(src, 'app.routes.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'app.routes.ts'),
+    'config-public-private': result(findFile(src, 'api-config.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'core/config/api-config.ts (no explicit public/private split)'),
+    'generated-api-client': result(hasClient ? STATUS.COMPLIANT : STATUS.MISSING, hasClient ? '@enistere/api-client-fetch' : 'no generated client dependency'),
+    'ui-states': result(findFile(src, 'error.component.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'no loading/error/empty states at base'),
+    'error-boundary': result(findFile(src, 'app-api-error.ts') || findFile(src, 'global-error-handler.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'global ErrorHandler / app-api-error'),
+    accessibility: result(deps['@angular/cdk'] ? STATUS.PARTIAL : STATUS.MISSING, '@angular/cdk a11y'),
+    observability: result(STATUS.MISSING, 'no client logging'),
+    tests: result(scripts['test:ci'] || scripts.test ? STATUS.COMPLIANT : STATUS.MISSING, 'test:ci (Karma)'),
+    build: result(scripts.build ? STATUS.COMPLIANT : STATUS.MISSING, 'build script'),
+  };
+}
+
+/** Evaluates one generated Web application by runtime. */
+export function evaluateWebApp({ appDir, runtime }) {
+  const invariants = runtime === 'nextjs' ? evaluateNextjsWeb(appDir)
+    : runtime === 'angular' ? evaluateAngularWeb(appDir)
+      : null;
+  if (!invariants) throw new Error(`Platform Contract Web evaluation unsupported for runtime: ${runtime}`);
+  return invariants;
+}
+
 /**
  * The structural conformance level: a generated, evaluated app has reached
  * `Generatable`; `Bootable`/`Conformant` require the opt-in runtime runner.
  */
 function structuralLevel() { return 'Generatable'; }
 
+/** Evaluates one generated application by family/runtime, or null if its family is not yet evaluated. */
+function evaluateByFamily(app, appDir) {
+  if (app.kind === 'api') return { family: 'api', invariants: evaluateApiApp({ appDir, runtime: app.runtime }) };
+  if (app.kind === 'web') return { family: 'web', invariants: evaluateWebApp({ appDir, runtime: app.runtime }) };
+  return null; // Mobile is not evaluated yet.
+}
+
 /**
- * Builds the computed conformance record for a generated project (API family).
- * Consumes the GenerationPlan only for identity/digests; evidence is read from
- * the generated tree — never from a hand-written status.
+ * Builds the computed conformance record for a generated project across all
+ * evaluated families (API, Web). Consumes the GenerationPlan only for
+ * identity/digests; evidence is read from the generated tree — never from a
+ * hand-written status.
  */
-export function buildApiConformance({ plan, projectDir }) {
-  const apps = plan.applications.filter((app) => app.kind === 'api').map((app) => {
-    const invariants = evaluateApiApp({ appDir: join(projectDir, app.appDir), runtime: app.runtime });
-    return {
+export function buildConformance({ plan, projectDir }) {
+  const apps = [];
+  for (const app of plan.applications) {
+    const evaluated = evaluateByFamily(app, join(projectDir, app.appDir));
+    if (!evaluated) continue;
+    apps.push({
       id: app.id,
+      kind: app.kind,
       runtime: app.runtime,
+      family: evaluated.family,
       level: structuralLevel(),
-      invariants,
-      nonConformant: Object.entries(invariants).filter(([, r]) => r.status === STATUS.NON_CONFORMANT || r.status === STATUS.MISSING).map(([id]) => id),
-    };
-  });
+      invariants: evaluated.invariants,
+      nonConformant: Object.entries(evaluated.invariants)
+        .filter(([, r]) => r.status === STATUS.NON_CONFORMANT || r.status === STATUS.MISSING)
+        .map(([id]) => id),
+    });
+  }
   return {
     schemaVersion: '1',
-    family: 'api',
+    families: [...new Set(apps.map((a) => a.family))],
     contract: 'PLATFORM_CONTRACT.md',
     generatedFrom: { systemDigest: plan.systemDigest, resolutionDigest: plan.resolutionDigest, planDigest: plan.planDigest },
     evaluation: 'structural',

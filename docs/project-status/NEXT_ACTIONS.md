@@ -2,26 +2,21 @@
 
 ## Action unique
 
-**Étendre le Platform Contract exécutable à la famille Web (Next.js ↔ Angular)** : définir les invariants Web
-communs, les mesurer via l'évaluateur de conformité, puis converger le minimal — sans encore modifier Auth,
-RBAC ou Files.
+**Converger le socle Web (Angular) vers la parité Next.js** sur les divergences porteuses mesurées — sans
+encore modifier Auth, RBAC ou Files.
 
-Le Platform Contract **minimal de la famille API est complet** ([ADR-047](../adr/ADR-047-executable-platform-contract-api.md),
-[ADR-048](../adr/ADR-048-canonical-api-error-contract.md), [ADR-049](../adr/ADR-049-api-observability-convergence.md)) :
-NestJS↔Spring sont en parité mesurée sur `config-validated`, `error-canonical`, `correlation-id`, health,
-`openapi`, `base-security` et `observability` (migrations = par composition). La suite de conformité et
-`enistere.conformance.json` sont en place pour être étendus à une nouvelle famille.
-
-La famille Web a ses propres invariants ([Platform Contract](../specifications/PLATFORM_CONTRACT.md) §Web :
-routage, config publique/privée, client API généré, session, contrôle d'accès, états loading/error/empty,
-error boundaries, accessibilité, observabilité, tests, build). Rappel audit : Angular est **base-only**
-(auth/rbac/files `planned`) — la parité capabilities Web relève d'une étape ultérieure (roadmap Phase 3).
+La **mesure Web est livrée** ([ADR-050](../adr/ADR-050-web-platform-contract-measurement.md)) : l'évaluateur
+`factory/conformance/` est multi-familles et `enistere.conformance.json` couvre API + Web. La baseline
+**calculée** montre un Angular **base-only** honnêtement non conforme sur : **client API généré**
+(`@enistere/api-client-fetch` absent), **error-boundary** (global ErrorHandler), **états** (loading/error/empty),
+**accessibilité**, config publique/privée (partielle) — Next.js étant largement conforme.
 
 Périmètre (à cadrer en Phase A) :
 
-1. invariants Web communs Next.js↔Angular dans l'évaluateur (`family: 'web'`) ;
-2. mesure honnête (`enistere.conformance.json` Web) ;
-3. convergence minimale des divergences porteuses.
+1. converger le socle Angular sur les cibles tractables (client généré, error-boundary/ErrorHandler, états,
+   config publique/privée) à parité avec Next.js ;
+2. re-mesurer (`enistere.conformance.json` Web) pour prouver la parité de base ;
+3. observabilité Web et parité capabilities Web (auth/rbac/files) restent différées (roadmap Phase 3).
 
 ## Cadrage gouvernance
 
