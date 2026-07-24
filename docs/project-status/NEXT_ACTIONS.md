@@ -23,15 +23,26 @@ golden. Preuve : golden-runtime `spring-files` (mvnw verify vert, MinIO + Postgr
 **Politique de composition des capabilities actée** ([ADR-055](../adr/ADR-055-capability-composition-policy.md)) :
 capabilities **atomiques** + graphe `requires` **source unique** (la closure en dérive par tri topologique ;
 l'enforcement codé en dur de `validateCapabilityDependencies` est supprimé) + **auto-closure tracée**. Pas de
-fusion de capabilities, pas de bundles. Décision documentaire — **aucune implémentation dans l'ADR**.
+fusion de capabilities, pas de bundles.
 
-**Prochaine action unique — séquence à trancher** (deux missions ouvertes, une seule à la fois) :
+**Contrat de base par famille acté** ([ADR-056](../adr/ADR-056-base-contract-per-family.md)) : la base =
+**plancher d'invariants** de la famille, mesuré par conformité, extras = capabilities. Le contrat **API** est
+complété de `audit-trail` + `rate-limiting` (infra d'audit + mécanisme de throttling en **base**, événements /
+limites par **overlay**, miroir NestJS). Découverte bloquante : l'app complète Spring loge `audit` et
+`rate-limiting` **hors de la composition** (ni `base/` ni overlays) → supprimer le doublon régresserait la
+sécurité (§12, §8.6) tant que la base Spring n'est pas complétée. Ces trois ADR (054/055/056) sont **des
+décisions documentaires — aucune implémentation**.
 
-1. **ADR-054 étape (2)** : repointer la CI (`api-spring-verify`) sur une composition **générée** `spring-files`
-   plutôt que sur l'app Spring dédoublée. Puis (3) supprimer l'app dédoublée (`starters/spring/src`), remonter
-   `base/` à la racine ; (4) fitness function « source unique ». Ordre global : Spring → Angular → Flutter.
-2. **ADR-055 étape (1)** : dériver `validateCapabilityDependencies` du `requires` déclaré (tri topologique +
-   cycle) ; supprimer les branches codées en dur. Refus observables inchangés, source unique.
+**Prochaine action unique — ADR-056 étapes 1-2** (débloque tout le reste) :
+
+1. Ajouter `rate-limiting` + `audit-trail` aux **invariants du contrat API** (`platform-contract.mjs`), mesurés
+   sur Nest **et** Spring.
+2. **Porter la base Spring** à parité NestJS (audit-infra + throttling en `base/`, événements / usage par
+   overlay), preuve `golden-runtime spring-*` verte.
+
+Puis, **débloquées** : ADR-054 A (repointer CI → supprimer `starters/spring/src` → remonter `base/` → fitness
+« source unique ») ; ADR-055 étape 1 (dériver la closure du graphe `requires`) ; **dette mobile** (base RN
+sur-remplie ↔ Flutter minimale, même vice) ; **vérification Web**. Ordre global : API → Mobile → Web.
 
 Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
 capabilities Web/Mobile (Phase 3).

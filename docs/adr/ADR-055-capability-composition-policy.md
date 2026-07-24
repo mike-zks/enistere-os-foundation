@@ -52,8 +52,10 @@ Adopter une **politique de composition à capabilities atomiques et graphe de d�
    par closure (pas d'inclusion silencieuse, DX §14).
 4. **`conflicts` activé** : deux capabilities en conflit → refus **actionnable** (ou migration, spec §46).
 5. **Isolation (spec §44)** : une capability ne modifie pas directement une autre ; les couplages passent par
-   **événements**. `audit` sera **sa propre capability**, alimentée par événements — c'est la raison du
-   découplage `FileService ↔ audit` réalisé en Phase 1 de la modularisation `files` Spring (ADR-054).
+   **événements**. L'**infra d'audit est un invariant de base** ([ADR-056](ADR-056-base-contract-per-family.md)),
+   pas une capability isolée ; **chaque capability déclare ses propres événements d'audit** dans son overlay —
+   c'est la raison du découplage `FileService ↔ audit` réalisé en Phase 1 de la modularisation `files` Spring
+   (ADR-054) : l'overlay émet ses événements au lieu de dépendre du module audit.
 6. **Aucun mécanisme de regroupement nouveau** (ni bundles, ni capabilities fusionnées) : le besoin de
    « pack » est couvert par **l'auto-closure + les profils existants** (presets d'entrée, mandat §3).
 
@@ -70,11 +72,15 @@ Le graphe et la politique doivent absorber l'ajout d'une capability **sans touch
 | `rbac` | base, auth | autorisation (rôles/permissions) |
 | `files` | base, auth, rbac | stockage objet |
 
-**Planifiées** (déjà déclarées `planned` dans les starters) : `audit` (journal, alimenté par événements),
-`observability` (métriques, tracing, logs structurés étendus).
+**Invariants de base** (pas des capabilities — [ADR-056](ADR-056-base-contract-per-family.md)) : l'**infra
+d'audit** et le **rate-limiting** sont des invariants de la base API ; les capabilities y contribuent leurs
+**événements** / **limites** via overlay.
+
+**Planifiées** (déjà déclarées `planned` dans les starters) : `observability` avancée (métriques, tracing —
+l'observabilité minimale est déjà un invariant de base, ADR-049).
 
 **Horizon** (design, **non engagé** — l'ordre §9 gouverne la séquence) : gestion de comptes/utilisateurs,
-notifications, jobs/scheduler, rate-limiting, feature-flags, i18n, webhooks, recherche, api-keys/service-auth,
+notifications, jobs/scheduler, feature-flags, i18n, webhooks, recherche, api-keys/service-auth,
 multi-tenant, billing.
 
 ## Migration (programme ordonné, phasé)
@@ -98,7 +104,8 @@ sont refusées) ; seule **l'origine** de la règle change (le graphe déclaré a
 - **composabilité préservée** : `auth` sans `rbac` reste possible (profils `*-auth` déjà `ready`), granularité
   par target conservée (`rbac` = `not-applicable` sur React Native) ;
 - **extensibilité** : le catalogue peut grandir sans modification du moteur ;
-- couplages inter-capabilities canalisés par événements → `audit` devient une capability propre.
+- couplages inter-capabilities canalisés par événements → l'infra d'audit est un **invariant de base**
+  alimenté par les événements des capabilities ([ADR-056](ADR-056-base-contract-per-family.md)).
 
 ## Coûts et risques
 
