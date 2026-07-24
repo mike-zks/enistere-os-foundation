@@ -42,7 +42,7 @@ class FilesUploadIntegrationTest extends AbstractIntegrationTest {
                 .file(file)
                 .param("category", "DOCUMENT"))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.status").value(401));
+            .andExpect(jsonPath("$.statusCode").value(401));
     }
 
     @Test
@@ -91,7 +91,7 @@ class FilesUploadIntegrationTest extends AbstractIntegrationTest {
                 .file(file)
                 .header("Authorization", "Bearer " + token))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+            .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
     @Test

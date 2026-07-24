@@ -59,8 +59,8 @@ class RateLimitIntegrationTest extends AbstractIntegrationTest {
         // third request hits limit
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isTooManyRequests())
-            .andExpect(jsonPath("$.status").value(429))
-            .andExpect(jsonPath("$.code").value("TOO_MANY_REQUESTS"));
+            .andExpect(jsonPath("$.statusCode").value(429))
+            .andExpect(jsonPath("$.errorCode").value("TOO_MANY_REQUESTS"));
     }
 
     @Test
@@ -81,7 +81,7 @@ class RateLimitIntegrationTest extends AbstractIntegrationTest {
                 .param("category", "DOCUMENT")
                 .header("Authorization", "Bearer " + token))
             .andExpect(status().isTooManyRequests())
-            .andExpect(jsonPath("$.status").value(429));
+            .andExpect(jsonPath("$.statusCode").value(429));
     }
 
     @Test
@@ -98,7 +98,7 @@ class RateLimitIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/files/" + fileId + "/download-url")
                 .header("Authorization", "Bearer " + token))
             .andExpect(status().isTooManyRequests())
-            .andExpect(jsonPath("$.status").value(429));
+            .andExpect(jsonPath("$.statusCode").value(429));
     }
 
     @Test
