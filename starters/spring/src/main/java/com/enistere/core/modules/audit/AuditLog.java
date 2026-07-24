@@ -2,8 +2,6 @@ package com.enistere.core.modules.audit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +10,10 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Generic audit log entry. The {@code eventType} is a stable string identifier
+ * declared by the emitting capability — the base imposes no event enum.
+ */
 @Entity
 @Table(name = "audit_logs")
 public class AuditLog {
@@ -21,9 +23,8 @@ public class AuditLog {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false, length = 64)
-    private AuditEventType eventType;
+    private String eventType;
 
     @Column(name = "user_id")
     private UUID userId;
@@ -45,8 +46,8 @@ public class AuditLog {
 
     public UUID getId() { return id; }
 
-    public AuditEventType getEventType() { return eventType; }
-    public void setEventType(AuditEventType eventType) { this.eventType = eventType; }
+    public String getEventType() { return eventType; }
+    public void setEventType(String eventType) { this.eventType = eventType; }
 
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }

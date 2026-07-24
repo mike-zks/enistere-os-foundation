@@ -38,7 +38,7 @@ Statuts : `COMPLIANT` · `PARTIAL` · `MISSING` · `NOT_APPLICABLE` · `UNKNOWN`
   Golden runtime : `nestjs-base/auth/auth-rbac/files` + `nestjs-{next,angular,react-native,flutter}-base`
   (`.github/workflows/factory-golden-runtime.yml:49-69`).
 - **Spring** — base + auth + rbac **runtime-proven** (`spring-base`, `spring-auth`, `spring-auth-rbac`).
-  Config Java (`starters/spring/base/.../config/`), gestion d'erreurs et client API décrits en
+  Config Java (`starters/spring/.../config/`), gestion d'erreurs et client API décrits en
   spécification ; observabilité/tracing non prouvés. Gate `api-spring-verify` en CI.
 - **Next.js** — sécurité BFF forte (CSRF/Origin, cookies HttpOnly), client API généré, capabilities
   auth/rbac/files prouvées via `nest-next-*`. Observabilité/correlation non établies.

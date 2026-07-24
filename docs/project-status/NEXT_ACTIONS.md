@@ -41,13 +41,18 @@ throttling** (`RateLimiter` en base, interceptors auth/files par overlay). `spri
 `compliant` sur `migrations`, `audit-trail`, `rate-limiting`. Preuves : `golden-runtime spring-base|spring-auth|
 spring-auth-rbac|spring-files` verts ; `factory:test` 406/406.
 
-**Prochaine action unique : ADR-054 A (dédoublage Spring)** — désormais **débloquée** (la composition reproduit
-l'app complète, audit + rate-limiting inclus) :
+**ADR-054 A (dédoublage Spring) FAITE** (même PR) : l'app dédoublée `starters/spring/src` est **supprimée**, la
+base modulaire **remontée à la racine** (`starters/spring` = base, **plus aucun `base/`**), `composition.baseSource`
+retiré (le resolver pointe la racine, comme NestJS). La CI `api-spring-ci.yml` (qui testait l'app écrite à la main)
+est **supprimée** — la couverture passe aux golden-runtime `spring-*` (compositions **générées**). Fitness function
+**FF5b « source unique »** : un starter sans `baseSource` ne doit pas garder de `base/`. Spring est donc
+**source unique** (comme nestjs/nextjs/react-native).
 
-1. Repointer la CI `api-spring-verify` sur une composition **générée** plutôt que sur `starters/spring/src`.
-2. **Supprimer** l'app Spring dédoublée (`starters/spring/src`), remonter `base/` à la racine, retirer
-   `composition.baseSource`.
-3. Fitness function de garde « source unique ».
+**Prochaine action unique : appliquer le même modèle à Angular puis Flutter** (ADR-054 A pour Web/Mobile) :
+supprimer leur app dédoublée (`src`/`lib`), remonter leur `base/` à la racine, retirer `baseSource` — FF5b les y
+force dès qu'ils perdent `baseSource`. Prérequis symétrique : compléter leur base au contrat de famille (Web =
+9 invariants dont a11y ; Mobile = 8). En parallèle, dette : **base RN sur-remplie** (extraire ses features en
+capabilities). Puis ADR-055 étape 1 (dériver la closure du graphe `requires`). Ordre : Angular → Flutter → Mobile RN.
 
 Puis : ADR-055 étape 1 (dériver la closure du graphe `requires`) ; **dette mobile** (base RN sur-remplie ↔
 Flutter minimale, même vice) ; **vérification Web**. Ordre global : API → Mobile → Web.

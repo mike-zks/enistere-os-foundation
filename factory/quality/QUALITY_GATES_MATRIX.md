@@ -123,22 +123,18 @@
 
 ### 2.9 starters/spring
 
-> Maven Wrapper (`./mvnw verify`) — Java 21 Temurin, Spring Boot 4.1.0, Flyway V1+V2.
-> Tests unitaires (32) + intégration Testcontainers PostgreSQL (39) = **71 tests**.
-> FakeStorageService `@Profile("test")` — aucun MinIO réel, aucun secret.
-> Docker requis (Testcontainers) — exclu de `all-safe`.
+> `starters/spring` est désormais **la base modulaire** (ADR-054/056) — plus de sous-dossier `base/`, plus
+> d'app dédoublée. La base porte la persistence (JPA/Flyway, migration V0 `audit_logs`), l'infra d'audit et
+> le rate-limiting ; ses tests sont **unitaires** (audit, rate-limiter), sans Docker. La couverture
+> d'intégration complète (auth/rbac/files, Testcontainers PostgreSQL + MinIO) est fournie par les
+> **golden-runtime** qui **génèrent** la composition. Le workflow dédié `api-spring-ci.yml` est supprimé
+> (redondant avec `factory-golden-runtime.yml`).
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
-| compile + tests (71) | `cd starters/spring && ./mvnw verify --no-transfer-progress` | Java 21 Temurin, Docker (TC PostgreSQL) | **L5** | chaque PR |
-| Flyway migrations (V1+V2) | inclus dans `./mvnw verify` (FlywayMigrationTest) | Java 21, Testcontainers PostgreSQL | **L5** | chaque PR |
+| compile + tests unitaires (base) | `cd starters/spring && ./mvnw verify --no-transfer-progress` | Java 21 Temurin | local | à la demande |
+| compositions générées | `node factory/quality/scripts/golden-runtime.mjs spring-base\|spring-auth\|spring-auth-rbac\|spring-files` | Java 21, Docker (TC PostgreSQL + MinIO) | **golden-runtime** | chaque PR |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
-
-> **Gates exclus** : MinIO Testcontainers (différé futur, FakeStorageService utilisé) ;
-> Apache Tika (différé futur, whitelist statique) ; smoke réel contre MinIO staging (runbook CC11).
->
-> **Note branch protection** : pour ajouter `api-spring-verify` comme check requis sur `main`,
-> ajouter le nom de job exact au ruleset `protect-main` (runbook `BRANCH_PROTECTION_RUNBOOK.md`).
 
 ### 2.10 deployment
 

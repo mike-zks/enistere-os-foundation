@@ -17,8 +17,8 @@ public class OpenApiConfig {
             .info(new Info()
                 .title("Enistere API Core")
                 .version("0.1.0")
-                .description("Spring Boot 4 — auth, RBAC, files socle. " +
-                    "Statut : IMPLEMENTATION_PARTIELLE / FILE_UPLOAD_READY"))
+                .description("Spring Boot 4 — Enistere base API. " +
+                    "Optional capabilities are composed by the Factory."))
             .addSecurityItem(new SecurityRequirement().addList("Bearer"))
             .components(new Components()
                 .addSecuritySchemes("Bearer", new SecurityScheme()
