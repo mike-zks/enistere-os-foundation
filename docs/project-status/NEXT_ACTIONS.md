@@ -2,20 +2,24 @@
 
 ## Action unique
 
-**Jalon atteint : les 6 runtimes ont la parité de contrat de base, mesurée.** Le socle Flutter a convergé
-([ADR-053](../adr/ADR-053-flutter-base-convergence.md)) — `enistere.conformance.json` montre Flutter base
-`compliant` sur les 8 invariants Mobile. La **convergence runtime de base** (roadmap Phase 2) est donc couverte
-et mesurée pour NestJS, Spring, Next.js, Angular, React Native et Flutter.
+**Décision structurante actée : homogénéiser le modèle de composition des 6 runtimes**
+([ADR-054](../adr/ADR-054-homogeneous-composition-model.md)) — modèle modular à **source unique** (racine =
+base modulaire + overlays ; app complète toujours **composée**, jamais dédoublée ; **aucun `base/` nulle
+part**). Aujourd'hui Spring/Angular/Flutter maintiennent une **app complète en double** (`src/`/`lib/`) qui
+dérive de leur `base/` — la contradiction du contrat d'erreur Spring (`src/` complet ancien vs `base/`
+canonique) en est le symptôme actif.
 
-**Prochaine action unique : parité des contrats GÉNÉRÉS (Angular + Flutter)** — faire consommer aux clients
-Angular et Flutter les types dérivés du contrat canonique (`@enistere/api-contracts` / génération polyglotte,
-[`CONTRACT_ARCHITECTURE`](../architecture/CONTRACT_ARCHITECTURE.md)) au lieu de types écrits à la main, comme
-Next.js consomme déjà `@enistere/api-client-fetch`. C'est le dernier écart de contrat de base avant la parité
-**produit** (product-equivalence) et l'audit le classe P0 (« génération Java/Dart absente »).
+**Prochaine action unique : Interim ADR-054 — réconcilier la contradiction du contrat d'erreur Spring**
+(`starters/spring/src` complet → enveloppe plate canonique : `ApiError` + `GlobalExceptionHandler` + entry
+point sécurité + tests `$.status`→`$.statusCode` / `$.code`→`$.errorCode`), vérifié par `mvnw verify`. C'est
+le seul écart **logique actif** ; il est **non bloqué** (indépendant de la modularisation `files`).
 
-Point de pilotage : c'est un **checkpoint majeur**. Alternatives légitimes selon la priorité de l'owner :
-convergence des contrats générés (ci-dessus) ; OU parité capabilities Web/Mobile (auth/rbac/files sur
-Angular/Flutter, roadmap Phase 3) ; OU pause de consolidation (rapport de readiness global du Platform Contract).
+Puis migration ADR-054 (ordre Spring → Angular → Flutter) : (1) modulariser `files` + compléter les overlays ;
+(2) repointer la CI sur une composition générée ; (3) supprimer l'app dédoublée, remonter `base/` à la racine ;
+(4) fitness function de garde « source unique ».
+
+Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
+capabilities Web/Mobile (Phase 3).
 
 ## Cadrage gouvernance
 
