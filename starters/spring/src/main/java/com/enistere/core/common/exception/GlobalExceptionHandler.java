@@ -14,20 +14,37 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.regex.Pattern;
 
+/**
+ * Maps exceptions to the canonical flat error envelope (ADR-048, reconciled here
+ * by ADR-054) — the same ApiErrorResponse the generated client consumes. Never
+ * exposes a stack trace. The requestId is the validated {@code X-Request-Id}
+ * header or null (this reference app carries no correlation filter).
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Pattern SAFE_ID = Pattern.compile("^[A-Za-z0-9._-]{8,128}$");
+
+    private static String requestId(HttpServletRequest request) {
+        String incoming = request.getHeader("X-Request-Id");
+        return incoming != null && SAFE_ID.matcher(incoming).matches() ? incoming : null;
+    }
+
+    private static ResponseEntity<ApiError> respond(int statusCode, String errorCode, String message, Object details, HttpServletRequest request) {
+        return ResponseEntity.status(statusCode).body(
+            ApiError.of(statusCode, errorCode, message, details, request.getRequestURI(), requestId(request))
+        );
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
             .toList();
-        return ResponseEntity.badRequest().body(
-            new ApiError(400, "VALIDATION_ERROR", "Validation failed", errors, Instant.now(), request.getRequestURI())
-        );
+        return respond(HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR", "Validation failed", errors, request);
     }
 
     @ExceptionHandler(BindException.class)
@@ -35,53 +52,41 @@ public class GlobalExceptionHandler {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
             .toList();
-        return ResponseEntity.badRequest().body(
-            new ApiError(400, "VALIDATION_ERROR", "Validation failed", errors, Instant.now(), request.getRequestURI())
-        );
+        return respond(HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR", "Validation failed", errors, request);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        return ResponseEntity.badRequest().body(
-            new ApiError(400, "BAD_REQUEST", "Malformed or missing request body", List.of(), Instant.now(), request.getRequestURI())
-        );
+        return respond(HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST", "Malformed or missing request body", null, request);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiError> handleMaxUploadSize(MaxUploadSizeExceededException ex, HttpServletRequest request) {
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(
-            new ApiError(413, "FILE_TOO_LARGE", "File size exceeds the maximum allowed", List.of(), Instant.now(), request.getRequestURI())
-        );
+        return respond(HttpStatus.PAYLOAD_TOO_LARGE.value(), "FILE_TOO_LARGE", "File size exceeds the maximum allowed", null, request);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiError> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
-        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(
-            new ApiError(415, "UNSUPPORTED_MEDIA_TYPE", "Content type not supported", List.of(), Instant.now(), request.getRequestURI())
-        );
+        return respond(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), "UNSUPPORTED_MEDIA_TYPE", "Content type not supported", null, request);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiError> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
         int statusValue = ex.getStatusCode().value();
-        String code = ex.getStatusCode() instanceof HttpStatus hs ? hs.name() : String.valueOf(statusValue);
+        String errorCode = ex.getStatusCode() instanceof HttpStatus hs ? hs.name() : String.valueOf(statusValue);
         String message = ex.getReason() != null ? ex.getReason() : "Error";
-        return ResponseEntity.status(ex.getStatusCode()).body(
-            new ApiError(statusValue, code, message, List.of(), Instant.now(), request.getRequestURI())
-        );
+        return respond(statusValue, errorCode, message, null, request);
     }
 
     @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
     public void handleSecurityException(RuntimeException ex) throws RuntimeException {
-        // Re-throw to let Spring Security's ExceptionTranslationFilter handle 401/403
+        // Re-throw to let Spring Security's ExceptionTranslationFilter handle 401/403.
         throw ex;
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, HttpServletRequest request) {
-        // Never expose stack traces — log internally, return opaque error
-        return ResponseEntity.internalServerError().body(
-            new ApiError(500, "INTERNAL_ERROR", "An unexpected error occurred", List.of(), Instant.now(), request.getRequestURI())
-        );
+        // Never expose stack traces — log internally, return an opaque error.
+        return respond(HttpStatus.INTERNAL_SERVER_ERROR.value(), "INTERNAL_ERROR", "An unexpected error occurred", null, request);
     }
 }

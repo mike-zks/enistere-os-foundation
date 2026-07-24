@@ -42,7 +42,7 @@ class FilesDownloadUrlIntegrationTest extends AbstractIntegrationTest {
     void downloadUrl_withoutToken_returns401() throws Exception {
         mockMvc.perform(get("/api/v1/files/00000000-0000-0000-0000-000000000001/download-url"))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.status").value(401));
+            .andExpect(jsonPath("$.statusCode").value(401));
     }
 
     @Test
