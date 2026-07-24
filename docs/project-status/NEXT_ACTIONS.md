@@ -13,9 +13,16 @@ L'**interim ADR-054 est fait** : le contrat d'erreur du `src/` Spring complet es
 plate canonique (`ApiError` == base, `GlobalExceptionHandler` + entry point sécurité, tests
 `$.status`→`$.statusCode`), `mvnw verify` 99/0. Plus aucun écart **logique actif** entre `base/` et `src/`.
 
-**Prochaine action unique : migration ADR-054 Phase 1 (Spring) — modulariser `files`** (Spring) et compléter
-les overlays, condition pour supprimer l'app Spring dédoublée. Puis (2) repointer la CI (`api-spring-verify`)
-sur une composition générée ; (3) supprimer l'app dédoublée, remonter `base/` à la racine ; (4) fitness
+La **Phase 1 ADR-054 (Spring) est faite** : `files` est modularisé en overlay
+(`capabilities/files/targets/spring`) — module files, service de stockage MinIO, `FilesConfig`/`StorageConfig`,
+migration `V3__add_stored_files.sql`, tests + `FakeStorageService`, `FileService` découplé de l'audit
+(cohérent avec les overlays auth/rbac). Target `files/spring` = `ready`, profil `spring-files` promu avec son
+golden. Preuve : golden-runtime `spring-files` (mvnw verify vert, MinIO + Postgres Testcontainers) ;
+`factory:test` 406/406. Spring compose désormais **base + auth + rbac + files** sans dépasser la sélection.
+
+**Prochaine action unique : migration ADR-054 Phase 1 (Spring) — étape (2)** : repointer la CI
+(`api-spring-verify`) sur une composition **générée** `spring-files` plutôt que sur l'app Spring dédoublée.
+Puis (3) supprimer l'app dédoublée (`starters/spring/src`), remonter `base/` à la racine ; (4) fitness
 function de garde « source unique ». Ordre global : Spring → Angular → Flutter.
 
 Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
