@@ -7,6 +7,7 @@
   "operations": ["files", "dependencies", "environment", "integrations", "verification"],
   "files": [
     { "source": "files/src/main/java/com/enistere/core/modules/files", "destination": "src/main/java/com/enistere/core/modules/files" },
+    { "source": "files/src/main/java/com/enistere/core/infrastructure/ratelimit", "destination": "src/main/java/com/enistere/core/infrastructure/ratelimit" },
     { "source": "files/src/main/java/com/enistere/core/infrastructure/storage", "destination": "src/main/java/com/enistere/core/infrastructure/storage" },
     { "source": "files/src/main/java/com/enistere/core/config/FilesConfig.java", "destination": "src/main/java/com/enistere/core/config/FilesConfig.java" },
     { "source": "files/src/main/java/com/enistere/core/config/StorageConfig.java", "destination": "src/main/java/com/enistere/core/config/StorageConfig.java" },

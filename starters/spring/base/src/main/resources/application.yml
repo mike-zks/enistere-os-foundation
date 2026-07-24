@@ -4,6 +4,18 @@ server:
 spring:
   application:
     name: enistere-api-spring-core
+  # Persistence + migrations are base infrastructure (ADR-056). Flyway is authoritative;
+  # Hibernate only validates. Capabilities add their own migrations after the base baseline.
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/enistere}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:enistere}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:change-me}}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
 
 management:
   endpoints:
