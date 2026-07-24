@@ -29,6 +29,8 @@ Tout runtime fournit, selon sa catégorie :
 - liveness et readiness ;
 - persistence integration ;
 - migrations et transactions ;
+- journal d'audit générique (infra en base, événements par capability — ADR-056) ;
+- rate-limiting (mécanisme en base, limites par endpoint — ADR-056) ;
 - points d’intégration Auth/Authorization ;
 - logs, metrics et tracing ;
 - tests unitaires, intégration et contrat.

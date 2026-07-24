@@ -39,6 +39,8 @@ export const API_CONTRACT_INVARIANTS = Object.freeze([
   'migrations',
   'base-security',
   'observability',
+  'audit-trail',
+  'rate-limiting',
 ]);
 
 /**
@@ -134,6 +136,8 @@ function evaluateNestjs(appDir) {
     migrations: result(existsSync(join(appDir, 'prisma', 'migrations')) ? STATUS.COMPLIANT : STATUS.MISSING, 'prisma/migrations'),
     'base-security': result(findFile(join(appDir, 'src'), 'throttling') || readContains(appDir, 'main.ts', 'helmet') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'helmet/throttling'),
     observability: result(findFile(join(appDir, 'src'), 'logging.config.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'common/logging (structured, ADR-040)'),
+    'audit-trail': result(findFile(join(appDir, 'src'), 'audit.service.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'src/audit (generic sink)'),
+    'rate-limiting': result(findFile(join(appDir, 'src'), 'throttling.module.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'common/throttling (base mechanism)'),
   };
 }
 
@@ -156,6 +160,8 @@ function evaluateSpring(appDir) {
     migrations: result(existsSync(join(appDir, 'src', 'main', 'resources', 'db', 'migration')) ? STATUS.COMPLIANT : STATUS.MISSING, 'flyway db/migration'),
     'base-security': result(findFile(java, 'SecurityConfig.java') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'SecurityConfig.java'),
     observability: result(structuredLogs && requestLog ? STATUS.COMPLIANT : (structuredLogs || requestLog ? STATUS.PARTIAL : STATUS.MISSING), 'structured logging + RequestLoggingFilter'),
+    'audit-trail': result(findFile(java, 'AuditService.java') ? STATUS.COMPLIANT : STATUS.MISSING, 'modules/audit (generic sink)'),
+    'rate-limiting': result(findFile(java, 'RateLimiter.java') ? STATUS.COMPLIANT : STATUS.MISSING, 'infrastructure/ratelimit (base mechanism)'),
   };
 }
 

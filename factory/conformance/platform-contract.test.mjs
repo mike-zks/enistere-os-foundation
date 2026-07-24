@@ -68,6 +68,9 @@ describe('platform-contract — computed API conformance', () => {
     assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
     assert.equal(api.invariants.observability.status, STATUS.COMPLIANT);
+    // ADR-056: audit sink (src/audit) and rate-limit mechanism (common/throttling) are base invariants.
+    assert.equal(api.invariants['audit-trail'].status, STATUS.COMPLIANT);
+    assert.equal(api.invariants['rate-limiting'].status, STATUS.COMPLIANT);
     assert.ok(!api.nonConformant.includes('error-canonical'));
   });
 
@@ -82,10 +85,12 @@ describe('platform-contract — computed API conformance', () => {
     assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants['health-liveness-readiness'].status, STATUS.COMPLIANT);
     assert.equal(api.invariants.observability.status, STATUS.COMPLIANT);
-    // OpenAPI (springdoc) is present on the base; migrations live in the full
-    // composition, so the base is honestly reported as missing them.
+    // ADR-056: the base now owns the DB baseline (V0 audit_logs), the audit sink and the
+    // rate-limit mechanism, so spring-base is compliant on migrations, audit-trail and rate-limiting.
     assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
-    assert.equal(api.invariants.migrations.status, STATUS.MISSING);
+    assert.equal(api.invariants.migrations.status, STATUS.COMPLIANT);
+    assert.equal(api.invariants['audit-trail'].status, STATUS.COMPLIANT);
+    assert.equal(api.invariants['rate-limiting'].status, STATUS.COMPLIANT);
   });
 
   it('rejects an unsupported runtime', () => {

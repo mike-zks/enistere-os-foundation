@@ -33,16 +33,24 @@ limites par **overlay**, miroir NestJS). Découverte bloquante : l'app complète
 sécurité (§12, §8.6) tant que la base Spring n'est pas complétée. Ces trois ADR (054/055/056) sont **des
 décisions documentaires — aucune implémentation**.
 
-**Prochaine action unique — ADR-056 étapes 1-2** (débloque tout le reste) :
+**ADR-056 étapes 1-2 FAITES** : le contrat API porte désormais `audit-trail` + `rate-limiting`
+(`platform-contract.mjs`, mesurés `compliant` sur Nest **et** Spring). La **base Spring** possède désormais la
+couche DB/migrations (relocalisée depuis l'overlay auth), l'**infra d'audit** générique (`AuditService` +
+`audit_logs` V0, événements par capability : `AuthAuditEvents`, `FilesAuditEvents`) et le **mécanisme de
+throttling** (`RateLimiter` en base, interceptors auth/files par overlay). `spring-base` est maintenant
+`compliant` sur `migrations`, `audit-trail`, `rate-limiting`. Preuves : `golden-runtime spring-base|spring-auth|
+spring-auth-rbac|spring-files` verts ; `factory:test` 406/406.
 
-1. Ajouter `rate-limiting` + `audit-trail` aux **invariants du contrat API** (`platform-contract.mjs`), mesurés
-   sur Nest **et** Spring.
-2. **Porter la base Spring** à parité NestJS (audit-infra + throttling en `base/`, événements / usage par
-   overlay), preuve `golden-runtime spring-*` verte.
+**Prochaine action unique : ADR-054 A (dédoublage Spring)** — désormais **débloquée** (la composition reproduit
+l'app complète, audit + rate-limiting inclus) :
 
-Puis, **débloquées** : ADR-054 A (repointer CI → supprimer `starters/spring/src` → remonter `base/` → fitness
-« source unique ») ; ADR-055 étape 1 (dériver la closure du graphe `requires`) ; **dette mobile** (base RN
-sur-remplie ↔ Flutter minimale, même vice) ; **vérification Web**. Ordre global : API → Mobile → Web.
+1. Repointer la CI `api-spring-verify` sur une composition **générée** plutôt que sur `starters/spring/src`.
+2. **Supprimer** l'app Spring dédoublée (`starters/spring/src`), remonter `base/` à la racine, retirer
+   `composition.baseSource`.
+3. Fitness function de garde « source unique ».
+
+Puis : ADR-055 étape 1 (dériver la closure du graphe `requires`) ; **dette mobile** (base RN sur-remplie ↔
+Flutter minimale, même vice) ; **vérification Web**. Ordre global : API → Mobile → Web.
 
 Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
 capabilities Web/Mobile (Phase 3).
