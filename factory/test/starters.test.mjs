@@ -39,5 +39,5 @@ it('reports a truthful target support matrix', async () => {
   assert.equal(matrix.files.nestjs, 'ready');
   assert.equal(matrix.files.nextjs, 'ready');
   assert.equal(matrix.files['react-native'], 'ready');
-  assert.equal(matrix.files.spring, 'planned');
+  assert.equal(matrix.files.spring, 'ready');
 });

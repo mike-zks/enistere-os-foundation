@@ -63,7 +63,7 @@ Deux champs distincts portent cette nuance :
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (21)
+### `ready` — composables, prouvés et exacts (22)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -82,6 +82,7 @@ Deux champs distincts portent cette nuance :
 | `spring-base` | spring | — | — | base | `spring-base` |
 | `spring-auth` | spring | — | — | base + auth | `spring-auth` |
 | `spring-rbac` | spring | — | — | base + auth + rbac | `spring-auth-rbac` |
+| `spring-files` | spring | — | — | base + auth + rbac + files | `spring-files` |
 | `spring-next-base` | spring | nextjs | — | base | `spring-next-base` |
 | `spring-react-native-base` | spring | — | react-native | base | `spring-react-native-base` |
 | `nestjs-angular-base` | nestjs | angular | — | base | `nestjs-angular-base` |
@@ -105,15 +106,14 @@ Ces profils sont valides **parce que `base` est disponible sur les six starters*
 que leurs gates passent réellement. Angular et Flutter suivent désormais le contrat modulaire :
 la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: false`).
 
-Les overlays Auth/RBAC/Files restent une mission distincte : la base exacte ne prouve pas encore
-la parité métier de ces capabilities sur Angular et Flutter. Sur Spring, Auth et RBAC sont prêts ;
-Files reste planifié.
+Les overlays Auth/RBAC/Files restent une mission distincte sur Angular et Flutter : la base exacte ne
+prouve pas encore la parité métier de ces capabilities. Sur Spring, **Auth, RBAC et Files sont prêts**
+(overlays modulaires + golden `spring-files`).
 
-### `planned` — cibles de parité, génération refusée (5)
+### `planned` — cibles de parité, génération refusée (4)
 
 | Profil | API | Web | Mobile | Capabilities | Bloqué par |
 |---|---|---|---|---|---|
-| `spring-files` | spring | — | — | base + auth + rbac + files | auth+rbac+files/spring |
 | `spring-angular-auth` | spring | angular | — | base + auth | auth/spring, auth/angular |
 | `spring-angular-rbac` | spring | angular | — | base + auth + rbac | auth+rbac/spring, auth+rbac/angular |
 | `spring-flutter-auth` | spring | — | flutter | base + auth | auth/spring, auth/flutter |
