@@ -20,10 +20,18 @@ migration `V3__add_stored_files.sql`, tests + `FakeStorageService`, `FileService
 golden. Preuve : golden-runtime `spring-files` (mvnw verify vert, MinIO + Postgres Testcontainers) ;
 `factory:test` 406/406. Spring compose désormais **base + auth + rbac + files** sans dépasser la sélection.
 
-**Prochaine action unique : migration ADR-054 Phase 1 (Spring) — étape (2)** : repointer la CI
-(`api-spring-verify`) sur une composition **générée** `spring-files` plutôt que sur l'app Spring dédoublée.
-Puis (3) supprimer l'app dédoublée (`starters/spring/src`), remonter `base/` à la racine ; (4) fitness
-function de garde « source unique ». Ordre global : Spring → Angular → Flutter.
+**Politique de composition des capabilities actée** ([ADR-055](../adr/ADR-055-capability-composition-policy.md)) :
+capabilities **atomiques** + graphe `requires` **source unique** (la closure en dérive par tri topologique ;
+l'enforcement codé en dur de `validateCapabilityDependencies` est supprimé) + **auto-closure tracée**. Pas de
+fusion de capabilities, pas de bundles. Décision documentaire — **aucune implémentation dans l'ADR**.
+
+**Prochaine action unique — séquence à trancher** (deux missions ouvertes, une seule à la fois) :
+
+1. **ADR-054 étape (2)** : repointer la CI (`api-spring-verify`) sur une composition **générée** `spring-files`
+   plutôt que sur l'app Spring dédoublée. Puis (3) supprimer l'app dédoublée (`starters/spring/src`), remonter
+   `base/` à la racine ; (4) fitness function « source unique ». Ordre global : Spring → Angular → Flutter.
+2. **ADR-055 étape (1)** : dériver `validateCapabilityDependencies` du `requires` déclaré (tri topologique +
+   cycle) ; supprimer les branches codées en dur. Refus observables inchangés, source unique.
 
 Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
 capabilities Web/Mobile (Phase 3).
