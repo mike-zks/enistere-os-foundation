@@ -9,14 +9,14 @@ part**). Aujourd'hui Spring/Angular/Flutter maintiennent une **app complète en 
 dérive de leur `base/` — la contradiction du contrat d'erreur Spring (`src/` complet ancien vs `base/`
 canonique) en est le symptôme actif.
 
-**Prochaine action unique : Interim ADR-054 — réconcilier la contradiction du contrat d'erreur Spring**
-(`starters/spring/src` complet → enveloppe plate canonique : `ApiError` + `GlobalExceptionHandler` + entry
-point sécurité + tests `$.status`→`$.statusCode` / `$.code`→`$.errorCode`), vérifié par `mvnw verify`. C'est
-le seul écart **logique actif** ; il est **non bloqué** (indépendant de la modularisation `files`).
+L'**interim ADR-054 est fait** : le contrat d'erreur du `src/` Spring complet est réconcilié sur l'enveloppe
+plate canonique (`ApiError` == base, `GlobalExceptionHandler` + entry point sécurité, tests
+`$.status`→`$.statusCode`), `mvnw verify` 99/0. Plus aucun écart **logique actif** entre `base/` et `src/`.
 
-Puis migration ADR-054 (ordre Spring → Angular → Flutter) : (1) modulariser `files` + compléter les overlays ;
-(2) repointer la CI sur une composition générée ; (3) supprimer l'app dédoublée, remonter `base/` à la racine ;
-(4) fitness function de garde « source unique ».
+**Prochaine action unique : migration ADR-054 Phase 1 (Spring) — modulariser `files`** (Spring) et compléter
+les overlays, condition pour supprimer l'app Spring dédoublée. Puis (2) repointer la CI (`api-spring-verify`)
+sur une composition générée ; (3) supprimer l'app dédoublée, remonter `base/` à la racine ; (4) fitness
+function de garde « source unique ». Ordre global : Spring → Angular → Flutter.
 
 Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
 capabilities Web/Mobile (Phase 3).
