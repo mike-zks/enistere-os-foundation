@@ -99,5 +99,5 @@ jobs:
       - name: Build (nest build)
         run: npm run build
 
-      - name: npm audit
-        run: npm audit
+      - name: npm audit (exceptions documentées, scopées et datées — sans désactivation globale)
+        run: node ../../factory/quality/scripts/audit-check.mjs . --targets nestjs

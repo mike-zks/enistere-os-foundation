@@ -62,6 +62,7 @@ describe('blueprint v1', () => {
     const rootPackage = JSON.parse(await readFile(join(output, 'package.json'), 'utf8'));
     assert.deepEqual(rootPackage.workspaces, ['packages/*', 'apps/api']);
     assert.match(rootPackage.scripts['build:packages'], /api-contracts/);
+    assert.equal(rootPackage.overrides.next.postcss, '8.5.23');
     // Unified workspace: the standalone starter's lockfile is removed (root lock is authoritative).
     await assert.rejects(access(join(output, 'apps/api/package-lock.json')), /ENOENT/);
   });

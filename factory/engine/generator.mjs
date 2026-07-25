@@ -74,7 +74,9 @@ function rootPackage(plan) {
     overrides: {
       'form-data': '^4.0.6',
       'js-yaml': '^4.2.0',
-      postcss: '^8.5.15',
+      next: {
+        postcss: '8.5.23',
+      },
     },
     scripts: {
       'build:packages': packageBuilds.join(' && '),
