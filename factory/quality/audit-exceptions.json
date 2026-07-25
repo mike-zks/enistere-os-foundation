@@ -117,10 +117,11 @@
       "maxSeverity": "high",
       "appliesTo": ["nestjs", "spring"],
       "advisory": "GHSA-mh99-v99m-4gvg — expansion non bornée pouvant provoquer une saturation mémoire",
-      "scope": "Copie transitive de l'outillage openapi-typescript/@redocly utilisée sur un unique document OpenAPI local, versionné et relu. Aucune entrée utilisateur ni exécution runtime.",
-      "justification": "Même cause racine que @redocly/openapi-core ; aucun correctif compatible dans la branche 1.x exigée par openapi-typescript 7.",
+      "scope": "Dépendance transitive de l'outillage OpenAPI, ESLint, Jest et Nest CLI. Les motifs et documents traités sont versionnés par la Foundation ; aucune entrée utilisateur ni exécution dans les artefacts de production.",
+      "justification": "L'advisory affecte toutes les branches historiques jusqu'à 5.0.7 et n'est corrigé qu'en 5.0.8. Forcer cette version majeure sous les anciennes branches de minimatch/glob casserait leur contrat de dépendances. Les paquets parents signalés par npm ne portent pas d'advisory distinct : le gate peut accepter leur seule propagation depuis cette racine, sans accepter un nouvel advisory direct.",
+      "allowPropagation": true,
       "deadline": "2026-08-31",
-      "review": "Supprimer avec l'exception @redocly/openapi-core après migration du générateur."
+      "review": "Mettre à niveau les chaînes OpenAPI, ESLint, Jest et Nest CLI vers des versions consommant brace-expansion 5.0.8+, puis supprimer l'autorisation de propagation."
     },
     {
       "package": "minimatch",

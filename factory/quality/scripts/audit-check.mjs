@@ -37,32 +37,96 @@ export function evaluateAudit(auditJson, exceptions, { targets = [], now = new D
   const vulnerabilities = auditJson?.vulnerabilities ?? {};
   const violations = [];
   const accepted = [];
+  const assessments = new Map();
+
+  function eligibleException(name, severity) {
+    const candidates = exceptions.filter((item) => item.package === name);
+    if (candidates.length === 0) return { exception: null, reason: 'no documented exception' };
+
+    const scoped = candidates.filter((item) =>
+      (item.appliesTo ?? []).some((target) => targets.includes(target)));
+    if (scoped.length === 0) {
+      const scopes = [...new Set(candidates.flatMap((item) => item.appliesTo ?? []))];
+      return {
+        exception: null,
+        reason: `exception is scoped to ${scopes.join(', ') || 'nothing'} but composition targets ${targets.join(', ') || 'none'}`,
+      };
+    }
+
+    const severityMatch = scoped.find((item) => rank(severity) <= rank(item.maxSeverity));
+    if (!severityMatch) {
+      return {
+        exception: null,
+        reason: `severity exceeds documented ${scoped.map((item) => item.maxSeverity).join(' or ')}`,
+      };
+    }
+
+    const deadline = severityMatch.deadline
+      ? new Date(`${severityMatch.deadline}T23:59:59Z`)
+      : null;
+    if (deadline && now > deadline) {
+      return {
+        exception: null,
+        reason: `exception expired on ${severityMatch.deadline} (review required)`,
+      };
+    }
+    return { exception: severityMatch, reason: null };
+  }
+
+  function assess(name, trail = new Set()) {
+    if (assessments.has(name)) return assessments.get(name);
+    const info = vulnerabilities[name];
+    const severity = info?.severity ?? 'unknown';
+    if (!info) return { ok: false, reason: `propagation references unknown package ${name}` };
+    if (trail.has(name)) return { ok: false, reason: `cyclic advisory propagation through ${name}` };
+
+    const via = Array.isArray(info.via) ? info.via : [];
+    const directAdvisories = via.filter((item) => typeof item === 'object' && item !== null);
+    const dependencies = via.filter((item) => typeof item === 'string');
+
+    // npm reports every affected parent as a vulnerability. A parent can inherit
+    // an accepted root advisory without repeating one exception per package, but
+    // only when the root exception explicitly authorizes that propagation.
+    if (directAdvisories.length === 0 && dependencies.length > 0) {
+      const nextTrail = new Set(trail).add(name);
+      const causes = dependencies.map((dependency) => assess(dependency, nextTrail));
+      if (causes.every((cause) => cause.ok && cause.propagationAuthorized)) {
+        const result = {
+          ok: true,
+          propagationAuthorized: true,
+          deadline: causes.map((cause) => cause.deadline).filter(Boolean).sort()[0],
+          propagatedVia: dependencies,
+        };
+        assessments.set(name, result);
+        return result;
+      }
+    }
+
+    const { exception, reason } = eligibleException(name, severity);
+    const result = exception
+      ? {
+          ok: true,
+          propagationAuthorized: exception.allowPropagation === true,
+          deadline: exception.deadline,
+        }
+      : { ok: false, propagationAuthorized: false, reason };
+    assessments.set(name, result);
+    return result;
+  }
 
   for (const [name, info] of Object.entries(vulnerabilities)) {
     const severity = info?.severity ?? 'unknown';
-    const exception = exceptions.find((item) => item.package === name);
-    if (!exception) {
-      violations.push({ package: name, severity, reason: 'no documented exception' });
+    const assessment = assess(name);
+    if (!assessment.ok) {
+      violations.push({ package: name, severity, reason: assessment.reason });
       continue;
     }
-    const scoped = (exception.appliesTo ?? []).some((target) => targets.includes(target));
-    if (!scoped) {
-      violations.push({
-        package: name, severity,
-        reason: `exception is scoped to ${(exception.appliesTo ?? []).join(', ') || 'nothing'} but composition targets ${targets.join(', ') || 'none'}`,
-      });
-      continue;
-    }
-    if (rank(severity) > rank(exception.maxSeverity)) {
-      violations.push({ package: name, severity, reason: `severity exceeds documented ${exception.maxSeverity}` });
-      continue;
-    }
-    const deadline = exception.deadline ? new Date(`${exception.deadline}T23:59:59Z`) : null;
-    if (deadline && now > deadline) {
-      violations.push({ package: name, severity, reason: `exception expired on ${exception.deadline} (review required)` });
-      continue;
-    }
-    accepted.push({ package: name, severity, deadline: exception.deadline });
+    accepted.push({
+      package: name,
+      severity,
+      deadline: assessment.deadline,
+      ...(assessment.propagatedVia ? { propagatedVia: assessment.propagatedVia } : {}),
+    });
   }
 
   return { ok: violations.length === 0, violations, accepted, total: Object.keys(vulnerabilities).length };
