@@ -21,6 +21,7 @@ matérialisation. **Aucune référence au blueprint brut.**
 ```text
 GenerationPlan
 ├── project, displayName
+├── architecture { profile, clients, backend, deployment, data, communication, operations }
 ├── generationMode, bundledFeaturesMayExceedSelection
 ├── stack, targetAdapters
 ├── capabilities[]                 (ids)

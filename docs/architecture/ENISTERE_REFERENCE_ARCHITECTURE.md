@@ -85,14 +85,17 @@ chaque statut à ses preuves.
 
 | Profil | Intention | Topologie de référence | Évolution habituelle |
 |---|---|---|---|
-| `api` | exposer une API ou un backend spécialisé | une API, zéro client imposé | `multi-client` ou service d'un système distribué |
-| `monolith` | livrer un produit cohésif avec faible coût opérationnel | une API modulaire et un ou plusieurs clients, déploiement coordonné | extraction de modules chauds |
-| `multi-client` | servir plusieurs expériences depuis une autorité métier | une API principale, plusieurs Web/Mobile | BFF ou `modular-distributed` |
-| `modular-distributed` | distribuer sélectivement certains domaines | plusieurs unités autonomes, contrats explicites, ownership unique | extraction progressive et réversible |
-| `microservices` | autonomie organisationnelle et opérationnelle forte | services indépendants, communications sync/async, données possédées | optimisation/agrégation par preuves |
+| `backend-service` | exposer une capacité backend | un backend, aucun client officiel imposé | backend d’un produit ou unité distribuée |
+| `product-platform` | livrer un produit cohérent | un backend modulaire, un ou plusieurs clients | extraction de frontières prouvées |
+| `distributed-platform` | séparer certains domaines ou technologies | plusieurs backends sous gouvernance commune | extraction ou réintégration progressive |
+| `service-ecosystem` | autonomie forte des domaines et équipes | services indépendants, données possédées | optimisation/agrégation par preuves |
 
 La spécification complète est dans
 [SYSTEM_ARCHITECTURE_PROFILES.md](SYSTEM_ARCHITECTURE_PROFILES.md).
+
+`single-client`/`multiple`, `modular-monolith`/`distributed-services`/`microservices`, le couplage de
+déploiement, l’ownership des données, les communications et la maturité opérationnelle sont des dimensions
+orthogonales au profil.
 
 ## 6. Runtimes
 
@@ -268,7 +271,7 @@ Voir [AI_REFERENCE_ARCHITECTURE.md](AI_REFERENCE_ARCHITECTURE.md).
 ## 16. Déploiement
 
 Une `application` est une unité logique ; une `deploymentUnit` est une unité livrable ; un runtime est une
-implémentation. Ces notions ne sont pas synonymes. Un monolith peut regrouper plusieurs modules dans une
+implémentation. Ces notions ne sont pas synonymes. Un monolithe modulaire peut regrouper plusieurs modules dans une
 unité, tandis qu'un profil distribué les sépare.
 
 Les environnements cibles restent local, test, integration, staging et production. Kubernetes est un

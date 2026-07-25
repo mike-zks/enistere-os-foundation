@@ -1,4 +1,4 @@
-# Référence — Microservices complet
+# Référence — Service ecosystem complet
 
 ## Finalité et graphe
 
@@ -23,7 +23,14 @@ apiVersion: enistere.io/v2alpha1
 kind: SystemBlueprint
 metadata: { name: regulated-commerce, version: 1.0.0 }
 spec:
-  architecture: { profile: microservices }
+  architecture:
+    profile: service-ecosystem
+    clients: { mode: multiple }
+    backend: { style: microservices }
+    deployment: { coupling: independent }
+    data: { ownership: per-service }
+    communication: { primary: hybrid }
+    operations: { maturity: distributed }
   applications:
     - { id: identity, kind: api, runtime: spring, domains: [identity] }
     - { id: customers, kind: api, runtime: nestjs, domains: [customers] }
@@ -68,6 +75,6 @@ Model/provider changes passent evaluations, approbation et canary ; un fallback 
 |---|---|---|
 | profil et blueprint | TARGET | représentable dans la cible seulement |
 | content repository/broker/secrets | TARGET | adapters absents |
-| orchestration microservices | TARGET | génération complète reportée en phase 15 |
+| orchestration de services autonomes | TARGET | génération complète reportée en phase 15 |
 | preuve opérationnelle | aucune | pas de golden, SLO ou scénario de panne |
 | système | TARGET | ne pas présenter comme supporté |

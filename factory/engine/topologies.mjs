@@ -28,14 +28,6 @@ export const APPLICATION_KINDS = Object.freeze({
 
 export const APPLICATION_KIND_IDS = Object.freeze(Object.keys(APPLICATION_KINDS));
 
-/**
- * Architecture styles the model can declare (the levels a blueprint travels
- * without a rewrite). `monolith` and `modular-monolith` are single-deployable and
- * generatable; `microservices` (multiple deployables) is declarable but its
- * generation is gated on the distributed capability packs (Phase D).
- */
-export const ARCHITECTURE_STYLES = Object.freeze(['monolith', 'modular-monolith', 'microservices']);
-
 /** Kinds a blueprint can generate today (status `ready`). */
 export const GENERATABLE_KINDS = Object.freeze(
   APPLICATION_KIND_IDS.filter((kind) => APPLICATION_KINDS[kind].status === 'ready'),

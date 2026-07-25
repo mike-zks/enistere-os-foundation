@@ -1,15 +1,15 @@
-# Matrice des profils (R7)
+# Matrice des presets de composition (R7)
 
 > **État d'implémentation, pas architecture cible.** Ce document décrit ce que le moteur de composition
 > supporte *aujourd'hui*. La topologie « une API obligatoire, un Web et un Mobile optionnels » est un
 > héritage d'[ADR-042](../adr/ADR-042-ai-native-project-factory-architecture.md), remplacée comme cible
-> par [ADR-057](../adr/ADR-057-reference-architecture-and-platform-baseline.md) et la
+> par [ADR-060](../adr/ADR-060-system-profile-taxonomy.md) et la
 > [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md). L'écart est mesuré
 > dans [TARGET_VS_CURRENT_IMPLEMENTATION.md](../audits/TARGET_VS_CURRENT_IMPLEMENTATION.md).
 
-Dans le moteur actuel, un **profil** est une composition *nommée* de
-`{api, web?, mobile?, capabilities}`. Ce registre ne doit pas être confondu avec les cinq profils
-architecturaux cibles.
+Dans le moteur actuel, un **preset de composition** — historiquement nommé profil — est une composition
+nommée de `{api, web?, mobile?, capabilities}`. Ce registre ne doit pas être confondu avec les quatre
+profils système canoniques.
 
 Il ne remplace pas la matrice des capabilities : celle-ci dit ce qu'une capability vaut sur une
 target, le profil dit quelle **combinaison complète** est supportée, et avec quelle preuve.

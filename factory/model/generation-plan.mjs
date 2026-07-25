@@ -44,6 +44,15 @@ export function buildPlan(resolved) {
   const base = {
     project: resolved.metadata.name,
     displayName: resolved.metadata.displayName,
+    architecture: {
+      ...resolved.architecture,
+      clients: { ...resolved.architecture.clients },
+      backend: { ...resolved.architecture.backend },
+      deployment: { ...resolved.architecture.deployment },
+      data: { ...resolved.architecture.data },
+      communication: { ...resolved.architecture.communication },
+      operations: { ...resolved.architecture.operations },
+    },
     generationMode: selection.generationMode,
     bundledFeaturesMayExceedSelection: !selection.allModular,
     stack: { ...selection.stack },

@@ -4,11 +4,13 @@
 
 ### Topologies
 
-- api ;
-- monolith ;
-- multi-client ;
-- modular-distributed ;
-- microservices.
+- backend-service ;
+- product-platform ;
+- distributed-platform ;
+- service-ecosystem.
+
+La topologie client et le style backend, dont `microservices`, sont des dimensions du système et non des
+profils concurrents.
 
 ### Runtimes
 

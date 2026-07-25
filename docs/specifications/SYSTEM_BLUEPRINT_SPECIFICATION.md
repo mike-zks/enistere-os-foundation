@@ -16,8 +16,14 @@ metadata:
 
 spec:
   architecture:
-    profile: multi-client
-    evolutionTarget: modular-distributed
+    profile: product-platform
+    evolutionTarget: distributed-platform
+    clients: { mode: multiple }
+    backend: { style: modular-monolith }
+    deployment: { coupling: coordinated }
+    data: { ownership: bounded-context }
+    communication: { primary: synchronous }
+    operations: { maturity: standard }
   applications: []
   domains: []
   capabilities: []
@@ -54,15 +60,15 @@ Plusieurs applications d’une même famille sont autorisées.
 
 ## Profils
 
-- api ;
-- monolith ;
-- multi-client ;
-- modular-distributed ;
-- microservices.
+- backend-service ;
+- product-platform ;
+- distributed-platform ;
+- service-ecosystem.
 
 Les règles détaillées sont définies dans
 [ARCHITECTURE_PROFILE_SPECIFICATION.md](ARCHITECTURE_PROFILE_SPECIFICATION.md). Les syntaxes historiques
-peuvent être migrées à la frontière d'entrée mais ne circulent pas dans le moteur.
+`api`, `monolith`, `multi-client`, `modular-distributed` et `microservices` peuvent être migrées à la
+frontière d'entrée mais ne circulent pas dans le moteur.
 
 ## Capabilities
 

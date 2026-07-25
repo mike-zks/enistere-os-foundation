@@ -13,7 +13,7 @@ Il est autoritaire pour le constat de cible, notamment :
 
 - Platform Baseline obligatoire ;
 - Observability et Technical Audit hors catalogue des capabilities ;
-- cinq profils et sept runtimes cibles ;
+- quatre profils système, six dimensions d’architecture et sept runtimes cibles ;
 - primitives sémantiques ;
 - statut de représentation distinct du support réel ;
 - prochaine mission unique.

@@ -12,16 +12,22 @@ import { loadStarterManifests, modularStarterIds, validateManifestConsistency } 
 import { finalizeDependencies, verifyProjectDependencies } from '../engine/dependencies.mjs';
 import { normalizeBlueprint } from '../blueprint/normalize.mjs';
 import { hasErrors } from '../model/diagnostics.mjs';
+import { SYSTEM_PROFILE_DEFINITIONS, SYSTEM_PROFILES } from '../model/system-profiles.mjs';
 
 const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
 function help() {
   console.log([
-    'Usage: enistere <doctor|profiles|profile|init|plan|generate|install|verify> [arguments]',
+    'Usage: enistere <doctor|architecture|profiles|profile|init|plan|generate|install|verify> [arguments]',
     '',
     '  doctor                              environment and manifest matrix',
-    '  profiles                            supported named compositions',
-    '  profile <name>                      detail one profile and its proof',
+    '  profiles                            historical composition presets',
+    '  profile <name>                      detail one preset and its proof',
+    '  architecture list                   list canonical system profiles',
+    '  architecture describe <name>        describe one canonical system profile',
+    '  architecture recommend [drivers]    recommend the least-distributed profile',
+    '    drivers: --apis=N --clients=N --teams=N --independent-deployments',
+    '             --isolated-data --polyglot',
     '  init [path] [slug]                  write a default blueprint',
     '  plan <blueprint>                    print the generation plan',
     '  generate <blueprint> <out> [--install|--no-install]',
@@ -62,9 +68,48 @@ export function wantsInstall(flags) {
   return flags.has('--install');
 }
 
+function numericFlag(flags, name, fallback) {
+  const prefix = `${name}=`;
+  const match = [...flags].find((flag) => flag.startsWith(prefix));
+  if (!match) return fallback;
+  const value = Number.parseInt(match.slice(prefix.length), 10);
+  if (!Number.isInteger(value) || value < 0) throw new Error(`${name} must be a non-negative integer`);
+  return value;
+}
+
+/** Deterministic, conservative profile recommendation from architecture drivers. */
+export function recommendSystemProfile(flags) {
+  const apis = numericFlag(flags, '--apis', 1);
+  const clients = numericFlag(flags, '--clients', 0);
+  const teams = numericFlag(flags, '--teams', 1);
+  const autonomous = flags.has('--independent-deployments') && flags.has('--isolated-data') && teams > 1;
+  if (autonomous) return { profile: 'service-ecosystem', reason: 'independent deployments, isolated data and multiple autonomous teams' };
+  if (apis > 1 || flags.has('--polyglot')) return { profile: 'distributed-platform', reason: apis > 1 ? 'multiple backend authorities' : 'different backend technologies' };
+  if (clients > 0) return { profile: 'product-platform', reason: 'one product authority with official clients' };
+  return { profile: 'backend-service', reason: 'a backend capability without an official client' };
+}
+
 async function main() {
   const { positional, flags } = parseArguments(process.argv.slice(2));
   const [command, first, second] = positional;
+
+  if (command === 'architecture') {
+    if (first === 'list') {
+      console.log(JSON.stringify({ profiles: SYSTEM_PROFILES.map((id) => SYSTEM_PROFILE_DEFINITIONS[id]) }, null, 2));
+      return;
+    }
+    if (first === 'describe') {
+      if (!second || !SYSTEM_PROFILE_DEFINITIONS[second]) throw new Error('architecture describe requires a canonical system profile');
+      console.log(JSON.stringify(SYSTEM_PROFILE_DEFINITIONS[second], null, 2));
+      return;
+    }
+    if (first === 'recommend') {
+      const recommendation = recommendSystemProfile(flags);
+      console.log(JSON.stringify({ ...recommendation, status: SYSTEM_PROFILE_DEFINITIONS[recommendation.profile] }, null, 2));
+      return;
+    }
+    throw new Error('architecture requires list, describe or recommend');
+  }
 
   if (command === 'doctor') {
     const starters = await loadStarterManifests(FOUNDATION_ROOT);

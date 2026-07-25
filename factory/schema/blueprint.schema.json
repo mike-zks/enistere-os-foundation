@@ -55,13 +55,49 @@
       }
     },
     "architecture": {
-      "description": "Architecture style and evolution target (levels the blueprint can travel).",
+      "description": "System profile and independent topology dimensions. `style` is deprecated migration input and is never emitted by the canonical model.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["style"],
       "properties": {
+        "profile": { "enum": ["backend-service", "product-platform", "distributed-platform", "service-ecosystem", "api", "monolith", "multi-client", "modular-distributed", "microservices"] },
         "style": { "enum": ["monolith", "modular-monolith", "microservices"] },
-        "evolutionTarget": { "enum": ["monolith", "modular-monolith", "microservices"] }
+        "evolutionTarget": { "enum": ["backend-service", "product-platform", "distributed-platform", "service-ecosystem", "api", "monolith", "multi-client", "modular-distributed", "microservices"] },
+        "clients": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": { "mode": { "enum": ["none", "single", "multiple"] } }
+        },
+        "backend": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style"],
+          "properties": { "style": { "enum": ["modular-monolith", "distributed-services", "microservices"] } }
+        },
+        "deployment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coupling"],
+          "properties": { "coupling": { "enum": ["coordinated", "partially-independent", "independent"] } }
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ownership"],
+          "properties": { "ownership": { "enum": ["shared", "bounded-context", "per-service"] } }
+        },
+        "communication": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary"],
+          "properties": { "primary": { "enum": ["synchronous", "event-driven", "hybrid"] } }
+        },
+        "operations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maturity"],
+          "properties": { "maturity": { "enum": ["standard", "advanced", "distributed"] } }
+        }
       }
     },
     "domain": {

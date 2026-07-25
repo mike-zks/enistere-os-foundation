@@ -12,9 +12,15 @@
 
 import {
   APPLICATION_KINDS,
+  BACKEND_STYLES,
+  CLIENT_MODES,
+  COMMUNICATION_MODES,
+  DATA_OWNERSHIP_MODES,
+  DEPLOYMENT_COUPLINGS,
   ENVIRONMENT_KINDS,
+  OPERATIONS_MATURITY_LEVELS,
   RUNTIMES,
-  SUPPORTED_ARCHITECTURE_STYLES,
+  SYSTEM_PROFILES,
 } from '../model/canonical-system.mjs';
 import { CSM_DIAGNOSTIC_CODES as CODES, diagnostic } from '../model/diagnostics.mjs';
 import { isRuntimeForKind } from '../engine/topologies.mjs';
@@ -23,6 +29,19 @@ const RUNTIME_SET = new Set(RUNTIMES);
 const KIND_SET = new Set(APPLICATION_KINDS);
 const ENVIRONMENT_KIND_SET = new Set(ENVIRONMENT_KINDS);
 const MANDATORY_KIND = 'api';
+
+const ARCHITECTURE_DIMENSIONS = Object.freeze([
+  ['clients.mode', CLIENT_MODES],
+  ['backend.style', BACKEND_STYLES],
+  ['deployment.coupling', DEPLOYMENT_COUPLINGS],
+  ['data.ownership', DATA_OWNERSHIP_MODES],
+  ['communication.primary', COMMUNICATION_MODES],
+  ['operations.maturity', OPERATIONS_MATURITY_LEVELS],
+]);
+
+function nestedValue(object, path) {
+  return path.split('.').reduce((value, key) => value?.[key], object);
+}
 
 /**
  * Returns the structured diagnostics for a system. An empty array means the
@@ -36,12 +55,29 @@ export function validateCanonicalSystem(system) {
     diagnostics.push(diagnostic(CODES.EMPTY_SYSTEM_NAME, 'metadata.name must be a non-empty system name', { path: 'metadata.name' }));
   }
 
-  if (!SUPPORTED_ARCHITECTURE_STYLES.includes(system?.architecture?.style)) {
+  if (!SYSTEM_PROFILES.includes(system?.architecture?.profile)) {
     diagnostics.push(diagnostic(
-      CODES.UNSUPPORTED_ARCHITECTURE_STYLE,
-      `architecture.style '${system?.architecture?.style}' is not supported; supported: ${SUPPORTED_ARCHITECTURE_STYLES.join(', ')}`,
-      { path: 'architecture.style', details: { supported: [...SUPPORTED_ARCHITECTURE_STYLES] } },
+      CODES.INVALID_SYSTEM_PROFILE,
+      `architecture.profile '${system?.architecture?.profile}' is invalid; expected: ${SYSTEM_PROFILES.join(', ')}`,
+      { path: 'architecture.profile', details: { expected: [...SYSTEM_PROFILES] } },
     ));
+  }
+  if (system?.architecture?.evolutionTarget !== undefined && !SYSTEM_PROFILES.includes(system.architecture.evolutionTarget)) {
+    diagnostics.push(diagnostic(
+      CODES.INVALID_SYSTEM_PROFILE,
+      `architecture.evolutionTarget '${system.architecture.evolutionTarget}' is invalid; expected: ${SYSTEM_PROFILES.join(', ')}`,
+      { path: 'architecture.evolutionTarget', details: { expected: [...SYSTEM_PROFILES] } },
+    ));
+  }
+  for (const [path, allowed] of ARCHITECTURE_DIMENSIONS) {
+    const value = nestedValue(system?.architecture, path);
+    if (!allowed.includes(value)) {
+      diagnostics.push(diagnostic(
+        CODES.INVALID_ARCHITECTURE_DIMENSION,
+        `architecture.${path} '${value}' is invalid; expected: ${allowed.join(', ')}`,
+        { path: `architecture.${path}`, details: { expected: [...allowed] } },
+      ));
+    }
   }
 
   const applications = Array.isArray(system?.applications) ? system.applications : [];
@@ -92,7 +128,39 @@ export function validateCanonicalSystem(system) {
     diagnostics.push(diagnostic(
       CODES.TOPOLOGY_NOT_GENERATABLE,
       `multiple API applications are not generatable yet (${apiCount} declared)`,
-      { path: 'applications', details: { apiCount } },
+      { path: 'applications', severity: 'warning', details: { apiCount } },
+    ));
+  }
+
+  const clientCount = applications.filter((app) => app.kind === 'web' || app.kind === 'mobile').length;
+  const declaredClientMode = system?.architecture?.clients?.mode;
+  const actualClientMode = clientCount === 0 ? 'none' : clientCount === 1 ? 'single' : 'multiple';
+  if (declaredClientMode !== actualClientMode) {
+    diagnostics.push(diagnostic(
+      CODES.INCOHERENT_STRUCTURE,
+      `architecture.clients.mode '${declaredClientMode}' does not match ${clientCount} declared client application(s)`,
+      { path: 'architecture.clients.mode', details: { actual: actualClientMode, clientCount } },
+    ));
+  }
+  if (system?.architecture?.profile === 'backend-service' && clientCount > 0) {
+    diagnostics.push(diagnostic(
+      CODES.INCOHERENT_STRUCTURE,
+      'backend-service cannot own official web or mobile clients; use product-platform',
+      { path: 'architecture.profile' },
+    ));
+  }
+  if (system?.architecture?.profile === 'product-platform' && clientCount === 0) {
+    diagnostics.push(diagnostic(
+      CODES.INCOHERENT_STRUCTURE,
+      'product-platform requires at least one official web or mobile client; use backend-service',
+      { path: 'architecture.profile' },
+    ));
+  }
+  if (['distributed-platform', 'service-ecosystem'].includes(system?.architecture?.profile) && apiCount < 2) {
+    diagnostics.push(diagnostic(
+      CODES.INCOHERENT_STRUCTURE,
+      `${system.architecture.profile} requires at least two backend authorities`,
+      { path: 'architecture.profile', details: { apiCount } },
     ));
   }
 

@@ -11,7 +11,7 @@ Réel : `factory/schema/blueprint.schema.json`, `factory/engine/applications.mjs
 | `apiVersion: enistere.io/v1alpha1` | `version: "1"` | REFACTOR |
 | `kind: SystemBlueprint` | absent (`topology: "monorepo"`) | CREATE |
 | `metadata.{name,version}` | `project.{name,slug}` | REFACTOR |
-| `spec.architecture.style` | `architecture.style` (monolith/modular-monolith/microservices) | PARTIAL |
+| `spec.architecture.profile` + dimensions | `architecture.profile` + six dimensions ; alias v1 à la frontière | IMPLEMENTED |
 | `spec.applications[]` | `applications[]` **ou** sucre `stack` | PARTIAL |
 | `spec.domains[]` | `domain.entities[]` | PARTIAL |
 | `spec.capabilities[]` (id + version + targets) | `capabilities[]` = enum figé `[base,auth,rbac,files]` | REFACTOR |
@@ -34,12 +34,11 @@ Réel : `factory/schema/blueprint.schema.json`, `factory/engine/applications.mjs
 
 | Topologie cible | Réel | État |
 |---|---|:--:|
-| API seule | générable | KEEP |
-| API + plusieurs Web/Mobile | générable | KEEP (PR #189) |
-| multi-client | partiel (via multi-surface) | PARTIAL |
-| modular-monolith | style déclarable | PARTIAL |
-| modular-monolith-with-workers | worker `planned`/refusé | MISSING |
-| service-oriented / microservices | multi-API refusé | MISSING |
+| `backend-service` | représentable ; compositions API seules générables selon preset | ADAPT |
+| `product-platform` single/multiple clients | représentable ; multi-surface générable | ADAPT |
+| `distributed-platform` | représentable ; multi-API refusé à la génération | PLANNED |
+| `service-ecosystem` + style `microservices` | représentable ; multi-API refusé | PLANNED |
+| workers/gateway/BFF | déclarables, `planned`/refusés | MISSING |
 
 ## Contraintes codées en dur
 
@@ -52,9 +51,9 @@ Réel : `factory/schema/blueprint.schema.json`, `factory/engine/applications.mjs
 
 ## Profils fixes
 
-Le moteur porte un registre de **profils nommés** (`factory/engine/profiles.mjs`) — une notion héritée du
-modèle « 18 compositions » qui n'existe pas dans la cible V2 (le blueprint y décrit un système, pas un
-profil parmi une liste finie). À terme : REFACTOR/DEFER vers le résolveur d'architecture.
+Le moteur porte un registre de **presets de composition** historiquement nommés profils
+(`factory/engine/profiles.mjs`). Il reste la preuve des combinaisons générables, mais il est distinct de
+`architecture.profile`. Blueprint v2 devra renommer le champ racine `profile` en `generationPreset`.
 
 ## Traitement
 
@@ -64,6 +63,6 @@ profil parmi une liste finie). À terme : REFACTOR/DEFER vers le résolveur d'ar
 | `primitives` / `communications` / `policies` absents | ARCHITECTURE | P1 | CREATE |
 | `capabilities` enum figé (sans version/targets) | ARCHITECTURE | P1 | REFACTOR |
 | `enistere.plan.json` / `enistere.conformance.json` non émis | LIFECYCLE | P1 | CREATE |
-| workers / service-oriented / microservices refusés | ARCHITECTURE | P2 | CREATE (Phase distribuée) |
-| Registre de profils fixes | ARCHITECTURE | P2 | REFACTOR / DEFER |
+| matérialisation workers et profils distribués refusée | ARCHITECTURE | P2 | CREATE (Phase distribuée) |
+| Registre de presets encore nommé profiles | VOCABULAIRE | P2 | ADAPT lors de Blueprint v2 |
 | Multi-surface générable | — | — | KEEP |

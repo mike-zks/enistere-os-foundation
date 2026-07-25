@@ -6,18 +6,19 @@ import { validateCanonicalSystem } from '../blueprint/validate.mjs';
 import { resolveSystem } from '../engine/resolver.mjs';
 import { buildPlan } from '../model/generation-plan.mjs';
 import { buildGenerationPlan } from '../engine/plan.mjs';
-import { CSM_DIAGNOSTIC_CODES } from '../model/diagnostics.mjs';
+import { CSM_DIAGNOSTIC_CODES, hasErrors } from '../model/diagnostics.mjs';
 import { loadStarterManifests, modularStarterIds } from '../engine/starters.mjs';
 import { loadCapabilityManifests } from '../engine/capabilities.mjs';
 import { materializeProfileInput } from '../engine/profiles.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 
-function blueprint({ stack, applications, capabilities = ['base'] } = {}) {
+function blueprint({ stack, applications, capabilities = ['base'], architecture } = {}) {
   const bp = {
     version: '1', project: { name: 'Sample', slug: 'sample' }, topology: 'monorepo',
     designSystem: true, domain: { entities: [] }, capabilities, deployment: { environments: ['local'] },
   };
+  if (architecture) bp.architecture = architecture;
   if (applications) bp.applications = applications; else bp.stack = stack ?? { api: 'nestjs', web: null, mobile: null };
   return bp;
 }
@@ -74,6 +75,26 @@ describe('canonical pipeline — multi-application strategy', () => {
     ] });
     const diagnostics = validateCanonicalSystem(normalizeBlueprint(bp));
     assert.ok(diagnostics.some((d) => d.code === CSM_DIAGNOSTIC_CODES.TOPOLOGY_NOT_GENERATABLE));
+  });
+
+  it('keeps a future profile representable but blocks its generation during resolution', async () => {
+    const bp = blueprint({
+      applications: [
+        { id: 'identity', kind: 'api', runtime: 'spring' },
+        { id: 'business', kind: 'api', runtime: 'nestjs' },
+      ],
+      architecture: { profile: 'distributed-platform' },
+    });
+    const csm = normalizeBlueprint(bp);
+    assert.equal(csm.architecture.profile, 'distributed-platform');
+    assert.equal(hasErrors(validateCanonicalSystem(csm)), false);
+    const plan = buildPlan(resolveSystem(csm, await registryFor(['base'])));
+    assert.equal(plan.architecture.profile, 'distributed-platform');
+    assert.equal(plan.support.level, 'blocked');
+    assert.ok(plan.diagnostics.some((diagnostic) =>
+      diagnostic.code === 'RESOLUTION_ARCHITECTURE_PROFILE_NOT_GENERATABLE'));
+    assert.ok(plan.diagnostics.some((diagnostic) =>
+      diagnostic.code === 'RESOLUTION_TOPOLOGY_NOT_GENERATABLE'));
   });
 });
 

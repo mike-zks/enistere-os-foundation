@@ -16,21 +16,7 @@ import {
   canonicalEnvironment,
   canonicalSystem,
 } from '../model/canonical-system.mjs';
-
-/**
- * Maps the blueprint architecture style to a CSM style. `standard` is the
- * default; `microservices` maps to the reserved CSM style, which the validator
- * refuses — the model never silently downgrades an unsupported style.
- */
-function architectureStyle(blueprint) {
-  switch (blueprint.architecture?.style) {
-    case 'modular-monolith': return 'modular-monolith';
-    case 'microservices': return 'microservices';
-    case 'monolith':
-    case undefined: return 'standard';
-    default: return blueprint.architecture.style;
-  }
-}
+import { normalizeSystemArchitecture } from '../model/system-profiles.mjs';
 
 /**
  * Requested consumption edges. An explicit `consumes` on the canonical blueprint
@@ -78,7 +64,7 @@ export function normalizeBlueprint(blueprint, { file } = {}) {
 
   return canonicalSystem({
     metadata: { name: blueprint.project.slug, displayName: blueprint.project.name, version: '1.0.0' },
-    architecture: { style: architectureStyle(blueprint) },
+    architecture: normalizeSystemArchitecture(blueprint.architecture, applications),
     applications,
     capabilities,
     domain: { entities: [...(blueprint.domain?.entities ?? [])] },
