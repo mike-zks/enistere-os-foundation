@@ -20,7 +20,7 @@ import { PLAN_DIAGNOSTIC_CODES as PC, diagnostic } from './diagnostics.mjs';
 export function buildPlan(resolved) {
   const { selection } = resolved;
   const applications = resolved.applications.map((app) => ({
-    id: app.id, kind: app.kind, runtime: app.runtime, source: app.source, appDir: app.appDir,
+    id: app.id, kind: app.kind, runtime: app.runtime, baseline: { ...app.baseline }, source: app.source, appDir: app.appDir,
   }));
 
   const apiDirs = applications.filter((app) => app.kind === 'api').map((app) => app.appDir);

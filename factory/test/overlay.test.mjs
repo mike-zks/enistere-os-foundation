@@ -32,11 +32,7 @@ function validManifest(extra = {}) {
 
 const CAPABILITY_MANIFESTS = [
   {
-    schemaVersion: '2', id: 'base', version: '0.1.0', requires: [], responsibilities: ['health'],
-    targets: { nestjs: { status: 'ready', mode: 'built-in' } },
-  },
-  {
-    schemaVersion: '2', id: 'auth', version: '0.1.0', requires: ['base'], responsibilities: ['login'],
+    schemaVersion: '2', id: 'auth', version: '0.1.0', requires: [], responsibilities: ['login'],
     targets: { nestjs: { status: 'ready', mode: 'overlay' } },
   },
 ];
@@ -64,7 +60,7 @@ async function fixtureOutput() {
 function applyArguments(repoRoot, output) {
   return {
     repoRoot,
-    plan: { capabilities: ['base', 'auth'], starterSources: { api: 'starters/nestjs' } },
+    plan: { capabilities: ['auth'], starterSources: { api: 'starters/nestjs' } },
     output,
     capabilityManifests: CAPABILITY_MANIFESTS,
   };
@@ -148,9 +144,8 @@ describe('overlay manifest validation', () => {
 });
 
 describe('capability dependencies', () => {
-  it('resolves base before auth and requires base', () => {
-    assert.deepEqual(validateCapabilityDependencies(['base', 'auth']), []);
-    assert.match(validateCapabilityDependencies(['auth']).join(' '), /base is mandatory/);
+  it('does not model the mandatory Platform Baseline as a capability dependency', () => {
+    assert.deepEqual(validateCapabilityDependencies(['auth']), []);
   });
 });
 

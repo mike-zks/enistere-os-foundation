@@ -2,6 +2,10 @@
 
 **Entrée unique** du générateur. Décision : [ADR-046](../../docs/adr/ADR-046-single-canonical-factory-pipeline.md).
 
+> Ce fichier décrit le plan exécutable actuel. La cible adoptée par
+> [ADR-057](../../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md) étend ce plan aux
+> primitives, communications, contrats, opérations lifecycle, risques, approbations et statuts.
+
 ## Rôle
 
 ```text
@@ -27,7 +31,7 @@ GenerationPlan
 ├── profile | null                 (descriptif)
 ├── support { level, blockers[], notApplicable[] }
 ├── gates { <appId>: [{ gate, command }] }
-├── directories[], applications[] { id, kind, runtime, source, appDir }, starterSources
+├── directories[], applications[] { id, kind, runtime, baseline, source, appDir }, starterSources
 ├── diagnostics[]                  (RESOLUTION_* + PLAN_*)
 ├── systemDigest, resolutionDigest
 └── planDigest

@@ -128,8 +128,8 @@ describe('canonical pipeline — profiles are presets', () => {
   it('materializes a profile into a blueprint input consumed by the normal chain', async () => {
     const input = materializeProfileInput('nestjs-auth');
     assert.equal(input.version, '1');
-    assert.deepEqual(input.capabilities, ['base', 'auth']);
-    const plan = buildGenerationPlan(input, await registryFor(['base', 'auth']));
+    assert.deepEqual(input.capabilities, ['auth']);
+    const plan = buildGenerationPlan(input, await registryFor(['auth']));
     assert.equal(plan.profile?.id, 'nestjs-auth');
   });
 });

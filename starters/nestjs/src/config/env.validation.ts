@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 
 /**
- * Variables d'environnement de la baseline `base` : runtime HTTP, base de
+ * Variables d'environnement du Platform Baseline : runtime HTTP, base de
  * données, CORS et logging. Les capabilities composées (Auth, ...) valident
  * leurs propres variables dans leur configuration namespace (`registerAs`),
  * chargée par leur module — jamais ici.

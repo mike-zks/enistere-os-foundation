@@ -1,5 +1,5 @@
 {
-  "//": "Variante `base + auth` : compile les modules FRAMEWORK-AGNOSTIQUES du socle ET de la capability Auth (auth/session/forms/storage/api) + leurs tests en CommonJS pour `node --test`. Ce fichier REMPLACE (remplacement déclaré par l'overlay Auth) la variante de la baseline. zod est résolu en résolution node classique (zod 3.x, root main/types).",
+  "//": "Variante Platform Baseline + Auth : compile les modules FRAMEWORK-AGNOSTIQUES du socle ET de la capability Auth (auth/session/forms/storage/api) + leurs tests en CommonJS pour `node --test`. Ce fichier REMPLACE (remplacement déclaré par l'overlay Auth) la variante de la baseline. zod est résolu en résolution node classique (zod 3.x, root main/types).",
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",

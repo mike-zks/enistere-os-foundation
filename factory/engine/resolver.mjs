@@ -64,6 +64,10 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
       kind: app.kind,
       runtime: app.runtime,
       adapter: adapterVersions[app.runtime] ?? null,
+      baseline: {
+        contractVersion: starter?.baseline?.contractVersion ?? null,
+        familyContract: starter?.baseline?.familyContract ?? null,
+      },
       source: sourceFor(app.runtime),
       appDir: `apps/${app.id}`,
       gates,

@@ -4,7 +4,7 @@
 // s'exécute avant l'évaluation du fichier de test et de ses imports).
 // Ce sont des placeholders de test, jamais des secrets réels.
 //
-// Baseline `base` : uniquement les variables de la baseline. Les capabilities
+// Platform Baseline : uniquement les variables obligatoires. Les capabilities
 // composées remplacent ce fichier via leur overlay (remplacement déclaré) pour
 // ajouter leurs propres variables.
 //

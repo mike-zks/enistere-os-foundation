@@ -3,6 +3,10 @@
   "id": "nextjs",
   "kind": "web",
   "framework": "Next.js",
+  "baseline": {
+    "contractVersion": "2.0.0",
+    "familyContract": "web/2.0.0"
+  },
   "commands": {
     "install": [
       "npm",
@@ -29,17 +33,13 @@
     ]
   },
   "composition": {
-    "contractVersion": "1",
-    "base": "built-in",
     "model": "modular",
     "readyCapabilities": [
       "auth",
       "rbac",
       "files"
     ],
-    "plannedCapabilities": [
-      "observability"
-    ]
+    "plannedCapabilities": []
   },
   "deployment": {
     "dockerfile": "Dockerfile",

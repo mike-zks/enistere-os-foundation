@@ -1,7 +1,7 @@
 package com.enistere.core.modules.files;
 
 /**
- * Audit event types emitted by the Files capability. The base audit infrastructure
+ * Audit event types emitted by the Files capability. The Platform Baseline audit infrastructure
  * imposes no registry (ADR-055 §5 / ADR-056): this capability declares its own
  * stable identifiers and records them via the base AuditService.
  */

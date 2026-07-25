@@ -3,6 +3,10 @@
 Décision : [ADR-046](../docs/adr/ADR-046-single-canonical-factory-pipeline.md). Après l'ingestion, le
 **Canonical System Model** est l'unique représentation interne ; aucune couche ne relit le blueprint brut.
 
+Ce document décrit le pipeline **implémenté**. La cible le prolonge par `MaterializedSystem` et
+`ConformanceReport` selon
+[ADR-057](../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md).
+
 ## Flux
 
 ```text

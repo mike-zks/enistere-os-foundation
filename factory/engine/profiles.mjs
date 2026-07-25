@@ -83,74 +83,74 @@ const profile = (id, status, stack, capabilities, extra = {}) => Object.freeze({
  */
 export const PROFILES = Object.freeze([
   // ── API-only : the API is a complete composition on its own ────────────────
-  profile('nestjs-base', 'ready', { api: 'nestjs' }, ['base'], { golden: 'nestjs-base' }),
-  profile('nestjs-auth', 'ready', { api: 'nestjs' }, ['base', 'auth'], { golden: 'nestjs-auth' }),
-  profile('nestjs-rbac', 'ready', { api: 'nestjs' }, ['base', 'auth', 'rbac'], { golden: 'nestjs-auth-rbac' }),
-  profile('nestjs-files', 'ready', { api: 'nestjs' }, ['base', 'auth', 'rbac', 'files'], { golden: 'nestjs-files' }),
+  profile('nestjs-base', 'ready', { api: 'nestjs' }, [], { golden: 'nestjs-base' }),
+  profile('nestjs-auth', 'ready', { api: 'nestjs' }, ['auth'], { golden: 'nestjs-auth' }),
+  profile('nestjs-rbac', 'ready', { api: 'nestjs' }, ['auth', 'rbac'], { golden: 'nestjs-auth-rbac' }),
+  profile('nestjs-files', 'ready', { api: 'nestjs' }, ['auth', 'rbac', 'files'], { golden: 'nestjs-files' }),
   // Spring now has a minimal modular base. Its base golden therefore proves
   // the selected composition without importing Auth/RBAC/Files by accident.
-  profile('spring-base', 'ready', { api: 'spring' }, ['base'], {
+  profile('spring-base', 'ready', { api: 'spring' }, [], {
     golden: 'spring-base',
   }),
 
   // ── Base compositions with a web or mobile surface ─────────────────────────
   // Composition exacte (NestJS + Next.js / React Native sont modulaires) : R8A
   // prouve les gates ET l'absence de surface non sélectionnée.
-  profile('nestjs-next-base', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base'], {
+  profile('nestjs-next-base', 'ready', { api: 'nestjs', web: 'nextjs' }, [], {
     golden: 'nestjs-next-base',
   }),
-  profile('nestjs-react-native-base', 'ready', { api: 'nestjs', mobile: 'react-native' }, ['base'], {
+  profile('nestjs-react-native-base', 'ready', { api: 'nestjs', mobile: 'react-native' }, [], {
     golden: 'nestjs-react-native-base',
   }),
-  profile('nestjs-angular-base', 'ready', { api: 'nestjs', web: 'angular' }, ['base'], {
+  profile('nestjs-angular-base', 'ready', { api: 'nestjs', web: 'angular' }, [], {
     golden: 'nestjs-angular-base',
   }),
-  profile('nestjs-flutter-base', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['base'], {
+  profile('nestjs-flutter-base', 'ready', { api: 'nestjs', mobile: 'flutter' }, [], {
     golden: 'nestjs-flutter-base',
   }),
-  profile('spring-next-base', 'ready', { api: 'spring', web: 'nextjs' }, ['base'], {
+  profile('spring-next-base', 'ready', { api: 'spring', web: 'nextjs' }, [], {
     golden: 'spring-next-base',
   }),
-  profile('spring-react-native-base', 'ready', { api: 'spring', mobile: 'react-native' }, ['base'], {
+  profile('spring-react-native-base', 'ready', { api: 'spring', mobile: 'react-native' }, [], {
     golden: 'spring-react-native-base',
   }),
-  profile('spring-angular-base', 'ready', { api: 'spring', web: 'angular' }, ['base'], {
+  profile('spring-angular-base', 'ready', { api: 'spring', web: 'angular' }, [], {
     golden: 'spring-angular-base',
   }),
-  profile('spring-flutter-base', 'ready', { api: 'spring', mobile: 'flutter' }, ['base'], {
+  profile('spring-flutter-base', 'ready', { api: 'spring', mobile: 'flutter' }, [], {
     golden: 'spring-flutter-base',
   }),
 
   // ── Proven TypeScript vertical ─────────────────────────────────────────────
-  profile('nestjs-next-auth', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base', 'auth'], {
+  profile('nestjs-next-auth', 'ready', { api: 'nestjs', web: 'nextjs' }, ['auth'], {
     golden: 'nest-next-auth',
   }),
-  profile('nestjs-next-rbac', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base', 'auth', 'rbac'], {
+  profile('nestjs-next-rbac', 'ready', { api: 'nestjs', web: 'nextjs' }, ['auth', 'rbac'], {
     golden: 'nest-next-auth-rbac',
   }),
-  profile('nestjs-next-files', 'ready', { api: 'nestjs', web: 'nextjs' }, ['base', 'auth', 'rbac', 'files'], {
+  profile('nestjs-next-files', 'ready', { api: 'nestjs', web: 'nextjs' }, ['auth', 'rbac', 'files'], {
     golden: 'nest-next-files',
   }),
-  profile('nestjs-next-react-native-auth', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth'], {
+  profile('nestjs-next-react-native-auth', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['auth'], {
     golden: 'triple-auth',
   }),
-  profile('nestjs-next-react-native-rbac', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth', 'rbac'], {
+  profile('nestjs-next-react-native-rbac', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['auth', 'rbac'], {
     golden: 'triple-auth-rbac',
     note: 'RBAC is not-applicable on React Native: the mobile app receives decisions from the API.',
   }),
-  profile('nestjs-next-react-native-files', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth', 'rbac', 'files'], {
+  profile('nestjs-next-react-native-files', 'ready', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['auth', 'rbac', 'files'], {
     golden: 'triple-files',
     note: 'RBAC is not-applicable on React Native: the mobile app receives decisions from the API.',
   }),
 
   // ── Parity targets : declared, never presented as usable ───────────────────
-  profile('spring-auth', 'ready', { api: 'spring' }, ['base', 'auth'], { golden: 'spring-auth' }),
-  profile('spring-rbac', 'ready', { api: 'spring' }, ['base', 'auth', 'rbac'], { golden: 'spring-auth-rbac' }),
-  profile('spring-files', 'ready', { api: 'spring' }, ['base', 'auth', 'rbac', 'files'], { golden: 'spring-files' }),
-  profile('spring-angular-auth', 'planned', { api: 'spring', web: 'angular' }, ['base', 'auth']),
-  profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['base', 'auth', 'rbac']),
-  profile('spring-flutter-auth', 'planned', { api: 'spring', mobile: 'flutter' }, ['base', 'auth']),
-  profile('spring-angular-flutter-files', 'planned', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['base', 'auth', 'rbac', 'files']),
+  profile('spring-auth', 'ready', { api: 'spring' }, ['auth'], { golden: 'spring-auth' }),
+  profile('spring-rbac', 'ready', { api: 'spring' }, ['auth', 'rbac'], { golden: 'spring-auth-rbac' }),
+  profile('spring-files', 'ready', { api: 'spring' }, ['auth', 'rbac', 'files'], { golden: 'spring-files' }),
+  profile('spring-angular-auth', 'planned', { api: 'spring', web: 'angular' }, ['auth']),
+  profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
+  profile('spring-flutter-auth', 'planned', { api: 'spring', mobile: 'flutter' }, ['auth']),
+  profile('spring-angular-flutter-files', 'planned', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['auth', 'rbac', 'files']),
 ]);
 
 const BY_ID = new Map(PROFILES.map((entry) => [entry.id, entry]));

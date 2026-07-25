@@ -27,7 +27,7 @@ import java.io.IOException;
  * (header, body, query, signed URL) is ever emitted.
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+@Order(Ordered.HIGHEST_PRECEDENCE + 2)
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger("http.access");

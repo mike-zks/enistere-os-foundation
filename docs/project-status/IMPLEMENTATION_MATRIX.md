@@ -14,9 +14,11 @@
 | Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
 | Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
 | Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
-| Platform Contract exécutable (API) | **Complet** (ADR-047, ADR-048, ADR-049) | `factory/conformance/` émet `enistere.conformance.json` (statut calculé) ; parité Nest↔Spring sur erreur, correlation, health et observabilité (logs structurés) ; metrics/tracing différés |
+| Platform Contract exécutable (API) | **Convergence en cours** (ADR-059) | NestJS 26 conformes/2 partiels/0 manquant ; Spring 22/6/0 ; lifecycle, extensions, sécurité, métriques et W3C testés |
 | Platform Contract exécutable (Web, socle) | **Implémenté** (ADR-050, ADR-051) | évaluateur multi-familles, invariants Web idiomatiques ; socle Angular convergé vers Next.js (`enistere.conformance.json`) ; parité contrats générés + capabilities Web différées |
 | Platform Contract exécutable (Mobile, socle) | **Implémenté** (ADR-052, ADR-053) | évaluateur 3 familles ; RN compliant + socle Flutter convergé (`core/api` Dio) → `enistere.conformance.json` Flutter base compliant ; **jalon : 6 runtimes en parité de contrat de base** |
+| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/059) | Common/API/Web/Mobile versionnés ; APIs sans invariant manquant mais encore partielles ; rapport calculé dans `factory/conformance/reports/` |
+| Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
 | `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 21 générables |
 | Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |
@@ -40,19 +42,16 @@
 
 | Capability | Dépendances | Nest | Spring | Next | Angular | RN | Flutter |
 |---|---|---|---|---|---|---|---|
-| base | aucune | intégré | intégré | intégré | intégré | intégré | intégré |
-| auth | base | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
-| rbac | base + auth | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **non applicable** | planifié |
-| files | base + auth + rbac | **ready (overlay)** | planifié | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
-| audit | à décider | intégré (base) | planifié | non défini | non défini | non défini | non défini |
+| auth | aucune | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
+| rbac | auth | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **non applicable** | planifié |
+| files | auth + rbac | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
 | notifications | à décider | non défini | non défini | non défini | non défini | planifié | planifié |
-| observability | à décider | planifié | planifié | planifié | planifié | planifié | planifié |
 
 `auth` (1A), `rbac` (1B) et `files` (1C) sont `ready` en mode overlay : overlays déclaratifs, baselines sans la
 surface correspondante, tests d'absence et goldens runtime vérifiés. `rbac` requiert explicitement
-`base + auth`. Sur React Native, `rbac` est **`not-applicable`** (autorisation fine côté serveur) :
+`auth`. Sur React Native, `rbac` est **`not-applicable`** (autorisation fine côté serveur) :
 ce statut ne bloque pas la composition triple et n'injecte aucune surface mobile. Le payload parqué
-`files` exige explicitement `base + auth + rbac` et n'injecte aucune surface sur les targets
+`files` exige explicitement `auth + rbac` et n'injecte aucune surface sur les targets
 planifiées.
 
 ## Profils

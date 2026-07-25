@@ -11,7 +11,7 @@ function readPositiveInt(name: string, fallback: number): number {
 /**
  * Configuration centralisée et globale des throttlers nommés (TTL en millisecondes).
  *
- * La baseline `base` n'enregistre aucun throttler : les fenêtres nommées sont
+ * Le Platform Baseline n'enregistre aucun throttler métier : les fenêtres nommées sont
  * déclarées par les capabilities composées (fichier de composition généré par la
  * Factory) et chaque route sélectionne la sienne via `@SkipThrottle`. Les valeurs
  * sont lues depuis l'environnement déclaré par l'overlay (`.env.example`), avec

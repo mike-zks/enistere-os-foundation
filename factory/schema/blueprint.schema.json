@@ -72,8 +72,8 @@
     },
     "capabilities": {
       "type": "array",
+      "description": "Optional product capabilities. Legacy v1 input may contain base; ingestion removes it because the Platform Baseline is implicit.",
       "items": { "enum": ["base", "auth", "rbac", "files"] },
-      "contains": { "const": "base" },
       "uniqueItems": true
     },
     "deployment": {

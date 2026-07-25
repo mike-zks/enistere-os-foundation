@@ -13,7 +13,7 @@ datasource db {
 }
 
 // ADR-002 retient Prisma comme ORM V1.
-// Schéma de la baseline `base` : uniquement l'infrastructure transverse (audit).
+// Schéma du Platform Baseline : uniquement l'infrastructure transverse (audit).
 // Les modèles des capabilities composées (Auth : User/RefreshSession ; RBAC ;
 // Files) sont apportés par les fragments Prisma déclarés par leur overlay et
 // assemblés à la suite de ce schéma par la Factory.

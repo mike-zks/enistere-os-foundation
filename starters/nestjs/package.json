@@ -2,7 +2,7 @@
   "name": "@enistere-os/api-nestjs-core",
   "version": "0.1.0",
   "private": true,
-  "description": "Starter minimal API Core NestJS V1 (baseline base) pour Enistere OS Foundation.",
+  "description": "Starter API NestJS fondé sur le Platform Baseline v2 pour Enistere OS Foundation.",
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",

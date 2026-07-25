@@ -4,6 +4,9 @@
 
 Enistere transforme une intention produit en un système logiciel composé et vérifié.
 
+Chaque runtime matérialisé porte le Platform Baseline obligatoire ; les capabilities restent des
+fonctionnalités optionnelles.
+
 ```text
 Intention
   ↓

@@ -1,0 +1,1505 @@
+{
+  "schemaVersion": "2",
+  "families": [
+    "api",
+    "web",
+    "mobile"
+  ],
+  "contract": {
+    "id": "platform-baseline",
+    "version": "2.0.0",
+    "source": "factory/conformance/contracts/platform-baseline.v2.json"
+  },
+  "generatedFrom": {
+    "systemDigest": "repository-scan",
+    "resolutionDigest": "repository-scan",
+    "planDigest": "repository-scan"
+  },
+  "evaluation": "structural",
+  "apps": [
+    {
+      "id": "nestjs",
+      "kind": "api",
+      "runtime": "nestjs",
+      "family": "api",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "compliant",
+            "evidence": "validated/typed configuration seam found",
+            "source": "structural"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "compliant",
+            "evidence": "structured request logging found",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
+          },
+          "technical-audit": {
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "compliant",
+            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
+            "source": "behavioral-test"
+          },
+          "health": {
+            "status": "compliant",
+            "evidence": "runtime health signal found",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "partial",
+            "evidence": "canonical errors and health provide partial diagnostics",
+            "source": "structural"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
+            "source": "behavioral-test"
+          },
+          "extension-points": {
+            "status": "compliant",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "build-quality-gates": {
+            "status": "compliant",
+            "evidence": "build/test gates found",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "api/2.0.0",
+        "invariants": {
+          "http-server": {
+            "status": "compliant",
+            "evidence": "NestJS bootstrap",
+            "source": "structural"
+          },
+          "input-validation": {
+            "status": "compliant",
+            "evidence": "global validation pipe",
+            "source": "structural"
+          },
+          "canonical-http-errors": {
+            "status": "compliant",
+            "evidence": "error shape: flat-envelope (canonical target: flat-envelope)",
+            "source": "structural"
+          },
+          "openapi": {
+            "status": "compliant",
+            "evidence": "3 operations",
+            "source": "structural"
+          },
+          "health-liveness-readiness": {
+            "status": "compliant",
+            "evidence": "openapi ops: health_get, health_live, health_ready",
+            "source": "structural"
+          },
+          "persistence-ports": {
+            "status": "compliant",
+            "evidence": "PrismaService",
+            "source": "structural"
+          },
+          "migration-ports": {
+            "status": "compliant",
+            "evidence": "prisma/migrations",
+            "source": "structural"
+          },
+          "transaction-ports": {
+            "status": "partial",
+            "evidence": "Prisma transaction access, no neutral port",
+            "source": "structural"
+          },
+          "authentication-hook": {
+            "status": "compliant",
+            "evidence": "versioned AuthenticationHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "authorization-hook": {
+            "status": "compliant",
+            "evidence": "versioned AuthorizationHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "file-hook": {
+            "status": "compliant",
+            "evidence": "versioned FileHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "event-hook": {
+            "status": "compliant",
+            "evidence": "versioned EventHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "graceful-shutdown": {
+            "status": "compliant",
+            "evidence": "signal hooks and idempotent reverse shutdown behavior tested",
+            "source": "behavioral-test"
+          },
+          "contract-tests": {
+            "status": "compliant",
+            "evidence": "API contract/e2e tests",
+            "source": "structural"
+          },
+          "rate-limiting": {
+            "status": "compliant",
+            "evidence": "common/throttling (base mechanism)",
+            "source": "structural"
+          }
+        }
+      },
+      "nonConformant": [],
+      "diagnostics": [
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.nestjs.baseline.diagnostics",
+          "invariant": "diagnostics",
+          "status": "partial",
+          "evidence": "canonical errors and health provide partial diagnostics"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.nestjs.api.transaction-ports",
+          "invariant": "transaction-ports",
+          "status": "partial",
+          "evidence": "Prisma transaction access, no neutral port"
+        }
+      ]
+    },
+    {
+      "id": "spring",
+      "kind": "api",
+      "runtime": "spring",
+      "family": "api",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "partial",
+            "evidence": "validated/typed configuration seam found",
+            "source": "structural"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "compliant",
+            "evidence": "structured request logging found",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
+          },
+          "technical-audit": {
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "compliant",
+            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
+            "source": "behavioral-test"
+          },
+          "health": {
+            "status": "compliant",
+            "evidence": "runtime health signal found",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "partial",
+            "evidence": "canonical errors and health provide partial diagnostics",
+            "source": "structural"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
+            "source": "behavioral-test"
+          },
+          "extension-points": {
+            "status": "compliant",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "build-quality-gates": {
+            "status": "partial",
+            "evidence": "build/test gates found",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "api/2.0.0",
+        "invariants": {
+          "http-server": {
+            "status": "compliant",
+            "evidence": "Spring Boot application",
+            "source": "structural"
+          },
+          "input-validation": {
+            "status": "partial",
+            "evidence": "Jakarta validation error handling",
+            "source": "structural"
+          },
+          "canonical-http-errors": {
+            "status": "compliant",
+            "evidence": "error shape: flat-envelope (canonical target: flat-envelope)",
+            "source": "structural"
+          },
+          "openapi": {
+            "status": "compliant",
+            "evidence": "springdoc OpenApiConfig",
+            "source": "structural"
+          },
+          "health-liveness-readiness": {
+            "status": "compliant",
+            "evidence": "HealthController.java (/health, /health/live, /health/ready)",
+            "source": "structural"
+          },
+          "persistence-ports": {
+            "status": "partial",
+            "evidence": "JPA base infrastructure, no neutral port",
+            "source": "structural"
+          },
+          "migration-ports": {
+            "status": "compliant",
+            "evidence": "flyway db/migration",
+            "source": "structural"
+          },
+          "transaction-ports": {
+            "status": "partial",
+            "evidence": "Spring transaction infrastructure, no neutral port",
+            "source": "structural"
+          },
+          "authentication-hook": {
+            "status": "compliant",
+            "evidence": "versioned AuthenticationHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "authorization-hook": {
+            "status": "compliant",
+            "evidence": "versioned AuthorizationHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "file-hook": {
+            "status": "compliant",
+            "evidence": "versioned FileHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "event-hook": {
+            "status": "compliant",
+            "evidence": "versioned EventHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "graceful-shutdown": {
+            "status": "compliant",
+            "evidence": "graceful timeout and idempotent reverse shutdown behavior tested",
+            "source": "behavioral-test"
+          },
+          "contract-tests": {
+            "status": "compliant",
+            "evidence": "API baseline behavioral contract tests",
+            "source": "structural"
+          },
+          "rate-limiting": {
+            "status": "compliant",
+            "evidence": "infrastructure/ratelimit (base mechanism)",
+            "source": "structural"
+          }
+        }
+      },
+      "nonConformant": [],
+      "diagnostics": [
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.spring.baseline.configuration",
+          "invariant": "configuration",
+          "status": "partial",
+          "evidence": "validated/typed configuration seam found"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.spring.baseline.diagnostics",
+          "invariant": "diagnostics",
+          "status": "partial",
+          "evidence": "canonical errors and health provide partial diagnostics"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.spring.baseline.build-quality-gates",
+          "invariant": "build-quality-gates",
+          "status": "partial",
+          "evidence": "build/test gates found"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.spring.api.input-validation",
+          "invariant": "input-validation",
+          "status": "partial",
+          "evidence": "Jakarta validation error handling"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.spring.api.persistence-ports",
+          "invariant": "persistence-ports",
+          "status": "partial",
+          "evidence": "JPA base infrastructure, no neutral port"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.spring.api.transaction-ports",
+          "invariant": "transaction-ports",
+          "status": "partial",
+          "evidence": "Spring transaction infrastructure, no neutral port"
+        }
+      ]
+    },
+    {
+      "id": "nextjs",
+      "kind": "web",
+      "runtime": "nextjs",
+      "family": "web",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "compliant",
+            "evidence": "validated/typed configuration seam found",
+            "source": "structural"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "missing",
+            "evidence": "structured logging missing",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "missing",
+            "evidence": "correlation propagation missing",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "missing",
+            "evidence": "logs/metrics/traces baseline missing",
+            "source": "structural"
+          },
+          "technical-audit": {
+            "status": "missing",
+            "evidence": "technical audit infrastructure missing",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "compliant",
+            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
+            "source": "structural"
+          },
+          "health": {
+            "status": "partial",
+            "evidence": "runtime health signal found",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "partial",
+            "evidence": "canonical errors and health provide partial diagnostics",
+            "source": "structural"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "partial",
+            "evidence": "lifecycle hooks missing",
+            "source": "structural"
+          },
+          "extension-points": {
+            "status": "compliant",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "structural"
+          },
+          "build-quality-gates": {
+            "status": "compliant",
+            "evidence": "build/test gates found",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "web/2.0.0",
+        "invariants": {
+          "routing": {
+            "status": "compliant",
+            "evidence": "App Router (src/app)",
+            "source": "structural"
+          },
+          "typed-api-client": {
+            "status": "compliant",
+            "evidence": "@enistere/api-client-fetch (generated)",
+            "source": "structural"
+          },
+          "session-hook": {
+            "status": "compliant",
+            "evidence": "capability provider seam",
+            "source": "structural"
+          },
+          "access-control-hook": {
+            "status": "partial",
+            "evidence": "capability provider seam",
+            "source": "structural"
+          },
+          "error-boundaries": {
+            "status": "compliant",
+            "evidence": "app/error.tsx",
+            "source": "structural"
+          },
+          "form-foundation": {
+            "status": "missing",
+            "evidence": "form/validation dependencies",
+            "source": "structural"
+          },
+          "ui-states": {
+            "status": "compliant",
+            "evidence": "loading.tsx + error.tsx + not-found.tsx",
+            "source": "structural"
+          },
+          "accessibility": {
+            "status": "compliant",
+            "evidence": "jest-axe / jsx-a11y",
+            "source": "structural"
+          },
+          "security-headers": {
+            "status": "compliant",
+            "evidence": "Next.js security headers",
+            "source": "structural"
+          },
+          "telemetry": {
+            "status": "missing",
+            "evidence": "client logger only; OTEL hooks absent",
+            "source": "structural"
+          },
+          "e2e-foundation": {
+            "status": "compliant",
+            "evidence": "test:e2e script",
+            "source": "structural"
+          }
+        }
+      },
+      "nonConformant": [
+        "baseline.structured-logging",
+        "baseline.correlation",
+        "baseline.observability",
+        "baseline.technical-audit",
+        "web.form-foundation",
+        "web.telemetry"
+      ],
+      "diagnostics": [
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.nextjs.baseline.structured-logging",
+          "invariant": "structured-logging",
+          "status": "missing",
+          "evidence": "structured logging missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.nextjs.baseline.correlation",
+          "invariant": "correlation",
+          "status": "missing",
+          "evidence": "correlation propagation missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.nextjs.baseline.observability",
+          "invariant": "observability",
+          "status": "missing",
+          "evidence": "logs/metrics/traces baseline missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.nextjs.baseline.technical-audit",
+          "invariant": "technical-audit",
+          "status": "missing",
+          "evidence": "technical audit infrastructure missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.nextjs.baseline.health",
+          "invariant": "health",
+          "status": "partial",
+          "evidence": "runtime health signal found"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.nextjs.baseline.diagnostics",
+          "invariant": "diagnostics",
+          "status": "partial",
+          "evidence": "canonical errors and health provide partial diagnostics"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.nextjs.baseline.lifecycle-hooks",
+          "invariant": "lifecycle-hooks",
+          "status": "partial",
+          "evidence": "lifecycle hooks missing"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.nextjs.web.access-control-hook",
+          "invariant": "access-control-hook",
+          "status": "partial",
+          "evidence": "capability provider seam"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.nextjs.web.form-foundation",
+          "invariant": "form-foundation",
+          "status": "missing",
+          "evidence": "form/validation dependencies"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.nextjs.web.telemetry",
+          "invariant": "telemetry",
+          "status": "missing",
+          "evidence": "client logger only; OTEL hooks absent"
+        }
+      ]
+    },
+    {
+      "id": "angular",
+      "kind": "web",
+      "runtime": "angular",
+      "family": "web",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "partial",
+            "evidence": "validated/typed configuration seam found",
+            "source": "structural"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "compliant",
+            "evidence": "structured request logging found",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "missing",
+            "evidence": "correlation propagation missing",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "partial",
+            "evidence": "observability components incomplete or without behavioral proof",
+            "source": "structural"
+          },
+          "technical-audit": {
+            "status": "missing",
+            "evidence": "technical audit infrastructure missing",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "missing",
+            "evidence": "security baseline incomplete",
+            "source": "structural"
+          },
+          "health": {
+            "status": "missing",
+            "evidence": "health/diagnostic signal missing",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "missing",
+            "evidence": "structured actionable diagnostics missing",
+            "source": "structural"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "partial",
+            "evidence": "lifecycle hooks missing",
+            "source": "structural"
+          },
+          "extension-points": {
+            "status": "partial",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "structural"
+          },
+          "build-quality-gates": {
+            "status": "compliant",
+            "evidence": "build/test gates found",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "web/2.0.0",
+        "invariants": {
+          "routing": {
+            "status": "compliant",
+            "evidence": "app.routes.ts",
+            "source": "structural"
+          },
+          "typed-api-client": {
+            "status": "partial",
+            "evidence": "HttpClient typed seam; generated client absent",
+            "source": "structural"
+          },
+          "session-hook": {
+            "status": "partial",
+            "evidence": "provider seam; no neutral session hook",
+            "source": "structural"
+          },
+          "access-control-hook": {
+            "status": "partial",
+            "evidence": "provider seam; no neutral access hook",
+            "source": "structural"
+          },
+          "error-boundaries": {
+            "status": "partial",
+            "evidence": "HTTP error boundary only",
+            "source": "structural"
+          },
+          "form-foundation": {
+            "status": "compliant",
+            "evidence": "@angular/forms",
+            "source": "structural"
+          },
+          "ui-states": {
+            "status": "compliant",
+            "evidence": "loading/error/empty state components",
+            "source": "structural"
+          },
+          "accessibility": {
+            "status": "partial",
+            "evidence": "@angular/cdk a11y",
+            "source": "structural"
+          },
+          "security-headers": {
+            "status": "missing",
+            "evidence": "deployment security headers not declared",
+            "source": "structural"
+          },
+          "telemetry": {
+            "status": "partial",
+            "evidence": "request logging only; OTEL hooks absent",
+            "source": "structural"
+          },
+          "e2e-foundation": {
+            "status": "missing",
+            "evidence": "e2e script",
+            "source": "structural"
+          }
+        }
+      },
+      "nonConformant": [
+        "baseline.correlation",
+        "baseline.technical-audit",
+        "baseline.security-baseline",
+        "baseline.health",
+        "baseline.diagnostics",
+        "web.security-headers",
+        "web.e2e-foundation"
+      ],
+      "diagnostics": [
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.baseline.configuration",
+          "invariant": "configuration",
+          "status": "partial",
+          "evidence": "validated/typed configuration seam found"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.baseline.correlation",
+          "invariant": "correlation",
+          "status": "missing",
+          "evidence": "correlation propagation missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.baseline.observability",
+          "invariant": "observability",
+          "status": "partial",
+          "evidence": "observability components incomplete or without behavioral proof"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.baseline.technical-audit",
+          "invariant": "technical-audit",
+          "status": "missing",
+          "evidence": "technical audit infrastructure missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.baseline.security-baseline",
+          "invariant": "security-baseline",
+          "status": "missing",
+          "evidence": "security baseline incomplete"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.baseline.health",
+          "invariant": "health",
+          "status": "missing",
+          "evidence": "health/diagnostic signal missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.baseline.diagnostics",
+          "invariant": "diagnostics",
+          "status": "missing",
+          "evidence": "structured actionable diagnostics missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.baseline.lifecycle-hooks",
+          "invariant": "lifecycle-hooks",
+          "status": "partial",
+          "evidence": "lifecycle hooks missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.baseline.extension-points",
+          "invariant": "extension-points",
+          "status": "partial",
+          "evidence": "versioned extension registry behavior tested"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.web.typed-api-client",
+          "invariant": "typed-api-client",
+          "status": "partial",
+          "evidence": "HttpClient typed seam; generated client absent"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.web.session-hook",
+          "invariant": "session-hook",
+          "status": "partial",
+          "evidence": "provider seam; no neutral session hook"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.web.access-control-hook",
+          "invariant": "access-control-hook",
+          "status": "partial",
+          "evidence": "provider seam; no neutral access hook"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.web.error-boundaries",
+          "invariant": "error-boundaries",
+          "status": "partial",
+          "evidence": "HTTP error boundary only"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.web.accessibility",
+          "invariant": "accessibility",
+          "status": "partial",
+          "evidence": "@angular/cdk a11y"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.web.security-headers",
+          "invariant": "security-headers",
+          "status": "missing",
+          "evidence": "deployment security headers not declared"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.angular.web.telemetry",
+          "invariant": "telemetry",
+          "status": "partial",
+          "evidence": "request logging only; OTEL hooks absent"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.angular.web.e2e-foundation",
+          "invariant": "e2e-foundation",
+          "status": "missing",
+          "evidence": "e2e script"
+        }
+      ]
+    },
+    {
+      "id": "react-native",
+      "kind": "mobile",
+      "runtime": "react-native",
+      "family": "mobile",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "compliant",
+            "evidence": "validated/typed configuration seam found",
+            "source": "structural"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "compliant",
+            "evidence": "structured request logging found",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "missing",
+            "evidence": "correlation propagation missing",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "partial",
+            "evidence": "observability components incomplete or without behavioral proof",
+            "source": "structural"
+          },
+          "technical-audit": {
+            "status": "missing",
+            "evidence": "technical audit infrastructure missing",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "compliant",
+            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
+            "source": "structural"
+          },
+          "health": {
+            "status": "partial",
+            "evidence": "runtime health signal found",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "partial",
+            "evidence": "canonical errors and health provide partial diagnostics",
+            "source": "structural"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
+            "source": "structural"
+          },
+          "extension-points": {
+            "status": "partial",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "structural"
+          },
+          "build-quality-gates": {
+            "status": "compliant",
+            "evidence": "build/test gates found",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "mobile/2.0.0",
+        "invariants": {
+          "navigation": {
+            "status": "compliant",
+            "evidence": "expo-router (app/)",
+            "source": "structural"
+          },
+          "typed-api-client": {
+            "status": "partial",
+            "evidence": "query client present; generated transport contract incomplete",
+            "source": "structural"
+          },
+          "secure-storage": {
+            "status": "missing",
+            "evidence": "secure session storage",
+            "source": "structural"
+          },
+          "session-hook": {
+            "status": "compliant",
+            "evidence": "capability provider seam",
+            "source": "structural"
+          },
+          "network-state": {
+            "status": "compliant",
+            "evidence": "network state adapter",
+            "source": "structural"
+          },
+          "error-handling": {
+            "status": "compliant",
+            "evidence": "query-errors / retryable-error",
+            "source": "structural"
+          },
+          "permissions": {
+            "status": "compliant",
+            "evidence": "permissions hook",
+            "source": "structural"
+          },
+          "deep-links": {
+            "status": "compliant",
+            "evidence": "link resolver",
+            "source": "structural"
+          },
+          "offline-hook": {
+            "status": "compliant",
+            "evidence": "offline queue seam",
+            "source": "structural"
+          },
+          "push-hook": {
+            "status": "partial",
+            "evidence": "push placeholder adapter",
+            "source": "structural"
+          },
+          "crash-reporting": {
+            "status": "partial",
+            "evidence": "crash reporting seam",
+            "source": "structural"
+          },
+          "build-foundation": {
+            "status": "compliant",
+            "evidence": "android/ios scripts",
+            "source": "structural"
+          }
+        }
+      },
+      "nonConformant": [
+        "baseline.correlation",
+        "baseline.technical-audit",
+        "mobile.secure-storage"
+      ],
+      "diagnostics": [
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.react-native.baseline.correlation",
+          "invariant": "correlation",
+          "status": "missing",
+          "evidence": "correlation propagation missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.baseline.observability",
+          "invariant": "observability",
+          "status": "partial",
+          "evidence": "observability components incomplete or without behavioral proof"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.react-native.baseline.technical-audit",
+          "invariant": "technical-audit",
+          "status": "missing",
+          "evidence": "technical audit infrastructure missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.baseline.health",
+          "invariant": "health",
+          "status": "partial",
+          "evidence": "runtime health signal found"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.baseline.diagnostics",
+          "invariant": "diagnostics",
+          "status": "partial",
+          "evidence": "canonical errors and health provide partial diagnostics"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.baseline.extension-points",
+          "invariant": "extension-points",
+          "status": "partial",
+          "evidence": "versioned extension registry behavior tested"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.mobile.typed-api-client",
+          "invariant": "typed-api-client",
+          "status": "partial",
+          "evidence": "query client present; generated transport contract incomplete"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.react-native.mobile.secure-storage",
+          "invariant": "secure-storage",
+          "status": "missing",
+          "evidence": "secure session storage"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.mobile.push-hook",
+          "invariant": "push-hook",
+          "status": "partial",
+          "evidence": "push placeholder adapter"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.react-native.mobile.crash-reporting",
+          "invariant": "crash-reporting",
+          "status": "partial",
+          "evidence": "crash reporting seam"
+        }
+      ]
+    },
+    {
+      "id": "flutter",
+      "kind": "mobile",
+      "runtime": "flutter",
+      "family": "mobile",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "partial",
+            "evidence": "validated/typed configuration seam found",
+            "source": "structural"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "compliant",
+            "evidence": "structured request logging found",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "missing",
+            "evidence": "correlation propagation missing",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "partial",
+            "evidence": "observability components incomplete or without behavioral proof",
+            "source": "structural"
+          },
+          "technical-audit": {
+            "status": "missing",
+            "evidence": "technical audit infrastructure missing",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "missing",
+            "evidence": "security baseline incomplete",
+            "source": "structural"
+          },
+          "health": {
+            "status": "missing",
+            "evidence": "health/diagnostic signal missing",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "missing",
+            "evidence": "structured actionable diagnostics missing",
+            "source": "structural"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "missing",
+            "evidence": "lifecycle hooks missing",
+            "source": "structural"
+          },
+          "extension-points": {
+            "status": "partial",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "structural"
+          },
+          "build-quality-gates": {
+            "status": "partial",
+            "evidence": "build/test gates found",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "mobile/2.0.0",
+        "invariants": {
+          "navigation": {
+            "status": "compliant",
+            "evidence": "go_router (router.dart)",
+            "source": "structural"
+          },
+          "typed-api-client": {
+            "status": "partial",
+            "evidence": "Dio client present; generated Dart client absent",
+            "source": "structural"
+          },
+          "secure-storage": {
+            "status": "missing",
+            "evidence": "secure session store",
+            "source": "structural"
+          },
+          "session-hook": {
+            "status": "missing",
+            "evidence": "session store seam",
+            "source": "structural"
+          },
+          "network-state": {
+            "status": "missing",
+            "evidence": "no network state port in baseline",
+            "source": "structural"
+          },
+          "error-handling": {
+            "status": "compliant",
+            "evidence": "core/api/error_interceptor.dart",
+            "source": "structural"
+          },
+          "permissions": {
+            "status": "missing",
+            "evidence": "no permissions port in baseline",
+            "source": "structural"
+          },
+          "deep-links": {
+            "status": "partial",
+            "evidence": "router present; deep-link policy absent",
+            "source": "structural"
+          },
+          "offline-hook": {
+            "status": "missing",
+            "evidence": "no offline hook",
+            "source": "structural"
+          },
+          "push-hook": {
+            "status": "missing",
+            "evidence": "no push hook",
+            "source": "structural"
+          },
+          "crash-reporting": {
+            "status": "missing",
+            "evidence": "no crash reporting hook",
+            "source": "structural"
+          },
+          "build-foundation": {
+            "status": "compliant",
+            "evidence": "flutter toolchain (pubspec; platforms scaffolded on demand)",
+            "source": "structural"
+          }
+        }
+      },
+      "nonConformant": [
+        "baseline.correlation",
+        "baseline.technical-audit",
+        "baseline.security-baseline",
+        "baseline.health",
+        "baseline.diagnostics",
+        "baseline.lifecycle-hooks",
+        "mobile.secure-storage",
+        "mobile.session-hook",
+        "mobile.network-state",
+        "mobile.permissions",
+        "mobile.offline-hook",
+        "mobile.push-hook",
+        "mobile.crash-reporting"
+      ],
+      "diagnostics": [
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.flutter.baseline.configuration",
+          "invariant": "configuration",
+          "status": "partial",
+          "evidence": "validated/typed configuration seam found"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.baseline.correlation",
+          "invariant": "correlation",
+          "status": "missing",
+          "evidence": "correlation propagation missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.flutter.baseline.observability",
+          "invariant": "observability",
+          "status": "partial",
+          "evidence": "observability components incomplete or without behavioral proof"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.baseline.technical-audit",
+          "invariant": "technical-audit",
+          "status": "missing",
+          "evidence": "technical audit infrastructure missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.baseline.security-baseline",
+          "invariant": "security-baseline",
+          "status": "missing",
+          "evidence": "security baseline incomplete"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.baseline.health",
+          "invariant": "health",
+          "status": "missing",
+          "evidence": "health/diagnostic signal missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.baseline.diagnostics",
+          "invariant": "diagnostics",
+          "status": "missing",
+          "evidence": "structured actionable diagnostics missing"
+        },
+        {
+          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.baseline.lifecycle-hooks",
+          "invariant": "lifecycle-hooks",
+          "status": "missing",
+          "evidence": "lifecycle hooks missing"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.flutter.baseline.extension-points",
+          "invariant": "extension-points",
+          "status": "partial",
+          "evidence": "versioned extension registry behavior tested"
+        },
+        {
+          "code": "BASELINE_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.flutter.baseline.build-quality-gates",
+          "invariant": "build-quality-gates",
+          "status": "partial",
+          "evidence": "build/test gates found"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.flutter.mobile.typed-api-client",
+          "invariant": "typed-api-client",
+          "status": "partial",
+          "evidence": "Dio client present; generated Dart client absent"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.secure-storage",
+          "invariant": "secure-storage",
+          "status": "missing",
+          "evidence": "secure session store"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.session-hook",
+          "invariant": "session-hook",
+          "status": "missing",
+          "evidence": "session store seam"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.network-state",
+          "invariant": "network-state",
+          "status": "missing",
+          "evidence": "no network state port in baseline"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.permissions",
+          "invariant": "permissions",
+          "status": "missing",
+          "evidence": "no permissions port in baseline"
+        },
+        {
+          "code": "FAMILY_INVARIANT_PARTIAL",
+          "severity": "warning",
+          "path": "apps.flutter.mobile.deep-links",
+          "invariant": "deep-links",
+          "status": "partial",
+          "evidence": "router present; deep-link policy absent"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.offline-hook",
+          "invariant": "offline-hook",
+          "status": "missing",
+          "evidence": "no offline hook"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.push-hook",
+          "invariant": "push-hook",
+          "status": "missing",
+          "evidence": "no push hook"
+        },
+        {
+          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
+          "severity": "error",
+          "path": "apps.flutter.mobile.crash-reporting",
+          "invariant": "crash-reporting",
+          "status": "missing",
+          "evidence": "no crash reporting hook"
+        }
+      ]
+    }
+  ],
+  "scan": {
+    "kind": "repository-runtime-baseline",
+    "runtimes": [
+      "nestjs",
+      "spring",
+      "nextjs",
+      "angular",
+      "react-native",
+      "flutter"
+    ]
+  },
+  "summary": {
+    "nestjs": {
+      "compliant": 26,
+      "partial": 2,
+      "missing": 0,
+      "conformant": false
+    },
+    "spring": {
+      "compliant": 22,
+      "partial": 6,
+      "missing": 0,
+      "conformant": false
+    },
+    "nextjs": {
+      "compliant": 14,
+      "partial": 4,
+      "missing": 6,
+      "conformant": false
+    },
+    "angular": {
+      "compliant": 7,
+      "partial": 10,
+      "missing": 7,
+      "conformant": false
+    },
+    "react-native": {
+      "compliant": 15,
+      "partial": 7,
+      "missing": 3,
+      "conformant": false
+    },
+    "flutter": {
+      "compliant": 6,
+      "partial": 6,
+      "missing": 13,
+      "conformant": false
+    }
+  }
+}

@@ -294,7 +294,7 @@ async function writePrismaComposition(appDirectory, composition, capabilities) {
 
 /**
  * Applies the overlays selected by the plan onto a materialized output.
- * Deterministic: capabilities resolve in registry order (base first), files are
+ * Deterministic: optional capabilities resolve in registry order, files are
  * copied in declared order, integrations render sorted composition files.
  * Returns lock entries ({ capability, target, version, digest }) and the
  * verification argv lists per app kind.

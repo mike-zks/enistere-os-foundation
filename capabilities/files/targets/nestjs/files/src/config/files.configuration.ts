@@ -78,7 +78,7 @@ class FilesEnvironmentVariables {
 
 /**
  * Plain ConfigFactory intentionally merges only Files-owned keys into Nest's
- * ConfigService. Base/Auth/RBAC remain unaware of this capability.
+ * ConfigService. Platform Baseline/Auth/RBAC remain unaware of this capability.
  */
 export const filesConfiguration = (): FilesConfig => {
   const environment = plainToInstance(FilesEnvironmentVariables, process.env, {

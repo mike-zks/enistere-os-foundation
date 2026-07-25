@@ -6,17 +6,18 @@ Une primitive est une brique d’infrastructure utilisée par les runtimes et ca
 
 ## Types
 
-- database ;
+- relational-database ;
+- document-database ;
 - cache ;
 - object-storage ;
+- content-repository ;
 - queue ;
 - broker ;
 - mail ;
 - push ;
-- scheduler ;
 - search ;
-- secrets ;
-- telemetry.
+- telemetry-backend ;
+- secrets.
 
 ## Contrat
 
@@ -39,3 +40,11 @@ Enistere standardise les capacités nécessaires sans masquer artificiellement l
 ## Ownership
 
 Toute donnée persistante possède un owner explicite. Un service ne lit pas directement la base d’un autre owner.
+
+## Distinction de contenu
+
+MinIO est un provider `object-storage`. Alfresco est un provider `content-repository`. Ils ne sont pas
+interchangeables : le second porte versionnement, métadonnées et gouvernance documentaires.
+
+La spécification détaillée est
+[INFRASTRUCTURE_PRIMITIVE_SPECIFICATION.md](INFRASTRUCTURE_PRIMITIVE_SPECIFICATION.md).

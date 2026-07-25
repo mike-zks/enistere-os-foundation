@@ -9,9 +9,9 @@ import { generateProject } from '../engine/generator.mjs';
 
 describe('blueprint v1', () => {
   it('accepts the default Spring + Angular profile', () => assert.deepEqual(validateBlueprint(createDefaultBlueprint()), []));
-  it('requires the base capability', () => {
-    const value = createDefaultBlueprint(); value.capabilities = ['auth'];
-    assert.match(validateBlueprint(value).join(' '), /include base/);
+  it('treats the Platform Baseline as implicit', () => {
+    const value = createDefaultBlueprint(); value.capabilities = [];
+    assert.deepEqual(validateBlueprint(value), []);
   });
   it('enforces capability dependencies', () => {
     const value = createDefaultBlueprint(); value.capabilities = ['base', 'rbac'];
@@ -58,7 +58,7 @@ describe('blueprint v1', () => {
     await access(join(output, 'packages/api-contracts/package.json'));
     await access(join(output, 'packages/api-client-fetch/package.json'));
     await access(join(output, 'packages/ui-kit/package.json'));
-    await access(join(output, 'capabilities/base/capability.json'));
+    await assert.rejects(access(join(output, 'capabilities/base/capability.json')), /ENOENT/);
     const rootPackage = JSON.parse(await readFile(join(output, 'package.json'), 'utf8'));
     assert.deepEqual(rootPackage.workspaces, ['packages/*', 'apps/api']);
     assert.match(rootPackage.scripts['build:packages'], /api-contracts/);

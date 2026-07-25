@@ -61,7 +61,9 @@ export function normalizeBlueprint(blueprint, { file } = {}) {
   // Global blueprint capabilities → CSM capabilities whose requested targets are
   // the whole system. The resolver narrows them to the effective per-target
   // support; this layer only records the user intent.
-  const capabilities = [...blueprint.capabilities].map((id) => canonicalCapability({
+  // `base` is accepted only as legacy Blueprint v1 input and erased here:
+  // the Platform Baseline is implicit in every runtime, never a CSM capability.
+  const capabilities = [...blueprint.capabilities].filter((id) => id !== 'base').map((id) => canonicalCapability({
     id,
     requestedTargets: [...applicationIds],
     configuration: {},

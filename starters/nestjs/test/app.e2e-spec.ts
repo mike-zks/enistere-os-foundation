@@ -5,6 +5,7 @@ import { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
+import { PrismaService } from '../src/database/prisma.service';
 
 describe('starter NestJS (e2e)', () => {
   let app: INestApplication<App>;
@@ -14,7 +15,13 @@ describe('starter NestJS (e2e)', () => {
     // (setupFiles), avant le chargement d'AppModule et la validation d'environnement.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({
+        $queryRaw: jest.fn().mockResolvedValue([{ '?column?': 1 }]),
+        $disconnect: jest.fn().mockResolvedValue(undefined),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     // Réutilise la configuration applicative commune (centralisation bootstrap).
@@ -84,5 +91,17 @@ describe('starter NestJS (e2e)', () => {
       .set('X-Request-Id', 'trace-abcdef12345')
       .expect(200);
     expect(accepted.headers['x-request-id']).toBe('trace-abcdef12345');
+  });
+
+  it('continues a valid W3C trace and emits a new server span', async () => {
+    const traceId = '4bf92f3577b34da6a3ce929d0e0e4736';
+    const response = await request(app.getHttpServer())
+      .get('/health')
+      .set('traceparent', `00-${traceId}-00f067aa0ba902b7-01`)
+      .expect(200);
+
+    expect(response.headers.traceparent).toMatch(
+      new RegExp(`^00-${traceId}-[0-9a-f]{16}-01$`),
+    );
   });
 });

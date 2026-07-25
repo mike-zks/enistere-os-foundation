@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { STARTER_IDS } from './starters.mjs';
 
-export const CAPABILITY_IDS = Object.freeze(['base', 'auth', 'rbac', 'files']);
+export const CAPABILITY_IDS = Object.freeze(['auth', 'rbac', 'files']);
 
 /**
  * Support status of a capability on a target, with explicit semantics:
@@ -117,7 +117,9 @@ function validateOptionalCapabilityFields(value) {
 
 export async function loadCapabilityManifests(repoRoot, selected = CAPABILITY_IDS) {
   const manifests = [];
-  for (const id of selected) {
+  // `base` is accepted only as legacy Blueprint v1 input. It is erased before
+  // registry resolution because the Platform Baseline is not a capability.
+  for (const id of selected.filter((candidate) => candidate !== 'base')) {
     if (!CAPABILITY_IDS.includes(id)) throw new Error(`Unknown capability manifest: ${id}`);
     const value = JSON.parse(await readFile(join(repoRoot, 'capabilities', id, 'capability.json'), 'utf8'));
     const issues = validateCapabilityManifest(value);
@@ -129,8 +131,6 @@ export async function loadCapabilityManifests(repoRoot, selected = CAPABILITY_ID
 
 export function validateCapabilityDependencies(selected) {
   const issues = [];
-  if (!selected.includes('base')) issues.push('base is mandatory');
-  if (selected.includes('auth') && !selected.includes('base')) issues.push('auth requires base');
   if (selected.includes('rbac') && !selected.includes('auth')) issues.push('rbac requires auth');
   if (selected.includes('files') && !selected.includes('auth')) issues.push('files requires auth');
   if (selected.includes('files') && !selected.includes('rbac')) issues.push('files requires rbac');

@@ -50,6 +50,8 @@ Le modèle canonique est :
 ```text
 Enistere System =
 Blueprint
++ Architecture Profile
++ Platform Baseline
 + Runtime Adapters
 + Capabilities
 + Infrastructure Primitives
@@ -62,7 +64,8 @@ Les familles initiales de runtimes sont :
 ```text
 API Runtime
 ├── NestJS
-└── Spring Boot
+├── Spring Boot
+└── FastAPI
 
 Web Runtime
 ├── Next.js
@@ -76,6 +79,18 @@ Mobile Runtime
 Les frameworks sont des implémentations interchangeables. Ils ne constituent pas la source de vérité du système.
 
 L’unité centrale est le système décrit par son blueprint, normalisé dans le Canonical System Model, résolu puis matérialisé.
+
+Les profils architecturaux cibles sont :
+
+```text
+api
+monolith
+multi-client
+modular-distributed
+microservices
+```
+
+L'appartenance à la cible ne vaut jamais support de génération.
 
 ---
 
@@ -104,9 +119,11 @@ GenerationPlan
       ↓
 Materialization
       ↓
+MaterializedSystem
+      ↓
 Verification
       ↓
-Conformance
+ConformanceReport
 ```
 
 Après normalisation :
@@ -199,6 +216,13 @@ Elle rend le composant non conforme jusqu’à :
 Avant une mission structurante, lis au minimum :
 
 ```text
+docs/architecture/ENISTERE_REFERENCE_ARCHITECTURE.md
+docs/architecture/SYSTEM_ARCHITECTURE_PROFILES.md
+docs/architecture/PLATFORM_BASELINE_ARCHITECTURE.md
+docs/architecture/AI_REFERENCE_ARCHITECTURE.md
+docs/specifications/ARCHITECTURE_PROFILE_SPECIFICATION.md
+docs/specifications/PLATFORM_BASELINE_SPECIFICATION.md
+docs/specifications/INFRASTRUCTURE_PRIMITIVE_SPECIFICATION.md
 docs/specifications/PLATFORM_CONTRACT.md
 docs/specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md
 docs/specifications/RUNTIME_ADAPTER_SPECIFICATION.md
@@ -224,6 +248,8 @@ docs/governance/DEFINITION_OF_DONE.md
 docs/project-status/FOUNDATION_CURRENT_STATE.md
 docs/project-status/NEXT_ACTIONS.md
 docs/project-status/IMPLEMENTATION_MATRIX.md
+docs/roadmap/ENISTERE_IMPLEMENTATION_MASTER_ROADMAP.md
+docs/audits/TARGET_VS_CURRENT_IMPLEMENTATION.md
 ```
 
 Lis également le dernier ADR accepté et les audits pertinents.
@@ -293,7 +319,7 @@ Chaque complexité doit répondre à une exigence mesurée.
 
 ## 8.3 Contrats avant implémentation
 
-Toute capability doit être définie par :
+Toute capability, nécessairement optionnelle, composable, ciblable et versionnée, doit être définie par :
 
 * ses cas d’usage ;
 * ses règles ;
@@ -304,7 +330,28 @@ Toute capability doit être définie par :
 * ses dépendances ;
 * ses tests de conformité.
 
-Les adapters NestJS, Spring, Next.js, Angular, React Native et Flutter viennent ensuite.
+Les adapters NestJS, Spring, FastAPI, Next.js, Angular, React Native et Flutter viennent ensuite.
+
+Le Platform Baseline n'est pas une capability. Il est obligatoire pour chaque runtime et comprend :
+
+```text
+Configuration
+Canonical Errors
+Structured Logging
+Correlation
+Observability
+Technical Audit
+Security Baseline
+Health
+Diagnostics
+Testing Foundation
+Lifecycle Hooks
+Extension Points
+Build and Quality Gates
+```
+
+Observability et Technical Audit ne doivent jamais apparaître dans le catalogue des capabilities. Les
+domaines et capabilities déclarent leurs règles d'audit métier et utilisent l'infrastructure du baseline.
 
 ## 8.4 Parité produit
 
@@ -325,10 +372,11 @@ Elle signifie :
 
 Ne déclare jamais un composant `ready` parce qu’il compile.
 
-Utilise les niveaux :
+Utilise les statuts :
 
 ```text
-DECLARED
+TARGET
+PLANNED
 IMPLEMENTED
 GENERATABLE
 BOOTABLE
@@ -360,28 +408,26 @@ Le code appartenant à l’utilisateur ne doit jamais être écrasé silencieuse
 
 # 9. Ordre stratégique du programme
 
-L’ordre général reste :
+L’ordre général est :
 
 ```text
-1. Pipeline canonique unique
-2. Canonical System Model
-3. ResolvedSystem
-4. GenerationPlan
-5. Platform Contract exécutable
-6. Convergence des runtimes API
-7. Convergence des runtimes Web
-8. Convergence des runtimes Mobile
-9. Architecture des contrats polyglottes
-10. Modèle de capabilities
-11. Adapters des capabilities
-12. Goldens de parité
-13. Primitives typées
-14. Multi-applications avancées
-15. Domain Compiler
-16. Lifecycle Manager
-17. Architectures distribuées
-18. Registry et distribution industrielle
-19. IA intégrée et gouvernée
+1. Target Architecture
+2. Platform Kernel
+3. Runtime Contracts
+4. API Runtime Convergence
+5. Web Runtime Convergence
+6. Mobile Runtime Convergence
+7. Architecture Profiles
+8. Capability Framework
+9. Capabilities
+10. Infrastructure Primitives
+11. Polyglot Contracts
+12. Product Goldens
+13. Domain Compiler
+14. Lifecycle
+15. Microservices
+16. Registry and Distribution
+17. Advanced AI
 ```
 
 Ne saute pas une couche fondatrice pour livrer rapidement une fonctionnalité visible.
@@ -392,33 +438,46 @@ Ne saute pas une couche fondatrice pour livrer rapidement une fonctionnalité vi
 
 Le **pipeline canonique unique** (`Blueprint → CSM → ResolvedSystem → GenerationPlan → Materialization`) est **fusionné sur `main`** et gardé par des fitness functions (FF6–FF8). Le socle V2 « contrats stables, plugins gated » est en place ; la vague CVE est couverte par exceptions documentées (`factory/quality/audit-exceptions.json`).
 
+L'**ADR-057** adopte désormais l'architecture de référence complète : cinq profils, sept runtimes cibles,
+Platform Baseline obligatoire, primitives sémantiques, CLI système, lifecycle, deux périmètres IA et
+roadmap à 17 phases. Cette adoption ne vaut pas implémentation. FastAPI, les profils distribués complets,
+les primitives riches et le lifecycle restent TARGET ou PLANNED selon les preuves.
+
 **Décisions structurantes actées (ADR) :**
 
 * **ADR-047 → 049** — Platform Contract API exécutable : enveloppe d’erreur **plate canonique** (`ApiErrorResponse`, ADR-048), correlation ID, health liveness/readiness, observabilité minimale (logs structurés corrélés) à parité NestJS/Spring.
 * **ADR-050 → 053** — mesure des contrats Web (Next/Angular) et Mobile (RN/Flutter) par l’évaluateur de conformité ; convergence des bases Angular et Flutter.
 * **ADR-054 — Modèle de composition homogène (source unique)** : chaque runtime a **une seule** base modulaire (la racine `starters/<runtime>/`) ; les capabilities sont des **overlays** déclaratifs (`capabilities/<cap>/targets/<runtime>/`) ; l’application complète est **toujours composée, jamais dédoublée**. **Aucun sous-dossier `base/`.**
 * **ADR-055 — Politique de composition des capabilities** : capabilities **atomiques** ; le graphe `requires` déclaré est la **source unique** de la politique de dépendance (closure dérivée par tri topologique, **auto-closure tracée**) ; ni fusion, ni bundles.
-* **ADR-056 — Contrat de base par famille** : la base = **plancher d’invariants** de la famille, mesuré par conformité ; tout extra est une capability. Le contrat **API** inclut `audit-trail` et `rate-limiting` (infra + mécanisme en **base**, événements/limites **par overlay**).
+* **ADR-056 — Contrat de base par famille** : actif historique utile, précisé par ADR-057.
+* **ADR-057 — Architecture de référence et Platform Baseline** : la base obligatoire inclut notamment
+  Observability et Technical Audit ; une capability reste strictement optionnelle.
+* **ADR-058 — Platform Baseline v2 exécutable** : source JSON unique Common/API/Web/Mobile, versions
+  résolues dans les manifests/ResolvedSystem/GenerationPlan, rapport v2 calculé ; `base` supprimé du graphe
+  des capabilities et toléré uniquement à la frontière Blueprint v1.
+* **ADR-059 — Convergence Common/API v2** : NestJS et Spring exposent lifecycle, extensions
+  `api-extension/2.0.0`, sécurité et observabilité testés ; aucun invariant Common/API ne reste `MISSING`.
 
 **Convergence par famille :**
 
-* **API** — NestJS et Spring **à parité** sur le contrat de base ; audit + rate-limiting = **invariants de base** (infra générique en base, événements par capability) ; auth/rbac/files modularisés en overlays ; **Spring est source-unique** (doublon `src/` supprimé, `base/` remonté à la racine, `baseSource` retiré). La fitness function **FF5b** garde la source unique.
+* **API** — NestJS et Spring n’ont plus d’invariant Common/API v2 `MISSING`. Leur parité est testée
+  sur lifecycle, extensions, sécurité, métriques et propagation W3C. Il reste deux statuts `PARTIAL`
+  pour NestJS et six pour Spring ; aucun statut `CONFORMANT` n’est donc revendiqué.
 * **Web / Mobile** — Angular et Flutter ont **encore** un sous-dossier `base/` + une app dédoublée (dédoublage à faire, même modèle que Spring) ; la base **React Native est sur-remplie** (features à extraire en capabilities).
 
-La couche fondatrice (pipeline canonique, CSM, contrat de base API) est **acquise** ; l’ordre stratégique (§9) reste la référence pour la suite.
+La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Aucun des six runtimes existants
+n'est encore conforme au baseline v2 ; le rapport calculé est dans
+`factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 ---
 
 # 11. Prochaine étape
 
-> Étendre le **modèle source-unique** et le **contrat de base par famille** à **Angular puis Flutter** (ADR-054 A pour Web/Mobile) : compléter leur base au contrat de leur famille (Web = 9 invariants dont a11y ; Mobile = 8), supprimer leur app dédoublée, remonter `base/` à la racine — la fitness function **FF5b** l’exige dès qu’ils perdent `baseSource`.
+> Achever la convergence **NestJS/Spring Common/API v2** en supprimant les huit statuts `PARTIAL`,
+> puis produire une preuve de boot et de contrat HTTP pour chaque runtime — sans ajouter FastAPI ni
+> nouvelle capability.
 
-En parallèle ou ensuite :
-
-* **dériver la closure des capabilities** du graphe `requires` déclaré (ADR-055 étape 1) et **supprimer** l’enforcement codé en dur (`validateCapabilityDependencies`) ;
-* **réconcilier la base React Native sur-remplie** : extraire ses features en capabilities, offertes aussi à Flutter en overlays ;
-* étendre les overlays **Auth/RBAC/Files à Angular/Flutter** (parité métier non-TS) ;
-* faire contribuer chaque capability à ses **événements d’audit** sur les runtimes restants.
+Cette mission précède FastAPI : elle stabilise d'abord la référence API v2 sur les deux adapters existants.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -558,6 +617,10 @@ AI Orchestrator
 ```
 
 Les providers doivent rester interchangeables.
+
+L'IA de la Factory est distincte de l'IA générée dans les projets dérivés. Cette dernière est une charge
+applicative optionnelle (par exemple un service FastAPI) avec modèles/providers, RAG, agents métier,
+inférence, évaluations et observabilité IA propres.
 
 ---
 
@@ -726,3 +789,26 @@ Ne suppose jamais qu’une base, un contrat ou une capability est complet : vér
 Ne modifie rien avant d’avoir présenté un plan cohérent (§16 Phase B) : objectif unique, périmètre, hors-périmètre, architecture, fichiers envisagés, risques, stratégie de tests, critères d’acceptation.
 
 Ne pousse, ne fusionne, ne tague et ne publie **jamais** sans autorisation explicite (§17). Après validation, réalise la mission localement, fournis un rapport de readiness (§16 Phase E), et n’avance qu’une seule prochaine action.
+
+---
+
+# 22. État d’exécution du Platform Baseline
+
+ADR-058 a rendu les contrats Common/API/Web/Mobile v2 exécutables.
+ADR-059 a convergé NestJS et Spring Boot sur le lifecycle, les extensions
+versionnées, la sécurité et l’observabilité.
+
+État calculé au 2026-07-24 :
+
+```text
+NestJS      26 COMPLIANT / 2 PARTIAL / 0 MISSING
+Spring Boot 22 COMPLIANT / 6 PARTIAL / 0 MISSING
+```
+
+La présence d’un logger ne suffit jamais à prouver Observability. Pour les APIs,
+la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
+hook OpenTelemetry versionné et tests comportementaux.
+
+La prochaine mission unique consiste à supprimer les huit statuts `PARTIAL`
+restants puis à produire une preuve de boot et de contrat HTTP pour chaque API.
+FastAPI et les nouvelles capabilities restent hors périmètre jusque-là.

@@ -1,5 +1,8 @@
 # Analyse d'écart — Goldens et conformité
 
+> Rapport fondé sur l'ancien modèle de statuts. Depuis ADR-057, `TARGET` et `PLANNED` précèdent les niveaux
+> de preuve ; voir [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Cible : [Conformance Model](../specifications/CONFORMANCE_MODEL.md), Conformance Engine de
 l'[architecture technique](../architecture/technical/ENISTERE_TECHNICAL_ARCHITECTURE.md).
 Réel : `factory/test/*.test.mjs`, `factory/quality/scripts/{golden-runtime,fitness-functions}.mjs`,
@@ -8,11 +11,12 @@ Réel : `factory/test/*.test.mjs`, `factory/quality/scripts/{golden-runtime,fitn
 ## Niveaux de conformité atteints
 
 Le [modèle](../specifications/CONFORMANCE_MODEL.md) définit :
-`Declared → Implemented → Generatable → Bootable → Conformant → Product-equivalent → Production-ready`.
+`TARGET → PLANNED → IMPLEMENTED → GENERATABLE → BOOTABLE → CONFORMANT → PRODUCT_EQUIVALENT →
+PRODUCTION_READY`.
 
 | Niveau | Preuve disponible | Atteint ? |
 |---|---|---|
-| Declared | manifestes valides, schémas | **oui** |
+| TARGET/PLANNED | architecture adoptée / travail séquencé | **oui, selon composant** |
 | Implemented | code des overlays/starters | **oui** (targets `ready`) |
 | Generatable | `goldens.test.mjs` (structurel), tests d'absence | **oui** |
 | Bootable | `golden-runtime` : install reproductible + gates réels (+ `GOLDEN_RUNTIME_START`) | **oui, partiel** (compositions couvertes) |

@@ -1,0 +1,60 @@
+# Référence — API FastAPI
+
+## Finalité et graphe
+
+API headless d'analyse documentaire avec endpoint métier et service IA optionnel.
+
+```text
+clients externes → document-api (FastAPI)
+                         ├── PostgreSQL
+                         ├── MinIO
+                         └── telemetry backend
+```
+
+## Blueprint cible
+
+```yaml
+apiVersion: enistere.io/v2alpha1
+kind: SystemBlueprint
+metadata: { name: document-api, version: 1.0.0 }
+spec:
+  architecture: { profile: api }
+  applications:
+    - id: document-api
+      kind: api
+      runtime: fastapi
+      capabilities: [authentication, authorization, files]
+  domains:
+    - id: documents
+      owner: document-api
+      auditRules: [document.uploaded, document.deleted]
+  primitives:
+    - { id: db, kind: relational-database, provider: postgresql, owner: document-api }
+    - { id: objects, kind: object-storage, provider: minio, owner: document-api }
+    - { id: telemetry, kind: telemetry-backend, provider: otel-compatible }
+  policies:
+    observability: { required: true, standard: opentelemetry }
+    audit: { technicalAuditRequired: true, sensitiveOperationsRequired: true }
+```
+
+## Contrats et déploiement
+
+Une unité `document-api`, OpenAPI public, schémas JSON et client(s) hors scope. PostgreSQL porte métadonnées
+et ownership ; MinIO porte les blobs. Déploiement conteneurisé avec migrations ordonnées, readiness et
+rollback applicatif.
+
+## Baseline, audit et IA
+
+FastAPI doit implémenter le contrat API complet. L'audit technique couvre démarrage, auth, configuration,
+permissions et opérations administratives ; le domaine déclare upload/delete. Une extension IA peut
+ajouter extraction ou classification avec provider, evaluation et human review, sans changer le profil.
+
+## Statut réel
+
+| Élément | Statut | Preuve/limite |
+|---|---|---|
+| représentation cible | TARGET | spécifications V2 |
+| runtime FastAPI | TARGET | absent du registry et des starters |
+| composition | TARGET | non générable |
+| PostgreSQL/MinIO | IMPLEMENTED partiel | actifs existants sur autres runtimes, non qualifiés ici |
+| système | TARGET | ni boot ni conformité revendiqués |

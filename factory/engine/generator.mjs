@@ -161,7 +161,7 @@ function projectReadme(plan, overlays) {
     '',
     ...overlayLines,
     '',
-    'Une génération `base` seule ne contient aucune surface au-delà du socle. Les capabilities sont',
+    'Une génération sans capability ne contient aucune surface au-delà du Platform Baseline. Les capabilities sont',
     'ajoutées uniquement via leurs overlays déclaratifs (voir `enistere.lock` → `overlays`).',
     '',
     '## Prérequis',

@@ -32,6 +32,10 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true,
   });
 
+  // Le runtime participe au cycle de vie du processus : SIGTERM/SIGINT déclenchent
+  // les hooks Nest, la fermeture des ressources et l'arrêt gracieux du serveur HTTP.
+  app.enableShutdownHooks();
+
   // Le logger structuré officiel remplace le logger NestJS (logs de bootstrap inclus, via bufferLogs).
   const logger = app.get(AppLogger);
   app.useLogger(logger);
@@ -49,7 +53,8 @@ async function bootstrap(): Promise<void> {
     credentials: true,
     // Méthodes/headers minimisés (le starter n'expose ni PUT ni en-têtes exotiques).
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-Id', 'traceparent'],
+    exposedHeaders: ['X-Request-Id', 'traceparent'],
   });
 
   // Configuration applicative commune (pipes, filtre, interceptor) — voir bootstrap/configure-app.ts.
