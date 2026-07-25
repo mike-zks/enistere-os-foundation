@@ -2,89 +2,129 @@
 
 ## 1. Objet normatif
 
-Cette spécification définit comment un profil architectural est déclaré, validé, recommandé et résolu.
-Les mots **DOIT**, **NE DOIT PAS**, **DEVRAIT** et **PEUT** sont normatifs.
+Cette spécification définit comment un profil système et ses dimensions d’architecture sont déclarés,
+validés, recommandés et résolus. **DOIT**, **NE DOIT PAS**, **DEVRAIT** et **PEUT** sont normatifs.
 
-## 2. Identifiants
+## 2. Profils canoniques
 
-Les valeurs autorisées de `spec.architecture.profile` sont :
+`spec.architecture.profile` DOIT valoir :
 
 ```text
-api | monolith | multi-client | modular-distributed | microservices
+backend-service | product-platform | distributed-platform | service-ecosystem
 ```
 
-`evolutionTarget` PEUT nommer un autre profil. Il exprime une intention, jamais une génération simultanée.
+Un profil exprime le cas d’usage et la gouvernance du système. Il NE DOIT PAS encoder seul le nombre de
+clients, le style backend, l’ownership des données ou le couplage de déploiement.
 
-## 3. Forme
+## 3. Dimensions obligatoires du CSM
 
 ```yaml
 architecture:
-  profile: multi-client
-  evolutionTarget: modular-distributed
-  rationale:
-    drivers: [multiple-channels, shared-domain-authority]
-    rejected: [microservices]
+  profile: product-platform
+  evolutionTarget: distributed-platform
+  clients:
+    mode: multiple
+  backend:
+    style: modular-monolith
+  deployment:
+    coupling: coordinated
+  data:
+    ownership: bounded-context
+  communication:
+    primary: synchronous
+  operations:
+    maturity: standard
 ```
 
-Le normalizer DOIT produire une seule représentation canonique, qu'un profil soit saisi directement ou
-issu d'une recommandation.
+Valeurs autorisées :
 
-## 4. Contraintes
+| Dimension | Valeurs |
+|---|---|
+| `clients.mode` | `none`, `single`, `multiple` |
+| `backend.style` | `modular-monolith`, `distributed-services`, `microservices` |
+| `deployment.coupling` | `coordinated`, `partially-independent`, `independent` |
+| `data.ownership` | `shared`, `bounded-context`, `per-service` |
+| `communication.primary` | `synchronous`, `event-driven`, `hybrid` |
+| `operations.maturity` | `standard`, `advanced`, `distributed` |
 
-| Profil | APIs | Clients gérés | Données | Communications |
-|---|---:|---:|---|---|
-| `api` | 1 | 0 | owner API explicite | sync ; async optionnel |
-| `monolith` | 1 | 1..n | ownership logique par module | in-process/interne |
-| `multi-client` | 1 | 2..n | owner API | contrats clients → API |
-| `modular-distributed` | 2..n | 0..n | owner exclusif par domaine | sync/async explicites |
-| `microservices` | 2..n | 0..n | datastore par service owner | sync/async gouvernés |
+`evolutionTarget` PEUT nommer un autre profil canonique. Il exprime une intention, jamais une
+matérialisation simultanée.
 
-Des workers ne comptent pas comme API mais DOIVENT avoir un owner, un runtime/adapter et un contrat de
-lifecycle.
+## 4. Contraintes des profils
 
-## 5. Validation commune
+| Profil | Backends | Clients gérés | Style par défaut | Données | Déploiement |
+|---|---:|---:|---|---|---|
+| `backend-service` | 1 principalement | 0 | `modular-monolith` | owner backend | autonome |
+| `product-platform` | 1 principal | 1..n | `modular-monolith` | modules/bounded contexts | coordonné |
+| `distributed-platform` | 2..n | 0..n | `distributed-services` | owner par domaine | partiellement indépendant |
+| `service-ecosystem` | 2..n | 0..n | `microservices` | owner par service | indépendant |
+
+Des workers ne comptent pas comme backend d’autorité, mais DOIVENT avoir un owner, un runtime/adapter et
+un contrat de lifecycle.
+
+## 5. Compatibilité d’entrée
+
+La frontière Blueprint PEUT accepter temporairement les alias suivants :
+
+| Alias historique | Profil canonique | Dimension fixée ou déduite |
+|---|---|---|
+| `api` | `backend-service` | `clients.mode: none` |
+| `monolith` | `product-platform` | `backend.style: modular-monolith` |
+| `multi-client` | `product-platform` | `clients.mode: multiple` |
+| `modular-distributed` | `distributed-platform` | `backend.style: distributed-services` |
+| `microservices` | `service-ecosystem` | `backend.style: microservices` |
+
+Le normalizer DOIT les convertir. Aucun alias historique NE DOIT circuler dans `CanonicalSystem`,
+`ResolvedSystem`, `GenerationPlan` ou les nouveaux lockfiles.
+
+Le champ `profile` historique à la racine du Blueprint v1 désigne un **preset de composition**
+(`nestjs-base`, par exemple), pas un profil système. Il reste toléré pour compatibilité et DOIT être
+renommé `generationPreset` lors de la migration Blueprint v2.
+
+## 6. Validation commune
 
 Tout profil DOIT :
 
 - référencer des applications uniques ;
+- faire correspondre `clients.mode` aux clients déclarés ;
 - identifier les owners des données persistantes ;
 - résoudre chaque communication vers deux endpoints existants ;
-- définir protocole, mode, contrat, timeout et politique d'identité ;
+- définir protocole, mode, contrat, timeout et identité ;
 - appliquer le Platform Baseline à chaque runtime ;
-- associer chaque deployment unit à un environnement et une stratégie ;
 - produire des diagnostics structurés pour toute target ou adapter absent.
 
-## 6. Validations distribuées
+`backend-service` NE DOIT PAS posséder de client officiel. `product-platform` DOIT en posséder au moins
+un. Une topologie représentable mais non matérialisable DOIT conserver son CSM et recevoir un statut de
+génération `PLANNED` ou un diagnostic de plan explicite.
 
-`modular-distributed` et `microservices` DOIVENT en plus :
+## 7. Validations distribuées
 
-- interdire l'accès direct au datastore d'un autre owner ;
-- exiger compatibilité et version pour chaque contrat ;
-- définir timeouts et budgets de retry ;
-- définir idempotence pour les mutations rejouables ;
-- définir propagation du contexte et tracing distribué ;
+`distributed-platform` et `service-ecosystem` DOIVENT en plus :
+
+- interdire l’accès direct au datastore d’un autre owner ;
+- versionner les contrats synchrones et asynchrones ;
+- définir timeouts, budgets de retry et idempotence ;
+- propager le contexte et le tracing distribué ;
 - associer une stratégie de panne à chaque dépendance ;
 - décrire migration, ordre de déploiement et rollback ;
-- exiger un owner opérationnel et des SLI/SLO par unité.
+- identifier owner opérationnel et SLI/SLO par unité.
 
-`microservices` DOIT également fournir une justification organisationnelle et un modèle de dépréciation
-des contrats. L'absence de ces preuves produit un refus, pas un simple avertissement.
+`service-ecosystem` DOIT fournir une justification organisationnelle et une politique de dépréciation des
+contrats. L’absence de ces preuves produit un refus de recommandation ou de génération.
 
-## 7. Recommandation
+## 8. Recommandation
 
 `enistere architecture recommend` DOIT :
 
-1. collecter les drivers et contraintes ;
-2. évaluer le profil le plus simple qui les satisfait ;
+1. collecter cas d’usage, clients, domaines, autonomie de release, ownership, équipes et contraintes ;
+2. choisir le profil le moins distribué qui satisfait les exigences ;
 3. expliquer le choix, les alternatives et les refus ;
-4. afficher le statut de support séparément ;
-5. demander confirmation avant de produire un blueprint.
+4. afficher le statut de représentation et de génération séparément ;
+5. demander confirmation avant d’écrire un blueprint.
 
-L'IA PEUT proposer ; le resolver déterministe valide.
+L’IA PEUT proposer. Le recommender et le resolver déterministes valident.
 
-## 8. Support
-
-Le registry déclare séparément :
+## 9. Support et conformité
 
 ```yaml
 status:
@@ -94,11 +134,6 @@ status:
   evidence: []
 ```
 
-Un profil représentable NE DOIT PAS être présenté comme `GENERATABLE`. Les statuts sont ceux du
-[Conformance Model](CONFORMANCE_MODEL.md).
-
-## 9. Conformité
-
-Les preuves minimales sont : schema/normalization tests, graph validation, plan déterministe, golden de
-topologie, boot des unités, contract tests, security gates, observability/audit assertions et scénario de
-défaillance adapté.
+Un profil représentable NE DOIT PAS être présenté comme `GENERATABLE`. Les preuves minimales sont :
+schema/normalization tests, graph validation, plan déterministe, golden topologique, boot, contract tests,
+security gates, assertions observability/audit et scénario de défaillance adapté.

@@ -32,7 +32,15 @@ Voir l'[architecture de la Factory](../ARCHITECTURE.md).
 CanonicalSystem
 ├── apiVersion : enistere.io/v1alpha1
 ├── metadata { name, displayName, version, description? }
-├── architecture { style }              # standard | multi-client | modular-monolith
+├── architecture
+│   ├── profile                         # backend-service | product-platform
+│   │                                   # distributed-platform | service-ecosystem
+│   ├── clients { mode }
+│   ├── backend { style }
+│   ├── deployment { coupling }
+│   ├── data { ownership }
+│   ├── communication { primary }
+│   └── operations { maturity }
 ├── applications[] { id, kind, runtime, consumes[], options }
 ├── capabilities[] { id, version?, requestedTargets[], configuration }
 ├── domain { entities[] }
@@ -41,8 +49,10 @@ CanonicalSystem
 └── source { blueprintVersion, file?, profile?, digest }
 ```
 
-- **Styles** : `standard`, `multi-client`, `modular-monolith` supportés ; `service-oriented`,
-  `microservices` réservés mais **refusés** par la validation.
+- **Profils système** : quatre identifiants canoniques ; la génération de
+  `distributed-platform` et `service-ecosystem` reste planifiée.
+- **Dimensions** : topologie client, style backend, couplage de déploiement, ownership, communication et
+  maturité opérationnelle sont validés séparément.
 - **Kinds** : `api`, `web`, `mobile`. Plusieurs applications d'un même kind sont autorisées.
 - `requestedTargets` porte l'**intention** ; la résolution des targets appartient au
   [resolver](RESOLVED_SYSTEM_MODEL.md).
@@ -51,7 +61,8 @@ CanonicalSystem
 
 `CSM_EMPTY_SYSTEM_NAME`, `CSM_DUPLICATE_APPLICATION_ID`, `CSM_UNSUPPORTED_RUNTIME`,
 `CSM_INCOMPATIBLE_KIND_RUNTIME`, `CSM_INVALID_APPLICATION`, `CSM_INVALID_CAPABILITY_TARGET`,
-`CSM_UNSUPPORTED_ARCHITECTURE_STYLE`, `CSM_MISSING_API`, `CSM_TOPOLOGY_NOT_GENERATABLE`
+`CSM_INVALID_SYSTEM_PROFILE`, `CSM_INVALID_ARCHITECTURE_DIMENSION`, `CSM_MISSING_API`,
+`CSM_TOPOLOGY_NOT_GENERATABLE`
 (refus des topologies non générables : plusieurs API), `CSM_INCOHERENT_STRUCTURE`.
 
 ## Déterminisme et immutabilité
@@ -64,7 +75,8 @@ chemin absolu ni aléatoire. `source.digest` = sha256 stable (champ digest exclu
 
 - `capabilities[].requestedTargets` = toutes les applications (intention globale du blueprint v1) ; la
   résolution effective par target est calculée par le resolver.
-- Non modélisés dans le code actuel : les cinq profils cibles, `primitives`, `communications`, `deployment`,
-  `security`, `quality`, `ai`, `policies` étendues, `architecture.evolutionTarget` et plusieurs API.
+- Non modélisés dans le code actuel : `primitives`, `communications`, deployment détaillé,
+  `security`, `quality`, `ai`, policies étendues et matérialisation de plusieurs API. Les quatre profils,
+  leurs dimensions et `architecture.evolutionTarget` sont modélisés.
 - Le blueprint public v1 (`stack`/`applications[]`) reste accepté ; il est traduit **immédiatement** en
   CSM. Aucune conversion inverse CSM → blueprint n'existe.

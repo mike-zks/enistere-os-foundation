@@ -2,8 +2,18 @@ import { readFile } from 'node:fs/promises';
 import { CAPABILITY_IDS, validateCapabilityDependencies } from './capabilities.mjs';
 import { validateEntities } from './contracts.mjs';
 import { validateBlueprintProfile } from './profiles.mjs';
-import { APPLICATION_KINDS, ARCHITECTURE_STYLES } from './topologies.mjs';
+import { APPLICATION_KINDS } from './topologies.mjs';
 import { assertGeneratableTopology, validateApplications } from './applications.mjs';
+import {
+  BACKEND_STYLES,
+  CLIENT_MODES,
+  COMMUNICATION_MODES,
+  DATA_OWNERSHIP_MODES,
+  DEPLOYMENT_COUPLINGS,
+  LEGACY_SYSTEM_PROFILE_ALIASES,
+  OPERATIONS_MATURITY_LEVELS,
+  SYSTEM_PROFILES,
+} from '../model/system-profiles.mjs';
 
 // The application-kind registry is the single source of truth for valid runtimes
 // per slot; the stack sugar derives its enums from it.
@@ -14,6 +24,19 @@ const CAPABILITIES = new Set(CAPABILITY_IDS);
 const LEGACY_INPUT_CAPABILITIES = new Set(['base']);
 const ENVIRONMENTS = new Set(['local', 'staging']);
 const SLUG = /^[a-z][a-z0-9-]{1,62}$/;
+const SYSTEM_PROFILE_INPUTS = new Set([...SYSTEM_PROFILES, ...Object.keys(LEGACY_SYSTEM_PROFILE_ALIASES)]);
+const LEGACY_ARCHITECTURE_STYLES = new Set(['monolith', 'modular-monolith', 'microservices']);
+
+function validateArchitectureObject(issues, architecture, key, field, allowed) {
+  const value = architecture[key];
+  if (value === undefined) return;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    issues.push(`architecture.${key} must be an object`);
+    return;
+  }
+  for (const child of Object.keys(value)) if (child !== field) issues.push(`architecture.${key}.${child} is not a known field`);
+  if (!allowed.includes(value[field])) issues.push(`architecture.${key}.${field} is invalid`);
+}
 
 export async function readBlueprint(path) {
   const source = await readFile(path, 'utf8');
@@ -56,9 +79,17 @@ export function validateBlueprint(value) {
   if (value.architecture !== undefined) {
     if (!value.architecture || typeof value.architecture !== 'object' || Array.isArray(value.architecture)) issues.push('architecture must be an object');
     else {
-      for (const key of Object.keys(value.architecture)) if (!['style', 'evolutionTarget'].includes(key)) issues.push(`architecture.${key} is not a known field`);
-      if (!ARCHITECTURE_STYLES.includes(value.architecture.style)) issues.push('architecture.style is invalid');
-      if (value.architecture.evolutionTarget !== undefined && !ARCHITECTURE_STYLES.includes(value.architecture.evolutionTarget)) issues.push('architecture.evolutionTarget is invalid');
+      const known = ['profile', 'style', 'evolutionTarget', 'clients', 'backend', 'deployment', 'data', 'communication', 'operations'];
+      for (const key of Object.keys(value.architecture)) if (!known.includes(key)) issues.push(`architecture.${key} is not a known field`);
+      if (value.architecture.profile !== undefined && !SYSTEM_PROFILE_INPUTS.has(value.architecture.profile)) issues.push('architecture.profile is invalid');
+      if (value.architecture.style !== undefined && !LEGACY_ARCHITECTURE_STYLES.has(value.architecture.style)) issues.push('architecture.style is invalid');
+      if (value.architecture.evolutionTarget !== undefined && !SYSTEM_PROFILE_INPUTS.has(value.architecture.evolutionTarget)) issues.push('architecture.evolutionTarget is invalid');
+      validateArchitectureObject(issues, value.architecture, 'clients', 'mode', CLIENT_MODES);
+      validateArchitectureObject(issues, value.architecture, 'backend', 'style', BACKEND_STYLES);
+      validateArchitectureObject(issues, value.architecture, 'deployment', 'coupling', DEPLOYMENT_COUPLINGS);
+      validateArchitectureObject(issues, value.architecture, 'data', 'ownership', DATA_OWNERSHIP_MODES);
+      validateArchitectureObject(issues, value.architecture, 'communication', 'primary', COMMUNICATION_MODES);
+      validateArchitectureObject(issues, value.architecture, 'operations', 'maturity', OPERATIONS_MATURITY_LEVELS);
     }
   }
 

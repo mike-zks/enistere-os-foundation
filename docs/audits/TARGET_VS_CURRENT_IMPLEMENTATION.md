@@ -1,8 +1,8 @@
 # Audit — Architecture cible vs implémentation actuelle
 
-- Date : 2026-07-24
-- Branche auditée : `feat/api-base-audit-ratelimit-contract`
-- Commit de départ : `3da14a2b6e48f077f7f6340bd9828a3c37957dee`
+- Date : 2026-07-25
+- Branche auditée : `feat/system-profile-taxonomy`
+- Référence de départ : merge de la PR #207 (`8975f4b`)
 - Nature : audit documentaire et architectural ; aucune promotion de statut
 
 ## Méthode
@@ -23,10 +23,9 @@ Classification :
 ## Résumé
 
 Le pipeline canonique, les modèles internes initiaux, les goldens, les six runtimes et les overlays sont de
-bons actifs. La cible complète n'est toutefois pas représentable par le schéma actuel, les contrats de
-baseline restent minimaux et majoritairement vérifiés par structure, FastAPI/primitives distribuées/
-lifecycle/contrats polyglottes manquent. Les profils actuels sont des combinaisons de starters, pas encore
-les cinq profils architecturaux normatifs.
+bons actifs. Les quatre profils système et leurs dimensions sont désormais représentables et normalisés.
+Le Blueprint V2 complet, les primitives, FastAPI, les topologies distribuées, le lifecycle et les contrats
+polyglottes manquent encore. Les 26 « profils » historiques restent des presets de composition distincts.
 
 ## Matrice des actifs
 
@@ -36,9 +35,9 @@ les cinq profils architecturaux normatifs.
 | `factory/model/canonical-system.mjs` | ADAPT | modèle V2 complet | applications/policies partiels |
 | `factory/model/resolved-system.mjs` | ADAPT | graph/primitives/contracts/support complet | pipeline utilisé |
 | `factory/model/generation-plan.mjs` | ADAPT | opérations, risques, approvals, support | digests déjà présents |
-| blueprint schema v1 | REPLACE | schéma V2 + migration frontière | styles/champs historiques |
-| profiles/topologies engine | REFACTOR | cinq profils comme presets du CSM | 26 profils stack, 21 générables |
-| CLI `doctor/init/profiles/profile/plan/generate/verify` | ADAPT | CLI système cible | parcours partiel |
+| blueprint schema v1 | REPLACE | enveloppe V2 + migration frontière | taxonomie système adaptée ; enveloppe/champs historiques restants |
+| profiles/topologies engine | REFACTOR | distinguer profils système et presets de composition | 26 presets stack, 22 générables |
+| CLI système + presets historiques | ADAPT | parcours cible complet | `architecture list/describe/recommend` initial ; lifecycle absent |
 | lock/provenance/digests | ADAPT | registry resolution et lifecycle | fondations présentes |
 | conformance engine | ADAPT | remplacer progressivement probes critiques par comportements | baseline v2 exécutable depuis ADR-058 |
 | fitness functions FF6–FF8 | KEEP | préserver pipeline unique | preuves présentes |
@@ -66,18 +65,17 @@ les cinq profils architecturaux normatifs.
 | Factory AI local adapter/approval | ADAPT | orchestration/policies/evals | prototype utile |
 | derived-system AI runtime | CREATE | services FastAPI gouvernés | absent |
 | exemples blueprints actuels | ADAPT | migrer vers V2 et goldens | syntaxe/support actuels |
-| documents V2 existants | ADAPT | aligner ADR-057 | plusieurs classifications obsolètes |
+| documents V2 existants | ADAPT | aligner ADR-057/060 | taxonomie active corrigée ; détails lifecycle à compléter |
 | anciennes roadmaps actives | REPLACE | roadmap maître unique | séquence trop courte |
 
 ## Profils
 
 | Profil cible | Représentation actuelle | Génération actuelle | Décision |
 |---|---|---|---|
-| `api` | approximation par profil starter | plusieurs APIs bootables séparément | ADAPT |
-| `monolith` | `modular-monolith` partiel | compositions API+client | REFACTOR |
-| `multi-client` | partiel | certains profils multi-surface | ADAPT |
-| `modular-distributed` | non complet | non | CREATE |
-| `microservices` | valeur réservée/refusée | non | CREATE après lifecycle |
+| `backend-service` | profil canonique + inférence | plusieurs backends bootables séparément | ADAPT |
+| `product-platform` | profil canonique + dimensions | compositions backend+client | ADAPT |
+| `distributed-platform` | représentable ; multi-backend refusé à la génération | non | CREATE |
+| `service-ecosystem` | représentable ; style `microservices` distinct | non | CREATE après lifecycle |
 
 ## Runtimes et baseline
 
@@ -98,20 +96,20 @@ Le baseline v2 est désormais exécutable (ADR-058) et prouve qu'aucun runtime n
 
 - Audit et Observability retirés du catalogue canonique des capabilities ;
 - `base` requalifié en baseline, non capability ;
-- cinq profils et sept runtimes deviennent la cible ;
+- quatre profils système, leurs dimensions et sept runtimes deviennent la cible ;
 - MinIO et Alfresco sont distingués ;
 - la roadmap courte V2 est remplacée comme autorité par la roadmap maître ;
 - les statuts incluent `TARGET` et `PLANNED` avant les niveaux de preuve ;
 - l'IA Factory est séparée de l'IA dérivée.
 
-Les ADR historiques gardent leur texte comme historique. L'ADR-057 indique précisément ce qu'il supersède.
+Les ADR historiques gardent leur texte comme historique. Les ADR-057 et ADR-060 indiquent précisément ce qu'ils supersèdent.
 Les entrées `plannedCapabilities` contradictoires ont été retirées des manifests : ce nettoyage de
 classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
 1. **P0 — convergence runtime v2 :** contrat exécutable, mais aucun runtime conforme.
-2. **P0 — blueprint/CSM partiels :** profils et primitives cibles non représentables dans le moteur.
+2. **P0 — blueprint/CSM partiels :** profils désormais représentables, mais primitives et Blueprint V2 complet manquent.
 3. **P1 — bases Web/Mobile divergentes :** duplication et sur-remplissage.
 4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
 5. **P2 — primitives/lifecycle distribués absents :** aucune génération distribuée crédible.

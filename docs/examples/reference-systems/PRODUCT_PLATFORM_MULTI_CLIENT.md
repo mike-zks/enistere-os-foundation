@@ -1,4 +1,4 @@
-# Référence — Multi-client NestJS
+# Référence — Product platform NestJS multi-client
 
 ## Finalité et graphe
 
@@ -18,7 +18,15 @@ apiVersion: enistere.io/v2alpha1
 kind: SystemBlueprint
 metadata: { name: citizen-platform, version: 1.0.0 }
 spec:
-  architecture: { profile: multi-client, evolutionTarget: modular-distributed }
+  architecture:
+    profile: product-platform
+    evolutionTarget: distributed-platform
+    clients: { mode: multiple }
+    backend: { style: modular-monolith }
+    deployment: { coupling: coordinated }
+    data: { ownership: bounded-context }
+    communication: { primary: synchronous }
+    operations: { maturity: standard }
   applications:
     - { id: core-api, kind: api, runtime: nestjs,
         capabilities: [authentication, authorization, user-management, files, events, notifications] }

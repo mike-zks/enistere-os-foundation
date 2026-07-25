@@ -83,12 +83,16 @@ L’unité centrale est le système décrit par son blueprint, normalisé dans l
 Les profils architecturaux cibles sont :
 
 ```text
-api
-monolith
-multi-client
-modular-distributed
-microservices
+backend-service
+product-platform
+distributed-platform
+service-ecosystem
 ```
+
+Le nombre de clients, le style backend, le couplage de déploiement, l’ownership des données, le mode de
+communication et la maturité opérationnelle sont des dimensions indépendantes. `api`, `monolith`,
+`multi-client`, `modular-distributed` et `microservices` ne sont que des alias d’entrée historiques ;
+ils ne doivent jamais être émis par le modèle canonique.
 
 L'appartenance à la cible ne vaut jamais support de génération.
 
@@ -131,7 +135,8 @@ Après normalisation :
 * aucune couche ne doit relire le blueprint brut ;
 * le planner ne reçoit qu’un `ResolvedSystem` ;
 * le générateur ne reçoit qu’un `GenerationPlan` ;
-* les profils ne sont que des presets d’entrée ;
+* les profils système ne sont pas des presets de starters ;
+* les presets de composition historiques restent une notion d’entrée distincte ;
 * aucune représentation interne concurrente n’est autorisée.
 
 Ne réintroduis aucune logique legacy ou pipeline parallèle.
@@ -425,7 +430,7 @@ L’ordre général est :
 12. Product Goldens
 13. Domain Compiler
 14. Lifecycle
-15. Microservices
+15. Service Ecosystem
 16. Registry and Distribution
 17. Advanced AI
 ```
@@ -434,11 +439,12 @@ Ne saute pas une couche fondatrice pour livrer rapidement une fonctionnalité vi
 
 ---
 
-# 10. État courant (au 2026-07-24)
+# 10. État courant (au 2026-07-25)
 
 Le **pipeline canonique unique** (`Blueprint → CSM → ResolvedSystem → GenerationPlan → Materialization`) est **fusionné sur `main`** et gardé par des fitness functions (FF6–FF8). Le socle V2 « contrats stables, plugins gated » est en place ; la vague CVE est couverte par exceptions documentées (`factory/quality/audit-exceptions.json`).
 
-L'**ADR-057** adopte désormais l'architecture de référence complète : cinq profils, sept runtimes cibles,
+Les **ADR-057 et ADR-060** adoptent désormais l'architecture de référence complète : quatre profils
+système fondés sur les cas d’usage, six dimensions d’architecture indépendantes, sept runtimes cibles,
 Platform Baseline obligatoire, primitives sémantiques, CLI système, lifecycle, deux périmètres IA et
 roadmap à 17 phases. Cette adoption ne vaut pas implémentation. FastAPI, les profils distribués complets,
 les primitives riches et le lifecycle restent TARGET ou PLANNED selon les preuves.
@@ -457,6 +463,8 @@ les primitives riches et le lifecycle restent TARGET ou PLANNED selon les preuve
   des capabilities et toléré uniquement à la frontière Blueprint v1.
 * **ADR-059 — Convergence Common/API v2** : NestJS et Spring exposent lifecycle, extensions
   `api-extension/2.0.0`, sécurité et observabilité testés ; aucun invariant Common/API ne reste `MISSING`.
+* **ADR-060 — Profils système** : quatre profils fondés sur les cas d’usage et six dimensions
+  indépendantes ; les cinq anciens noms sont des alias d’entrée, jamais une sortie canonique.
 
 **Convergence par famille :**
 

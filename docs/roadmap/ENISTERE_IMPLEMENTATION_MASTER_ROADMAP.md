@@ -21,7 +21,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
   lockfile et diagnostics.
 - **Dépendances :** phase 1.
 - **Livrables :** schémas versionnés, migrations d'entrée, modèles immuables, resolver/planner uniques.
-- **Sortie :** cinq profils représentables ; aucune lecture du blueprint après normalisation ; plans
+- **Sortie :** quatre profils et leurs dimensions représentables ; aucune lecture du blueprint après normalisation ; plans
   déterministes et explicables.
 - **Risques :** double pipeline, migration cassante ; **preuves :** fitness functions, snapshots/goldens,
   tests de migration et digest.
@@ -68,13 +68,13 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## 7. Architecture Profiles
 
-- **Objectifs :** matérialiser `api`, `monolith`, `multi-client`, `modular-distributed`; conserver
-  `microservices` représentable.
+- **Objectifs :** matérialiser `backend-service` et `product-platform`, puis `distributed-platform` ;
+  conserver `service-ecosystem` représentable sans support fictif.
 - **Dépendances :** runtimes convergés.
 - **Livrables :** profile registry, validations, recommender déterministe, topological goldens.
-- **Sortie :** quatre profils générables/bootables avec refus justifiés ; microservices reste honnête.
+- **Sortie :** trois profils générables/bootables avec refus justifiés ; `service-ecosystem` reste honnête.
 - **Risques :** presets concurrents du CSM ; **preuves :** normalisation identique et graph tests.
-- **Prochaine mission :** golden `api`, puis complexité croissante.
+- **Prochaine mission :** golden `backend-service`, puis complexité croissante.
 
 ## 8. Capability Framework
 
@@ -121,7 +121,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 - **Livrables :** projets générés éphémères, boot/E2E/security/ops proofs.
 - **Sortie :** parité produit mesurée, pas seulement bases.
 - **Risques :** matrice explosive ; **preuves :** matrice de risques et échantillonnage documenté.
-- **Prochaine mission :** golden monolith Spring+Next.js.
+- **Prochaine mission :** golden `product-platform` Spring+Next.js.
 
 ## 13. Domain Compiler
 
@@ -141,15 +141,16 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 - **Risques :** écrasement, migrations irréversibles ; **preuves :** property tests, backups et failure drills.
 - **Prochaine mission :** inspect/diff read-only.
 
-## 15. Microservices
+## 15. Service Ecosystem
 
-- **Objectifs :** génération complète du profil avec ownership, service identity, sync/async, outbox, DLQ,
+- **Objectifs :** génération complète du profil `service-ecosystem`, avec style backend `microservices`,
+  ownership, service identity, sync/async, outbox, DLQ,
   tracing, SLO et résilience.
-- **Dépendances :** modular-distributed, primitives, lifecycle, goldens.
+- **Dépendances :** `distributed-platform`, primitives, lifecycle, goldens.
 - **Livrables :** topology planner, deployment/migration orchestration, failure scenarios.
-- **Sortie :** golden microservices bootable/conformant et chaos ciblé.
+- **Sortie :** golden `service-ecosystem` bootable/conformant et chaos ciblé.
 - **Risques :** complexité opérationnelle ; **preuves :** panne partielle, compatibilité, restore, rollback.
-- **Prochaine mission :** étendre un golden modular-distributed prouvé.
+- **Prochaine mission :** étendre un golden `distributed-platform` prouvé.
 
 ## 16. Registry and Distribution
 

@@ -1,4 +1,4 @@
-# Référence — API FastAPI
+# Référence — Backend service FastAPI
 
 ## Finalité et graphe
 
@@ -18,7 +18,14 @@ apiVersion: enistere.io/v2alpha1
 kind: SystemBlueprint
 metadata: { name: document-api, version: 1.0.0 }
 spec:
-  architecture: { profile: api }
+  architecture:
+    profile: backend-service
+    clients: { mode: none }
+    backend: { style: modular-monolith }
+    deployment: { coupling: coordinated }
+    data: { ownership: bounded-context }
+    communication: { primary: synchronous }
+    operations: { maturity: standard }
   applications:
     - id: document-api
       kind: api

@@ -10,6 +10,7 @@
 | Capacité | État | Limite actuelle |
 |---|---|---|
 | `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
+| `architecture list/describe/recommend` | Implémenté (ADR-060) | recommandation déterministe initiale ; écriture guidée du Blueprint à compléter |
 | Pipeline canonique unique | **Implémenté et testé** (ADR-046) | blueprint → CSM → ResolvedSystem → Plan → génération ; pipeline legacy supprimé |
 | Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
 | Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
@@ -20,8 +21,8 @@
 | Platform Baseline v2 exécutable | **Implémenté** (ADR-058/059) | Common/API/Web/Mobile versionnés ; APIs sans invariant manquant mais encore partielles ; rapport calculé dans `factory/conformance/reports/` |
 | Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
-| `profiles` / `profile <name>` | Implémenté (R7) | 26 profils déclarés, 21 générables |
-| Matrice de profils | Implémentée (R7) | validée contre la matrice réelle par test |
+| `profiles` / `profile <name>` | Implémenté (R7) | presets de composition historiques : 26 déclarés, 22 générables |
+| Matrice de presets | Implémentée (R7) | validée contre la matrice réelle par test |
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
 | 18 combinaisons de stacks | Planifiées/testées | distinctes des profils ; pas toutes démarrées en golden |
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
@@ -54,13 +55,13 @@ ce statut ne bloque pas la composition triple et n'injecte aucune surface mobile
 `files` exige explicitement `auth + rbac` et n'injecte aucune surface sur les targets
 planifiées.
 
-## Profils
+## Presets de composition
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 21 | autorisée | composables, exacts et prouvés par un golden runtime |
+| `ready` | 22 | autorisée | composables, exacts et prouvés par un golden runtime |
 | `supported` | 0 | autorisée | aucun dépassement de baseline après R8A-3 |
-| `planned` | 5 | **refusée** | Files Spring et auth/RBAC/files Angular/Flutter |
+| `planned` | 4 | **refusée** | auth/RBAC/files Angular/Flutter selon le preset |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
 et golden ; aucun profil ne compose sans API.

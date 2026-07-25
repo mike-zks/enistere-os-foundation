@@ -58,7 +58,9 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
 - `Resolved System Model` : **IMPLEMENTED_AND_USED** (ADR-046).
 - `Single Factory Pipeline` : **IMPLEMENTED_AND_TESTED** (ADR-046).
 - `Legacy Internal Pipeline` : **REMOVED** (ADR-046).
-- `Full Blueprint V2` : **PARTIAL** ; les cinq profils, primitives et sections complètes sont TARGET.
+- `System profile taxonomy` : **IMPLEMENTED** à l’ingestion/CSM (ADR-060) ; quatre profils et six
+  dimensions, avec alias historiques limités à la frontière Blueprint v1.
+- `Full Blueprint V2` : **PARTIAL** ; primitives et sections complètes restent TARGET.
 - `Platform Contract executable (API minimal v1)` : **HISTORIQUE** (ADR-047, ADR-048, ADR-049) — suite de conformité
   calculée (`factory/conformance/`, émet `enistere.conformance.json`) ; NestJS↔Spring en **parité** sur
   `config-validated`, `error-canonical` (enveloppe plate `ApiErrorResponse`), `correlation-id`, health,

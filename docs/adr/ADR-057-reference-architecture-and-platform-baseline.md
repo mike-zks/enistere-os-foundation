@@ -1,6 +1,7 @@
 # ADR-057 — Architecture de référence complète et Platform Baseline
 
-- Statut : Validé
+- Statut : Validé ; taxonomie des profils supersédée par
+  [ADR-060](ADR-060-system-profile-taxonomy.md)
 - Date : 2026-07-24
 - Décideur : Owner Foundation
 
@@ -99,7 +100,7 @@ d'implémentation unique consacrée au baseline et aux contrats.
 
 - link checker documentaire ;
 - recherche sans classification active Audit/Observability comme capabilities ;
-- cohérence des cinq profils, sept runtimes, douze primitives et huit statuts ;
+- cohérence de la taxonomie de profils alors adoptée, des sept runtimes, douze primitives et huit statuts ;
 - audit cible/existant avec classification `KEEP|ADAPT|REFACTOR|REPLACE|REMOVE|CREATE`.
 
 ## Rollback

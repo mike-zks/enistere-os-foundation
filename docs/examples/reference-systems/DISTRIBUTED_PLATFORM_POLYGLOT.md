@@ -1,4 +1,4 @@
-# Référence — Modular-distributed polyglotte
+# Référence — Distributed platform polyglotte
 
 ## Finalité et graphe
 
@@ -24,7 +24,14 @@ apiVersion: enistere.io/v2alpha1
 kind: SystemBlueprint
 metadata: { name: distributed-platform, version: 1.0.0 }
 spec:
-  architecture: { profile: modular-distributed }
+  architecture:
+    profile: distributed-platform
+    clients: { mode: multiple }
+    backend: { style: distributed-services }
+    deployment: { coupling: partially-independent }
+    data: { ownership: bounded-context }
+    communication: { primary: hybrid }
+    operations: { maturity: advanced }
   applications:
     - { id: core-api, kind: api, runtime: spring, domains: [accounts, contracts] }
     - { id: engagement-api, kind: api, runtime: nestjs, domains: [notifications, campaigns] }

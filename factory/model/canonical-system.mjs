@@ -15,18 +15,18 @@
 
 import { createHash } from 'node:crypto';
 import { deepFreeze } from './immutable.mjs';
+export {
+  BACKEND_STYLES,
+  CLIENT_MODES,
+  COMMUNICATION_MODES,
+  DATA_OWNERSHIP_MODES,
+  DEPLOYMENT_COUPLINGS,
+  OPERATIONS_MATURITY_LEVELS,
+  SYSTEM_PROFILES,
+} from './system-profiles.mjs';
 
 /** Version propre du CSM (distincte de la version de schéma du blueprint). */
 export const SYSTEM_API_VERSION = 'enistere.io/v1alpha1';
-
-/** Styles d'architecture supportés aujourd'hui. */
-export const SUPPORTED_ARCHITECTURE_STYLES = Object.freeze(['standard', 'multi-client', 'modular-monolith']);
-
-/** Styles réservés dans le type mais explicitement non supportés (refusés par la validation). */
-export const RESERVED_ARCHITECTURE_STYLES = Object.freeze(['service-oriented', 'microservices']);
-
-/** Tous les styles nommables (supportés puis réservés). */
-export const ARCHITECTURE_STYLES = Object.freeze([...SUPPORTED_ARCHITECTURE_STYLES, ...RESERVED_ARCHITECTURE_STYLES]);
 
 /** Kinds d'application modélisés par le CSM minimal. */
 export const APPLICATION_KINDS = Object.freeze(['api', 'web', 'mobile']);
@@ -81,7 +81,15 @@ export function canonicalSystem({ metadata, architecture, applications, capabili
   const base = {
     apiVersion: SYSTEM_API_VERSION,
     metadata: { ...metadata },
-    architecture: { ...architecture },
+    architecture: {
+      ...architecture,
+      clients: { ...architecture.clients },
+      backend: { ...architecture.backend },
+      deployment: { ...architecture.deployment },
+      data: { ...architecture.data },
+      communication: { ...architecture.communication },
+      operations: { ...architecture.operations },
+    },
     applications: applications.map((app) => canonicalApplication(app)),
     capabilities: capabilities.map((capability) => canonicalCapability(capability)),
     domain: { entities: [...(domain.entities ?? [])] },

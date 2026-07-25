@@ -32,7 +32,21 @@ function blueprint({ stack, applications, capabilities = ['base'], environments 
 }
 
 /** Hand-builds a CSM to exercise the validator directly. */
-function system({ applications, capabilities = [], environments = [{ id: 'local', kind: 'local' }], architecture = { style: 'standard' }, metadata = { name: 'sample-app', version: '1.0.0' } }) {
+function system({
+  applications,
+  capabilities = [],
+  environments = [{ id: 'local', kind: 'local' }],
+  architecture = {
+    profile: 'backend-service',
+    clients: { mode: 'none' },
+    backend: { style: 'modular-monolith' },
+    deployment: { coupling: 'coordinated' },
+    data: { ownership: 'bounded-context' },
+    communication: { primary: 'synchronous' },
+    operations: { maturity: 'standard' },
+  },
+  metadata = { name: 'sample-app', version: '1.0.0' },
+}) {
   return canonicalSystem({
     metadata, architecture, applications, capabilities, environments, policies: {}, source: { blueprintVersion: '1' },
   });
@@ -46,7 +60,9 @@ describe('canonical system — normalizer', () => {
     assert.equal(csm.apiVersion, SYSTEM_API_VERSION);
     assert.equal(csm.metadata.name, 'sample-app');
     assert.equal(csm.metadata.version, '1.0.0');
-    assert.equal(csm.architecture.style, 'standard');
+    assert.equal(csm.architecture.profile, 'backend-service');
+    assert.deepEqual(csm.architecture.clients, { mode: 'none' });
+    assert.deepEqual(csm.architecture.backend, { style: 'modular-monolith' });
     assert.deepEqual(csm.applications.map((a) => [a.id, a.kind, a.runtime]), [['api', 'api', 'nestjs']]);
     assert.deepEqual(csm.applications[0].consumes, []);
     assert.deepEqual(csm.capabilities.map((c) => c.id), []);
@@ -92,10 +108,60 @@ describe('canonical system — normalizer', () => {
     assert.deepEqual(csm.environments, [{ id: 'local', kind: 'local' }, { id: 'staging', kind: 'staging' }]);
   });
 
-  it('maps architecture styles: default and modular-monolith', () => {
-    assert.equal(normalizeBlueprint(blueprint({ stack: { api: 'nestjs' } })).architecture.style, 'standard');
-    assert.equal(normalizeBlueprint(blueprint({ stack: { api: 'nestjs' }, architecture: { style: 'monolith' } })).architecture.style, 'standard');
-    assert.equal(normalizeBlueprint(blueprint({ stack: { api: 'nestjs' }, architecture: { style: 'modular-monolith' } })).architecture.style, 'modular-monolith');
+  it('separates the system profile from architecture dimensions', () => {
+    const backend = normalizeBlueprint(blueprint({ stack: { api: 'nestjs' } })).architecture;
+    assert.equal(backend.profile, 'backend-service');
+    assert.equal(backend.clients.mode, 'none');
+    const product = normalizeBlueprint(blueprint({ stack: { api: 'nestjs', web: 'nextjs', mobile: 'flutter' } })).architecture;
+    assert.equal(product.profile, 'product-platform');
+    assert.equal(product.clients.mode, 'multiple');
+    assert.equal(product.backend.style, 'modular-monolith');
+  });
+
+  it('migrates historical profile names without emitting them in the CSM', () => {
+    const product = normalizeBlueprint(blueprint({
+      stack: { api: 'nestjs', web: 'nextjs', mobile: 'flutter' },
+      architecture: { profile: 'multi-client', evolutionTarget: 'modular-distributed' },
+    })).architecture;
+    assert.equal(product.profile, 'product-platform');
+    assert.equal(product.evolutionTarget, 'distributed-platform');
+    assert.equal(product.clients.mode, 'multiple');
+
+    const ecosystem = normalizeBlueprint(blueprint({
+      stack: { api: 'nestjs' },
+      architecture: { style: 'microservices' },
+    })).architecture;
+    assert.equal(ecosystem.profile, 'service-ecosystem');
+    assert.equal(ecosystem.backend.style, 'microservices');
+  });
+
+  it('does not silently downgrade an unknown profile or evolution target', () => {
+    const csm = normalizeBlueprint(blueprint({
+      stack: { api: 'nestjs' },
+      architecture: { profile: 'unknown-platform', evolutionTarget: 'unknown-target' },
+    }));
+    assert.equal(csm.architecture.profile, 'unknown-platform');
+    assert.equal(csm.architecture.evolutionTarget, 'unknown-target');
+    assert.equal(codes(validateCanonicalSystem(csm)).filter((code) =>
+      code === CSM_DIAGNOSTIC_CODES.INVALID_SYSTEM_PROFILE).length, 2);
+  });
+
+  it('preserves explicit independent architecture dimensions', () => {
+    const architecture = normalizeBlueprint(blueprint({
+      stack: { api: 'nestjs', web: 'nextjs' },
+      architecture: {
+        profile: 'product-platform',
+        clients: { mode: 'single' },
+        backend: { style: 'modular-monolith' },
+        deployment: { coupling: 'coordinated' },
+        data: { ownership: 'shared' },
+        communication: { primary: 'event-driven' },
+        operations: { maturity: 'advanced' },
+      },
+    })).architecture;
+    assert.equal(architecture.data.ownership, 'shared');
+    assert.equal(architecture.communication.primary, 'event-driven');
+    assert.equal(architecture.operations.maturity, 'advanced');
   });
 
   it('normalizes the stack sugar and the applications form to the same model', () => {
@@ -134,9 +200,20 @@ describe('canonical system — invariants', () => {
     assert.ok(codes(validateCanonicalSystem(csm)).includes(CSM_DIAGNOSTIC_CODES.INVALID_CAPABILITY_TARGET));
   });
 
-  it('rejects a reserved (unsupported) architecture style', () => {
-    const csm = system({ applications: [canonicalApplication({ id: 'api', kind: 'api', runtime: 'nestjs' })], architecture: { style: 'microservices' } });
-    assert.ok(codes(validateCanonicalSystem(csm)).includes(CSM_DIAGNOSTIC_CODES.UNSUPPORTED_ARCHITECTURE_STYLE));
+  it('rejects an unknown system profile', () => {
+    const csm = system({
+      applications: [canonicalApplication({ id: 'api', kind: 'api', runtime: 'nestjs' })],
+      architecture: {
+        profile: 'fashion-driven',
+        clients: { mode: 'none' },
+        backend: { style: 'microservices' },
+        deployment: { coupling: 'independent' },
+        data: { ownership: 'per-service' },
+        communication: { primary: 'hybrid' },
+        operations: { maturity: 'distributed' },
+      },
+    });
+    assert.ok(codes(validateCanonicalSystem(csm)).includes(CSM_DIAGNOSTIC_CODES.INVALID_SYSTEM_PROFILE));
   });
 
   it('rejects a system with no API', () => {
@@ -157,10 +234,17 @@ describe('canonical system — invariants', () => {
     assert.ok(codes(validateCanonicalSystem(csm)).includes(CSM_DIAGNOSTIC_CODES.INCOHERENT_STRUCTURE));
   });
 
-  it('refuses a blueprint whose architecture is unsupported once normalized', () => {
-    // The blueprint schema accepts `microservices` as a style; the CSM does not.
-    const csm = normalizeBlueprint(blueprint({ stack: { api: 'nestjs' }, architecture: { style: 'microservices' } }));
-    assert.ok(hasErrors(validateCanonicalSystem(csm)));
+  it('represents a future profile without claiming it is generatable', () => {
+    const csm = normalizeBlueprint(blueprint({
+      applications: [
+        { id: 'identity', kind: 'api', runtime: 'spring' },
+        { id: 'business', kind: 'api', runtime: 'nestjs' },
+      ],
+      architecture: { profile: 'service-ecosystem' },
+    }));
+    assert.equal(csm.architecture.profile, 'service-ecosystem');
+    assert.equal(csm.architecture.backend.style, 'microservices');
+    assert.equal(hasErrors(validateCanonicalSystem(csm)), false);
   });
 
   it('every emitted diagnostic uses a registered code', () => {

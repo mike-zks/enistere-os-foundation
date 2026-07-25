@@ -14,6 +14,7 @@ import { assessCapabilitySupport, buildCapabilityMatrix, validateCapabilityDepen
 import { matchProfileSelection } from './profiles.mjs';
 import { RESOLUTION_DIAGNOSTIC_CODES as RC, diagnostic } from '../model/diagnostics.mjs';
 import { resolvedSystem } from '../model/resolved-system.mjs';
+import { SYSTEM_PROFILE_DEFINITIONS } from '../model/system-profiles.mjs';
 
 const GATE_COMMANDS = ['install', 'test', 'build', 'verify'];
 const SLOTS = ['api', 'web', 'mobile'];
@@ -21,7 +22,9 @@ const SLOTS = ['api', 'web', 'mobile'];
 /** Resolves a CSM into a ResolvedSystem against the registry context. */
 export function resolveSystem(csm, { starters, capabilityManifests, modularStarters }) {
   const diagnostics = [];
+  const architectureBlockers = [];
   const apps = csm.applications;
+  const apiCount = apps.filter((app) => app.kind === 'api').length;
   const runtimes = [...new Set(apps.map((app) => app.runtime))];
   const modular = new Set(modularStarters);
   const allModular = runtimes.every((runtime) => modular.has(runtime));
@@ -43,6 +46,35 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
   const support = assessCapabilitySupport(runtimes, capabilityManifests);
   for (const blocker of support.blockers) {
     diagnostics.push(diagnostic(RC.CAPABILITY_NOT_READY, `${blocker.capability} on ${blocker.starter} is ${blocker.status}`, { details: blocker }));
+  }
+  const systemProfile = SYSTEM_PROFILE_DEFINITIONS[csm.architecture.profile];
+  if (apiCount > 1) {
+    const blocker = {
+      kind: 'topology',
+      apiCount,
+      status: 'PLANNED',
+      reason: 'multiple backend applications are not materializable yet',
+    };
+    architectureBlockers.push(blocker);
+    diagnostics.push(diagnostic(
+      RC.TOPOLOGY_NOT_GENERATABLE,
+      `${apiCount} backend applications are representable but not generatable`,
+      { path: 'applications', details: blocker },
+    ));
+  }
+  if (systemProfile?.generation === 'PLANNED') {
+    const blocker = {
+      kind: 'architecture-profile',
+      profile: csm.architecture.profile,
+      status: systemProfile.generation,
+      reason: systemProfile.generationScope,
+    };
+    architectureBlockers.push(blocker);
+    diagnostics.push(diagnostic(
+      RC.ARCHITECTURE_PROFILE_NOT_GENERATABLE,
+      `system profile ${csm.architecture.profile} is representable but not generatable`,
+      { path: 'architecture.profile', details: blocker },
+    ));
   }
 
   const matrix = buildCapabilityMatrix(capabilityManifests);
@@ -104,7 +136,11 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     policies: csm.policies,
     selection: { runtimes, stack, allModular, generationMode, targetAdapters: adapterVersions },
     profile,
-    support: { level: support.ready ? 'ready' : 'blocked', blockers: support.blockers, notApplicable: support.notApplicable },
+    support: {
+      level: support.ready && architectureBlockers.length === 0 ? 'ready' : 'blocked',
+      blockers: [...support.blockers, ...architectureBlockers],
+      notApplicable: support.notApplicable,
+    },
     diagnostics,
     systemDigest: csm.source.digest,
   });

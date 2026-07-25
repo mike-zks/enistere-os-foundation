@@ -1,145 +1,153 @@
-# Profils d'architecture système
+# Profils d’architecture système
 
-## Règles communes
+## Principe de classification
 
-Un profil est un preset de décisions et de contraintes, jamais un second modèle interne. Il se normalise
-dans le même `CanonicalSystem`. Le choix doit être expliqué par les exigences, la structure des équipes,
-les contraintes de données et les objectifs de disponibilité — pas par la mode.
+Enistere choisit d’abord le **cas d’usage du système**, puis décrit séparément sa topologie applicative,
+son style backend, son déploiement, ses données, ses communications et sa maturité opérationnelle :
 
-Tous les profils appliquent le Platform Baseline, l'ownership explicite, des contrats versionnés, la
-sécurité par défaut, la corrélation, l'audit technique et des preuves de conformité.
+```text
+cas d’usage → topologie applicative → style backend → déploiement → runtimes et primitives
+```
 
-## 1. `api`
+Un profil système n’est ni un runtime, ni un nombre de clients, ni un preset de starters. Tous les profils
+appliquent le Platform Baseline, la modularité métier, des contrats versionnés, un ownership explicite,
+la sécurité par défaut, l’observabilité et l’audit technique.
 
-**Finalité.** Fournir une autorité backend ou une API spécialisée sans imposer de client.
+## 1. `backend-service`
 
-**Cas d'usage.** API partenaire, backend headless, service IA, intégration, façade sur système existant.
+**Finalité.** Exposer une capacité backend autonome sans imposer de client officiel.
 
-| Dimension | Règle |
-|---|---|
-| Topologie | une application API ; primitives attachées ; workers facultatifs |
-| API / clients | une API ; zéro client géré |
-| Déploiement | une unité API, unités de primitives distinctes |
-| Données | API owner de ses données ; aucun accès externe direct |
-| Communications | HTTP synchrone par défaut ; messages si besoin démontré |
-| Sécurité | authentification selon exposition, authorization aux frontières, rate limit, secrets |
-| Observabilité/audit | baseline complet, audit des accès et opérations sensibles |
-| Résilience | timeouts, graceful shutdown, idempotence aux frontières mutables |
-| Infrastructure | DB optionnelle, cache/storage/queue selon capabilities |
-
-**Sélectionner si** l'API est le produit ou si les clients sont hors scope. **Refuser si** le produit exige
-une expérience client générée ou plusieurs domaines autonomes. **Évolution :** ajouter des clients et passer
-à `multi-client`, ou intégrer l'API comme unité d'un profil distribué.
-
-## 2. `monolith`
-
-**Finalité.** Maximiser la vitesse et la cohérence transactionnelle avec une frontière de déploiement
-principale et des modules métier explicites.
-
-**Cas d'usage.** Nouveau SaaS, back-office, produit transactionnel, équipe petite ou moyenne.
+**Cas d’usage.** API partenaire, moteur de paiement ou de recommandation, backend mobile existant,
+service documentaire, intégration, équipement ou agent IA.
 
 | Dimension | Règle |
 |---|---|
-| Topologie | API modulaire centrale + un ou plusieurs clients ; workers co-déployés ou séparés |
-| API / clients | une API ; 1..n clients |
-| Déploiement | backend principal, clients déployables indépendamment si nécessaire |
-| Données | schéma/DB partagés possibles, ownership par module obligatoire |
-| Communications | appels en processus entre modules ; événements internes explicites |
-| Sécurité | politique centrale, frontières modules, séparation admin/public |
-| Observabilité/audit | contexte de module dans logs/traces/audit |
-| Résilience | transactions locales ; isolation des intégrations externes |
-| Infrastructure | PostgreSQL typique ; Redis/MinIO/etc. seulement si requis |
+| Topologie | un backend principal ; interfaces HTTP, événements, jobs ou temps réel selon besoin |
+| API / clients | une API principalement ; clients externes ou aucun client géré |
+| Déploiement | unité backend autonome ; primitives déployées séparément |
+| Données | backend owner ; aucun accès externe direct |
+| Communications | synchrone par défaut ; async si le besoin le justifie |
+| Sécurité | exposition explicite, M2M possible, authorization aux frontières, secrets |
+| Observabilité / audit | baseline complet ; accès et opérations sensibles audités |
+| Résilience | timeouts, graceful shutdown, idempotence des mutations rejouables |
+| Infrastructure | DB, cache, storage ou queue uniquement selon les besoins |
 
-**Sélectionner si** une unité métier et une cadence coordonnée dominent. **Refuser si** des domaines exigent
-déjà autonomie de release, isolation réglementaire ou profils de scalabilité incompatibles. **Évolution :**
-extraire un module via contrats, outbox et ownership vers `modular-distributed`.
+**Sélectionner si** la capacité backend est le produit ou si les clients sont hors scope. **Refuser si**
+Enistere doit livrer une expérience utilisateur officielle ou si plusieurs autorités backend autonomes
+sont déjà requises. **Évolution :** devenir le backend d’une `product-platform` ou une unité d’une
+`distributed-platform`.
 
-## 3. `multi-client`
+## 2. `product-platform`
 
-**Finalité.** Servir plusieurs expériences cohérentes depuis une autorité métier commune.
+**Finalité.** Construire un produit numérique cohérent avec un backend principal, un domaine commun et
+un ou plusieurs clients officiels.
 
-**Cas d'usage.** Portail client + administration + applications mobiles.
-
-| Dimension | Règle |
-|---|---|
-| Topologie | une API principale ; plusieurs Web/Mobile |
-| API / clients | une API ; 2..n clients |
-| Déploiement | chaque client et l'API peuvent être livrés séparément |
-| Données | API seule owner des données serveur ; stockage local client borné |
-| Communications | clients → API via contrats générés ; push/realtime optionnels |
-| Sécurité | sessions adaptées à chaque canal, permissions cohérentes, CORS/CSRF/deep links |
-| Observabilité/audit | correlation propagée par client et API ; télémétrie client consentie |
-| Résilience | offline/degradation mobile selon besoin ; compatibilité contractuelle |
-| Infrastructure | primitives de l'API + mail/push éventuels |
-
-**Sélectionner si** plusieurs canaux partagent règles et données. **Refuser si** les clients ont des backends
-et domaines réellement autonomes ou si une seule surface suffit. **Évolution :** BFF ciblés ou extraction
-de domaines vers `modular-distributed`, sans dupliquer l'autorité métier.
-
-## 4. `modular-distributed`
-
-**Finalité.** Distribuer seulement les domaines qui bénéficient d'une autonomie de scalabilité, de sécurité,
-de données ou de release, tout en conservant une architecture gouvernable.
-
-**Cas d'usage.** Plateforme avec core transactionnel, service documentaire, automatisation et IA à cycles
-distincts.
+**Cas d’usage.** SaaS, ERP, e-commerce, application métier, marketplace, plateforme immobilière ou
+service public numérique.
 
 | Dimension | Règle |
 |---|---|
-| Topologie | 2..n applications API/worker, gateway/BFF facultatif, plusieurs clients |
-| API / clients | plusieurs APIs ; clients via gateway ou contrats de services autorisés |
-| Déploiement | unités indépendantes, versions compatibles et orchestration de migration |
-| Données | ownership exclusif par domaine ; aucun accès cross-database |
-| Communications | HTTP/gRPC pour requête ; broker pour événements ; contrats versionnés |
+| Topologie | backend principal modulaire + 1..n Web/Mobile |
+| API / clients | une autorité backend ; un ou plusieurs clients |
+| Déploiement | releases coordonnées ; clients séparables sans autonomie métier |
+| Données | infrastructure partagée possible ; ownership logique par bounded context |
+| Communications | appels internes en processus ; clients via contrats générés |
+| Sécurité | politique centrale, sessions par canal, frontières admin/public |
+| Observabilité / audit | contexte client et module dans logs, traces et audit |
+| Résilience | transactions locales ; intégrations externes isolées |
+| Infrastructure | primitives principalement partagées, toujours avec owner |
+
+Le style backend par défaut est `modular-monolith`. Le nombre de clients est une dimension
+`clients.mode: single|multiple`, pas un changement de profil.
+
+**Sélectionner si** une autorité métier et une gouvernance produit communes dominent. **Refuser si** des
+domaines exigent dès maintenant autonomie de release, isolation réglementaire ou scalabilité distincte.
+**Évolution :** extraire une frontière prouvée vers `distributed-platform`.
+
+## 3. `distributed-platform`
+
+**Finalité.** Séparer physiquement certains domaines, technologies ou charges tout en conservant un
+produit global et une gouvernance commune.
+
+**Cas d’usage.** Core transactionnel Spring, engagement NestJS, IA FastAPI, service documentaire isolé,
+API publique séparée ou intégration progressive d’un existant.
+
+| Dimension | Règle |
+|---|---|
+| Topologie | plusieurs backends ; gateway/BFF facultatif ; 0..n clients |
+| API / clients | autorités backend explicites ; clients via gateway ou contrats autorisés |
+| Déploiement | unités séparables, gouvernées et migrées ensemble |
+| Données | ownership exclusif par bounded context ; aucun accès cross-database |
+| Communications | sync et async explicites ; contrats versionnés |
 | Sécurité | identité workload, authorization interservice, secrets par unité |
-| Observabilité/audit | traces distribuées obligatoires ; audit corrélé et ownership des sinks |
-| Résilience | timeouts, retries bornés, circuit breakers, idempotence, outbox/DLQ selon flux |
-| Infrastructure | DBs par owner possibles, broker, telemetry backend, secrets |
+| Observabilité / audit | traces distribuées ; audit corrélé avec owner des sinks |
+| Résilience | timeouts, retries bornés, breakers, idempotence, outbox/DLQ selon flux |
+| Infrastructure | DB par owner possible, broker, telemetry backend et secrets |
 
-**Sélectionner si** au moins une frontière distribuée possède une justification et un owner opérationnel.
-**Refuser si** l'équipe ne peut pas opérer plusieurs unités, si les transactions synchrones globales restent
-nécessaires ou si les frontières sont spéculatives. **Évolution :** extraction/integration incrémentale ;
-un module peut être réintégré si le coût distribué dépasse le bénéfice.
+**Sélectionner si** chaque frontière distribuée possède une justification, un owner et une stratégie
+d’exploitation. **Refuser si** l’équipe ne peut pas opérer plusieurs unités ou si les transactions
+globales synchrones restent nécessaires. **Évolution :** extraction ou réintégration incrémentale ;
+passage à `service-ecosystem` seulement avec autonomie organisationnelle démontrée.
 
-## 5. `microservices`
+## 4. `service-ecosystem`
 
-**Finalité.** Soutenir une autonomie forte de domaines et d'équipes avec isolation du déploiement, des
-données et de la capacité.
+**Finalité.** Exploiter des services réellement autonomes lorsque domaines et équipes doivent évoluer,
+être déployés et scaler indépendamment.
 
-**Cas d'usage.** Organisation multi-équipes mature, exigences réglementaires distinctes, charge très
-hétérogène, disponibilité indépendante.
+**Cas d’usage.** Organisation multi-équipes mature, domaines fortement séparés, disponibilité ou
+réglementation distincte, charges très hétérogènes.
 
 | Dimension | Règle |
 |---|---|
-| Topologie | services nombreux et bornés, gateways, workers, clients, control plane |
-| API / clients | plusieurs APIs internes/externes ; BFF possibles |
-| Déploiement | service indépendamment versionné, déployé et rollbackable |
-| Données | datastore par service/owner ; réplication seulement par contrats/événements |
-| Communications | contrats sync et async ; compatibilité et dépréciation gouvernées |
-| Sécurité | zero-trust pragmatique, identité workload, policy enforcement, segmentation |
-| Observabilité/audit | traces bout en bout, SLO par service, audit inviolable et corrélé |
-| Résilience | bulkheads, backpressure, DLQ, outbox, chaos ciblé, budgets d'erreur |
-| Infrastructure | broker, secrets, telemetry, registry, orchestration selon contexte |
+| Topologie | services bornés, gateways/BFF, workers, control planes et clients éventuels |
+| API / clients | plusieurs interfaces internes/externes ; BFF possibles |
+| Déploiement | indépendant, versionné et rollbackable par service |
+| Données | datastore et owner par service ; réplication par contrats/événements |
+| Communications | sync/async gouvernés, compatibilité et dépréciation |
+| Sécurité | identité workload, moindre privilège, segmentation, policy enforcement |
+| Observabilité / audit | traces bout en bout, SLO par service, audit corrélé et durable |
+| Résilience | panne partielle, bulkheads, backpressure, DLQ, outbox, budgets d’erreur |
+| Infrastructure | broker, secrets, telemetry, registry et orchestration selon contexte |
+
+Le style backend associé est `microservices`, mais ce style n’est pas lui-même un profil système.
 
 **Sélectionner si** les preuves organisationnelles et non fonctionnelles justifient le coût. **Refuser si**
-une équipe unique opère le système, si les frontières/SLI sont inconnues, ou si le monolithe répond aux
-contraintes. **Évolution :** extraire depuis `modular-distributed`; fusionner les services trop fins.
+une équipe unique opère le système, si les frontières ou SLI sont inconnus, ou si une plateforme moins
+distribuée satisfait les contraintes. **Évolution :** extraire depuis `distributed-platform` ; fusionner
+les services trop fins si le coût dépasse le bénéfice.
 
 ## Comparaison de sélection
 
-| Question | api | monolith | multi-client | modular-distributed | microservices |
-|---|---:|---:|---:|---:|---:|
-| Client généré requis | non | oui | plusieurs | plusieurs | plusieurs |
-| Autonomie de déploiement backend | faible | faible | faible | ciblée | forte |
-| Ownership de datastore isolé | API | par module logique | API | par domaine distribué | par service |
-| Transactions multi-domaines simples | oui | oui | oui | non, orchestration | non, orchestration |
-| Maturité opérationnelle requise | faible | faible | moyenne | élevée | très élevée |
+| Profil | Backend | Clients | Couplage de déploiement | Cas principal |
+|---|---:|---:|---|---|
+| `backend-service` | 1 principalement | externes ou aucun | autonome | exposer une capacité backend |
+| `product-platform` | 1 principal | 1..n | coordonné | construire un produit complet |
+| `distributed-platform` | plusieurs | 0..n | partiellement indépendant | séparer certains domaines/technologies |
+| `service-ecosystem` | services autonomes | 0..n | indépendant | autonomie forte des domaines et équipes |
 
-## Invariants d'évolution
+## Dimensions indépendantes
 
-- aucune extraction sans contrat, owner, SLO, migration et rollback ;
-- aucun service ne lit le datastore d'un autre ;
+```yaml
+architecture:
+  profile: product-platform
+  clients: { mode: multiple } # none | single | multiple
+  backend: { style: modular-monolith } # modular-monolith | distributed-services | microservices
+  deployment: { coupling: coordinated } # coordinated | partially-independent | independent
+  data: { ownership: bounded-context } # shared | bounded-context | per-service
+  communication: { primary: synchronous } # synchronous | event-driven | hybrid
+  operations: { maturity: standard } # standard | advanced | distributed
+```
+
+`api`, `monolith`, `multi-client`, `modular-distributed` et `microservices` sont des alias d’entrée
+historiques. Ils sont migrés respectivement vers `backend-service`, `product-platform`,
+`product-platform`, `distributed-platform` et `service-ecosystem`, puis disparaissent du CSM.
+
+## Invariants d’évolution
+
+- aucune distribution sans contrat, owner, SLO, migration et rollback ;
+- aucun service ne lit le datastore d’un autre ;
 - les clients ne deviennent pas autorités métier ;
-- les événements sont versionnés et observables ;
-- la distribution n'abaisse jamais le baseline ;
-- le profil cible et le support réel sont reportés séparément.
+- la modularité métier est obligatoire dans tous les profils ;
+- les événements sont versionnés, sécurisés et observables ;
+- la distribution n’abaisse jamais le Platform Baseline ;
+- profil cible, représentation et support de génération sont reportés séparément.

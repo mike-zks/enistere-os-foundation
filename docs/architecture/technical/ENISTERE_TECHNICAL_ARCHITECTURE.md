@@ -20,7 +20,7 @@ Lifecycle Manager
 Component Registry
 ```
 
-La cible complète, incluant Platform Baseline, cinq profils et sept runtimes, est définie dans
+La cible complète, incluant Platform Baseline, quatre profils système, leurs dimensions et sept runtimes, est définie dans
 [ENISTERE_REFERENCE_ARCHITECTURE.md](../ENISTERE_REFERENCE_ARCHITECTURE.md).
 
 ## 2. Blueprint Compiler

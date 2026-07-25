@@ -1,4 +1,4 @@
-# Référence — Monolith Spring Boot + Next.js
+# Référence — Product platform Spring Boot + Next.js
 
 ## Finalité et graphe
 
@@ -21,8 +21,14 @@ kind: SystemBlueprint
 metadata: { name: commerce-monolith, version: 1.0.0 }
 spec:
   architecture:
-    profile: monolith
-    evolutionTarget: modular-distributed
+    profile: product-platform
+    evolutionTarget: distributed-platform
+    clients: { mode: single }
+    backend: { style: modular-monolith }
+    deployment: { coupling: coordinated }
+    data: { ownership: bounded-context }
+    communication: { primary: synchronous }
+    operations: { maturity: standard }
   applications:
     - id: core-api
       kind: api
@@ -56,7 +62,8 @@ source de vérité.
 ## Stratégie d'évolution
 
 Billing ne peut être extrait qu'après contrat versionné, owner de données isolé, outbox, migration,
-observabilité distribuée et rollback. Le profil reste monolith tant que cette extraction n'est pas prouvée.
+observabilité distribuée et rollback. Le profil reste `product-platform` tant que cette extraction n'est
+pas prouvée ; son style backend reste `modular-monolith`.
 
 ## Statut réel
 
@@ -64,5 +71,5 @@ observabilité distribuée et rollback. Le profil reste monolith tant que cette 
 |---|---|---|
 | Spring et Next.js pris séparément | BOOTABLE | goldens actuels |
 | capabilities auth/rbac | GENERATABLE partiel | overlays existants, équivalence globale non prouvée |
-| profil `monolith` V2 | PLANNED | modèle actuel utilise une taxonomie antérieure |
+| profil `product-platform` | IMPLEMENTED | représentation CSM ; génération bornée aux presets prouvés |
 | système complet | PLANNED | pas de golden produit ni audit baseline complet |

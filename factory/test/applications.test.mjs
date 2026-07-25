@@ -122,4 +122,23 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     assert.deepEqual(validateBlueprint(blueprint({ stack: { api: 'nestjs' }, architecture: { style: 'modular-monolith', evolutionTarget: 'microservices' } })), []);
     assert.ok(validateBlueprint(blueprint({ stack: { api: 'nestjs' }, architecture: { style: 'unknown' } })).some((m) => m.includes('architecture.style is invalid')));
   });
+
+  it('validates canonical system profiles and independent dimensions', () => {
+    assert.deepEqual(validateBlueprint(blueprint({
+      stack: { api: 'nestjs', web: 'nextjs' },
+      architecture: {
+        profile: 'product-platform',
+        clients: { mode: 'single' },
+        backend: { style: 'modular-monolith' },
+        deployment: { coupling: 'coordinated' },
+        data: { ownership: 'bounded-context' },
+        communication: { primary: 'synchronous' },
+        operations: { maturity: 'standard' },
+      },
+    })), []);
+    assert.ok(validateBlueprint(blueprint({
+      stack: { api: 'nestjs' },
+      architecture: { profile: 'unknown-platform' },
+    })).some((message) => message.includes('architecture.profile is invalid')));
+  });
 });
