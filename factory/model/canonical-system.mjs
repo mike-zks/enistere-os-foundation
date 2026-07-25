@@ -31,8 +31,8 @@ export const SYSTEM_API_VERSION = 'enistere.io/v1alpha1';
 /** Kinds d'application modélisés par le CSM minimal. */
 export const APPLICATION_KINDS = Object.freeze(['api', 'web', 'mobile']);
 
-/** Runtimes reconnus (les six runtimes Foundation). */
-export const RUNTIMES = Object.freeze(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
+/** Runtimes reconnus (les sept runtimes Foundation). */
+export const RUNTIMES = Object.freeze(['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
 
 /** Kinds d'environnement reconnus. */
 export const ENVIRONMENT_KINDS = Object.freeze(['local', 'staging', 'production']);

@@ -10,8 +10,8 @@ import { resolveStack } from './applications.mjs';
  * for a web-only or mobile-only profile is refused with an explicit message
  * pointing at the API-bearing profiles that cover the same starter.
  *
- * Profiles are a *functional* layer on top of the 18 stack combinations
- * (2 apis x 3 web x 3 mobile). A stack combination says what can be assembled;
+ * Profiles are a *functional* layer on top of the 27 stack combinations
+ * (3 APIs x 3 web x 3 mobile). A stack combination says what can be assembled;
  * a profile says what is supported, and with which proof.
  */
 
@@ -41,7 +41,7 @@ export const PROFILE_STATUSES = Object.freeze(['ready', 'supported', 'planned'])
 export const GENERATABLE_PROFILE_STATUSES = Object.freeze(['ready', 'supported']);
 
 /** Starters that can satisfy the mandatory `stack.api` slot. */
-export const API_STARTER_IDS = Object.freeze(['nestjs', 'spring']);
+export const API_STARTER_IDS = Object.freeze(['nestjs', 'spring', 'fastapi']);
 
 /**
  * Names that describe a composition without an API. They are refused on sight
@@ -91,6 +91,9 @@ export const PROFILES = Object.freeze([
   // the selected composition without importing Auth/RBAC/Files by accident.
   profile('spring-base', 'ready', { api: 'spring' }, [], {
     golden: 'spring-base',
+  }),
+  profile('fastapi-base', 'ready', { api: 'fastapi' }, [], {
+    golden: 'fastapi-base',
   }),
 
   // ── Base compositions with a web or mobile surface ─────────────────────────

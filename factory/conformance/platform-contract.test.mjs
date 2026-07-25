@@ -64,12 +64,12 @@ describe('Platform Baseline v2 — contract registry and error shape', () => {
   });
 });
 
-describe('Platform Baseline v2 — six runtime gap reports', () => {
+describe('Platform Baseline v2 — seven runtime gap reports', () => {
   const roots = [];
   after(async () => { for (const root of roots) await rm(root, { recursive: true, force: true }); });
 
-  it('evaluates NestJS and Spring against Common + API v2', async () => {
-    for (const runtime of ['nestjs', 'spring']) {
+  it('evaluates NestJS, Spring and FastAPI against Common + API v2', async () => {
+    for (const runtime of ['nestjs', 'spring', 'fastapi']) {
       const generated = await generate(`${runtime}-base`, { api: runtime, web: null, mobile: null });
       roots.push(generated.root);
       const report = buildConformance({ plan: generated.plan, projectDir: generated.out });

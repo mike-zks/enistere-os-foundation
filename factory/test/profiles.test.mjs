@@ -228,17 +228,17 @@ describe('valid and invalid combinations', () => {
   });
 });
 
-describe('profiles stay distinct from the 18 stack combinations', () => {
-  it('counts 18 stack combinations, which the registry does not enumerate', () => {
+describe('profiles stay distinct from the 27 stack combinations', () => {
+  it('counts 27 stack combinations, which the registry does not enumerate', () => {
     const apis = STARTER_IDS.filter((id) => API_STARTER_IDS.includes(id));
     const webs = [null, 'nextjs', 'angular'];
     const mobiles = [null, 'react-native', 'flutter'];
-    assert.equal(apis.length * webs.length * mobiles.length, 18);
+    assert.equal(apis.length * webs.length * mobiles.length, 27);
     // A profile is a functional composition, not a stack cell: several profiles
     // share one stack combination, and some combinations carry none.
     const stacks = listProfiles().map((entry) => `${entry.stack.api}|${entry.stack.web}|${entry.stack.mobile}`);
     assert.ok(new Set(stacks).size < listProfiles().length, 'profiles must not be one-per-stack');
-    assert.ok(new Set(stacks).size <= 18);
+    assert.ok(new Set(stacks).size <= 27);
   });
 
   it('names the profile a blueprint matches, and none when it matches nothing', () => {

@@ -6,7 +6,7 @@ import { loadStarterManifests, STARTER_IDS, validateManifestConsistency, validat
 
 const root = resolve(import.meta.dirname, '../..');
 
-it('loads six independent starters with Platform Baseline v2 contracts', async () => {
+it('loads seven independent starters with Platform Baseline v2 contracts', async () => {
   const manifests = await loadStarterManifests(root);
   assert.deepEqual(manifests.map((item) => item.id), STARTER_IDS);
   assert.ok(manifests.every((item) => item.schemaVersion === '2'));
@@ -14,10 +14,10 @@ it('loads six independent starters with Platform Baseline v2 contracts', async (
   assert.ok(manifests.every((item) => item.baseline.familyContract === `${item.kind}/2.0.0`));
   assert.ok(manifests.every((item) => item.composition.base === undefined));
   const modular = manifests.filter((item) => item.composition.model === 'modular');
-  assert.deepEqual(modular.map((item) => item.id), ['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
+  assert.deepEqual(modular.map((item) => item.id), ['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
   assert.ok(modular.every((item) => item.composition.readyCapabilities.length === 0 || item.composition.readyCapabilities.includes('auth')));
   assert.ok(manifests.filter((item) => item.composition.model !== 'modular').every((item) => item.composition.readyCapabilities.length === 0));
-  assert.equal(manifests.filter((item) => item.kind === 'api').length, 2);
+  assert.equal(manifests.filter((item) => item.kind === 'api').length, 3);
   assert.equal(manifests.filter((item) => item.kind === 'web').length, 2);
   assert.equal(manifests.filter((item) => item.kind === 'mobile').length, 2);
 });

@@ -25,6 +25,11 @@ temp/
 
 # Dependances et builds futurs
 node_modules/
+.venv/
+.runtime-venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
 .dart_tool/
 .flutter-plugins-dependencies
 dist/

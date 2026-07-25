@@ -84,6 +84,7 @@ const BUILT_IN = [
   }, composition: [
     { kinds: ['spring.module'], destination: 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java', render: renderSpringComposition },
   ] },
+  { id: 'fastapi', version: '1.0.0', dependencyManager: 'python', integrationKinds: {}, composition: [] },
   { id: 'angular', version: '1.0.0', integrationKinds: {}, composition: [] },
   { id: 'flutter', version: '1.0.0', integrationKinds: {}, composition: [] },
 ].map((adapter) => Object.freeze({

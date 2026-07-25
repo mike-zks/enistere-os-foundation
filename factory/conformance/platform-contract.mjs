@@ -215,6 +215,75 @@ function evaluateSpring(appDir) {
   };
 }
 
+/** Evaluates the invariants of a generated FastAPI application. */
+function evaluateFastapi(appDir) {
+  const app = join(appDir, 'app');
+  const tests = join(appDir, 'tests');
+  const main = readOptional(join(app, 'main.py'));
+  const platform = readOptional(join(app, 'platform.py'));
+  const httpProof = readOptional(join(tests, 'test_http_contract.py'));
+  const platformProof = readOptional(join(tests, 'test_platform.py'));
+  const shape = classifyErrorShape(main);
+  const extensionsProven = [
+    'AUTHENTICATION', 'AUTHORIZATION', 'FILES', 'EVENTS',
+  ].every((token) => platform.includes(token))
+    && platform.includes('API_EXTENSION_CONTRACT_VERSION')
+    && platformProof.includes('test_extension_registry_is_versioned_and_exclusive');
+  const lifecycleProven = platform.includes('RuntimeLifecycle')
+    && platform.includes('runtime_lifespan')
+    && platformProof.includes('test_lifecycle_stops_hooks_once_in_reverse_order');
+  const persistencePort = platform.includes('class PersistencePort(Protocol');
+  const migrationPort = platform.includes('class MigrationPort(Protocol');
+  const transactionPort = platform.includes('class TransactionPort(Protocol');
+  return {
+    'http-server': result(main.includes('FastAPI(') ? STATUS.COMPLIANT : STATUS.MISSING, 'FastAPI ASGI application'),
+    'input-validation': result(
+      platform.includes('InputValidationPort')
+        && main.includes('RequestValidationError')
+        && httpProof.includes('canonical_validation_error')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral validation port and canonical FastAPI validation mapping tested',
+      'behavioral-test'),
+    'canonical-http-errors': errorResult(shape),
+    openapi: result(
+      main.includes('operation_id=') && httpProof.includes('/openapi.json')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'FastAPI OpenAPI publication behavior tested',
+      'behavioral-test'),
+    'health-liveness-readiness': result(
+      ['/health"', '/health/live"', '/health/ready"'].every((path) => main.includes(path))
+        && httpProof.includes('test_health_http_contract')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'health, liveness and readiness HTTP behavior tested',
+      'behavioral-test'),
+    'persistence-ports': result(persistencePort ? STATUS.COMPLIANT : STATUS.MISSING, 'provider-neutral PersistencePort'),
+    'migration-ports': result(
+      migrationPort && existsSync(join(appDir, 'migrations'))
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'provider-neutral MigrationPort and governed migrations location'),
+    'transaction-ports': result(
+      transactionPort ? STATUS.COMPLIANT : STATUS.MISSING,
+      'provider-neutral TransactionPort'),
+    'authentication-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned AuthenticationHook registry behavior tested', 'behavioral-test'),
+    'authorization-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned AuthorizationHook registry behavior tested', 'behavioral-test'),
+    'file-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned FileHook registry behavior tested', 'behavioral-test'),
+    'event-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned EventHook registry behavior tested', 'behavioral-test'),
+    'graceful-shutdown': result(
+      lifecycleProven ? STATUS.COMPLIANT : STATUS.MISSING,
+      'ASGI lifespan and idempotent reverse shutdown behavior tested',
+      'behavioral-test'),
+    'contract-tests': result(
+      httpProof && platformProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'API baseline behavioral contract tests',
+      'behavioral-test'),
+    'rate-limiting': result(
+      main.includes('rate_limit_per_minute') && httpProof.includes('test_rate_limit_and_security_headers_are_enforced')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'bounded in-memory baseline rate limiter behavior tested',
+      'behavioral-test'),
+  };
+}
+
 function result(status, evidence, source = 'structural') { return { status, evidence, source }; }
 
 /**
@@ -235,6 +304,7 @@ function readContains(appDir, name, token) {
 export function evaluateApiApp({ appDir, runtime }) {
   const invariants = runtime === 'nestjs' ? evaluateNestjs(appDir)
     : runtime === 'spring' ? evaluateSpring(appDir)
+      : runtime === 'fastapi' ? evaluateFastapi(appDir)
       : null;
   if (!invariants) throw new Error(`Platform Contract API evaluation unsupported for runtime: ${runtime}`);
   return invariants;
@@ -376,7 +446,7 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
   const java = join(src, 'main', 'java');
   const resources = join(src, 'main', 'resources');
   const scripts = packageScripts(appDir);
-  const isApi = runtime === 'nestjs' || runtime === 'spring';
+  const isApi = runtime === 'nestjs' || runtime === 'spring' || runtime === 'fastapi';
   const isWeb = runtime === 'nextjs' || runtime === 'angular';
   const isMobile = runtime === 'react-native' || runtime === 'flutter';
 
@@ -470,6 +540,47 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     buildGatesProven = buildGates
       && pom.includes('maven-enforcer-plugin')
       && pom.includes('maven-surefire-plugin');
+  } else if (runtime === 'fastapi') {
+    const app = join(appDir, 'app');
+    const testsDir = join(appDir, 'tests');
+    const config = readOptional(join(app, 'config.py'));
+    const main = readOptional(join(app, 'main.py'));
+    const platform = readOptional(join(app, 'platform.py'));
+    const httpProof = readOptional(join(testsDir, 'test_http_contract.py'));
+    const platformProof = readOptional(join(testsDir, 'test_platform.py'));
+    const pyproject = readOptional(join(appDir, 'pyproject.toml'));
+    configuration = config.includes('BaseSettings') && config.includes('Field(');
+    configurationProven = configuration && platformProof.includes('test_configuration_is_typed');
+    canonicalErrors = classifyErrorShape(main) === 'flat-envelope';
+    structuredLogging = main.includes('http.request.completed') && main.includes('json.dumps');
+    correlation = main.includes('SAFE_REQUEST_ID') && httpProof.includes('X-Request-Id');
+    technicalAudit = platform.includes('class TechnicalAudit')
+      && platformProof.includes('test_technical_audit_emits_structured_context_without_payload');
+    observability = platform.includes('class OpenTelemetryExporter')
+      && platform.includes('class RuntimeTelemetry')
+      && main.includes('telemetry.record');
+    observabilityProven = observability
+      && platformProof.includes('test_opentelemetry_hook_is_versioned')
+      && platformProof.includes('test_continues_w3c_trace_with_a_new_span');
+    security = main.includes('CORSMiddleware')
+      && main.includes('X-Content-Type-Options')
+      && main.includes('rate_limit_per_minute')
+      && httpProof.includes('test_rate_limit_and_security_headers_are_enforced');
+    health = ['/health"', '/health/live"', '/health/ready"'].every((path) => main.includes(path));
+    tests = Boolean(httpProof && platformProof);
+    lifecycle = platform.includes('runtime_lifespan')
+      && platformProof.includes('test_lifecycle_stops_hooks_once_in_reverse_order');
+    extensionPoints = platform.includes('class RuntimeExtensionRegistry')
+      && platformProof.includes('test_extension_registry_is_versioned_and_exclusive');
+    buildGates = pyproject.includes('[tool.pytest.ini_options]')
+      && pyproject.includes('[tool.ruff]')
+      && existsSync(join(appDir, 'requirements.lock'))
+      && existsSync(join(appDir, 'requirements.runtime.lock'))
+      && readOptional(join(appDir, 'requirements.txt')).includes('pip-audit==')
+      && platformProof.includes('test_requirements_lock_covers_every_direct_dependency');
+    buildGatesProven = buildGates;
+    diagnosticsProven = platform.includes('class RuntimeDiagnostics')
+      && platformProof.includes('test_diagnostics_are_sorted_and_sanitized');
   } else if (runtime === 'nextjs') {
     configuration = Boolean(findFile(src, 'public-config.ts') && findFile(src, 'server-config.ts'));
     canonicalErrors = Boolean(findFile(src, 'map-api-error.ts'));

@@ -1,4 +1,4 @@
-import { access, cp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join, resolve } from 'node:path';
@@ -18,20 +18,39 @@ function stable(value) { return `${JSON.stringify(value, null, 2)}\n`; }
 
 const FOUNDATION_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const EXCLUDED_NAMES = new Set([
-  '.dart_tool', '.expo', '.gradle', '.next', 'build', 'build-test', 'coverage',
-  'dist', 'node_modules', 'target',
+  '.dart_tool', '.expo', '.gradle', '.next', '.pytest_cache', '.runtime-venv', '.venv', '__pycache__',
+  'build', 'build-test', 'coverage', 'dist', 'node_modules', 'target',
 ]);
 
 function copyFilter(source) {
   const name = source.split(/[\\/]/).at(-1);
   if (EXCLUDED_NAMES.has(name)) return false;
   if (name?.endsWith('.tsbuildinfo')) return false;
+  if (/\.py[co]$/.test(name ?? '')) return false;
   if (name === '.env' || name?.endsWith('.local')) return false;
   return true;
 }
 
 async function copyTree(source, destination) {
   await cp(source, destination, { recursive: true, filter: copyFilter });
+}
+
+async function runtimeDependencyLocks(plan, output) {
+  const entries = [];
+  for (const app of plan.applications) {
+    if (app.runtime !== 'fastapi') continue;
+    for (const filename of ['requirements.lock', 'requirements.runtime.lock']) {
+      const relative = `${app.appDir}/${filename}`;
+      const bytes = await readFile(join(output, relative));
+      entries.push({
+        application: app.id,
+        runtime: app.runtime,
+        lockfile: relative,
+        lockDigest: createHash('sha256').update(bytes).digest('hex'),
+      });
+    }
+  }
+  return entries;
 }
 
 async function materializeFoundation(plan, output) {
@@ -97,6 +116,7 @@ function verifyScript(plan, overlayVerification = {}) {
   const commands = {
     nestjs: ['npm', 'run', 'openapi:check'],
     spring: ['./mvnw', 'verify', '--no-transfer-progress'],
+    fastapi: ['.venv/bin/python', '-m', 'pytest', '-q'],
     nextjs: ['npm', 'run', 'check'],
     angular: ['npm', 'run', 'test:ci'],
     'react-native': ['npm', 'run', 'doctor'],
@@ -110,13 +130,15 @@ function verifyScript(plan, overlayVerification = {}) {
 }
 
 const STARTER_LABELS = {
-  nestjs: 'NestJS (API)', spring: 'Spring Boot (API)', nextjs: 'Next.js (Web)',
+  nestjs: 'NestJS (API)', spring: 'Spring Boot (API)', fastapi: 'FastAPI (API)',
+  nextjs: 'Next.js (Web)',
   angular: 'Angular (Web)', 'react-native': 'React Native / Expo (Mobile)', flutter: 'Flutter (Mobile)',
 };
 function runCommand(runtime, appDir) {
   switch (runtime) {
     case 'nestjs': return `npm run start:dev --workspace=${appDir}`;
     case 'spring': return `(cd ${appDir} && ./mvnw spring-boot:run)`;
+    case 'fastapi': return `(cd ${appDir} && .venv/bin/python -m uvicorn app.main:app --reload --port 8000)`;
     case 'nextjs': return `npm run dev --workspace=${appDir}`;
     case 'angular': return `npm run start --workspace=${appDir}`;
     case 'react-native': return `npm run start --workspace=${appDir}`;
@@ -130,6 +152,7 @@ function projectReadme(plan, overlays) {
   const apps = plan.applications;
   const hasApi = apps.some((app) => app.kind === 'api');
   const hasNestjs = apps.some((app) => app.runtime === 'nestjs');
+  const hasFastapi = apps.some((app) => app.runtime === 'fastapi');
   const nestjsApiDir = apps.find((app) => app.runtime === 'nestjs' && app.kind === 'api')?.appDir ?? 'apps/api';
   const stackLines = apps.map((app) => `- \`${app.appDir}\` — ${STARTER_LABELS[app.runtime] ?? app.runtime}`);
   const runLines = apps.map((app) => `- ${STARTER_LABELS[app.runtime] ?? app.runtime} : \`${runCommand(app.runtime, app.appDir)}\``);
@@ -141,6 +164,7 @@ function projectReadme(plan, overlays) {
     if (app.runtime === 'nestjs') envLines.push(`- \`${app.appDir}/.env\` — copier depuis \`${app.appDir}/.env.example\` (config API, secrets Auth si composé).`);
     else if (app.runtime === 'nextjs') envLines.push(`- \`${app.appDir}/.env.local\` — copier depuis \`${app.appDir}/.env.example\`.`);
     else if (app.runtime === 'react-native') envLines.push(`- \`${app.appDir}/.env\` — copier depuis \`${app.appDir}/.env.example\`.`);
+    else if (app.runtime === 'fastapi') envLines.push(`- \`${app.appDir}\` — variables préfixées \`ENISTERE_\` (configuration typée Pydantic).`);
   }
   envLines.push('- `infrastructure/local/.env` — copier depuis `infrastructure/local/.env.example` (mots de passe locaux).');
 
@@ -169,6 +193,7 @@ function projectReadme(plan, overlays) {
     '## Prérequis',
     '',
     '- Node.js 24+ et npm 10+ (workspace unifié).',
+    ...(hasFastapi ? ['- Python 3.12 à 3.14 (API FastAPI).'] : []),
     '- Docker + Docker Compose (infrastructure locale : PostgreSQL, etc.).',
     ...(hasNestjs ? ['- Un accès PostgreSQL (fourni par `infrastructure/local/compose.yaml`).'] : []),
     '',
@@ -191,10 +216,17 @@ function projectReadme(plan, overlays) {
     '',
     '# 3) Build des packages partagés (contracts, client, UI Kit).',
     'npm run build:packages',
+    ...(hasFastapi ? [
+      '',
+      '# 4) Installation de l’arbre Python transitif verrouillé.',
+      'python -m venv apps/api/.venv',
+      'apps/api/.venv/bin/python -m pip install -r apps/api/requirements.lock',
+    ] : []),
     '```',
     '',
     'Une fois verrouillé, `enistere verify <ce-projet>` recalcule le digest du lock et détecte toute',
     'modification par rapport à celui enregistré dans `enistere.lock`.',
+    ...(hasFastapi ? ['Le même contrôle couvre les locks Python d’installation et de production dès la génération.'] : []),
     '',
     '## Variables d\'environnement',
     '',
@@ -280,6 +312,7 @@ export async function materializeProject(plan, output, options = {}) {
       await rm(join(output, `${app.appDir}/package-lock.json`), { force: true });
     }
   }
+  const runtimeLocks = options.materialize === false ? [] : await runtimeDependencyLocks(plan, output);
   await mkdir(join(output, 'scripts'), { recursive: true });
   await writeFile(join(output, 'enistere.lock'), stable({
     schemaVersion: '1', foundationVersion: '2.0.0-dev',
@@ -290,6 +323,7 @@ export async function materializeProject(plan, output, options = {}) {
     lockfile: 'package-lock.json',
     lockDigest: null,
     lockfileVersion: null,
+    runtimeLocks,
   }));
   await writeFile(join(output, 'README.md'), projectReadme(plan, overlays.applied));
   await writeFile(join(output, 'package.json'), stable(rootPackage(plan)));

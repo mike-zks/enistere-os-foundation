@@ -66,7 +66,8 @@ providers, RAG, évaluations, quotas, human review et mode dégradé sans IA.
 | Élément | Statut | Limite |
 |---|---|---|
 | représentation | TARGET | modèle cible documenté |
-| FastAPI, RabbitMQ, document DB | TARGET | non implémentés/arbitrés |
+| FastAPI base | CONFORMANT | runtime seul prouvé ; service IA de l'exemple non implémenté |
+| RabbitMQ, document DB | TARGET | providers non implémentés/arbitrés |
 | communications distribuées | TARGET | pipeline actuel ne matérialise pas cette topologie |
 | contrats polyglottes | TARGET | TypeScript seulement partiellement actif |
 | système | TARGET | aucune preuve de génération/boot/conformité |

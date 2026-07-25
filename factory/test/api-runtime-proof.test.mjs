@@ -6,9 +6,10 @@ import {
 } from '../quality/scripts/golden-runtime.mjs';
 
 describe('API runtime boot/HTTP proof', () => {
-  it('targets the canonical health endpoint for both API runtimes', () => {
+  it('targets the canonical health endpoint for all three API runtimes', () => {
     assert.equal(startupProbeFor('nestjs').url, 'http://127.0.0.1:3000/health');
     assert.equal(startupProbeFor('spring').url, 'http://127.0.0.1:8080/health');
+    assert.equal(startupProbeFor('fastapi').url, 'http://127.0.0.1:8000/health');
   });
 
   it('proves health semantics, correlation, W3C tracing and security headers', async () => {
@@ -27,7 +28,7 @@ describe('API runtime boot/HTTP proof', () => {
       });
     };
 
-    const evidence = await verifyHttpContract(startupProbeFor('spring'), fakeFetch);
+    const evidence = await verifyHttpContract(startupProbeFor('fastapi'), fakeFetch);
 
     assert.deepEqual(evidence, [
       { path: '/health', status: 200, state: 'ok' },

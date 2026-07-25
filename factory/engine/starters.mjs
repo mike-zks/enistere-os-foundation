@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export const STARTER_IDS = Object.freeze(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
+export const STARTER_IDS = Object.freeze(['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
 const KINDS = new Set(['api', 'web', 'mobile']);
 const COMMANDS = ['install', 'dev', 'test', 'build', 'verify'];
 const FAMILY_CONTRACTS = Object.freeze({ api: 'api/2.0.0', web: 'web/2.0.0', mobile: 'mobile/2.0.0' });

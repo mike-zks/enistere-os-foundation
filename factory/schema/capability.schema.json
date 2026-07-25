@@ -14,11 +14,12 @@
     "responsibilities": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
     "targets": {
       "type": "object",
-      "required": ["nestjs", "spring", "nextjs", "angular", "react-native", "flutter"],
+      "required": ["nestjs", "spring", "fastapi", "nextjs", "angular", "react-native", "flutter"],
       "additionalProperties": false,
       "properties": {
         "nestjs": { "$ref": "#/$defs/target" },
         "spring": { "$ref": "#/$defs/target" },
+        "fastapi": { "$ref": "#/$defs/target" },
         "nextjs": { "$ref": "#/$defs/target" },
         "angular": { "$ref": "#/$defs/target" },
         "react-native": { "$ref": "#/$defs/target" },
@@ -52,7 +53,7 @@
         "runtimes": {
           "type": "object",
           "additionalProperties": { "type": "string", "minLength": 1 },
-          "propertyNames": { "enum": ["nestjs", "spring", "nextjs", "angular", "react-native", "flutter"] }
+          "propertyNames": { "enum": ["nestjs", "spring", "fastapi", "nextjs", "angular", "react-native", "flutter"] }
         }
       }
     },

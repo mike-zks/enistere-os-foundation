@@ -71,7 +71,7 @@ export function validateBlueprint(value) {
     if (appIssues.length === 0) issues.push(...assertGeneratableTopology(value));
   } else {
     for (const key of Object.keys(value.stack)) if (!['api', 'web', 'mobile'].includes(key)) issues.push(`stack.${key} is not a known field`);
-    if (!APIS.has(value.stack.api)) issues.push('stack.api must be nestjs or spring');
+    if (!APIS.has(value.stack.api)) issues.push('stack.api must be nestjs, spring or fastapi');
     if (!WEBS.has(value.stack.web ?? null)) issues.push('stack.web must be nextjs, angular or null');
     if (!MOBILES.has(value.stack.mobile ?? null)) issues.push('stack.mobile must be react-native, flutter or null');
   }

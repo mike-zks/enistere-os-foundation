@@ -336,6 +336,165 @@
       "diagnostics": []
     },
     {
+      "id": "fastapi",
+      "kind": "api",
+      "runtime": "fastapi",
+      "family": "api",
+      "level": "GENERATABLE",
+      "baseline": {
+        "contractVersion": "common/2.0.0",
+        "invariants": {
+          "configuration": {
+            "status": "compliant",
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
+          },
+          "canonical-errors": {
+            "status": "compliant",
+            "evidence": "canonical error mapping found",
+            "source": "structural"
+          },
+          "structured-logging": {
+            "status": "compliant",
+            "evidence": "structured request logging found",
+            "source": "structural"
+          },
+          "correlation": {
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
+            "source": "structural"
+          },
+          "observability": {
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
+          },
+          "technical-audit": {
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
+            "source": "structural"
+          },
+          "security-baseline": {
+            "status": "compliant",
+            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
+            "source": "behavioral-test"
+          },
+          "health": {
+            "status": "compliant",
+            "evidence": "runtime health signal found",
+            "source": "structural"
+          },
+          "diagnostics": {
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "testing-foundation": {
+            "status": "compliant",
+            "evidence": "test foundation found",
+            "source": "structural"
+          },
+          "lifecycle-hooks": {
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
+            "source": "behavioral-test"
+          },
+          "extension-points": {
+            "status": "compliant",
+            "evidence": "versioned extension registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "build-quality-gates": {
+            "status": "compliant",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
+            "source": "structural"
+          }
+        }
+      },
+      "familyContract": {
+        "contractVersion": "api/2.0.0",
+        "invariants": {
+          "http-server": {
+            "status": "compliant",
+            "evidence": "FastAPI ASGI application",
+            "source": "structural"
+          },
+          "input-validation": {
+            "status": "compliant",
+            "evidence": "neutral validation port and canonical FastAPI validation mapping tested",
+            "source": "behavioral-test"
+          },
+          "canonical-http-errors": {
+            "status": "compliant",
+            "evidence": "error shape: flat-envelope (canonical target: flat-envelope)",
+            "source": "structural"
+          },
+          "openapi": {
+            "status": "compliant",
+            "evidence": "FastAPI OpenAPI publication behavior tested",
+            "source": "behavioral-test"
+          },
+          "health-liveness-readiness": {
+            "status": "compliant",
+            "evidence": "health, liveness and readiness HTTP behavior tested",
+            "source": "behavioral-test"
+          },
+          "persistence-ports": {
+            "status": "compliant",
+            "evidence": "provider-neutral PersistencePort",
+            "source": "structural"
+          },
+          "migration-ports": {
+            "status": "compliant",
+            "evidence": "provider-neutral MigrationPort and governed migrations location",
+            "source": "structural"
+          },
+          "transaction-ports": {
+            "status": "compliant",
+            "evidence": "provider-neutral TransactionPort",
+            "source": "structural"
+          },
+          "authentication-hook": {
+            "status": "compliant",
+            "evidence": "versioned AuthenticationHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "authorization-hook": {
+            "status": "compliant",
+            "evidence": "versioned AuthorizationHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "file-hook": {
+            "status": "compliant",
+            "evidence": "versioned FileHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "event-hook": {
+            "status": "compliant",
+            "evidence": "versioned EventHook registry behavior tested",
+            "source": "behavioral-test"
+          },
+          "graceful-shutdown": {
+            "status": "compliant",
+            "evidence": "ASGI lifespan and idempotent reverse shutdown behavior tested",
+            "source": "behavioral-test"
+          },
+          "contract-tests": {
+            "status": "compliant",
+            "evidence": "API baseline behavioral contract tests",
+            "source": "behavioral-test"
+          },
+          "rate-limiting": {
+            "status": "compliant",
+            "evidence": "bounded in-memory baseline rate limiter behavior tested",
+            "source": "behavioral-test"
+          }
+        }
+      },
+      "nonConformant": [],
+      "diagnostics": []
+    },
+    {
       "id": "nextjs",
       "kind": "web",
       "runtime": "nextjs",
@@ -1392,6 +1551,7 @@
     "runtimes": [
       "nestjs",
       "spring",
+      "fastapi",
       "nextjs",
       "angular",
       "react-native",
@@ -1406,6 +1566,12 @@
       "conformant": true
     },
     "spring": {
+      "compliant": 28,
+      "partial": 0,
+      "missing": 0,
+      "conformant": true
+    },
+    "fastapi": {
       "compliant": 28,
       "partial": 0,
       "missing": 0,

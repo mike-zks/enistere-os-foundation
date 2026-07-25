@@ -39,13 +39,14 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## 4. API Runtime Convergence
 
+- **État : COMPLETE** (ADR-061/062).
 - **Objectifs :** rendre NestJS et Spring conformes, puis construire FastAPI contre le même contrat.
 - **Dépendances :** phase 3.
 - **Livrables :** bases API, adapters, goldens et conformance reports.
 - **Sortie :** chaque runtime au moins `CONFORMANT`; aucune feature optionnelle dans la base.
 - **Risques :** copier des structures non idiomatiques, ajouter FastAPI trop tôt ; **preuves :** boot réel,
   OpenAPI, erreurs, audit, OTEL, migrations, shutdown, security.
-- **Prochaine mission :** créer FastAPI contre le contrat désormais prouvé par NestJS/Spring.
+- **Preuves de sortie :** trois rapports `28/0/0`, trois goldens API de base avec boot/HTTP.
 
 ## 5. Web Runtime Convergence
 
@@ -54,7 +55,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 - **Livrables :** bases, clients générés, a11y, telemetry et E2E.
 - **Sortie :** `CONFORMANT` sur baseline/Web, contrats API polyglottes consommés.
 - **Risques :** session/auth cachées dans la base ; **preuves :** goldens, a11y, headers, E2E.
-- **Prochaine mission :** dédoublage puis conformance Angular.
+- **Prochaine mission :** fermer ensemble les écarts Common/Web v2 de Next.js et Angular.
 
 ## 6. Mobile Runtime Convergence
 
@@ -173,7 +174,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable (ADR-058) et la conformité NestJS/Spring (ADR-061) sont acquis.
+Le contrat exécutable (ADR-058) et la conformité des trois APIs (ADR-061/062) sont acquis.
 
-> **Créer FastAPI comme troisième adapter API de référence contre Common/API v2, avec rapport de
-> conformité et golden boot/HTTP — sans capability métier.**
+> **Converger Next.js et Angular contre Common/Web v2, avec preuves comportementales et goldens
+> de base conformes — sans capability métier.**

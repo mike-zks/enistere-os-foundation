@@ -31,7 +31,7 @@
       "type": "object",
       "required": ["api"],
       "properties": {
-        "api": { "enum": ["nestjs", "spring"] },
+        "api": { "enum": ["nestjs", "spring", "fastapi"] },
         "web": { "enum": ["nextjs", "angular", null] },
         "mobile": { "enum": ["react-native", "flutter", null] }
       },
@@ -48,7 +48,7 @@
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$" },
           "kind": { "enum": ["api", "web", "mobile", "worker", "gateway", "bff"] },
-          "runtime": { "enum": ["nestjs", "spring", "nextjs", "angular", "react-native", "flutter"] },
+          "runtime": { "enum": ["nestjs", "spring", "fastapi", "nextjs", "angular", "react-native", "flutter"] },
           "audience": { "type": "string", "minLength": 1 },
           "consumes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
         }

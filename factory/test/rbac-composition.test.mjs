@@ -65,6 +65,7 @@ describe('capability status semantics', () => {
       schemaVersion: '2', id: 'rbac', version: '0.2.0', requires: ['auth'], responsibilities: ['roles'],
       targets: {
         nestjs: { status: 'ready', mode: 'overlay' }, spring: { status: 'planned' },
+        fastapi: { status: 'unsupported' },
         nextjs: { status: 'ready', mode: 'overlay' }, angular: { status: 'planned' },
         'react-native': { status: 'not-applicable' }, flutter: { status: 'planned' },
       },

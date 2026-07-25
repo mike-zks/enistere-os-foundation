@@ -57,6 +57,7 @@ jobs:
           - nest-next-files
           - triple-files
           - spring-base
+          - fastapi-base
           - spring-auth
           - spring-auth-rbac
           - spring-files
@@ -118,6 +119,13 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - uses: actions/setup-python@v5
+        if: contains(matrix.composition, 'fastapi')
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: starters/fastapi/requirements.lock
+
       - uses: subosito/flutter-action@v2
         if: contains(matrix.composition, 'flutter')
         with:
@@ -148,7 +156,7 @@ jobs:
 
       - name: Golden runtime — generate, reproducible install, gates
         env:
-          # La preuve de boot + contrat HTTP est obligatoire sur les deux
+          # La preuve de boot + contrat HTTP est obligatoire sur les trois
           # références API de base, sans multiplier inutilement les démarrages.
-          GOLDEN_RUNTIME_START: ${{ (matrix.composition == 'nestjs-base' || matrix.composition == 'spring-base') && '1' || '0' }}
+          GOLDEN_RUNTIME_START: ${{ (matrix.composition == 'nestjs-base' || matrix.composition == 'spring-base' || matrix.composition == 'fastapi-base') && '1' || '0' }}
         run: node factory/quality/scripts/golden-runtime.mjs ${{ matrix.composition }}

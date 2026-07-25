@@ -6,6 +6,7 @@
   "responsibilities": ["upload", "metadata", "download-url", "delete", "quarantine", "reconciliation", "quota"],
   "targets": {
     "nestjs": { "status": "ready", "mode": "overlay" }, "spring": { "status": "ready", "mode": "overlay" },
+    "fastapi": { "status": "unsupported" },
     "nextjs": { "status": "ready", "mode": "overlay" }, "angular": { "status": "planned" },
     "react-native": { "status": "ready", "mode": "overlay" }, "flutter": { "status": "planned" }
   }

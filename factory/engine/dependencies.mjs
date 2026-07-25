@@ -37,6 +37,11 @@ export async function computeLockDigest(projectDir) {
   return createHash('sha256').update(await readFile(lockPath)).digest('hex');
 }
 
+async function computeFileDigest(path) {
+  if (!(await exists(path))) return null;
+  return createHash('sha256').update(await readFile(path)).digest('hex');
+}
+
 export async function readProjectManifest(projectDir) {
   const path = join(projectDir, PROJECT_MANIFEST);
   try {
@@ -95,6 +100,24 @@ export async function verifyProjectDependencies(projectDir) {
   const issues = [];
   const locked = manifest.dependenciesLocked === true;
   const actualDigest = await computeLockDigest(projectDir);
+  for (const runtimeLock of manifest.runtimeLocks ?? []) {
+    if (typeof runtimeLock?.lockfile !== 'string'
+      || runtimeLock.lockfile.startsWith('/')
+      || runtimeLock.lockfile.includes('\\')
+      || runtimeLock.lockfile.split('/').includes('..')) {
+      issues.push('runtime lock path is invalid');
+      continue;
+    }
+    if (!/^[a-f0-9]{64}$/.test(runtimeLock.lockDigest ?? '')) {
+      issues.push(`runtime lock digest is invalid: ${runtimeLock.lockfile}`);
+      continue;
+    }
+    const actual = await computeFileDigest(join(projectDir, runtimeLock.lockfile));
+    if (!actual) issues.push(`runtime lock is missing: ${runtimeLock.lockfile}`);
+    else if (actual !== runtimeLock.lockDigest) {
+      issues.push(`${runtimeLock.lockfile} digest mismatch: recorded ${runtimeLock.lockDigest.slice(0, 12)}…, actual ${actual.slice(0, 12)}…`);
+    }
+  }
 
   if (!locked) {
     if (manifest.lockDigest) issues.push('dependenciesLocked is false but a lockDigest is recorded');
@@ -103,6 +126,7 @@ export async function verifyProjectDependencies(projectDir) {
       dependenciesLocked: false,
       recordedDigest: manifest.lockDigest ?? null,
       actualDigest,
+      runtimeLocks: manifest.runtimeLocks ?? [],
       issues,
       note: 'Project generated without dependency finalization: run `enistere install <project>`.',
     };
@@ -119,6 +143,7 @@ export async function verifyProjectDependencies(projectDir) {
     dependenciesLocked: true,
     recordedDigest: manifest.lockDigest ?? null,
     actualDigest,
+    runtimeLocks: manifest.runtimeLocks ?? [],
     issues,
   };
 }

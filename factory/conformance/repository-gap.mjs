@@ -9,7 +9,7 @@ import { buildConformance, STATUS } from './platform-contract.mjs';
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = resolve(MODULE_DIR, '../..');
 const DEFAULT_OUTPUT = join(MODULE_DIR, 'reports', 'platform-baseline-v2-gap.json');
-const RUNTIMES = Object.freeze(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
+const RUNTIMES = Object.freeze(['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
 
 function starterSource(repoRoot, manifest) {
   return resolve(repoRoot, manifest.composition.baseSource ?? `starters/${manifest.id}`);

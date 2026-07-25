@@ -1,7 +1,7 @@
 # QUALITY_GATES_MATRIX.md — Matrice des gates qualité
 
 > Gates qualité réels du monorepo Enistere OS Foundation.
-> Dernière mise à jour : 2026-07-16 (Web Angular CI — workflow web-angular-ci.yml + scope web-angular).
+> Dernière mise à jour : 2026-07-25 (FastAPI baseline v2 — ADR-062).
 >
 > **Script de sélection locale** : `node factory/quality/scripts/quality-gates.mjs plan <scope>`
 > Scopes : `docs` | `packages` | `ui-kit` | `web` | `web-angular` | `root-audit` | `mobile-static` | `api-spring` | `all-safe`
@@ -30,6 +30,7 @@
 | **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
 | **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
 | **api-spring** | ✅ L5 (mvnw) | — | ✅ L5 (71: 32u+39e2e TC) | ✅ L5 (Flyway) | — | — | — | — | — | — | ✅ L5 |
+| **api-fastapi** | ✅ compile | ✅ Ruff | ✅ pytest (12) | ✅ compileall | ✅ golden | — | ✅ HTTP | — | — | — | ✅ natif |
 | **cloud** | — | — | — | — | — | — | 🔒 staging | ✅ L4 | — | — | — |
 
 ## 2. Détail par core / package
@@ -136,7 +137,22 @@
 | compositions générées | `node factory/quality/scripts/golden-runtime.mjs spring-base\|spring-auth\|spring-auth-rbac\|spring-files` | Java 21, Docker (TC PostgreSQL + MinIO) | **golden-runtime** | chaque PR |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
-### 2.10 deployment
+### 2.10 starters/fastapi
+
+| Gate | Commande | Environnement | CI | Fréquence |
+|---|---|---|---|---|
+| lint | `cd starters/fastapi && python -m ruff check .` | Python 3.14 | **golden-runtime** | chaque PR |
+| tests | `cd starters/fastapi && python -m pytest -q` | Python 3.14 | **golden-runtime** | chaque PR |
+| compilation | `cd starters/fastapi && python -m compileall -q app` | Python 3.14 | **golden-runtime** | chaque PR |
+| audit Python | `cd starters/fastapi && python -m pip_audit --strict` | Python 3.14, PyPI advisories | **golden-runtime** | chaque PR |
+| boot + HTTP | `node factory/quality/scripts/golden-runtime.mjs fastapi-base` | Python 3.14, Uvicorn | **golden-runtime** | chaque PR |
+| audit packages partagés | même golden, scope `shared-packages` | Node 24 | **golden-runtime** | chaque PR |
+
+Le golden installe l'arbre transitif depuis `requirements.lock`, vérifie le lock
+npm partagé, démarre le processus et exerce health/live/ready, correlation,
+continuation W3C et en-têtes de sécurité.
+
+### 2.11 deployment
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|

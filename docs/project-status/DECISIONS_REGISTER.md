@@ -25,6 +25,7 @@
 | 059 | Convergence Common/API v2 NestJS et Spring | lifecycle, extensions, sécurité et observabilité testés ; aucun invariant API `MISSING` |
 | 060 | Profils système et dimensions d’architecture | quatre profils canoniques ; anciens noms limités aux entrées ; presets distincts |
 | 061 | Conformité Common/API v2 NestJS et Spring | 28/0/0 chacun ; ports neutres, diagnostics et quality gates testés ; boot/HTTP exigé sur les goldens API |
+| 062 | FastAPI, troisième adapter API | base sans capability ; 28/0/0 ; golden généré, lock Python, boot/HTTP et audit partagé prouvés |
 
 ## Règles
 

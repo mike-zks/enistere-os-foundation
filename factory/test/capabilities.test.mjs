@@ -5,7 +5,7 @@ import { loadCapabilityManifests, validateCapabilityManifest } from '../engine/c
 
 const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
-/** Minimal valid v2 manifest (all six targets declared). */
+/** Minimal valid v2 manifest (all seven targets declared). */
 function baseManifest(overrides = {}) {
   return {
     schemaVersion: '2',
@@ -16,6 +16,7 @@ function baseManifest(overrides = {}) {
     targets: {
       nestjs: { status: 'ready', mode: 'overlay' },
       spring: { status: 'ready', mode: 'overlay' },
+      fastapi: { status: 'unsupported' },
       nextjs: { status: 'ready', mode: 'overlay' },
       angular: { status: 'planned' },
       'react-native': { status: 'not-applicable' },

@@ -17,8 +17,8 @@ describe('blueprint v1', () => {
     const value = createDefaultBlueprint(); value.capabilities = ['base', 'rbac'];
     assert.match(validateBlueprint(value).join(' '), /rbac requires auth/);
   });
-  it('supports all 18 API/web/mobile compositions', () => {
-    for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
+  it('supports all 27 API/web/mobile compositions', () => {
+    for (const api of ['nestjs', 'spring', 'fastapi']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
       const value = createDefaultBlueprint(); value.stack = { api, web, mobile };
       assert.deepEqual(validateBlueprint(value), [], `${api}/${web}/${mobile}`);
     }
@@ -78,18 +78,18 @@ describe('blueprint v1', () => {
   });
   it('plans every supported stack combination as a golden matrix', () => {
     const seen = new Set();
-    for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
+    for (const api of ['nestjs', 'spring', 'fastapi']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
       const blueprint = createDefaultBlueprint(`${api}-${web ?? 'no-web'}-${mobile ?? 'no-mobile'}`);
       blueprint.stack = { api, web, mobile };
       const plan = buildGenerationPlan(blueprint);
       seen.add(JSON.stringify(plan.starterSources));
       assert.equal(plan.starterSources.api, `starters/${api}`);
     }
-    assert.equal(seen.size, 18);
+    assert.equal(seen.size, 27);
   });
-  it('generates base-only locks for all 18 stack combinations', async () => {
-    const MODULAR = new Set(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
-    for (const api of ['nestjs', 'spring']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
+  it('generates base-only locks for all 27 stack combinations', async () => {
+    const MODULAR = new Set(['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
+    for (const api of ['nestjs', 'spring', 'fastapi']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
       const root = await mkdtemp(join(tmpdir(), 'enistere-golden-'));
       const blueprint = createDefaultBlueprint(`${api}-${web ?? 'none'}-${mobile ?? 'none'}`);
       blueprint.stack = { api, web, mobile };

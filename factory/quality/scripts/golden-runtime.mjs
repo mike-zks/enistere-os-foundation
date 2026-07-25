@@ -21,6 +21,7 @@
  *
  * R8A — compositions `base` seul, nommées d'après leur profil :
  *   spring-base                 spring
+ *   fastapi-base                fastapi
  *   spring-auth                 spring, base+auth
  *   spring-next-base            spring + nextjs
  *   spring-react-native-base    spring + react-native
@@ -104,6 +105,7 @@ export const COMPOSITIONS = {
   // (`bundledFeaturesMayExceedSelection`). Le golden prouve le projet généré, pas
   // une composition minimale.
   'spring-base': { stack: { api: 'spring', web: null, mobile: null }, capabilities: [] },
+  'fastapi-base': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: [] },
   'spring-auth': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth'] },
   'spring-auth-rbac': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },
   'spring-files': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth', 'rbac', 'files'] },
@@ -119,7 +121,7 @@ export const COMPOSITIONS = {
 
 /** argv of the npm-audit-by-exception gate applied to every golden. */
 export function auditGate(projectDir, kinds) {
-  return ['node', [AUDIT_CHECK, projectDir, '--targets', kinds.join(',')]];
+  return ['node', [AUDIT_CHECK, projectDir, '--targets', [...kinds, 'shared-packages'].join(',')]];
 }
 
 /** Blueprint for a composition (shared by the driver and its tests). */
@@ -152,6 +154,14 @@ function run(label, cmd, args, cwd) {
 function prepareGatesFor(kind, hasDb, capabilities = []) {
   // Flutter resolves its own dependencies through pub, outside the npm workspace.
   if (kind === 'flutter') return [['mobile: flutter pub get', 'flutter', ['pub', 'get'], 'apps/mobile']];
+  if (kind === 'fastapi') {
+    return [
+      ['api: create Python virtual environment', 'python', ['-m', 'venv', '.venv'], 'apps/api'],
+      ['api: install locked Python dependencies', '.venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.lock'], 'apps/api'],
+      ['api: create production-only Python environment', 'python', ['-m', 'venv', '.runtime-venv'], 'apps/api'],
+      ['api: install production-only Python lock', '.runtime-venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.runtime.lock'], 'apps/api'],
+    ];
+  }
   if (kind !== 'nestjs') return [];
   return [
     ['api: prisma generate', 'npm', ['run', 'prisma:generate', '--workspace=apps/api']],
@@ -196,6 +206,17 @@ function gatesFor(kind, hasDb, capabilities = []) {
     // Docker must be reachable; the driver refuses to claim a pass without it.
     return [['api: mvnw verify', './mvnw', ['verify', '--no-transfer-progress', '-B'], 'apps/api']];
   }
+  if (kind === 'fastapi') {
+    return [
+      ['api: ruff', '.venv/bin/python', ['-m', 'ruff', 'check', '.'], 'apps/api'],
+      ['api: tests', '.venv/bin/python', ['-m', 'pytest', '-q'], 'apps/api'],
+      ['api: compile', '.venv/bin/python', ['-m', 'compileall', '-q', 'app'], 'apps/api'],
+      ['api: dependency consistency', '.venv/bin/python', ['-m', 'pip', 'check'], 'apps/api'],
+      ['api: dependency audit', '.venv/bin/python', ['-m', 'pip_audit', '--strict', '--progress-spinner', 'off'], 'apps/api'],
+      ['api: production dependency smoke', '.runtime-venv/bin/python', ['-c', 'import fastapi, pydantic_settings, uvicorn; print("production dependencies: ok")'], 'apps/api'],
+      ['api: production dependency consistency', '.runtime-venv/bin/python', ['-m', 'pip', 'check'], 'apps/api'],
+    ];
+  }
   if (kind === 'angular') {
     // Angular publishes no `typecheck` script: `build` is the compilation gate.
     return [
@@ -232,6 +253,13 @@ export function startupProbeFor(kind) {
       args: ['run', 'start:prod'], url: 'http://127.0.0.1:3000/health', needsDb: true,
     };
   }
+  if (kind === 'fastapi') {
+    return {
+      slot: 'api', runtime: 'fastapi', cwd: 'apps/api', cmd: '.venv/bin/python',
+      args: ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000'],
+      url: 'http://127.0.0.1:8000/health', needsDb: false,
+    };
+  }
   if (kind === 'nextjs') {
     return { slot: 'web', cwd: 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3000/', needsDb: false };
   }
@@ -252,7 +280,7 @@ function healthPayload(body) {
  * injectable so the contract logic is unit-tested without a socket.
  */
 export async function verifyHttpContract(probe, fetchImpl = fetch) {
-  if (!['nestjs', 'spring'].includes(probe.runtime)) return [];
+  if (!['nestjs', 'spring', 'fastapi'].includes(probe.runtime)) return [];
   const traceId = '4bf92f3577b34da6a3ce929d0e0e4736';
   const parentSpanId = '00f067aa0ba902b7';
   const requestId = 'runtime-proof-1234';
@@ -496,12 +524,20 @@ async function main() {
     await generateProject(compositionBlueprint(composition), twin);
     try {
       const twinDeps = await finalizeDependencies(twin, { install: false });
-      const first = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8')).lockDigest;
+      const firstManifest = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+      const twinManifest = JSON.parse(await readFile(join(twin, 'enistere.lock'), 'utf8'));
+      const first = firstManifest.lockDigest;
       if (twinDeps.lockDigest !== first) {
         console.log(`\n❌ FAILED: lock digest differs (${first?.slice(0, 12)}… vs ${twinDeps.lockDigest?.slice(0, 12)}…)`);
         ok = false;
+      } else if (JSON.stringify(firstManifest.runtimeLocks ?? []) !== JSON.stringify(twinManifest.runtimeLocks ?? [])) {
+        console.log('\n❌ FAILED: runtime dependency lock digests differ');
+        ok = false;
       } else {
         console.log(`✓ lock digest reproducible: ${first.slice(0, 12)}…`);
+        if ((firstManifest.runtimeLocks ?? []).length > 0) {
+          console.log(`✓ runtime lock digests reproducible: ${firstManifest.runtimeLocks.length}`);
+        }
       }
     } catch (error) {
       console.log(`\n❌ FAILED: lock determinism — ${error.message}`);
