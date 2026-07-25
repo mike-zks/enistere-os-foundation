@@ -103,6 +103,46 @@
       "review": "Réévaluer avec l'upgrade Expo."
     },
     {
+      "package": "@redocly/openapi-core",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "Propagation de GHSA-mh99-v99m-4gvg via minimatch/brace-expansion dans openapi-typescript 7",
+      "scope": "Outillage de génération OpenAPI exécuté uniquement sur le snapshot OpenAPI versionné par la Foundation. Il n'est ni embarqué ni exécuté au runtime des applications générées.",
+      "justification": "La branche openapi-typescript 7 impose @redocly/openapi-core ^1.34.6, dont toutes les versions publiées restent affectées. npm ne propose qu'un downgrade majeur vers openapi-typescript 6.7.6 ou un override Redocly 2 non compatible. Une migration de générateur avec comparaison du schéma produit est requise.",
+      "deadline": "2026-08-31",
+      "review": "Migrer openapi-typescript vers une version supportant @redocly/openapi-core 2 ou qualifier le downgrade 6.7.6, puis supprimer simultanément les quatre exceptions OpenAPI."
+    },
+    {
+      "package": "brace-expansion",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "GHSA-mh99-v99m-4gvg — expansion non bornée pouvant provoquer une saturation mémoire",
+      "scope": "Copie transitive de l'outillage openapi-typescript/@redocly utilisée sur un unique document OpenAPI local, versionné et relu. Aucune entrée utilisateur ni exécution runtime.",
+      "justification": "Même cause racine que @redocly/openapi-core ; aucun correctif compatible dans la branche 1.x exigée par openapi-typescript 7.",
+      "deadline": "2026-08-31",
+      "review": "Supprimer avec l'exception @redocly/openapi-core après migration du générateur."
+    },
+    {
+      "package": "minimatch",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "Propagation de GHSA-mh99-v99m-4gvg via brace-expansion",
+      "scope": "Dépendance transitive de Redocly dans le générateur OpenAPI ; entrées limitées au snapshot versionné de la Foundation.",
+      "justification": "Même cause racine que @redocly/openapi-core ; un override isolé modifierait une dépendance majeure de Redocly sans preuve de compatibilité.",
+      "deadline": "2026-08-31",
+      "review": "Supprimer avec l'exception @redocly/openapi-core après migration du générateur."
+    },
+    {
+      "package": "openapi-typescript",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "Propagation de GHSA-mh99-v99m-4gvg via @redocly/openapi-core",
+      "scope": "DevDependency du package de contrats, exécutée uniquement pendant la génération à partir du snapshot OpenAPI versionné.",
+      "justification": "La version 7.13.0 est la dernière de la branche 7 et dépend encore de Redocly 1.x affecté. Le fix npm proposé est un downgrade majeur 6.7.6 qui change l'API de génération et doit être qualifié séparément.",
+      "deadline": "2026-08-31",
+      "review": "Qualifier une version corrigée ou le downgrade 6.7.6 avec tests de stabilité du contrat généré."
+    },
+    {
       "package": "sharp",
       "maxSeverity": "high",
       "appliesTo": ["nextjs"],

@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "dependencies": {
-      "@hookform/resolvers": "^5.4.0",
+      "@hookform/resolvers": "5.4.0",
       "react-hook-form": "^7.81.0",
       "zod": "^4.4.3"
     }
