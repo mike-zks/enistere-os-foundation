@@ -1,5 +1,6 @@
 package com.enistere.core.platform.diagnostics;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -16,6 +17,7 @@ public class RuntimeDiagnostics {
     private final List<DiagnosticProbe> probes;
     private final Clock clock;
 
+    @Autowired
     public RuntimeDiagnostics(List<DiagnosticProbe> probes) {
         this(probes, Clock.systemUTC());
     }
