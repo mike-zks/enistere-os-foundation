@@ -9,10 +9,14 @@ it('computes an honest Platform Baseline v2 gap for all six existing runtimes', 
   const report = buildRepositoryGap(root);
   assert.equal(report.schemaVersion, '2');
   assert.deepEqual(Object.keys(report.summary), ['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
-  assert.ok(Object.values(report.summary).every((summary) => summary.conformant === false));
-  assert.ok(report.apps.every((app) => app.diagnostics.length > 0));
+  assert.ok(['nextjs', 'angular', 'react-native', 'flutter']
+    .every((runtime) => report.summary[runtime].conformant === false));
   assert.equal(report.summary.nestjs.missing, 0);
   assert.equal(report.summary.spring.missing, 0);
-  assert.ok(report.summary.nestjs.partial > 0);
-  assert.ok(report.summary.spring.partial > 0);
+  assert.equal(report.summary.nestjs.partial, 0);
+  assert.equal(report.summary.spring.partial, 0);
+  assert.equal(report.summary.nestjs.conformant, true);
+  assert.equal(report.summary.spring.conformant, true);
+  assert.equal(report.apps.find((app) => app.runtime === 'nestjs').diagnostics.length, 0);
+  assert.equal(report.apps.find((app) => app.runtime === 'spring').diagnostics.length, 0);
 });

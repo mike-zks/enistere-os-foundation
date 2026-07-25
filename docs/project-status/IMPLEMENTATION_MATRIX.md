@@ -15,10 +15,10 @@
 | Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
 | Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
 | Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
-| Platform Contract exécutable (API) | **Convergence en cours** (ADR-059) | NestJS 26 conformes/2 partiels/0 manquant ; Spring 22/6/0 ; lifecycle, extensions, sécurité, métriques et W3C testés |
+| Platform Contract exécutable (API) | **Conforme sur NestJS/Spring** (ADR-061) | 28 conformes/0 partiel/0 manquant chacun ; suites comportementales et goldens boot/HTTP obligatoires ; FastAPI absent |
 | Platform Contract exécutable (Web, socle) | **Implémenté** (ADR-050, ADR-051) | évaluateur multi-familles, invariants Web idiomatiques ; socle Angular convergé vers Next.js (`enistere.conformance.json`) ; parité contrats générés + capabilities Web différées |
 | Platform Contract exécutable (Mobile, socle) | **Implémenté** (ADR-052, ADR-053) | évaluateur 3 familles ; RN compliant + socle Flutter convergé (`core/api` Dio) → `enistere.conformance.json` Flutter base compliant ; **jalon : 6 runtimes en parité de contrat de base** |
-| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/059) | Common/API/Web/Mobile versionnés ; APIs sans invariant manquant mais encore partielles ; rapport calculé dans `factory/conformance/reports/` |
+| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/061) | Common/API/Web/Mobile versionnés ; NestJS/Spring conformes, Web/Mobile encore en écart ; rapport calculé dans `factory/conformance/reports/` |
 | Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
 | `profiles` / `profile <name>` | Implémenté (R7) | presets de composition historiques : 26 déclarés, 22 générables |

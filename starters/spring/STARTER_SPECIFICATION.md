@@ -6,7 +6,10 @@ Le **starter Spring Boot** définit le socle backend Java de référence pour le
 
 Il doit fournir une base modulaire, sécurisée, testable et extensible pour construire des APIs robustes sans réinventer à chaque projet l'authentification, les utilisateurs, les rôles, les permissions, la validation, les erreurs, les logs, l'audit, les uploads, le cache, les queues, la documentation OpenAPI et les health checks.
 
-Cette spécification est documentaire. Elle ne crée aucun projet Spring Boot, `pom.xml`, `build.gradle`, code Java, dossier `src/` ou runtime. Aucune dépendance Java n'est installée.
+Cette spécification fixe la cible produit du starter. Le starter Maven et son code
+Java existent désormais ; son état prouvé est suivi par le rapport Platform
+Baseline v2 et les documents `docs/project-status/`, qui prévalent sur les jalons
+historiques encore décrits ci-dessous.
 
 **Positionnement** : Spring Boot complète l'starter NestJS (`VALIDE_V1`) en ciblant les besoins enterprise Java — écosystème JVM mature, Spring Security établi, JPA/Hibernate avec transactions managées, Testcontainers pour tests d'intégration réalistes. Les deux API cores partagent les mêmes **intentions** (auth, RBAC, OpenAPI, fichiers, audit, sécurité) sans dupliquer l'implémentation.
 
@@ -150,7 +153,7 @@ Structure indicative (non créée dans cette mission) :
 starters/spring/
 ├── README.md
 ├── STARTER_SPECIFICATION.md
-├── pom.xml ou build.gradle           ← à créer en Spring Boot 2
+├── pom.xml                            ← Maven retenu par ADR-041
 ├── src/
 │   ├── main/
 │   │   ├── java/com/enistere/core/

@@ -41,9 +41,9 @@ polyglottes manquent encore. Les 26 « profils » historiques restent des preset
 | lock/provenance/digests | ADAPT | registry resolution et lifecycle | fondations présentes |
 | conformance engine | ADAPT | remplacer progressivement probes critiques par comportements | baseline v2 exécutable depuis ADR-058 |
 | fitness functions FF6–FF8 | KEEP | préserver pipeline unique | preuves présentes |
-| six starters existants | ADAPT | runtime adapters conformes | boot/goldens partiels |
-| NestJS base | ADAPT | baseline complet OTEL/audit/diagnostics | meilleur actif API actuel |
-| Spring base source unique | ADAPT | baseline complet | audit/rate limit récemment convergés |
+| six starters existants | ADAPT | runtime adapters conformes | NestJS/Spring conformes ; Web/Mobile en écart |
+| NestJS base | KEEP | préserver Common/API v2 et faire évoluer les adapters | 28/0/0 + golden boot/HTTP |
+| Spring base source unique | KEEP | préserver Common/API v2 et faire évoluer les adapters | 28/0/0 + golden boot/HTTP |
 | Angular/Flutter double `base/` | REFACTOR | source unique | dette documentée |
 | React Native sur-rempli | REFACTOR | extraire features optionnelles | nombreuses features en base |
 | FastAPI runtime | CREATE | adapter API après contrat stable | absent |
@@ -81,8 +81,8 @@ polyglottes manquent encore. Les 26 « profils » historiques restent des preset
 
 | Runtime | Actif | Limite face à la cible | Classe |
 |---|---|---|---|
-| NestJS | starter + overlays + goldens | OTEL complet, audit contract/policies, diagnostics à compléter | ADAPT |
-| Spring | starter source unique + overlays | même écart baseline ; image/deployment à qualifier | ADAPT |
+| NestJS | starter + overlays + goldens | conforme v2 ; backend OTEL et parité produit non prouvés | KEEP |
+| Spring | starter source unique + overlays | conforme v2 ; image/deployment et parité produit à qualifier | KEEP |
 | FastAPI | aucun | runtime entier absent | CREATE |
 | Next.js | starter + E2E | baseline complet/audit technique Web à formaliser | ADAPT |
 | Angular | starter + base dupliquée | source unique, contracts/a11y/capabilities | REFACTOR |
@@ -90,7 +90,8 @@ polyglottes manquent encore. Les 26 « profils » historiques restent des preset
 | Flutter | starter + base dupliquée | source unique, capabilities, builds réels | REFACTOR |
 
 La conformité antérieure « 6 runtimes en parité de contrat de base » se rapporte au contrat minimal v1.
-Le baseline v2 est désormais exécutable (ADR-058) et prouve qu'aucun runtime n'est encore conforme.
+Le baseline v2 est exécutable (ADR-058) ; ADR-061 prouve NestJS et Spring conformes sur ses 28 invariants.
+Les runtimes Web/Mobile restent en écart.
 
 ## Contradictions documentaires corrigées
 
@@ -108,7 +109,7 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — convergence runtime v2 :** contrat exécutable, mais aucun runtime conforme.
+1. **P0 — FastAPI absent :** les deux références existantes sont conformes, la troisième API cible reste à créer.
 2. **P0 — blueprint/CSM partiels :** profils désormais représentables, mais primitives et Blueprint V2 complet manquent.
 3. **P1 — bases Web/Mobile divergentes :** duplication et sur-remplissage.
 4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
@@ -117,7 +118,7 @@ classification ne revendique aucune amélioration d'implémentation.
 ## Conclusion et action unique
 
 Les actifs du kernel et des runtimes justifient une convergence plutôt qu'une réécriture totale.
-ADR-059 a supprimé les invariants `MISSING` des deux APIs, mais huit statuts restent `PARTIAL`.
+ADR-061 a fermé les huit écarts des deux APIs existantes et stabilisé leur preuve de boot/contrat HTTP.
 
-> **Prochaine mission unique : achever la convergence NestJS/Spring Common/API v2, supprimer les huit
-> statuts partiels et produire les preuves de boot/contrat HTTP — sans ajouter FastAPI ni capability.**
+> **Prochaine mission unique : créer FastAPI contre Common/API v2 et produire son rapport de conformité
+> et son golden boot/HTTP — sans capability métier.**

@@ -28,8 +28,8 @@
         "invariants": {
           "configuration": {
             "status": "compliant",
-            "evidence": "validated/typed configuration seam found",
-            "source": "structural"
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-errors": {
             "status": "compliant",
@@ -67,9 +67,9 @@
             "source": "structural"
           },
           "diagnostics": {
-            "status": "partial",
-            "evidence": "canonical errors and health provide partial diagnostics",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
           },
           "testing-foundation": {
             "status": "compliant",
@@ -88,7 +88,7 @@
           },
           "build-quality-gates": {
             "status": "compliant",
-            "evidence": "build/test gates found",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
             "source": "structural"
           }
         }
@@ -123,7 +123,7 @@
           },
           "persistence-ports": {
             "status": "compliant",
-            "evidence": "PrismaService",
+            "evidence": "neutral PersistencePort with Prisma adapter infrastructure",
             "source": "structural"
           },
           "migration-ports": {
@@ -132,9 +132,9 @@
             "source": "structural"
           },
           "transaction-ports": {
-            "status": "partial",
-            "evidence": "Prisma transaction access, no neutral port",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "neutral TransactionPort with Prisma adapter behavior tested",
+            "source": "behavioral-test"
           },
           "authentication-hook": {
             "status": "compliant",
@@ -174,24 +174,7 @@
         }
       },
       "nonConformant": [],
-      "diagnostics": [
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.nestjs.baseline.diagnostics",
-          "invariant": "diagnostics",
-          "status": "partial",
-          "evidence": "canonical errors and health provide partial diagnostics"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.nestjs.api.transaction-ports",
-          "invariant": "transaction-ports",
-          "status": "partial",
-          "evidence": "Prisma transaction access, no neutral port"
-        }
-      ]
+      "diagnostics": []
     },
     {
       "id": "spring",
@@ -203,9 +186,9 @@
         "contractVersion": "common/2.0.0",
         "invariants": {
           "configuration": {
-            "status": "partial",
-            "evidence": "validated/typed configuration seam found",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-errors": {
             "status": "compliant",
@@ -243,9 +226,9 @@
             "source": "structural"
           },
           "diagnostics": {
-            "status": "partial",
-            "evidence": "canonical errors and health provide partial diagnostics",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
           },
           "testing-foundation": {
             "status": "compliant",
@@ -263,8 +246,8 @@
             "source": "behavioral-test"
           },
           "build-quality-gates": {
-            "status": "partial",
-            "evidence": "build/test gates found",
+            "status": "compliant",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
             "source": "structural"
           }
         }
@@ -278,9 +261,9 @@
             "source": "structural"
           },
           "input-validation": {
-            "status": "partial",
-            "evidence": "Jakarta validation error handling",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "neutral InputValidationPort, Jakarta adapter and canonical HTTP mapping behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-http-errors": {
             "status": "compliant",
@@ -298,8 +281,8 @@
             "source": "structural"
           },
           "persistence-ports": {
-            "status": "partial",
-            "evidence": "JPA base infrastructure, no neutral port",
+            "status": "compliant",
+            "evidence": "neutral PersistencePort with JPA adapter infrastructure",
             "source": "structural"
           },
           "migration-ports": {
@@ -308,9 +291,9 @@
             "source": "structural"
           },
           "transaction-ports": {
-            "status": "partial",
-            "evidence": "Spring transaction infrastructure, no neutral port",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "neutral TransactionPort with Spring adapter behavior tested",
+            "source": "behavioral-test"
           },
           "authentication-hook": {
             "status": "compliant",
@@ -350,56 +333,7 @@
         }
       },
       "nonConformant": [],
-      "diagnostics": [
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.spring.baseline.configuration",
-          "invariant": "configuration",
-          "status": "partial",
-          "evidence": "validated/typed configuration seam found"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.spring.baseline.diagnostics",
-          "invariant": "diagnostics",
-          "status": "partial",
-          "evidence": "canonical errors and health provide partial diagnostics"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.spring.baseline.build-quality-gates",
-          "invariant": "build-quality-gates",
-          "status": "partial",
-          "evidence": "build/test gates found"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.spring.api.input-validation",
-          "invariant": "input-validation",
-          "status": "partial",
-          "evidence": "Jakarta validation error handling"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.spring.api.persistence-ports",
-          "invariant": "persistence-ports",
-          "status": "partial",
-          "evidence": "JPA base infrastructure, no neutral port"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.spring.api.transaction-ports",
-          "invariant": "transaction-ports",
-          "status": "partial",
-          "evidence": "Spring transaction infrastructure, no neutral port"
-        }
-      ]
+      "diagnostics": []
     },
     {
       "id": "nextjs",
@@ -1466,16 +1400,16 @@
   },
   "summary": {
     "nestjs": {
-      "compliant": 26,
-      "partial": 2,
+      "compliant": 28,
+      "partial": 0,
       "missing": 0,
-      "conformant": false
+      "conformant": true
     },
     "spring": {
-      "compliant": 22,
-      "partial": 6,
+      "compliant": 28,
+      "partial": 0,
       "missing": 0,
-      "conformant": false
+      "conformant": true
     },
     "nextjs": {
       "compliant": 14,

@@ -126,6 +126,10 @@ function evaluateNestjs(appDir) {
   const lifecycleProven = readContains(appDir, 'main.ts', 'enableShutdownHooks')
     && Boolean(findFile(join(appDir, 'src'), 'runtime-lifecycle.service.ts'))
     && Boolean(findFile(join(appDir, 'src'), 'runtime-lifecycle.service.spec.ts'));
+  const persistencePort = findFile(join(appDir, 'src'), 'persistence.port.ts');
+  const transactionPort = findFile(join(appDir, 'src'), 'transaction.port.ts');
+  const transactionAdapter = findFile(join(appDir, 'src'), 'prisma-transaction.adapter.ts');
+  const transactionProof = findFile(join(appDir, 'src'), 'prisma-transaction.adapter.spec.ts');
   const health = ops.includes('health_live') && ops.includes('health_ready')
     ? STATUS.COMPLIANT
     : ops.includes('health_get') ? STATUS.PARTIAL : STATUS.MISSING;
@@ -135,9 +139,16 @@ function evaluateNestjs(appDir) {
     'canonical-http-errors': errorResult(shape),
     openapi: result(ops.length ? STATUS.COMPLIANT : STATUS.MISSING, `${ops.length} operations`),
     'health-liveness-readiness': result(health, `openapi ops: ${ops.filter((o) => o.startsWith('health')).join(', ') || 'none'}`),
-    'persistence-ports': result(findFile(join(appDir, 'src'), 'prisma.service.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'PrismaService'),
+    'persistence-ports': result(
+      persistencePort && findFile(join(appDir, 'src'), 'prisma.service.ts') ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral PersistencePort with Prisma adapter infrastructure'),
     'migration-ports': result(existsSync(join(appDir, 'prisma', 'migrations')) ? STATUS.COMPLIANT : STATUS.MISSING, 'prisma/migrations'),
-    'transaction-ports': result(findFile(join(appDir, 'src'), 'prisma.service.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'Prisma transaction access, no neutral port'),
+    'transaction-ports': result(
+      transactionPort && transactionAdapter && transactionProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      transactionPort && transactionAdapter
+        ? 'neutral TransactionPort with Prisma adapter behavior tested'
+        : 'neutral transaction port or adapter missing',
+      transactionProof ? 'behavioral-test' : 'structural'),
     'authentication-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, extensionsProven ? 'versioned AuthenticationHook registry behavior tested' : 'versioned AuthenticationHook missing', extensionsProven ? 'behavioral-test' : 'structural'),
     'authorization-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, extensionsProven ? 'versioned AuthorizationHook registry behavior tested' : 'versioned AuthorizationHook missing', extensionsProven ? 'behavioral-test' : 'structural'),
     'file-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, extensionsProven ? 'versioned FileHook registry behavior tested' : 'versioned FileHook missing', extensionsProven ? 'behavioral-test' : 'structural'),
@@ -167,15 +178,33 @@ function evaluateSpring(appDir) {
     appYml && readFileSync(appYml, 'utf8').includes('shutdown: graceful')
     && findFile(java, 'RuntimeLifecycle.java')
     && findFile(join(appDir, 'src', 'test'), 'RuntimeLifecycleTest.java'));
+  const validationPort = findFile(java, 'InputValidationPort.java');
+  const validationAdapter = findFile(java, 'JakartaInputValidationAdapter.java');
+  const validationProof = findFile(join(appDir, 'src', 'test'), 'JakartaInputValidationAdapterTest.java');
+  const persistencePort = findFile(java, 'PersistencePort.java');
+  const transactionPort = findFile(java, 'TransactionPort.java');
+  const transactionAdapter = findFile(java, 'SpringTransactionAdapter.java');
+  const transactionProof = findFile(join(appDir, 'src', 'test'), 'SpringTransactionAdapterTest.java');
   return {
     'http-server': result(findFile(java, 'EnistereCoreApplication.java') ? STATUS.COMPLIANT : STATUS.MISSING, 'Spring Boot application'),
-    'input-validation': result(findFile(java, 'GlobalExceptionHandler.java') ? STATUS.PARTIAL : STATUS.MISSING, 'Jakarta validation error handling'),
+    'input-validation': result(
+      validationPort && validationAdapter && validationProof && findFile(java, 'GlobalExceptionHandler.java')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral InputValidationPort, Jakarta adapter and canonical HTTP mapping behavior tested',
+      validationProof ? 'behavioral-test' : 'structural'),
     'canonical-http-errors': errorResult(shape),
     openapi: result(findFile(java, 'OpenApiConfig.java') ? STATUS.COMPLIANT : STATUS.MISSING, 'springdoc OpenApiConfig'),
     'health-liveness-readiness': result(healthController ? STATUS.COMPLIANT : STATUS.MISSING, healthController ? 'HealthController.java (/health, /health/live, /health/ready)' : 'actuator aggregate only'),
-    'persistence-ports': result(findFile(java, 'BaseEntity.java') ? STATUS.PARTIAL : STATUS.MISSING, 'JPA base infrastructure, no neutral port'),
+    'persistence-ports': result(
+      persistencePort && findFile(java, 'BaseEntity.java') ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral PersistencePort with JPA adapter infrastructure'),
     'migration-ports': result(existsSync(join(appDir, 'src', 'main', 'resources', 'db', 'migration')) ? STATUS.COMPLIANT : STATUS.MISSING, 'flyway db/migration'),
-    'transaction-ports': result(findFile(java, 'DatabaseConfig.java') ? STATUS.PARTIAL : STATUS.MISSING, 'Spring transaction infrastructure, no neutral port'),
+    'transaction-ports': result(
+      transactionPort && transactionAdapter && transactionProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      transactionPort && transactionAdapter
+        ? 'neutral TransactionPort with Spring adapter behavior tested'
+        : 'neutral transaction port or adapter missing',
+      transactionProof ? 'behavioral-test' : 'structural'),
     'authentication-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, extensionsProven ? 'versioned AuthenticationHook registry behavior tested' : 'versioned AuthenticationHook missing', extensionsProven ? 'behavioral-test' : 'structural'),
     'authorization-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, extensionsProven ? 'versioned AuthorizationHook registry behavior tested' : 'versioned AuthorizationHook missing', extensionsProven ? 'behavioral-test' : 'structural'),
     'file-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, extensionsProven ? 'versioned FileHook registry behavior tested' : 'versioned FileHook missing', extensionsProven ? 'behavioral-test' : 'structural'),
@@ -364,6 +393,9 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
   let lifecycle = false;
   let extensionPoints = false;
   let buildGates = false;
+  let configurationProven = false;
+  let diagnosticsProven = false;
+  let buildGatesProven = false;
 
   if (runtime === 'nestjs') {
     configuration = Boolean(findFile(src, 'env.validation.ts'));
@@ -392,9 +424,14 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
       findFile(src, 'runtime-extension.contract.ts')
       && findFile(src, 'runtime-extension.contract.spec.ts'));
     buildGates = Boolean(scripts.build && scripts.test);
+    configurationProven = configuration && Boolean(findFile(src, 'env.validation.spec.ts'));
+    diagnosticsProven = Boolean(
+      findFile(src, 'runtime-diagnostics.service.ts')
+      && findFile(src, 'runtime-diagnostics.service.spec.ts'));
+    buildGatesProven = buildGates;
   } else if (runtime === 'spring') {
     const appYml = findFile(resources, 'application.yml');
-    configuration = Boolean(appYml);
+    configuration = Boolean(appYml && findFile(java, 'PlatformProperties.java'));
     canonicalErrors = classifyErrorShape(readOptional(findFile(java, 'ApiError.java'))) === 'flat-envelope';
     structuredLogging = readOptional(appYml).includes('structured') && Boolean(findFile(java, 'RequestLoggingFilter.java'));
     correlation = Boolean(findFile(java, 'CorrelationIdFilter.java'));
@@ -423,7 +460,16 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     extensionPoints = Boolean(
       findFile(java, 'RuntimeExtensionRegistry.java')
       && findFile(join(src, 'test'), 'RuntimeExtensionRegistryTest.java'));
-    buildGates = existsSync(join(appDir, 'pom.xml'));
+    const pom = readOptional(join(appDir, 'pom.xml'));
+    buildGates = Boolean(pom);
+    configurationProven = configuration
+      && Boolean(findFile(join(src, 'test'), 'PlatformPropertiesTest.java'));
+    diagnosticsProven = Boolean(
+      findFile(java, 'RuntimeDiagnostics.java')
+      && findFile(join(src, 'test'), 'RuntimeDiagnosticsTest.java'));
+    buildGatesProven = buildGates
+      && pom.includes('maven-enforcer-plugin')
+      && pom.includes('maven-surefire-plugin');
   } else if (runtime === 'nextjs') {
     configuration = Boolean(findFile(src, 'public-config.ts') && findFile(src, 'server-config.ts'));
     canonicalErrors = Boolean(findFile(src, 'map-api-error.ts'));
@@ -467,7 +513,17 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
 
   const diagnostics = canonicalErrors && health;
   return {
-    configuration: present(configuration, 'validated/typed configuration seam found', 'validated configuration missing', runtime === 'spring' || runtime === 'angular' || runtime === 'flutter'),
+    configuration: result(
+      configurationProven || (configuration && runtime === 'nestjs')
+        ? STATUS.COMPLIANT
+        : configuration
+          ? (runtime === 'spring' || runtime === 'angular' || runtime === 'flutter'
+            ? STATUS.PARTIAL : STATUS.COMPLIANT)
+          : STATUS.MISSING,
+      configurationProven
+        ? 'typed configuration validation behavior tested'
+        : configuration ? 'validated/typed configuration seam found' : 'validated configuration missing',
+      configurationProven ? 'behavioral-test' : 'structural'),
     'canonical-errors': present(canonicalErrors, 'canonical error mapping found', 'canonical error mapping missing'),
     'structured-logging': present(structuredLogging, 'structured request logging found', 'structured logging missing'),
     correlation: present(correlation, 'correlation propagation seam found', 'correlation propagation missing'),
@@ -485,7 +541,12 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
       security ? 'bounded CORS, security headers and rate limiting behavior covered' : 'security baseline incomplete',
       security && isApi ? 'behavioral-test' : 'structural'),
     health: present(health, 'runtime health signal found', 'health/diagnostic signal missing', !isApi),
-    diagnostics: present(diagnostics, 'canonical errors and health provide partial diagnostics', 'structured actionable diagnostics missing', true),
+    diagnostics: result(
+      diagnosticsProven ? STATUS.COMPLIANT : diagnostics ? STATUS.PARTIAL : STATUS.MISSING,
+      diagnosticsProven
+        ? 'sanitized diagnostics registry behavior tested'
+        : diagnostics ? 'canonical errors and health provide partial diagnostics' : 'structured actionable diagnostics missing',
+      diagnosticsProven ? 'behavioral-test' : 'structural'),
     'testing-foundation': present(tests, 'test foundation found', 'test foundation missing'),
     'lifecycle-hooks': result(
       lifecycle ? STATUS.COMPLIANT : isWeb ? STATUS.PARTIAL : STATUS.MISSING,
@@ -495,7 +556,14 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
       extensionPoints ? (isMobile || runtime === 'angular' ? STATUS.PARTIAL : STATUS.COMPLIANT) : STATUS.MISSING,
       extensionPoints ? 'versioned extension registry behavior tested' : 'versioned extension points missing',
       extensionPoints && isApi ? 'behavioral-test' : 'structural'),
-    'build-quality-gates': present(buildGates, 'build/test gates found', 'build and quality gates missing', runtime === 'spring' || runtime === 'flutter'),
+    'build-quality-gates': result(
+      buildGatesProven ? STATUS.COMPLIANT
+        : buildGates ? (runtime === 'spring' || runtime === 'flutter' ? STATUS.PARTIAL : STATUS.COMPLIANT)
+          : STATUS.MISSING,
+      buildGatesProven
+        ? 'build, test and toolchain quality gates explicitly declared'
+        : buildGates ? 'build/test gates found' : 'build and quality gates missing',
+      'structural'),
   };
 }
 

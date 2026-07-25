@@ -90,6 +90,13 @@ describe('Platform Baseline v2 — six runtime gap reports', () => {
       assert.equal(app.familyContract.invariants['file-hook'].status, STATUS.COMPLIANT);
       assert.equal(app.familyContract.invariants['event-hook'].status, STATUS.COMPLIANT);
       assert.equal(app.familyContract.invariants['graceful-shutdown'].source, 'behavioral-test');
+      assert.equal(app.baseline.invariants.configuration.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants.diagnostics.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['build-quality-gates'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['persistence-ports'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['transaction-ports'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['input-validation'].status, STATUS.COMPLIANT);
+      assert.deepEqual(app.diagnostics, []);
     }
   });
 
