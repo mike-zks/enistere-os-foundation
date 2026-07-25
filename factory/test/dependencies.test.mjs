@@ -155,6 +155,78 @@ describe('npm audit by documented exception', () => {
     assert.match(report.violations[0].reason, /no documented exception/);
   });
 
+  it('accepts a transitive npm propagation only when its documented root authorizes it', () => {
+    const propagationExceptions = [{
+      package: 'brace-expansion',
+      maxSeverity: 'high',
+      appliesTo: ['nestjs'],
+      deadline: '2026-08-31',
+      allowPropagation: true,
+    }];
+    const vulnerabilities = {
+      'brace-expansion': {
+        severity: 'high',
+        via: [{ source: 1, name: 'brace-expansion', severity: 'high' }],
+      },
+      minimatch: { severity: 'high', via: ['brace-expansion'] },
+      eslint: { severity: 'high', via: ['minimatch'] },
+    };
+    const report = evaluateAudit(
+      { vulnerabilities }, propagationExceptions,
+      { targets: ['nestjs'], now: new Date('2026-07-25') },
+    );
+    assert.equal(report.ok, true);
+    assert.deepEqual(report.accepted.find((item) => item.package === 'eslint').propagatedVia, ['minimatch']);
+  });
+
+  it('does not hide a direct advisory behind an accepted propagated cause', () => {
+    const propagationExceptions = [{
+      package: 'brace-expansion',
+      maxSeverity: 'high',
+      appliesTo: ['nestjs'],
+      deadline: '2026-08-31',
+      allowPropagation: true,
+    }];
+    const vulnerabilities = {
+      'brace-expansion': {
+        severity: 'high',
+        via: [{ source: 1, name: 'brace-expansion', severity: 'high' }],
+      },
+      minimatch: {
+        severity: 'high',
+        via: ['brace-expansion', { source: 2, name: 'minimatch', severity: 'high' }],
+      },
+    };
+    const report = evaluateAudit(
+      { vulnerabilities }, propagationExceptions,
+      { targets: ['nestjs'], now: new Date('2026-07-25') },
+    );
+    assert.equal(report.ok, false);
+    assert.equal(report.violations[0].package, 'minimatch');
+  });
+
+  it('does not propagate an exception unless it explicitly authorizes propagation', () => {
+    const nonPropagatingExceptions = [{
+      package: 'brace-expansion',
+      maxSeverity: 'high',
+      appliesTo: ['nestjs'],
+      deadline: '2026-08-31',
+    }];
+    const vulnerabilities = {
+      'brace-expansion': {
+        severity: 'high',
+        via: [{ source: 1, name: 'brace-expansion', severity: 'high' }],
+      },
+      minimatch: { severity: 'high', via: ['brace-expansion'] },
+    };
+    const report = evaluateAudit(
+      { vulnerabilities }, nonPropagatingExceptions,
+      { targets: ['nestjs'], now: new Date('2026-07-25') },
+    );
+    assert.equal(report.ok, false);
+    assert.equal(report.violations[0].package, 'minimatch');
+  });
+
   it('accepts the pre-existing Expo advisories only for a react-native composition', () => {
     const vulnerabilities = { uuid: { severity: 'moderate' }, xcode: { severity: 'moderate' } };
     const inScope = evaluateAudit({ vulnerabilities }, exceptions, { targets: rnTargets, now: new Date('2026-07-19') });

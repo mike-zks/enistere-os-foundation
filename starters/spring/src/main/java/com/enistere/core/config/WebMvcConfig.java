@@ -1,27 +1,26 @@
 package com.enistere.core.config;
 
-import com.enistere.core.infrastructure.ratelimit.RateLimitInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Autowired(required = false)
-    private RateLimitInterceptor rateLimitInterceptor;
+    private final CorsConfig cors;
+
+    public WebMvcConfig(CorsConfig cors) {
+        this.cors = cors;
+    }
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        if (rateLimitInterceptor != null) {
-            registry.addInterceptor(rateLimitInterceptor)
-                .addPathPatterns(
-                    "/api/v1/auth/login",
-                    "/api/v1/auth/refresh",
-                    "/api/v1/files/upload",
-                    "/api/v1/files/*/download-url"
-                );
-        }
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins(cors.getAllowedOriginsList().toArray(String[]::new))
+            .allowedMethods("GET", "POST", "PATCH", "DELETE", "OPTIONS")
+            .allowedHeaders("Authorization", "Content-Type", "X-Request-Id", "traceparent")
+            .exposedHeaders("X-Request-Id", "traceparent")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
 }

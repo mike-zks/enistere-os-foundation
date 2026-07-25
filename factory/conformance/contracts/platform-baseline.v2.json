@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1",
+  "id": "platform-baseline",
+  "version": "2.0.0",
+  "common": {
+    "contractVersion": "common/2.0.0",
+    "invariants": [
+      "configuration",
+      "canonical-errors",
+      "structured-logging",
+      "correlation",
+      "observability",
+      "technical-audit",
+      "security-baseline",
+      "health",
+      "diagnostics",
+      "testing-foundation",
+      "lifecycle-hooks",
+      "extension-points",
+      "build-quality-gates"
+    ]
+  },
+  "families": {
+    "api": {
+      "contractVersion": "api/2.0.0",
+      "invariants": [
+        "http-server",
+        "input-validation",
+        "canonical-http-errors",
+        "openapi",
+        "health-liveness-readiness",
+        "persistence-ports",
+        "migration-ports",
+        "transaction-ports",
+        "authentication-hook",
+        "authorization-hook",
+        "file-hook",
+        "event-hook",
+        "graceful-shutdown",
+        "contract-tests",
+        "rate-limiting"
+      ]
+    },
+    "web": {
+      "contractVersion": "web/2.0.0",
+      "invariants": [
+        "routing",
+        "typed-api-client",
+        "session-hook",
+        "access-control-hook",
+        "error-boundaries",
+        "form-foundation",
+        "ui-states",
+        "accessibility",
+        "security-headers",
+        "telemetry",
+        "e2e-foundation"
+      ]
+    },
+    "mobile": {
+      "contractVersion": "mobile/2.0.0",
+      "invariants": [
+        "navigation",
+        "typed-api-client",
+        "secure-storage",
+        "session-hook",
+        "network-state",
+        "error-handling",
+        "permissions",
+        "deep-links",
+        "offline-hook",
+        "push-hook",
+        "crash-reporting",
+        "build-foundation"
+      ]
+    }
+  }
+}

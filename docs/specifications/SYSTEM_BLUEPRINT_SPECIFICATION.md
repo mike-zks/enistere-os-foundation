@@ -16,13 +16,18 @@ metadata:
 
 spec:
   architecture:
-    style: modular-monolith
+    profile: multi-client
+    evolutionTarget: modular-distributed
   applications: []
   domains: []
   capabilities: []
   primitives: []
   communications: []
   environments: []
+  deployment: {}
+  security: {}
+  quality: {}
+  ai: {}
   policies: {}
 ```
 
@@ -47,16 +52,17 @@ applications:
 
 Plusieurs applications d’une même famille sont autorisées.
 
-## Styles
+## Profils
 
-- standard ;
+- api ;
+- monolith ;
 - multi-client ;
-- modular-monolith ;
-- modular-monolith-with-workers ;
-- service-oriented ;
+- modular-distributed ;
 - microservices.
 
-Les microservices exigent des validations renforcées.
+Les règles détaillées sont définies dans
+[ARCHITECTURE_PROFILE_SPECIFICATION.md](ARCHITECTURE_PROFILE_SPECIFICATION.md). Les syntaxes historiques
+peuvent être migrées à la frontière d'entrée mais ne circulent pas dans le moteur.
 
 ## Capabilities
 
@@ -75,9 +81,23 @@ capabilities:
 ```yaml
 primitives:
   - id: primary-db
-    kind: database
-    engine: postgresql
+    kind: relational-database
+    provider: postgresql
     owner: core-api
+```
+
+Les kinds normatifs sont définis dans
+[INFRASTRUCTURE_PRIMITIVE_SPECIFICATION.md](INFRASTRUCTURE_PRIMITIVE_SPECIFICATION.md).
+
+## Platform Baseline
+
+Le baseline n'apparaît pas dans `capabilities`. Il est configuré par policies :
+
+```yaml
+policies:
+  observability: { required: true, standard: opentelemetry }
+  audit: { technicalAuditRequired: true, sensitiveOperationsRequired: true }
+  security: { baseline: production }
 ```
 
 ## Communications

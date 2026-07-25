@@ -62,7 +62,7 @@ describe('capability status semantics', () => {
 
   it('accepts not-applicable in a capability manifest', () => {
     const value = {
-      schemaVersion: '2', id: 'rbac', version: '0.2.0', requires: ['base', 'auth'], responsibilities: ['roles'],
+      schemaVersion: '2', id: 'rbac', version: '0.2.0', requires: ['auth'], responsibilities: ['roles'],
       targets: {
         nestjs: { status: 'ready', mode: 'overlay' }, spring: { status: 'planned' },
         nextjs: { status: 'ready', mode: 'overlay' }, angular: { status: 'planned' },
@@ -74,19 +74,14 @@ describe('capability status semantics', () => {
 });
 
 describe('rbac dependency contract', () => {
-  it('requires auth (and base) before rbac', () => {
-    assert.match(validateCapabilityDependencies(['base', 'rbac']).join(' '), /rbac requires auth/);
-    assert.deepEqual(validateCapabilityDependencies(['base', 'auth', 'rbac']), []);
+  it('requires auth before rbac', () => {
+    assert.match(validateCapabilityDependencies(['rbac']).join(' '), /rbac requires auth/);
+    assert.deepEqual(validateCapabilityDependencies(['auth', 'rbac']), []);
   });
 
-  it('refuses rbac without base', () => {
-    const issues = validateCapabilityDependencies(['auth', 'rbac']).join(' ');
-    assert.match(issues, /base is mandatory/);
-  });
-
-  it('declares requires: [base, auth] in the shipped manifest', async () => {
+  it('declares requires: [auth] in the shipped manifest', async () => {
     const value = JSON.parse(await readFile(new URL('../../capabilities/rbac/capability.json', import.meta.url), 'utf8'));
-    assert.deepEqual(value.requires, ['base', 'auth']);
+    assert.deepEqual(value.requires, ['auth']);
     assert.equal(value.targets.nestjs.status, 'ready');
     assert.equal(value.targets.nextjs.status, 'ready');
     assert.equal(value.targets['react-native'].status, 'not-applicable');
@@ -94,7 +89,7 @@ describe('rbac dependency contract', () => {
     for (const planned of ['angular', 'flutter']) assert.equal(value.targets[planned].status, 'planned');
   });
 
-  it('rejects generating base + rbac without auth', async () => {
+  it('rejects generating rbac without auth', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-rbac-dep-'));
     await assert.rejects(
       generateProject(blueprint('no-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'rbac']), join(root, 'p'), { materialize: false }),

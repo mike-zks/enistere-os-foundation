@@ -11,7 +11,7 @@ function baseManifest(overrides = {}) {
     schemaVersion: '2',
     id: 'auth',
     version: '1.0.0',
-    requires: ['base'],
+    requires: [],
     responsibilities: ['login'],
     targets: {
       nestjs: { status: 'ready', mode: 'overlay' },
@@ -67,9 +67,7 @@ describe('Capability Contract v2', () => {
       .some((m) => m.includes('provides.unknown is not supported')));
   });
 
-  // Backward compatibility: the real manifests on disk must satisfy the hardened
-  // v2 contract unchanged (they use none of the optional fields).
-  it('validates the four shipped manifests unchanged', async () => {
+  it('validates the three optional capability manifests', async () => {
     await assert.doesNotReject(loadCapabilityManifests(FOUNDATION_ROOT));
   });
 });

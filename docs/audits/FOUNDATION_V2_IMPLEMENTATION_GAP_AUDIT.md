@@ -1,5 +1,8 @@
 # Audit d'écart — Foundation V2 : implémentation vs cible
 
+> Rapport antérieur à l'ADR-057. Audit et Observability ne sont plus des capabilities. Le constat courant
+> est [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Synthèse exécutive. Détails et preuves dans les documents liés depuis
 [`README.md`](README.md).
 
@@ -46,7 +49,7 @@ est organisée autour du **système** (blueprint → runtime adapters → capabi
 | P1-3 | **Parité Mobile rompue** : Flutter base-only (auth/files `planned`) | FUNCTIONAL | CREATE |
 | P1-4 | **Parité API rompue sur Files** : `capabilities/files/targets/spring` absent | FUNCTIONAL | CREATE |
 | P1-5 | **Primitives non modélisées** : cuites dans les packs Compose (postgres, minio) ; pas de type `primitives` | ARCHITECTURE | CREATE |
-| P1-6 | **Capabilities cibles manquantes** : user-management, audit, events, notifications, observability | FUNCTIONAL | CREATE |
+| P1-6 | **Capabilities cibles manquantes** : user-management, events, notifications | FUNCTIONAL | CREATE |
 | P1-7 | **Artefacts de conformité non émis** : pas de `enistere.plan.json` ni `enistere.conformance.json` | LIFECYCLE | CREATE |
 | P1-8 | **CI non verte** : gate `audit` rouge (CVE transitives) → base non industrialisable en l'état | OPERATIONS/SECURITY | REFACTOR |
 
@@ -69,8 +72,9 @@ Détails : [matrice runtimes](RUNTIME_CONFORMANCE_GAP_MATRIX.md),
 ## 7. Parité des capabilities
 
 `base` : 6/6. `auth` : 4/6 (Angular, Flutter `planned`). `rbac` : 3/6 + RN `n/a` (Angular, Flutter
-`planned`). `files` : 3/6 (Spring, Angular, Flutter `planned`). `user-management/audit/events/
-notifications/observability` : 0/6 (absentes). Voir [parité](CAPABILITY_PARITY_GAP_MATRIX.md).
+`planned`). `files` : 3/6 (Spring, Angular, Flutter `planned`). `user-management/events/notifications` :
+0/6 (absentes). Audit technique et Observability relèvent désormais du baseline. Voir
+[parité](CAPABILITY_PARITY_GAP_MATRIX.md).
 
 ## 8. Blueprint et Factory
 

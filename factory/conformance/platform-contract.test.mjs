@@ -11,30 +11,19 @@ import {
   evaluateApiApp,
   evaluateWebApp,
   evaluateMobileApp,
+  evaluateCommonBaseline,
   buildConformance,
-  STATUS,
+  validatePlatformBaselineContract,
+  PLATFORM_BASELINE_CONTRACT,
+  COMMON_BASELINE_INVARIANTS,
   API_CONTRACT_INVARIANTS,
   WEB_CONTRACT_INVARIANTS,
   MOBILE_CONTRACT_INVARIANTS,
+  STATUS,
 } from './platform-contract.mjs';
 import { writeConformance } from './run.mjs';
 
-describe('platform-contract — error shape classification', () => {
-  it('recognizes the NestJS flat envelope', () => {
-    assert.equal(classifyErrorShape('response.status(status).json({ success, statusCode, errorCode, requestId })'), 'flat-envelope');
-  });
-  it('recognizes the Spring ApiError record', () => {
-    assert.equal(classifyErrorShape('public record ApiError(int status, String code, String message, List<String> errors, Instant timestamp, String path) {}'), 'spring-apierror');
-  });
-  it('recognizes canonical Problem Details', () => {
-    assert.equal(classifyErrorShape('{ "type": "...", "title": "...", "detail": "...", "correlationId": "..." }'), 'problem-details');
-  });
-  it('returns unknown for an unrelated source', () => {
-    assert.equal(classifyErrorShape('export const x = 1;'), 'unknown');
-  });
-});
-
-async function generate(composition, stack, capabilities = ['base']) {
+async function generate(composition, stack, capabilities = []) {
   const root = await mkdtemp(join(tmpdir(), `enistere-conformance-${composition}-`));
   const out = join(root, 'project');
   const blueprint = createDefaultBlueprint(`conformance-${composition}`);
@@ -45,137 +34,102 @@ async function generate(composition, stack, capabilities = ['base']) {
   return { root, out, plan };
 }
 
-describe('platform-contract — computed API conformance', () => {
+function assertContractKeys(app, expectedFamily) {
+  assert.equal(app.baseline.contractVersion, 'common/2.0.0');
+  assert.equal(app.familyContract.contractVersion, `${app.family}/2.0.0`);
+  assert.deepEqual(Object.keys(app.baseline.invariants).sort(), [...COMMON_BASELINE_INVARIANTS].sort());
+  assert.deepEqual(Object.keys(app.familyContract.invariants).sort(), [...expectedFamily].sort());
+}
+
+describe('Platform Baseline v2 — contract registry and error shape', () => {
+  it('loads one versioned contract for Common/API/Web/Mobile', () => {
+    assert.equal(PLATFORM_BASELINE_CONTRACT.version, '2.0.0');
+    assert.equal(PLATFORM_BASELINE_CONTRACT.common.contractVersion, 'common/2.0.0');
+    assert.deepEqual(Object.keys(PLATFORM_BASELINE_CONTRACT.families), ['api', 'web', 'mobile']);
+    assert.deepEqual(validatePlatformBaselineContract(PLATFORM_BASELINE_CONTRACT), []);
+    assert.match(validatePlatformBaselineContract({})[0], /schemaVersion/);
+  });
+
+  it('classifies the canonical and rejected API error shapes', () => {
+    assert.equal(classifyErrorShape('response.json({ statusCode, errorCode, requestId })'), 'flat-envelope');
+    assert.equal(classifyErrorShape('record ApiError(errors, timestamp, path)'), 'spring-apierror');
+    assert.equal(classifyErrorShape('{ type, title, detail, correlationId }'), 'problem-details');
+    assert.equal(classifyErrorShape('export const x = 1'), 'unknown');
+  });
+
+  it('reports every invariant missing for an empty runtime tree', () => {
+    const common = evaluateCommonBaseline({ appDir: '/nonexistent', runtime: 'nestjs' });
+    assert.deepEqual(Object.keys(common).sort(), [...COMMON_BASELINE_INVARIANTS].sort());
+    assert.ok(Object.values(common).every((entry) => entry.status === STATUS.MISSING));
+  });
+});
+
+describe('Platform Baseline v2 — six runtime gap reports', () => {
   const roots = [];
-  after(async () => { for (const r of roots) await rm(r, { recursive: true, force: true }); });
+  after(async () => { for (const root of roots) await rm(root, { recursive: true, force: true }); });
 
-  it('measures a generated NestJS API (error canonical, health + correlation compliant)', async () => {
-    const { root, out, plan } = await generate('nestjs-base', { api: 'nestjs', web: null, mobile: null });
-    roots.push(root);
-    const report = buildConformance({ plan, projectDir: out });
-
-    assert.ok(report.families.includes('api'));
-    assert.equal(report.generatedFrom.planDigest, plan.planDigest);
-    const api = report.apps.find((a) => a.runtime === 'nestjs');
-    assert.ok(api, 'a nestjs api app is present');
-    assert.equal(api.family, 'api');
-    assert.deepEqual(Object.keys(api.invariants).sort(), [...API_CONTRACT_INVARIANTS].sort());
-
-    // ADR-048: the flat envelope is the canonical error contract → compliant.
-    assert.equal(api.invariants['error-canonical'].status, STATUS.COMPLIANT);
-    assert.match(api.invariants['error-canonical'].evidence, /flat-envelope/);
-    assert.equal(api.invariants['health-liveness-readiness'].status, STATUS.COMPLIANT);
-    assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
-    assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
-    assert.equal(api.invariants.observability.status, STATUS.COMPLIANT);
-    assert.ok(!api.nonConformant.includes('error-canonical'));
+  it('evaluates NestJS and Spring against Common + API v2', async () => {
+    for (const runtime of ['nestjs', 'spring']) {
+      const generated = await generate(`${runtime}-base`, { api: runtime, web: null, mobile: null });
+      roots.push(generated.root);
+      const report = buildConformance({ plan: generated.plan, projectDir: generated.out });
+      assert.equal(report.schemaVersion, '2');
+      assert.equal(report.contract.version, '2.0.0');
+      const app = report.apps.find((item) => item.runtime === runtime);
+      assertContractKeys(app, API_CONTRACT_INVARIANTS);
+      assert.equal(app.familyContract.invariants['canonical-http-errors'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['rate-limiting'].status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants.observability.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants.observability.source, 'behavioral-test');
+      assert.equal(app.baseline.invariants['technical-audit'].status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['security-baseline'].status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['lifecycle-hooks'].status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['extension-points'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['authentication-hook'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['authorization-hook'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['file-hook'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['event-hook'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['graceful-shutdown'].source, 'behavioral-test');
+    }
   });
 
-  it('measures a generated Spring API (error canonical + correlation + health compliant)', async () => {
-    const { root, out, plan } = await generate('spring-base', { api: 'spring', web: null, mobile: null });
-    roots.push(root);
-    const api = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'spring');
-    assert.ok(api, 'a spring api app is present');
-    assert.deepEqual(Object.keys(api.invariants).sort(), [...API_CONTRACT_INVARIANTS].sort());
-    // ADR-048 + ADR-047: Spring converges onto the flat envelope, correlation and health.
-    assert.equal(api.invariants['error-canonical'].status, STATUS.COMPLIANT);
-    assert.equal(api.invariants['correlation-id'].status, STATUS.COMPLIANT);
-    assert.equal(api.invariants['health-liveness-readiness'].status, STATUS.COMPLIANT);
-    assert.equal(api.invariants.observability.status, STATUS.COMPLIANT);
-    // OpenAPI (springdoc) is present on the base; migrations live in the full
-    // composition, so the base is honestly reported as missing them.
-    assert.equal(api.invariants.openapi.status, STATUS.COMPLIANT);
-    assert.equal(api.invariants.migrations.status, STATUS.MISSING);
+  it('evaluates Next.js and Angular against Common + Web v2 without claiming full conformance', async () => {
+    for (const runtime of ['nextjs', 'angular']) {
+      const generated = await generate(`${runtime}-base`, { api: 'nestjs', web: runtime, mobile: null });
+      roots.push(generated.root);
+      const app = buildConformance({ plan: generated.plan, projectDir: generated.out }).apps.find((item) => item.runtime === runtime);
+      assertContractKeys(app, WEB_CONTRACT_INVARIANTS);
+      assert.equal(app.familyContract.invariants.routing.status, STATUS.COMPLIANT);
+      assert.notEqual(app.baseline.invariants.observability.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['technical-audit'].status, STATUS.MISSING);
+    }
   });
 
-  it('rejects an unsupported runtime', () => {
-    assert.throws(() => evaluateApiApp({ appDir: '/nonexistent', runtime: 'deno' }), /unsupported/);
+  it('evaluates React Native and Flutter against Common + Mobile v2 without hiding gaps', async () => {
+    for (const runtime of ['react-native', 'flutter']) {
+      const generated = await generate(`${runtime}-base`, { api: 'nestjs', web: null, mobile: runtime });
+      roots.push(generated.root);
+      const app = buildConformance({ plan: generated.plan, projectDir: generated.out }).apps.find((item) => item.runtime === runtime);
+      assertContractKeys(app, MOBILE_CONTRACT_INVARIANTS);
+      assert.equal(app.familyContract.invariants.navigation.status, STATUS.COMPLIANT);
+      assert.notEqual(app.baseline.invariants.observability.status, STATUS.COMPLIANT);
+      assert.ok(app.nonConformant.some((id) => id.startsWith('baseline.')));
+    }
   });
 
-  it('writes a computed enistere.conformance.json into a generated project', async () => {
-    const { root, out } = await generate('nestjs-base', { api: 'nestjs', web: null, mobile: null });
-    roots.push(root);
-    const written = writeConformance(out);
-    const onDisk = JSON.parse(readFileSync(join(out, 'enistere.conformance.json'), 'utf8'));
-    assert.ok(onDisk.families.includes('api'));
-    assert.equal(onDisk.evaluation, 'structural');
+  it('writes the v2 computed report into a generated project', async () => {
+    const generated = await generate('write-report', { api: 'nestjs', web: null, mobile: null });
+    roots.push(generated.root);
+    const written = writeConformance(generated.out);
+    const onDisk = JSON.parse(readFileSync(join(generated.out, 'enistere.conformance.json'), 'utf8'));
     assert.deepEqual(onDisk, written);
-    assert.ok(onDisk.apps.some((a) => a.runtime === 'nestjs'));
-  });
-});
-
-describe('platform-contract — computed Web conformance', () => {
-  const roots = [];
-  after(async () => { for (const r of roots) await rm(r, { recursive: true, force: true }); });
-
-  it('measures a generated Next.js web (mature: typed client + error handling compliant)', async () => {
-    const { root, out, plan } = await generate('nest-next-base', { api: 'nestjs', web: 'nextjs', mobile: null });
-    roots.push(root);
-    const report = buildConformance({ plan, projectDir: out });
-    assert.ok(report.families.includes('web'));
-    const web = report.apps.find((a) => a.runtime === 'nextjs');
-    assert.ok(web, 'a nextjs web app is present');
-    assert.equal(web.family, 'web');
-    assert.deepEqual(Object.keys(web.invariants).sort(), [...WEB_CONTRACT_INVARIANTS].sort());
-    assert.equal(web.invariants.routing.status, STATUS.COMPLIANT);
-    assert.equal(web.invariants['typed-api-access'].status, STATUS.COMPLIANT);
-    assert.equal(web.invariants['error-handling'].status, STATUS.COMPLIANT);
+    assert.equal(onDisk.schemaVersion, '2');
+    assert.equal(onDisk.contract.source, 'factory/conformance/contracts/platform-baseline.v2.json');
   });
 
-  it('measures a generated Angular web (base converged idiomatically: typed access, error handling, states)', async () => {
-    const { root, out, plan } = await generate('nestjs-angular-base', { api: 'nestjs', web: 'angular', mobile: null });
-    roots.push(root);
-    const web = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'angular');
-    assert.ok(web, 'an angular web app is present');
-    assert.equal(web.family, 'web');
-    assert.deepEqual(Object.keys(web.invariants).sort(), [...WEB_CONTRACT_INVARIANTS].sort());
-    assert.equal(web.invariants.routing.status, STATUS.COMPLIANT);
-    // ADR-051: Angular base converges idiomatically (HttpClient + interceptors + AppApiError).
-    assert.equal(web.invariants['typed-api-access'].status, STATUS.COMPLIANT);
-    assert.equal(web.invariants['error-handling'].status, STATUS.COMPLIANT);
-    assert.equal(web.invariants['ui-states'].status, STATUS.COMPLIANT);
-    assert.equal(web.invariants.observability.status, STATUS.COMPLIANT);
-  });
-
-  it('rejects an unsupported web runtime', () => {
+  it('rejects unsupported family adapters', () => {
+    assert.throws(() => evaluateApiApp({ appDir: '/nonexistent', runtime: 'deno' }), /unsupported/);
     assert.throws(() => evaluateWebApp({ appDir: '/nonexistent', runtime: 'svelte' }), /unsupported/);
-  });
-});
-
-describe('platform-contract — computed Mobile conformance', () => {
-  const roots = [];
-  after(async () => { for (const r of roots) await rm(r, { recursive: true, force: true }); });
-
-  it('measures a generated React Native mobile (mature: typed access, error handling, observability)', async () => {
-    const { root, out, plan } = await generate('nestjs-react-native-base', { api: 'nestjs', web: null, mobile: 'react-native' });
-    roots.push(root);
-    const report = buildConformance({ plan, projectDir: out });
-    assert.ok(report.families.includes('mobile'));
-    const mobile = report.apps.find((a) => a.runtime === 'react-native');
-    assert.ok(mobile, 'a react-native mobile app is present');
-    assert.equal(mobile.family, 'mobile');
-    assert.deepEqual(Object.keys(mobile.invariants).sort(), [...MOBILE_CONTRACT_INVARIANTS].sort());
-    assert.equal(mobile.invariants.navigation.status, STATUS.COMPLIANT);
-    assert.equal(mobile.invariants['typed-api-access'].status, STATUS.COMPLIANT);
-    assert.equal(mobile.invariants.observability.status, STATUS.COMPLIANT);
-  });
-
-  it('measures a generated Flutter mobile (base converged: dio client, error handling, observability)', async () => {
-    const { root, out, plan } = await generate('nestjs-flutter-base', { api: 'nestjs', web: null, mobile: 'flutter' });
-    roots.push(root);
-    const mobile = buildConformance({ plan, projectDir: out }).apps.find((a) => a.runtime === 'flutter');
-    assert.ok(mobile, 'a flutter mobile app is present');
-    assert.equal(mobile.family, 'mobile');
-    assert.deepEqual(Object.keys(mobile.invariants).sort(), [...MOBILE_CONTRACT_INVARIANTS].sort());
-    assert.equal(mobile.invariants.navigation.status, STATUS.COMPLIANT);
-    assert.equal(mobile.invariants['ui-states'].status, STATUS.COMPLIANT);
-    // ADR-053: Flutter base converges on the Dio client + error/logging interceptors.
-    assert.equal(mobile.invariants['typed-api-access'].status, STATUS.COMPLIANT);
-    assert.equal(mobile.invariants['error-handling'].status, STATUS.COMPLIANT);
-    assert.equal(mobile.invariants.observability.status, STATUS.COMPLIANT);
-  });
-
-  it('rejects an unsupported mobile runtime', () => {
     assert.throws(() => evaluateMobileApp({ appDir: '/nonexistent', runtime: 'kotlin-native' }), /unsupported/);
   });
 });

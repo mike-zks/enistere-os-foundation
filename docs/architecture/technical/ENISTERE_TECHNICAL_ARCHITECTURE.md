@@ -20,6 +20,9 @@ Lifecycle Manager
 Component Registry
 ```
 
+La cible complète, incluant Platform Baseline, cinq profils et sept runtimes, est définie dans
+[ENISTERE_REFERENCE_ARCHITECTURE.md](../ENISTERE_REFERENCE_ARCHITECTURE.md).
+
 ## 2. Blueprint Compiler
 
 Transforme l’intention utilisateur en Canonical System Model.
@@ -106,7 +109,6 @@ Types de composants :
 - runtime-adapter ;
 - capability ;
 - primitive ;
-- feature-pack ;
 - policy-pack ;
 - deployment-pack.
 

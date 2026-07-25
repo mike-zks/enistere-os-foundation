@@ -1,75 +1,47 @@
 # Prochaine action
 
-## Action unique
+## Mission achevée
 
-**Décision structurante actée : homogénéiser le modèle de composition des 6 runtimes**
-([ADR-054](../adr/ADR-054-homogeneous-composition-model.md)) — modèle modular à **source unique** (racine =
-base modulaire + overlays ; app complète toujours **composée**, jamais dédoublée ; **aucun `base/` nulle
-part**). Aujourd'hui Spring/Angular/Flutter maintiennent une **app complète en double** (`src/`/`lib/`) qui
-dérive de leur `base/` — la contradiction du contrat d'erreur Spring (`src/` complet ancien vs `base/`
-canonique) en est le symptôme actif.
+NestJS et Spring Boot ont convergé sur les invariants prioritaires Common/API v2
+([ADR-059](../adr/ADR-059-api-runtime-baseline-v2-convergence.md)).
 
-L'**interim ADR-054 est fait** : le contrat d'erreur du `src/` Spring complet est réconcilié sur l'enveloppe
-plate canonique (`ApiError` == base, `GlobalExceptionHandler` + entry point sécurité, tests
-`$.status`→`$.statusCode`), `mvnw verify` 99/0. Plus aucun écart **logique actif** entre `base/` et `src/`.
+Preuves :
 
-La **Phase 1 ADR-054 (Spring) est faite** : `files` est modularisé en overlay
-(`capabilities/files/targets/spring`) — module files, service de stockage MinIO, `FilesConfig`/`StorageConfig`,
-migration `V3__add_stored_files.sql`, tests + `FakeStorageService`, `FileService` découplé de l'audit
-(cohérent avec les overlays auth/rbac). Target `files/spring` = `ready`, profil `spring-files` promu avec son
-golden. Preuve : golden-runtime `spring-files` (mvnw verify vert, MinIO + Postgres Testcontainers) ;
-`factory:test` 406/406. Spring compose désormais **base + auth + rbac + files** sans dépasser la sélection.
+- lifecycle explicite et arrêt gracieux testés ;
+- registres `api-extension/2.0.0` pour Authentication, Authorization, Files et Events ;
+- sécurité HTTP et CORS borné ;
+- propagation W3C, métriques et hook `telemetry/2.0.0` ;
+- mêmes assertions Common/API exécutées par le moteur de conformité ;
+- aucun invariant `MISSING` pour les deux APIs.
 
-**Politique de composition des capabilities actée** ([ADR-055](../adr/ADR-055-capability-composition-policy.md)) :
-capabilities **atomiques** + graphe `requires` **source unique** (la closure en dérive par tri topologique ;
-l'enforcement codé en dur de `validateCapabilityDependencies` est supprimé) + **auto-closure tracée**. Pas de
-fusion de capabilities, pas de bundles.
+## Écart calculé API
 
-**Contrat de base par famille acté** ([ADR-056](../adr/ADR-056-base-contract-per-family.md)) : la base =
-**plancher d'invariants** de la famille, mesuré par conformité, extras = capabilities. Le contrat **API** est
-complété de `audit-trail` + `rate-limiting` (infra d'audit + mécanisme de throttling en **base**, événements /
-limites par **overlay**, miroir NestJS). Découverte bloquante : l'app complète Spring loge `audit` et
-`rate-limiting` **hors de la composition** (ni `base/` ni overlays) → supprimer le doublon régresserait la
-sécurité (§12, §8.6) tant que la base Spring n'est pas complétée. Ces trois ADR (054/055/056) sont **des
-décisions documentaires — aucune implémentation**.
+| Runtime | Conformes | Partiels | Manquants/non conformes | Conforme v2 |
+|---|---:|---:|---:|---|
+| NestJS | 26 | 2 | 0 | non |
+| Spring Boot | 22 | 6 | 0 | non |
 
-**Prochaine action unique — ADR-056 étapes 1-2** (débloque tout le reste) :
+Écarts restants :
 
-1. Ajouter `rate-limiting` + `audit-trail` aux **invariants du contrat API** (`platform-contract.mjs`), mesurés
-   sur Nest **et** Spring.
-2. **Porter la base Spring** à parité NestJS (audit-infra + throttling en `base/`, événements / usage par
-   overlay), preuve `golden-runtime spring-*` verte.
+- NestJS : `diagnostics`, `transaction-ports` ;
+- Spring Boot : `configuration`, `diagnostics`, `build-quality-gates`,
+  `input-validation`, `persistence-ports`, `transaction-ports`.
 
-Puis, **débloquées** : ADR-054 A (repointer CI → supprimer `starters/spring/src` → remonter `base/` → fitness
-« source unique ») ; ADR-055 étape 1 (dériver la closure du graphe `requires`) ; **dette mobile** (base RN
-sur-remplie ↔ Flutter minimale, même vice) ; **vérification Web**. Ordre global : API → Mobile → Web.
+Source :
+[`platform-baseline-v2-gap.json`](../../factory/conformance/reports/platform-baseline-v2-gap.json).
 
-Dette suivie : parité des contrats **générés** (Angular/Flutter → `@enistere/api-contracts`, audit P0) ; a11y ;
-capabilities Web/Mobile (Phase 3).
+## Prochaine mission unique
 
-## Cadrage gouvernance
+> **Achever la convergence NestJS/Spring Common/API v2 en supprimant les huit
+> statuts `PARTIAL`, puis produire une preuve de boot et de contrat HTTP pour
+> chaque runtime — sans ajouter FastAPI ni nouvelle capability.**
 
-Selon [`ARCHITECTURE_GOVERNANCE.md`](../governance/ARCHITECTURE_GOVERNANCE.md) et la
-[Definition of Ready](../governance/DEFINITION_OF_READY.md), commencer par une analyse directe du dépôt après
-merge (ne pas supposer les contrats Web suffisants), et aucune readiness sans preuve exécutable
-([Definition of Done](../governance/DEFINITION_OF_DONE.md)).
+### Critères de sortie
 
-## Dette suivie — missions d'upgrade dédiées
-
-Deux advisories CVE-2026 sans correctif upstream sont couvertes par des exceptions documentées
-(`factory/quality/audit-exceptions.json`, échéance 2026-10-31, revue forcée par le gate `audit-check`).
-Elles se lèvent **hors du chemin critique** de l'action ci-dessus, chacune selon
-[`DEPENDENCY_POLICY.md`](../governance/DEPENDENCY_POLICY.md) (matrice de compatibilité, tests, preuve golden) :
-
-1. **Upgrade Next** — jusqu'à un Next promouvant `sharp` ≥ 0.35.0 → lève les exceptions `sharp` / `next` ;
-2. **Upgrade Angular CLI** — jusqu'à ce que la chaîne `@angular/cli` → `@modelcontextprotocol/sdk` tire
-   `@hono/node-server` ≥ 2.0.5 → lève la chaîne hono.
-
-## Interdictions temporaires
-
-- nouvelle capability ;
-- nouveau runtime ;
-- nouvelle topologie ;
-- promotion de profil ;
-- extension du Domain Compiler ;
-- microservices.
+- ports neutres persistence/transaction dans les deux APIs ;
+- configuration Spring typée et validée ;
+- validation d’entrée et diagnostics comportementaux communs ;
+- quality gates Maven explicites ;
+- aucun invariant Common/API `PARTIAL` ou `MISSING` ;
+- boot contrôlé et contrat HTTP prouvés pour NestJS et Spring ;
+- statut maximal accordé par preuve, sans revendiquer `PRODUCTION_READY`.

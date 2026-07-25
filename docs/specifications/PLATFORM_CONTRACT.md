@@ -2,7 +2,8 @@
 
 ## Objet
 
-Le Platform Contract définit les garanties communes exigées de tout composant Enistere.
+Le Platform Contract définit les garanties communes exigées de tout runtime Enistere. Sa base normative
+est la [Platform Baseline Specification](PLATFORM_BASELINE_SPECIFICATION.md).
 
 ## Contrat commun
 
@@ -13,9 +14,13 @@ Tout runtime fournit, selon sa catégorie :
 - logs structurés ;
 - corrélation ;
 - télémétrie ;
+- infrastructure d'audit technique ;
+- health et diagnostics ;
 - gestion sécurisée des secrets ;
 - stratégie de tests ;
+- lifecycle hooks ;
 - points d’extension ;
+- build et quality gates ;
 - version et migration ;
 - documentation d’exploitation.
 
@@ -29,9 +34,13 @@ Tout runtime fournit, selon sa catégorie :
 - liveness et readiness ;
 - persistence integration ;
 - migrations et transactions ;
+- journal d'audit générique (infra en base, événements par capability — ADR-056) ;
+- rate-limiting (mécanisme en base, limites par endpoint — ADR-056) ;
 - points d’intégration Auth/Authorization ;
 - logs, metrics et tracing ;
 - tests unitaires, intégration et contrat.
+
+Adapters cibles : NestJS, Spring Boot et FastAPI.
 
 ## Web Runtime
 
@@ -47,6 +56,9 @@ Tout runtime fournit, selon sa catégorie :
 - tests unitaires et E2E ;
 - build et déploiement.
 
+Adapters cibles : Next.js et Angular. Session et contrôle d'accès sont des hooks de base ; leur
+comportement est apporté par les capabilities sélectionnées.
+
 ## Mobile Runtime
 
 - navigation ;
@@ -61,6 +73,14 @@ Tout runtime fournit, selon sa catégorie :
 - tests ;
 - build Android/iOS ;
 - points d’extension offline et notifications.
+
+Adapters cibles : React Native et Flutter. Offline et Push sont des hooks ; ils ne sont pas activés par
+défaut.
+
+## Classification
+
+Observability et Technical Audit sont des invariants obligatoires, jamais des capabilities. Les événements
+d'audit métier sont déclarés par les domaines/capabilities et émis via le port du baseline.
 
 ## Worker Runtime
 

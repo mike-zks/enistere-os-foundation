@@ -9,6 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Generic audit sink of the API base. The infrastructure imposes no event
+ * registry: each composed capability declares its own event types (stable
+ * SCREAMING_SNAKE_CASE identifiers — e.g. {@code AuthAuditEvents}) and records
+ * them here. Metadata is limited to non-sensitive primitives (never tokens,
+ * hashes, passwords or full payloads).
+ */
 @Service
 public class AuditService {
 
@@ -23,7 +30,7 @@ public class AuditService {
     // REQUIRES_NEW: the audit entry is committed independently of the caller's transaction.
     // A catch-all prevents a DB write failure from propagating to the caller (best-effort).
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void record(AuditEventType eventType, UUID userId, String targetType, String targetId,
+    public void record(String eventType, UUID userId, String targetType, String targetId,
                        String ipAddress, String userAgent) {
         try {
             AuditLog entry = new AuditLog();

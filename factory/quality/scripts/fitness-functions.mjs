@@ -15,7 +15,7 @@
  */
 
 import { resolve, dirname, join } from 'node:path';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { loadStarterManifests, validateManifestConsistency, STARTER_IDS } from '../../engine/starters.mjs';
@@ -62,6 +62,16 @@ export function runFitnessFunctions({ starters, capabilities }) {
   // FF5 — the profile registry is truthful: no `ready` without a golden and an
   // exact composition, no status the real matrix does not support.
   for (const issue of validateProfileRegistry(capabilities, starters)) fail('profile-truthfulness', issue);
+
+  // FF5b — single source per runtime (ADR-054/056): a starter that does not declare
+  // a `baseSource` IS its own modular base, so it must not keep a `base/` subfolder
+  // (the eliminated double representation). Starters mid-migration that still declare
+  // a `baseSource` are exempt until their base is promoted to the root.
+  for (const starter of starters) {
+    if (!starter.composition?.baseSource && existsSync(join(REPO_ROOT, 'starters', starter.id, 'base'))) {
+      fail('single-source', `starter ${starter.id} declares no baseSource but still carries a base/ subfolder (double representation)`);
+    }
+  }
 
   return { passed: findings.length === 0, findings };
 }

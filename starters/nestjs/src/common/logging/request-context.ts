@@ -8,6 +8,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
  */
 export interface RequestContext {
   requestId?: string;
+  traceId?: string;
   operationId?: string;
   userId?: string;
   sessionId?: string;
@@ -44,6 +45,9 @@ export function currentContextFields(): RequestContext {
   const fields: RequestContext = {};
   if (store.requestId) {
     fields.requestId = store.requestId;
+  }
+  if (store.traceId) {
+    fields.traceId = store.traceId;
   }
   if (store.operationId) {
     fields.operationId = store.operationId;

@@ -2,7 +2,7 @@
   "schemaVersion": "2",
   "id": "rbac",
   "version": "0.2.0",
-  "requires": ["base", "auth"],
+  "requires": ["auth"],
   "responsibilities": ["roles", "permissions", "authorization-context", "authorization-summary"],
   "targets": {
     "nestjs": { "status": "ready", "mode": "overlay" },

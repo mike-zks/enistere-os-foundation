@@ -49,7 +49,7 @@ describe('canonical system — normalizer', () => {
     assert.equal(csm.architecture.style, 'standard');
     assert.deepEqual(csm.applications.map((a) => [a.id, a.kind, a.runtime]), [['api', 'api', 'nestjs']]);
     assert.deepEqual(csm.applications[0].consumes, []);
-    assert.deepEqual(csm.capabilities.map((c) => c.id), ['base']);
+    assert.deepEqual(csm.capabilities.map((c) => c.id), []);
     assert.equal(csm.source.blueprintVersion, '1');
     assert.match(csm.source.digest, /^[0-9a-f]{64}$/);
     assert.deepEqual(validateCanonicalSystem(csm), []);
@@ -78,9 +78,9 @@ describe('canonical system — normalizer', () => {
     assert.deepEqual(validateCanonicalSystem(csm), []);
   });
 
-  it('converts global capabilities into targeted capabilities (base/auth/rbac/files)', () => {
+  it('erases legacy base and targets only optional capabilities', () => {
     const csm = normalizeBlueprint(blueprint({ stack: { api: 'nestjs', web: 'nextjs' }, capabilities: ['base', 'auth', 'rbac', 'files'] }));
-    assert.deepEqual(csm.capabilities.map((c) => c.id), ['base', 'auth', 'rbac', 'files']);
+    assert.deepEqual(csm.capabilities.map((c) => c.id), ['auth', 'rbac', 'files']);
     const appIds = csm.applications.map((a) => a.id);
     for (const capability of csm.capabilities) assert.deepEqual(capability.requestedTargets, appIds);
     assert.deepEqual(validateCanonicalSystem(csm), []);

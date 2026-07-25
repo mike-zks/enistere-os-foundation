@@ -4,7 +4,7 @@
  *
  * Il ne contient aucune donnée : il exécute, dans l'ordre déclaré, les seeds
  * apportés par les capabilities composées (registre généré par la Factory dans
- * `prisma/seed/capability-seeds.ts`). La baseline `base` n'a rien à semer.
+ * `prisma/seed/capability-seeds.ts`). Le Platform Baseline n'a rien à semer.
  *
  * Garanties attendues de chaque seed : idempotent (réexécutable sans effet de
  * bord), aucune identité ni mot de passe, aucune donnée métier.

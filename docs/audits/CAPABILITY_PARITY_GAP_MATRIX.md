@@ -1,5 +1,9 @@
 # Matrice de parité des capabilities
 
+> Rapport de mesure antérieur à l'ADR-057. Le Platform Baseline et l'audit technique ne sont pas des
+> capabilities. Le constat courant est
+> [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Parité par capability et target, mesurée contre la
 [Capability Specification](../specifications/CAPABILITY_SPECIFICATION.md) et la
 [Capability Architecture](../architecture/CAPABILITY_ARCHITECTURE.md).
@@ -9,20 +13,19 @@ Sources d'évidence : manifestes `capabilities/*/capability.json`, payloads
 
 ## Existence vs cible
 
-La cible ([Capability Architecture](../architecture/CAPABILITY_ARCHITECTURE.md)) nomme neuf capabilities.
-Quatre existent, sous une nomenclature différente ; cinq sont absentes.
+La cible courante est définie par
+[Capability Architecture](../architecture/CAPABILITY_ARCHITECTURE.md). Le tableau ci-dessous est
+requalifié selon cette cible.
 
 | Cible | Implémentation | État |
 |---|---|---|
-| Base Platform | `base` | présent |
+| Platform Baseline | ancien `base` | présent partiellement, à sortir du modèle capability |
 | Authentication | `auth` | présent (renommage) |
 | Authorization | `rbac` | présent (renommage) |
 | User Management | — | **absent** |
 | Files | `files` | présent |
-| Audit | — | **absent** (déclaré `planned` dans les manifestes starter) |
 | Events | — | **absent** |
 | Notifications | — | **absent** |
-| Observability | — | **absent** (déclaré `planned`) |
 
 ## Matrice de statut (déclaré)
 
@@ -35,7 +38,7 @@ Statut déclaré dans `capability.json` (`ready` avec `mode`, `planned`, `unsupp
 | Authorization (`rbac`) | ready | ready | ready | **planned** | n/a | **planned** |
 | Files | ready | **planned** | ready | **planned** | ready | **planned** |
 | User Management | — | — | — | — | — | — |
-| Audit / Events / Notifications / Observability | — | — | — | — | — | — |
+| Events / Notifications | — | — | — | — | — | — |
 
 ## Matrice de preuve runtime (golden CI)
 
@@ -60,7 +63,7 @@ Statut déclaré dans `capability.json` (`ready` avec `mode`, `planned`, `unsupp
 | Auth / Flutter | absent | — | non | non | Mobile base-only ; casse la parité Mobile | P1 |
 | Files / Flutter | absent | — | non | non | idem | P1 |
 | User Management (toutes) | absent | absent | non | non | Capability cible entièrement manquante | P1 |
-| Audit / Events / Notif / Observability | absent | absent | non | non | Capabilities cibles manquantes | P2 |
+| Events / Notifications | absent | absent | non | non | Capabilities cibles manquantes | P2 |
 
 ## Conclusion de parité
 

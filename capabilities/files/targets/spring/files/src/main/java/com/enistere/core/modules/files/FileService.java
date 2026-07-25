@@ -2,6 +2,7 @@ package com.enistere.core.modules.files;
 
 import com.enistere.core.config.FilesConfig;
 import com.enistere.core.infrastructure.storage.StorageService;
+import com.enistere.core.modules.audit.AuditService;
 import com.enistere.core.modules.files.dto.DownloadUrlResponseDto;
 import com.enistere.core.modules.files.dto.StoredFileResponseDto;
 import com.enistere.core.modules.users.User;
@@ -41,13 +42,16 @@ public class FileService {
     private final StorageService storageService;
     private final UserRepository userRepository;
     private final FilesConfig filesConfig;
+    private final AuditService auditService;
 
     public FileService(StoredFileRepository repository, StorageService storageService,
-                       UserRepository userRepository, FilesConfig filesConfig) {
+                       UserRepository userRepository, FilesConfig filesConfig,
+                       AuditService auditService) {
         this.repository = repository;
         this.storageService = storageService;
         this.userRepository = userRepository;
         this.filesConfig = filesConfig;
+        this.auditService = auditService;
     }
 
     public StoredFileResponseDto upload(MultipartFile file, FileCategory category,
@@ -87,6 +91,8 @@ public class FileService {
         stored.setSubjectId(subjectId);
         stored = repository.save(stored);
 
+        auditService.record(FilesAuditEvents.FILE_UPLOADED, owner.getId(), "file",
+            stored.getId().toString(), ipAddress, userAgent);
         return toDto(stored);
     }
 
@@ -105,6 +111,8 @@ public class FileService {
 
         log.info("Download URL generated: fileId={} category={}", fileId, file.getCategory());
 
+        auditService.record(FilesAuditEvents.DOWNLOAD_URL_ISSUED, owner.getId(), "file",
+            fileId.toString(), ipAddress, userAgent);
         return new DownloadUrlResponseDto(fileId, url, filesConfig.getPresignedUrlTtlSeconds());
     }
 

@@ -4,7 +4,7 @@
 // overlays déclarent leurs modules, guards globaux et throttlers nommés via des
 // intégrations connues (`nestjs.module`, `nestjs.global-guard`,
 // `nestjs.throttler`) et la Factory régénère ce fichier de manière déterministe.
-// La baseline `base` n'enregistre rien : ces listes restent vides.
+// Le Platform Baseline n'enregistre aucune capability : ces listes restent vides.
 import type { CanActivate, DynamicModule, ForwardReference, Type } from '@nestjs/common';
 
 /** Throttler nommé déclaré par une capability (TTL en secondes, lu depuis l'environnement). */

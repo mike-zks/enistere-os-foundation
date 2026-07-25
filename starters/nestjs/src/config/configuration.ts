@@ -17,7 +17,7 @@ export interface AppConfig {
 }
 
 /**
- * Configuration de la baseline `base` : runtime HTTP, base de données, CORS et
+ * Configuration du Platform Baseline : runtime HTTP, base de données, CORS et
  * logging uniquement. Les capabilities composées (Auth, ...) portent leur propre
  * configuration namespace auto-validée (`registerAs`), déclarée par leur overlay.
  */

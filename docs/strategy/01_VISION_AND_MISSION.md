@@ -18,13 +18,16 @@ Enistere doit permettre de :
 
 ## Problème traité
 
-Les équipes reconstruisent fréquemment les mêmes fondations : authentification, autorisation, utilisateurs, fichiers, notifications, événements, audit, observabilité, configuration et déploiement.
+Les équipes reconstruisent fréquemment les mêmes fondations : configuration, erreurs, sécurité,
+observabilité, audit technique, authentification, autorisation, utilisateurs, fichiers, notifications,
+événements et déploiement.
 
 Cette répétition provoque divergence fonctionnelle, dette technique, sécurité inégale, duplication et dépendance excessive à un framework.
 
 ## Réponse
 
-Enistere sépare l’intention du système, les contrats, les choix de runtime, les capabilities, l’infrastructure et les preuves de conformité.
+Enistere sépare l’intention du système, le Platform Baseline obligatoire, les contrats, les choix de
+runtime, les capabilities optionnelles, l’infrastructure et les preuves de conformité.
 
 ## Équivalence attendue
 

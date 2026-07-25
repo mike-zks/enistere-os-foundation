@@ -1,50 +1,64 @@
 # Périmètre et limites
 
-## Périmètre V1 cible
+## Périmètre cible
 
 ### Topologies
 
-- API seule ;
-- API avec un ou plusieurs Web ;
-- API avec un ou plusieurs Mobile ;
-- multi-clients ;
-- monolithe modulaire ;
-- workers simples lorsque requis.
+- api ;
+- monolith ;
+- multi-client ;
+- modular-distributed ;
+- microservices.
 
 ### Runtimes
 
-- NestJS et Spring Boot ;
+- NestJS, Spring Boot et FastAPI ;
 - Next.js et Angular ;
 - React Native et Flutter.
 
 ### Capabilities
 
-- Base Platform ;
 - Authentication ;
 - Authorization ;
 - User Management ;
 - Files ;
-- Audit ;
 - Events ;
 - Notifications ;
-- Observability.
+- Automation ;
+- Realtime ;
+- Search ;
+- Feature Flags ;
+- Multitenancy ;
+- Workflow.
+
+### Platform Baseline
+
+Configuration, Canonical Errors, Structured Logging, Correlation, Observability, Technical Audit, Security
+Baseline, Health, Diagnostics, Testing Foundation, Lifecycle Hooks, Extension Points, Build et Quality
+Gates sont obligatoires et ne sont pas des capabilities.
 
 ### Primitives
 
-- PostgreSQL ;
-- Redis ;
-- stockage objet S3-compatible ;
+- relational/document databases ;
+- cache ;
+- object storage ;
+- content repository ;
+- queue et broker ;
 - SMTP ;
 - Push Provider ;
-- Scheduler ;
-- Queue/Broker optionnel.
+- search ;
+- telemetry backend ;
+- secrets.
 
-## Hors périmètre V1
+## Non obligatoires par défaut
 
 - Kubernetes obligatoire ;
 - service mesh ;
-- microservices généralisés ;
+- microservices sans justification ni preuves opérationnelles ;
 - event sourcing par défaut ;
 - marketplace publique ;
 - adoption automatique de tout projet ;
 - support illimité de frameworks.
+
+L'appartenance à la cible (`TARGET`) ne vaut pas support de génération. Le statut réel est publié
+séparément.

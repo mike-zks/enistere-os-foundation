@@ -2,7 +2,7 @@
   "schemaVersion": "2",
   "id": "auth",
   "version": "0.2.0",
-  "requires": ["base"],
+  "requires": [],
   "responsibilities": ["login", "refresh", "logout", "session"],
   "targets": {
     "nestjs": { "status": "ready", "mode": "overlay" },

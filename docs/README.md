@@ -7,15 +7,17 @@ silencieusement : voir [`governance/SOURCE_OF_TRUTH.md`](governance/SOURCE_OF_TR
 
 Par ordre d'autorité décroissante :
 
-1. `specifications/` : Platform Contract, Runtime Adapter, Capability, System Blueprint, Primitive,
-   Composition Model, Conformance Model, Lifecycle & Upgrade ;
+1. `specifications/` : Architecture Profiles, Platform Baseline/Contract, Runtime Adapter, Capability,
+   System Blueprint, Infrastructure Primitive, Composition Model, Conformance Model, Lifecycle & Upgrade ;
 2. `adr/` : décisions durables et backlog ;
-3. `architecture/` : fonctionnelle, technique, capability, contract, security, operations, AI ;
+3. `architecture/` : architecture de référence, profils, baseline, fonctionnelle, technique, capability,
+   contract, security, operations et AI ;
 4. `governance/` : source de vérité, gouvernance, DoR, DoD, politiques opérationnelles ;
 5. `strategy/` : vision, positionnement, utilisateurs, principes, périmètre ;
-6. `roadmap/` : trajectoire V2 ;
+6. `roadmap/` : roadmap maître de construction ;
 7. `project-status/` : état courant, matrices calculées et action unique ;
-8. `guides/`, `onboarding/`, `checklists/`, `project-factory/`, `glossary/` : usage opérationnel.
+8. `examples/reference-systems/` : exemples cibles avec statut réel explicite ;
+9. `guides/`, `onboarding/`, `checklists/`, `project-factory/`, `glossary/` : usage opérationnel.
 
 ## Surfaces techniques
 

@@ -4,6 +4,7 @@ import { join } from 'node:path';
 export const STARTER_IDS = Object.freeze(['nestjs', 'spring', 'nextjs', 'angular', 'react-native', 'flutter']);
 const KINDS = new Set(['api', 'web', 'mobile']);
 const COMMANDS = ['install', 'dev', 'test', 'build', 'verify'];
+const FAMILY_CONTRACTS = Object.freeze({ api: 'api/2.0.0', web: 'web/2.0.0', mobile: 'mobile/2.0.0' });
 
 export function validateStarterManifest(value) {
   const issues = [];
@@ -12,8 +13,12 @@ export function validateStarterManifest(value) {
   if (!KINDS.has(value?.kind)) issues.push('kind is invalid');
   if (typeof value?.framework !== 'string' || !value.framework) issues.push('framework is required');
   for (const command of COMMANDS) if (!Array.isArray(value?.commands?.[command]) || value.commands[command].length === 0) issues.push(`commands.${command} is required`);
-  if (value?.composition?.contractVersion !== '1') issues.push('composition.contractVersion must be 1');
-  if (value?.composition?.base !== 'built-in') issues.push('composition.base must be built-in');
+  if (value?.baseline?.contractVersion !== '2.0.0') issues.push('baseline.contractVersion must be 2.0.0');
+  if (value?.baseline?.familyContract !== FAMILY_CONTRACTS[value?.kind]) {
+    issues.push(`baseline.familyContract must be ${FAMILY_CONTRACTS[value?.kind] ?? 'a registered family contract'}`);
+  }
+  if (value?.composition?.contractVersion !== undefined) issues.push('composition.contractVersion was replaced by baseline.contractVersion');
+  if (value?.composition?.base !== undefined) issues.push('composition.base is forbidden: the Platform Baseline is not a capability');
   if (value?.composition?.model !== undefined && !['modular', 'bundled'].includes(value.composition.model)) {
     issues.push('composition.model must be modular or bundled');
   }
@@ -40,7 +45,6 @@ export function validateManifestConsistency(starters, capabilities) {
     for (const starterId of STARTER_IDS) {
       const starter = byStarter.get(starterId);
       const target = capability.targets[starterId];
-      if (capability.id === 'base') continue;
       const declaredReady = starter.composition.readyCapabilities.includes(capability.id);
       const declaredPlanned = starter.composition.plannedCapabilities.includes(capability.id);
       if (target.status === 'ready' && !declaredReady) issues.push(`${starterId}/${capability.id}: target ready but starter does not declare ready`);

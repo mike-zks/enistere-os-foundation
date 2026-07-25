@@ -1,5 +1,9 @@
 # Carte d'impact de migration
 
+> Rapport antérieur à l'ADR-057. Toute classification d'Audit ou Observability comme capability est
+> supersédée par le Platform Baseline. Voir
+> [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Impact, risque, dépendances et ordre recommandé par zone, pour converger de l'implémentation actuelle
 vers l'architecture V2. Niveaux de risque : `LOW` · `MEDIUM` · `HIGH` · `CRITICAL`.
 
@@ -15,7 +19,7 @@ vers l'architecture V2. Niveaux de risque : `LOW` · `MEDIUM` · `HIGH` · `CRIT
 | **Angular** | **Extraction auth/rbac/files** (base-only aujourd'hui) | HIGH | Conformance, Contrats, capabilities | 6 |
 | **React Native** | Requalification ; RBAC reste n/a | MEDIUM | Conformance | 7 |
 | **Flutter** | **Extraction auth/files** (base-only aujourd'hui) | HIGH | Conformance, Contrats Dart | 7 |
-| **Capabilities** | Modèle cible (adapters/contracts/conformance) ; ajout user-management/audit/events/notif/observability | HIGH | Contrats, Conformance | 8 |
+| **Capabilities** | Modèle cible (adapters/contracts/conformance) ; ajout user-management/events/notifications | HIGH | Contrats, Conformance | 8 |
 | **Goldens** | Goldens de parité par famille | MEDIUM | Adapters convergés | 9 |
 | **Deployment / Primitives** | Modéliser les primitives typées ; mode production | MEDIUM | Blueprint (primitives) | 10 |
 | **Dépendances / audit** | Bump CVE transitives (`brace-expansion`, `js-yaml`, `body-parser`) | LOW | — | **0 (immédiat)** |

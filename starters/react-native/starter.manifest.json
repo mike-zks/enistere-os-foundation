@@ -3,6 +3,10 @@
   "id": "react-native",
   "kind": "mobile",
   "framework": "React Native / Expo",
+  "baseline": {
+    "contractVersion": "2.0.0",
+    "familyContract": "mobile/2.0.0"
+  },
   "commands": {
     "install": [
       "npm",
@@ -31,16 +35,13 @@
     ]
   },
   "composition": {
-    "contractVersion": "1",
-    "base": "built-in",
     "model": "modular",
     "readyCapabilities": [
       "auth",
       "files"
     ],
     "plannedCapabilities": [
-      "notifications",
-      "observability"
+      "notifications"
     ]
   },
   "deployment": {

@@ -4,6 +4,10 @@ Représentation interne **unique** de l'intention d'un système Enistere. Décis
 [ADR-045](../../docs/adr/ADR-045-canonical-system-model.md) (introduction),
 [ADR-046](../../docs/adr/ADR-046-single-canonical-factory-pipeline.md) (pipeline canonique unique).
 
+> Ce fichier décrit l'implémentation actuelle. La forme cible complète est définie dans
+> [l'architecture de référence](../../docs/architecture/ENISTERE_REFERENCE_ARCHITECTURE.md) et adoptée par
+> [ADR-057](../../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md).
+
 ## Blueprint vs CSM
 
 | | Blueprint | Canonical System Model |
@@ -60,7 +64,7 @@ chemin absolu ni aléatoire. `source.digest` = sha256 stable (champ digest exclu
 
 - `capabilities[].requestedTargets` = toutes les applications (intention globale du blueprint v1) ; la
   résolution effective par target est calculée par le resolver.
-- Non modélisés (réservés) : `primitives`, `communications`, `policies` étendues,
-  `architecture.evolutionTarget`, plusieurs API (refusées explicitement).
+- Non modélisés dans le code actuel : les cinq profils cibles, `primitives`, `communications`, `deployment`,
+  `security`, `quality`, `ai`, `policies` étendues, `architecture.evolutionTarget` et plusieurs API.
 - Le blueprint public v1 (`stack`/`applications[]`) reste accepté ; il est traduit **immédiatement** en
   CSM. Aucune conversion inverse CSM → blueprint n'existe.

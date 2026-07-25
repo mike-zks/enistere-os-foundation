@@ -74,7 +74,9 @@ function rootPackage(plan) {
     overrides: {
       'form-data': '^4.0.6',
       'js-yaml': '^4.2.0',
-      postcss: '^8.5.15',
+      next: {
+        postcss: '8.5.23',
+      },
     },
     scripts: {
       'build:packages': packageBuilds.join(' && '),
@@ -161,7 +163,7 @@ function projectReadme(plan, overlays) {
     '',
     ...overlayLines,
     '',
-    'Une génération `base` seule ne contient aucune surface au-delà du socle. Les capabilities sont',
+    'Une génération sans capability ne contient aucune surface au-delà du Platform Baseline. Les capabilities sont',
     'ajoutées uniquement via leurs overlays déclaratifs (voir `enistere.lock` → `overlays`).',
     '',
     '## Prérequis',

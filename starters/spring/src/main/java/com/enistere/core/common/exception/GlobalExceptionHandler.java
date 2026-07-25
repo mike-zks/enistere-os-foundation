@@ -1,11 +1,10 @@
 package com.enistere.core.common.exception;
 
+import com.enistere.core.common.web.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,22 +14,19 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
- * Maps exceptions to the canonical flat error envelope (ADR-048, reconciled here
- * by ADR-054) — the same ApiErrorResponse the generated client consumes. Never
- * exposes a stack trace. The requestId is the validated {@code X-Request-Id}
- * header or null (this reference app carries no correlation filter).
+ * Maps exceptions to the canonical flat error envelope (ADR-048) — the same
+ * {@code ApiErrorResponse} the generated client consumes. Never exposes a stack
+ * trace or an internal detail. The {@code requestId} is the correlation id set by
+ * {@link CorrelationIdFilter}.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Pattern SAFE_ID = Pattern.compile("^[A-Za-z0-9._-]{8,128}$");
-
     private static String requestId(HttpServletRequest request) {
-        String incoming = request.getHeader("X-Request-Id");
-        return incoming != null && SAFE_ID.matcher(incoming).matches() ? incoming : null;
+        Object id = request.getAttribute(CorrelationIdFilter.REQUEST_ID_ATTRIBUTE);
+        return id instanceof String value ? value : null;
     }
 
     private static ResponseEntity<ApiError> respond(int statusCode, String errorCode, String message, Object details, HttpServletRequest request) {
@@ -76,12 +72,6 @@ public class GlobalExceptionHandler {
         String errorCode = ex.getStatusCode() instanceof HttpStatus hs ? hs.name() : String.valueOf(statusValue);
         String message = ex.getReason() != null ? ex.getReason() : "Error";
         return respond(statusValue, errorCode, message, null, request);
-    }
-
-    @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
-    public void handleSecurityException(RuntimeException ex) throws RuntimeException {
-        // Re-throw to let Spring Security's ExceptionTranslationFilter handle 401/403.
-        throw ex;
     }
 
     @ExceptionHandler(Exception.class)

@@ -3,7 +3,8 @@
   "id": "spring",
   "kind": "api",
   "framework": "Spring Boot",
+  "baseline": { "contractVersion": "2.0.0", "familyContract": "api/2.0.0" },
   "commands": { "install": ["./mvnw", "dependency:go-offline"], "dev": ["./mvnw", "spring-boot:run"], "test": ["./mvnw", "test"], "build": ["./mvnw", "package"], "verify": ["./mvnw", "verify", "--no-transfer-progress"] },
-  "composition": { "contractVersion": "1", "base": "built-in", "model": "modular", "baseSource": "starters/spring/base", "readyCapabilities": ["auth", "rbac", "files"], "plannedCapabilities": ["audit", "observability"] },
+  "composition": { "model": "modular", "readyCapabilities": ["auth", "rbac", "files"], "plannedCapabilities": [] },
   "deployment": { "dockerfile": null, "healthPath": "/actuator/health" }
 }

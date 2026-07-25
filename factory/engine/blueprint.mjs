@@ -11,6 +11,7 @@ const APIS = new Set(APPLICATION_KINDS.api.runtimes);
 const WEBS = new Set([null, ...APPLICATION_KINDS.web.runtimes]);
 const MOBILES = new Set([null, ...APPLICATION_KINDS.mobile.runtimes]);
 const CAPABILITIES = new Set(CAPABILITY_IDS);
+const LEGACY_INPUT_CAPABILITIES = new Set(['base']);
 const ENVIRONMENTS = new Set(['local', 'staging']);
 const SLUG = /^[a-z][a-z0-9-]{1,62}$/;
 
@@ -65,10 +66,11 @@ export function validateBlueprint(value) {
   else issues.push(...validateEntities(value.domain.entities));
   if (!Array.isArray(value.capabilities)) issues.push('capabilities must be an array');
   else {
-    if (!value.capabilities.includes('base')) issues.push('capabilities must include base');
     if (new Set(value.capabilities).size !== value.capabilities.length) issues.push('capabilities must be unique');
-    for (const item of value.capabilities) if (!CAPABILITIES.has(item)) issues.push(`unknown capability: ${item}`);
-    issues.push(...validateCapabilityDependencies(value.capabilities));
+    for (const item of value.capabilities) {
+      if (!CAPABILITIES.has(item) && !LEGACY_INPUT_CAPABILITIES.has(item)) issues.push(`unknown capability: ${item}`);
+    }
+    issues.push(...validateCapabilityDependencies(value.capabilities.filter((id) => id !== 'base')));
   }
   const environments = value.deployment?.environments;
   if (!Array.isArray(environments)) issues.push('deployment.environments must be an array');
@@ -105,7 +107,7 @@ export function createDefaultBlueprint(slug = 'enistere-app') {
     designSystem: true,
     stack: { api: 'spring', web: 'angular', mobile: null },
     domain: { entities: [] },
-    capabilities: ['base'],
+    capabilities: [],
     deployment: { environments: ['local', 'staging'] },
   };
 }

@@ -310,7 +310,11 @@ describe('the plan reports capabilities and gates', () => {
   it('reports the selected capabilities, the matched profile and its proof', async () => {
     const starters = await loadStarterManifests(root);
     const plan = buildGenerationPlan(blueprintFor(getProfile('nestjs-next-auth')), { starters });
-    assert.deepEqual(plan.capabilities, ['base', 'auth']);
+    assert.deepEqual(plan.capabilities, ['auth']);
+    assert.deepEqual(plan.applications.map((app) => app.baseline), [
+      { contractVersion: '2.0.0', familyContract: 'api/2.0.0' },
+      { contractVersion: '2.0.0', familyContract: 'web/2.0.0' },
+    ]);
     assert.equal(plan.profile.id, 'nestjs-next-auth');
     assert.equal(plan.profile.status, 'ready');
     assert.equal(plan.profile.runtimeProven, true);

@@ -1,53 +1,40 @@
 server:
   port: 8080
+  shutdown: graceful
 
 spring:
   application:
     name: enistere-api-spring-core
-  data:
-    redis:
-      url: ${REDIS_URL:redis://localhost:6379}
-      connect-timeout: 2000
-      timeout: 2000
-      repositories:
-        enabled: false
+  # Persistence + migrations are base infrastructure (ADR-056). Flyway is authoritative;
+  # Hibernate only validates. Capabilities add their own migrations after the base baseline.
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/enistere_dev}
-    username: ${DB_USERNAME:enistere}
-    password: ${DB_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/enistere}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:enistere}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:change-me}}
   jpa:
     hibernate:
-      ddl-auto: none        # Flyway is authoritative — never create/drop schema
-    show-sql: false
-    open-in-view: false     # Disable OSIV
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: validate
+    open-in-view: false
   flyway:
     enabled: true
-    locations: classpath:db/migration
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 11MB
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: never
 
+# Structured JSON logs on stdout (ADR-049), correlated by the requestId MDC
+# (CorrelationIdFilter). Collection is a Deployment concern — no embedded transport.
 logging:
-  level:
-    root: INFO
-    com.enistere: DEBUG
-    org.springframework.security: WARN
-    org.flywaydb: INFO
+  structured:
+    format:
+      console: ecs
 
 springdoc:
   api-docs:
@@ -57,32 +44,5 @@ springdoc:
 
 enistere:
   security:
-    jwt:
-      # PRODUCTION: override with JWT_SECRET env var (min 32 bytes, cryptographically random)
-      secret: ${JWT_SECRET:enistere-dev-only-jwt-secret-starter-2026-not-for-production}
-      expiration: 900  # access token lifetime in seconds (15 min)
-    argon2:
-      salt-length: 16
-      hash-length: 32
-      parallelism: 1
-      memory: 65536     # 64 MB — OWASP minimum recommendation
-      iterations: 3
     cors:
-      # PRODUCTION: override with CORS_ALLOWED_ORIGINS env var (comma-separated list of origins)
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:8080,http://localhost:8081,http://localhost:19006}
-    rate-limit:
-      enabled: true
-      auth-capacity: ${RATE_LIMIT_AUTH_CAPACITY:10}
-      auth-refill-seconds: ${RATE_LIMIT_AUTH_REFILL_SECONDS:60}
-      upload-capacity: ${RATE_LIMIT_UPLOAD_CAPACITY:20}
-      upload-refill-seconds: ${RATE_LIMIT_UPLOAD_REFILL_SECONDS:60}
-      download-url-capacity: ${RATE_LIMIT_DOWNLOAD_URL_CAPACITY:30}
-      download-url-refill-seconds: ${RATE_LIMIT_DOWNLOAD_URL_REFILL_SECONDS:60}
-  files:
-    # PRODUCTION: override all enistere.files.* via environment variables — never commit real secrets
-    endpoint: ${FILES_ENDPOINT:http://localhost:9000}
-    bucket: ${FILES_BUCKET:enistere-dev}
-    region: ${FILES_REGION:us-east-1}
-    access-key: ${FILES_ACCESS_KEY:minioadmin}
-    secret-key: ${FILES_SECRET_KEY:minioadmin}
-    presigned-url-ttl-seconds: ${FILES_PRESIGNED_TTL_SECONDS:300}
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200}

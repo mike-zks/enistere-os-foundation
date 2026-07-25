@@ -84,36 +84,36 @@ if (!process.env.CHROME_BIN) {
 }
 
 export const COMPOSITIONS = {
-  'nestjs-base': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base'] },
-  'nestjs-auth': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth'] },
-  'nest-next-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth'] },
-  'triple-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth'] },
+  'nestjs-base': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: [] },
+  'nestjs-auth': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['auth'] },
+  'nest-next-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['auth'] },
+  'triple-auth': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['auth'] },
   // RBAC (1B) : NestJS + Next.js consomment RBAC ; React Native reste sur base + auth
   // (`not-applicable`) sans recevoir la moindre surface RBAC.
-  'nestjs-auth-rbac': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
-  'nest-next-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
-  'triple-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth', 'rbac'] },
-  'nestjs-files': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
-  'nest-next-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
-  'triple-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['base', 'auth', 'rbac', 'files'] },
+  'nestjs-auth-rbac': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },
+  'nest-next-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['auth', 'rbac'] },
+  'triple-auth-rbac': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['auth', 'rbac'] },
+  'nestjs-files': { stack: { api: 'nestjs', web: null, mobile: null }, capabilities: ['auth', 'rbac', 'files'] },
+  'nest-next-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['auth', 'rbac', 'files'] },
+  'triple-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['auth', 'rbac', 'files'] },
   // R8A : compositions `base` seul. Nommées d'après leur profil, de sorte que le
   // lien golden ↔ profil soit une identité vérifiable et non une convention.
   // Spring, Angular et Flutter ne suivent pas le contrat modulaire : leur baseline
   // est copiée telle quelle et embarque des fonctionnalités au-delà de `base`
   // (`bundledFeaturesMayExceedSelection`). Le golden prouve le projet généré, pas
   // une composition minimale.
-  'spring-base': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base'] },
-  'spring-auth': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base', 'auth'] },
-  'spring-auth-rbac': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac'] },
-  'spring-files': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['base', 'auth', 'rbac', 'files'] },
-  'spring-next-base': { stack: { api: 'spring', web: 'nextjs', mobile: null }, capabilities: ['base'] },
-  'spring-react-native-base': { stack: { api: 'spring', web: null, mobile: 'react-native' }, capabilities: ['base'] },
-  'spring-angular-base': { stack: { api: 'spring', web: 'angular', mobile: null }, capabilities: ['base'] },
-  'spring-flutter-base': { stack: { api: 'spring', web: null, mobile: 'flutter' }, capabilities: ['base'] },
-  'nestjs-next-base': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: ['base'] },
-  'nestjs-react-native-base': { stack: { api: 'nestjs', web: null, mobile: 'react-native' }, capabilities: ['base'] },
-  'nestjs-angular-base': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['base'] },
-  'nestjs-flutter-base': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['base'] },
+  'spring-base': { stack: { api: 'spring', web: null, mobile: null }, capabilities: [] },
+  'spring-auth': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth'] },
+  'spring-auth-rbac': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },
+  'spring-files': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth', 'rbac', 'files'] },
+  'spring-next-base': { stack: { api: 'spring', web: 'nextjs', mobile: null }, capabilities: [] },
+  'spring-react-native-base': { stack: { api: 'spring', web: null, mobile: 'react-native' }, capabilities: [] },
+  'spring-angular-base': { stack: { api: 'spring', web: 'angular', mobile: null }, capabilities: [] },
+  'spring-flutter-base': { stack: { api: 'spring', web: null, mobile: 'flutter' }, capabilities: [] },
+  'nestjs-next-base': { stack: { api: 'nestjs', web: 'nextjs', mobile: null }, capabilities: [] },
+  'nestjs-react-native-base': { stack: { api: 'nestjs', web: null, mobile: 'react-native' }, capabilities: [] },
+  'nestjs-angular-base': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: [] },
+  'nestjs-flutter-base': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: [] },
 };
 
 /** argv of the npm-audit-by-exception gate applied to every golden. */

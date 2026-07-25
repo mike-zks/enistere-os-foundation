@@ -8,6 +8,7 @@ Exemples :
 
 - `api/nestjs` ;
 - `api/spring` ;
+- `api/fastapi` ;
 - `web/nextjs` ;
 - `web/angular` ;
 - `mobile/react-native` ;
@@ -29,6 +30,8 @@ README.md
 
 Le runtime fournit :
 
+- le Platform Baseline commun obligatoire ;
+- le contrat de sa famille ;
 - bootstrap ;
 - structure technique ;
 - conventions du framework ;
@@ -38,7 +41,9 @@ Le runtime fournit :
 - exécution locale ;
 - build.
 
-Il ne définit pas seul Auth, Authorization, Files, Notifications, Audit ou les règles métier partagées.
+Il ne définit pas seul Authentication, Authorization, User Management, Files, Events, Notifications ou les
+règles métier partagées. Il fournit en revanche obligatoirement l'Observability et le Technical Audit du
+Platform Baseline.
 
 ## Interchangeabilité
 

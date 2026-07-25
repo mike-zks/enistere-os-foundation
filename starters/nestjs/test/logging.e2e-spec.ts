@@ -10,7 +10,7 @@ import { disableLogCapture, enableLogCapture } from '../src/common/logging/loggi
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Logging structuré de la baseline `base` (ADR-040) : logs JSON, log HTTP de fin
+ * Logging structuré du Platform Baseline (ADR-040) : logs JSON, log HTTP de fin
  * de requête avec route normalisée, propagation du X-Request-Id, sondes santé en
  * succès non loguées par défaut. Les scénarios authentifiés/fichiers vivent avec
  * leurs capabilities respectives.

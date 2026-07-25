@@ -2,7 +2,7 @@
   "schemaVersion": "2",
   "id": "files",
   "version": "0.2.0",
-  "requires": ["base", "auth", "rbac"],
+  "requires": ["auth", "rbac"],
   "responsibilities": ["upload", "metadata", "download-url", "delete", "quarantine", "reconciliation", "quota"],
   "targets": {
     "nestjs": { "status": "ready", "mode": "overlay" }, "spring": { "status": "ready", "mode": "overlay" },

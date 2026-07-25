@@ -17,8 +17,9 @@ mais structurellement inadapté (auto-log d'URL brute, request id propre, destin
 
 `timestamp` (ISO-8601), `level`, `message`, `context`, `service`, `environment`, puis selon le
 contexte : `requestId`, `method`, `route` (**normalisée**, ex. `/files/:id`), `statusCode`,
-`durationMs`, `userId`/`sessionId` (UUID), `operation`, `errorCode`, `errorType`. Réservés futurs :
-`traceId`/`spanId` (OpenTelemetry, non implémenté).
+`durationMs`, `traceId`, `userId`/`sessionId` (UUID), `operation`, `errorCode`, `errorType`.
+Le `traceId` provient du contexte W3C `traceparent`; le `spanId` reste géré par l’adapter
+OpenTelemetry lorsqu’il est branché.
 
 ## Configuration
 
@@ -74,5 +75,6 @@ inchangée. `stack` **uniquement** en logs techniques, jamais dans la réponse.
 ## Préparation Loki / OpenTelemetry
 
 Loki (Deployment) : labels **peu nombreux** (`service`, `environment`, `level`) ; `requestId`/
-`userId`/`fileId`/route restent dans le **corps** JSON (cardinalité maîtrisée). OpenTelemetry : champs
-`traceId`/`spanId` réservés ; non implémenté en V1.
+`userId`/`fileId`/route restent dans le **corps** JSON (cardinalité maîtrisée). Le starter propage
+W3C Trace Context, agrège les métriques HTTP et expose le contrat `telemetry/2.0.0`; le SDK,
+l’exporter et le backend OpenTelemetry restent des adapters/primitives de déploiement.

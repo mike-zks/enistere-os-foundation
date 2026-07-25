@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Emits the computed conformance record for a generated project (ADR-047, ADR-050).
+ * Emits the computed Platform Baseline v2 conformance record (ADR-057).
  *
  * Usage: node factory/conformance/run.mjs <projectDir>
  *
  * Reads the GenerationPlan from the project's `enistere.lock`, evaluates every
- * supported family (API, Web) against the Platform Contract and writes
+ * supported family (API, Web, Mobile) against Common + family v2 and writes
  * `enistere.conformance.json`. The record is informational (measurement): it never
  * mutates the project's code and exits 0 — the golden gates and fitness functions
  * enforce; this records.
@@ -27,12 +27,15 @@ export function writeConformance(projectDir) {
 
 /** One-line-per-invariant summary for the terminal. */
 export function formatSummary(report) {
-  const lines = [`Platform Contract conformance (${report.families.join(', ')}) — evaluation: ${report.evaluation}`];
+  const lines = [`Platform Baseline ${report.contract.version} (${report.families.join(', ')}) — evaluation: ${report.evaluation}`];
   for (const app of report.apps) {
     lines.push(`\n  ${app.id} [${app.family}/${app.runtime}] — level: ${app.level}`);
-    for (const [invariant, r] of Object.entries(app.invariants)) {
-      const mark = r.status === STATUS.COMPLIANT ? '✓' : r.status === STATUS.NON_CONFORMANT ? '✗' : r.status === STATUS.MISSING ? '·' : '~';
-      lines.push(`    ${mark} ${invariant.padEnd(28)} ${r.status.padEnd(15)} ${r.evidence}`);
+    for (const [scope, contract] of [['baseline', app.baseline], [app.family, app.familyContract]]) {
+      lines.push(`    ${scope} (${contract.contractVersion})`);
+      for (const [invariant, r] of Object.entries(contract.invariants)) {
+        const mark = r.status === STATUS.COMPLIANT ? '✓' : r.status === STATUS.NON_CONFORMANT ? '✗' : r.status === STATUS.MISSING ? '·' : '~';
+        lines.push(`      ${mark} ${invariant.padEnd(28)} ${r.status.padEnd(15)} ${r.evidence}`);
+      }
     }
   }
   return lines.join('\n');

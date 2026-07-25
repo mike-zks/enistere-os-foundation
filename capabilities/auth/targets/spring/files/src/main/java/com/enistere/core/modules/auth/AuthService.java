@@ -2,6 +2,7 @@ package com.enistere.core.modules.auth;
 
 import com.enistere.core.config.JwtConfig;
 import com.enistere.core.infrastructure.security.JwtTokenProvider;
+import com.enistere.core.modules.audit.AuditService;
 import com.enistere.core.modules.auth.dto.LoginResponseDto;
 import com.enistere.core.modules.auth.dto.MeResponseDto;
 import com.enistere.core.modules.users.User;
@@ -31,27 +32,32 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtConfig jwtConfig;
+    private final AuditService auditService;
 
     public AuthService(
             UserRepository userRepository,
             RefreshTokenRepository refreshTokenRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenProvider jwtTokenProvider,
-            JwtConfig jwtConfig) {
+            JwtConfig jwtConfig,
+            AuditService auditService) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.jwtConfig = jwtConfig;
+        this.auditService = auditService;
     }
 
     public LoginResponseDto login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+            auditService.record(AuthAuditEvents.LOGIN_FAILED, null, "auth", null, null, null);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         if (!user.isActive()) {
+            auditService.record(AuthAuditEvents.LOGIN_FAILED, user.getId(), "auth", null, null, null);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account disabled");
         }
 
@@ -59,6 +65,7 @@ public class AuthService {
         userRepository.save(user);
 
         LoginResponseDto response = buildTokenResponse(user);
+        auditService.record(AuthAuditEvents.LOGIN_SUCCEEDED, user.getId(), "auth", null, null, null);
         return response;
     }
 
@@ -83,6 +90,7 @@ public class AuthService {
         refreshTokenRepository.save(token);
 
         LoginResponseDto response = buildTokenResponse(token.getUser());
+        auditService.record(AuthAuditEvents.REFRESH_SUCCEEDED, token.getUser().getId(), "auth", null, null, null);
         return response;
     }
 
@@ -94,6 +102,7 @@ public class AuthService {
         refreshTokenRepository.findByTokenHash(hash).ifPresent(token -> {
             token.revoke();
             refreshTokenRepository.save(token);
+            auditService.record(AuthAuditEvents.LOGOUT, token.getUser().getId(), "auth", null, null, null);
         });
     }
 

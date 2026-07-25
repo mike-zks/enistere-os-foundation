@@ -59,48 +59,51 @@ describe('auth golden compositions', () => {
   it('Spring base carries only the minimal base API surface', async () => {
     const out = await gen('spring-base', { api: 'spring', web: null, mobile: null }, ['base']);
     const pom = await readFile(join(out, 'apps/api/pom.xml'), 'utf8');
-    for (const dependency of ['spring-boot-starter-security', 'spring-boot-starter-data-jpa', 'flyway-core', 'minio', 'jjwt']) {
+    // Persistence + migrations are base infrastructure (ADR-056); capability deps stay out.
+    assert.ok(pom.includes('spring-boot-starter-data-jpa'), 'persistence is base infrastructure');
+    for (const dependency of ['spring-boot-starter-security', 'minio', 'jjwt']) {
       assert.ok(!pom.includes(dependency), `${dependency} must not be a base dependency`);
     }
-    assert.equal(await exists(join(out, 'apps/api/src/main/modules')), false, 'feature modules must be absent');
-    assert.equal(await exists(join(out, 'apps/api/src/main/resources/db')), false, 'database migrations must be absent');
+    assert.equal(await exists(join(out, 'apps/api/src/main/java/com/enistere/core/modules/auth')), false, 'feature modules must be absent');
+    assert.ok(await exists(join(out, 'apps/api/src/main/resources/db/migration')), 'base owns the migration baseline (ADR-056)');
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     assert.equal(lock.plan.generationMode, 'modular-overlay');
     assert.equal(lock.plan.bundledFeaturesMayExceedSelection, false);
     assert.deepEqual(lock.overlays, []);
   });
 
-  it('Spring base+auth composes Auth without RBAC, Audit or Files', async () => {
+  it('Spring base+auth composes Auth without RBAC or Files (audit sink is base infra)', async () => {
     const out = await gen('spring-auth', { api: 'spring', web: null, mobile: null }, ['base', 'auth']);
     const javaRoot = join(out, 'apps/api/src/main/java/com/enistere/core');
     assert.ok(await exists(join(javaRoot, 'modules/auth/AuthController.java')));
     assert.ok(await exists(join(javaRoot, 'modules/users/User.java')));
     assert.equal(await exists(join(javaRoot, 'modules/roles')), false, 'no RBAC roles');
     assert.equal(await exists(join(javaRoot, 'modules/permissions')), false, 'no RBAC permissions');
-    assert.equal(await exists(join(javaRoot, 'modules/audit')), false, 'no implicit Audit capability');
+    assert.ok(await exists(join(javaRoot, 'modules/audit')), 'audit sink is base infrastructure (ADR-056)');
     assert.equal(await exists(join(javaRoot, 'modules/files')), false, 'no Files');
     const authService = await readFile(join(javaRoot, 'modules/auth/AuthService.java'), 'utf8');
-    assert.ok(!/PermissionRepository|AuditService|modules\.roles/.test(authService));
+    assert.ok(!/PermissionRepository|modules\.roles/.test(authService), 'AuthService stays free of RBAC coupling');
     const migration = await readFile(join(out, 'apps/api/src/main/resources/db/migration/V1__init_schema.sql'), 'utf8');
     assert.match(migration, /CREATE TABLE users/);
     assert.match(migration, /CREATE TABLE refresh_tokens/);
     assert.ok(!/CREATE TABLE (roles|permissions|user_roles|role_permissions)/.test(migration));
     const application = await readFile(join(out, 'apps/api/src/main/resources/application.properties'), 'utf8');
     assert.match(application, /JWT_ACCESS_SECRET/);
-    assert.match(application, /SPRING_DATASOURCE_URL/);
+    const baseYml = await readFile(join(out, 'apps/api/src/main/resources/application.yml'), 'utf8');
+    assert.match(baseYml, /SPRING_DATASOURCE_URL/, 'datasource is base infrastructure (ADR-056)');
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     assert.equal(lock.overlays.length, 1);
     assert.equal(lock.overlays[0].capability, 'auth');
     assert.equal(lock.overlays[0].target, 'spring');
   });
 
-  it('Spring base+auth+rbac composes RBAC without Audit or Files', async () => {
+  it('Spring base+auth+rbac composes RBAC without Files (audit sink is base infra)', async () => {
     const out = await gen('spring-auth-rbac', { api: 'spring', web: null, mobile: null }, ['base', 'auth', 'rbac']);
     const javaRoot = join(out, 'apps/api/src/main/java/com/enistere/core');
     assert.ok(await exists(join(javaRoot, 'modules/authorization/AuthorizationController.java')));
     assert.ok(await exists(join(javaRoot, 'modules/roles/Role.java')));
     assert.ok(await exists(join(javaRoot, 'modules/permissions/Permission.java')));
-    assert.equal(await exists(join(javaRoot, 'modules/audit')), false, 'no implicit Audit capability');
+    assert.ok(await exists(join(javaRoot, 'modules/audit')), 'audit sink is base infrastructure (ADR-056)');
     assert.equal(await exists(join(javaRoot, 'modules/files')), false, 'no Files capability');
     const migration = await readFile(join(out, 'apps/api/src/main/resources/db/migration/V2__add_rbac.sql'), 'utf8');
     for (const table of ['roles', 'permissions', 'user_roles', 'role_permissions']) {

@@ -10,6 +10,9 @@ import { configuration } from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { RuntimeExtensionModule } from './platform/extensions/runtime-extension.module';
+import { RuntimeLifecycleModule } from './platform/lifecycle/runtime-lifecycle.module';
+import { RuntimeObservabilityModule } from './platform/observability/runtime-observability.module';
 
 @Module({
   imports: [
@@ -18,13 +21,16 @@ import { HealthModule } from './health/health.module';
       load: [configuration],
       validate: validateEnv,
     }),
+    RuntimeObservabilityModule,
     LoggingModule,
     DatabaseModule,
     ThrottlingModule,
     AuditModule,
     HealthModule,
+    RuntimeExtensionModule,
+    RuntimeLifecycleModule,
     // Modules des capabilities composées (fichier de composition généré par la Factory ;
-    // vide dans la baseline `base`).
+    // vide dans le Platform Baseline).
     ...CAPABILITY_MODULES,
   ],
   // Guards globaux fournis par les capabilities composées, dans l'ordre de composition

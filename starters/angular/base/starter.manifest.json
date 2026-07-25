@@ -3,7 +3,8 @@
   "id": "angular",
   "kind": "web",
   "framework": "Angular",
+  "baseline": { "contractVersion": "2.0.0", "familyContract": "web/2.0.0" },
   "commands": { "install": ["npm", "ci"], "dev": ["npm", "start"], "test": ["npm", "run", "test:ci"], "build": ["npm", "run", "build"], "verify": ["npm", "audit"] },
-  "composition": { "contractVersion": "1", "base": "built-in", "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files", "observability"] },
+  "composition": { "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files"] },
   "deployment": { "dockerfile": null, "healthPath": "/" }
 }

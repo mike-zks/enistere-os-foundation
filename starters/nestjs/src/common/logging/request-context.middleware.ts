@@ -5,6 +5,10 @@ import { NextFunction, Request, Response } from 'express';
 import { AppConfig } from '../../config/configuration';
 import { RequestContext, runWithRequestContext } from './request-context';
 import { AppLogger, Level, LogFields } from './logging.service';
+import {
+  continueTraceparent,
+  RuntimeTelemetryService,
+} from '../../platform/observability/runtime-telemetry.service';
 
 /**
  * Établit le contexte de corrélation par requête (`AsyncLocalStorage`) en réutilisant le
@@ -21,6 +25,7 @@ export class RequestContextMiddleware implements NestMiddleware {
   constructor(
     private readonly logger: AppLogger,
     configService: ConfigService<AppConfig, true>,
+    private readonly telemetry: RuntimeTelemetryService,
   ) {
     this.httpEnabled = configService.get('logHttpEnabled', { infer: true });
     this.healthSuccessEnabled = configService.get('logHealthSuccessEnabled', { infer: true });
@@ -31,8 +36,13 @@ export class RequestContextMiddleware implements NestMiddleware {
     // `route` est renseigné par Express après le routage (route normalisée).
     const request = req as Request & { requestId?: string };
     const requestId = request.requestId;
+    const incomingTraceparent = Array.isArray(req.headers.traceparent)
+      ? req.headers.traceparent[0]
+      : req.headers.traceparent;
+    const trace = continueTraceparent(incomingTraceparent);
+    res.setHeader('traceparent', trace.traceparent);
     // Store mutable partagé : l'intercepteur d'auth y ajoute userId/sessionId pendant la requête.
-    const store: RequestContext = { requestId };
+    const store: RequestContext = { requestId, traceId: trace.traceId };
     const start = process.hrtime.bigint();
 
     if (this.httpEnabled) {
@@ -46,6 +56,7 @@ export class RequestContextMiddleware implements NestMiddleware {
         const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
         const fields: LogFields = {
           requestId,
+          traceId: trace.traceId,
           method: req.method,
           // Jamais l'URL brute : route normalisée si disponible, sinon omise (anti-fuite d'identifiants).
           route,
@@ -62,6 +73,18 @@ export class RequestContextMiddleware implements NestMiddleware {
         this.logger.logHttp(level, fields);
       });
     }
+
+    res.on('finish', () => {
+      const route: string | undefined = (request.route as { path?: string } | undefined)?.path;
+      const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+      this.telemetry.recordRequest({
+        method: req.method,
+        route,
+        statusCode: res.statusCode,
+        durationMs,
+        traceId: trace.traceId,
+      });
+    });
 
     runWithRequestContext(store, () => next());
   }

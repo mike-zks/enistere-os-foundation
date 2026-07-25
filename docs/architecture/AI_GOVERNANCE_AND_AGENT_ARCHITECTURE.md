@@ -1,59 +1,41 @@
-# Architecture IA et gouvernance des agents
+# Gouvernance IA et architecture des agents
 
-## Rôle
+La cible complète est définie dans
+[AI_REFERENCE_ARCHITECTURE.md](AI_REFERENCE_ARCHITECTURE.md). Ce document résume les règles de gouvernance.
 
-L’IA peut assister :
+## Deux périmètres
 
-- l’analyse d’idée ;
-- l’extraction d’exigences ;
-- la proposition d’architecture ;
-- la génération de code métier ;
-- la migration ;
-- la documentation ;
-- la revue ;
-- le diagnostic.
+- **IA de la Factory :** analyse, recommandation, blueprint, assistance de développement, revue, sécurité,
+  migration, documentation et opérations.
+- **IA des projets dérivés :** runtimes/services applicatifs, modèles/providers, RAG, agents métier,
+  inference et observabilité IA.
 
-## Limites d’autorité
+Ces périmètres ne partagent ni autorité implicite, ni données, ni statut.
 
-L’IA ne décide pas seule :
+## Autorité
 
-- l’architecture finale ;
-- une suppression destructive ;
-- une migration irréversible ;
-- un merge ;
-- un tag ;
-- une release ;
-- un statut production-ready.
+L'IA propose. Les schémas, resolver, policies, tests, approbations humaines et Conformance Reports
+décident. Un agent ne peut seul modifier une spécification, fusionner, publier, appliquer une action
+destructive, approuver une migration irréversible ou déclarer la production readiness.
 
 ## Exécution
 
-Les agents :
+Chaque mission déclare objectif, contexte autorisé, tools, budget, schéma de sortie, données interdites,
+approbations et évaluations. L'exécution est isolée, bornée, least-privilege et traçable. Les providers sont
+interchangeables.
 
-- sont interchangeables ;
-- travaillent dans un environnement isolé ;
-- reçoivent un contexte limité ;
-- produisent un plan ;
-- nécessitent une approbation avant exécution ;
-- produisent un diff ;
-- nécessitent une approbation avant application.
+## Preuves
 
-## Traçabilité
-
-Chaque mission conserve :
-
-- prompt ;
-- contexte ;
-- plan ;
-- commandes ;
-- diff ;
-- résultats ;
-- décision humaine.
+Sont conservés sous politique : contexte, versions prompt/modèle/provider, plan, tool calls, diff,
+approbations, tests, évaluations, coûts/latence et décision. Secrets et données sensibles sont redacted ou
+référencés.
 
 ## Sécurité
 
-- secrets masqués ;
-- commandes interdites ;
-- chemins autorisés ;
-- absence de push automatique ;
-- limites de ressources ;
-- validation des sorties.
+- pas de push/release automatique ;
+- approbation séparée pour action prod ou irréversible ;
+- chemins/actions allowlisted ;
+- protection contre prompt injection et exfiltration ;
+- limites de ressources, tools et boucles ;
+- évaluations sécurité/régression avant promotion ;
+- mode dégradé et human handoff.

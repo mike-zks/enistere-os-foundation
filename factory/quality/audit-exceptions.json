@@ -19,6 +19,7 @@
       "advisory": "Missing buffer bounds check in v3/v5/v6 when buf is provided",
       "scope": "Outillage de build Expo uniquement (chaîne xcode → @expo/config-plugins). Non atteignable depuis le bundle applicatif : aucun code applicatif n'appelle uuid v3/v5/v6 avec un buffer fourni.",
       "justification": "Advisory PRÉEXISTANT sur main, transitif via la dépendance `xcode` d'Expo. Aucune correction disponible sans upgrade majeur d'Expo (hors périmètre Capability Packs 1A/1A-R). Sévérité modérée, aucune high/critical. Le retrait de dépendances par l'extraction Auth n'a pas introduit cet advisory.",
+      "allowPropagation": true,
       "deadline": "2026-10-31",
       "review": "Réévaluer lors de la prochaine mission d'upgrade Expo (matrice de compatibilité + preuve golden)."
     },
@@ -103,12 +104,53 @@
       "review": "Réévaluer avec l'upgrade Expo."
     },
     {
+      "package": "@redocly/openapi-core",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "Propagation de GHSA-mh99-v99m-4gvg via minimatch/brace-expansion dans openapi-typescript 7",
+      "scope": "Outillage de génération OpenAPI exécuté uniquement sur le snapshot OpenAPI versionné par la Foundation. Il n'est ni embarqué ni exécuté au runtime des applications générées.",
+      "justification": "La branche openapi-typescript 7 impose @redocly/openapi-core ^1.34.6, dont toutes les versions publiées restent affectées. npm ne propose qu'un downgrade majeur vers openapi-typescript 6.7.6 ou un override Redocly 2 non compatible. Une migration de générateur avec comparaison du schéma produit est requise.",
+      "deadline": "2026-08-31",
+      "review": "Migrer openapi-typescript vers une version supportant @redocly/openapi-core 2 ou qualifier le downgrade 6.7.6, puis supprimer simultanément les quatre exceptions OpenAPI."
+    },
+    {
+      "package": "brace-expansion",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring", "nextjs", "angular", "react-native"],
+      "advisory": "GHSA-mh99-v99m-4gvg — expansion non bornée pouvant provoquer une saturation mémoire",
+      "scope": "Dépendance transitive de l'outillage OpenAPI, ESLint, Jest et Nest CLI. Les motifs et documents traités sont versionnés par la Foundation ; aucune entrée utilisateur ni exécution dans les artefacts de production.",
+      "justification": "L'advisory affecte toutes les branches historiques jusqu'à 5.0.7 et n'est corrigé qu'en 5.0.8. Forcer cette version majeure sous les anciennes branches de minimatch/glob casserait leur contrat de dépendances. Les paquets parents signalés par npm ne portent pas d'advisory distinct : le gate peut accepter leur seule propagation depuis cette racine, sans accepter un nouvel advisory direct.",
+      "allowPropagation": true,
+      "deadline": "2026-08-31",
+      "review": "Mettre à niveau les chaînes OpenAPI, ESLint, Jest et Nest CLI vers des versions consommant brace-expansion 5.0.8+, puis supprimer l'autorisation de propagation."
+    },
+    {
+      "package": "minimatch",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "Propagation de GHSA-mh99-v99m-4gvg via brace-expansion",
+      "scope": "Dépendance transitive de Redocly dans le générateur OpenAPI ; entrées limitées au snapshot versionné de la Foundation.",
+      "justification": "Même cause racine que @redocly/openapi-core ; un override isolé modifierait une dépendance majeure de Redocly sans preuve de compatibilité.",
+      "deadline": "2026-08-31",
+      "review": "Supprimer avec l'exception @redocly/openapi-core après migration du générateur."
+    },
+    {
+      "package": "openapi-typescript",
+      "maxSeverity": "high",
+      "appliesTo": ["nestjs", "spring"],
+      "advisory": "Propagation de GHSA-mh99-v99m-4gvg via @redocly/openapi-core",
+      "scope": "DevDependency du package de contrats, exécutée uniquement pendant la génération à partir du snapshot OpenAPI versionné.",
+      "justification": "La version 7.13.0 est la dernière de la branche 7 et dépend encore de Redocly 1.x affecté. Le fix npm proposé est un downgrade majeur 6.7.6 qui change l'API de génération et doit être qualifié séparément.",
+      "deadline": "2026-08-31",
+      "review": "Qualifier une version corrigée ou le downgrade 6.7.6 avec tests de stabilité du contrat généré."
+    },
+    {
       "package": "sharp",
       "maxSeverity": "high",
       "appliesTo": ["nextjs"],
       "advisory": "GHSA-f88m-g3jw-g9cj — sharp inherited vulnerabilities in libvips (CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591)",
       "scope": "Dépendance OPTIONNELLE de Next pour l'optimisation d'images (libvips). Advisory de la vague CVE-2026 publiée le 2026-07-21 (racine était à 0 le 2026-07-19). Vecteur : traitement d'images non fiables ; les gates tournent sous Linux CI sans traitement d'image non fiable, et le starter n'expose que l'optimisation next/image.",
-      "justification": "Aucun correctif upstream disponible : le fix est sharp 0.35.0, hors de la plage `sharp ^0.34.5` épinglée par Next ; Next `latest` (16.2.11) épingle toujours `^0.34.5` et il n'existe pas de Next 17. Sous npm 11, un override sur cette dépendance optionnelle est soit ignoré, soit force le retrait de sharp (régression de l'optimisation d'images). La correction relève d'une mission d'upgrade Next dédiée dès qu'une version supportant sharp 0.35 est publiée.",
+      "justification": "Aucun correctif upstream disponible : le fix est sharp 0.35.0, hors de la plage `sharp ^0.34.5` épinglée par Next ; Next `latest` (16.2.12) épingle toujours `^0.34.5` et il n'existe pas de Next 17. Sous npm 11, un override sur cette dépendance optionnelle est soit ignoré, soit force le retrait de sharp (régression de l'optimisation d'images). La correction relève d'une mission d'upgrade Next dédiée dès qu'une version supportant sharp 0.35 est publiée.",
       "deadline": "2026-10-31",
       "review": "Réévaluer lors de la prochaine mission d'upgrade Next : vérifier si un Next 16.x/17 promeut sharp ≥ 0.35.0."
     },

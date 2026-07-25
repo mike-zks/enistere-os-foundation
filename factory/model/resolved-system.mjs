@@ -25,7 +25,13 @@ export function resolvedSystem({
   const base = {
     metadata: { ...metadata },
     architecture: { ...architecture },
-    applications: applications.map((app) => ({ ...app, gates: [...app.gates], resolvedCapabilities: [...app.resolvedCapabilities], consumes: [...app.consumes] })),
+    applications: applications.map((app) => ({
+      ...app,
+      baseline: { ...app.baseline },
+      gates: [...app.gates],
+      resolvedCapabilities: [...app.resolvedCapabilities],
+      consumes: [...app.consumes],
+    })),
     capabilities: capabilities.map((c) => ({ ...c })),
     domain: { entities: [...(domain.entities ?? [])] },
     environments: environments.map((e) => ({ ...e })),

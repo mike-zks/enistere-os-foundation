@@ -3,6 +3,10 @@
   "id": "nestjs",
   "kind": "api",
   "framework": "NestJS",
+  "baseline": {
+    "contractVersion": "2.0.0",
+    "familyContract": "api/2.0.0"
+  },
   "commands": {
     "install": [
       "npm",
@@ -29,18 +33,13 @@
     ]
   },
   "composition": {
-    "contractVersion": "1",
-    "base": "built-in",
     "model": "modular",
     "readyCapabilities": [
       "auth",
       "rbac",
       "files"
     ],
-    "plannedCapabilities": [
-      "audit",
-      "observability"
-    ]
+    "plannedCapabilities": []
   },
   "deployment": {
     "dockerfile": "Dockerfile",

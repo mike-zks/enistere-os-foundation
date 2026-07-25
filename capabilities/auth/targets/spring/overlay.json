@@ -7,10 +7,9 @@
   "operations": ["files", "dependencies", "environment", "integrations", "verification"],
   "files": [
     { "source": "files/src/main/java/com/enistere/core/config/Argon2Config.java", "destination": "src/main/java/com/enistere/core/config/Argon2Config.java" },
-    { "source": "files/src/main/java/com/enistere/core/config/DatabaseConfig.java", "destination": "src/main/java/com/enistere/core/config/DatabaseConfig.java" },
     { "source": "files/src/main/java/com/enistere/core/config/JwtConfig.java", "destination": "src/main/java/com/enistere/core/config/JwtConfig.java" },
     { "source": "files/src/main/java/com/enistere/core/config/SecurityConfig.java", "destination": "src/main/java/com/enistere/core/config/SecurityConfig.java" },
-    { "source": "files/src/main/java/com/enistere/core/infrastructure/persistence/BaseEntity.java", "destination": "src/main/java/com/enistere/core/infrastructure/persistence/BaseEntity.java" },
+    { "source": "files/src/main/java/com/enistere/core/infrastructure/ratelimit", "destination": "src/main/java/com/enistere/core/infrastructure/ratelimit" },
     { "source": "files/src/main/java/com/enistere/core/infrastructure/security", "destination": "src/main/java/com/enistere/core/infrastructure/security" },
     { "source": "files/src/main/java/com/enistere/core/modules/auth", "destination": "src/main/java/com/enistere/core/modules/auth" },
     { "source": "files/src/main/java/com/enistere/core/modules/users", "destination": "src/main/java/com/enistere/core/modules/users" },
@@ -22,10 +21,6 @@
   "dependencies": {
     "maven": [
       { "groupId": "org.springframework.boot", "artifactId": "spring-boot-starter-security" },
-      { "groupId": "org.springframework.boot", "artifactId": "spring-boot-starter-data-jpa" },
-      { "groupId": "org.springframework.boot", "artifactId": "spring-boot-starter-flyway" },
-      { "groupId": "org.postgresql", "artifactId": "postgresql", "scope": "runtime" },
-      { "groupId": "org.flywaydb", "artifactId": "flyway-database-postgresql", "scope": "runtime" },
       { "groupId": "io.jsonwebtoken", "artifactId": "jjwt-api", "version": "0.12.6" },
       { "groupId": "io.jsonwebtoken", "artifactId": "jjwt-impl", "version": "0.12.6", "scope": "runtime" },
       { "groupId": "io.jsonwebtoken", "artifactId": "jjwt-jackson", "version": "0.12.6", "scope": "runtime" },

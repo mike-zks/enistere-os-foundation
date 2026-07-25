@@ -1,8 +1,9 @@
 # Capability RBAC
 
-Autorisation par rôles et permissions fines (ADR-006), composée **au-dessus de `base + auth`**.
+Autorisation par rôles et permissions fines (ADR-006), composée **au-dessus du Platform Baseline et
+d'Authentication**.
 
-`requires: ["base", "auth"]` — le moteur refuse `base + rbac` sans Auth. L'**API reste l'unique
+`requires: ["auth"]` — le baseline est implicite et le moteur refuse RBAC sans Auth. L'**API reste l'unique
 autorité d'autorisation** : le Web ne fait que conditionner l'affichage (UX), il ne décide jamais.
 
 ## Statut par target
@@ -17,7 +18,7 @@ autorité d'autorisation** : le Web ne fait que conditionner l'affichage (UX), i
 
 `not-applicable` (React Native) : l'autorisation fine est une préoccupation **serveur**. L'app mobile
 reçoit les décisions de l'API (401/403) et ne possède aucune surface RBAC. Ce statut **ne bloque pas**
-la génération d'une composition triple `base + auth + rbac` et **n'injecte rien** dans le mobile —
+la génération d'une composition triple `auth + rbac` et **n'injecte rien** dans le mobile —
 aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §statuts.
 
 ## NestJS (`targets/nestjs`)

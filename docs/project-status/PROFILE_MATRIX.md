@@ -3,11 +3,13 @@
 > **État d'implémentation, pas architecture cible.** Ce document décrit ce que le moteur de composition
 > supporte *aujourd'hui*. La topologie « une API obligatoire, un Web et un Mobile optionnels » est un
 > héritage d'[ADR-042](../adr/ADR-042-ai-native-project-factory-architecture.md), remplacée comme cible
-> par [ADR-044](../adr/ADR-044-enistere-foundation-v2-architecture-reset.md) et la
-> [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md). L'écart entre les
-> deux sera mesuré par l'audit d'écart (voir [`NEXT_ACTIONS.md`](NEXT_ACTIONS.md)).
+> par [ADR-057](../adr/ADR-057-reference-architecture-and-platform-baseline.md) et la
+> [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md). L'écart est mesuré
+> dans [TARGET_VS_CURRENT_IMPLEMENTATION.md](../audits/TARGET_VS_CURRENT_IMPLEMENTATION.md).
 
-Un **profil** est une composition *nommée* de `{api, web?, mobile?, capabilities}`.
+Dans le moteur actuel, un **profil** est une composition *nommée* de
+`{api, web?, mobile?, capabilities}`. Ce registre ne doit pas être confondu avec les cinq profils
+architecturaux cibles.
 
 Il ne remplace pas la matrice des capabilities : celle-ci dit ce qu'une capability vaut sur une
 target, le profil dit quelle **combinaison complète** est supportée, et avec quelle preuve.
@@ -67,28 +69,28 @@ Deux champs distincts portent cette nuance :
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
-| `nestjs-base` | nestjs | — | — | base | `nestjs-base` |
-| `nestjs-auth` | nestjs | — | — | base + auth | `nestjs-auth` |
-| `nestjs-rbac` | nestjs | — | — | base + auth + rbac | `nestjs-auth-rbac` |
-| `nestjs-files` | nestjs | — | — | base + auth + rbac + files | `nestjs-files` |
-| `nestjs-next-auth` | nestjs | nextjs | — | base + auth | `nest-next-auth` |
-| `nestjs-next-rbac` | nestjs | nextjs | — | base + auth + rbac | `nest-next-auth-rbac` |
-| `nestjs-next-files` | nestjs | nextjs | — | base + auth + rbac + files | `nest-next-files` |
-| `nestjs-next-react-native-auth` | nestjs | nextjs | react-native | base + auth | `triple-auth` |
-| `nestjs-next-react-native-rbac` | nestjs | nextjs | react-native | base + auth + rbac | `triple-auth-rbac` |
-| `nestjs-next-react-native-files` | nestjs | nextjs | react-native | base + auth + rbac + files | `triple-files` |
-| `nestjs-next-base` | nestjs | nextjs | — | base | `nestjs-next-base` |
-| `nestjs-react-native-base` | nestjs | — | react-native | base | `nestjs-react-native-base` |
-| `spring-base` | spring | — | — | base | `spring-base` |
-| `spring-auth` | spring | — | — | base + auth | `spring-auth` |
-| `spring-rbac` | spring | — | — | base + auth + rbac | `spring-auth-rbac` |
-| `spring-files` | spring | — | — | base + auth + rbac + files | `spring-files` |
-| `spring-next-base` | spring | nextjs | — | base | `spring-next-base` |
-| `spring-react-native-base` | spring | — | react-native | base | `spring-react-native-base` |
-| `nestjs-angular-base` | nestjs | angular | — | base | `nestjs-angular-base` |
-| `nestjs-flutter-base` | nestjs | — | flutter | base | `nestjs-flutter-base` |
-| `spring-angular-base` | spring | angular | — | base | `spring-angular-base` |
-| `spring-flutter-base` | spring | — | flutter | base | `spring-flutter-base` |
+| `nestjs-base` | nestjs | — | — | aucune | `nestjs-base` |
+| `nestjs-auth` | nestjs | — | — | auth | `nestjs-auth` |
+| `nestjs-rbac` | nestjs | — | — | auth + rbac | `nestjs-auth-rbac` |
+| `nestjs-files` | nestjs | — | — | auth + rbac + files | `nestjs-files` |
+| `nestjs-next-auth` | nestjs | nextjs | — | auth | `nest-next-auth` |
+| `nestjs-next-rbac` | nestjs | nextjs | — | auth + rbac | `nest-next-auth-rbac` |
+| `nestjs-next-files` | nestjs | nextjs | — | auth + rbac + files | `nest-next-files` |
+| `nestjs-next-react-native-auth` | nestjs | nextjs | react-native | auth | `triple-auth` |
+| `nestjs-next-react-native-rbac` | nestjs | nextjs | react-native | auth + rbac | `triple-auth-rbac` |
+| `nestjs-next-react-native-files` | nestjs | nextjs | react-native | auth + rbac + files | `triple-files` |
+| `nestjs-next-base` | nestjs | nextjs | — | aucune | `nestjs-next-base` |
+| `nestjs-react-native-base` | nestjs | — | react-native | aucune | `nestjs-react-native-base` |
+| `spring-base` | spring | — | — | aucune | `spring-base` |
+| `spring-auth` | spring | — | — | auth | `spring-auth` |
+| `spring-rbac` | spring | — | — | auth + rbac | `spring-auth-rbac` |
+| `spring-files` | spring | — | — | auth + rbac + files | `spring-files` |
+| `spring-next-base` | spring | nextjs | — | aucune | `spring-next-base` |
+| `spring-react-native-base` | spring | — | react-native | aucune | `spring-react-native-base` |
+| `nestjs-angular-base` | nestjs | angular | — | aucune | `nestjs-angular-base` |
+| `nestjs-flutter-base` | nestjs | — | flutter | aucune | `nestjs-flutter-base` |
+| `spring-angular-base` | spring | angular | — | aucune | `spring-angular-base` |
+| `spring-flutter-base` | spring | — | flutter | aucune | `spring-flutter-base` |
 
 Sur `nestjs-next-react-native-rbac` et `nestjs-next-react-native-files`, `rbac` est `not-applicable` sur React
 Native : l'autorisation fine reste côté serveur et **aucune surface RBAC n'est injectée** sur le
@@ -102,7 +104,8 @@ mobile. Les deux profils triples réutilisent exactement les compositions golden
 Les quatre profils Angular/Flutter ont été promus `ready` après extraction de leurs baselines et
 goldens structurels/runtime. Aucun profil `supported` ne subsiste pour un dépassement de baseline.
 
-Ces profils sont valides **parce que `base` est disponible sur les six starters**, et R8A prouve
+Ces profils sont valides parce que le Platform Baseline est **implicite sur les six runtimes** ; le suffixe
+historique `-base` signifie désormais « aucune capability optionnelle ». R8A prouve
 que leurs gates passent réellement. Angular et Flutter suivent désormais le contrat modulaire :
 la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: false`).
 
@@ -114,10 +117,10 @@ prouve pas encore la parité métier de ces capabilities. Sur Spring, **Auth, RB
 
 | Profil | API | Web | Mobile | Capabilities | Bloqué par |
 |---|---|---|---|---|---|
-| `spring-angular-auth` | spring | angular | — | base + auth | auth/spring, auth/angular |
-| `spring-angular-rbac` | spring | angular | — | base + auth + rbac | auth+rbac/spring, auth+rbac/angular |
-| `spring-flutter-auth` | spring | — | flutter | base + auth | auth/spring, auth/flutter |
-| `spring-angular-flutter-files` | spring | angular | flutter | base + auth + rbac + files | toute la verticale non-TS |
+| `spring-angular-auth` | spring | angular | — | auth | auth/spring, auth/angular |
+| `spring-angular-rbac` | spring | angular | — | auth + rbac | auth+rbac/spring, auth+rbac/angular |
+| `spring-flutter-auth` | spring | — | flutter | auth | auth/spring, auth/flutter |
+| `spring-angular-flutter-files` | spring | angular | flutter | auth + rbac + files | toute la verticale non-TS |
 
 Ces profils déclarent la cible de parité **sans jamais être présentés comme prêts**. Le refus actuel
 des targets `planned` n'est contourné par aucun d'entre eux.
@@ -137,7 +140,8 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 ## Couverture des goldens
 
 R8A puis Capability Packs 2 portent le golden runtime à **21 compositions** : les 10 compositions
-NestJS des capability packs, les 9 compositions `base` seul, `spring-auth` et `spring-auth-rbac`.
+NestJS des capability packs, les 9 compositions sans capability optionnelle, `spring-auth` et
+`spring-auth-rbac`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
