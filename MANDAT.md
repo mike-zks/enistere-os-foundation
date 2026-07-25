@@ -465,27 +465,30 @@ les primitives riches et le lifecycle restent TARGET ou PLANNED selon les preuve
   `api-extension/2.0.0`, sécurité et observabilité testés ; aucun invariant Common/API ne reste `MISSING`.
 * **ADR-060 — Profils système** : quatre profils fondés sur les cas d’usage et six dimensions
   indépendantes ; les cinq anciens noms sont des alias d’entrée, jamais une sortie canonique.
+* **ADR-061 — Conformité Common/API v2** : NestJS et Spring satisfont chacun les 28 invariants ;
+  ports neutres, diagnostics, validation/configuration et quality gates sont testés, et les deux goldens
+  de base doivent prouver le boot et le contrat HTTP réel.
 
 **Convergence par famille :**
 
-* **API** — NestJS et Spring n’ont plus d’invariant Common/API v2 `MISSING`. Leur parité est testée
-  sur lifecycle, extensions, sécurité, métriques et propagation W3C. Il reste deux statuts `PARTIAL`
-  pour NestJS et six pour Spring ; aucun statut `CONFORMANT` n’est donc revendiqué.
+* **API** — NestJS et Spring obtiennent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`. Le scan
+  structurel reste `GENERATABLE`; l’exécution des suites normatives et des goldens boot/HTTP fournit
+  la preuve `CONFORMANT`, sans valoir parité produit ni readiness de production.
 * **Web / Mobile** — Angular et Flutter ont **encore** un sous-dossier `base/` + une app dédoublée (dédoublage à faire, même modèle que Spring) ; la base **React Native est sur-remplie** (features à extraire en capabilities).
 
-La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Aucun des six runtimes existants
-n'est encore conforme au baseline v2 ; le rapport calculé est dans
-`factory/conformance/reports/platform-baseline-v2-gap.json`.
+La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les deux runtimes API existants
+sont conformes au baseline v2 ; les quatre runtimes Web/Mobile conservent des écarts. Le rapport calculé
+est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 ---
 
 # 11. Prochaine étape
 
-> Achever la convergence **NestJS/Spring Common/API v2** en supprimant les huit statuts `PARTIAL`,
-> puis produire une preuve de boot et de contrat HTTP pour chaque runtime — sans ajouter FastAPI ni
-> nouvelle capability.
+> Créer **FastAPI** comme troisième adapter API de référence contre `common/2.0.0` et `api/2.0.0`,
+> avec rapport de conformité et golden boot/HTTP — sans capability métier.
 
-Cette mission précède FastAPI : elle stabilise d'abord la référence API v2 sur les deux adapters existants.
+Le préalable NestJS/Spring est satisfait : FastAPI peut désormais viser un contrat stabilisé sans créer
+une troisième variante à réconcilier.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -804,19 +807,20 @@ Ne pousse, ne fusionne, ne tague et ne publie **jamais** sans autorisation expli
 
 ADR-058 a rendu les contrats Common/API/Web/Mobile v2 exécutables.
 ADR-059 a convergé NestJS et Spring Boot sur le lifecycle, les extensions
-versionnées, la sécurité et l’observabilité.
+versionnées, la sécurité et l’observabilité. ADR-061 a fermé les huit écarts
+restants et rendu le boot/contrat HTTP obligatoire dans les goldens API de base.
 
-État calculé au 2026-07-24 :
+État calculé au 2026-07-25 :
 
 ```text
-NestJS      26 COMPLIANT / 2 PARTIAL / 0 MISSING
-Spring Boot 22 COMPLIANT / 6 PARTIAL / 0 MISSING
+NestJS      28 COMPLIANT / 0 PARTIAL / 0 MISSING
+Spring Boot 28 COMPLIANT / 0 PARTIAL / 0 MISSING
 ```
 
 La présence d’un logger ne suffit jamais à prouver Observability. Pour les APIs,
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à supprimer les huit statuts `PARTIAL`
-restants puis à produire une preuve de boot et de contrat HTTP pour chaque API.
-FastAPI et les nouvelles capabilities restent hors périmètre jusque-là.
+La prochaine mission unique consiste à créer l’adapter FastAPI contre ces mêmes
+contrats, avec les mêmes preuves de conformité et de boot. Les capabilities métier
+et les topologies distribuées restent hors périmètre.

@@ -36,7 +36,9 @@ export CORS_ALLOWED_ORIGINS=https://customer.example,https://admin.example
 - `/health`, `/health/live`, `/health/ready` et Actuator ;
 - lifecycle `STARTING → READY → DRAINING → STOPPED` ;
 - arrêt gracieux avec délai borné ;
-- tests unitaires et comportementaux Maven.
+- diagnostics internes déterministes sans fuite des erreurs de probes ;
+- ports neutres de validation, persistence et transaction ;
+- Enforcer Java/Maven et Surefire avec échec en absence de tests.
 
 ## Points d’extension API
 
@@ -69,10 +71,11 @@ hooks additionnels en ordre inverse d’inscription et garantit leur exécution 
 
 ## Limites prouvées
 
-La conformité structurelle reste `GENERATABLE`. Les ports neutres de persistence et de
-transaction, les diagnostics avancés, la configuration typée complète et les quality
-gates Java renforcés restent partiels. Aucun statut `BOOTABLE`, `CONFORMANT` ou
-`PRODUCTION_READY` n’est déduit de ce README.
+Le scan structurel reste étiqueté `GENERATABLE`, mais les 28 invariants
+Common/API v2 sont conformes et leurs scénarios comportementaux sont exécutés par
+les quality gates. Le golden `spring-base` doit en plus démarrer et réussir le
+contrat HTTP réel en CI. Ces preuves ne valent ni parité produit, ni backend
+OpenTelemetry imposé, ni statut `PRODUCTION_READY`.
 
 Voir également [STARTER_SPECIFICATION.md](./STARTER_SPECIFICATION.md) et le rapport
 calculé `factory/conformance/reports/platform-baseline-v2-gap.json`.

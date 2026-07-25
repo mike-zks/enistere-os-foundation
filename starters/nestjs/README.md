@@ -71,9 +71,11 @@ sélectionnées. Le terme historique `base` ne représente plus une capability.
 
 ## Limites prouvées
 
-La conformité structurelle reste `GENERATABLE`. Le port de transaction neutre et
-les diagnostics avancés restent partiels. Aucun statut `BOOTABLE`, `CONFORMANT` ou
-`PRODUCTION_READY` n’est déduit de ce README.
+Le scan structurel reste étiqueté `GENERATABLE`, mais les 28 invariants
+Common/API v2 sont conformes et leurs scénarios comportementaux sont exécutés par
+les quality gates. Le golden `nestjs-base` doit en plus démarrer et réussir le
+contrat HTTP réel en CI. Ces preuves ne valent ni parité produit, ni backend
+OpenTelemetry imposé, ni statut `PRODUCTION_READY`.
 
 Voir [STARTER_SPECIFICATION.md](./STARTER_SPECIFICATION.md) et le rapport calculé
 `factory/conformance/reports/platform-baseline-v2-gap.json`.

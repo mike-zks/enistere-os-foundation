@@ -147,4 +147,8 @@ jobs:
             -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
       - name: Golden runtime — generate, reproducible install, gates
+        env:
+          # La preuve de boot + contrat HTTP est obligatoire sur les deux
+          # références API de base, sans multiplier inutilement les démarrages.
+          GOLDEN_RUNTIME_START: ${{ (matrix.composition == 'nestjs-base' || matrix.composition == 'spring-base') && '1' || '0' }}
         run: node factory/quality/scripts/golden-runtime.mjs ${{ matrix.composition }}

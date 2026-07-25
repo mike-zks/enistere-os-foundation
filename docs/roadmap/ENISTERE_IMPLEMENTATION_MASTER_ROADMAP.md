@@ -45,7 +45,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 - **Sortie :** chaque runtime au moins `CONFORMANT`; aucune feature optionnelle dans la base.
 - **Risques :** copier des structures non idiomatiques, ajouter FastAPI trop tôt ; **preuves :** boot réel,
   OpenAPI, erreurs, audit, OTEL, migrations, shutdown, security.
-- **Prochaine mission :** convergence NestJS/Spring avant création FastAPI.
+- **Prochaine mission :** créer FastAPI contre le contrat désormais prouvé par NestJS/Spring.
 
 ## 5. Web Runtime Convergence
 
@@ -173,8 +173,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable (ADR-058) et la première convergence API (ADR-059) sont acquis.
+Le contrat exécutable (ADR-058) et la conformité NestJS/Spring (ADR-061) sont acquis.
 
-> **Achever la convergence NestJS/Spring Common/API v2 en supprimant les huit statuts `PARTIAL`,
-> puis produire une preuve de boot et de contrat HTTP pour chaque runtime — sans ajouter FastAPI ni
-> capability.**
+> **Créer FastAPI comme troisième adapter API de référence contre Common/API v2, avec rapport de
+> conformité et golden boot/HTTP — sans capability métier.**

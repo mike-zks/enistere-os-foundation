@@ -34,9 +34,10 @@
  * Gates DB (prisma migrate, e2e NestJS) exécutés uniquement si DATABASE_URL est
  * défini. Aucun secret réel : la CI fournit des valeurs jetables via l'env.
  *
- * `GOLDEN_RUNTIME_START=1` ajoute la preuve de démarrage réel : l'application est
- * lancée et son endpoint de santé interrogé. Les cibles mobiles n'ont pas de
- * démarrage vérifiable sans émulateur et sont explicitement déclarées comme telles.
+ * `GOLDEN_RUNTIME_START=1` ajoute la preuve de démarrage réel. Pour une API,
+ * health/live/ready, corrélation, W3C et sécurité sont vérifiés sur le processus
+ * lancé. Les cibles mobiles n'ont pas de démarrage vérifiable sans émulateur et
+ * sont explicitement déclarées comme telles.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -220,10 +221,16 @@ function gatesFor(kind, hasDb, capabilities = []) {
  */
 export function startupProbeFor(kind) {
   if (kind === 'spring') {
-    return { slot: 'api', cwd: 'apps/api', cmd: './mvnw', args: ['spring-boot:run', '-q'], url: 'http://127.0.0.1:8080/actuator/health', needsDb: true };
+    return {
+      slot: 'api', runtime: 'spring', cwd: 'apps/api', cmd: './mvnw',
+      args: ['spring-boot:run', '-q'], url: 'http://127.0.0.1:8080/health', needsDb: true,
+    };
   }
   if (kind === 'nestjs') {
-    return { slot: 'api', cwd: 'apps/api', cmd: 'npm', args: ['run', 'start:prod'], url: 'http://127.0.0.1:3000/health', needsDb: true };
+    return {
+      slot: 'api', runtime: 'nestjs', cwd: 'apps/api', cmd: 'npm',
+      args: ['run', 'start:prod'], url: 'http://127.0.0.1:3000/health', needsDb: true,
+    };
   }
   if (kind === 'nextjs') {
     return { slot: 'web', cwd: 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3000/', needsDb: false };
@@ -233,6 +240,61 @@ export function startupProbeFor(kind) {
   }
   // react-native / flutter: no headless startup without an emulator.
   return null;
+}
+
+function healthPayload(body) {
+  return body?.data ?? body;
+}
+
+/**
+ * Proves the cross-runtime API health contract on a live process: status
+ * semantics, correlation, W3C propagation and security headers. `fetchImpl` is
+ * injectable so the contract logic is unit-tested without a socket.
+ */
+export async function verifyHttpContract(probe, fetchImpl = fetch) {
+  if (!['nestjs', 'spring'].includes(probe.runtime)) return [];
+  const traceId = '4bf92f3577b34da6a3ce929d0e0e4736';
+  const parentSpanId = '00f067aa0ba902b7';
+  const requestId = 'runtime-proof-1234';
+  const expected = [
+    ['', 'ok'],
+    ['/live', 'live'],
+    ['/ready', 'ready'],
+  ];
+  const evidence = [];
+  for (const [suffix, expectedStatus] of expected) {
+    const response = await fetchImpl(`${probe.url}${suffix}`, {
+      headers: {
+        'X-Request-Id': requestId,
+        traceparent: `00-${traceId}-${parentSpanId}-01`,
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.status !== 200) {
+      throw new Error(`${probe.runtime} ${suffix || '/'} returned HTTP ${response.status}`);
+    }
+    const payload = healthPayload(await response.json());
+    if (payload?.status !== expectedStatus) {
+      throw new Error(`${probe.runtime} ${suffix || '/'} returned status '${payload?.status}'`);
+    }
+    if (response.headers.get('x-request-id') !== requestId) {
+      throw new Error(`${probe.runtime} ${suffix || '/'} did not propagate X-Request-Id`);
+    }
+    const continuedTrace = response.headers.get('traceparent') ?? '';
+    const traceMatch = continuedTrace.match(
+      new RegExp(`^00-${traceId}-([0-9a-f]{16})-01$`),
+    );
+    if (!traceMatch
+      || traceMatch[1] === parentSpanId
+      || traceMatch[1] === '0000000000000000') {
+      throw new Error(`${probe.runtime} ${suffix || '/'} did not continue the W3C trace`);
+    }
+    if (response.headers.get('x-content-type-options') !== 'nosniff') {
+      throw new Error(`${probe.runtime} ${suffix || '/'} missed the security header contract`);
+    }
+    evidence.push({ path: `/health${suffix}`, status: response.status, state: payload.status });
+  }
+  return evidence;
 }
 
 /** Operations always published by the NestJS baseline (`base`). */
@@ -319,6 +381,10 @@ async function verifyStartup(out, probe, timeoutMs = 180000) {
       return false;
     }
     console.log(`✓ ${probe.slot} started and answered ${status} on ${probe.url}`);
+    const evidence = await verifyHttpContract(probe);
+    for (const proof of evidence) {
+      console.log(`✓ HTTP contract ${probe.runtime} ${proof.path}: ${proof.status}/${proof.state}`);
+    }
     return true;
   } finally {
     try { process.kill(-child.pid, 'SIGTERM'); } catch { /* already gone */ }

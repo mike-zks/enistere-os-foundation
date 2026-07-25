@@ -43,6 +43,9 @@ springdoc:
     path: /swagger-ui.html
 
 enistere:
+  runtime:
+    service-name: ${SERVICE_NAME:api-spring-core}
+    shutdown-timeout-seconds: ${SHUTDOWN_TIMEOUT_SECONDS:20}
   security:
     cors:
       allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200}

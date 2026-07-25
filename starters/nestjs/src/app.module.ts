@@ -11,6 +11,7 @@ import { validateEnv } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { RuntimeExtensionModule } from './platform/extensions/runtime-extension.module';
+import { RuntimeDiagnosticsModule } from './platform/diagnostics/runtime-diagnostics.module';
 import { RuntimeLifecycleModule } from './platform/lifecycle/runtime-lifecycle.module';
 import { RuntimeObservabilityModule } from './platform/observability/runtime-observability.module';
 
@@ -21,6 +22,7 @@ import { RuntimeObservabilityModule } from './platform/observability/runtime-obs
       load: [configuration],
       validate: validateEnv,
     }),
+    RuntimeDiagnosticsModule,
     RuntimeObservabilityModule,
     LoggingModule,
     DatabaseModule,

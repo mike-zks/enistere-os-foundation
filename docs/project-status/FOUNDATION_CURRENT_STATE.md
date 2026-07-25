@@ -19,7 +19,7 @@ Architecture de référence courante :
 Contrat exécutable courant :
 [`ADR-058`](../adr/ADR-058-executable-platform-baseline-v2.md).
 Convergence API courante :
-[`ADR-059`](../adr/ADR-059-api-runtime-baseline-v2-convergence.md).
+[`ADR-061`](../adr/ADR-061-api-runtime-baseline-v2-conformance.md).
 
 ## Actifs existants à migrer
 
@@ -36,18 +36,19 @@ Ces éléments sont des actifs à auditer, non la définition de la cible.
 
 ## Maturité réelle
 
-Niveau **`Bootable`** du [modèle de conformité](../specifications/CONFORMANCE_MODEL.md) : les
-compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est prouvée `Conformant` ni
-`Product-equivalent`. Audit complet : [`docs/audits/`](../audits/README.md).
+Les compositions couvertes sont **`BOOTABLE`**. NestJS et Spring sont en plus
+**`CONFORMANT`** aux contrats Common/API v2 par exécution des suites normatives et
+des goldens HTTP. Aucun runtime n’est prouvé `PRODUCT_EQUIVALENT` ou
+`PRODUCTION_READY`. Audit complet : [`docs/audits/`](../audits/README.md).
 
 ## Écarts (mesurés par l'audit)
 
 - **P0** — contrats centrés TypeScript (pas de génération Java/Dart). *Partiellement adressé* : le pipeline
   canonique unique ([ADR-046](../adr/ADR-046-single-canonical-factory-pipeline.md)) et une **suite Platform
   Contract exécutable** minimale pour la famille API ([ADR-047](../adr/ADR-047-executable-platform-contract-api.md))
-  existent ; NestJS↔Spring convergent sur erreur canonique, correlation, health, lifecycle, sécurité,
-  extensions et observabilité mesurée (ADR-059). Restent **non implémentés** : Blueprint V2 complet,
-  conformité API sans statut partiel et génération polyglotte des contrats.
+  existent ; NestJS↔Spring sont conformes sur les 28 invariants Common/API v2, avec boot et contrat HTTP
+  vérifiés (ADR-061). Restent **non implémentés** : Blueprint V2 complet, FastAPI et génération
+  polyglotte des contrats.
 - **P1** — Lifecycle Manager absent ; dettes de source unique Web/Mobile ; primitives non modélisées ;
   capabilities cibles manquantes (notamment user-management, events, notifications). Observability et
   Technical Audit relèvent désormais du baseline.
@@ -78,8 +79,9 @@ compositions couvertes génèrent, s'installent et démarrent, mais aucune n'est
   pas conformité au Platform Baseline v2 adopté par ADR-057.
 - `Platform Baseline v2 + Runtime Contracts` : **IMPLEMENTED** (ADR-058) — contrat JSON versionné,
   manifests résolus jusqu'au plan, rapports schema v2, diagnostics et scan des six runtimes.
-- `API Runtime Convergence v2` : **IN_PROGRESS** (ADR-059) — NestJS `26/2/0` et Spring `22/6/0`
-  (`COMPLIANT/PARTIAL/MISSING`). Aucun runtime n'est encore `CONFORMANT` : voir
+- `API Runtime Convergence v2` : **PARTIAL_PHASE_COMPLETE** (ADR-061) — NestJS et Spring sont chacun
+  `28/0/0` (`COMPLIANT/PARTIAL/MISSING`) et leurs goldens prouvent le boot/HTTP. FastAPI reste à créer
+  avant la sortie complète de la phase : voir
   [`platform-baseline-v2-gap.json`](../../factory/conformance/reports/platform-baseline-v2-gap.json).
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
