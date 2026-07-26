@@ -439,7 +439,7 @@ Ne saute pas une couche fondatrice pour livrer rapidement une fonctionnalité vi
 
 ---
 
-# 10. État courant (au 2026-07-25)
+# 10. État courant (au 2026-07-26)
 
 Le **pipeline canonique unique** (`Blueprint → CSM → ResolvedSystem → GenerationPlan → Materialization`) est **fusionné sur `main`** et gardé par des fitness functions (FF6–FF8). Le socle V2 « contrats stables, plugins gated » est en place ; la vague CVE est couverte par exceptions documentées (`factory/quality/audit-exceptions.json`).
 
@@ -471,26 +471,33 @@ TARGET ou PLANNED selon les preuves.
   de base doivent prouver le boot et le contrat HTTP réel.
 * **ADR-062 — Adapter FastAPI** : troisième base API, sans capability ni IA implicite ; 28 invariants
   conformes, dépendances Python verrouillées et golden généré avec boot/HTTP réel.
+* **ADR-063 — Convergence Common/Web v2 et sources uniques** : Next.js et Angular satisfont chacun
+  les 24 invariants Common/Web ; leurs goldens prouvent le démarrage et la sécurité. Les sept starters
+  sont matérialisés à leur racine, sans dossier `base/` ni `composition.baseSource`.
 
 **Convergence par famille :**
 
 * **API** — NestJS, Spring et FastAPI obtiennent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`. Le scan
   structurel reste `GENERATABLE`; l’exécution des suites normatives et des goldens boot/HTTP fournit
   la preuve `CONFORMANT`, sans valoir parité produit ni readiness de production.
-* **Web / Mobile** — Angular et Flutter ont **encore** un sous-dossier `base/` + une app dédoublée (dédoublage à faire, même modèle que Spring) ; la base **React Native est sur-remplie** (features à extraire en capabilities).
+* **Web** — Next.js et Angular obtiennent chacun `24 COMPLIANT / 0 PARTIAL / 0 MISSING`, avec preuves
+  comportementales et goldens de démarrage.
+* **Mobile** — React Native reste à `15/7/3` et Flutter à `6/6/13`. Flutter est désormais une source
+  unique neutre, mais cet aplatissement ne vaut pas convergence Mobile v2. React Native conserve des
+  features optionnelles à extraire.
 
-La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les trois runtimes API cibles
-sont conformes au baseline v2 ; les quatre runtimes Web/Mobile conservent des écarts. Le rapport calculé
+La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les trois runtimes API et les
+deux runtimes Web sont conformes au baseline v2 ; les deux runtimes Mobile conservent des écarts. Le rapport calculé
 est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 ---
 
 # 11. Prochaine étape
 
-> Converger **Next.js et Angular** contre `common/2.0.0` et `web/2.0.0`, fermer leurs écarts
+> Converger **React Native et Flutter** contre `common/2.0.0` et `mobile/2.0.0`, fermer leurs écarts
 > par des preuves comportementales et rendre leurs goldens de base conformes — sans capability métier.
 
-La phase API est complète. Le scan réel impose maintenant la convergence Web avant Mobile,
+Les phases API et Web sont complètes. Le scan réel impose maintenant la convergence Mobile avant
 profils distribués et nouvelles capabilities.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
@@ -813,6 +820,8 @@ ADR-059 a convergé NestJS et Spring Boot sur le lifecycle, les extensions
 versionnées, la sécurité et l’observabilité. ADR-061 a fermé les huit écarts
 restants et rendu le boot/contrat HTTP obligatoire dans les goldens API de base.
 ADR-062 a ajouté FastAPI dans le même pipeline et avec les mêmes preuves.
+ADR-063 a convergé Next.js et Angular, rendu leurs goldens de démarrage
+obligatoires et supprimé les dernières représentations `base/`.
 
 État calculé au 2026-07-25 :
 
@@ -820,12 +829,14 @@ ADR-062 a ajouté FastAPI dans le même pipeline et avec les mêmes preuves.
 NestJS      28 COMPLIANT / 0 PARTIAL / 0 MISSING
 Spring Boot 28 COMPLIANT / 0 PARTIAL / 0 MISSING
 FastAPI     28 COMPLIANT / 0 PARTIAL / 0 MISSING
+Next.js     24 COMPLIANT / 0 PARTIAL / 0 MISSING
+Angular     24 COMPLIANT / 0 PARTIAL / 0 MISSING
 ```
 
 La présence d’un logger ne suffit jamais à prouver Observability. Pour les APIs,
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à converger Next.js et Angular contre les
-contrats Common/Web v2. Les capabilities métier et les topologies distribuées
-restent hors périmètre.
+La prochaine mission unique consiste à converger React Native et Flutter contre
+les contrats Common/Mobile v2. Les capabilities métier et les topologies
+distribuées restent hors périmètre.

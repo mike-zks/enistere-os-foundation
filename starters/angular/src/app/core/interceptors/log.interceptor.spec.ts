@@ -9,7 +9,6 @@ describe('logInterceptor', () => {
   let http: HttpClient;
   let controller: HttpTestingController;
   let logSpy: jasmine.Spy;
-  let errorSpy: jasmine.Spy;
 
   beforeEach(() => {
     // Interceptor order mirrors app.config.ts: auth → log → error.
@@ -23,7 +22,6 @@ describe('logInterceptor', () => {
     http = TestBed.inject(HttpClient);
     controller = TestBed.inject(HttpTestingController);
     logSpy = spyOn(console, 'log');
-    errorSpy = spyOn(console, 'error');
   });
 
   afterEach(() => controller.verify());
@@ -31,7 +29,11 @@ describe('logInterceptor', () => {
   it('logs method, path, and status on success', (done) => {
     http.get('/api/users').subscribe({
       next: () => {
-        expect(logSpy).toHaveBeenCalledOnceWith(jasmine.stringMatching(/^\[HTTP\] GET \/api\/users 200 \+\d+ms$/));
+        const record = JSON.parse(logSpy.calls.mostRecent().args[0] as string) as Record<string, unknown>;
+        expect(record['event']).toBe('http.request.completed');
+        expect(record['method']).toBe('GET');
+        expect(record['path']).toBe('/api/users');
+        expect(record['status']).toBe(200);
         done();
       },
     });
@@ -41,7 +43,9 @@ describe('logInterceptor', () => {
   it('logs correct method for POST', (done) => {
     http.post('/api/users', {}).subscribe({
       next: () => {
-        expect(logSpy).toHaveBeenCalledOnceWith(jasmine.stringMatching(/\[HTTP\] POST \/api\/users 201/));
+        const record = JSON.parse(logSpy.calls.mostRecent().args[0] as string) as Record<string, unknown>;
+        expect(record['method']).toBe('POST');
+        expect(record['status']).toBe(201);
         done();
       },
     });
@@ -51,9 +55,10 @@ describe('logInterceptor', () => {
   it('logs statusCode only on error (no body, no headers)', (done) => {
     http.get('/api/items/99').subscribe({
       error: () => {
-        expect(errorSpy).toHaveBeenCalledOnceWith(
-          jasmine.stringMatching(/^\[HTTP\] GET \/api\/items\/99 404 \+\d+ms$/),
-        );
+        const record = JSON.parse(logSpy.calls.mostRecent().args[0] as string) as Record<string, unknown>;
+        expect(record['event']).toBe('http.request.failed');
+        expect(record['path']).toBe('/api/items/99');
+        expect(record['statusCode']).toBe(404);
         done();
       },
     });
@@ -77,7 +82,7 @@ describe('logInterceptor', () => {
   it('strips query params from the logged URL on error', (done) => {
     http.get('/api/search?signed=secret&key=abc').subscribe({
       error: () => {
-        const logged: string = errorSpy.calls.mostRecent().args[0] as string;
+        const logged: string = logSpy.calls.mostRecent().args[0] as string;
         expect(logged).toContain('/api/search');
         expect(logged).not.toContain('signed');
         expect(logged).not.toContain('secret');
@@ -123,9 +128,8 @@ describe('logInterceptor', () => {
   it('logs "network" as statusCode for network errors', (done) => {
     http.get('/api/offline').subscribe({
       error: () => {
-        expect(errorSpy).toHaveBeenCalledOnceWith(
-          jasmine.stringMatching(/\[HTTP\] GET \/api\/offline network \+\d+ms/),
-        );
+        const record = JSON.parse(logSpy.calls.mostRecent().args[0] as string) as Record<string, unknown>;
+        expect(record['statusCode']).toBe('network');
         done();
       },
     });

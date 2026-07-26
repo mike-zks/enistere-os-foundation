@@ -19,6 +19,7 @@ export function validateStarterManifest(value) {
   }
   if (value?.composition?.contractVersion !== undefined) issues.push('composition.contractVersion was replaced by baseline.contractVersion');
   if (value?.composition?.base !== undefined) issues.push('composition.base is forbidden: the Platform Baseline is not a capability');
+  if (value?.composition?.baseSource !== undefined) issues.push('composition.baseSource is forbidden: every starter is materialized at its root');
   if (value?.composition?.model !== undefined && !['modular', 'bundled'].includes(value.composition.model)) {
     issues.push('composition.model must be modular or bundled');
   }

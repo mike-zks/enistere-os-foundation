@@ -12,6 +12,14 @@ describe('API runtime boot/HTTP proof', () => {
     assert.equal(startupProbeFor('fastapi').url, 'http://127.0.0.1:8000/health');
   });
 
+  it('binds both Web runtime probes to their explicit loopback ports', () => {
+    const next = startupProbeFor('nextjs');
+    const angular = startupProbeFor('angular');
+    assert.equal(next.url, 'http://127.0.0.1:3100/');
+    assert.equal(angular.url, 'http://127.0.0.1:4200/');
+    assert.deepEqual(angular.args, ['start', '--', '--host', '127.0.0.1', '--port', '4200']);
+  });
+
   it('proves health semantics, correlation, W3C tracing and security headers', async () => {
     const calls = [];
     const fakeFetch = async (url, options) => {

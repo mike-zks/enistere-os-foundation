@@ -35,6 +35,20 @@ describe('architecture fitness functions', () => {
     const report = runFitnessFunctions({ starters, capabilities: poisoned });
     assert.ok(report.findings.some((f) => f.rule === 'capability-closure' && f.detail.includes('ghost')));
   });
+
+  it('forbids the legacy baseSource indirection', async () => {
+    const starters = await loadStarterManifests(REPO_ROOT);
+    const capabilities = await loadCapabilityManifests(REPO_ROOT);
+    const poisoned = starters.map((starter) => (
+      starter.id === 'angular'
+        ? { ...starter, composition: { ...starter.composition, baseSource: 'starters/angular/base' } }
+        : starter
+    ));
+    const report = runFitnessFunctions({ starters: poisoned, capabilities });
+    assert.ok(report.findings.some(
+      (finding) => finding.rule === 'single-source' && finding.detail.includes('baseSource'),
+    ));
+  });
 });
 
 describe('pipeline fitness functions (ADR-046 boundary, FF6–FF8)', () => {

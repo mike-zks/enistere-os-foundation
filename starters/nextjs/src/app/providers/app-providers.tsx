@@ -2,6 +2,7 @@
 
 import type { ReactElement, ReactNode } from "react";
 
+import { RuntimeProvider } from "../../core/platform/runtime-provider.js";
 import { QueryProvider } from "../../core/query/query-provider.js";
 import { CapabilityProviders } from "./capability-providers.js";
 
@@ -13,8 +14,10 @@ import { CapabilityProviders } from "./capability-providers.js";
  */
 export function AppProviders({ children }: { readonly children: ReactNode }): ReactElement {
   return (
-    <QueryProvider>
-      <CapabilityProviders>{children}</CapabilityProviders>
-    </QueryProvider>
+    <RuntimeProvider>
+      <QueryProvider>
+        <CapabilityProviders>{children}</CapabilityProviders>
+      </QueryProvider>
+    </RuntimeProvider>
   );
 }

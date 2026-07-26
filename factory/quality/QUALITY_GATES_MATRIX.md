@@ -25,8 +25,8 @@
 | **api-contracts** | ✅ L1 | — | ✅ L1 (12) | ✅ L1 | — | — | — | — | — | — | ✅ L1 |
 | **api-client-fetch** | ✅ L1 | — | ✅ L1 (30) | ✅ L1 | — | — | — | — | — | — | — |
 | **ui-kit** | ✅ L1 | ✅ local | ✅ L1 (181) + coverage local | ✅ L1 | ✅ L1 | — | — | — | — | ✅ local | — |
-| **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (450) | ✅ L1 | ✅ L1 | ✅ L3 (15) | — | — | — | — | — |
-| **web-angular** | ✅ L6 (build TS) | — | ✅ L6 (267) | ✅ L6 | ✅ L6 | — | — | — | — | — | — |
+| **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (94) | ✅ L1 | ✅ L1 | ✅ L3 + golden | — | — | — | — | — |
+| **web-angular** | ✅ L6 (build TS) | — | ✅ L6 (108) | ✅ L6 | ✅ L6 | ✅ golden | — | — | — | — | — |
 | **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
 | **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
 | **api-spring** | ✅ L5 (mvnw) | — | ✅ L5 (71: 32u+39e2e TC) | ✅ L5 (Flyway) | — | — | — | — | — | — | ✅ L5 |
@@ -78,7 +78,7 @@
 |---|---|---|---|---|
 | typecheck | `npm run typecheck --workspace=@enistere/web-nextjs` | Node 24 | **L1** | chaque PR |
 | lint | `npm run lint --workspace=@enistere/web-nextjs` | Node 24 | **L1** | chaque PR |
-| tests (450) | `npm test --workspace=@enistere/web-nextjs` | Node 24, jsdom | **L1** | chaque PR |
+| tests (94) | `npm test --workspace=@enistere/web-nextjs` | Node 24, jsdom | **L1** | chaque PR |
 | build (sans API) | `npm run build --workspace=@enistere/web-nextjs` | Node 24 | **L1** | chaque PR |
 | E2E Playwright (15) | `npx playwright test` | Node 24, API+PG+MinIO+Web+Chromium | **L3** | chaque PR |
 
@@ -86,7 +86,7 @@
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
-| tests (267) | `cd starters/angular && npm run test:ci` | Node 24, Karma, ChromeHeadless | **L6** | chaque PR |
+| tests (108) | `cd starters/angular && npm run test:ci` | Node 24, Karma, ChromeHeadless | **L6** | chaque PR |
 | build production | `cd starters/angular && npm run build` | Node 24, Angular 22 | **L6** | chaque PR |
 | audit (0 vuln) | `cd starters/angular && npm audit` | Node 24 | **L6** | chaque PR |
 
@@ -196,11 +196,11 @@ continuation W3C et en-têtes de sécurité.
 | api-contracts | CI `main` (L1) | 12/12 verts |
 | api-client-fetch | CI `main` (L1) | 30/30 verts |
 | ui-kit | CI `main` (L1) + revue VALIDE_V1 2026-07-11 | 181/181 verts |
-| web-nextjs | CI `main` (L1) + CI L3 + revue VALIDE_V1 2026-07-10 | 450/450 + 15 E2E verts |
+| web-nextjs | CI `main` (L1) + CI L3 + golden Common/Web v2 | 94/94 + E2E + démarrage verts |
 | mobile-react-native | local RN35 2026-07-11 | 367/367 + doctor 19/19 + smoke Android verts |
 | api-nestjs | CI `main` (L2) | 386u + 101e2e verts |
 | api-spring | CI L5 `api-spring-verify` 2026-07-15 | 71/71 verts (32u + 39 TC) |
-| web-angular | CI L6 `web-angular` + readiness V1 2026-07-16 | 267/267 verts + build + audit 0 |
+| web-angular | CI L6 `web-angular` + golden Common/Web v2 | 108/108 + build + E2E démarré verts |
 | cloud | CI `main` (L4) + staging CC10/CC11 | images GHCR + staging HTTPS validé |
 
 ## 5. Script de sélection locale (Factory Quality 2)

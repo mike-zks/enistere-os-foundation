@@ -505,8 +505,8 @@
         "invariants": {
           "configuration": {
             "status": "compliant",
-            "evidence": "validated/typed configuration seam found",
-            "source": "structural"
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-errors": {
             "status": "compliant",
@@ -514,39 +514,39 @@
             "source": "structural"
           },
           "structured-logging": {
-            "status": "missing",
-            "evidence": "structured logging missing",
+            "status": "compliant",
+            "evidence": "structured request logging found",
             "source": "structural"
           },
           "correlation": {
-            "status": "missing",
-            "evidence": "correlation propagation missing",
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
             "source": "structural"
           },
           "observability": {
-            "status": "missing",
-            "evidence": "logs/metrics/traces baseline missing",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
           },
           "technical-audit": {
-            "status": "missing",
-            "evidence": "technical audit infrastructure missing",
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
             "source": "structural"
           },
           "security-baseline": {
             "status": "compliant",
-            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
-            "source": "structural"
+            "evidence": "deployable security headers exercised by an E2E contract",
+            "source": "behavioral-test"
           },
           "health": {
-            "status": "partial",
+            "status": "compliant",
             "evidence": "runtime health signal found",
             "source": "structural"
           },
           "diagnostics": {
-            "status": "partial",
-            "evidence": "canonical errors and health provide partial diagnostics",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
           },
           "testing-foundation": {
             "status": "compliant",
@@ -554,18 +554,18 @@
             "source": "structural"
           },
           "lifecycle-hooks": {
-            "status": "partial",
-            "evidence": "lifecycle hooks missing",
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
             "source": "structural"
           },
           "extension-points": {
             "status": "compliant",
             "evidence": "versioned extension registry behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "build-quality-gates": {
             "status": "compliant",
-            "evidence": "build/test gates found",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
             "source": "structural"
           }
         }
@@ -585,13 +585,13 @@
           },
           "session-hook": {
             "status": "compliant",
-            "evidence": "capability provider seam",
-            "source": "structural"
+            "evidence": "versioned neutral session extension behavior tested",
+            "source": "behavioral-test"
           },
           "access-control-hook": {
-            "status": "partial",
-            "evidence": "capability provider seam",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned neutral access-control extension behavior tested",
+            "source": "behavioral-test"
           },
           "error-boundaries": {
             "status": "compliant",
@@ -599,9 +599,9 @@
             "source": "structural"
           },
           "form-foundation": {
-            "status": "missing",
-            "evidence": "form/validation dependencies",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed framework-neutral form validation behavior tested",
+            "source": "behavioral-test"
           },
           "ui-states": {
             "status": "compliant",
@@ -615,13 +615,13 @@
           },
           "security-headers": {
             "status": "compliant",
-            "evidence": "Next.js security headers",
-            "source": "structural"
+            "evidence": "Next.js security headers exercised by E2E contract",
+            "source": "behavioral-test"
           },
           "telemetry": {
-            "status": "missing",
-            "evidence": "client logger only; OTEL hooks absent",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned telemetry exporter, metrics and W3C behavior tested",
+            "source": "behavioral-test"
           },
           "e2e-foundation": {
             "status": "compliant",
@@ -630,96 +630,8 @@
           }
         }
       },
-      "nonConformant": [
-        "baseline.structured-logging",
-        "baseline.correlation",
-        "baseline.observability",
-        "baseline.technical-audit",
-        "web.form-foundation",
-        "web.telemetry"
-      ],
-      "diagnostics": [
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.nextjs.baseline.structured-logging",
-          "invariant": "structured-logging",
-          "status": "missing",
-          "evidence": "structured logging missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.nextjs.baseline.correlation",
-          "invariant": "correlation",
-          "status": "missing",
-          "evidence": "correlation propagation missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.nextjs.baseline.observability",
-          "invariant": "observability",
-          "status": "missing",
-          "evidence": "logs/metrics/traces baseline missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.nextjs.baseline.technical-audit",
-          "invariant": "technical-audit",
-          "status": "missing",
-          "evidence": "technical audit infrastructure missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.nextjs.baseline.health",
-          "invariant": "health",
-          "status": "partial",
-          "evidence": "runtime health signal found"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.nextjs.baseline.diagnostics",
-          "invariant": "diagnostics",
-          "status": "partial",
-          "evidence": "canonical errors and health provide partial diagnostics"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.nextjs.baseline.lifecycle-hooks",
-          "invariant": "lifecycle-hooks",
-          "status": "partial",
-          "evidence": "lifecycle hooks missing"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.nextjs.web.access-control-hook",
-          "invariant": "access-control-hook",
-          "status": "partial",
-          "evidence": "capability provider seam"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.nextjs.web.form-foundation",
-          "invariant": "form-foundation",
-          "status": "missing",
-          "evidence": "form/validation dependencies"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.nextjs.web.telemetry",
-          "invariant": "telemetry",
-          "status": "missing",
-          "evidence": "client logger only; OTEL hooks absent"
-        }
-      ]
+      "nonConformant": [],
+      "diagnostics": []
     },
     {
       "id": "angular",
@@ -731,9 +643,9 @@
         "contractVersion": "common/2.0.0",
         "invariants": {
           "configuration": {
-            "status": "partial",
-            "evidence": "validated/typed configuration seam found",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-errors": {
             "status": "compliant",
@@ -746,34 +658,34 @@
             "source": "structural"
           },
           "correlation": {
-            "status": "missing",
-            "evidence": "correlation propagation missing",
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
             "source": "structural"
           },
           "observability": {
-            "status": "partial",
-            "evidence": "observability components incomplete or without behavioral proof",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
           },
           "technical-audit": {
-            "status": "missing",
-            "evidence": "technical audit infrastructure missing",
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
             "source": "structural"
           },
           "security-baseline": {
-            "status": "missing",
-            "evidence": "security baseline incomplete",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "deployable security headers exercised by an E2E contract",
+            "source": "behavioral-test"
           },
           "health": {
-            "status": "missing",
-            "evidence": "health/diagnostic signal missing",
+            "status": "compliant",
+            "evidence": "runtime health signal found",
             "source": "structural"
           },
           "diagnostics": {
-            "status": "missing",
-            "evidence": "structured actionable diagnostics missing",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
           },
           "testing-foundation": {
             "status": "compliant",
@@ -781,18 +693,18 @@
             "source": "structural"
           },
           "lifecycle-hooks": {
-            "status": "partial",
-            "evidence": "lifecycle hooks missing",
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
             "source": "structural"
           },
           "extension-points": {
-            "status": "partial",
+            "status": "compliant",
             "evidence": "versioned extension registry behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "build-quality-gates": {
             "status": "compliant",
-            "evidence": "build/test gates found",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
             "source": "structural"
           }
         }
@@ -806,29 +718,29 @@
             "source": "structural"
           },
           "typed-api-client": {
-            "status": "partial",
-            "evidence": "HttpClient typed seam; generated client absent",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed Angular HttpClient facade behavior tested",
+            "source": "behavioral-test"
           },
           "session-hook": {
-            "status": "partial",
-            "evidence": "provider seam; no neutral session hook",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned neutral session extension behavior tested",
+            "source": "behavioral-test"
           },
           "access-control-hook": {
-            "status": "partial",
-            "evidence": "provider seam; no neutral access hook",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned neutral access-control extension behavior tested",
+            "source": "behavioral-test"
           },
           "error-boundaries": {
-            "status": "partial",
-            "evidence": "HTTP error boundary only",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "HTTP mapping and global ErrorHandler behavior tested",
+            "source": "behavioral-test"
           },
           "form-foundation": {
             "status": "compliant",
-            "evidence": "@angular/forms",
-            "source": "structural"
+            "evidence": "Reactive Forms foundation behavior tested",
+            "source": "behavioral-test"
           },
           "ui-states": {
             "status": "compliant",
@@ -836,174 +748,29 @@
             "source": "structural"
           },
           "accessibility": {
-            "status": "partial",
-            "evidence": "@angular/cdk a11y",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "Angular CDK and accessible UI-state behavior tested",
+            "source": "behavioral-test"
           },
           "security-headers": {
-            "status": "missing",
-            "evidence": "deployment security headers not declared",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "deployable security-header policy exercised by E2E contract",
+            "source": "behavioral-test"
           },
           "telemetry": {
-            "status": "partial",
-            "evidence": "request logging only; OTEL hooks absent",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned telemetry exporter, metrics and W3C behavior tested",
+            "source": "behavioral-test"
           },
           "e2e-foundation": {
-            "status": "missing",
-            "evidence": "e2e script",
+            "status": "compliant",
+            "evidence": "booted runtime E2E contract script",
             "source": "structural"
           }
         }
       },
-      "nonConformant": [
-        "baseline.correlation",
-        "baseline.technical-audit",
-        "baseline.security-baseline",
-        "baseline.health",
-        "baseline.diagnostics",
-        "web.security-headers",
-        "web.e2e-foundation"
-      ],
-      "diagnostics": [
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.baseline.configuration",
-          "invariant": "configuration",
-          "status": "partial",
-          "evidence": "validated/typed configuration seam found"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.baseline.correlation",
-          "invariant": "correlation",
-          "status": "missing",
-          "evidence": "correlation propagation missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.baseline.observability",
-          "invariant": "observability",
-          "status": "partial",
-          "evidence": "observability components incomplete or without behavioral proof"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.baseline.technical-audit",
-          "invariant": "technical-audit",
-          "status": "missing",
-          "evidence": "technical audit infrastructure missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.baseline.security-baseline",
-          "invariant": "security-baseline",
-          "status": "missing",
-          "evidence": "security baseline incomplete"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.baseline.health",
-          "invariant": "health",
-          "status": "missing",
-          "evidence": "health/diagnostic signal missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.baseline.diagnostics",
-          "invariant": "diagnostics",
-          "status": "missing",
-          "evidence": "structured actionable diagnostics missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.baseline.lifecycle-hooks",
-          "invariant": "lifecycle-hooks",
-          "status": "partial",
-          "evidence": "lifecycle hooks missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.baseline.extension-points",
-          "invariant": "extension-points",
-          "status": "partial",
-          "evidence": "versioned extension registry behavior tested"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.web.typed-api-client",
-          "invariant": "typed-api-client",
-          "status": "partial",
-          "evidence": "HttpClient typed seam; generated client absent"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.web.session-hook",
-          "invariant": "session-hook",
-          "status": "partial",
-          "evidence": "provider seam; no neutral session hook"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.web.access-control-hook",
-          "invariant": "access-control-hook",
-          "status": "partial",
-          "evidence": "provider seam; no neutral access hook"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.web.error-boundaries",
-          "invariant": "error-boundaries",
-          "status": "partial",
-          "evidence": "HTTP error boundary only"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.web.accessibility",
-          "invariant": "accessibility",
-          "status": "partial",
-          "evidence": "@angular/cdk a11y"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.web.security-headers",
-          "invariant": "security-headers",
-          "status": "missing",
-          "evidence": "deployment security headers not declared"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.angular.web.telemetry",
-          "invariant": "telemetry",
-          "status": "partial",
-          "evidence": "request logging only; OTEL hooks absent"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.angular.web.e2e-foundation",
-          "invariant": "e2e-foundation",
-          "status": "missing",
-          "evidence": "e2e script"
-        }
-      ]
+      "nonConformant": [],
+      "diagnostics": []
     },
     {
       "id": "react-native",
@@ -1046,7 +813,7 @@
           },
           "security-baseline": {
             "status": "compliant",
-            "evidence": "bounded CORS, security headers and rate limiting behavior covered",
+            "evidence": "deployable security headers exercised by an E2E contract",
             "source": "structural"
           },
           "health": {
@@ -1578,16 +1345,16 @@
       "conformant": true
     },
     "nextjs": {
-      "compliant": 14,
-      "partial": 4,
-      "missing": 6,
-      "conformant": false
+      "compliant": 24,
+      "partial": 0,
+      "missing": 0,
+      "conformant": true
     },
     "angular": {
-      "compliant": 7,
-      "partial": 10,
-      "missing": 7,
-      "conformant": false
+      "compliant": 24,
+      "partial": 0,
+      "missing": 0,
+      "conformant": true
     },
     "react-native": {
       "compliant": 15,

@@ -20,6 +20,8 @@ Contrat exécutable courant :
 [`ADR-058`](../adr/ADR-058-executable-platform-baseline-v2.md).
 Convergence API courante :
 [`ADR-062`](../adr/ADR-062-fastapi-runtime-adapter.md).
+Convergence Web courante :
+[`ADR-063`](../adr/ADR-063-web-runtime-v2-convergence.md).
 
 ## Actifs existants à migrer
 
@@ -36,9 +38,9 @@ Ces éléments sont des actifs à auditer, non la définition de la cible.
 
 ## Maturité réelle
 
-Les compositions couvertes sont **`BOOTABLE`**. NestJS, Spring et FastAPI sont en plus
-**`CONFORMANT`** aux contrats Common/API v2 par exécution des suites normatives et
-des goldens HTTP. Aucun runtime n’est prouvé `PRODUCT_EQUIVALENT` ou
+Les compositions couvertes sont **`BOOTABLE`**. NestJS, Spring, FastAPI, Next.js
+et Angular sont en plus **`CONFORMANT`** aux contrats de leur famille par
+exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `PRODUCT_EQUIVALENT` ou
 `PRODUCTION_READY`. Audit complet : [`docs/audits/`](../audits/README.md).
 
 ## Écarts (mesurés par l'audit)
@@ -49,7 +51,7 @@ des goldens HTTP. Aucun runtime n’est prouvé `PRODUCT_EQUIVALENT` ou
   existent ; NestJS, Spring et FastAPI sont conformes sur les 28 invariants Common/API v2, avec boot et
   contrat HTTP vérifiés (ADR-061/062). Restent **non implémentés** : Blueprint V2 complet et génération
   polyglotte des contrats.
-- **P1** — Lifecycle Manager absent ; dettes de source unique Web/Mobile ; primitives non modélisées ;
+- **P1** — Lifecycle Manager absent ; convergence Mobile incomplète ; primitives non modélisées ;
   capabilities cibles manquantes (notamment user-management, events, notifications). Observability et
   Technical Audit relèvent désormais du baseline.
 
@@ -82,10 +84,14 @@ des goldens HTTP. Aucun runtime n’est prouvé `PRODUCT_EQUIVALENT` ou
 - `API Runtime Convergence v2` : **COMPLETE** (ADR-061/062) — NestJS, Spring et FastAPI sont chacun
   `28/0/0` (`COMPLIANT/PARTIAL/MISSING`) et leurs goldens prouvent le boot/HTTP : voir
   [`platform-baseline-v2-gap.json`](../../factory/conformance/reports/platform-baseline-v2-gap.json).
+- `Web Runtime Convergence v2` : **COMPLETE** (ADR-063) — Next.js et Angular
+  sont chacun `24/0/0`; leurs goldens prouvent build, démarrage et contrat E2E.
+- `Starter single source` : **COMPLETE** (ADR-063) — les sept starters sont
+  matérialisés à leur racine ; aucun dossier `base/` ni `composition.baseSource`.
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
-  Reste, avant la parité **produit** : contrats **générés** Angular/Flutter (`@enistere/api-contracts`) et
-  capabilities Web/Mobile (Phase 3).
+  Reste, avant la parité **produit** : convergence Mobile, contrats polyglottes
+  générés et capabilities Web/Mobile.
 
 Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
 

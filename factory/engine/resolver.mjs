@@ -31,7 +31,7 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
   const generationMode = allModular ? 'modular-overlay' : 'baseline-copy';
 
   const starterById = new Map(starters.map((starter) => [starter.id, starter]));
-  const sourceFor = (runtime) => starterById.get(runtime)?.composition?.baseSource ?? `starters/${runtime}`;
+  const sourceFor = (runtime) => `starters/${runtime}`;
   const adapterVersions = adapterVersionsFor(runtimes);
 
   // Slot view (first app of each slot) — descriptive, for profile lookup and lock.

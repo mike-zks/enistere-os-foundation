@@ -84,15 +84,15 @@ polyglottes manquent encore. Les 27 « profils » historiques restent des preset
 | NestJS | starter + overlays + goldens | conforme v2 ; backend OTEL et parité produit non prouvés | KEEP |
 | Spring | starter source unique + overlays | conforme v2 ; image/deployment et parité produit à qualifier | KEEP |
 | FastAPI | starter modulaire + golden | conforme v2 ; capabilities et providers absents | KEEP |
-| Next.js | starter + E2E | baseline complet/audit technique Web à formaliser | ADAPT |
-| Angular | starter + base dupliquée | source unique, contracts/a11y/capabilities | REFACTOR |
+| Next.js | starter + E2E + golden | Common/Web v2 conforme ; parité produit non prouvée | KEEP |
+| Angular | starter source unique + E2E + golden | Common/Web v2 conforme ; capabilities absentes | KEEP |
 | React Native | starter riche | séparer baseline et features optionnelles | REFACTOR |
-| Flutter | starter + base dupliquée | source unique, capabilities, builds réels | REFACTOR |
+| Flutter | starter source unique neutralisé | Common/Mobile v2 encore à converger, builds device à prouver | REFACTOR |
 
 La conformité antérieure « 6 runtimes en parité de contrat de base » se rapporte au contrat minimal v1.
-Le baseline v2 est exécutable (ADR-058) ; ADR-061/062 prouvent les trois APIs conformes sur ses
-28 invariants.
-Les runtimes Web/Mobile restent en écart.
+Le baseline v2 est exécutable (ADR-058) ; ADR-061/062 prouvent les trois APIs
+conformes sur leurs 28 invariants et ADR-063 les deux runtimes Web conformes sur
+leurs 24 invariants. Les runtimes Mobile restent en écart.
 
 ## Contradictions documentaires corrigées
 
@@ -110,17 +110,19 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — Common/Web v2 incomplet :** Next.js est à 14/4/6 et Angular à 7/10/7.
+1. **P0 — Common/Mobile v2 incomplet :** React Native est à 15/7/3 et Flutter à 6/6/13.
 2. **P0 — blueprint/CSM partiels :** profils désormais représentables, mais primitives et Blueprint V2 complet manquent.
-3. **P1 — bases Web/Mobile divergentes :** duplication et sur-remplissage.
+3. **P1 — bases Mobile divergentes :** React Native reste sur-rempli et Flutter incomplet.
 4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
 5. **P2 — primitives/lifecycle distribués absents :** aucune génération distribuée crédible.
 
 ## Conclusion et action unique
 
 Les actifs du kernel et des runtimes justifient une convergence plutôt qu'une réécriture totale.
-ADR-061 a fermé les écarts des deux APIs existantes ; ADR-062 a ajouté FastAPI dans le même pipeline
-avec les mêmes preuves.
+ADR-061 a fermé les écarts des deux APIs existantes ; ADR-062 a ajouté FastAPI
+dans le même pipeline ; ADR-063 a fermé les écarts Web et supprimé les dernières
+représentations `base/`.
 
-> **Prochaine mission unique : converger Next.js et Angular contre Common/Web v2, avec preuves
-> comportementales et goldens de base conformes — sans capability métier.**
+> **Prochaine mission unique : converger React Native et Flutter contre
+> Common/Mobile v2, avec preuves comportementales et goldens de base conformes
+> — sans capability métier.**
