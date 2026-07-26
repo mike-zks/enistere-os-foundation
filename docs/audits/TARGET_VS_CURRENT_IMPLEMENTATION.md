@@ -1,9 +1,9 @@
 # Audit — Architecture cible vs implémentation actuelle
 
-- Date : 2026-07-25
-- Branche auditée : `feat/fastapi-runtime-v2`
-- Référence de départ : merge de la PR #209 (`428d51a`)
-- Nature : audit vivant cible/existant, actualisé par les preuves d'ADR-062
+- Date : 2026-07-26
+- Branche auditée : `feat/mobile-runtime-v2-convergence`
+- Référence de départ : merge de la PR #211 (`3f669ba`)
+- Nature : audit vivant cible/existant, actualisé par les preuves d'ADR-064
 
 ## Méthode
 
@@ -41,11 +41,11 @@ polyglottes manquent encore. Les 27 « profils » historiques restent des preset
 | lock/provenance/digests | ADAPT | registry resolution et lifecycle | fondations présentes |
 | conformance engine | ADAPT | remplacer progressivement probes critiques par comportements | baseline v2 exécutable depuis ADR-058 |
 | fitness functions FF6–FF8 | KEEP | préserver pipeline unique | preuves présentes |
-| sept starters existants | ADAPT | runtime adapters conformes | trois APIs conformes ; Web/Mobile en écart |
+| sept starters existants | KEEP | préserver les Runtime Contracts | sept adapters conformes à Common + famille v2 |
 | NestJS base | KEEP | préserver Common/API v2 et faire évoluer les adapters | 28/0/0 + golden boot/HTTP |
 | Spring base source unique | KEEP | préserver Common/API v2 et faire évoluer les adapters | 28/0/0 + golden boot/HTTP |
-| Angular/Flutter double `base/` | REFACTOR | source unique | dette documentée |
-| React Native sur-rempli | REFACTOR | extraire features optionnelles | nombreuses features en base |
+| anciens doubles `base/` Angular/Flutter | REMOVE | source unique | supprimés et interdits par fitness function |
+| ancien moteur Notifications React Native | REMOVE | hook push neutre | supprimé et interdit par fitness function |
 | FastAPI runtime | KEEP | préserver Common/API v2 ; ajouter des capabilities uniquement par overlay | 28/0/0 + golden boot/HTTP |
 | capabilities auth/rbac/files | ADAPT | manifests vNext, audit métier, parité targets | overlays réels mais partiels |
 | `capabilities/base` | REMOVE | baseline n'est pas une capability | **retiré par ADR-058** |
@@ -86,13 +86,14 @@ polyglottes manquent encore. Les 27 « profils » historiques restent des preset
 | FastAPI | starter modulaire + golden | conforme v2 ; capabilities et providers absents | KEEP |
 | Next.js | starter + E2E + golden | Common/Web v2 conforme ; parité produit non prouvée | KEEP |
 | Angular | starter source unique + E2E + golden | Common/Web v2 conforme ; capabilities absentes | KEEP |
-| React Native | starter riche | séparer baseline et features optionnelles | REFACTOR |
-| Flutter | starter source unique neutralisé | Common/Mobile v2 encore à converger, builds device à prouver | REFACTOR |
+| React Native | starter source unique | Common/Mobile v2 conforme ; test device non prouvé | KEEP |
+| Flutter | starter source unique | Common/Mobile v2 conforme ; APK debug prouvé, test device non prouvé | KEEP |
 
 La conformité antérieure « 6 runtimes en parité de contrat de base » se rapporte au contrat minimal v1.
 Le baseline v2 est exécutable (ADR-058) ; ADR-061/062 prouvent les trois APIs
-conformes sur leurs 28 invariants et ADR-063 les deux runtimes Web conformes sur
-leurs 24 invariants. Les runtimes Mobile restent en écart.
+conformes sur leurs 28 invariants, ADR-063 les deux runtimes Web conformes sur
+leurs 24 invariants et ADR-064 les deux runtimes Mobile conformes sur leurs
+25 invariants.
 
 ## Contradictions documentaires corrigées
 
@@ -110,19 +111,20 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — Common/Mobile v2 incomplet :** React Native est à 15/7/3 et Flutter à 6/6/13.
-2. **P0 — blueprint/CSM partiels :** profils désormais représentables, mais primitives et Blueprint V2 complet manquent.
-3. **P1 — bases Mobile divergentes :** React Native reste sur-rempli et Flutter incomplet.
-4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
-5. **P2 — primitives/lifecycle distribués absents :** aucune génération distribuée crédible.
+1. **P0 — profils canoniques partiellement exécutables :** le vocabulaire
+   système adopté n’est pas encore le parcours principal CLI/resolver.
+2. **P0 — blueprint/CSM partiels :** primitives et Blueprint V2 complet manquent.
+3. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
+4. **P2 — primitives/lifecycle distribués absents :** aucune génération distribuée crédible.
 
 ## Conclusion et action unique
 
 Les actifs du kernel et des runtimes justifient une convergence plutôt qu'une réécriture totale.
 ADR-061 a fermé les écarts des deux APIs existantes ; ADR-062 a ajouté FastAPI
 dans le même pipeline ; ADR-063 a fermé les écarts Web et supprimé les dernières
-représentations `base/`.
+représentations `base/` ; ADR-064 a fermé les écarts Mobile et retiré
+Notifications du runtime React Native.
 
-> **Prochaine mission unique : converger React Native et Flutter contre
-> Common/Mobile v2, avec preuves comportementales et goldens de base conformes
-> — sans capability métier.**
+> **Prochaine mission unique : rendre `backend-service` et `product-platform`
+> exécutables dans la CLI et le resolver, puis préparer honnêtement
+> `distributed-platform`.**

@@ -121,15 +121,24 @@ describe('Platform Baseline v2 — seven runtime gap reports', () => {
     }
   });
 
-  it('evaluates React Native and Flutter against Common + Mobile v2 without hiding gaps', async () => {
+  it('evaluates React Native and Flutter against Common + Mobile v2 with behavioral proof', async () => {
     for (const runtime of ['react-native', 'flutter']) {
       const generated = await generate(`${runtime}-base`, { api: 'nestjs', web: null, mobile: runtime });
       roots.push(generated.root);
       const app = buildConformance({ plan: generated.plan, projectDir: generated.out }).apps.find((item) => item.runtime === runtime);
       assertContractKeys(app, MOBILE_CONTRACT_INVARIANTS);
       assert.equal(app.familyContract.invariants.navigation.status, STATUS.COMPLIANT);
-      assert.notEqual(app.baseline.invariants.observability.status, STATUS.COMPLIANT);
-      assert.ok(app.nonConformant.some((id) => id.startsWith('baseline.')));
+      for (const invariant of Object.values(app.baseline.invariants)) {
+        assert.equal(invariant.status, STATUS.COMPLIANT);
+      }
+      for (const invariant of Object.values(app.familyContract.invariants)) {
+        assert.equal(invariant.status, STATUS.COMPLIANT);
+      }
+      assert.equal(app.baseline.invariants.observability.source, 'behavioral-test');
+      assert.equal(app.baseline.invariants['technical-audit'].source, 'structural');
+      assert.equal(app.familyContract.invariants['typed-api-client'].source, 'behavioral-test');
+      assert.deepEqual(app.nonConformant, []);
+      assert.deepEqual(app.diagnostics, []);
     }
   });
 

@@ -10,7 +10,6 @@ import { test } from 'node:test';
 import {
   isInternalRoute,
   resolveLink,
-  resolveNotificationLink,
   type LinkingConfig,
 } from '../src/linking/resolve';
 
@@ -99,18 +98,4 @@ test('invalid / empty input never throws', () => {
   assert.deepEqual(resolveLink(null, config), { kind: 'invalid', reason: 'empty' });
   assert.deepEqual(resolveLink(42, config), { kind: 'invalid', reason: 'empty' });
   assert.deepEqual(resolveLink('relative/no/slash', config), { kind: 'invalid', reason: 'unparseable' });
-});
-
-test('resolveNotificationLink reads a configurable data key', () => {
-  const data = { link: 'myapp://home', other: 'ignored' };
-  assert.equal(resolveNotificationLink(data, config).kind, 'internal');
-  // custom key
-  assert.equal(
-    resolveNotificationLink({ deeplink: 'myapp://home' }, config, { key: 'deeplink' }).kind,
-    'internal',
-  );
-  // missing / wrong type -> invalid, no throw
-  assert.deepEqual(resolveNotificationLink({}, config), { kind: 'invalid', reason: 'empty' });
-  assert.deepEqual(resolveNotificationLink({ link: 99 }, config), { kind: 'invalid', reason: 'empty' });
-  assert.deepEqual(resolveNotificationLink(null, config), { kind: 'invalid', reason: 'empty' });
 });

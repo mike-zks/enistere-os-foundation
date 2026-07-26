@@ -73,10 +73,11 @@
 - [ ] openapi:check ✅ | build ✅ | audit 0 vuln ✅
 - [ ] Tests E2E navigateur (L3) verts
 
-#### Mobile Core → VALIDE_V1 (futur)
-- [ ] typecheck ✅ | lint ✅ | test 367+/367+ ✅ | expo export -p ios ✅ | doctor 19+/19 ✅
-- [ ] smoke:android ✅ | smoke:ios ✅ (macOS requis — RN31 en attente)
-- [ ] audit 0 vuln ✅
+#### Mobile Runtimes → Common/Mobile v2
+- [ ] React Native : typecheck ✅ | lint ✅ | 321 tests ✅ | export iOS ✅ | doctor 19/19 ✅
+- [ ] Flutter : format ✅ | analyze ✅ | 9 tests ✅ | APK debug ✅
+- [ ] goldens reproductibles et audit gouverné ✅
+- [ ] tests device déclarés séparément ; aucune preuve simulée si l’environnement manque
 
 #### Factory Quality → SPECIFICATION_DOCUMENTAIRE
 - [ ] specification active présent et complet

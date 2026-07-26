@@ -4,7 +4,7 @@ import 'package:mobile_flutter/src/features/home/home_screen.dart';
 import 'package:mobile_flutter/src/theme/enistere_theme.dart';
 
 void main() {
-  testWidgets('renders the neutral base starter without Auth controls', (
+  testWidgets('renders the neutral runtime without Auth controls', (
     tester,
   ) async {
     await tester.pumpWidget(

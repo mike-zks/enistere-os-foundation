@@ -10,7 +10,7 @@ it('computes an honest Platform Baseline v2 gap for all seven existing runtimes'
   assert.equal(report.schemaVersion, '2');
   assert.deepEqual(Object.keys(report.summary), ['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
   assert.ok(['react-native', 'flutter']
-    .every((runtime) => report.summary[runtime].conformant === false));
+    .every((runtime) => report.summary[runtime].conformant === true));
   assert.equal(report.summary.nestjs.missing, 0);
   assert.equal(report.summary.spring.missing, 0);
   assert.equal(report.summary.fastapi.missing, 0);
@@ -26,9 +26,15 @@ it('computes an honest Platform Baseline v2 gap for all seven existing runtimes'
   assert.equal(report.summary.fastapi.conformant, true);
   assert.equal(report.summary.nextjs.conformant, true);
   assert.equal(report.summary.angular.conformant, true);
+  assert.equal(report.summary['react-native'].missing, 0);
+  assert.equal(report.summary.flutter.missing, 0);
+  assert.equal(report.summary['react-native'].partial, 0);
+  assert.equal(report.summary.flutter.partial, 0);
   assert.equal(report.apps.find((app) => app.runtime === 'nestjs').diagnostics.length, 0);
   assert.equal(report.apps.find((app) => app.runtime === 'spring').diagnostics.length, 0);
   assert.equal(report.apps.find((app) => app.runtime === 'fastapi').diagnostics.length, 0);
   assert.equal(report.apps.find((app) => app.runtime === 'nextjs').diagnostics.length, 0);
   assert.equal(report.apps.find((app) => app.runtime === 'angular').diagnostics.length, 0);
+  assert.equal(report.apps.find((app) => app.runtime === 'react-native').diagnostics.length, 0);
+  assert.equal(report.apps.find((app) => app.runtime === 'flutter').diagnostics.length, 0);
 });

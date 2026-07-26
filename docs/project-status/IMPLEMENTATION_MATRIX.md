@@ -17,9 +17,9 @@
 | Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
 | Platform Contract exécutable (API) | **Conforme sur NestJS/Spring/FastAPI** (ADR-061/062) | 28 conformes/0 partiel/0 manquant chacun ; suites comportementales et goldens boot/HTTP obligatoires |
 | Platform Contract exécutable (Web) | **Conforme sur Next.js/Angular** (ADR-063) | 24 conformes/0 partiel/0 manquant chacun ; preuves comportementales et goldens démarrés |
-| Platform Contract exécutable (Mobile, socle) | **Implémenté** (ADR-052, ADR-053) | évaluateur 3 familles ; RN compliant + socle Flutter convergé (`core/api` Dio) → `enistere.conformance.json` Flutter base compliant ; **jalon : 6 runtimes en parité de contrat de base** |
-| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/061/062/063) | Common/API/Web/Mobile versionnés ; trois APIs et deux Web conformes, Mobile encore en écart ; rapport calculé dans `factory/conformance/reports/` |
-| Source unique des starters | **Implémentée et gardée** (ADR-063) | sept racines `starters/<runtime>` ; `base/` et `composition.baseSource` interdits par fitness function |
+| Platform Contract exécutable (Mobile) | **Conforme sur React Native/Flutter** (ADR-064) | 25 conformes/0 partiel/0 manquant chacun ; preuves comportementales et goldens build/export |
+| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/061/062/063/064) | Common/API/Web/Mobile versionnés ; sept runtimes conformes ; rapport calculé dans `factory/conformance/reports/` |
+| Source unique des starters | **Implémentée et gardée** (ADR-063/064) | sept racines `starters/<runtime>` ; `base/`, `composition.baseSource` et capabilities Mobile embarquées interdits |
 | Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
 | `profiles` / `profile <name>` | Implémenté (R7/ADR-062) | presets de composition historiques : 27 déclarés, 23 générables |

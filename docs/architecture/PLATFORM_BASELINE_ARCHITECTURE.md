@@ -12,7 +12,8 @@ Le contrat v2 adopté par
 [ADR-058](../adr/ADR-058-executable-platform-baseline-v2.md) est défini dans
 `factory/conformance/contracts/platform-baseline.v2.json`. Les manifests le résolvent dans le pipeline et
 `npm run factory:baseline-gap` recalcule l'écart des sept runtimes. NestJS, Spring Boot et FastAPI
-atteignent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`; Web et Mobile conservent des écarts.
+atteignent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`; Next.js et Angular
+atteignent chacun `24/0/0`; React Native et Flutter atteignent chacun `25/0/0`.
 
 ## Composants communs
 

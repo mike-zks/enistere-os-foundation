@@ -1,30 +1,29 @@
-# Starter Flutter
+# Runtime Flutter
 
-Socle mobile Flutter matérialisé directement à la racine `starters/flutter`.
+Runtime Mobile Flutter conforme à `common/2.0.0` et `mobile/2.0.0`, matérialisé
+directement à la racine `starters/flutter`.
 
-## Statut réel
+## Statut prouvé
 
-- Platform Baseline cible : `common/2.0.0`
-- contrat de famille cible : `mobile/2.0.0`
-- composition : modulaire, sans dossier `base` et sans capability embarquée
-- conformité actuelle : non acquise ; l’évaluateur conserve explicitement les
-  invariants partiels ou manquants
+| Portée | Conformes | Partiels | Manquants |
+|---|---:|---:|---:|
+| Common + Mobile v2 | 25 | 0 | 0 |
 
-Le starter est analysable et testable, mais son aplatissement ne constitue pas
-une convergence Mobile V2. Cette convergence est la prochaine mission proposée.
+Le niveau structurel calculé reste `GENERATABLE`. Les tests comportementaux,
+l’analyse, le build APK et le golden généré portent la preuve `CONFORMANT`.
+Aucun démarrage sur émulateur ou appareil n’est revendiqué.
 
-`Authentication`, `Authorization`, `Files` et `Notifications` sont des
-capabilities planifiées. Elles ne sont pas intégrées à ce runtime de base.
+## Composition
 
-## Éléments présents
+- aucun sous-dossier `base/` ;
+- aucune propriété `composition.baseSource` ;
+- aucune implémentation Authentication, Authorization, Files ou Notifications ;
+- session, offline, push et crash reporting sont des hooks neutres et versionnés.
 
-- application Flutter et navigation `go_router` ;
-- client HTTP Dio et modèle d’erreur ;
-- configuration d’API ;
-- journalisation HTTP ;
-- états UI Foundation ;
-- thème Material 3 ;
-- test de base.
+Le runtime fournit configuration et transport sûrs, erreurs canoniques, logs,
+corrélation W3C, observabilité, audit technique, diagnostics, lifecycle,
+extensions, navigation, client typé, secure-storage port, état réseau,
+permissions, deep links et fondation Android.
 
 ## Commandes
 
@@ -32,6 +31,7 @@ capabilities planifiées. Elles ne sont pas intégrées à ce runtime de base.
 flutter pub get
 flutter analyze
 flutter test
+flutter build apk --debug
 ```
 
 La spécification locale

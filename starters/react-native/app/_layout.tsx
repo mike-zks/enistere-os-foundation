@@ -3,7 +3,7 @@
  *
  * Ordre des providers : SafeAreaProvider → ThemePreferenceProvider (ADR-010) →
  * QueryProvider (ADR-012) → CapabilityProviders. `CapabilityProviders` est le
- * point d'intégration généré par la Factory : la baseline `base` n'y monte aucun
+ * point d'intégration généré par la Factory : le runtime neutre n'y monte aucun
  * provider ; la capability Auth composée y insère son `AuthProvider` (ADR-004/015)
  * via l'intégration `expo.provider`, sans modifier ce layout.
  */

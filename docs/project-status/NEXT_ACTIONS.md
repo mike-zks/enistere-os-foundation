@@ -2,29 +2,32 @@
 
 ## Mission achevée
 
-Next.js et Angular sont les deux adapters Web conformes à `common/2.0.0` et
-`web/2.0.0` ([ADR-063](../adr/ADR-063-web-runtime-v2-convergence.md)).
+React Native et Flutter sont les deux adapters Mobile conformes à
+`common/2.0.0` et `mobile/2.0.0`
+([ADR-064](../adr/ADR-064-mobile-runtime-v2-convergence.md)).
 
-| Runtime | Conformes | Partiels | Manquants/non conformes | Baseline v2 |
+| Runtime | Conformes | Partiels | Manquants | Baseline v2 |
 |---|---:|---:|---:|---|
-| Next.js | 24 | 0 | 0 | conforme |
-| Angular | 24 | 0 | 0 | conforme |
+| React Native | 25 | 0 | 0 | conforme |
+| Flutter | 25 | 0 | 0 | conforme |
 
 Preuves :
 
-- configuration, erreurs, logs, corrélation W3C, observabilité, audit technique,
-  diagnostics, lifecycle et extensions versionnées testés ;
-- routing, clients typés, formulaires, états UI, accessibilité, télémétrie et
-  sécurité testés idiomatiquement ;
-- Next.js : typecheck, lint, 22 suites de tests, build et E2E ;
-- Angular : 108 tests, build production et E2E sur processus démarré ;
-- goldens `nestjs-next-base` et `nestjs-angular-base` : génération, installation,
-  démarrage Web, audit gouverné et lock reproductible ;
+- configuration, erreurs, logs, corrélation W3C, observabilité, audit
+  technique, diagnostics, lifecycle et extensions testés ;
+- navigation, clients typés, secure storage, session, réseau, permissions,
+  deep links, hooks offline/push, crash reporting et build testés ;
+- React Native : typecheck, lint, 47 fichiers de tests, Expo Doctor 19/19 et
+  export iOS ;
+- Flutter : format, analyze, 9 tests et build APK debug ;
+- goldens `nestjs-react-native-base` et `nestjs-flutter-base` : génération,
+  installation, tests, build/export, audit gouverné et lock reproductible ;
 - sept starters à source unique dans `starters/<runtime>`, sans dossier `base/`
-  ni propriété `composition.baseSource`.
+  ni propriété `composition.baseSource` ;
+- aucune implémentation Auth, Files ou Notifications dans les starters Mobile.
 
-Le rapport structurel conserve `level: GENERATABLE`. Les suites normatives et
-les goldens portent la preuve `CONFORMANT`, sans valoir `PRODUCT_EQUIVALENT` ni
+Le rapport structurel conserve `level: GENERATABLE`. Les suites et goldens
+portent la preuve `CONFORMANT`, sans valoir test device, `PRODUCT_EQUIVALENT` ni
 `PRODUCTION_READY`.
 
 Source :
@@ -32,37 +35,30 @@ Source :
 
 ## Prochaine mission unique
 
-> **Converger React Native et Flutter contre `common/2.0.0` et `mobile/2.0.0`,
-> fermer leurs écarts par des preuves comportementales et rendre leurs goldens
-> de base conformes — sans implémenter de capability.**
+> **Rendre les profils système canoniques `backend-service` et
+> `product-platform` exécutables dans la CLI et le resolver, avec leurs six
+> dimensions indépendantes, puis préparer `distributed-platform` sans déclarer
+> `service-ecosystem` générable.**
 
 ### Justification de l’ordre
 
-Les trois runtimes API et les deux runtimes Web sont conformes. La roadmap place
-Mobile avant les profils distribués et le framework de capabilities. Le scan
-réel conserve :
-
-| Runtime | Conformes | Partiels | Manquants/non conformes |
-|---|---:|---:|---:|
-| React Native | 15 | 7 | 3 |
-| Flutter | 6 | 6 | 13 |
-
-Flutter a été aplati en source unique et débarrassé des flux Auth/Files
-embarqués, mais cet assainissement structurel n’est pas une convergence.
-React Native conserve également des surfaces optionnelles à extraire. Ajouter
-une capability maintenant figerait ces divergences.
+Les phases Runtime Contracts et convergence des sept runtimes sont complètes.
+La phase 7 de la roadmap est Architecture Profiles ; elle précède le framework
+de capabilities. Le dépôt possède déjà un modèle canonique et une décision
+normative sur quatre profils, mais la CLI et certains registres conservent
+encore un vocabulaire historique orienté combinaisons de starters.
 
 ### Critères de sortie
 
-- même Common/Mobile v2, implémenté idiomatiquement dans les deux frameworks ;
-- aucun invariant `PARTIAL` ou `MISSING` dans le rapport calculé ;
-- aucun flux Authentication, Authorization, Files ou Notifications dans les
-  bases ;
-- configuration, erreurs, logs, corrélation, observabilité, audit technique,
-  sécurité, diagnostics, lifecycle et extensions prouvés ;
-- navigation, client API, secure storage, session/access hooks, état réseau,
-  permissions, deep links, offline/push hooks, crash reporting et build
-  foundation prouvés ;
-- goldens React Native et Flutter reproductibles, avec limites d’émulateur
-  déclarées honnêtement ;
-- aucune nouvelle capability, topologie ou parité produit revendiquée.
+- la CLI demande d’abord le type de système, pas un framework ;
+- les sorties canoniques sont uniquement `backend-service`,
+  `product-platform`, `distributed-platform`, `service-ecosystem` ;
+- les anciens noms restent des alias d’entrée versionnés, jamais des sorties ;
+- client topology, backend style, deployment coupling, data ownership,
+  communication et operations maturity restent des dimensions indépendantes ;
+- `backend-service` et `product-platform` sont planifiables/générables avec
+  goldens ;
+- `distributed-platform` est représenté et refusé avec diagnostics là où le
+  support manque ;
+- `service-ecosystem` reste `TARGET`, sans support fictif ;
+- aucun pipeline parallèle et aucune nouvelle capability.
