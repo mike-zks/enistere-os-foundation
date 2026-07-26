@@ -17,24 +17,25 @@ offline/push, crash reporting et fondations de build/test.
 Il ne doit pas embarquer de flux fonctionnels d’authentification, d’autorisation,
 de fichiers ou de notifications. Ces fonctions appartiennent aux capabilities.
 
-## 3. État courant
+## 3. Contrats exécutables
 
-La racine contient une application Flutter minimale, `go_router`, Riverpod, Dio,
-la configuration d’API, des erreurs, des états UI et un thème. `flutter analyze`
-et `flutter test` constituent des preuves locales.
+`lib/src/core/platform/runtime_contract.dart` implémente configuration, erreurs
+canoniques, logs avec redaction, corrélation W3C, télémétrie versionnée, audit
+technique, diagnostics, lifecycle et registre d’extensions.
 
-Ces actifs ne satisfont pas encore l’intégralité des contrats Common et Mobile
-V2. En particulier, la convergence devra compléter et prouver la corrélation,
-l’observabilité, l’audit technique, les diagnostics, le cycle de vie, les points
-d’extension, le stockage sécurisé, l’état réseau, les permissions, les deep
-links, les hooks offline/push et le crash reporting.
+Les modules `api`, `storage`, `session`, `network`, `permissions`, `linking`,
+`offline`, `push` et `crash` implémentent les invariants Mobile. Les hooks
+session/offline/push/crash sont neutres : ils n’activent aucune capability.
 
 ## 4. Critère de conformité
 
-Le statut `CONFORMANT` ne pourra être déclaré qu’après :
+Le runtime conserve le statut de preuve `CONFORMANT` uniquement si :
 
-1. implémentation des invariants Common et Mobile V2 sans capability ;
-2. tests comportementaux pour chaque invariant ;
-3. analyse et tests Flutter réussis ;
-4. golden généré reproductible ;
-5. évaluation canonique sans invariant partiel ou manquant.
+1. le rapport reste à `25 COMPLIANT / 0 PARTIAL / 0 MISSING` ;
+2. `flutter analyze`, `flutter test` et `dart format` réussissent ;
+3. `flutter build apk --debug` réussit ;
+4. le golden généré est reproductible ;
+5. aucune source Auth/Files/Notifications et aucun dossier `base/` ne réapparaît.
+
+La preuve headless ne vaut ni test sur appareil, ni `PRODUCT_EQUIVALENT`, ni
+`PRODUCTION_READY`.

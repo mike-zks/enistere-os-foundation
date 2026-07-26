@@ -27,7 +27,8 @@
 | **ui-kit** | ✅ L1 | ✅ local | ✅ L1 (181) + coverage local | ✅ L1 | ✅ L1 | — | — | — | — | ✅ local | — |
 | **web-nextjs** | ✅ L1 | ✅ L1 | ✅ L1 (94) | ✅ L1 | ✅ L1 | ✅ L3 + golden | — | — | — | — | — |
 | **web-angular** | ✅ L6 (build TS) | — | ✅ L6 (108) | ✅ L6 | ✅ L6 | ✅ golden | — | — | — | — | — |
-| **mobile-react-native** | ✅ local | ✅ local | ✅ local (367) | — | ✅ local | — | ✅ Android local / ⚠️ iOS bloqué | — | ✅ local (19/19) | — | — |
+| **mobile-react-native** | ✅ golden | ✅ golden | ✅ golden (321) | ✅ export iOS | ✅ golden | — | ⚠️ device non prouvé | — | ✅ golden (19/19) | — | — |
+| **mobile-flutter** | ✅ analyze | ✅ format | ✅ golden (9) | ✅ APK debug | ✅ golden | — | ⚠️ device non prouvé | — | — | — | — |
 | **api-nestjs** | — (build TS) | ✅ L2 | ✅ L2 (386u+101e2e) | ✅ L2 | ✅ L2 | — | — | — | — | — | ✅ L2 |
 | **api-spring** | ✅ L5 (mvnw) | — | ✅ L5 (71: 32u+39e2e TC) | ✅ L5 (Flyway) | — | — | — | — | — | — | ✅ L5 |
 | **api-fastapi** | ✅ compile | ✅ Ruff | ✅ pytest (12) | ✅ compileall | ✅ golden | — | ✅ HTTP | — | — | — | ✅ natif |
@@ -96,11 +97,11 @@
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
-| typecheck | `cd starters/react-native && npm run typecheck` | Node 24 | local (pas de CI mobile) | chaque PR mobile |
-| lint | `cd starters/react-native && npm run lint` | Node 24 | local | chaque PR mobile |
-| tests (367, node --test) | `cd starters/react-native && npm test` | Node 24, node:test | local | chaque PR mobile |
-| expo export iOS | `cd starters/react-native && npx expo export -p ios` | Node 24, Metro | local | chaque PR mobile |
-| expo-doctor (19/19) | `cd starters/react-native && npm run doctor` | Node 24 | local | chaque PR mobile |
+| typecheck | `cd starters/react-native && npm run typecheck` | Node 24 | golden Mobile | chaque PR mobile |
+| lint | `cd starters/react-native && npm run lint` | Node 24 | golden Mobile | chaque PR mobile |
+| tests (321, node --test) | `cd starters/react-native && npm test` | Node 24, node:test | golden Mobile | chaque PR mobile |
+| expo export iOS | `cd starters/react-native && npm run build` | Node 24, Metro | golden Mobile | chaque PR mobile |
+| expo-doctor (19/19) | `cd starters/react-native && npm run doctor` | Node 24 | golden Mobile | chaque PR mobile |
 | smoke Android | `cd starters/react-native && npm run smoke:android` | Node 24, emulator-5554 Android | local | PR shell / runtime |
 | smoke iOS | `cd starters/react-native && npm run smoke:ios` | macOS + Xcode + simulateur | ⚠️ bloqué Linux | PR shell sur macOS |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
@@ -108,7 +109,17 @@
 > **Note smoke iOS** : `npm run smoke:ios` est bloqué en environnement Linux (`detectedPlatform: linux`).
 > Il doit être exécuté sur macOS avec Xcode installé (Mobile Core RN31 — en attente macOS/device réel).
 
-### 2.8 starters/nestjs
+### 2.8 starters/flutter
+
+| Gate | Commande | Environnement | CI | Fréquence |
+|---|---|---|---|---|
+| format | `dart format --output=none --set-exit-if-changed .` | Dart/Flutter | golden Mobile | chaque PR mobile |
+| analyze | `flutter analyze` | Flutter | golden Mobile | chaque PR mobile |
+| tests (9) | `flutter test` | Flutter | golden Mobile | chaque PR mobile |
+| build APK debug | `flutter build apk --debug` | Flutter/Android SDK | golden Mobile | chaque PR mobile |
+| audit | audit Foundation gouverné | Node 24 | golden Mobile | chaque PR |
+
+### 2.9 starters/nestjs
 
 > L'API Core est un projet npm autonome et n'expose pas de script `typecheck` dédié.
 > Le gate de compilation TypeScript est `npm run build` (Nest build).
@@ -122,7 +133,7 @@
 | build | `cd starters/nestjs && npm run build` | Node 24 | **L2** | chaque PR API |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
-### 2.9 starters/spring
+### 2.10 starters/spring
 
 > `starters/spring` est désormais **la base modulaire** (ADR-054/056) — plus de sous-dossier `base/`, plus
 > d'app dédoublée. La base porte la persistence (JPA/Flyway, migration V0 `audit_logs`), l'infra d'audit et
@@ -137,7 +148,7 @@
 | compositions générées | `node factory/quality/scripts/golden-runtime.mjs spring-base\|spring-auth\|spring-auth-rbac\|spring-files` | Java 21, Docker (TC PostgreSQL + MinIO) | **golden-runtime** | chaque PR |
 | audit | `npm audit` (via root) | Node 24 | **L1** root | chaque PR |
 
-### 2.10 starters/fastapi
+### 2.11 starters/fastapi
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
@@ -152,7 +163,7 @@ Le golden installe l'arbre transitif depuis `requirements.lock`, vérifie le loc
 npm partagé, démarre le processus et exerce health/live/ready, correlation,
 continuation W3C et en-têtes de sécurité.
 
-### 2.11 deployment
+### 2.12 deployment
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|
@@ -197,7 +208,8 @@ continuation W3C et en-têtes de sécurité.
 | api-client-fetch | CI `main` (L1) | 30/30 verts |
 | ui-kit | CI `main` (L1) + revue VALIDE_V1 2026-07-11 | 181/181 verts |
 | web-nextjs | CI `main` (L1) + CI L3 + golden Common/Web v2 | 94/94 + E2E + démarrage verts |
-| mobile-react-native | local RN35 2026-07-11 | 367/367 + doctor 19/19 + smoke Android verts |
+| mobile-react-native | golden Common/Mobile v2 | 321 tests + doctor 19/19 + export iOS verts |
+| mobile-flutter | golden Common/Mobile v2 | 9 tests + analyze/format + APK debug verts |
 | api-nestjs | CI `main` (L2) | 386u + 101e2e verts |
 | api-spring | CI L5 `api-spring-verify` 2026-07-15 | 71/71 verts (32u + 39 TC) |
 | web-angular | CI L6 `web-angular` + golden Common/Web v2 | 108/108 + build + E2E démarré verts |

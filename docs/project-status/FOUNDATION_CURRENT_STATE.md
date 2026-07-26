@@ -22,6 +22,8 @@ Convergence API courante :
 [`ADR-062`](../adr/ADR-062-fastapi-runtime-adapter.md).
 Convergence Web courante :
 [`ADR-063`](../adr/ADR-063-web-runtime-v2-convergence.md).
+Convergence Mobile courante :
+[`ADR-064`](../adr/ADR-064-mobile-runtime-v2-convergence.md).
 
 ## Actifs existants à migrer
 
@@ -38,8 +40,8 @@ Ces éléments sont des actifs à auditer, non la définition de la cible.
 
 ## Maturité réelle
 
-Les compositions couvertes sont **`BOOTABLE`**. NestJS, Spring, FastAPI, Next.js
-et Angular sont en plus **`CONFORMANT`** aux contrats de leur famille par
+Les compositions couvertes sont **`BOOTABLE`** selon les preuves disponibles.
+Les sept runtimes sont **`CONFORMANT`** aux contrats de leur famille par
 exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `PRODUCT_EQUIVALENT` ou
 `PRODUCTION_READY`. Audit complet : [`docs/audits/`](../audits/README.md).
 
@@ -51,7 +53,7 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   existent ; NestJS, Spring et FastAPI sont conformes sur les 28 invariants Common/API v2, avec boot et
   contrat HTTP vérifiés (ADR-061/062). Restent **non implémentés** : Blueprint V2 complet et génération
   polyglotte des contrats.
-- **P1** — Lifecycle Manager absent ; convergence Mobile incomplète ; primitives non modélisées ;
+- **P1** — Lifecycle Manager absent ; profils canoniques encore partiels ; primitives non modélisées ;
   capabilities cibles manquantes (notamment user-management, events, notifications). Observability et
   Technical Audit relèvent désormais du baseline.
 
@@ -86,12 +88,15 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   [`platform-baseline-v2-gap.json`](../../factory/conformance/reports/platform-baseline-v2-gap.json).
 - `Web Runtime Convergence v2` : **COMPLETE** (ADR-063) — Next.js et Angular
   sont chacun `24/0/0`; leurs goldens prouvent build, démarrage et contrat E2E.
+- `Mobile Runtime Convergence v2` : **COMPLETE** (ADR-064) — React Native et
+  Flutter sont chacun `25/0/0`; leurs goldens prouvent tests, export/build,
+  audit et reproductibilité sans revendiquer de test device.
 - `Starter single source` : **COMPLETE** (ADR-063) — les sept starters sont
   matérialisés à leur racine ; aucun dossier `base/` ni `composition.baseSource`.
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
-  Reste, avant la parité **produit** : convergence Mobile, contrats polyglottes
-  générés et capabilities Web/Mobile.
+  Reste, avant la parité **produit** : profils système exécutables, contrats
+  polyglottes générés et capabilities Web/Mobile.
 
 Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
 

@@ -12,8 +12,8 @@ Elle mesure le Platform Baseline `common/2.0.0` et le contrat de famille
 | FastAPI | API | 28 | 0 | 0 | oui |
 | Next.js | Web | 24 | 0 | 0 | oui |
 | Angular | Web | 24 | 0 | 0 | oui |
-| React Native | Mobile | 15 | 7 | 3 | non |
-| Flutter | Mobile | 6 | 6 | 13 | non |
+| React Native | Mobile | 25 | 0 | 0 | oui |
+| Flutter | Mobile | 25 | 0 | 0 | oui |
 
 ## Lecture des preuves
 
@@ -21,8 +21,8 @@ Elle mesure le Platform Baseline `common/2.0.0` et le contrat de famille
   boot et contrat HTTP réel.
 - Next.js et Angular ont des suites comportementales Common/Web et des goldens
   avec démarrage Web et contrat E2E de sécurité.
-- React Native et Flutter restent non conformes au contrat Mobile V2. Leurs
-  anciens statuts V1 et leur capacité à compiler ne ferment pas ces écarts.
+- React Native et Flutter ont des suites comportementales et des goldens avec
+  export iOS ou build APK ; aucun test device n’est revendiqué.
 - L’évaluation structurelle émet `level: GENERATABLE`. Le statut
   `CONFORMANT` repose en plus sur les suites normatives et les goldens ; il ne
   signifie ni `PRODUCT_EQUIVALENT` ni `PRODUCTION_READY`.
@@ -38,5 +38,5 @@ jamais classés comme capabilities.
 
 ## Action
 
-La prochaine mission unique est la convergence Common/Mobile V2 de React Native
-et Flutter, sans capability.
+La prochaine mission unique est l’exécution des profils système canoniques,
+d’abord `backend-service` et `product-platform`.

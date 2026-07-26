@@ -50,6 +50,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## 5. Web Runtime Convergence
 
+- **État : COMPLETE** (ADR-063).
 - **Objectifs :** Next.js et Angular conformes au contrat Web, source unique chacun.
 - **Dépendances :** contrats, API de référence stable.
 - **Livrables :** bases, clients générés, a11y, telemetry et E2E.
@@ -59,13 +60,16 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## 6. Mobile Runtime Convergence
 
+- **État : COMPLETE** (ADR-064).
 - **Objectifs :** React Native et Flutter conformes sans surcharger la base.
 - **Dépendances :** contrats, API stable.
 - **Livrables :** bases, secure storage/hooks, telemetry/crash, builds et smokes.
-- **Sortie :** extras RN extraits ; builds Android et iOS qualifiés selon environnement.
+- **Sortie :** deux rapports `25/0/0`, moteur Notifications RN extrait, build
+  APK Flutter et export iOS React Native prouvés sans faux smoke device.
 - **Risques :** confondre hooks et capabilities, preuves iOS absentes ; **preuves :** tests devices/simulators,
   goldens et security storage.
-- **Prochaine mission :** classifier puis extraire les extras RN.
+- **Preuves de sortie :** suites comportementales, fitness function, goldens
+  `nestjs-react-native-base` et `nestjs-flutter-base`.
 
 ## 7. Architecture Profiles
 
@@ -174,8 +178,9 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable, la conformité des trois APIs (ADR-061/062) et celle des
-deux runtimes Web (ADR-063) sont acquis.
+Le contrat exécutable et la conformité des sept runtimes (ADR-061 à ADR-064)
+sont acquis.
 
-> **Converger React Native et Flutter contre Common/Mobile v2, avec preuves
-> comportementales et goldens de base conformes — sans capability métier.**
+> **Rendre `backend-service` et `product-platform` exécutables dans la CLI et le
+> resolver, puis préparer `distributed-platform` sans support fictif de
+> `service-ecosystem`.**

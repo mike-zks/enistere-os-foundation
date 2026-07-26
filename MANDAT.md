@@ -474,6 +474,9 @@ TARGET ou PLANNED selon les preuves.
 * **ADR-063 — Convergence Common/Web v2 et sources uniques** : Next.js et Angular satisfont chacun
   les 24 invariants Common/Web ; leurs goldens prouvent le démarrage et la sécurité. Les sept starters
   sont matérialisés à leur racine, sans dossier `base/` ni `composition.baseSource`.
+* **ADR-064 — Convergence Common/Mobile v2** : React Native et Flutter satisfont chacun les
+  25 invariants Common/Mobile ; leurs goldens prouvent tests, build/export, audit et reproductibilité.
+  Les hooks session/offline/push restent neutres et les flux Auth/Files/Notifications sont exclus.
 
 **Convergence par famille :**
 
@@ -482,23 +485,25 @@ TARGET ou PLANNED selon les preuves.
   la preuve `CONFORMANT`, sans valoir parité produit ni readiness de production.
 * **Web** — Next.js et Angular obtiennent chacun `24 COMPLIANT / 0 PARTIAL / 0 MISSING`, avec preuves
   comportementales et goldens de démarrage.
-* **Mobile** — React Native reste à `15/7/3` et Flutter à `6/6/13`. Flutter est désormais une source
-  unique neutre, mais cet aplatissement ne vaut pas convergence Mobile v2. React Native conserve des
-  features optionnelles à extraire.
+* **Mobile** — React Native et Flutter obtiennent chacun
+  `25 COMPLIANT / 0 PARTIAL / 0 MISSING`, avec preuves comportementales,
+  export iOS React Native et build APK Flutter. Aucun test device n’est revendiqué.
 
-La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les trois runtimes API et les
-deux runtimes Web sont conformes au baseline v2 ; les deux runtimes Mobile conservent des écarts. Le rapport calculé
-est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
+La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les sept
+runtimes satisfont désormais leur contrat Common + famille v2. Le rapport
+calculé est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 ---
 
 # 11. Prochaine étape
 
-> Converger **React Native et Flutter** contre `common/2.0.0` et `mobile/2.0.0`, fermer leurs écarts
-> par des preuves comportementales et rendre leurs goldens de base conformes — sans capability métier.
+> Rendre les profils canoniques **`backend-service`** et
+> **`product-platform`** exécutables dans la CLI et le resolver, puis préparer
+> `distributed-platform` sans déclarer `service-ecosystem` générable.
 
-Les phases API et Web sont complètes. Le scan réel impose maintenant la convergence Mobile avant
-profils distribués et nouvelles capabilities.
+Les phases Runtime Contracts et convergence API/Web/Mobile sont complètes.
+L’ordre de la roadmap impose maintenant Architecture Profiles avant le
+framework de capabilities.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -822,8 +827,11 @@ restants et rendu le boot/contrat HTTP obligatoire dans les goldens API de base.
 ADR-062 a ajouté FastAPI dans le même pipeline et avec les mêmes preuves.
 ADR-063 a convergé Next.js et Angular, rendu leurs goldens de démarrage
 obligatoires et supprimé les dernières représentations `base/`.
+ADR-064 a convergé React Native et Flutter, remplacé les placeholders évalués
+structurellement par des contrats testés et retiré le moteur Notifications
+embarqué de React Native.
 
-État calculé au 2026-07-25 :
+État calculé au 2026-07-26 :
 
 ```text
 NestJS      28 COMPLIANT / 0 PARTIAL / 0 MISSING
@@ -831,12 +839,14 @@ Spring Boot 28 COMPLIANT / 0 PARTIAL / 0 MISSING
 FastAPI     28 COMPLIANT / 0 PARTIAL / 0 MISSING
 Next.js     24 COMPLIANT / 0 PARTIAL / 0 MISSING
 Angular     24 COMPLIANT / 0 PARTIAL / 0 MISSING
+React Native 25 COMPLIANT / 0 PARTIAL / 0 MISSING
+Flutter      25 COMPLIANT / 0 PARTIAL / 0 MISSING
 ```
 
 La présence d’un logger ne suffit jamais à prouver Observability. Pour les APIs,
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à converger React Native et Flutter contre
-les contrats Common/Mobile v2. Les capabilities métier et les topologies
-distribuées restent hors périmètre.
+La prochaine mission unique consiste à rendre `backend-service` et
+`product-platform` exécutables comme profils système canoniques, avec leurs six
+dimensions indépendantes. Les nouvelles capabilities restent hors périmètre.
