@@ -11,8 +11,8 @@ sélectionnable, ni supprimable, ni commercialisé comme capability. Un runtime 
 Le contrat v2 adopté par
 [ADR-058](../adr/ADR-058-executable-platform-baseline-v2.md) est défini dans
 `factory/conformance/contracts/platform-baseline.v2.json`. Les manifests le résolvent dans le pipeline et
-`npm run factory:baseline-gap` recalcule l'écart des six runtimes. Le rapport courant ne déclare aucun
-runtime conforme.
+`npm run factory:baseline-gap` recalcule l'écart des sept runtimes. NestJS, Spring Boot et FastAPI
+atteignent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`; Web et Mobile conservent des écarts.
 
 ## Composants communs
 

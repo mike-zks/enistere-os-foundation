@@ -62,7 +62,7 @@ OpenTelemetry-compatible.
 
 | Élément | Statut | Limite |
 |---|---|---|
-| sept runtimes demandés | PLANNED | six présents ; FastAPI non concerné |
+| sept runtimes de la Factory | IMPLEMENTED | tous enregistrés ; cet exemple n'utilise pas FastAPI |
 | cinq applications représentées | PLANNED | CSM support partiel, blueprint V2 absent |
 | Angular/Flutter capabilities | PLANNED | overlays incomplets |
 | contrats Dart/Java/Python | TARGET | génération absente |

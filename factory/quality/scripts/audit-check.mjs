@@ -12,7 +12,7 @@
  * d'advisory : les exceptions sont explicites, scopées et datées
  * (factory/quality/audit-exceptions.json).
  *
- * Usage : node factory/quality/scripts/audit-check.mjs <projectDir> [--targets nestjs,nextjs,react-native]
+ * Usage : node factory/quality/scripts/audit-check.mjs <projectDir> [--targets nestjs,nextjs,shared-packages]
  */
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';

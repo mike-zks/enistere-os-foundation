@@ -27,6 +27,14 @@ function nestjsAuth(slug = 'dep-app') {
   return b;
 }
 
+function fastapiBase(slug = 'fastapi-dep-app') {
+  const blueprint = createDefaultBlueprint(slug);
+  blueprint.stack = { api: 'fastapi', web: null, mobile: null };
+  blueprint.capabilities = [];
+  blueprint.deployment = { environments: ['local'] };
+  return blueprint;
+}
+
 /** Minimal generated-project fixture: an enistere.lock plus a matching lockfile. */
 async function lockedFixture({ lockContent = '{"lockfileVersion":3}\n', record = true } = {}) {
   const dir = await mkdtemp(join(tmpdir(), 'enistere-dep-fix-'));
@@ -58,6 +66,23 @@ describe('dependency finalization contract', () => {
     assert.equal(verified.valid, true, 'an honestly unlocked project is valid');
     assert.equal(verified.dependenciesLocked, false);
     assert.match(verified.note, /enistere install/);
+  });
+
+  it('records and verifies the FastAPI transitive dependency lock at generation time', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-fastapi-dep-'));
+    const out = join(root, 'p');
+    await generateProject(fastapiBase(), out);
+    const manifest = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+    assert.equal(manifest.runtimeLocks.length, 2);
+    assert.equal(manifest.runtimeLocks[0].lockfile, 'apps/api/requirements.lock');
+    assert.equal(manifest.runtimeLocks[1].lockfile, 'apps/api/requirements.runtime.lock');
+    assert.equal((await verifyProjectDependencies(out)).valid, true);
+
+    await writeFile(join(out, 'apps/api/requirements.lock'), 'tampered==1.0.0\n');
+    const tampered = await verifyProjectDependencies(out);
+    assert.equal(tampered.valid, false);
+    assert.match(tampered.issues.join(' '), /requirements\.lock digest mismatch/);
+    await rm(root, { recursive: true, force: true });
   });
 
   it('verify accepts a project whose lock matches the recorded digest', async () => {
@@ -238,6 +263,28 @@ describe('npm audit by documented exception', () => {
     assert.match(outOfScope.violations[0].reason, /scoped to react-native/);
   });
 
+  it('scopes shared contract tooling independently from the selected runtime', () => {
+    const vulnerabilities = {
+      'brace-expansion': {
+        severity: 'high',
+        via: [{ source: 1, name: 'brace-expansion', severity: 'high' }],
+      },
+    };
+    const inScope = evaluateAudit(
+      { vulnerabilities },
+      exceptions,
+      { targets: ['fastapi', 'shared-packages'], now: new Date('2026-07-25') },
+    );
+    assert.equal(inScope.ok, true);
+
+    const withoutSharedScope = evaluateAudit(
+      { vulnerabilities },
+      exceptions,
+      { targets: ['fastapi'], now: new Date('2026-07-25') },
+    );
+    assert.equal(withoutSharedScope.ok, false);
+  });
+
   it('fails when an advisory exceeds the documented severity', () => {
     const report = evaluateAudit(
       { vulnerabilities: { uuid: { severity: 'critical' } } }, exceptions,
@@ -279,6 +326,7 @@ describe('golden runtime audit wiring', () => {
       'nestjs-auth-rbac', 'nest-next-auth-rbac', 'triple-auth-rbac',
       'nestjs-files', 'nest-next-files', 'triple-files',
       'spring-base', 'spring-next-base', 'spring-react-native-base',
+      'fastapi-base',
       'spring-auth',
       'spring-angular-base', 'spring-flutter-base',
       'nestjs-next-base', 'nestjs-react-native-base',
@@ -294,7 +342,7 @@ describe('golden runtime audit wiring', () => {
       assert.match(args[0], /audit-check\.mjs$/);
       assert.equal(args[1], '/tmp/project');
       assert.equal(args[2], '--targets');
-      assert.equal(args[3], kinds.join(','));
+      assert.equal(args[3], [...kinds, 'shared-packages'].join(','));
     }
   });
 });

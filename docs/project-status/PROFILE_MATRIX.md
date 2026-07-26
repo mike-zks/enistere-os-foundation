@@ -65,7 +65,7 @@ Deux champs distincts portent cette nuance :
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (22)
+### `ready` — composables, prouvés et exacts (23)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -82,6 +82,7 @@ Deux champs distincts portent cette nuance :
 | `nestjs-next-base` | nestjs | nextjs | — | aucune | `nestjs-next-base` |
 | `nestjs-react-native-base` | nestjs | — | react-native | aucune | `nestjs-react-native-base` |
 | `spring-base` | spring | — | — | aucune | `spring-base` |
+| `fastapi-base` | fastapi | — | — | aucune | `fastapi-base` |
 | `spring-auth` | spring | — | — | auth | `spring-auth` |
 | `spring-rbac` | spring | — | — | auth + rbac | `spring-auth-rbac` |
 | `spring-files` | spring | — | — | auth + rbac + files | `spring-files` |
@@ -104,7 +105,7 @@ mobile. Les deux profils triples réutilisent exactement les compositions golden
 Les quatre profils Angular/Flutter ont été promus `ready` après extraction de leurs baselines et
 goldens structurels/runtime. Aucun profil `supported` ne subsiste pour un dépassement de baseline.
 
-Ces profils sont valides parce que le Platform Baseline est **implicite sur les six runtimes** ; le suffixe
+Ces profils sont valides parce que le Platform Baseline est **implicite sur les sept runtimes** ; le suffixe
 historique `-base` signifie désormais « aucune capability optionnelle ». R8A prouve
 que leurs gates passent réellement. Angular et Flutter suivent désormais le contrat modulaire :
 la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: false`).
@@ -127,7 +128,7 @@ des targets `planned` n'est contourné par aucun d'entre eux.
 
 ## Profils et combinaisons de stacks
 
-Les **18 combinaisons de stacks** (2 API × 3 Web dont aucun × 3 Mobile dont aucun) restent une
+Les **27 combinaisons de stacks** (3 API × 3 Web dont aucun × 3 Mobile dont aucun) restent une
 grandeur distincte des profils :
 
 - une combinaison de stacks dit ce qui est **assemblable** ;
@@ -135,13 +136,13 @@ grandeur distincte des profils :
 
 Plusieurs profils partagent une même combinaison de stacks (`nestjs + nextjs` porte
 `nestjs-next-base`, `nestjs-next-auth` et `nestjs-next-rbac`), et de nombreuses combinaisons ne
-portent aucun profil. La matrice des profils n'est donc pas une énumération des 18 cellules.
+portent aucun profil. La matrice des profils n'est donc pas une énumération des 27 cellules.
 
 ## Couverture des goldens
 
-R8A puis Capability Packs 2 portent le golden runtime à **21 compositions** : les 10 compositions
-NestJS des capability packs, les 9 compositions sans capability optionnelle, `spring-auth` et
-`spring-auth-rbac`.
+R8A puis Capability Packs 2 et l'adapter FastAPI portent le golden runtime à **23 compositions** :
+les 10 compositions NestJS des capability packs, les 10 compositions sans capability optionnelle,
+`spring-auth`, `spring-auth-rbac` et `spring-files`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par

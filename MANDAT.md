@@ -446,8 +446,9 @@ Le **pipeline canonique unique** (`Blueprint → CSM → ResolvedSystem → Gene
 Les **ADR-057 et ADR-060** adoptent désormais l'architecture de référence complète : quatre profils
 système fondés sur les cas d’usage, six dimensions d’architecture indépendantes, sept runtimes cibles,
 Platform Baseline obligatoire, primitives sémantiques, CLI système, lifecycle, deux périmètres IA et
-roadmap à 17 phases. Cette adoption ne vaut pas implémentation. FastAPI, les profils distribués complets,
-les primitives riches et le lifecycle restent TARGET ou PLANNED selon les preuves.
+roadmap à 17 phases. Cette adoption ne vaut pas implémentation globale. FastAPI est désormais générable
+et conforme au baseline ; les profils distribués complets, les primitives riches et le lifecycle restent
+TARGET ou PLANNED selon les preuves.
 
 **Décisions structurantes actées (ADR) :**
 
@@ -468,15 +469,17 @@ les primitives riches et le lifecycle restent TARGET ou PLANNED selon les preuve
 * **ADR-061 — Conformité Common/API v2** : NestJS et Spring satisfont chacun les 28 invariants ;
   ports neutres, diagnostics, validation/configuration et quality gates sont testés, et les deux goldens
   de base doivent prouver le boot et le contrat HTTP réel.
+* **ADR-062 — Adapter FastAPI** : troisième base API, sans capability ni IA implicite ; 28 invariants
+  conformes, dépendances Python verrouillées et golden généré avec boot/HTTP réel.
 
 **Convergence par famille :**
 
-* **API** — NestJS et Spring obtiennent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`. Le scan
+* **API** — NestJS, Spring et FastAPI obtiennent chacun `28 COMPLIANT / 0 PARTIAL / 0 MISSING`. Le scan
   structurel reste `GENERATABLE`; l’exécution des suites normatives et des goldens boot/HTTP fournit
   la preuve `CONFORMANT`, sans valoir parité produit ni readiness de production.
 * **Web / Mobile** — Angular et Flutter ont **encore** un sous-dossier `base/` + une app dédoublée (dédoublage à faire, même modèle que Spring) ; la base **React Native est sur-remplie** (features à extraire en capabilities).
 
-La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les deux runtimes API existants
+La couche fondatrice initiale et le contrat v2 exécutable sont acquis. Les trois runtimes API cibles
 sont conformes au baseline v2 ; les quatre runtimes Web/Mobile conservent des écarts. Le rapport calculé
 est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
@@ -484,11 +487,11 @@ est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 # 11. Prochaine étape
 
-> Créer **FastAPI** comme troisième adapter API de référence contre `common/2.0.0` et `api/2.0.0`,
-> avec rapport de conformité et golden boot/HTTP — sans capability métier.
+> Converger **Next.js et Angular** contre `common/2.0.0` et `web/2.0.0`, fermer leurs écarts
+> par des preuves comportementales et rendre leurs goldens de base conformes — sans capability métier.
 
-Le préalable NestJS/Spring est satisfait : FastAPI peut désormais viser un contrat stabilisé sans créer
-une troisième variante à réconcilier.
+La phase API est complète. Le scan réel impose maintenant la convergence Web avant Mobile,
+profils distribués et nouvelles capabilities.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -809,18 +812,20 @@ ADR-058 a rendu les contrats Common/API/Web/Mobile v2 exécutables.
 ADR-059 a convergé NestJS et Spring Boot sur le lifecycle, les extensions
 versionnées, la sécurité et l’observabilité. ADR-061 a fermé les huit écarts
 restants et rendu le boot/contrat HTTP obligatoire dans les goldens API de base.
+ADR-062 a ajouté FastAPI dans le même pipeline et avec les mêmes preuves.
 
 État calculé au 2026-07-25 :
 
 ```text
 NestJS      28 COMPLIANT / 0 PARTIAL / 0 MISSING
 Spring Boot 28 COMPLIANT / 0 PARTIAL / 0 MISSING
+FastAPI     28 COMPLIANT / 0 PARTIAL / 0 MISSING
 ```
 
 La présence d’un logger ne suffit jamais à prouver Observability. Pour les APIs,
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à créer l’adapter FastAPI contre ces mêmes
-contrats, avec les mêmes preuves de conformité et de boot. Les capabilities métier
-et les topologies distribuées restent hors périmètre.
+La prochaine mission unique consiste à converger Next.js et Angular contre les
+contrats Common/Web v2. Les capabilities métier et les topologies distribuées
+restent hors périmètre.

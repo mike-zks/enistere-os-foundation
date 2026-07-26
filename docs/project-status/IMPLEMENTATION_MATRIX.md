@@ -15,16 +15,16 @@
 | Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
 | Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
 | Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
-| Platform Contract exécutable (API) | **Conforme sur NestJS/Spring** (ADR-061) | 28 conformes/0 partiel/0 manquant chacun ; suites comportementales et goldens boot/HTTP obligatoires ; FastAPI absent |
+| Platform Contract exécutable (API) | **Conforme sur NestJS/Spring/FastAPI** (ADR-061/062) | 28 conformes/0 partiel/0 manquant chacun ; suites comportementales et goldens boot/HTTP obligatoires |
 | Platform Contract exécutable (Web, socle) | **Implémenté** (ADR-050, ADR-051) | évaluateur multi-familles, invariants Web idiomatiques ; socle Angular convergé vers Next.js (`enistere.conformance.json`) ; parité contrats générés + capabilities Web différées |
 | Platform Contract exécutable (Mobile, socle) | **Implémenté** (ADR-052, ADR-053) | évaluateur 3 familles ; RN compliant + socle Flutter convergé (`core/api` Dio) → `enistere.conformance.json` Flutter base compliant ; **jalon : 6 runtimes en parité de contrat de base** |
-| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/061) | Common/API/Web/Mobile versionnés ; NestJS/Spring conformes, Web/Mobile encore en écart ; rapport calculé dans `factory/conformance/reports/` |
+| Platform Baseline v2 exécutable | **Implémenté** (ADR-058/061/062) | Common/API/Web/Mobile versionnés ; trois APIs conformes, Web/Mobile encore en écart ; rapport calculé dans `factory/conformance/reports/` |
 | Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
-| `profiles` / `profile <name>` | Implémenté (R7) | presets de composition historiques : 26 déclarés, 22 générables |
+| `profiles` / `profile <name>` | Implémenté (R7/ADR-062) | presets de composition historiques : 27 déclarés, 23 générables |
 | Matrice de presets | Implémentée (R7) | validée contre la matrice réelle par test |
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
-| 18 combinaisons de stacks | Planifiées/testées | distinctes des profils ; pas toutes démarrées en golden |
+| 27 combinaisons de stacks | Planifiées/testées | 3 API × 3 Web × 3 Mobile ; distinctes des profils |
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
@@ -41,12 +41,12 @@
 
 ## Capabilities
 
-| Capability | Dépendances | Nest | Spring | Next | Angular | RN | Flutter |
-|---|---|---|---|---|---|---|---|
-| auth | aucune | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
-| rbac | auth | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **non applicable** | planifié |
-| files | auth + rbac | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
-| notifications | à décider | non défini | non défini | non défini | non défini | planifié | planifié |
+| Capability | Dépendances | Nest | Spring | FastAPI | Next | Angular | RN | Flutter |
+|---|---|---|---|---|---|---|---|---|
+| auth | aucune | **ready (overlay)** | **ready (overlay)** | non supporté | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
+| rbac | auth | **ready (overlay)** | **ready (overlay)** | non supporté | **ready (overlay)** | planifié | **non applicable** | planifié |
+| files | auth + rbac | **ready (overlay)** | **ready (overlay)** | non supporté | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
+| notifications | à décider | non défini | non défini | non défini | non défini | non défini | planifié | planifié |
 
 `auth` (1A), `rbac` (1B) et `files` (1C) sont `ready` en mode overlay : overlays déclaratifs, baselines sans la
 surface correspondante, tests d'absence et goldens runtime vérifiés. `rbac` requiert explicitement
@@ -59,14 +59,14 @@ planifiées.
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 22 | autorisée | composables, exacts et prouvés par un golden runtime |
+| `ready` | 23 | autorisée | composables, exacts et prouvés par un golden runtime |
 | `supported` | 0 | autorisée | aucun dépassement de baseline après R8A-3 |
 | `planned` | 4 | **refusée** | auth/RBAC/files Angular/Flutter selon le preset |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
 et golden ; aucun profil ne compose sans API.
 
-Les goldens runtime adossent les profils `ready`, chacun sur une composition distincte. Les six
+Les goldens runtime adossent les profils `ready`, chacun sur une composition distincte. Les sept
 baselines sont modulaires ; les capabilities Angular/Flutter encore `planned` restent refusées.
 
 ## Qualité et exploitation

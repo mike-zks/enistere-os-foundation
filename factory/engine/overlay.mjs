@@ -27,7 +27,7 @@ const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
  * renders integrations it fully understands (no scripts, no hooks, no patches).
  */
 export const INTEGRATION_KINDS = Object.freeze(Object.fromEntries(
-  ['nestjs', 'nextjs', 'react-native', 'spring', 'angular', 'flutter']
+  ['nestjs', 'nextjs', 'react-native', 'spring', 'fastapi', 'angular', 'flutter']
     .map((id) => [id, integrationKindsFor(id) ?? {}]),
 ));
 

@@ -99,6 +99,7 @@ human handoff sont explicités. Un agent ne boucle jamais sans budget borné.
 
 ## 9. Statut actuel
 
-Le dépôt contient des actifs d'orchestration locale et de gouvernance, mais aucune plateforme IA complète
-ni runtime FastAPI générable n'est revendiqué. Leur qualification est détaillée dans
+Le dépôt contient des actifs d'orchestration locale et de gouvernance ainsi qu'un runtime FastAPI
+générable et conforme au baseline. Ce runtime n'embarque aucune plateforme IA, aucun modèle et aucun
+agent. Leur qualification est détaillée dans
 [l'audit cible/existant](../audits/TARGET_VS_CURRENT_IMPLEMENTATION.md).

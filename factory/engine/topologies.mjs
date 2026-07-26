@@ -18,10 +18,10 @@
  * the canonical `applications[]` form.
  */
 export const APPLICATION_KINDS = Object.freeze({
-  api: Object.freeze({ slot: 'api', status: 'ready', runtimes: Object.freeze(['nestjs', 'spring']) }),
+  api: Object.freeze({ slot: 'api', status: 'ready', runtimes: Object.freeze(['nestjs', 'spring', 'fastapi']) }),
   web: Object.freeze({ slot: 'web', status: 'ready', runtimes: Object.freeze(['nextjs', 'angular']) }),
   mobile: Object.freeze({ slot: 'mobile', status: 'ready', runtimes: Object.freeze(['react-native', 'flutter']) }),
-  worker: Object.freeze({ slot: null, status: 'planned', runtimes: Object.freeze(['nestjs', 'spring']) }),
+  worker: Object.freeze({ slot: null, status: 'planned', runtimes: Object.freeze(['nestjs', 'spring', 'fastapi']) }),
   gateway: Object.freeze({ slot: null, status: 'planned', runtimes: Object.freeze(['nestjs']) }),
   bff: Object.freeze({ slot: null, status: 'planned', runtimes: Object.freeze(['nestjs', 'nextjs']) }),
 });

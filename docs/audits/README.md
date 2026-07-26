@@ -3,7 +3,7 @@
 ## Audit courant
 
 [`TARGET_VS_CURRENT_IMPLEMENTATION.md`](TARGET_VS_CURRENT_IMPLEMENTATION.md) compare l'architecture de
-référence adoptée par ADR-057 au dépôt au 2026-07-24. Il utilise la classification :
+référence adoptée par ADR-057 au dépôt au 2026-07-25. Il utilise la classification :
 
 ```text
 KEEP | ADAPT | REFACTOR | REPLACE | REMOVE | CREATE

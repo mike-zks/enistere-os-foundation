@@ -1,9 +1,9 @@
 # Audit — Architecture cible vs implémentation actuelle
 
 - Date : 2026-07-25
-- Branche auditée : `feat/system-profile-taxonomy`
-- Référence de départ : merge de la PR #207 (`8975f4b`)
-- Nature : audit documentaire et architectural ; aucune promotion de statut
+- Branche auditée : `feat/fastapi-runtime-v2`
+- Référence de départ : merge de la PR #209 (`428d51a`)
+- Nature : audit vivant cible/existant, actualisé par les preuves d'ADR-062
 
 ## Méthode
 
@@ -22,10 +22,10 @@ Classification :
 
 ## Résumé
 
-Le pipeline canonique, les modèles internes initiaux, les goldens, les six runtimes et les overlays sont de
+Le pipeline canonique, les modèles internes initiaux, les goldens, les sept runtimes et les overlays sont de
 bons actifs. Les quatre profils système et leurs dimensions sont désormais représentables et normalisés.
-Le Blueprint V2 complet, les primitives, FastAPI, les topologies distribuées, le lifecycle et les contrats
-polyglottes manquent encore. Les 26 « profils » historiques restent des presets de composition distincts.
+Le Blueprint V2 complet, les primitives, les topologies distribuées, le lifecycle et les contrats
+polyglottes manquent encore. Les 27 « profils » historiques restent des presets de composition distincts.
 
 ## Matrice des actifs
 
@@ -36,17 +36,17 @@ polyglottes manquent encore. Les 26 « profils » historiques restent des preset
 | `factory/model/resolved-system.mjs` | ADAPT | graph/primitives/contracts/support complet | pipeline utilisé |
 | `factory/model/generation-plan.mjs` | ADAPT | opérations, risques, approvals, support | digests déjà présents |
 | blueprint schema v1 | REPLACE | enveloppe V2 + migration frontière | taxonomie système adaptée ; enveloppe/champs historiques restants |
-| profiles/topologies engine | REFACTOR | distinguer profils système et presets de composition | 26 presets stack, 22 générables |
+| profiles/topologies engine | REFACTOR | distinguer profils système et presets de composition | 27 presets stack, 23 générables |
 | CLI système + presets historiques | ADAPT | parcours cible complet | `architecture list/describe/recommend` initial ; lifecycle absent |
 | lock/provenance/digests | ADAPT | registry resolution et lifecycle | fondations présentes |
 | conformance engine | ADAPT | remplacer progressivement probes critiques par comportements | baseline v2 exécutable depuis ADR-058 |
 | fitness functions FF6–FF8 | KEEP | préserver pipeline unique | preuves présentes |
-| six starters existants | ADAPT | runtime adapters conformes | NestJS/Spring conformes ; Web/Mobile en écart |
+| sept starters existants | ADAPT | runtime adapters conformes | trois APIs conformes ; Web/Mobile en écart |
 | NestJS base | KEEP | préserver Common/API v2 et faire évoluer les adapters | 28/0/0 + golden boot/HTTP |
 | Spring base source unique | KEEP | préserver Common/API v2 et faire évoluer les adapters | 28/0/0 + golden boot/HTTP |
 | Angular/Flutter double `base/` | REFACTOR | source unique | dette documentée |
 | React Native sur-rempli | REFACTOR | extraire features optionnelles | nombreuses features en base |
-| FastAPI runtime | CREATE | adapter API après contrat stable | absent |
+| FastAPI runtime | KEEP | préserver Common/API v2 ; ajouter des capabilities uniquement par overlay | 28/0/0 + golden boot/HTTP |
 | capabilities auth/rbac/files | ADAPT | manifests vNext, audit métier, parité targets | overlays réels mais partiels |
 | `capabilities/base` | REMOVE | baseline n'est pas une capability | **retiré par ADR-058** |
 | planned capability Audit | REMOVE | Technical Audit dans baseline | classification retirée des manifests pendant la mission |
@@ -83,14 +83,15 @@ polyglottes manquent encore. Les 26 « profils » historiques restent des preset
 |---|---|---|---|
 | NestJS | starter + overlays + goldens | conforme v2 ; backend OTEL et parité produit non prouvés | KEEP |
 | Spring | starter source unique + overlays | conforme v2 ; image/deployment et parité produit à qualifier | KEEP |
-| FastAPI | aucun | runtime entier absent | CREATE |
+| FastAPI | starter modulaire + golden | conforme v2 ; capabilities et providers absents | KEEP |
 | Next.js | starter + E2E | baseline complet/audit technique Web à formaliser | ADAPT |
 | Angular | starter + base dupliquée | source unique, contracts/a11y/capabilities | REFACTOR |
 | React Native | starter riche | séparer baseline et features optionnelles | REFACTOR |
 | Flutter | starter + base dupliquée | source unique, capabilities, builds réels | REFACTOR |
 
 La conformité antérieure « 6 runtimes en parité de contrat de base » se rapporte au contrat minimal v1.
-Le baseline v2 est exécutable (ADR-058) ; ADR-061 prouve NestJS et Spring conformes sur ses 28 invariants.
+Le baseline v2 est exécutable (ADR-058) ; ADR-061/062 prouvent les trois APIs conformes sur ses
+28 invariants.
 Les runtimes Web/Mobile restent en écart.
 
 ## Contradictions documentaires corrigées
@@ -109,7 +110,7 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — FastAPI absent :** les deux références existantes sont conformes, la troisième API cible reste à créer.
+1. **P0 — Common/Web v2 incomplet :** Next.js est à 14/4/6 et Angular à 7/10/7.
 2. **P0 — blueprint/CSM partiels :** profils désormais représentables, mais primitives et Blueprint V2 complet manquent.
 3. **P1 — bases Web/Mobile divergentes :** duplication et sur-remplissage.
 4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
@@ -118,7 +119,8 @@ classification ne revendique aucune amélioration d'implémentation.
 ## Conclusion et action unique
 
 Les actifs du kernel et des runtimes justifient une convergence plutôt qu'une réécriture totale.
-ADR-061 a fermé les huit écarts des deux APIs existantes et stabilisé leur preuve de boot/contrat HTTP.
+ADR-061 a fermé les écarts des deux APIs existantes ; ADR-062 a ajouté FastAPI dans le même pipeline
+avec les mêmes preuves.
 
-> **Prochaine mission unique : créer FastAPI contre Common/API v2 et produire son rapport de conformité
-> et son golden boot/HTTP — sans capability métier.**
+> **Prochaine mission unique : converger Next.js et Angular contre Common/Web v2, avec preuves
+> comportementales et goldens de base conformes — sans capability métier.**

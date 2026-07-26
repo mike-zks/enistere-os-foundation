@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "2",
+  "id": "fastapi",
+  "kind": "api",
+  "framework": "FastAPI",
+  "baseline": { "contractVersion": "2.0.0", "familyContract": "api/2.0.0" },
+  "commands": {
+    "install": ["python", "-m", "pip", "install", "-r", "requirements.lock"],
+    "dev": ["python", "-m", "uvicorn", "app.main:app", "--reload"],
+    "test": ["python", "-m", "pytest"],
+    "build": ["python", "-m", "compileall", "-q", "app"],
+    "verify": ["python", "-m", "pytest", "-q"]
+  },
+  "composition": {
+    "model": "modular",
+    "readyCapabilities": [],
+    "plannedCapabilities": []
+  },
+  "deployment": { "dockerfile": "Dockerfile", "healthPath": "/health" }
+}

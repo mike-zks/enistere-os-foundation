@@ -52,7 +52,7 @@ rollback applicatif.
 
 ## Baseline, audit et IA
 
-FastAPI doit implémenter le contrat API complet. L'audit technique couvre démarrage, auth, configuration,
+FastAPI implémente le contrat API complet. L'audit technique couvre démarrage, auth, configuration,
 permissions et opérations administratives ; le domaine déclare upload/delete. Une extension IA peut
 ajouter extraction ou classification avec provider, evaluation et human review, sans changer le profil.
 
@@ -60,8 +60,8 @@ ajouter extraction ou classification avec provider, evaluation et human review, 
 
 | Élément | Statut | Preuve/limite |
 |---|---|---|
-| représentation cible | TARGET | spécifications V2 |
-| runtime FastAPI | TARGET | absent du registry et des starters |
-| composition | TARGET | non générable |
+| représentation cible | IMPLEMENTED partiel | profil et dimensions normalisés ; Blueprint V2 complet à livrer |
+| runtime FastAPI base | CONFORMANT | 28/0/0 + golden `fastapi-base` boot/HTTP |
+| composition complète décrite | PLANNED | capabilities FastAPI et primitives typées non générables |
 | PostgreSQL/MinIO | IMPLEMENTED partiel | actifs existants sur autres runtimes, non qualifiés ici |
-| système | TARGET | ni boot ni conformité revendiqués |
+| système produit | TARGET | seule la base sans capability est prouvée |

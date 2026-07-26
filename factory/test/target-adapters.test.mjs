@@ -12,7 +12,7 @@ import {
 describe('target adapter registry', () => {
   it('registers all Foundation targets without coupling the engine to a framework', () => {
     assert.deepEqual(listTargetAdapters().map((adapter) => adapter.id), [
-      'nestjs', 'nextjs', 'react-native', 'spring', 'angular', 'flutter',
+      'nestjs', 'nextjs', 'react-native', 'spring', 'fastapi', 'angular', 'flutter',
     ]);
     assert.ok(integrationKindsFor('spring'));
     assert.deepEqual(integrationKindsFor('spring'), { 'spring.module': { importPath: 'string', symbol: 'string' } });

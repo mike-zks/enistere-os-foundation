@@ -106,7 +106,7 @@
     {
       "package": "@redocly/openapi-core",
       "maxSeverity": "high",
-      "appliesTo": ["nestjs", "spring"],
+      "appliesTo": ["shared-packages"],
       "advisory": "Propagation de GHSA-mh99-v99m-4gvg via minimatch/brace-expansion dans openapi-typescript 7",
       "scope": "Outillage de génération OpenAPI exécuté uniquement sur le snapshot OpenAPI versionné par la Foundation. Il n'est ni embarqué ni exécuté au runtime des applications générées.",
       "justification": "La branche openapi-typescript 7 impose @redocly/openapi-core ^1.34.6, dont toutes les versions publiées restent affectées. npm ne propose qu'un downgrade majeur vers openapi-typescript 6.7.6 ou un override Redocly 2 non compatible. Une migration de générateur avec comparaison du schéma produit est requise.",
@@ -116,7 +116,7 @@
     {
       "package": "brace-expansion",
       "maxSeverity": "high",
-      "appliesTo": ["nestjs", "spring", "nextjs", "angular", "react-native"],
+      "appliesTo": ["shared-packages", "nestjs", "spring", "nextjs", "angular", "react-native"],
       "advisory": "GHSA-mh99-v99m-4gvg — expansion non bornée pouvant provoquer une saturation mémoire",
       "scope": "Dépendance transitive de l'outillage OpenAPI, ESLint, Jest et Nest CLI. Les motifs et documents traités sont versionnés par la Foundation ; aucune entrée utilisateur ni exécution dans les artefacts de production.",
       "justification": "L'advisory affecte toutes les branches historiques jusqu'à 5.0.7 et n'est corrigé qu'en 5.0.8. Forcer cette version majeure sous les anciennes branches de minimatch/glob casserait leur contrat de dépendances. Les paquets parents signalés par npm ne portent pas d'advisory distinct : le gate peut accepter leur seule propagation depuis cette racine, sans accepter un nouvel advisory direct.",
@@ -127,7 +127,7 @@
     {
       "package": "minimatch",
       "maxSeverity": "high",
-      "appliesTo": ["nestjs", "spring"],
+      "appliesTo": ["shared-packages"],
       "advisory": "Propagation de GHSA-mh99-v99m-4gvg via brace-expansion",
       "scope": "Dépendance transitive de Redocly dans le générateur OpenAPI ; entrées limitées au snapshot versionné de la Foundation.",
       "justification": "Même cause racine que @redocly/openapi-core ; un override isolé modifierait une dépendance majeure de Redocly sans preuve de compatibilité.",
@@ -137,7 +137,7 @@
     {
       "package": "openapi-typescript",
       "maxSeverity": "high",
-      "appliesTo": ["nestjs", "spring"],
+      "appliesTo": ["shared-packages"],
       "advisory": "Propagation de GHSA-mh99-v99m-4gvg via @redocly/openapi-core",
       "scope": "DevDependency du package de contrats, exécutée uniquement pendant la génération à partir du snapshot OpenAPI versionné.",
       "justification": "La version 7.13.0 est la dernière de la branche 7 et dépend encore de Redocly 1.x affecté. Le fix npm proposé est un downgrade majeur 6.7.6 qui change l'API de génération et doit être qualifié séparément.",
