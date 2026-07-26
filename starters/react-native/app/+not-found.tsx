@@ -1,5 +1,5 @@
 /**
- * Écran de repli pour les routes inconnues (baseline `base`).
+ * Écran de repli pour les routes inconnues du runtime neutre.
  */
 import { Link, Stack } from 'expo-router';
 import { View } from 'react-native';

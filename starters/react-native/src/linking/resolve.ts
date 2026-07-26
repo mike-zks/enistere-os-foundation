@@ -204,25 +204,3 @@ export function resolveLink(input: unknown, config: LinkingConfig): LinkResoluti
 export function isInternalRoute(input: unknown, config: LinkingConfig): boolean {
   return resolveLink(input, config).kind === 'internal';
 }
-
-export interface NotificationLinkOptions {
-  /** Which `data` key holds the link (default `link`). */
-  readonly key?: string;
-}
-
-/**
- * Resolve a link carried in a notification's `data` (RN 10). Reads a CONFIGURABLE
- * key (default `link`) — it assumes NO business content. A missing/non-string
- * value resolves to `invalid`.
- */
-export function resolveNotificationLink(
-  data: Readonly<Record<string, unknown>> | null | undefined,
-  config: LinkingConfig,
-  options?: NotificationLinkOptions,
-): LinkResolution {
-  if (!data || typeof data !== 'object') {
-    return { kind: 'invalid', reason: 'empty' };
-  }
-  const key = options?.key ?? 'link';
-  return resolveLink((data as Record<string, unknown>)[key], config);
-}

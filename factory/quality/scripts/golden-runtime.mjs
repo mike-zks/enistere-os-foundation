@@ -227,6 +227,7 @@ function gatesFor(kind, hasDb, capabilities = []) {
       ['mobile: flutter analyze', 'flutter', ['analyze'], 'apps/mobile'],
       ['mobile: flutter test', 'flutter', ['test'], 'apps/mobile'],
       ['mobile: dart format', 'dart', ['format', '--output=none', '--set-exit-if-changed', '.'], 'apps/mobile'],
+      ['mobile: flutter build apk (debug, no emulator)', 'flutter', ['build', 'apk', '--debug'], 'apps/mobile'],
     ];
   }
   return [];

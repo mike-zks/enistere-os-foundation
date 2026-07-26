@@ -49,6 +49,21 @@ describe('architecture fitness functions', () => {
       (finding) => finding.rule === 'single-source' && finding.detail.includes('baseSource'),
     ));
   });
+
+  it('forbids capability implementations embedded in Mobile runtime sources', async () => {
+    const starters = await loadStarterManifests(REPO_ROOT);
+    const capabilities = await loadCapabilityManifests(REPO_ROOT);
+    const report = runFitnessFunctions({
+      starters,
+      capabilities,
+      repoRoot: '/virtual',
+      pathExists: (path) => path === '/virtual/starters/react-native/src/notifications',
+    });
+    assert.ok(report.findings.some(
+      (finding) => finding.rule === 'capability-free-runtime'
+        && finding.detail.includes('src/notifications'),
+    ));
+  });
 });
 
 describe('pipeline fitness functions (ADR-046 boundary, FF6–FF8)', () => {

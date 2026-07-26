@@ -2,7 +2,7 @@
   "name": "@enistere/mobile-react-native",
   "version": "0.0.0",
   "private": true,
-  "description": "Enistere Mobile Core React Native — baseline base (Expo Router). Socle générique réutilisable : thème/UI, TanStack Query, i18n, logger, états standards et seams de capabilities. Auth (AuthEngine, SecureStore seam, routes publique/protégée) et Files se composent via la Factory. AUCUNE logique métier.",
+  "description": "Runtime Mobile React Native / Expo conforme Common/Mobile v2, sans capability embarquée.",
   "license": "UNLICENSED",
   "main": "expo-router/entry",
   "engines": {
@@ -13,6 +13,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build": "expo export -p ios",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "node -e \"require('node:fs').rmSync('build-test',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test build-test/test/*.test.js",

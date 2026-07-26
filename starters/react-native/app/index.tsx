@@ -1,5 +1,5 @@
 /**
- * Écran d'accueil de la baseline `base`. Surface générique du socle : aucun
+ * Écran d'accueil du runtime neutre. Surface générique du socle : aucun
  * contenu métier, aucune session, aucun réseau. La capability Auth composée
  * REMPLACE cet écran par la porte d'entrée (redirection publique/protégée selon
  * l'état de session) via son overlay.

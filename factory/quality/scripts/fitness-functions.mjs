@@ -30,7 +30,12 @@ export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..
  * Runs the fitness functions against the given registries. Returns
  * `{ passed, findings }`; each finding is `{ rule, detail }`.
  */
-export function runFitnessFunctions({ starters, capabilities }) {
+export function runFitnessFunctions({
+  starters,
+  capabilities,
+  repoRoot = REPO_ROOT,
+  pathExists = existsSync,
+}) {
   const findings = [];
   const fail = (rule, detail) => findings.push({ rule, detail });
 
@@ -71,8 +76,36 @@ export function runFitnessFunctions({ starters, capabilities }) {
     if (starter.composition?.baseSource) {
       fail('single-source', `starter ${starter.id} declares forbidden composition.baseSource`);
     }
-    if (existsSync(join(REPO_ROOT, 'starters', starter.id, 'base'))) {
+    if (pathExists(join(repoRoot, 'starters', starter.id, 'base'))) {
       fail('single-source', `starter ${starter.id} carries a forbidden base/ subfolder`);
+    }
+  }
+
+  // FF5c — a runtime baseline exposes neutral hooks, never an optional
+  // capability implementation. These exact source roots are reserved for
+  // overlays after materialization.
+  const forbiddenCapabilityRoots = {
+    'react-native': [
+      'src/auth',
+      'src/upload',
+      'src/notifications',
+      'app/(public)',
+      'app/(app)',
+    ],
+    flutter: [
+      'lib/src/core/auth',
+      'lib/src/core/upload',
+      'lib/src/core/notifications',
+      'lib/src/features/auth',
+      'lib/src/features/upload',
+      'lib/src/features/notifications',
+    ],
+  };
+  for (const [runtime, roots] of Object.entries(forbiddenCapabilityRoots)) {
+    for (const relative of roots) {
+      if (pathExists(join(repoRoot, 'starters', runtime, relative))) {
+        fail('capability-free-runtime', `starter ${runtime} embeds forbidden capability source ${relative}`);
+      }
     }
   }
 

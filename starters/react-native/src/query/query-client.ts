@@ -1,5 +1,5 @@
 /**
- * TanStack Query client factory + default singleton (baseline `base`).
+ * TanStack Query client factory + default singleton du runtime neutre.
  *
  * Defaults are conservative and mobile-friendly. No business queries or query
  * keys live here. The baseline has no authenticated transport, so retry is a

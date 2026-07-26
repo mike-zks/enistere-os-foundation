@@ -556,7 +556,7 @@
           "lifecycle-hooks": {
             "status": "compliant",
             "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "extension-points": {
             "status": "compliant",
@@ -695,7 +695,7 @@
           "lifecycle-hooks": {
             "status": "compliant",
             "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "extension-points": {
             "status": "compliant",
@@ -783,8 +783,8 @@
         "invariants": {
           "configuration": {
             "status": "compliant",
-            "evidence": "validated/typed configuration seam found",
-            "source": "structural"
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-errors": {
             "status": "compliant",
@@ -797,34 +797,34 @@
             "source": "structural"
           },
           "correlation": {
-            "status": "missing",
-            "evidence": "correlation propagation missing",
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
             "source": "structural"
           },
           "observability": {
-            "status": "partial",
-            "evidence": "observability components incomplete or without behavioral proof",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
           },
           "technical-audit": {
-            "status": "missing",
-            "evidence": "technical audit infrastructure missing",
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
             "source": "structural"
           },
           "security-baseline": {
             "status": "compliant",
-            "evidence": "deployable security headers exercised by an E2E contract",
-            "source": "structural"
+            "evidence": "production transport validation and sensitive-data redaction behavior tested",
+            "source": "behavioral-test"
           },
           "health": {
-            "status": "partial",
+            "status": "compliant",
             "evidence": "runtime health signal found",
             "source": "structural"
           },
           "diagnostics": {
-            "status": "partial",
-            "evidence": "canonical errors and health provide partial diagnostics",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
           },
           "testing-foundation": {
             "status": "compliant",
@@ -834,16 +834,16 @@
           "lifecycle-hooks": {
             "status": "compliant",
             "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "extension-points": {
-            "status": "partial",
+            "status": "compliant",
             "evidence": "versioned extension registry behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "build-quality-gates": {
             "status": "compliant",
-            "evidence": "build/test gates found",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
             "source": "structural"
           }
         }
@@ -853,153 +853,68 @@
         "invariants": {
           "navigation": {
             "status": "compliant",
-            "evidence": "expo-router (app/)",
+            "evidence": "Expo Router filesystem navigation foundation",
             "source": "structural"
           },
           "typed-api-client": {
-            "status": "partial",
-            "evidence": "query client present; generated transport contract incomplete",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed transport propagates correlation and maps canonical errors",
+            "source": "behavioral-test"
           },
           "secure-storage": {
-            "status": "missing",
-            "evidence": "secure session storage",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned secure-storage port rejects unsafe keys",
+            "source": "behavioral-test"
           },
           "session-hook": {
             "status": "compliant",
-            "evidence": "capability provider seam",
-            "source": "structural"
+            "evidence": "neutral versioned session hook and exclusive extension slot",
+            "source": "behavioral-test"
           },
           "network-state": {
             "status": "compliant",
-            "evidence": "network state adapter",
-            "source": "structural"
+            "evidence": "network-state transitions behavior tested",
+            "source": "behavioral-test"
           },
           "error-handling": {
             "status": "compliant",
-            "evidence": "query-errors / retryable-error",
-            "source": "structural"
+            "evidence": "canonical mobile errors behavior tested",
+            "source": "behavioral-test"
           },
           "permissions": {
             "status": "compliant",
-            "evidence": "permissions hook",
-            "source": "structural"
+            "evidence": "permission port and safe state transitions behavior tested",
+            "source": "behavioral-test"
           },
           "deep-links": {
             "status": "compliant",
-            "evidence": "link resolver",
-            "source": "structural"
+            "evidence": "deep-link allowlist and open-redirect policy behavior tested",
+            "source": "behavioral-test"
           },
           "offline-hook": {
             "status": "compliant",
-            "evidence": "offline queue seam",
-            "source": "structural"
+            "evidence": "disabled-by-default versioned offline hook",
+            "source": "behavioral-test"
           },
           "push-hook": {
-            "status": "partial",
-            "evidence": "push placeholder adapter",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "disabled-by-default versioned push hook without Notifications capability",
+            "source": "behavioral-test"
           },
           "crash-reporting": {
-            "status": "partial",
-            "evidence": "crash reporting seam",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized crash-reporting adapter behavior tested",
+            "source": "behavioral-test"
           },
           "build-foundation": {
             "status": "compliant",
-            "evidence": "android/ios scripts",
+            "evidence": "Expo Android/iOS, doctor and export gates declared",
             "source": "structural"
           }
         }
       },
-      "nonConformant": [
-        "baseline.correlation",
-        "baseline.technical-audit",
-        "mobile.secure-storage"
-      ],
-      "diagnostics": [
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.react-native.baseline.correlation",
-          "invariant": "correlation",
-          "status": "missing",
-          "evidence": "correlation propagation missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.baseline.observability",
-          "invariant": "observability",
-          "status": "partial",
-          "evidence": "observability components incomplete or without behavioral proof"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.react-native.baseline.technical-audit",
-          "invariant": "technical-audit",
-          "status": "missing",
-          "evidence": "technical audit infrastructure missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.baseline.health",
-          "invariant": "health",
-          "status": "partial",
-          "evidence": "runtime health signal found"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.baseline.diagnostics",
-          "invariant": "diagnostics",
-          "status": "partial",
-          "evidence": "canonical errors and health provide partial diagnostics"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.baseline.extension-points",
-          "invariant": "extension-points",
-          "status": "partial",
-          "evidence": "versioned extension registry behavior tested"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.mobile.typed-api-client",
-          "invariant": "typed-api-client",
-          "status": "partial",
-          "evidence": "query client present; generated transport contract incomplete"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.react-native.mobile.secure-storage",
-          "invariant": "secure-storage",
-          "status": "missing",
-          "evidence": "secure session storage"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.mobile.push-hook",
-          "invariant": "push-hook",
-          "status": "partial",
-          "evidence": "push placeholder adapter"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.react-native.mobile.crash-reporting",
-          "invariant": "crash-reporting",
-          "status": "partial",
-          "evidence": "crash reporting seam"
-        }
-      ]
+      "nonConformant": [],
+      "diagnostics": []
     },
     {
       "id": "flutter",
@@ -1011,9 +926,9 @@
         "contractVersion": "common/2.0.0",
         "invariants": {
           "configuration": {
-            "status": "partial",
-            "evidence": "validated/typed configuration seam found",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed configuration validation behavior tested",
+            "source": "behavioral-test"
           },
           "canonical-errors": {
             "status": "compliant",
@@ -1026,34 +941,34 @@
             "source": "structural"
           },
           "correlation": {
-            "status": "missing",
-            "evidence": "correlation propagation missing",
+            "status": "compliant",
+            "evidence": "correlation propagation seam found",
             "source": "structural"
           },
           "observability": {
-            "status": "partial",
-            "evidence": "observability components incomplete or without behavioral proof",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "request metrics, W3C trace propagation and versioned OpenTelemetry hook behavior tested",
+            "source": "behavioral-test"
           },
           "technical-audit": {
-            "status": "missing",
-            "evidence": "technical audit infrastructure missing",
+            "status": "compliant",
+            "evidence": "technical audit service/sink found",
             "source": "structural"
           },
           "security-baseline": {
-            "status": "missing",
-            "evidence": "security baseline incomplete",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "production transport validation and sensitive-data redaction behavior tested",
+            "source": "behavioral-test"
           },
           "health": {
-            "status": "missing",
-            "evidence": "health/diagnostic signal missing",
+            "status": "compliant",
+            "evidence": "runtime health signal found",
             "source": "structural"
           },
           "diagnostics": {
-            "status": "missing",
-            "evidence": "structured actionable diagnostics missing",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "sanitized diagnostics registry behavior tested",
+            "source": "behavioral-test"
           },
           "testing-foundation": {
             "status": "compliant",
@@ -1061,18 +976,18 @@
             "source": "structural"
           },
           "lifecycle-hooks": {
-            "status": "missing",
-            "evidence": "lifecycle hooks missing",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "runtime lifecycle transitions and shutdown hooks behavior tested",
+            "source": "behavioral-test"
           },
           "extension-points": {
-            "status": "partial",
+            "status": "compliant",
             "evidence": "versioned extension registry behavior tested",
-            "source": "structural"
+            "source": "behavioral-test"
           },
           "build-quality-gates": {
-            "status": "partial",
-            "evidence": "build/test gates found",
+            "status": "compliant",
+            "evidence": "build, test and toolchain quality gates explicitly declared",
             "source": "structural"
           }
         }
@@ -1082,235 +997,68 @@
         "invariants": {
           "navigation": {
             "status": "compliant",
-            "evidence": "go_router (router.dart)",
+            "evidence": "GoRouter navigation foundation",
             "source": "structural"
           },
           "typed-api-client": {
-            "status": "partial",
-            "evidence": "Dio client present; generated Dart client absent",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "typed transport propagates correlation and maps canonical errors",
+            "source": "behavioral-test"
           },
           "secure-storage": {
-            "status": "missing",
-            "evidence": "secure session store",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "versioned secure-storage port rejects unsafe keys",
+            "source": "behavioral-test"
           },
           "session-hook": {
-            "status": "missing",
-            "evidence": "session store seam",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "neutral versioned session hook and exclusive extension slot",
+            "source": "behavioral-test"
           },
           "network-state": {
-            "status": "missing",
-            "evidence": "no network state port in baseline",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "neutral network-state hook behavior tested",
+            "source": "behavioral-test"
           },
           "error-handling": {
             "status": "compliant",
-            "evidence": "core/api/error_interceptor.dart",
-            "source": "structural"
+            "evidence": "canonical mobile errors behavior tested",
+            "source": "behavioral-test"
           },
           "permissions": {
-            "status": "missing",
-            "evidence": "no permissions port in baseline",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "permission port is disabled safely until an adapter is composed",
+            "source": "behavioral-test"
           },
           "deep-links": {
-            "status": "partial",
-            "evidence": "router present; deep-link policy absent",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "deep-link scheme/host allowlist behavior tested",
+            "source": "behavioral-test"
           },
           "offline-hook": {
-            "status": "missing",
-            "evidence": "no offline hook",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "disabled-by-default versioned offline hook",
+            "source": "behavioral-test"
           },
           "push-hook": {
-            "status": "missing",
-            "evidence": "no push hook",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "disabled-by-default versioned push hook without Notifications capability",
+            "source": "behavioral-test"
           },
           "crash-reporting": {
-            "status": "missing",
-            "evidence": "no crash reporting hook",
-            "source": "structural"
+            "status": "compliant",
+            "evidence": "disabled-by-default versioned crash-reporting hook",
+            "source": "behavioral-test"
           },
           "build-foundation": {
             "status": "compliant",
-            "evidence": "flutter toolchain (pubspec; platforms scaffolded on demand)",
+            "evidence": "Flutter Android platform and APK build gate declared",
             "source": "structural"
           }
         }
       },
-      "nonConformant": [
-        "baseline.correlation",
-        "baseline.technical-audit",
-        "baseline.security-baseline",
-        "baseline.health",
-        "baseline.diagnostics",
-        "baseline.lifecycle-hooks",
-        "mobile.secure-storage",
-        "mobile.session-hook",
-        "mobile.network-state",
-        "mobile.permissions",
-        "mobile.offline-hook",
-        "mobile.push-hook",
-        "mobile.crash-reporting"
-      ],
-      "diagnostics": [
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.flutter.baseline.configuration",
-          "invariant": "configuration",
-          "status": "partial",
-          "evidence": "validated/typed configuration seam found"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.baseline.correlation",
-          "invariant": "correlation",
-          "status": "missing",
-          "evidence": "correlation propagation missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.flutter.baseline.observability",
-          "invariant": "observability",
-          "status": "partial",
-          "evidence": "observability components incomplete or without behavioral proof"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.baseline.technical-audit",
-          "invariant": "technical-audit",
-          "status": "missing",
-          "evidence": "technical audit infrastructure missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.baseline.security-baseline",
-          "invariant": "security-baseline",
-          "status": "missing",
-          "evidence": "security baseline incomplete"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.baseline.health",
-          "invariant": "health",
-          "status": "missing",
-          "evidence": "health/diagnostic signal missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.baseline.diagnostics",
-          "invariant": "diagnostics",
-          "status": "missing",
-          "evidence": "structured actionable diagnostics missing"
-        },
-        {
-          "code": "BASELINE_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.baseline.lifecycle-hooks",
-          "invariant": "lifecycle-hooks",
-          "status": "missing",
-          "evidence": "lifecycle hooks missing"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.flutter.baseline.extension-points",
-          "invariant": "extension-points",
-          "status": "partial",
-          "evidence": "versioned extension registry behavior tested"
-        },
-        {
-          "code": "BASELINE_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.flutter.baseline.build-quality-gates",
-          "invariant": "build-quality-gates",
-          "status": "partial",
-          "evidence": "build/test gates found"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.flutter.mobile.typed-api-client",
-          "invariant": "typed-api-client",
-          "status": "partial",
-          "evidence": "Dio client present; generated Dart client absent"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.secure-storage",
-          "invariant": "secure-storage",
-          "status": "missing",
-          "evidence": "secure session store"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.session-hook",
-          "invariant": "session-hook",
-          "status": "missing",
-          "evidence": "session store seam"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.network-state",
-          "invariant": "network-state",
-          "status": "missing",
-          "evidence": "no network state port in baseline"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.permissions",
-          "invariant": "permissions",
-          "status": "missing",
-          "evidence": "no permissions port in baseline"
-        },
-        {
-          "code": "FAMILY_INVARIANT_PARTIAL",
-          "severity": "warning",
-          "path": "apps.flutter.mobile.deep-links",
-          "invariant": "deep-links",
-          "status": "partial",
-          "evidence": "router present; deep-link policy absent"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.offline-hook",
-          "invariant": "offline-hook",
-          "status": "missing",
-          "evidence": "no offline hook"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.push-hook",
-          "invariant": "push-hook",
-          "status": "missing",
-          "evidence": "no push hook"
-        },
-        {
-          "code": "FAMILY_REQUIRED_INVARIANT_MISSING",
-          "severity": "error",
-          "path": "apps.flutter.mobile.crash-reporting",
-          "invariant": "crash-reporting",
-          "status": "missing",
-          "evidence": "no crash reporting hook"
-        }
-      ]
+      "nonConformant": [],
+      "diagnostics": []
     }
   ],
   "scan": {
@@ -1357,16 +1105,16 @@
       "conformant": true
     },
     "react-native": {
-      "compliant": 15,
-      "partial": 7,
-      "missing": 3,
-      "conformant": false
+      "compliant": 25,
+      "partial": 0,
+      "missing": 0,
+      "conformant": true
     },
     "flutter": {
-      "compliant": 6,
-      "partial": 6,
-      "missing": 13,
-      "conformant": false
+      "compliant": 25,
+      "partial": 0,
+      "missing": 0,
+      "conformant": true
     }
   }
 }

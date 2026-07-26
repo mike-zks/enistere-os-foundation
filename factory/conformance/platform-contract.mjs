@@ -1,7 +1,7 @@
 /**
  * Executable Platform Baseline v2 and family contracts (ADR-057).
  *
- * Evaluates a generated application (API, Web) against the minimal common invariants of
+ * Evaluates a generated application (API, Web, Mobile) against the common invariants of
  * the [Platform Contract](../../docs/specifications/PLATFORM_CONTRACT.md) and
  * produces a COMPUTED conformance record (never a hand-written Markdown status —
  * see CONFORMANCE_MODEL). The evaluation is structural (it inspects the generated
@@ -415,42 +415,126 @@ function evaluateReactNative(appDir) {
   const src = join(appDir, 'src');
   const deps = packageDeps(appDir);
   const scripts = packageScripts(appDir);
+  const proof = readOptional(findFile(join(appDir, 'test'), 'mobile-runtime-contract.test.ts'));
+  const commonProof = proof.includes('mobile extension points are versioned and exclusive');
+  const apiProof = proof.includes('typed API client propagates request context and maps canonical errors');
+  const hooksProof = proof.includes('neutral session/offline/push hooks expose no capability behavior');
   return {
-    navigation: result(existsSync(join(appDir, 'app')) || deps['expo-router'] ? STATUS.COMPLIANT : STATUS.MISSING, 'expo-router (app/)'),
-    'typed-api-client': result(deps['@tanstack/react-query'] && findFile(src, 'query-client.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'query client present; generated transport contract incomplete'),
-    'secure-storage': result(findFile(src, 'secure-session-store.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'secure session storage'),
-    'session-hook': result(findFile(src, 'capability-providers.tsx') ? STATUS.COMPLIANT : STATUS.MISSING, 'capability provider seam'),
-    'network-state': result(findFile(src, 'network-state.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'network state adapter'),
-    'error-handling': result(findFile(src, 'query-errors.ts') || findFile(src, 'retryable-error.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'query-errors / retryable-error'),
-    permissions: result(findFile(src, 'use-permission.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'permissions hook'),
-    'deep-links': result(findFile(src, 'resolve.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'link resolver'),
-    'offline-hook': result(findFile(src, 'queue.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'offline queue seam'),
-    'push-hook': result(existsSync(join(src, 'notifications')) ? STATUS.PARTIAL : STATUS.MISSING, 'push placeholder adapter'),
-    'crash-reporting': result(existsSync(join(src, 'crash-reporting')) ? STATUS.PARTIAL : STATUS.MISSING, 'crash reporting seam'),
-    'build-foundation': result(scripts.android || scripts.ios ? STATUS.COMPLIANT : STATUS.MISSING, 'android/ios scripts'),
+    navigation: result(
+      existsSync(join(appDir, 'app')) && deps['expo-router'] ? STATUS.COMPLIANT : STATUS.MISSING,
+      'Expo Router filesystem navigation foundation'),
+    'typed-api-client': result(
+      findFile(src, 'typed-api-client.ts') && apiProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'typed transport propagates correlation and maps canonical errors',
+      apiProof ? 'behavioral-test' : 'structural'),
+    'secure-storage': result(
+      findFile(src, 'secure-storage-port.ts') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'versioned secure-storage port rejects unsafe keys',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'session-hook': result(
+      findFile(src, 'session-hook.ts') && commonProof && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral versioned session hook and exclusive extension slot',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'network-state': result(
+      findFile(src, 'network-state.ts') && findFile(join(appDir, 'test'), 'network-state.test.ts')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'network-state transitions behavior tested',
+      'behavioral-test'),
+    'error-handling': result(
+      findFile(src, 'typed-api-client.ts') && apiProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'canonical mobile errors behavior tested',
+      apiProof ? 'behavioral-test' : 'structural'),
+    permissions: result(
+      findFile(src, 'use-permission.ts') && findFile(join(appDir, 'test'), 'permission-engine.test.ts')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'permission port and safe state transitions behavior tested',
+      'behavioral-test'),
+    'deep-links': result(
+      findFile(src, 'resolve.ts') && findFile(join(appDir, 'test'), 'linking-resolve.test.ts')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'deep-link allowlist and open-redirect policy behavior tested',
+      'behavioral-test'),
+    'offline-hook': result(
+      findFile(src, 'offline-hook.ts') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'disabled-by-default versioned offline hook',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'push-hook': result(
+      findFile(src, 'push-hook.ts') && hooksProof
+        && !findFile(join(src, 'notifications'), 'engine.ts')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'disabled-by-default versioned push hook without Notifications capability',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'crash-reporting': result(
+      findFile(src, 'engine.ts') && findFile(join(appDir, 'test'), 'crash-reporting-engine.test.ts')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'sanitized crash-reporting adapter behavior tested',
+      'behavioral-test'),
+    'build-foundation': result(
+      scripts.android && scripts.ios && scripts.build && scripts.doctor
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'Expo Android/iOS, doctor and export gates declared'),
   };
 }
 
 /** Evaluates the base Mobile invariants of a generated Flutter application (Dart, lib/, pubspec). */
 function evaluateFlutter(appDir) {
   const lib = join(appDir, 'lib');
-  const hasTest = existsSync(join(appDir, 'test')) || existsSync(join(appDir, 'integration_test'));
-  // Like Expo prebuild (React Native), Flutter scaffolds android/ios on demand;
-  // build capability is carried by the toolchain (pubspec), not committed platform folders.
-  const buildable = existsSync(join(appDir, 'pubspec.yaml'));
+  const proof = readOptional(findFile(join(appDir, 'test'), 'mobile_runtime_contract_test.dart'));
+  const commonProof = proof.includes('mobile extension points are versioned and exclusive');
+  const apiProof = proof.includes('typed API client propagates correlation and maps canonical errors');
+  const hooksProof = proof.includes('neutral mobile hooks expose no capability behavior');
+  const manifest = readOptional(join(appDir, 'starter.manifest.json'));
+  const buildable = existsSync(join(appDir, 'pubspec.yaml'))
+    && existsSync(join(appDir, 'android'))
+    && manifest.includes('"flutter", "build", "apk"');
   return {
-    navigation: result(findFile(lib, 'router.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'go_router (router.dart)'),
-    'typed-api-client': result(findFile(lib, 'dio_client.dart') ? STATUS.PARTIAL : STATUS.MISSING, 'Dio client present; generated Dart client absent'),
-    'secure-storage': result(findFile(lib, 'secure_session_store.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'secure session store'),
-    'session-hook': result(findFile(lib, 'session_store.dart') ? STATUS.PARTIAL : STATUS.MISSING, 'session store seam'),
-    'network-state': result(STATUS.MISSING, 'no network state port in baseline'),
-    'error-handling': result(findFile(lib, 'error_interceptor.dart') ? STATUS.COMPLIANT : STATUS.MISSING, 'core/api/error_interceptor.dart'),
-    permissions: result(STATUS.MISSING, 'no permissions port in baseline'),
-    'deep-links': result(findFile(lib, 'router.dart') ? STATUS.PARTIAL : STATUS.MISSING, 'router present; deep-link policy absent'),
-    'offline-hook': result(STATUS.MISSING, 'no offline hook'),
-    'push-hook': result(STATUS.MISSING, 'no push hook'),
-    'crash-reporting': result(STATUS.MISSING, 'no crash reporting hook'),
-    'build-foundation': result(buildable ? STATUS.COMPLIANT : STATUS.MISSING, 'flutter toolchain (pubspec; platforms scaffolded on demand)'),
+    navigation: result(
+      findFile(lib, 'router.dart') && readOptional(join(appDir, 'pubspec.yaml')).includes('go_router')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'GoRouter navigation foundation'),
+    'typed-api-client': result(
+      findFile(lib, 'typed_api_client.dart') && apiProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'typed transport propagates correlation and maps canonical errors',
+      apiProof ? 'behavioral-test' : 'structural'),
+    'secure-storage': result(
+      findFile(lib, 'secure_storage.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'versioned secure-storage port rejects unsafe keys',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'session-hook': result(
+      findFile(lib, 'session_hook.dart') && commonProof && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral versioned session hook and exclusive extension slot',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'network-state': result(
+      findFile(lib, 'network_state.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'neutral network-state hook behavior tested',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'error-handling': result(
+      findFile(lib, 'typed_api_client.dart') && apiProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'canonical mobile errors behavior tested',
+      apiProof ? 'behavioral-test' : 'structural'),
+    permissions: result(
+      findFile(lib, 'permission_hook.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'permission port is disabled safely until an adapter is composed',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'deep-links': result(
+      findFile(lib, 'deep_link_policy.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'deep-link scheme/host allowlist behavior tested',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'offline-hook': result(
+      findFile(lib, 'offline_hook.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'disabled-by-default versioned offline hook',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'push-hook': result(
+      findFile(lib, 'push_hook.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'disabled-by-default versioned push hook without Notifications capability',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'crash-reporting': result(
+      findFile(lib, 'crash_reporting_hook.dart') && hooksProof ? STATUS.COMPLIANT : STATUS.MISSING,
+      'disabled-by-default versioned crash-reporting hook',
+      hooksProof ? 'behavioral-test' : 'structural'),
+    'build-foundation': result(
+      buildable ? STATUS.COMPLIANT : STATUS.MISSING,
+      'Flutter Android platform and APK build gate declared'),
   };
 }
 
@@ -684,23 +768,78 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     diagnosticsProven = healthProven && runtimeProof.includes('sorts diagnostics');
     buildGatesProven = buildGates && Boolean(scripts['test:e2e']);
   } else if (runtime === 'react-native') {
-    configuration = Boolean(findFile(src, 'env.ts'));
-    canonicalErrors = Boolean(findFile(src, 'query-errors.ts'));
-    structuredLogging = Boolean(findFile(src, 'logger.ts'));
-    security = Boolean(findFile(src, 'redaction.ts'));
-    health = Boolean(findFile(src, 'network-state.ts'));
+    const runtimeContract = readOptional(findFile(src, 'runtime-contract.ts'));
+    const runtimeProof = readOptional(findFile(join(appDir, 'test'), 'mobile-runtime-contract.test.ts'));
+    configuration = runtimeContract.includes('validateRuntimeConfiguration');
+    configurationProven = configuration
+      && runtimeProof.includes('validates typed public configuration and production transport');
+    canonicalErrors = runtimeContract.includes('mapCanonicalMobileError')
+      && runtimeProof.includes('maps canonical errors');
+    structuredLogging = Boolean(findFile(src, 'logger.ts'))
+      && runtimeProof.includes('structured logging and technical audit redact sensitive fields');
+    correlation = runtimeContract.includes('createMobileRequestContext')
+      && runtimeProof.includes('continues valid W3C context with a new span');
+    technicalAudit = runtimeContract.includes('class TechnicalAudit')
+      && runtimeProof.includes('technical audit redact sensitive fields');
+    observability = runtimeContract.includes('class RuntimeTelemetry')
+      && runtimeContract.includes('TELEMETRY_EXPORTER_CONTRACT_VERSION');
+    observabilityProven = observability
+      && runtimeProof.includes('versioned telemetry records metrics and propagates correlation');
+    security = Boolean(findFile(src, 'redaction.ts'))
+      && runtimeProof.includes('production transport')
+      && runtimeProof.includes('redact sensitive fields');
+    health = runtimeContract.includes('class RuntimeDiagnostics')
+      && Boolean(findFile(src, 'network-state.ts'));
+    healthProven = health && runtimeProof.includes('diagnostics are sorted');
     tests = Boolean(scripts.test);
-    lifecycle = existsSync(join(src, 'app-lifecycle'));
-    extensionPoints = Boolean(findFile(src, 'capability-providers.tsx'));
-    buildGates = Boolean(scripts.test && (scripts.android || scripts.ios));
+    lifecycle = runtimeContract.includes('class RuntimeLifecycle')
+      && runtimeProof.includes('lifecycle stops once in reverse order');
+    extensionPoints = runtimeContract.includes('class MobileRuntimeExtensionRegistry');
+    extensionPointsProven = extensionPoints
+      && runtimeProof.includes('mobile extension points are versioned and exclusive');
+    diagnosticsProven = healthProven;
+    buildGates = Boolean(
+      scripts.test && scripts.typecheck && scripts.lint
+      && scripts.doctor && scripts.build && scripts.android && scripts.ios);
+    buildGatesProven = buildGates;
   } else if (runtime === 'flutter') {
-    configuration = Boolean(findFile(lib, 'api_config.dart'));
-    canonicalErrors = Boolean(findFile(lib, 'app_api_error.dart') && findFile(lib, 'error_interceptor.dart'));
-    structuredLogging = Boolean(findFile(lib, 'logging_interceptor.dart'));
-    security = Boolean(findFile(lib, 'secure_session_store.dart'));
-    tests = existsSync(join(appDir, 'test')) || existsSync(join(appDir, 'integration_test'));
-    extensionPoints = Boolean(findFile(lib, 'dio_provider.dart'));
-    buildGates = existsSync(join(appDir, 'pubspec.yaml'));
+    const runtimeContract = readOptional(findFile(lib, 'runtime_contract.dart'));
+    const runtimeProof = readOptional(findFile(join(appDir, 'test'), 'mobile_runtime_contract_test.dart'));
+    const manifest = readOptional(join(appDir, 'starter.manifest.json'));
+    configuration = runtimeContract.includes('class RuntimeConfiguration');
+    configurationProven = configuration
+      && runtimeProof.includes('validates typed configuration and production transport');
+    canonicalErrors = runtimeContract.includes('class CanonicalMobileError')
+      && runtimeProof.includes('maps canonical errors');
+    structuredLogging = runtimeContract.includes('class StructuredLogger')
+      && runtimeProof.includes('structured logging and technical audit redact sensitive fields');
+    correlation = runtimeContract.includes('class MobileRequestContext')
+      && runtimeProof.includes('continues W3C context with a new span');
+    technicalAudit = runtimeContract.includes('class TechnicalAudit')
+      && runtimeProof.includes('technical audit redact sensitive fields');
+    observability = runtimeContract.includes('class RuntimeTelemetry')
+      && runtimeContract.includes('telemetryExporterContractVersion');
+    observabilityProven = observability
+      && runtimeProof.includes('versioned telemetry records metrics and correlation');
+    security = runtimeProof.includes('production transport')
+      && runtimeProof.includes('redact sensitive fields');
+    health = runtimeContract.includes('class RuntimeDiagnostics')
+      && Boolean(findFile(lib, 'network_state.dart'));
+    healthProven = health && runtimeProof.includes('diagnostics are sorted');
+    tests = Boolean(runtimeProof);
+    lifecycle = runtimeContract.includes('class RuntimeLifecycle')
+      && runtimeProof.includes('lifecycle stops once in reverse order');
+    extensionPoints = runtimeContract.includes('class MobileRuntimeExtensionRegistry');
+    extensionPointsProven = extensionPoints
+      && runtimeProof.includes('mobile extension points are versioned and exclusive');
+    diagnosticsProven = healthProven;
+    buildGates = existsSync(join(appDir, 'pubspec.yaml'))
+      && existsSync(join(appDir, 'analysis_options.yaml'))
+      && existsSync(join(appDir, 'android'))
+      && manifest.includes('"flutter", "analyze"')
+      && manifest.includes('"flutter", "test"')
+      && manifest.includes('"flutter", "build", "apk"');
+    buildGatesProven = buildGates;
   } else {
     throw new Error(`Platform Baseline evaluation unsupported for runtime: ${runtime}`);
   }
@@ -735,9 +874,11 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
       security
         ? isApi
           ? 'bounded CORS, security headers and rate limiting behavior covered'
-          : 'deployable security headers exercised by an E2E contract'
+          : isWeb
+            ? 'deployable security headers exercised by an E2E contract'
+            : 'production transport validation and sensitive-data redaction behavior tested'
         : 'security baseline incomplete',
-      security && (isApi || isWeb) ? 'behavioral-test' : 'structural'),
+      security ? 'behavioral-test' : 'structural'),
     health: present(health, 'runtime health signal found', 'health/diagnostic signal missing', !isApi && !healthProven),
     diagnostics: result(
       diagnosticsProven ? STATUS.COMPLIANT : diagnostics ? STATUS.PARTIAL : STATUS.MISSING,
@@ -749,7 +890,7 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     'lifecycle-hooks': result(
       lifecycle ? STATUS.COMPLIANT : isWeb ? STATUS.PARTIAL : STATUS.MISSING,
       lifecycle ? 'runtime lifecycle transitions and shutdown hooks behavior tested' : 'lifecycle hooks missing',
-      lifecycle && isApi ? 'behavioral-test' : 'structural'),
+      lifecycle && (isApi || isWeb || isMobile) ? 'behavioral-test' : 'structural'),
     'extension-points': result(
       extensionPoints ? (extensionPointsProven ? STATUS.COMPLIANT : isMobile ? STATUS.PARTIAL : STATUS.COMPLIANT) : STATUS.MISSING,
       extensionPoints ? 'versioned extension registry behavior tested' : 'versioned extension points missing',
