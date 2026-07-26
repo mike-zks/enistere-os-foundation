@@ -64,7 +64,7 @@
 - [ ] Réserves non bloquantes documentées
 
 #### Web Core → VALIDE_V1
-- [ ] typecheck ✅ | lint ✅ | test 450/450 ✅ | build ✅ | audit 0 vuln ✅
+- [ ] typecheck ✅ | lint ✅ | test 94/94 ✅ | build ✅ | audit gouverné ✅
 - [ ] E2E Playwright 15/15 ✅ (stack réelle API+PG+MinIO)
 - [ ] §56 critères vérifiés (voir `starters/nextjs/STARTER_SPECIFICATION.md`)
 

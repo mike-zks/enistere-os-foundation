@@ -174,7 +174,8 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable (ADR-058) et la conformité des trois APIs (ADR-061/062) sont acquis.
+Le contrat exécutable, la conformité des trois APIs (ADR-061/062) et celle des
+deux runtimes Web (ADR-063) sont acquis.
 
-> **Converger Next.js et Angular contre Common/Web v2, avec preuves comportementales et goldens
-> de base conformes — sans capability métier.**
+> **Converger React Native et Flutter contre Common/Mobile v2, avec preuves
+> comportementales et goldens de base conformes — sans capability métier.**
