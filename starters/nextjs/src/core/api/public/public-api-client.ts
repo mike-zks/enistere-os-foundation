@@ -6,6 +6,7 @@ import {
 } from "@enistere/api-client-fetch";
 
 import { getPublicApiUrl } from "../../config/public-config.js";
+import { withRequestContext } from "../../platform/runtime-contract.js";
 
 type InjectedFetch = NonNullable<EnistereApiClientOptions["fetch"]>;
 
@@ -29,7 +30,7 @@ export interface PublicApiClientOptions {
 export function createPublicApiClient(options: PublicApiClientOptions): EnistereApiClient {
   return createEnistereApiClient({
     baseUrl: options.baseUrl,
-    fetch: options.fetch,
+    fetch: withRequestContext(options.fetch ?? fetch),
     enableRefresh: false,
     createRequestId: defaultRequestIdFactory,
   });

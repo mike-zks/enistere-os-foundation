@@ -31,11 +31,11 @@ describe('HomeComponent', () => {
     expect(el.querySelector('h1')?.textContent?.trim()).toContain('Enistère');
   });
 
-  it('should show IMPLEMENTATION_AVANCEE status badge', () => {
+  it('should show the base starter status badge', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('IMPLEMENTATION_AVANCEE');
+    expect(el.querySelector('.status-value')?.textContent?.trim()).toContain('STARTER_BASE_READY');
   });
 
   it('should have a labelled status section', () => {
@@ -46,13 +46,12 @@ describe('HomeComponent', () => {
     expect(section).toBeTruthy();
   });
 
-  it('should have navigation links to login and dashboard', () => {
+  it('should not expose Auth navigation in the base starter', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    const nav = el.querySelector('nav[aria-label]');
-    expect(nav).toBeTruthy();
-    const links = nav?.querySelectorAll('a');
-    expect(links?.length).toBeGreaterThanOrEqual(2);
+    const links = Array.from(el.querySelectorAll('a')).map((link) => link.getAttribute('href'));
+    expect(links).not.toContain('/login');
+    expect(links).not.toContain('/dashboard');
   });
 });

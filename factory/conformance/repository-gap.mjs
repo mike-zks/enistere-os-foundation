@@ -12,7 +12,7 @@ const DEFAULT_OUTPUT = join(MODULE_DIR, 'reports', 'platform-baseline-v2-gap.jso
 const RUNTIMES = Object.freeze(['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
 
 function starterSource(repoRoot, manifest) {
-  return resolve(repoRoot, manifest.composition.baseSource ?? `starters/${manifest.id}`);
+  return resolve(repoRoot, `starters/${manifest.id}`);
 }
 
 export function buildRepositoryGap(repoRoot = DEFAULT_ROOT) {

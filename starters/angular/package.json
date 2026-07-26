@@ -9,6 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "architect web-angular:test",
     "test:ci": "architect web-angular:test",
+    "test:e2e": "node --test e2e/*.test.mjs",
     "build:architect": "architect web-angular:build",
     "test:architect": "architect web-angular:test"
   },

@@ -13,6 +13,7 @@ it('loads seven independent starters with Platform Baseline v2 contracts', async
   assert.ok(manifests.every((item) => item.baseline.contractVersion === '2.0.0'));
   assert.ok(manifests.every((item) => item.baseline.familyContract === `${item.kind}/2.0.0`));
   assert.ok(manifests.every((item) => item.composition.base === undefined));
+  assert.ok(manifests.every((item) => item.composition.baseSource === undefined));
   const modular = manifests.filter((item) => item.composition.model === 'modular');
   assert.deepEqual(modular.map((item) => item.id), ['nestjs', 'spring', 'fastapi', 'nextjs', 'angular', 'react-native', 'flutter']);
   assert.ok(modular.every((item) => item.composition.readyCapabilities.length === 0 || item.composition.readyCapabilities.includes('auth')));
@@ -33,6 +34,15 @@ it('rejects the legacy capability-style base classification', async () => {
   const legacy = structuredClone(manifest);
   legacy.composition.base = 'built-in';
   assert.ok(validateStarterManifest(legacy).some((issue) => issue.includes('composition.base is forbidden')));
+});
+
+it('rejects the legacy baseSource indirection', async () => {
+  const [manifest] = await loadStarterManifests(root);
+  const legacy = structuredClone(manifest);
+  legacy.composition.baseSource = `starters/${manifest.id}/base`;
+  assert.ok(validateStarterManifest(legacy).some(
+    (issue) => issue.includes('composition.baseSource is forbidden'),
+  ));
 });
 
 it('reports a truthful target support matrix', async () => {

@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'src/core/navigation/router.dart';
 import 'src/theme/enistere_theme.dart';
 
-class EnistereApp extends ConsumerWidget {
+class EnistereApp extends StatelessWidget {
   const EnistereApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
+  Widget build(BuildContext context) {
+    final router = routerProvider;
     return MaterialApp.router(
       title: 'Enistere',
       theme: EnistereTheme.light(),

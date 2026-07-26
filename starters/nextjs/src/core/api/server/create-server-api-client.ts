@@ -6,6 +6,7 @@ import {
 } from "@enistere/api-client-fetch";
 
 import { getServerApiUrl } from "../../config/server-config.js";
+import { withRequestContext } from "../../platform/runtime-contract.js";
 
 type InjectedFetch = NonNullable<EnistereApiClientOptions["fetch"]>;
 
@@ -36,7 +37,7 @@ export function createServerApiClient(options?: ServerApiClientOptions): Enister
   const incomingId = options?.requestId;
   return createEnistereApiClient({
     baseUrl,
-    fetch: options?.fetch ?? noStoreFetch,
+    fetch: withRequestContext(options?.fetch ?? noStoreFetch, { requestId: incomingId }),
     enableRefresh: false,
     createRequestId: incomingId !== undefined ? () => incomingId : defaultRequestIdFactory,
   });

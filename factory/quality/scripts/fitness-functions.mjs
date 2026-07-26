@@ -63,13 +63,16 @@ export function runFitnessFunctions({ starters, capabilities }) {
   // exact composition, no status the real matrix does not support.
   for (const issue of validateProfileRegistry(capabilities, starters)) fail('profile-truthfulness', issue);
 
-  // FF5b — single source per runtime (ADR-054/056): a starter that does not declare
-  // a `baseSource` IS its own modular base, so it must not keep a `base/` subfolder
-  // (the eliminated double representation). Starters mid-migration that still declare
-  // a `baseSource` are exempt until their base is promoted to the root.
+  // FF5b — single source per runtime: every starter is materialized directly at
+  // `starters/<runtime>`. The former `baseSource` escape hatch and `base/`
+  // subfolders are forbidden; otherwise the repository would again carry two
+  // competing representations of the same runtime.
   for (const starter of starters) {
-    if (!starter.composition?.baseSource && existsSync(join(REPO_ROOT, 'starters', starter.id, 'base'))) {
-      fail('single-source', `starter ${starter.id} declares no baseSource but still carries a base/ subfolder (double representation)`);
+    if (starter.composition?.baseSource) {
+      fail('single-source', `starter ${starter.id} declares forbidden composition.baseSource`);
+    }
+    if (existsSync(join(REPO_ROOT, 'starters', starter.id, 'base'))) {
+      fail('single-source', `starter ${starter.id} carries a forbidden base/ subfolder`);
     }
   }
 

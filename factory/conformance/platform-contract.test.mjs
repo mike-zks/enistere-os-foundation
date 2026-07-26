@@ -100,15 +100,24 @@ describe('Platform Baseline v2 — seven runtime gap reports', () => {
     }
   });
 
-  it('evaluates Next.js and Angular against Common + Web v2 without claiming full conformance', async () => {
+  it('proves Next.js and Angular conformant against Common + Web v2', async () => {
     for (const runtime of ['nextjs', 'angular']) {
       const generated = await generate(`${runtime}-base`, { api: 'nestjs', web: runtime, mobile: null });
       roots.push(generated.root);
       const app = buildConformance({ plan: generated.plan, projectDir: generated.out }).apps.find((item) => item.runtime === runtime);
       assertContractKeys(app, WEB_CONTRACT_INVARIANTS);
       assert.equal(app.familyContract.invariants.routing.status, STATUS.COMPLIANT);
-      assert.notEqual(app.baseline.invariants.observability.status, STATUS.COMPLIANT);
-      assert.equal(app.baseline.invariants['technical-audit'].status, STATUS.MISSING);
+      assert.equal(app.baseline.invariants.observability.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants.observability.source, 'behavioral-test');
+      assert.equal(app.baseline.invariants['technical-audit'].status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants.correlation.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants.diagnostics.status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['lifecycle-hooks'].status, STATUS.COMPLIANT);
+      assert.equal(app.baseline.invariants['extension-points'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['session-hook'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants['access-control-hook'].status, STATUS.COMPLIANT);
+      assert.equal(app.familyContract.invariants.telemetry.status, STATUS.COMPLIANT);
+      assert.deepEqual(app.diagnostics, []);
     }
   });
 

@@ -100,10 +100,8 @@ export const COMPOSITIONS = {
   'triple-files': { stack: { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, capabilities: ['auth', 'rbac', 'files'] },
   // R8A : compositions `base` seul. Nommées d'après leur profil, de sorte que le
   // lien golden ↔ profil soit une identité vérifiable et non une convention.
-  // Spring, Angular et Flutter ne suivent pas le contrat modulaire : leur baseline
-  // est copiée telle quelle et embarque des fonctionnalités au-delà de `base`
-  // (`bundledFeaturesMayExceedSelection`). Le golden prouve le projet généré, pas
-  // une composition minimale.
+  // Chaque starter est une source modulaire unique à sa racine. Les capabilities
+  // restent des overlays explicites ; une composition `base` est donc exacte.
   'spring-base': { stack: { api: 'spring', web: null, mobile: null }, capabilities: [] },
   'fastapi-base': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: [] },
   'spring-auth': { stack: { api: 'spring', web: null, mobile: null }, capabilities: ['auth'] },
@@ -261,10 +259,18 @@ export function startupProbeFor(kind) {
     };
   }
   if (kind === 'nextjs') {
-    return { slot: 'web', cwd: 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3000/', needsDb: false };
+    return { slot: 'web', runtime: 'nextjs', cwd: 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3100/', needsDb: false };
   }
   if (kind === 'angular') {
-    return { slot: 'web', cwd: 'apps/web', cmd: 'npm', args: ['start', '--', '--port', '4200'], url: 'http://127.0.0.1:4200/', needsDb: false };
+    return {
+      slot: 'web',
+      runtime: 'angular',
+      cwd: 'apps/web',
+      cmd: 'npm',
+      args: ['start', '--', '--host', '127.0.0.1', '--port', '4200'],
+      url: 'http://127.0.0.1:4200/',
+      needsDb: false,
+    };
   }
   // react-native / flutter: no headless startup without an emulator.
   return null;
@@ -412,6 +418,19 @@ async function verifyStartup(out, probe, timeoutMs = 180000) {
     const evidence = await verifyHttpContract(probe);
     for (const proof of evidence) {
       console.log(`✓ HTTP contract ${probe.runtime} ${proof.path}: ${proof.status}/${proof.state}`);
+    }
+    if (probe.runtime === 'angular') {
+      const e2e = spawnSync('npm', ['run', 'test:e2e'], {
+        cwd: join(out, probe.cwd),
+        stdio: 'inherit',
+        shell: false,
+        env: { ...process.env, E2E_WEB_URL: probe.url },
+      });
+      if (e2e.status !== 0) {
+        console.log('\n❌ FAILED: Angular runtime E2E contract');
+        return false;
+      }
+      console.log('✓ Angular runtime E2E contract');
     }
     return true;
   } finally {

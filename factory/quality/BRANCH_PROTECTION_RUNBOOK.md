@@ -101,7 +101,7 @@ Ces checks sont légers, déjà verts en CI, et couvrent la non-régression core
 | `api-contracts` | L1 | ~1 min | Gate contrat OpenAPI — toute dérive détectée |
 | `api-client-fetch` | L1 | ~1 min | Gate client officiel — compatible contracts |
 | `ui-kit` | L1 | ~2 min | Gate design tokens + 181 tests a11y |
-| `web-nextjs` | L1 | ~3 min | Gate Web Core VALIDE_V1 — 450 tests + build |
+| `web-nextjs` | L1 | ~3 min | Gate Web Common/Web v2 — 94 tests + build |
 | `audit` | L1 | ~1 min | Gate 0 vulnérabilité + gardes Axios/Zustand |
 | `api-runtime` | L2 | ~4 min | Gate runtime API NestJS (PG+MinIO jetables) |
 | `web-e2e` | L3 | ~5 min | Gate E2E navigateur (15 parcours Playwright) |

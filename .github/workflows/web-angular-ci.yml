@@ -2,7 +2,7 @@ name: Web Angular CI
 
 # Gate CI dédié Web Core Angular — Angular 22 / Material 3 / Karma ChromeHeadless.
 # Projet npm autonome (hors workspaces racine), sans secret, sans backend, sans déploiement.
-# Valide le starter Angular VALIDE_V1 : tests Karma, build production et audit npm local.
+# Valide l'adapter Angular Common/Web v2 : tests Karma, build production et audit npm local.
 
 on:
   pull_request:

@@ -333,17 +333,32 @@ function evaluateNextjsWeb(appDir) {
   const scripts = packageScripts(appDir);
   const hasClient = Boolean(deps['@enistere/api-client-fetch']);
   const a11y = Boolean(deps['jest-axe'] || deps['eslint-plugin-jsx-a11y']);
+  const runtimeContract = readOptional(findFile(src, 'runtime-contract.ts'));
+  const runtimeProof = readOptional(findFile(join(appDir, 'test'), 'runtime-contract.test.ts'));
+  const formFoundation = findFile(src, 'form-foundation.ts');
+  const formProof = findFile(join(appDir, 'test'), 'form-foundation.test.ts');
+  const securityProof = readOptional(findFile(join(appDir, 'e2e'), 'health.spec.ts'));
+  const extensionsProven = runtimeContract.includes('WebRuntimeExtensionRegistry')
+    && runtimeProof.includes('session and access-control extension points are versioned and exclusive');
+  const telemetryProven = runtimeContract.includes('RuntimeTelemetry')
+    && runtimeProof.includes('telemetry exporter is versioned');
   return {
     routing: result(existsSync(app) ? STATUS.COMPLIANT : STATUS.MISSING, 'App Router (src/app)'),
     'typed-api-client': result(hasClient ? STATUS.COMPLIANT : STATUS.MISSING, hasClient ? '@enistere/api-client-fetch (generated)' : 'no typed API client'),
-    'session-hook': result(findFile(src, 'capability-providers.tsx') ? STATUS.COMPLIANT : STATUS.MISSING, 'capability provider seam'),
-    'access-control-hook': result(findFile(src, 'capability-providers.tsx') ? STATUS.PARTIAL : STATUS.MISSING, 'capability provider seam'),
+    'session-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned neutral session extension behavior tested', extensionsProven ? 'behavioral-test' : 'structural'),
+    'access-control-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned neutral access-control extension behavior tested', extensionsProven ? 'behavioral-test' : 'structural'),
     'error-boundaries': result(findFile(app, 'error.tsx') ? STATUS.COMPLIANT : STATUS.MISSING, 'app/error.tsx'),
-    'form-foundation': result(deps['react-hook-form'] || deps.zod ? STATUS.PARTIAL : STATUS.MISSING, 'form/validation dependencies'),
+    'form-foundation': result(formFoundation && formProof ? STATUS.COMPLIANT : STATUS.MISSING, 'typed framework-neutral form validation behavior tested', formProof ? 'behavioral-test' : 'structural'),
     'ui-states': result(findFile(app, 'loading.tsx') && findFile(app, 'error.tsx') && findFile(app, 'not-found.tsx') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'loading.tsx + error.tsx + not-found.tsx'),
     accessibility: result(a11y ? STATUS.COMPLIANT : STATUS.MISSING, a11y ? 'jest-axe / jsx-a11y' : 'no a11y tooling'),
-    'security-headers': result(findFile(appDir, 'next.config.ts') && readFileSync(join(appDir, 'next.config.ts'), 'utf8').includes('headers') ? STATUS.COMPLIANT : STATUS.MISSING, 'Next.js security headers'),
-    telemetry: result(findFile(src, 'logger.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'client logger only; OTEL hooks absent'),
+    'security-headers': result(
+      findFile(appDir, 'next.config.ts')
+        && readFileSync(join(appDir, 'next.config.ts'), 'utf8').includes('headers')
+        && securityProof.includes('x-content-type-options')
+        ? STATUS.COMPLIANT : STATUS.MISSING,
+      'Next.js security headers exercised by E2E contract',
+      'behavioral-test'),
+    telemetry: result(telemetryProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned telemetry exporter, metrics and W3C behavior tested', telemetryProven ? 'behavioral-test' : 'structural'),
     'e2e-foundation': result(scripts['test:e2e'] ? STATUS.COMPLIANT : STATUS.MISSING, 'test:e2e script'),
   };
 }
@@ -353,18 +368,36 @@ function evaluateAngularWeb(appDir) {
   const src = join(appDir, 'src');
   const deps = packageDeps(appDir);
   const scripts = packageScripts(appDir);
+  const runtimeContract = readOptional(findFile(src, 'runtime-contract.ts'));
+  const runtimeProof = readOptional(findFile(src, 'runtime-contract.spec.ts'));
+  const extensionsProven = runtimeContract.includes('WebRuntimeExtensionRegistry')
+    && runtimeProof.includes('session and access-control extensions versioned and exclusive');
+  const typedClientProven = Boolean(findFile(src, 'typed-api-client.ts') && findFile(src, 'typed-api-client.spec.ts'));
+  const errorBoundaryProven = Boolean(findFile(src, 'runtime.providers.ts') && findFile(src, 'runtime.providers.spec.ts'));
+  const formProven = Boolean(findFile(src, 'form-foundation.ts') && findFile(src, 'form-foundation.spec.ts'));
+  const accessibilityProven = Boolean(
+    deps['@angular/cdk']
+    && findFile(src, 'enistere-loading-state.component.spec.ts')
+    && findFile(src, 'enistere-error-state.component.spec.ts'));
+  const securityProven = existsSync(join(appDir, 'public', '_headers'))
+    && Boolean(findFile(join(appDir, 'e2e'), 'runtime-contract.test.mjs'));
+  const telemetryProven = runtimeContract.includes('RuntimeTelemetry')
+    && runtimeProof.includes('versioned telemetry');
   return {
     routing: result(findFile(src, 'app.routes.ts') ? STATUS.COMPLIANT : STATUS.MISSING, 'app.routes.ts'),
-    'typed-api-client': result(findFile(src, 'api-config.ts') && findFile(src, 'app-api-error.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'HttpClient typed seam; generated client absent'),
-    'session-hook': result(findFile(src, 'app.config.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'provider seam; no neutral session hook'),
-    'access-control-hook': result(findFile(src, 'app.config.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'provider seam; no neutral access hook'),
-    'error-boundaries': result(findFile(src, 'error.interceptor.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'HTTP error boundary only'),
-    'form-foundation': result(deps['@angular/forms'] ? STATUS.COMPLIANT : STATUS.MISSING, '@angular/forms'),
+    'typed-api-client': result(typedClientProven ? STATUS.COMPLIANT : STATUS.MISSING, 'typed Angular HttpClient facade behavior tested', typedClientProven ? 'behavioral-test' : 'structural'),
+    'session-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned neutral session extension behavior tested', extensionsProven ? 'behavioral-test' : 'structural'),
+    'access-control-hook': result(extensionsProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned neutral access-control extension behavior tested', extensionsProven ? 'behavioral-test' : 'structural'),
+    'error-boundaries': result(errorBoundaryProven ? STATUS.COMPLIANT : STATUS.MISSING, 'HTTP mapping and global ErrorHandler behavior tested', errorBoundaryProven ? 'behavioral-test' : 'structural'),
+    'form-foundation': result(
+      deps['@angular/forms'] && formProven ? STATUS.COMPLIANT : STATUS.MISSING,
+      'Reactive Forms foundation behavior tested',
+      formProven ? 'behavioral-test' : 'structural'),
     'ui-states': result(findFile(src, 'enistere-loading-state.component.ts') && findFile(src, 'enistere-error-state.component.ts') ? STATUS.COMPLIANT : STATUS.PARTIAL, 'loading/error/empty state components'),
-    accessibility: result(deps['@angular/cdk'] ? STATUS.PARTIAL : STATUS.MISSING, '@angular/cdk a11y'),
-    'security-headers': result(STATUS.MISSING, 'deployment security headers not declared'),
-    telemetry: result(findFile(src, 'log.interceptor.ts') ? STATUS.PARTIAL : STATUS.MISSING, 'request logging only; OTEL hooks absent'),
-    'e2e-foundation': result(scripts.e2e ? STATUS.COMPLIANT : STATUS.MISSING, 'e2e script'),
+    accessibility: result(accessibilityProven ? STATUS.COMPLIANT : STATUS.MISSING, 'Angular CDK and accessible UI-state behavior tested', accessibilityProven ? 'behavioral-test' : 'structural'),
+    'security-headers': result(securityProven ? STATUS.COMPLIANT : STATUS.MISSING, 'deployable security-header policy exercised by E2E contract', securityProven ? 'behavioral-test' : 'structural'),
+    telemetry: result(telemetryProven ? STATUS.COMPLIANT : STATUS.MISSING, 'versioned telemetry exporter, metrics and W3C behavior tested', telemetryProven ? 'behavioral-test' : 'structural'),
+    'e2e-foundation': result(scripts['test:e2e'] && securityProven ? STATUS.COMPLIANT : STATUS.MISSING, 'booted runtime E2E contract script'),
   };
 }
 
@@ -466,6 +499,8 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
   let configurationProven = false;
   let diagnosticsProven = false;
   let buildGatesProven = false;
+  let healthProven = false;
+  let extensionPointsProven = false;
 
   if (runtime === 'nestjs') {
     configuration = Boolean(findFile(src, 'env.validation.ts'));
@@ -582,24 +617,72 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     diagnosticsProven = platform.includes('class RuntimeDiagnostics')
       && platformProof.includes('test_diagnostics_are_sorted_and_sanitized');
   } else if (runtime === 'nextjs') {
+    const runtimeContract = readOptional(findFile(src, 'runtime-contract.ts'));
+    const runtimeProof = readOptional(findFile(join(appDir, 'test'), 'runtime-contract.test.ts'));
     configuration = Boolean(findFile(src, 'public-config.ts') && findFile(src, 'server-config.ts'));
     canonicalErrors = Boolean(findFile(src, 'map-api-error.ts'));
-    structuredLogging = Boolean(findFile(src, 'logger.ts'));
-    correlation = false;
-    technicalAudit = false;
-    security = existsSync(join(appDir, 'next.config.ts')) && readFileSync(join(appDir, 'next.config.ts'), 'utf8').includes('headers');
-    health = Boolean(findFile(src, 'health-probe-view.tsx'));
+    structuredLogging = runtimeContract.includes('class StructuredLogger')
+      && runtimeProof.includes('structured logging and technical audit redact sensitive fields');
+    correlation = runtimeContract.includes('withRequestContext')
+      && runtimeProof.includes('continues a valid W3C trace with a new span');
+    technicalAudit = runtimeContract.includes('class TechnicalAudit')
+      && runtimeProof.includes('technical audit redact sensitive fields');
+    observability = runtimeContract.includes('class RuntimeTelemetry')
+      && runtimeContract.includes('TELEMETRY_EXPORTER_CONTRACT_VERSION');
+    observabilityProven = observability
+      && runtimeProof.includes('telemetry exporter is versioned')
+      && runtimeProof.includes('continues a valid W3C trace');
+    security = existsSync(join(appDir, 'next.config.ts'))
+      && readFileSync(join(appDir, 'next.config.ts'), 'utf8').includes('headers')
+      && readOptional(findFile(join(appDir, 'e2e'), 'health.spec.ts')).includes('x-content-type-options');
+    health = Boolean(findFile(src, 'health-probe-view.tsx') && runtimeContract.includes('RuntimeDiagnostics'));
+    healthProven = health && runtimeProof.includes('diagnostics are sorted');
     tests = Boolean(scripts.test);
-    lifecycle = false;
-    extensionPoints = Boolean(findFile(src, 'capability-providers.tsx'));
+    lifecycle = runtimeContract.includes('class RuntimeLifecycle')
+      && runtimeProof.includes('lifecycle starts in order and stops once in reverse order');
+    extensionPoints = runtimeContract.includes('class WebRuntimeExtensionRegistry');
+    extensionPointsProven = extensionPoints
+      && runtimeProof.includes('session and access-control extension points are versioned and exclusive');
     buildGates = Boolean(scripts.build && scripts.test);
+    configurationProven = configuration
+      && Boolean(findFile(join(appDir, 'test'), 'public-config.test.ts'))
+      && Boolean(findFile(join(appDir, 'test'), 'api-config.test.ts'));
+    diagnosticsProven = healthProven;
+    buildGatesProven = buildGates && Boolean(scripts.typecheck && scripts.lint && scripts['test:e2e']);
   } else if (runtime === 'angular') {
-    configuration = Boolean(findFile(src, 'api-config.ts'));
+    const runtimeContract = readOptional(findFile(src, 'runtime-contract.ts'));
+    const runtimeProof = readOptional(findFile(src, 'runtime-contract.spec.ts'));
+    const e2eProof = readOptional(findFile(join(appDir, 'e2e'), 'runtime-contract.test.mjs'));
+    configuration = readOptional(findFile(src, 'api-config.ts')).includes('validateApiBaseUrl');
     canonicalErrors = Boolean(findFile(src, 'app-api-error.ts') && findFile(src, 'error.interceptor.ts'));
-    structuredLogging = Boolean(findFile(src, 'log.interceptor.ts'));
+    structuredLogging = runtimeContract.includes('class StructuredLogger')
+      && runtimeProof.includes('redacts technical audit fields');
+    correlation = Boolean(findFile(src, 'correlation.interceptor.ts'))
+      && Boolean(findFile(src, 'correlation.interceptor.spec.ts'))
+      && runtimeProof.includes('continues W3C context');
+    technicalAudit = runtimeContract.includes('class TechnicalAudit')
+      && runtimeProof.includes('redacts technical audit fields');
+    observability = runtimeContract.includes('class RuntimeTelemetry')
+      && runtimeContract.includes('TELEMETRY_EXPORTER_CONTRACT_VERSION');
+    observabilityProven = observability
+      && runtimeProof.includes('versioned telemetry')
+      && Boolean(findFile(src, 'log.interceptor.spec.ts'));
+    security = existsSync(join(appDir, 'public', '_headers'))
+      && e2eProof.includes('security headers');
+    health = runtimeContract.includes('class RuntimeDiagnostics')
+      && e2eProof.includes('baseline boots');
+    healthProven = health;
     tests = Boolean(scripts['test:ci'] || scripts.test);
-    extensionPoints = Boolean(findFile(src, 'app.config.ts'));
+    lifecycle = runtimeContract.includes('class RuntimeLifecycle')
+      && runtimeProof.includes('stops idempotently in reverse order')
+      && Boolean(findFile(src, 'runtime.providers.spec.ts'));
+    extensionPoints = runtimeContract.includes('class WebRuntimeExtensionRegistry');
+    extensionPointsProven = extensionPoints
+      && runtimeProof.includes('session and access-control extensions versioned and exclusive');
     buildGates = Boolean(scripts.build && tests);
+    configurationProven = configuration && Boolean(findFile(src, 'api-config.spec.ts'));
+    diagnosticsProven = healthProven && runtimeProof.includes('sorts diagnostics');
+    buildGatesProven = buildGates && Boolean(scripts['test:e2e']);
   } else if (runtime === 'react-native') {
     configuration = Boolean(findFile(src, 'env.ts'));
     canonicalErrors = Boolean(findFile(src, 'query-errors.ts'));
@@ -649,9 +732,13 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     'technical-audit': present(technicalAudit, 'technical audit service/sink found', 'technical audit infrastructure missing'),
     'security-baseline': result(
       security ? STATUS.COMPLIANT : STATUS.MISSING,
-      security ? 'bounded CORS, security headers and rate limiting behavior covered' : 'security baseline incomplete',
-      security && isApi ? 'behavioral-test' : 'structural'),
-    health: present(health, 'runtime health signal found', 'health/diagnostic signal missing', !isApi),
+      security
+        ? isApi
+          ? 'bounded CORS, security headers and rate limiting behavior covered'
+          : 'deployable security headers exercised by an E2E contract'
+        : 'security baseline incomplete',
+      security && (isApi || isWeb) ? 'behavioral-test' : 'structural'),
+    health: present(health, 'runtime health signal found', 'health/diagnostic signal missing', !isApi && !healthProven),
     diagnostics: result(
       diagnosticsProven ? STATUS.COMPLIANT : diagnostics ? STATUS.PARTIAL : STATUS.MISSING,
       diagnosticsProven
@@ -664,9 +751,9 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
       lifecycle ? 'runtime lifecycle transitions and shutdown hooks behavior tested' : 'lifecycle hooks missing',
       lifecycle && isApi ? 'behavioral-test' : 'structural'),
     'extension-points': result(
-      extensionPoints ? (isMobile || runtime === 'angular' ? STATUS.PARTIAL : STATUS.COMPLIANT) : STATUS.MISSING,
+      extensionPoints ? (extensionPointsProven ? STATUS.COMPLIANT : isMobile ? STATUS.PARTIAL : STATUS.COMPLIANT) : STATUS.MISSING,
       extensionPoints ? 'versioned extension registry behavior tested' : 'versioned extension points missing',
-      extensionPoints && isApi ? 'behavioral-test' : 'structural'),
+      extensionPointsProven || (extensionPoints && isApi) ? 'behavioral-test' : 'structural'),
     'build-quality-gates': result(
       buildGatesProven ? STATUS.COMPLIANT
         : buildGates ? (runtime === 'spring' || runtime === 'flutter' ? STATUS.PARTIAL : STATUS.COMPLIANT)

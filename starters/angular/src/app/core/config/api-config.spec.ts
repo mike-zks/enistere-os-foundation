@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { APP_BASE_URL } from './api-config';
+import { APP_BASE_URL, validateApiBaseUrl } from './api-config';
 
 describe('APP_BASE_URL', () => {
   it('is injectable with a provided value', () => {
@@ -16,5 +16,11 @@ describe('APP_BASE_URL', () => {
     });
     const url = TestBed.inject(APP_BASE_URL);
     expect(url).toBe('');
+  });
+
+  it('validates and normalizes typed public configuration', () => {
+    expect(validateApiBaseUrl('https://api.example.test/')).toBe('https://api.example.test');
+    expect(validateApiBaseUrl(undefined)).toBe('');
+    expect(() => validateApiBaseUrl('https://user:secret@example.test')).toThrow();
   });
 });
