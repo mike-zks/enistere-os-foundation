@@ -58,6 +58,16 @@ applications:
 
 Plusieurs applications d’une même famille sont autorisées.
 
+L’enveloppe Blueprint v1 actuellement exécutable utilise `version: "1"` et
+place `architecture`, `applications`, `domain`, `capabilities` et `deployment`
+à la racine. Elle est une frontière de migration vers la forme cible ci-dessus,
+pas un second modèle interne. `enistere init --architecture=...` produit cette
+enveloppe ; l’ingestion la normalise immédiatement dans le CSM.
+
+Plusieurs clients officiels sur un backend sont générables. Plusieurs autorités
+backend sont représentables et planifiables mais restent bloquées au resolver
+tant que le profil distribué n’a pas de golden conforme.
+
 ## Profils
 
 - backend-service ;

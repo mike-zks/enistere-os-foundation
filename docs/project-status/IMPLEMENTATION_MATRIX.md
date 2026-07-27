@@ -9,12 +9,14 @@
 
 | Capacité | État | Limite actuelle |
 |---|---|---|
-| `doctor/init/plan/generate/verify` | Implémenté | CLI non distribuée |
-| `architecture list/describe/recommend` | Implémenté (ADR-060) | recommandation déterministe initiale ; écriture guidée du Blueprint à compléter |
+| `doctor/init/validate/plan/generate/verify` | Implémenté | lifecycle `inspect/diff/upgrade/migrate` non livré |
+| `architecture list/describe/recommend` | **Implémenté** (ADR-060/065) | quatre sorties canoniques, six dimensions et support séparé |
+| Initialisation system-first | **Implémentée** (ADR-065) | `init` exige `--architecture` avant les runtimes ; mode interactif riche non livré |
+| Profils système exécutables | **Partiel prouvé** (ADR-065) | `backend-service`/`product-platform` générables ; `distributed-platform` représenté et bloqué ; `service-ecosystem` TARGET |
 | Pipeline canonique unique | **Implémenté et testé** (ADR-046) | blueprint → CSM → ResolvedSystem → Plan → génération ; pipeline legacy supprimé |
 | Canonical System Model | **Implémenté et utilisé** (ADR-045/046) | unique modèle d'intention ; le blueprint n'est plus lu après ingestion |
-| Resolved System Model | **Implémenté et utilisé** (ADR-046) | unique modèle de résolution ; targets résolues (plus « toutes les apps ») |
-| Generation Plan | **Implémenté et utilisé** (ADR-046) | entrée unique du générateur ; trois digests distincts, immutabilité profonde |
+| Resolved System Model | **Implémenté et utilisé** (ADR-046/065) | profil système et preset de composition séparés ; targets résolues |
+| Generation Plan | **Implémenté et utilisé** (ADR-046/065) | support d’architecture explicable, trois digests, immutabilité profonde |
 | Platform Contract exécutable (API) | **Conforme sur NestJS/Spring/FastAPI** (ADR-061/062) | 28 conformes/0 partiel/0 manquant chacun ; suites comportementales et goldens boot/HTTP obligatoires |
 | Platform Contract exécutable (Web) | **Conforme sur Next.js/Angular** (ADR-063) | 24 conformes/0 partiel/0 manquant chacun ; preuves comportementales et goldens démarrés |
 | Platform Contract exécutable (Mobile) | **Conforme sur React Native/Flutter** (ADR-064) | 25 conformes/0 partiel/0 manquant chacun ; preuves comportementales et goldens build/export |

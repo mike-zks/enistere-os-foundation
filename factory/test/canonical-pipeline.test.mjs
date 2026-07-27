@@ -44,6 +44,8 @@ describe('canonical pipeline — single chain blueprint → CSM → resolved →
       assert.equal(plan.resolutionDigest, resolved.resolutionDigest);
       assert.equal(plan.applications.length, csm.applications.length);
       assert.equal(plan.support.level, 'ready');
+      assert.equal(plan.architectureProfile.generation, 'GENERATABLE');
+      assert.equal(plan.architectureProfile.generatable, true);
     }
   });
 
@@ -66,6 +68,9 @@ describe('canonical pipeline — multi-application strategy', () => {
     assert.deepEqual(validateCanonicalSystem(csm), []);
     const plan = buildPlan(resolveSystem(csm, await registryFor(['base'])));
     assert.deepEqual(plan.applications.map((a) => a.appDir), ['apps/api', 'apps/shop-web', 'apps/admin-web']);
+    assert.equal(plan.architectureProfile.id, 'product-platform');
+    assert.equal(plan.architectureProfile.generatable, true);
+    assert.equal(plan.compositionPreset, null);
   });
 
   it('refuses multiple API applications explicitly', () => {
@@ -90,6 +95,16 @@ describe('canonical pipeline — multi-application strategy', () => {
     assert.equal(hasErrors(validateCanonicalSystem(csm)), false);
     const plan = buildPlan(resolveSystem(csm, await registryFor(['base'])));
     assert.equal(plan.architecture.profile, 'distributed-platform');
+    assert.deepEqual(plan.architectureProfile, {
+      id: 'distributed-platform',
+      status: 'PLANNED',
+      representation: 'IMPLEMENTED',
+      generation: 'PLANNED',
+      generationScope: 'representation only; multiple backends are refused',
+      generatable: false,
+    });
+    assert.equal(plan.compositionPreset, null);
+    assert.equal(plan.profile, null);
     assert.equal(plan.support.level, 'blocked');
     assert.ok(plan.diagnostics.some((diagnostic) =>
       diagnostic.code === 'RESOLUTION_ARCHITECTURE_PROFILE_NOT_GENERATABLE'));
@@ -152,5 +167,7 @@ describe('canonical pipeline — profiles are presets', () => {
     assert.deepEqual(input.capabilities, ['auth']);
     const plan = buildGenerationPlan(input, await registryFor(['auth']));
     assert.equal(plan.profile?.id, 'nestjs-auth');
+    assert.equal(plan.compositionPreset?.id, 'nestjs-auth');
+    assert.equal(plan.architectureProfile.id, 'backend-service');
   });
 });

@@ -121,10 +121,25 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     return { id: capability.id, configuration: { ...capability.configuration }, requestedTargets: [...capability.requestedTargets], resolvedTargets, notApplicableTargets };
   });
 
-  const matched = matchProfileSelection(stack, capabilityIds);
-  const profile = matched
+  // A composition preset describes exactly one application per historical
+  // api/web/mobile slot. Never attach a single-stack preset to a multi-surface
+  // or distributed system merely because its first applications happen to
+  // match the preset.
+  const selectedSlotCount = Object.values(stack).filter(Boolean).length;
+  const presetEligible = apps.length === selectedSlotCount
+    && SLOTS.every((kind) => apps.filter((app) => app.kind === kind).length <= 1);
+  const matched = presetEligible ? matchProfileSelection(stack, capabilityIds) : null;
+  const compositionPreset = matched
     ? { id: matched.id, status: matched.status, golden: matched.golden, runtimeProven: Boolean(matched.golden), compositionExact: allModular }
     : null;
+  const architectureProfile = {
+    id: csm.architecture.profile,
+    status: systemProfile?.status ?? 'TARGET',
+    representation: systemProfile?.representation ?? 'TARGET',
+    generation: systemProfile?.generation ?? 'PLANNED',
+    generationScope: systemProfile?.generationScope ?? 'no registered support',
+    generatable: systemProfile?.generation === 'GENERATABLE' && architectureBlockers.length === 0,
+  };
 
   return resolvedSystem({
     metadata: csm.metadata,
@@ -135,7 +150,8 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     environments: csm.environments,
     policies: csm.policies,
     selection: { runtimes, stack, allModular, generationMode, targetAdapters: adapterVersions },
-    profile,
+    architectureProfile,
+    compositionPreset,
     support: {
       level: support.ready && architectureBlockers.length === 0 ? 'ready' : 'blocked',
       blockers: [...support.blockers, ...architectureBlockers],

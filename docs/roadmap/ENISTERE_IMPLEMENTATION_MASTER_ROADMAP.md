@@ -73,13 +73,17 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## 7. Architecture Profiles
 
+- **État : IN_PROGRESS** (ADR-065 : deux profils générables, profil distribué représentable/planifiable).
 - **Objectifs :** matérialiser `backend-service` et `product-platform`, puis `distributed-platform` ;
   conserver `service-ecosystem` représentable sans support fictif.
 - **Dépendances :** runtimes convergés.
 - **Livrables :** profile registry, validations, recommender déterministe, topological goldens.
 - **Sortie :** trois profils générables/bootables avec refus justifiés ; `service-ecosystem` reste honnête.
 - **Risques :** presets concurrents du CSM ; **preuves :** normalisation identique et graph tests.
-- **Prochaine mission :** golden `backend-service`, puis complexité croissante.
+- **Preuves acquises :** initialisation system-first, dimensions cohérentes,
+  support/presets séparés, plans distribués bloqués avec diagnostics.
+- **Prochaine mission :** contrat de graphe/ownership et golden
+  `distributed-platform` Spring + NestJS.
 
 ## 8. Capability Framework
 
@@ -178,9 +182,8 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable et la conformité des sept runtimes (ADR-061 à ADR-064)
-sont acquis.
+Le contrat exécutable, la conformité des sept runtimes et les profils simples
+exécutables (ADR-061 à ADR-065) sont acquis.
 
-> **Rendre `backend-service` et `product-platform` exécutables dans la CLI et le
-> resolver, puis préparer `distributed-platform` sans support fictif de
-> `service-ecosystem`.**
+> **Définir le graphe/ownership minimal de `distributed-platform` et le prouver
+> par un golden Spring + NestJS, sans promouvoir `service-ecosystem`.**

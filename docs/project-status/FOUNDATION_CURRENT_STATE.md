@@ -9,9 +9,9 @@
 Le corpus V2 est adopté comme architecture **cible**. Les développements d’expansion sont suspendus
 jusqu’à la convergence du code avec cette cible.
 
-L’adoption documentaire ne vaut pas implémentation : aucune parité produit complète n’est revendiquée,
-les runtimes actuels ne sont pas tous conformes au Platform Contract, et aucune nouvelle capability ne
-doit être ajoutée avant convergence.
+L’adoption documentaire ne vaut pas implémentation : aucune parité produit complète n’est revendiquée.
+Les sept runtimes sont désormais conformes à leur Runtime Contract v2 ; aucune nouvelle capability ne
+doit être ajoutée avant la fin du chantier Architecture Profiles.
 
 Décision de refondation initiale : [`ADR-044`](../adr/ADR-044-enistere-foundation-v2-architecture-reset.md).
 Architecture de référence courante :
@@ -24,6 +24,8 @@ Convergence Web courante :
 [`ADR-063`](../adr/ADR-063-web-runtime-v2-convergence.md).
 Convergence Mobile courante :
 [`ADR-064`](../adr/ADR-064-mobile-runtime-v2-convergence.md).
+Profils système exécutables :
+[`ADR-065`](../adr/ADR-065-executable-system-architecture-profiles.md).
 
 ## Actifs existants à migrer
 
@@ -53,7 +55,7 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   existent ; NestJS, Spring et FastAPI sont conformes sur les 28 invariants Common/API v2, avec boot et
   contrat HTTP vérifiés (ADR-061/062). Restent **non implémentés** : Blueprint V2 complet et génération
   polyglotte des contrats.
-- **P1** — Lifecycle Manager absent ; profils canoniques encore partiels ; primitives non modélisées ;
+- **P1** — Lifecycle Manager absent ; profil distribué non générable ; primitives non modélisées ;
   capabilities cibles manquantes (notamment user-management, events, notifications). Observability et
   Technical Audit relèvent désormais du baseline.
 
@@ -63,8 +65,11 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
 - `Resolved System Model` : **IMPLEMENTED_AND_USED** (ADR-046).
 - `Single Factory Pipeline` : **IMPLEMENTED_AND_TESTED** (ADR-046).
 - `Legacy Internal Pipeline` : **REMOVED** (ADR-046).
-- `System profile taxonomy` : **IMPLEMENTED** à l’ingestion/CSM (ADR-060) ; quatre profils et six
-  dimensions, avec alias historiques limités à la frontière Blueprint v1.
+- `System profile taxonomy` : **EXECUTABLE_PARTIAL** (ADR-060/065) ;
+  `backend-service` et `product-platform` traversent CLI/resolver/génération,
+  `distributed-platform` traverse la représentation et le plan bloqué,
+  `service-ecosystem` reste TARGET. Les six dimensions sont validées et les
+  alias historiques restent limités à la frontière Blueprint v1.
 - `Full Blueprint V2` : **PARTIAL** ; primitives et sections complètes restent TARGET.
 - `Platform Contract executable (API minimal v1)` : **HISTORIQUE** (ADR-047, ADR-048, ADR-049) — suite de conformité
   calculée (`factory/conformance/`, émet `enistere.conformance.json`) ; NestJS↔Spring en **parité** sur
@@ -95,8 +100,8 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   matérialisés à leur racine ; aucun dossier `base/` ni `composition.baseSource`.
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
-  Reste, avant la parité **produit** : profils système exécutables, contrats
-  polyglottes générés et capabilities Web/Mobile.
+  Reste, avant la parité **produit** : graphe/ownership et golden du profil
+  distribué, contrats polyglottes générés et capabilities Web/Mobile.
 
 Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
 

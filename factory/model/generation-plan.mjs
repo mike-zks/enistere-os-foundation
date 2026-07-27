@@ -65,7 +65,11 @@ export function buildPlan(resolved) {
     domain: { entities: [...resolved.domain.entities] },
     designSystem: Boolean(resolved.policies.designSystem),
     environments: resolved.environments.map((environment) => ({ ...environment })),
-    profile: resolved.profile ? { ...resolved.profile } : null,
+    architectureProfile: { ...resolved.architectureProfile },
+    compositionPreset: resolved.compositionPreset ? { ...resolved.compositionPreset } : null,
+    // Blueprint v1 compatibility: `profile` historically means a named
+    // composition preset. New consumers use `compositionPreset`.
+    profile: resolved.compositionPreset ? { ...resolved.compositionPreset } : null,
     support: { level: resolved.support.level, blockers: resolved.support.blockers.map((b) => ({ ...b })), notApplicable: resolved.support.notApplicable.map((n) => ({ ...n })) },
     gates: Object.fromEntries(resolved.applications.map((app) => [app.id, app.gates.map((gate) => ({ ...gate }))])),
     directories,

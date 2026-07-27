@@ -20,7 +20,7 @@ import { deepFreeze } from './immutable.mjs';
  */
 export function resolvedSystem({
   metadata, architecture, applications, capabilities, domain, environments, policies,
-  selection, profile, support, diagnostics, systemDigest,
+  selection, architectureProfile, compositionPreset, support, diagnostics, systemDigest,
 }) {
   const base = {
     metadata: { ...metadata },
@@ -37,7 +37,8 @@ export function resolvedSystem({
     environments: environments.map((e) => ({ ...e })),
     policies: { ...policies },
     selection: { ...selection, runtimes: [...selection.runtimes], stack: { ...selection.stack } },
-    profile: profile ? { ...profile } : null,
+    architectureProfile: { ...architectureProfile },
+    compositionPreset: compositionPreset ? { ...compositionPreset } : null,
     support: { level: support.level, blockers: [...support.blockers], notApplicable: [...support.notApplicable] },
     diagnostics: [...diagnostics],
     systemDigest,

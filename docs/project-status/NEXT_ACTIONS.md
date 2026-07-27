@@ -2,63 +2,61 @@
 
 ## Mission achevée
 
-React Native et Flutter sont les deux adapters Mobile conformes à
-`common/2.0.0` et `mobile/2.0.0`
-([ADR-064](../adr/ADR-064-mobile-runtime-v2-convergence.md)).
+Les profils système simples sont exécutables et les profils distribués
+traversent désormais honnêtement le pipeline canonique
+([ADR-065](../adr/ADR-065-executable-system-architecture-profiles.md)).
 
-| Runtime | Conformes | Partiels | Manquants | Baseline v2 |
-|---|---:|---:|---:|---|
-| React Native | 25 | 0 | 0 | conforme |
-| Flutter | 25 | 0 | 0 | conforme |
+| Profil | Représentation | Génération | Statut global |
+|---|---|---|---|
+| `backend-service` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées | exécutable |
+| `product-platform` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées | exécutable |
+| `distributed-platform` | `IMPLEMENTED` | `PLANNED` | planifiable, bloqué |
+| `service-ecosystem` | `IMPLEMENTED` | `PLANNED` | `TARGET` |
 
 Preuves :
 
-- configuration, erreurs, logs, corrélation W3C, observabilité, audit
-  technique, diagnostics, lifecycle et extensions testés ;
-- navigation, clients typés, secure storage, session, réseau, permissions,
-  deep links, hooks offline/push, crash reporting et build testés ;
-- React Native : typecheck, lint, 47 fichiers de tests, Expo Doctor 19/19 et
-  export iOS ;
-- Flutter : format, analyze, 9 tests et build APK debug ;
-- goldens `nestjs-react-native-base` et `nestjs-flutter-base` : génération,
-  installation, tests, build/export, audit gouverné et lock reproductible ;
-- sept starters à source unique dans `starters/<runtime>`, sans dossier `base/`
-  ni propriété `composition.baseSource` ;
-- aucune implémentation Auth, Files ou Notifications dans les starters Mobile.
-
-Le rapport structurel conserve `level: GENERATABLE`. Les suites et goldens
-portent la preuve `CONFORMANT`, sans valoir test device, `PRODUCT_EQUIVALENT` ni
-`PRODUCTION_READY`.
-
-Source :
-[`platform-baseline-v2-gap.json`](../../factory/conformance/reports/platform-baseline-v2-gap.json).
+- `init` exige le profil système avant les runtimes ;
+- `architecture list/describe/recommend` émet seulement les quatre profils
+  canoniques et leurs six dimensions ;
+- `validate` sépare la représentation du support de génération ;
+- `plan --explain` expose `architectureProfile`, `compositionPreset`, support et
+  diagnostics ;
+- les alias historiques sont normalisés à la frontière d’entrée ;
+- les incohérences entre profil et dimensions sont refusées par diagnostics CSM ;
+- une topologie à plusieurs backends atteint le resolver et ressort `PLANNED` ;
+- aucun preset mono-backend n’est attribué à un système multi-client ou
+  multi-backend ;
+- `service-ecosystem` n’est jamais annoncé générable ;
+- les sept starters restent à leur racine, sans dossier `base/` ni
+  `composition.baseSource`.
 
 ## Prochaine mission unique
 
-> **Rendre les profils système canoniques `backend-service` et
-> `product-platform` exécutables dans la CLI et le resolver, avec leurs six
-> dimensions indépendantes, puis préparer `distributed-platform` sans déclarer
-> `service-ecosystem` générable.**
+> **Définir le contrat minimal de graphe, communications et ownership de
+> `distributed-platform`, puis rendre générable et prouver un golden Spring +
+> NestJS, sans promouvoir `service-ecosystem`.**
 
 ### Justification de l’ordre
 
-Les phases Runtime Contracts et convergence des sept runtimes sont complètes.
-La phase 7 de la roadmap est Architecture Profiles ; elle précède le framework
-de capabilities. Le dépôt possède déjà un modèle canonique et une décision
-normative sur quatre profils, mais la CLI et certains registres conservent
-encore un vocabulaire historique orienté combinaisons de starters.
+La phase Architecture Profiles n’est pas terminée tant que le troisième profil
+reste uniquement représentable. Ajouter des capabilities maintenant
+stabiliserait leurs manifests contre un modèle mono-backend incomplet.
+
+Le premier slice distribué doit rester borné : deux autorités backend, ownership
+explicite, communications versionnées, déploiements séparables sous gouvernance
+commune et Platform Baseline inchangé.
 
 ### Critères de sortie
 
-- la CLI demande d’abord le type de système, pas un framework ;
-- les sorties canoniques sont uniquement `backend-service`,
-  `product-platform`, `distributed-platform`, `service-ecosystem` ;
-- les anciens noms restent des alias d’entrée versionnés, jamais des sorties ;
-- client topology, backend style, deployment coupling, data ownership,
-  communication et operations maturity restent des dimensions indépendantes ;
-- `backend-service` et `product-platform` sont planifiables/générables avec
-  goldens ;
-- `distributed-platform` est représenté et refusé avec diagnostics là où le
-  support manque ;
-- `service-ecosystem` reste `TARGET`, sans support fictif ;
-- aucun pipeline parallèle et aucune nouvelle capability.
+- le CSM porte owners et communications sans relire le Blueprint en aval ;
+- chaque edge référence deux applications existantes, un contrat, un mode,
+  l’identité, le timeout et la politique de panne ;
+- aucun backend n’accède directement au datastore de l’autre ;
+- le resolver refuse les graphes incomplets ou cycliques non justifiés ;
+- le plan ordonne matérialisation, déploiement et rollback ;
+- un golden Spring + NestJS prouve génération, installation, boot de chaque
+  backend, contrat inter-applications, corrélation/tracing et lock reproductible ;
+- `distributed-platform` ne devient `GENERATABLE` que pour ce scope prouvé ;
+- `service-ecosystem` reste `TARGET` ;
+- aucun nouveau runtime, aucune capability et aucun pipeline parallèle ;
+- aucun dossier `base/` n’est réintroduit.

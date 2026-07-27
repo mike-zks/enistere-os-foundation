@@ -151,3 +151,38 @@ historiques. Ils sont migrés respectivement vers `backend-service`, `product-pl
 - les événements sont versionnés, sécurisés et observables ;
 - la distribution n’abaisse jamais le Platform Baseline ;
 - profil cible, représentation et support de génération sont reportés séparément.
+
+## Exécution dans la Factory
+
+La sélection commence par le système :
+
+```bash
+enistere init enistere.yaml marketplace \
+  --architecture=product-platform \
+  --api=nestjs \
+  --web=nextjs,angular \
+  --mobile=react-native,flutter
+```
+
+Les sorties `ResolvedSystem` et `GenerationPlan` distinguent le profil système
+du preset de composition historique :
+
+```yaml
+architectureProfile:
+  id: product-platform
+  representation: IMPLEMENTED
+  generation: GENERATABLE
+  generatable: true
+compositionPreset: null # plusieurs clients : aucun preset mono-slot déduit
+```
+
+Pour une `distributed-platform`, `enistere validate` confirme la représentation
+et conserve l’avertissement de topologie. `enistere plan --explain` produit un
+plan bloqué avec diagnostics structurés. `generate` reste refusé.
+
+| Profil | Représentation | Génération actuelle |
+|---|---|---|
+| `backend-service` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées |
+| `product-platform` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées |
+| `distributed-platform` | `IMPLEMENTED` | `PLANNED` |
+| `service-ecosystem` | `IMPLEMENTED` | `PLANNED`, statut global `TARGET` |

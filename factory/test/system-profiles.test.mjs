@@ -1,12 +1,13 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSystemProfile } from '../cli/enistere.mjs';
+import { createArchitectureBlueprint, recommendSystemProfile } from '../cli/enistere.mjs';
 import {
   canonicalSystemProfile,
   inferClientMode,
   inferSystemProfile,
   normalizeSystemArchitecture,
   SYSTEM_PROFILES,
+  systemProfileDefaultArchitecture,
 } from '../model/system-profiles.mjs';
 
 describe('system profiles — canonical taxonomy', () => {
@@ -47,12 +48,42 @@ describe('system profiles — canonical taxonomy', () => {
     assert.equal(architecture.data.ownership, 'bounded-context');
     assert.equal(architecture.operations.maturity, 'advanced');
   });
+
+  it('emits complete defaults for every canonical profile', () => {
+    for (const profile of SYSTEM_PROFILES) {
+      const architecture = systemProfileDefaultArchitecture(profile);
+      assert.equal(architecture.profile, profile);
+      assert.ok(architecture.clients.mode);
+      assert.ok(architecture.backend.style);
+      assert.ok(architecture.deployment.coupling);
+      assert.ok(architecture.data.ownership);
+      assert.ok(architecture.communication.primary);
+      assert.ok(architecture.operations.maturity);
+    }
+  });
+
+  it('preserves the dimension implied by historical aliases', () => {
+    const multiClient = normalizeSystemArchitecture(
+      { profile: 'multi-client' },
+      [{ id: 'api', kind: 'api' }, { id: 'web', kind: 'web' }, { id: 'mobile', kind: 'mobile' }],
+    );
+    assert.equal(multiClient.profile, 'product-platform');
+    assert.equal(multiClient.clients.mode, 'multiple');
+    const microservices = normalizeSystemArchitecture(
+      { profile: 'microservices' },
+      [{ id: 'a', kind: 'api' }, { id: 'b', kind: 'api' }],
+    );
+    assert.equal(microservices.profile, 'service-ecosystem');
+    assert.equal(microservices.backend.style, 'microservices');
+  });
 });
 
 describe('system profiles — deterministic recommendation', () => {
   it('selects the least-distributed profile matching the drivers', () => {
     assert.equal(recommendSystemProfile(new Set()).profile, 'backend-service');
-    assert.equal(recommendSystemProfile(new Set(['--clients=3'])).profile, 'product-platform');
+    const product = recommendSystemProfile(new Set(['--clients=3']));
+    assert.equal(product.profile, 'product-platform');
+    assert.equal(product.architecture.clients.mode, 'multiple');
     assert.equal(recommendSystemProfile(new Set(['--apis=2'])).profile, 'distributed-platform');
     assert.equal(recommendSystemProfile(new Set(['--polyglot'])).profile, 'distributed-platform');
   });
@@ -64,5 +95,43 @@ describe('system profiles — deterministic recommendation', () => {
       '--independent-deployments',
       '--isolated-data',
     ])).profile, 'service-ecosystem');
+  });
+});
+
+describe('system profiles — system-first blueprint initialization', () => {
+  it('requires the system profile before any runtime selection', () => {
+    assert.throws(() => createArchitectureBlueprint('demo', new Set()), /init requires --architecture=/);
+  });
+
+  it('creates a backend service without official clients', () => {
+    const blueprint = createArchitectureBlueprint(
+      'payments',
+      new Set(['--architecture=backend-service', '--api=fastapi']),
+    );
+    assert.deepEqual(blueprint.architecture, { profile: 'backend-service' });
+    assert.deepEqual(blueprint.applications, [{ id: 'api', kind: 'api', runtime: 'fastapi' }]);
+  });
+
+  it('creates one product platform with multiple official clients', () => {
+    const blueprint = createArchitectureBlueprint(
+      'marketplace',
+      new Set([
+        '--architecture=product-platform',
+        '--api=nestjs',
+        '--web=nextjs,angular',
+        '--mobile=react-native,flutter',
+      ]),
+    );
+    assert.equal(blueprint.applications.filter((app) => app.kind === 'api').length, 1);
+    assert.equal(blueprint.applications.filter((app) => app.kind !== 'api').length, 4);
+  });
+
+  it('creates distributed intent but does not claim generation support', () => {
+    const blueprint = createArchitectureBlueprint(
+      'distributed',
+      new Set(['--architecture=distributed-platform']),
+    );
+    assert.equal(blueprint.applications.filter((app) => app.kind === 'api').length, 2);
+    assert.equal(blueprint.architecture.profile, 'distributed-platform');
   });
 });

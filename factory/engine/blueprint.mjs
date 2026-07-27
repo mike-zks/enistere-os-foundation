@@ -3,7 +3,7 @@ import { CAPABILITY_IDS, validateCapabilityDependencies } from './capabilities.m
 import { validateEntities } from './contracts.mjs';
 import { validateBlueprintProfile } from './profiles.mjs';
 import { APPLICATION_KINDS } from './topologies.mjs';
-import { assertGeneratableTopology, validateApplications } from './applications.mjs';
+import { validateApplications, validateRepresentableTopology } from './applications.mjs';
 import {
   BACKEND_STYLES,
   CLIENT_MODES,
@@ -66,9 +66,10 @@ export function validateBlueprint(value) {
   } else if (hasApplications) {
     const appIssues = validateApplications(value.applications);
     issues.push(...appIssues);
-    // The generatability gate (API-invariant, planned kinds, multi-surface) only
-    // runs on a structurally sound list.
-    if (appIssues.length === 0) issues.push(...assertGeneratableTopology(value));
+    // Representation and generation are deliberately separate. Multi-backend
+    // input reaches the CSM and resolver; unsupported materialization is then
+    // reported as a structured architecture blocker.
+    if (appIssues.length === 0) issues.push(...validateRepresentableTopology(value));
   } else {
     for (const key of Object.keys(value.stack)) if (!['api', 'web', 'mobile'].includes(key)) issues.push(`stack.${key} is not a known field`);
     if (!APIS.has(value.stack.api)) issues.push('stack.api must be nestjs, spring or fastapi');
