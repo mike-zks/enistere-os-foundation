@@ -486,6 +486,11 @@ TARGET ou PLANNED selon les preuves.
   domaines exclusifs, communications versionnées, ordre de
   déploiement/rollback ; le slice Spring + NestJS sync HTTP est générable.
   Toute autre variante reste bloquée et `service-ecosystem` reste TARGET.
+* **ADR-067 — Capability Manifest v2** : contrat fermé complet, registre local
+  découvert, closure topologique et auto-inclusions tracées, conflits
+  symétriques expliqués, résolution adapters/contrats/primitives/migrations/
+  conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
+  capability ; aucun dossier `base/`.
 
 **Convergence par famille :**
 
@@ -506,12 +511,13 @@ calculé est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 # 11. Prochaine étape
 
-> Définir le manifeste **Capability v2** et son graphe déterministe, sans
-> implémenter une nouvelle capability.
+> Rendre **Authentication** conforme au contrat Capability v2 sur ses targets
+> actuellement `ready`, avec une suite produit commune, sans ajouter de target
+> ni de nouvelle capability.
 
-Les trois profils nécessaires avant le framework de capabilities ont désormais
-un scope de génération prouvé. Il faut maintenant unifier targets, dépendances,
-conflits, primitives, migrations et conformité avant d’étendre le catalogue.
+Le manifest et le graphe v2 sont désormais exécutables. La prochaine preuve
+doit porter sur l’équivalence fonctionnelle d’une capability existante, avant
+toute extension du catalogue.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -844,6 +850,9 @@ multi-backend jusqu’au plan.
 ADR-066 a ajouté le contrat minimal d’ownership/communications, l’ordre de
 déploiement/rollback et le golden Spring + NestJS, sans promouvoir les autres
 graphes distribués.
+ADR-067 a rendu le Capability Manifest v2 et son graphe exécutables : closure
+topologique, auto-inclusions tracées, conflits symétriques, adapters/contrats/
+primitives/migrations/conformité résolus par application.
 
 État calculé au 2026-07-27 :
 
@@ -861,6 +870,7 @@ La présence d’un logger ne suffit jamais à prouver Observability. Pour les A
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à définir le manifeste Capability v2 et
-son graphe déterministe, sans implémenter une nouvelle capability. Tout
-pipeline parallèle et tout dossier `base/` restent hors périmètre.
+La prochaine mission unique consiste à rendre Authentication conforme au
+contrat Capability v2 sur ses targets `ready`, sans nouvelle target ni nouvelle
+capability. Tout pipeline parallèle et tout dossier `base/` restent hors
+périmètre.

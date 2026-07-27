@@ -124,6 +124,8 @@ charge, ni primitives isolées, ni `PRODUCT_EQUIVALENT`, ni
 
 ## Prochaine mission unique
 
-Définir le manifeste Capability v2 et son graphe déterministe
+Suite réalisée par
+[ADR-067](ADR-067-capability-manifest-v2-and-deterministic-graph.md) : manifeste
+Capability v2 et graphe déterministe.
 (`targets`, `requires`, `conflicts`, `primitives`, migrations et conformité),
 sans implémenter une nouvelle capability.

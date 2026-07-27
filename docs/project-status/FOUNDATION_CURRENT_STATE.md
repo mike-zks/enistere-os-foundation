@@ -26,6 +26,8 @@ Convergence Mobile courante :
 [`ADR-064`](../adr/ADR-064-mobile-runtime-v2-convergence.md).
 Profils système exécutables :
 [`ADR-065`](../adr/ADR-065-executable-system-architecture-profiles.md).
+Capability Manifest v2 :
+[`ADR-067`](../adr/ADR-067-capability-manifest-v2-and-deterministic-graph.md).
 
 ## Actifs existants à migrer
 
@@ -56,8 +58,10 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   contrat HTTP vérifiés (ADR-061/062). Restent **non implémentés** : Blueprint V2 complet et génération
   polyglotte des contrats.
 - **P1** — Lifecycle Manager absent ; distribution limitée au slice Spring +
-  NestJS sync HTTP ; primitives non modélisées ; framework Capability v2
-  incomplet. Observability et Technical Audit relèvent désormais du baseline.
+  NestJS sync HTTP ; primitives système non encore sélectionnées dans le
+  Blueprint. Le manifest Capability v2 sait désormais déclarer des besoins de
+  primitives provider-neutral. Observability et Technical Audit relèvent du
+  baseline.
 
 ## Statut des chantiers V2
 
@@ -101,8 +105,11 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   matérialisés à leur racine ; aucun dossier `base/` ni `composition.baseSource`.
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
-  Reste, avant la parité **produit** : graphe/ownership et golden du profil
-  distribué, contrats polyglottes générés et capabilities Web/Mobile.
+- `Capability Manifest v2` : **IMPLEMENTED** (ADR-067) — closure déterministe,
+  auto-inclusions tracées, conflits symétriques, adapters/contrats/primitives/
+  migrations/conformité résolus par application et artefact généré.
+  Reste, avant la parité **produit** : suites communes par capability, contrats
+  polyglottes générés et lifecycle.
 
 Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
 

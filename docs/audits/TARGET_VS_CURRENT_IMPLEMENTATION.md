@@ -111,9 +111,12 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — framework Capability v2 incomplet :** manifests, closure, conflits,
-   primitives et migrations ne forment pas encore un contrat universel.
-2. **P0 — blueprint/CSM partiels :** primitives et Blueprint V2 complet manquent.
+1. **P0 — conformité produit des capabilities absente :** le Manifest v2, la
+   closure, les conflits et la résolution par application sont implémentés
+   (ADR-067), mais aucune suite produit commune ne prouve encore l’équivalence
+   des adapters.
+2. **P0 — blueprint/CSM partiels :** sélection et résolution des providers de
+   primitives et Blueprint V2 complet manquent.
 3. **P1 — distribution partielle :** async, clients, isolation des primitives et
    appels métier interservice non prouvés.
 4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
@@ -128,5 +131,6 @@ Notifications du runtime React Native ; ADR-065 rend les deux profils simples
 exécutables ; ADR-066 rend le slice distribué Spring + NestJS générable sans
 promouvoir les autres graphes.
 
-> **Prochaine mission unique : définir le manifeste Capability v2 et son graphe
-> déterministe, sans implémenter une nouvelle capability.**
+> **Prochaine mission unique : rendre Authentication conforme au contrat
+> Capability v2 sur ses targets actuellement `ready`, sans nouvelle target ni
+> nouvelle capability.**

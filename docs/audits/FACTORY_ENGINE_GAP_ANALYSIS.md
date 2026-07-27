@@ -9,13 +9,13 @@ Réel : `factory/engine/*.mjs`, `factory/cli/enistere.mjs`, `factory/quality/scr
 
 | Étage cible | Module réel | État |
 |---|---|:--:|
-| Blueprint Compiler → Canonical System Model | `blueprint.mjs` (valide, ne compile pas vers un CSM neutre) | PARTIAL |
-| Architecture Resolver (graphe apps/caps/prims/comms) | `applications.mjs` + `capabilities.mjs` (partiel : pas de primitives/communications) | PARTIAL |
-| Composition Planner | `plan.mjs` (`buildGenerationPlan`) | PARTIAL |
+| Blueprint Compiler → Canonical System Model | `blueprint/normalize.mjs` + `model/canonical-system.mjs` | COMPLIANT |
+| Architecture Resolver (graphe apps/caps/prims/comms) | `resolver.mjs` + `capabilities.mjs` ; graphes apps/comms/capabilities, besoins primitifs par capability | PARTIAL |
+| Composition Planner | `plan.mjs` + `model/generation-plan.mjs` | COMPLIANT |
 | Generation Engine | `generator.mjs`, `overlay.mjs`, `overlay-renderers.mjs`, `prisma-schema.mjs`, `domain.mjs` | COMPLIANT |
 | Conformance Engine | `fitness-functions.mjs` (registre) + golden runtime ; **pas de Platform Contract suite** | PARTIAL |
 | Lifecycle Manager | **absent** | MISSING |
-| Component Registry | manifestes locaux ; pas de registre versionné/signé | PARTIAL |
+| Component Registry | manifests Capability v2 locaux versionnés, digests d’overlays ; distribution/signature absentes | PARTIAL |
 
 ## Composant par composant
 
@@ -27,10 +27,10 @@ Réel : `factory/engine/*.mjs`, `factory/cli/enistere.mjs`, `factory/quality/scr
 | Domain compiler (seam) | `domain.mjs` : capability synthétique ; `renderDomain` NestJS (Prisma+CRUD+client), autres `planned` | **KEEP / EXTRACT** |
 | Résolution dépendances + lock reproductible | `dependencies.mjs`, `reproducibility.test.mjs` ; workspace unifié, `npm install`→`npm ci` | **KEEP** |
 | Fitness functions | `fitness-functions.mjs` (FF1–FF5, invariants de **registre**) | **KEEP / EXTRACT** vers conformité runtime |
-| Couplage aux starters | `starters.mjs` `STARTER_IDS` figé à 6 ; `plan.mjs`/`generator.mjs` raisonnent en slots api/web/mobile | **REFACTOR** |
+| Couplage aux starters | sept runtimes ; adapters versionnés ; vue slots conservée pour compatibilité presets | **ADAPT** |
 | Couplage aux profils | `profiles.mjs` registre nommé (héritage 18 compositions) | **REFACTOR / DEFER** |
-| Canonical System Model | pas de modèle neutre intermédiaire ; le plan reste orienté « stack » | **CREATE** |
-| Primitives / communications | non résolus | **CREATE** |
+| Canonical System Model | modèle neutre unique et pipeline gardé par FF6–FF8 | **KEEP / EXTEND** |
+| Primitives / communications | communications minimales résolues ; exigences primitives des capabilities résolues, providers système absents | **EXTEND** |
 | Diff / add / remove / upgrade / migrate / reconcile / rollback | CLI = `doctor/profiles/profile/init/plan/generate/install/verify` (`enistere.mjs:17`) | **CREATE** |
 | Ownership de fichiers (Factory/user-owned) | non modélisé ; régénération complète | **CREATE** |
 | Registry versionné/signé (checksums/SBOM) | absent ; lock porte des digests d'overlays | **CREATE** |
@@ -45,10 +45,11 @@ une **force** à conserver telle quelle.
 
 - Conflits de fichiers : refus sur conflit non déclaré (`overlay.mjs`, politique
   `overwrite-policy.mjs`). **KEEP.**
-- Conflits de capabilities : champ `conflicts` du manifeste v2 + FF3
-  (`fitness-functions.mjs:53`). **KEEP.**
-- Versions : `compatibility.runtimes` et `migrations.from` figurent au schéma v2 mais ne sont pas encore
-  consommés par un Evolution Engine (inexistant). **PARTIAL → CREATE.**
+- Conflits de capabilities : symétriques, expliqués et bloquants via le
+  manifeste v2 + FF3. **KEEP.**
+- Versions : manifest, adapters et overlays sont alignés ; migrations possédées
+  et référencées par target. Leur exécution lors d’un upgrade in-place attend
+  l’Evolution Engine. **PARTIAL → CREATE.**
 
 ## Synthèse des traitements
 

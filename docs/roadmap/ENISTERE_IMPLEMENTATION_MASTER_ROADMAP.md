@@ -84,17 +84,26 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
   support/presets séparés, ownership/communications, ordre de
   déploiement/rollback et golden `distributed-spring-nestjs`. Les variantes
   distribuées hors scope et `service-ecosystem` restent bloquées.
-- **Prochaine mission :** stabiliser le manifeste Capability v2 et ses coutures.
+- **Prochaine mission :** acquise par ADR-067 ; poursuivre avec la conformité
+  produit Authentication.
 
 ## 8. Capability Framework
 
+- **État : CORE COMPLETE, LIFECYCLE DEFERRED** (ADR-067).
 - **Objectifs :** mécanisme universel de manifest/adapters/targets/dépendances/conflits/primitives/modes/
   migrations/conformance/install/remove/upgrade.
 - **Dépendances :** baseline et extension points stabilisés.
-- **Livrables :** schema capability, resolver de graphe, overlay structuré, lifecycle contract.
-- **Sortie :** capability exemple ajoutée/retirée sans modifier le runtime ni une autre capability.
+- **Livrables :** schema capability, resolver de graphe, overlay structuré ;
+  contrats add/remove/upgrade livrés plus tard par le Lifecycle Manager.
+- **Sortie core :** capabilities existantes migrées et auto-closure appliquée
+  sans modifier un runtime ni une autre capability. **Sortie lifecycle
+  différée :** ajout/retrait/upgrade in-place avec rollback.
 - **Risques :** fusion implicite, ordre codé en dur ; **preuves :** closure, conflits, absence, rollback.
-- **Prochaine mission :** stabiliser le manifeste et les coutures.
+- **Preuves acquises :** manifest fermé, registre découvert, closure et ordre
+  topologiques, conflits symétriques expliqués, résolution par application,
+  artefact et CLI. Install/remove/upgrade in-place restent au chantier Lifecycle.
+- **Prochaine mission :** conformité produit Authentication sur les targets
+  actuellement `ready`, sans extension de catalogue.
 
 ## 9. Capabilities
 
@@ -183,8 +192,8 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable, la conformité des sept runtimes et trois profils
-exécutables par scope (ADR-061 à ADR-066) sont acquis.
+Le contrat exécutable, la conformité des sept runtimes, trois profils
+exécutables par scope et le graphe Capability v2 (ADR-061 à ADR-067) sont acquis.
 
-> **Définir le manifeste Capability v2 et son graphe déterministe, sans
-> implémenter une nouvelle capability.**
+> **Rendre Authentication conforme au contrat Capability v2 sur ses targets
+> actuellement `ready`, sans nouvelle target ni nouvelle capability.**

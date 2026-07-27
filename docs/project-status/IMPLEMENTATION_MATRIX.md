@@ -11,6 +11,7 @@
 |---|---|---|
 | `doctor/init/validate/plan/generate/verify` | Implémenté | lifecycle `inspect/diff/upgrade/migrate` non livré |
 | `architecture list/describe/recommend` | **Implémenté** (ADR-060/065) | quatre sorties canoniques, six dimensions et support séparé |
+| `capability list/describe` | **Implémenté** (ADR-067) | lecture du registre v2 ; add/remove/upgrade relèvent du lifecycle futur |
 | Initialisation system-first | **Implémentée** (ADR-065) | `init` exige `--architecture` avant les runtimes ; mode interactif riche non livré |
 | Profils système exécutables | **Trois profils prouvés par scope** (ADR-065/066) | `distributed-platform` générable seulement sur Spring + NestJS sync HTTP ; `service-ecosystem` TARGET |
 | Pipeline canonique unique | **Implémenté et testé** (ADR-046) | blueprint → CSM → ResolvedSystem → Plan → génération ; pipeline legacy supprimé |
@@ -29,6 +30,8 @@
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
 | 27 combinaisons de stacks | Planifiées/testées | 3 API × 3 Web × 3 Mobile ; distinctes des profils |
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
+| Capability Manifest v2 | **Implémenté** (ADR-067) | contrat fermé ; adapters, contrats, primitives, modes, migrations et conformité par target |
+| Graphe de capabilities | **Implémenté** (ADR-067) | closure/ordre déterministes, auto-inclusions tracées, cycles et conflits refusés |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
 | CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C/R8A/ADR-066) | inclut le golden topologique `distributed-spring-nestjs` |
@@ -51,12 +54,14 @@
 | files | auth + rbac | **ready (overlay)** | **ready (overlay)** | non supporté | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
 | notifications | à décider | non défini | non défini | non défini | non défini | non défini | planifié | planifié |
 
-`auth` (1A), `rbac` (1B) et `files` (1C) sont `ready` en mode overlay : overlays déclaratifs, baselines sans la
+`auth` (1A), `rbac` (1B) et `files` (1C) satisfont le Manifest v2 et sont `ready` en mode overlay sur les
+targets indiquées : overlays déclaratifs, runtimes sans la
 surface correspondante, tests d'absence et goldens runtime vérifiés. `rbac` requiert explicitement
 `auth`. Sur React Native, `rbac` est **`not-applicable`** (autorisation fine côté serveur) :
 ce statut ne bloque pas la composition triple et n'injecte aucune surface mobile. Le payload parqué
-`files` exige explicitement `auth + rbac` et n'injecte aucune surface sur les targets
-planifiées.
+`files` exige explicitement `auth + rbac` ; une demande `files` seule produit
+l’auto-closure tracée `auth → rbac → files`. Aucune surface n’est injectée sur
+les targets planifiées.
 
 ## Presets de composition
 

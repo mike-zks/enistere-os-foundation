@@ -4,10 +4,15 @@
 - Date : 2026-07-24
 - Décideur : Owner Foundation
 
+> Mise en œuvre : [ADR-067](ADR-067-capability-manifest-v2-and-deterministic-graph.md)
+> remplace les détails d’implémentation ci-dessous. Le Platform Baseline est
+> matérialisé directement à la racine de chaque runtime ; aucun dossier
+> `starters/*/base/` n’existe.
+
 ## Contexte
 
-Les capabilities sont des **modules qui se greffent à `base`**, et certaines dépendent d'autres :
-`auth → base`, `rbac → base, auth`, `files → base, auth, rbac`. Le besoin exprimé : une **politique
+Les capabilities sont des **modules qui se greffent au Platform Baseline du runtime**, et certaines dépendent d'autres :
+`auth`, `rbac → auth`, `files → auth, rbac`. Le besoin exprimé : une **politique
 cohérente** pour ce greffage, en particulier pour les capabilities liées.
 
 Analyse directe du dépôt (2026-07-24) — le modèle **est déjà** un graphe déclaratif :

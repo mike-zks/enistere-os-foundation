@@ -177,6 +177,12 @@ Chaque manifeste déclare identité/version, cas d'usage, contrats, adapters, ta
 primitives, modes de déploiement, configuration, migrations, événements, audit métier et suites de
 conformité. Une capability absente ne laisse pas de comportement actif.
 
+Le noyau de ce contrat est exécuté par
+[ADR-067](../adr/ADR-067-capability-manifest-v2-and-deterministic-graph.md) :
+closure déterministe, conflits symétriques expliqués et résolution par
+application. Le lifecycle add/remove/upgrade et la conformité produit restent
+des preuves distinctes.
+
 Ne sont pas des capabilities : Configuration, Canonical Errors, Logging, Correlation, Observability,
 Technical Audit, Health, Security Baseline, Diagnostics, Testing Foundation, Lifecycle Hooks, Extension
 Points, Build et Quality Gates.
