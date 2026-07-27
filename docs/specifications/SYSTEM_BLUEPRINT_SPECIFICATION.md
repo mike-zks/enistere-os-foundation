@@ -65,8 +65,8 @@ pas un second modèle interne. `enistere init --architecture=...` produit cette
 enveloppe ; l’ingestion la normalise immédiatement dans le CSM.
 
 Plusieurs clients officiels sur un backend sont générables. Plusieurs autorités
-backend sont représentables et planifiables mais restent bloquées au resolver
-tant que le profil distribué n’a pas de golden conforme.
+backend sont représentables. Le slice Spring + NestJS défini par ADR-066 est
+générable ; toute autre topologie distribuée reste bloquée au resolver.
 
 ## Profils
 
@@ -120,12 +120,31 @@ policies:
 
 ```yaml
 communications:
-  - from: customer-web
+  - id: engagement-to-core
+    from: engagement-api
     to: core-api
-    mode: sync
+    mode: synchronous
     protocol: http
-    contract: public-api
+    contract: core-api.v1
+    timeoutMs: 2000
+    maxAttempts: 2
+    identity: workload
+    failurePolicy: degrade
 ```
+
+Le Blueprint v1 exécutable accepte ce sous-ensemble minimal. Pour une
+`distributed-platform`, chaque autorité backend déclare aussi :
+
+```yaml
+ownership:
+  team: core-team
+  domains: [accounts, contracts]
+```
+
+Un domaine de données possède une autorité unique. Chaque dépendance `consumes`
+doit avoir une arête explicite ; le premier slice refuse les cycles afin de
+produire un ordre de déploiement et de rollback déterministe. Les primitives et
+le Blueprint V2 complet restent à construire.
 
 ## Fichiers
 

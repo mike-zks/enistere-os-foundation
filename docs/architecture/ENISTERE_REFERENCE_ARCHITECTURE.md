@@ -97,11 +97,12 @@ La spécification complète est dans
 déploiement, l’ownership des données, les communications et la maturité opérationnelle sont des dimensions
 orthogonales au profil.
 
-Depuis ADR-065, ce choix est exécutable dans la CLI et la chaîne canonique.
+Depuis ADR-065 et ADR-066, ce choix est exécutable dans la CLI et la chaîne canonique.
 `backend-service` et `product-platform` sont générables dans le périmètre des
-compositions prouvées. `distributed-platform` est représenté et planifié avec
-blockers structurés, sans matérialisation revendiquée. `service-ecosystem`
-conserve le statut global `TARGET`.
+compositions prouvées. `distributed-platform` possède un premier slice
+générable Spring + NestJS avec ownership, communications versionnées et ordre
+de déploiement ; toute autre variante conserve des blockers structurés.
+`service-ecosystem` conserve le statut global `TARGET`.
 
 `architectureProfile` porte le support du système ;
 `compositionPreset` reste une commodité Blueprint v1 distincte. Une topologie

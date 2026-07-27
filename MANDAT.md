@@ -481,8 +481,11 @@ TARGET ou PLANNED selon les preuves.
   système ; `validate` sépare représentation et génération ; le resolver et le
   plan exposent distinctement profil système, preset de composition, support et
   blockers. `backend-service`/`product-platform` sont générables sur les
-  compositions prouvées, `distributed-platform` reste PLANNED et
-  `service-ecosystem` TARGET.
+  compositions prouvées.
+* **ADR-066 — Graphe minimal `distributed-platform`** : ownership d’équipe et
+  domaines exclusifs, communications versionnées, ordre de
+  déploiement/rollback ; le slice Spring + NestJS sync HTTP est générable.
+  Toute autre variante reste bloquée et `service-ecosystem` reste TARGET.
 
 **Convergence par famille :**
 
@@ -503,13 +506,12 @@ calculé est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 # 11. Prochaine étape
 
-> Définir le contrat minimal de graphe, communications et ownership de
-> **`distributed-platform`**, puis prouver un golden Spring + NestJS sans
-> promouvoir `service-ecosystem`.
+> Définir le manifeste **Capability v2** et son graphe déterministe, sans
+> implémenter une nouvelle capability.
 
-Les profils simples sont exécutables et la représentation distribuée est
-planifiable avec blockers. La phase Architecture Profiles doit maintenant
-prouver un premier slice multi-backend avant le framework de capabilities.
+Les trois profils nécessaires avant le framework de capabilities ont désormais
+un scope de génération prouvé. Il faut maintenant unifier targets, dépendances,
+conflits, primitives, migrations et conformité avant d’étendre le catalogue.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -838,7 +840,10 @@ structurellement par des contrats testés et retiré le moteur Notifications
 embarqué de React Native.
 ADR-065 a rendu les profils système exécutables, séparé le support
 d’architecture des presets de composition et fait traverser les intentions
-multi-backend jusqu’au plan bloqué.
+multi-backend jusqu’au plan.
+ADR-066 a ajouté le contrat minimal d’ownership/communications, l’ordre de
+déploiement/rollback et le golden Spring + NestJS, sans promouvoir les autres
+graphes distribués.
 
 État calculé au 2026-07-27 :
 
@@ -856,7 +861,6 @@ La présence d’un logger ne suffit jamais à prouver Observability. Pour les A
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à définir le contrat minimal de
-graphe/communications/ownership de `distributed-platform` et à prouver un
-golden Spring + NestJS. Les nouvelles capabilities et tout dossier `base/`
-restent hors périmètre.
+La prochaine mission unique consiste à définir le manifeste Capability v2 et
+son graphe déterministe, sans implémenter une nouvelle capability. Tout
+pipeline parallèle et tout dossier `base/` restent hors périmètre.

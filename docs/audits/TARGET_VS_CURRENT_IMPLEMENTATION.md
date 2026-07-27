@@ -74,7 +74,7 @@ polyglottes manquent encore. Les 27 « profils » historiques restent des preset
 |---|---|---|---|
 | `backend-service` | CLI/CSM/resolver/plan | compositions API prouvées | KEEP |
 | `product-platform` | CLI/CSM/resolver/plan, multi-client | compositions backend+clients prouvées | KEEP |
-| `distributed-platform` | représentable et planifiable avec blockers structurés | non | CREATE graph/ownership/golden |
+| `distributed-platform` | CSM + resolver + plan avec ownership/communications | slice Spring + NestJS sync HTTP | ADAPT pour clients/async/primitives |
 | `service-ecosystem` | représentable ; style `microservices` distinct | non | CREATE après lifecycle |
 
 ## Runtimes et baseline
@@ -111,11 +111,12 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — profil distribué non matérialisable :** graphe, ownership, contrats et
-   golden multi-backend restent absents.
+1. **P0 — framework Capability v2 incomplet :** manifests, closure, conflits,
+   primitives et migrations ne forment pas encore un contrat universel.
 2. **P0 — blueprint/CSM partiels :** primitives et Blueprint V2 complet manquent.
-3. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
-4. **P2 — primitives/lifecycle distribués absents :** aucune génération distribuée crédible.
+3. **P1 — distribution partielle :** async, clients, isolation des primitives et
+   appels métier interservice non prouvés.
+4. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
 
 ## Conclusion et action unique
 
@@ -124,9 +125,8 @@ ADR-061 a fermé les écarts des deux APIs existantes ; ADR-062 a ajouté FastAP
 dans le même pipeline ; ADR-063 a fermé les écarts Web et supprimé les dernières
 représentations `base/` ; ADR-064 a fermé les écarts Mobile et retiré
 Notifications du runtime React Native ; ADR-065 rend les deux profils simples
-exécutables et fait traverser les profils distribués jusqu’au plan sans support
-fictif.
+exécutables ; ADR-066 rend le slice distribué Spring + NestJS générable sans
+promouvoir les autres graphes.
 
-> **Prochaine mission unique : définir le graphe/ownership minimal de
-> `distributed-platform` et le prouver par un golden Spring + NestJS, sans
-> promouvoir `service-ecosystem`.**
+> **Prochaine mission unique : définir le manifeste Capability v2 et son graphe
+> déterministe, sans implémenter une nouvelle capability.**

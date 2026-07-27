@@ -29,6 +29,7 @@
 | 063 | Convergence Common/Web v2 et sources uniques | Next.js/Angular 24/0/0 ; goldens démarrés ; aucun dossier `base/` ni `baseSource` |
 | 064 | Convergence Common/Mobile v2 | React Native/Flutter 25/0/0 ; hooks neutres ; aucun flux Auth/Files/Notifications embarqué |
 | 065 | Profils système exécutables | initialisation system-first ; représentation séparée de la génération ; presets distincts ; profils distribués bloqués honnêtement |
+| 066 | Graphe minimal `distributed-platform` | ownership/domaines exclusifs, communications versionnées, ordre de déploiement/rollback ; slice Spring + NestJS générable |
 
 ## Règles
 

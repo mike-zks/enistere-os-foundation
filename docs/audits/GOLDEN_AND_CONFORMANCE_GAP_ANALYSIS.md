@@ -37,6 +37,8 @@ Compositions en CI (`factory-golden-runtime.yml:49-69`) :
 - **React Native** : `triple-auth`, `triple-auth-rbac` (RBAC n/a), `triple-files`.
 - **Spring** : `spring-base`, `spring-auth`, `spring-auth-rbac` + `{next,react-native,angular,flutter}-base`.
 - **Angular / Flutter** : **uniquement** `*-base`.
+- **Distributed** : `distributed-spring-nestjs`, deux autorités avec
+  ownership/communications, gates et boot séquentiels.
 
 ## Boot ≠ parité
 
