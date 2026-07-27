@@ -174,15 +174,55 @@ export function compositionBlueprint(composition, slug = `golden-${composition}`
   return blueprint;
 }
 
-function run(label, cmd, args, cwd) {
+function run(label, cmd, args, cwd, environment = process.env) {
   process.stdout.write(`\n── ${label}\n   $ ${cmd} ${args.join(' ')}  (cwd: ${cwd})\n`);
-  const result = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false, env: process.env });
+  const result = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false, env: environment });
   if (result.status !== 0) {
     process.stdout.write(`\n❌ FAILED: ${label} (exit ${result.status ?? 'signal ' + result.signal})\n`);
     return false;
   }
   process.stdout.write(`✓ ${label}\n`);
   return true;
+}
+
+function dataNamespace(application) {
+  return `authority_${application.id.replaceAll('-', '_')}`;
+}
+
+function withJdbcSchema(connection, schema) {
+  if (!connection) return connection;
+  const [base, query = ''] = connection.split('?', 2);
+  const parameters = new URLSearchParams(query);
+  parameters.set('currentSchema', schema);
+  return `${base}?${parameters.toString()}`;
+}
+
+/**
+ * Gives each distributed authority its own physical PostgreSQL namespace.
+ * Sharing a server remains possible for the minimal golden, but sharing a
+ * schema would violate bounded-context ownership and makes Prisma/Flyway
+ * migration histories collide.
+ */
+export function runtimeEnvironmentFor(application, architectureProfileId, baseEnvironment = process.env) {
+  const environment = { ...baseEnvironment };
+  if (architectureProfileId !== 'distributed-platform' || !application.ownership) {
+    return environment;
+  }
+
+  const namespace = dataNamespace(application);
+  environment.ENISTERE_DATA_NAMESPACE = namespace;
+  if (application.runtime === 'nestjs' && environment.DATABASE_URL) {
+    const database = new URL(environment.DATABASE_URL);
+    database.searchParams.set('schema', namespace);
+    environment.DATABASE_URL = database.toString();
+  }
+  if (application.runtime === 'spring' && environment.SPRING_DATASOURCE_URL) {
+    environment.SPRING_DATASOURCE_URL = withJdbcSchema(
+      environment.SPRING_DATASOURCE_URL,
+      namespace,
+    );
+  }
+  return environment;
 }
 
 /**
@@ -388,7 +428,7 @@ function operationIds(document) {
  * the composed capabilities (declared by each overlay in `contract.openapiOperations`)
  * and proves reproducibility by regenerating and comparing digests.
  */
-async function verifyComposedOpenApi(out, blueprint, application) {
+async function verifyComposedOpenApi(out, blueprint, application, environment = process.env) {
   console.log('\n── OpenAPI generated from the composed application');
   const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
   const expected = [...new Set([
@@ -398,7 +438,7 @@ async function verifyComposedOpenApi(out, blueprint, application) {
 
   const snapshot = join(out, application.appDir, 'openapi/openapi.json');
   const generate = () => spawnSync('npm', ['run', 'openapi:generate', `--workspace=${application.appDir}`], {
-    cwd: out, stdio: 'inherit', shell: false, env: process.env,
+    cwd: out, stdio: 'inherit', shell: false, env: environment,
   });
   if (generate().status !== 0) { console.log('\n❌ FAILED: openapi:generate'); return false; }
 
@@ -438,11 +478,11 @@ async function waitForHttp(url, timeoutMs) {
  * Launches a generated application and proves it answers on its health endpoint.
  * The process is always terminated, including on failure.
  */
-async function verifyStartup(out, probe, timeoutMs = 180000) {
+async function verifyStartup(out, probe, environment = process.env, timeoutMs = 180000) {
   const { spawn } = await import('node:child_process');
   console.log(`\n── startup: ${probe.slot} (${probe.cmd} ${probe.args.join(' ')}) → ${probe.url}`);
   const child = spawn(probe.cmd, probe.args, {
-    cwd: join(out, probe.cwd), env: process.env, shell: false, stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: join(out, probe.cwd), env: environment, shell: false, stdio: ['ignore', 'pipe', 'pipe'],
     detached: true,
   });
   let output = '';
@@ -465,7 +505,7 @@ async function verifyStartup(out, probe, timeoutMs = 180000) {
         cwd: join(out, probe.cwd),
         stdio: 'inherit',
         shell: false,
-        env: { ...process.env, E2E_WEB_URL: probe.url },
+        env: { ...environment, E2E_WEB_URL: probe.url },
       });
       if (e2e.status !== 0) {
         console.log('\n❌ FAILED: Angular runtime E2E contract');
@@ -512,6 +552,7 @@ export async function verifyDistributedContracts(out, plan) {
     `ownedDomains=${domains.length}`,
     `communicationEdges=${communications.edges.length}`,
     `deploymentOrder=${deployment.order.join('>')}`,
+    `dataNamespaces=${ownership.authorities.map((authority) => `authority_${authority.application.replaceAll('-', '_')}`).join(',')}`,
   ];
 }
 
@@ -572,13 +613,17 @@ async function main() {
   // 4) Schema/database preparation (Prisma client needed by the OpenAPI generation).
   if (ok) {
     for (const application of applications) {
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
       for (const [label, cmd, args, cwd] of prepareGatesFor(
         application.runtime,
         hasDb,
         blueprint.capabilities,
         application.appDir,
       )) {
-        ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
+        ok = run(label, cmd, args, cwd ? join(out, cwd) : out, environment) && ok;
         if (!ok) break;
       }
       if (!ok) break;
@@ -590,20 +635,28 @@ async function main() {
   //     proves the generated contract is reproducible.
   if (ok) {
     for (const application of applications.filter((item) => item.runtime === 'nestjs')) {
-      ok = await verifyComposedOpenApi(out, blueprint, application) && ok;
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
+      ok = await verifyComposedOpenApi(out, blueprint, application, environment) && ok;
       if (!ok) break;
     }
   }
   // 6) Per-application verification gates.
   if (ok) {
     for (const application of applications) {
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
       for (const [label, cmd, args, cwd] of gatesFor(
         application.runtime,
         hasDb,
         blueprint.capabilities,
         application.appDir,
       )) {
-        ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
+        ok = run(label, cmd, args, cwd ? join(out, cwd) : out, environment) && ok;
         if (!ok) break;
       }
       if (!ok) break;
@@ -621,10 +674,14 @@ async function main() {
         continue;
       }
       if (probe.needsDb && !hasDb) {
-        console.log(`\n── startup: ${kind} needs a database (GOLDEN_RUNTIME_DB=1) — not claimed`);
+        console.log(`\n── startup: ${application.runtime} needs a database (GOLDEN_RUNTIME_DB=1) — not claimed`);
         continue;
       }
-      ok = await verifyStartup(out, probe) && ok;
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
+      ok = await verifyStartup(out, probe, environment) && ok;
       if (!ok) break;
     }
   }

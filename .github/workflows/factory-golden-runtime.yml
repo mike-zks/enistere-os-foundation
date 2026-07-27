@@ -153,7 +153,11 @@ jobs:
       - name: Reset PostgreSQL schema
         run: |
           PGPASSWORD=enistere_test_password psql -h localhost -U enistere -d enistere_golden \
-            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public; \
+                DROP SCHEMA IF EXISTS authority_core_api CASCADE; \
+                DROP SCHEMA IF EXISTS authority_engagement_api CASCADE; \
+                CREATE SCHEMA authority_core_api AUTHORIZATION enistere; \
+                CREATE SCHEMA authority_engagement_api AUTHORIZATION enistere;"
 
       - name: Golden runtime — generate, reproducible install, gates
         env:
