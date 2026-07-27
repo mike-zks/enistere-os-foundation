@@ -43,6 +43,15 @@ function nestedValue(object, path) {
   return path.split('.').reduce((value, key) => value?.[key], object);
 }
 
+function profileMismatch(diagnostics, profile, path, actual, expected, rationale) {
+  if (expected.includes(actual)) return;
+  diagnostics.push(diagnostic(
+    CODES.INCOHERENT_ARCHITECTURE_PROFILE,
+    `${profile} requires architecture.${path} to be ${expected.join(' or ')}, got '${actual}': ${rationale}`,
+    { path: `architecture.${path}`, details: { profile, actual, expected } },
+  ));
+}
+
 /**
  * Returns the structured diagnostics for a system. An empty array means the
  * system is coherent. Callers refuse the composition when any diagnostic is an
@@ -162,6 +171,88 @@ export function validateCanonicalSystem(system) {
       `${system.architecture.profile} requires at least two backend authorities`,
       { path: 'architecture.profile', details: { apiCount } },
     ));
+  }
+
+  const architectureProfile = system?.architecture?.profile;
+  if (architectureProfile === 'backend-service') {
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'backend.style',
+      system.architecture.backend.style,
+      ['modular-monolith'],
+      'one backend authority remains internally modular',
+    );
+  }
+  if (architectureProfile === 'product-platform') {
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'backend.style',
+      system.architecture.backend.style,
+      ['modular-monolith'],
+      'several official clients do not imply a distributed backend',
+    );
+  }
+  if (architectureProfile === 'distributed-platform') {
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'backend.style',
+      system.architecture.backend.style,
+      ['distributed-services'],
+      'selected backend authorities are physically separated',
+    );
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'data.ownership',
+      system.architecture.data.ownership,
+      ['bounded-context', 'per-service'],
+      'every distributed authority needs explicit data ownership',
+    );
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'operations.maturity',
+      system.architecture.operations.maturity,
+      ['advanced', 'distributed'],
+      'several deployable authorities require distributed operational controls',
+    );
+  }
+  if (architectureProfile === 'service-ecosystem') {
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'backend.style',
+      system.architecture.backend.style,
+      ['microservices'],
+      'autonomous services are the defining backend style',
+    );
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'deployment.coupling',
+      system.architecture.deployment.coupling,
+      ['independent'],
+      'each service must be independently deployable',
+    );
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'data.ownership',
+      system.architecture.data.ownership,
+      ['per-service'],
+      'a service cannot share persistence authority with another service',
+    );
+    profileMismatch(
+      diagnostics,
+      architectureProfile,
+      'operations.maturity',
+      system.architecture.operations.maturity,
+      ['distributed'],
+      'partial failures and per-service SLOs must be operable',
+    );
   }
 
   (system?.capabilities ?? []).forEach((capability, index) => {

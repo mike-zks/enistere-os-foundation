@@ -76,7 +76,7 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     assert.deepEqual(validateBlueprint(multiWeb), []);
   });
 
-  it('declares but refuses planned kinds and multi-service (status-gated)', () => {
+  it('refuses unmodelled kinds but lets multi-backend intent reach the resolver', async () => {
     const withWorker = blueprint({ applications: [
       { id: 'api', kind: 'api', runtime: 'nestjs' },
       { id: 'notifier', kind: 'worker', runtime: 'nestjs' },
@@ -86,8 +86,17 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     const multiApi = blueprint({ applications: [
       { id: 'core-api', kind: 'api', runtime: 'nestjs' },
       { id: 'billing-api', kind: 'api', runtime: 'spring' },
-    ] });
-    assert.ok(validateBlueprint(multiApi).some((m) => m.includes('multiple API applications is planned')));
+    ], architecture: { profile: 'distributed-platform' } });
+    assert.deepEqual(validateBlueprint(multiApi), []);
+    const starters = await loadStarterManifests(FOUNDATION_ROOT);
+    const plan = buildGenerationPlan(multiApi, {
+      modularStarters: modularStarterIds(starters),
+      starters,
+    });
+    assert.equal(plan.architectureProfile.id, 'distributed-platform');
+    assert.equal(plan.architectureProfile.generatable, false);
+    assert.equal(plan.support.level, 'blocked');
+    assert.ok(plan.diagnostics.some((item) => item.code === 'RESOLUTION_TOPOLOGY_NOT_GENERATABLE'));
   });
 
   it('generates a multi-surface project (two web apps on one API)', async () => {

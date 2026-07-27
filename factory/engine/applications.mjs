@@ -68,13 +68,12 @@ export function validateApplications(applications) {
 }
 
 /**
- * The API-invariant and the generation gate. Every project composes at least one
- * API. Multiple web/mobile surfaces on a single API (multi-surface) are
- * generatable. A `worker`/`gateway`/`bff` (planned kind) or a second API
- * (multi-service) is declarable in the model but refused at generation until its
- * distributed capability packs are proven (Phase D). Returns issues.
+ * Representation gate. Every current CSM composes at least one API and only
+ * models runtime kinds supported by `canonical-system.mjs`. Multiple API
+ * authorities remain representable: their materialization is decided later by
+ * the resolver, which can therefore return a structured PLANNED diagnostic.
  */
-export function assertGeneratableTopology(blueprint) {
+export function validateRepresentableTopology(blueprint) {
   const issues = [];
   const applications = resolveApplications(blueprint);
   if (!applications.some((app) => app.kind === MANDATORY_KIND)) {
@@ -85,6 +84,17 @@ export function assertGeneratableTopology(blueprint) {
       issues.push(`application ${app.id} (kind: ${app.kind}) is planned and not generatable yet`);
     }
   }
+  return issues;
+}
+
+/**
+ * Compatibility helper for callers that explicitly need a generation
+ * pre-check. The canonical generation path does not use it: the resolver owns
+ * support decisions and emits machine-readable blockers.
+ */
+export function assertGeneratableTopology(blueprint) {
+  const issues = validateRepresentableTopology(blueprint);
+  const applications = resolveApplications(blueprint);
   const apiCount = applications.filter((app) => app.kind === MANDATORY_KIND).length;
   if (apiCount > 1) issues.push(`multiple API applications is planned (multi-service): ${apiCount} declared`);
   return issues;

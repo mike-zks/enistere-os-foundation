@@ -247,6 +247,31 @@ describe('canonical system — invariants', () => {
     assert.equal(hasErrors(validateCanonicalSystem(csm)), false);
   });
 
+  it('rejects dimensions that contradict the selected system profile', () => {
+    const csm = normalizeBlueprint(blueprint({
+      applications: [
+        { id: 'orders', kind: 'api', runtime: 'spring' },
+        { id: 'payments', kind: 'api', runtime: 'nestjs' },
+      ],
+      architecture: {
+        profile: 'service-ecosystem',
+        backend: { style: 'distributed-services' },
+        deployment: { coupling: 'coordinated' },
+        data: { ownership: 'shared' },
+        operations: { maturity: 'standard' },
+      },
+    }));
+    const mismatches = validateCanonicalSystem(csm).filter(
+      (item) => item.code === CSM_DIAGNOSTIC_CODES.INCOHERENT_ARCHITECTURE_PROFILE,
+    );
+    assert.deepEqual(mismatches.map((item) => item.path), [
+      'architecture.backend.style',
+      'architecture.deployment.coupling',
+      'architecture.data.ownership',
+      'architecture.operations.maturity',
+    ]);
+  });
+
   it('every emitted diagnostic uses a registered code', () => {
     const known = new Set(Object.values(CSM_DIAGNOSTIC_CODES));
     const emitted = [

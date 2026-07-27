@@ -38,7 +38,7 @@
       "additionalProperties": false
     },
     "applications": {
-      "description": "Canonical model: the deployable applications this project composes. An API (kind: api) is mandatory. worker/gateway/bff and multiple apps per slot are declarable but planned (refused at generation).",
+      "description": "Canonical model: the deployable applications this project composes. An API (kind: api) is mandatory. Multiple official web/mobile clients on one backend are generatable. Multiple backend authorities are representable and resolved as PLANNED; worker/gateway/bff remain future kinds.",
       "type": "array",
       "minItems": 1,
       "items": {
