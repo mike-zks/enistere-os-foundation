@@ -16,7 +16,7 @@ Réel : `factory/schema/blueprint.schema.json`, `factory/engine/applications.mjs
 | `spec.domains[]` | `domain.entities[]` | PARTIAL |
 | `spec.capabilities[]` (id + version + targets) | `capabilities[]` = enum figé `[base,auth,rbac,files]` | REFACTOR |
 | `spec.primitives[]` | **absent** | CREATE |
-| `spec.communications[]` | **absent** | CREATE |
+| `spec.communications[]` | sous-ensemble v1 versionné + policies | PARTIAL |
 | `spec.environments[]` | `deployment.environments` (`local`/`staging`) | PARTIAL |
 | `spec.policies{}` | **absent** | CREATE |
 | `enistere.lock` | émis (`generator.mjs:304`) | KEEP |
@@ -29,25 +29,25 @@ Réel : `factory/schema/blueprint.schema.json`, `factory/engine/applications.mjs
 
 - **Générable** : une API obligatoire + multi-surface (plusieurs `web`/`mobile` sur une API). Progrès
   réel de PR #189 (`b140e16`, `examples/blueprints/multi-surface.yaml`).
-- **Déclarable mais refusé (`planned`)** : `worker`, `gateway`, `bff` (`topologies.mjs`,
-  `assertGeneratableTopology:83`), et **plusieurs API** (multi-service, ligne 88).
+- **Déclarable mais refusé (`planned`)** : `worker`, `gateway`, `bff`. Plusieurs
+  API sont générables uniquement pour le slice Spring + NestJS d’ADR-066.
 
 | Topologie cible | Réel | État |
 |---|---|:--:|
 | `backend-service` | représentable ; compositions API seules générables selon preset | ADAPT |
 | `product-platform` single/multiple clients | représentable ; multi-surface générable | ADAPT |
-| `distributed-platform` | représentable ; multi-API refusé à la génération | PLANNED |
+| `distributed-platform` | ownership/communications représentés ; Spring + NestJS générable | PARTIAL |
 | `service-ecosystem` + style `microservices` | représentable ; multi-API refusé | PLANNED |
 | workers/gateway/BFF | déclarables, `planned`/refusés | MISSING |
 
 ## Contraintes codées en dur
 
-- `capabilities` est un **enum fermé** `[base,auth,rbac,files]` (`blueprint.schema.json:75`) : aucune
+- `capabilities` est un **enum fermé** `[base,auth,rbac,files]` : aucune
   capability hors de ces quatre n'est même exprimable, et sans version ni targets par application.
 - `topology: "monorepo"` (const) : la seule topologie de dépôt.
 - `deployment.environments` limité à `local`/`staging` : pas de `production`.
-- L'invariant « une API obligatoire » est structurel (`MANDATORY_KIND`, `applications.mjs:79`) — conforme
-  à la cible, mais gelé côté génération pour tout ce qui dépasse une API + surfaces.
+- L'invariant « une API obligatoire » est structurel (`MANDATORY_KIND`) et
+  conforme à la cible. Le resolver borne précisément les slices multi-API.
 
 ## Profils fixes
 
@@ -60,9 +60,9 @@ Le moteur porte un registre de **presets de composition** historiquement nommés
 | Écart | Type | Sévérité | Traitement |
 |---|---|:--:|---|
 | Enveloppe `version:"1"` vs `apiVersion/kind/metadata` + Canonical System Model | ARCHITECTURE | **P0** | REFACTOR |
-| `primitives` / `communications` / `policies` absents | ARCHITECTURE | P1 | CREATE |
+| `primitives` / policies étendues absentes ; communications partielles | ARCHITECTURE | P1 | CREATE/ADAPT |
 | `capabilities` enum figé (sans version/targets) | ARCHITECTURE | P1 | REFACTOR |
 | `enistere.plan.json` / `enistere.conformance.json` non émis | LIFECYCLE | P1 | CREATE |
-| matérialisation workers et profils distribués refusée | ARCHITECTURE | P2 | CREATE (Phase distribuée) |
+| workers et variantes distribuées hors Spring + NestJS refusés | ARCHITECTURE | P2 | CREATE après preuves |
 | Registre de presets encore nommé profiles | VOCABULAIRE | P2 | ADAPT lors de Blueprint v2 |
 | Multi-surface générable | — | — | KEEP |

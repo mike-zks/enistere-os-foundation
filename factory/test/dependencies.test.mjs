@@ -336,7 +336,9 @@ describe('golden runtime audit wiring', () => {
     }
     for (const composition of Object.keys(COMPOSITIONS)) {
       const spec = COMPOSITIONS[composition];
-      const kinds = Object.values(spec.stack).filter(Boolean);
+      const kinds = spec.stack
+        ? Object.values(spec.stack).filter(Boolean)
+        : [...new Set(spec.applications.map((application) => application.runtime))];
       const [cmd, args] = auditGate('/tmp/project', kinds);
       assert.equal(cmd, 'node');
       assert.match(args[0], /audit-check\.mjs$/);

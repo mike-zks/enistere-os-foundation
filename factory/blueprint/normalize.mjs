@@ -13,6 +13,7 @@ import { resolveApplications } from '../engine/applications.mjs';
 import {
   canonicalApplication,
   canonicalCapability,
+  canonicalCommunication,
   canonicalEnvironment,
   canonicalSystem,
 } from '../model/canonical-system.mjs';
@@ -41,6 +42,7 @@ export function normalizeBlueprint(blueprint, { file } = {}) {
     kind: app.kind,
     runtime: app.runtime,
     consumes: consumesFor(app, declaredById, apiIds),
+    ownership: declaredById.get(app.id)?.ownership ?? null,
     options: {},
   }));
 
@@ -67,6 +69,8 @@ export function normalizeBlueprint(blueprint, { file } = {}) {
     architecture: normalizeSystemArchitecture(blueprint.architecture, applications),
     applications,
     capabilities,
+    communications: (blueprint.communications ?? []).map((communication) =>
+      canonicalCommunication(communication)),
     domain: { entities: [...(blueprint.domain?.entities ?? [])] },
     environments,
     policies: { designSystem: Boolean(blueprint.designSystem) },

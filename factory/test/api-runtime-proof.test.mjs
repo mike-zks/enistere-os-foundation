@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  runtimeEnvironmentFor,
   startupProbeFor,
   verifyHttpContract,
 } from '../quality/scripts/golden-runtime.mjs';
@@ -18,6 +19,35 @@ describe('API runtime boot/HTTP proof', () => {
     assert.equal(next.url, 'http://127.0.0.1:3100/');
     assert.equal(angular.url, 'http://127.0.0.1:4200/');
     assert.deepEqual(angular.args, ['start', '--', '--host', '127.0.0.1', '--port', '4200']);
+  });
+
+  it('isolates distributed authority migration histories in distinct data namespaces', () => {
+    const baseEnvironment = {
+      DATABASE_URL: 'postgresql://user:secret@localhost:5432/enistere?schema=public',
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://localhost:5432/enistere',
+    };
+    const spring = runtimeEnvironmentFor({
+      id: 'core-api',
+      runtime: 'spring',
+      ownership: { team: 'core-team', domains: ['core'] },
+    }, 'distributed-platform', baseEnvironment);
+    const nestjs = runtimeEnvironmentFor({
+      id: 'engagement-api',
+      runtime: 'nestjs',
+      ownership: { team: 'engagement-team', domains: ['engagement'] },
+    }, 'distributed-platform', baseEnvironment);
+
+    assert.equal(spring.ENISTERE_DATA_NAMESPACE, 'authority_core_api');
+    assert.equal(
+      spring.SPRING_DATASOURCE_URL,
+      'jdbc:postgresql://localhost:5432/enistere?currentSchema=authority_core_api',
+    );
+    assert.equal(nestjs.ENISTERE_DATA_NAMESPACE, 'authority_engagement_api');
+    assert.equal(
+      new URL(nestjs.DATABASE_URL).searchParams.get('schema'),
+      'authority_engagement_api',
+    );
+    assert.equal(baseEnvironment.DATABASE_URL.endsWith('schema=public'), true);
   });
 
   it('proves health semantics, correlation, W3C tracing and security headers', async () => {

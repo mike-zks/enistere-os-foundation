@@ -49,6 +49,38 @@ spec:
     - { from: core-api, to: engagement-api, mode: async, protocol: amqp, contract: account.changed.v1 }
 ```
 
+## Slice actuellement prouvé
+
+La Factory ne revendique pas encore la matérialisation du système polyglotte
+complet ci-dessus. ADR-066 prouve uniquement :
+
+```yaml
+applications:
+  - id: core-api
+    kind: api
+    runtime: spring
+    ownership: { team: core-team, domains: [core] }
+  - id: engagement-api
+    kind: api
+    runtime: nestjs
+    consumes: [core-api]
+    ownership: { team: engagement-team, domains: [engagement] }
+communications:
+  - id: engagement-to-core
+    from: engagement-api
+    to: core-api
+    mode: synchronous
+    protocol: http
+    contract: core-api.v1
+    timeoutMs: 2000
+    maxAttempts: 2
+    identity: workload
+    failurePolicy: degrade
+```
+
+Le plan déploie `core-api` avant `engagement-api` et inverse cet ordre pour le
+rollback.
+
 ## Ownership, déploiement et résilience
 
 Chaque API possède ses données et son pipeline de release. Les appels synchrones ont timeout et breaker ;
@@ -65,9 +97,10 @@ providers, RAG, évaluations, quotas, human review et mode dégradé sans IA.
 
 | Élément | Statut | Limite |
 |---|---|---|
-| représentation | TARGET | modèle cible documenté |
+| représentation | IMPLEMENTED | applications, ownership et communications dans le CSM |
+| slice Spring + NestJS | GENERATABLE / BOOTABLE après golden vert | deux backends, sync HTTP, aucune capability/client |
 | FastAPI base | CONFORMANT | runtime seul prouvé ; service IA de l'exemple non implémenté |
 | RabbitMQ, document DB | TARGET | providers non implémentés/arbitrés |
-| communications distribuées | TARGET | pipeline actuel ne matérialise pas cette topologie |
+| communication versionnée minimale | IMPLEMENTED | artefact de graphe ; aucun appel métier interservice prouvé |
 | contrats polyglottes | TARGET | TypeScript seulement partiellement actif |
-| système | TARGET | aucune preuve de génération/boot/conformité |
+| système polyglotte complet | TARGET | FastAPI, clients, RabbitMQ et primitives restent hors scope |

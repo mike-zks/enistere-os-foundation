@@ -2,61 +2,54 @@
 
 ## Mission achevée
 
-Les profils système simples sont exécutables et les profils distribués
-traversent désormais honnêtement le pipeline canonique
-([ADR-065](../adr/ADR-065-executable-system-architecture-profiles.md)).
+Le contrat minimal de `distributed-platform` est exécutable
+([ADR-066](../adr/ADR-066-distributed-platform-minimal-graph.md)).
 
 | Profil | Représentation | Génération | Statut global |
 |---|---|---|---|
 | `backend-service` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées | exécutable |
 | `product-platform` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées | exécutable |
-| `distributed-platform` | `IMPLEMENTED` | `PLANNED` | planifiable, bloqué |
+| `distributed-platform` | `IMPLEMENTED` | `GENERATABLE` sur Spring + NestJS sync HTTP | scope borné |
 | `service-ecosystem` | `IMPLEMENTED` | `PLANNED` | `TARGET` |
 
 Preuves :
 
-- `init` exige le profil système avant les runtimes ;
-- `architecture list/describe/recommend` émet seulement les quatre profils
-  canoniques et leurs six dimensions ;
-- `validate` sépare la représentation du support de génération ;
-- `plan --explain` expose `architectureProfile`, `compositionPreset`, support et
-  diagnostics ;
-- les alias historiques sont normalisés à la frontière d’entrée ;
-- les incohérences entre profil et dimensions sont refusées par diagnostics CSM ;
-- une topologie à plusieurs backends atteint le resolver et ressort `PLANNED` ;
-- aucun preset mono-backend n’est attribué à un système multi-client ou
-  multi-backend ;
-- `service-ecosystem` n’est jamais annoncé générable ;
-- les sept starters restent à leur racine, sans dossier `base/` ni
-  `composition.baseSource`.
+- ownership d’équipe et domaines de données exclusifs dans le CSM ;
+- arêtes explicites et versionnées avec timeout, retry borné, identité workload
+  et stratégie de panne ;
+- incohérences, domaines multi-owners et cycles refusés ;
+- support accordé uniquement à deux autorités Spring + NestJS sans client ni
+  capability ;
+- ordre topologique de déploiement et ordre inverse de rollback dans le plan ;
+- artefacts déterministes ownership/communications/deployment ;
+- golden `distributed-spring-nestjs` branché sur le pipeline existant, avec
+  gates, boot/HTTP des deux runtimes, audit et lock reproductible ;
+- autres paires, clients, capabilities et async toujours bloqués ;
+- `service-ecosystem` non promu ;
+- aucune source `starters/*/base/`, aucun `composition.baseSource`.
 
 ## Prochaine mission unique
 
-> **Définir le contrat minimal de graphe, communications et ownership de
-> `distributed-platform`, puis rendre générable et prouver un golden Spring +
-> NestJS, sans promouvoir `service-ecosystem`.**
+> **Définir le manifeste Capability v2 et son graphe déterministe, sans
+> implémenter une nouvelle capability.**
 
 ### Justification de l’ordre
 
-La phase Architecture Profiles n’est pas terminée tant que le troisième profil
-reste uniquement représentable. Ajouter des capabilities maintenant
-stabiliserait leurs manifests contre un modèle mono-backend incomplet.
-
-Le premier slice distribué doit rester borné : deux autorités backend, ownership
-explicite, communications versionnées, déploiements séparables sous gouvernance
-commune et Platform Baseline inchangé.
+Les trois profils nécessaires avant le framework de capabilities possèdent
+maintenant un scope de génération réel. Les capabilities existantes restent
+fondées sur des manifests plus étroits que la cible : targets, dépendances,
+conflits, primitives, modes de déploiement, migrations et conformité doivent
+être unifiés avant d’étendre Authentication ou d’ajouter une capability.
 
 ### Critères de sortie
 
-- le CSM porte owners et communications sans relire le Blueprint en aval ;
-- chaque edge référence deux applications existantes, un contrat, un mode,
-  l’identité, le timeout et la politique de panne ;
-- aucun backend n’accède directement au datastore de l’autre ;
-- le resolver refuse les graphes incomplets ou cycliques non justifiés ;
-- le plan ordonne matérialisation, déploiement et rollback ;
-- un golden Spring + NestJS prouve génération, installation, boot de chaque
-  backend, contrat inter-applications, corrélation/tracing et lock reproductible ;
-- `distributed-platform` ne devient `GENERATABLE` que pour ce scope prouvé ;
-- `service-ecosystem` reste `TARGET` ;
-- aucun nouveau runtime, aucune capability et aucun pipeline parallèle ;
-- aucun dossier `base/` n’est réintroduit.
+- une spécification et un schéma versionnés uniques ;
+- `requires` forme une closure déterministe et acyclique ;
+- `conflicts` est symétrique et expliqué ;
+- targets et adapters sont résolus par application, y compris multi-backend ;
+- primitives et modes de déploiement sont déclarables sans provider fictif ;
+- migrations et tests de conformité appartiennent au manifest ;
+- les manifests Auth/RBAC/Files sont audités et migrés sans changer leur
+  comportement produit ;
+- aucun bundle implicite, aucun pipeline parallèle, aucune nouvelle capability ;
+- aucun dossier `base/`.

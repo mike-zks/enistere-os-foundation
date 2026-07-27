@@ -16,11 +16,45 @@ import { stableDigest, stableStringify } from './canonical-system.mjs';
 import { deepFreeze } from './immutable.mjs';
 import { PLAN_DIAGNOSTIC_CODES as PC, diagnostic } from './diagnostics.mjs';
 
+function deploymentPlan(applications) {
+  const byId = new Map(applications.map((application) => [application.id, application]));
+  const remaining = new Set(byId.keys());
+  const order = [];
+  while (remaining.size > 0) {
+    const ready = applications
+      .filter((application) => remaining.has(application.id))
+      .filter((application) => application.consumes.every((dependency) => !remaining.has(dependency)));
+    if (ready.length === 0) break;
+    for (const application of ready) {
+      order.push(application.id);
+      remaining.delete(application.id);
+    }
+  }
+  return {
+    units: applications.map((application) => ({
+      id: application.id,
+      dependsOn: application.consumes.filter((dependency) => byId.has(dependency)),
+      owner: application.ownership?.team ?? null,
+    })),
+    order,
+    rollbackOrder: [...order].reverse(),
+  };
+}
+
 /** Builds the deeply-immutable GenerationPlan from a ResolvedSystem. */
 export function buildPlan(resolved) {
   const { selection } = resolved;
   const applications = resolved.applications.map((app) => ({
-    id: app.id, kind: app.kind, runtime: app.runtime, baseline: { ...app.baseline }, source: app.source, appDir: app.appDir,
+    id: app.id,
+    kind: app.kind,
+    runtime: app.runtime,
+    baseline: { ...app.baseline },
+    source: app.source,
+    appDir: app.appDir,
+    consumes: [...app.consumes],
+    ownership: app.ownership
+      ? { team: app.ownership.team, domains: [...app.ownership.domains] }
+      : null,
   }));
 
   const apiDirs = applications.filter((app) => app.kind === 'api').map((app) => app.appDir);
@@ -62,6 +96,8 @@ export function buildPlan(resolved) {
       capability.id,
       { resolved: [...capability.resolvedTargets], notApplicable: [...capability.notApplicableTargets], configuration: { ...capability.configuration } },
     ])),
+    communications: resolved.communications.map((communication) => ({ ...communication })),
+    deploymentPlan: deploymentPlan(applications),
     domain: { entities: [...resolved.domain.entities] },
     designSystem: Boolean(resolved.policies.designSystem),
     environments: resolved.environments.map((environment) => ({ ...environment })),

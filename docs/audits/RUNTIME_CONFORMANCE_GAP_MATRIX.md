@@ -38,5 +38,6 @@ jamais classés comme capabilities.
 
 ## Action
 
-La prochaine mission unique est l’exécution des profils système canoniques,
-d’abord `backend-service` et `product-platform`.
+Les sept runtimes sont conformes et trois profils possèdent désormais un scope
+générable. La prochaine mission unique est le manifeste Capability v2 et son
+graphe déterministe, sans nouvelle capability.

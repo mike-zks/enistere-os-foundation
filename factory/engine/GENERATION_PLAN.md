@@ -4,7 +4,8 @@
 
 > Ce fichier décrit le plan exécutable actuel. La cible adoptée par
 > [ADR-057](../../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md) étend ce plan aux
-> primitives, communications, contrats, opérations lifecycle, risques, approbations et statuts.
+> primitives, contrats polyglottes, opérations lifecycle, risques, approbations
+> et statuts. ADR-066 ajoute déjà communications et déploiement distribués minimaux.
 
 ## Rôle
 
@@ -26,13 +27,16 @@ GenerationPlan
 ├── stack, targetAdapters
 ├── capabilities[]                 (ids)
 ├── capabilityTargets { <id>: { resolved[], notApplicable[], configuration } }
+├── communications[]
+├── deploymentPlan { units[], order[], rollbackOrder[] }
 ├── domain { entities[] }
 ├── designSystem
 ├── environments[] { id, kind }
 ├── profile | null                 (descriptif)
 ├── support { level, blockers[], notApplicable[] }
 ├── gates { <appId>: [{ gate, command }] }
-├── directories[], applications[] { id, kind, runtime, baseline, source, appDir }, starterSources
+├── directories[], applications[] { id, kind, runtime, baseline, source, appDir,
+│                                   consumes[], ownership? }, starterSources
 ├── diagnostics[]                  (RESOLUTION_* + PLAN_*)
 ├── systemDigest, resolutionDigest
 └── planDigest

@@ -41,16 +41,19 @@ CanonicalSystem
 │   ├── data { ownership }
 │   ├── communication { primary }
 │   └── operations { maturity }
-├── applications[] { id, kind, runtime, consumes[], options }
+├── applications[] { id, kind, runtime, consumes[], ownership?, options }
 ├── capabilities[] { id, version?, requestedTargets[], configuration }
+├── communications[] { id, from, to, mode, protocol, contract, timeoutMs,
+│                      maxAttempts, identity, failurePolicy }
 ├── domain { entities[] }
 ├── environments[] { id, kind }          # local | staging | production
 ├── policies { designSystem }
 └── source { blueprintVersion, file?, profile?, digest }
 ```
 
-- **Profils système** : quatre identifiants canoniques ; la génération de
-  `distributed-platform` et `service-ecosystem` reste planifiée.
+- **Profils système** : quatre identifiants canoniques ; le slice Spring +
+  NestJS de `distributed-platform` est générable, les autres variantes et
+  `service-ecosystem` restent planifiées.
 - **Dimensions** : topologie client, style backend, couplage de déploiement, ownership, communication et
   maturité opérationnelle sont validés séparément.
 - **Kinds** : `api`, `web`, `mobile`. Plusieurs applications d'un même kind sont autorisées.
@@ -61,9 +64,9 @@ CanonicalSystem
 
 `CSM_EMPTY_SYSTEM_NAME`, `CSM_DUPLICATE_APPLICATION_ID`, `CSM_UNSUPPORTED_RUNTIME`,
 `CSM_INCOMPATIBLE_KIND_RUNTIME`, `CSM_INVALID_APPLICATION`, `CSM_INVALID_CAPABILITY_TARGET`,
-`CSM_INVALID_SYSTEM_PROFILE`, `CSM_INVALID_ARCHITECTURE_DIMENSION`, `CSM_MISSING_API`,
-`CSM_TOPOLOGY_NOT_GENERATABLE`
-(refus des topologies non générables : plusieurs API), `CSM_INCOHERENT_STRUCTURE`.
+`CSM_INVALID_SYSTEM_PROFILE`, `CSM_INVALID_ARCHITECTURE_DIMENSION`,
+`CSM_MISSING_API`, `CSM_INVALID_OWNERSHIP`, `CSM_INVALID_COMMUNICATION`,
+`CSM_INCOHERENT_COMMUNICATION_GRAPH`, `CSM_INCOHERENT_STRUCTURE`.
 
 ## Déterminisme et immutabilité
 
@@ -75,8 +78,9 @@ chemin absolu ni aléatoire. `source.digest` = sha256 stable (champ digest exclu
 
 - `capabilities[].requestedTargets` = toutes les applications (intention globale du blueprint v1) ; la
   résolution effective par target est calculée par le resolver.
-- Non modélisés dans le code actuel : `primitives`, `communications`, deployment détaillé,
-  `security`, `quality`, `ai`, policies étendues et matérialisation de plusieurs API. Les quatre profils,
-  leurs dimensions et `architecture.evolutionTarget` sont modélisés.
+- Non modélisés dans le code actuel : `primitives`, `security`, `quality`, `ai`
+  et policies étendues. Ownership et communications sont modélisés pour le
+  slice distribué minimal ; ils ne constituent pas encore le Blueprint V2
+  complet.
 - Le blueprint public v1 (`stack`/`applications[]`) reste accepté ; il est traduit **immédiatement** en
   CSM. Aucune conversion inverse CSM → blueprint n'existe.

@@ -54,7 +54,7 @@ export function validateApplications(applications) {
   const SLUG = /^[a-z][a-z0-9-]{1,62}$/;
   for (const [index, app] of applications.entries()) {
     if (!app || typeof app !== 'object' || Array.isArray(app)) { issues.push(`applications[${index}] must be an object`); continue; }
-    for (const key of Object.keys(app)) if (!['id', 'kind', 'runtime', 'audience', 'consumes'].includes(key)) issues.push(`applications[${index}].${key} is not a known field`);
+    for (const key of Object.keys(app)) if (!['id', 'kind', 'runtime', 'audience', 'consumes', 'ownership'].includes(key)) issues.push(`applications[${index}].${key} is not a known field`);
     if (!SLUG.test(app.id ?? '')) issues.push(`applications[${index}].id must be kebab-case`);
     else if (ids.has(app.id)) issues.push(`applications[${index}].id is duplicated: ${app.id}`);
     ids.add(app.id);
@@ -63,6 +63,25 @@ export function validateApplications(applications) {
     if (!kind.runtimes.includes(app.runtime)) issues.push(`applications[${index}].runtime ${app.runtime} is invalid for kind ${app.kind}`);
     if (app.audience !== undefined && (typeof app.audience !== 'string' || app.audience === '')) issues.push(`applications[${index}].audience must be a non-empty string`);
     if (app.consumes !== undefined && (!Array.isArray(app.consumes) || app.consumes.some((c) => typeof c !== 'string' || c === ''))) issues.push(`applications[${index}].consumes must be an array of application ids`);
+    if (app.ownership !== undefined) {
+      if (!app.ownership || typeof app.ownership !== 'object' || Array.isArray(app.ownership)) {
+        issues.push(`applications[${index}].ownership must be an object`);
+      } else {
+        for (const key of Object.keys(app.ownership)) {
+          if (!['team', 'domains'].includes(key)) issues.push(`applications[${index}].ownership.${key} is not a known field`);
+        }
+        if (typeof app.ownership.team !== 'string' || !SLUG.test(app.ownership.team)) {
+          issues.push(`applications[${index}].ownership.team must be a kebab-case id`);
+        }
+        if (!Array.isArray(app.ownership.domains)
+          || app.ownership.domains.length === 0
+          || app.ownership.domains.some((domain) => typeof domain !== 'string' || !SLUG.test(domain))) {
+          issues.push(`applications[${index}].ownership.domains must be a non-empty array of kebab-case ids`);
+        } else if (new Set(app.ownership.domains).size !== app.ownership.domains.length) {
+          issues.push(`applications[${index}].ownership.domains must be unique`);
+        }
+      }
+    }
   }
   return issues;
 }

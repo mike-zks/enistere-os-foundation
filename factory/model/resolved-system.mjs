@@ -19,7 +19,7 @@ import { deepFreeze } from './immutable.mjs';
  * (stable sha256 over the resolution, its own digest excluded).
  */
 export function resolvedSystem({
-  metadata, architecture, applications, capabilities, domain, environments, policies,
+  metadata, architecture, applications, capabilities, communications, domain, environments, policies,
   selection, architectureProfile, compositionPreset, support, diagnostics, systemDigest,
 }) {
   const base = {
@@ -31,8 +31,12 @@ export function resolvedSystem({
       gates: [...app.gates],
       resolvedCapabilities: [...app.resolvedCapabilities],
       consumes: [...app.consumes],
+      ownership: app.ownership
+        ? { team: app.ownership.team, domains: [...app.ownership.domains] }
+        : null,
     })),
     capabilities: capabilities.map((c) => ({ ...c })),
+    communications: communications.map((communication) => ({ ...communication })),
     domain: { entities: [...(domain.entities ?? [])] },
     environments: environments.map((e) => ({ ...e })),
     policies: { ...policies },

@@ -15,6 +15,7 @@ import { matchProfileSelection } from './profiles.mjs';
 import { RESOLUTION_DIAGNOSTIC_CODES as RC, diagnostic } from '../model/diagnostics.mjs';
 import { resolvedSystem } from '../model/resolved-system.mjs';
 import { SYSTEM_PROFILE_DEFINITIONS } from '../model/system-profiles.mjs';
+import { assessDistributedPlatformSupport } from './architecture-support.mjs';
 
 const GATE_COMMANDS = ['install', 'test', 'build', 'verify'];
 const SLOTS = ['api', 'web', 'mobile'];
@@ -48,17 +49,22 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     diagnostics.push(diagnostic(RC.CAPABILITY_NOT_READY, `${blocker.capability} on ${blocker.starter} is ${blocker.status}`, { details: blocker }));
   }
   const systemProfile = SYSTEM_PROFILE_DEFINITIONS[csm.architecture.profile];
-  if (apiCount > 1) {
+  const distributedSupport = csm.architecture.profile === 'distributed-platform'
+    ? assessDistributedPlatformSupport(csm)
+    : null;
+  if (apiCount > 1 && !distributedSupport?.generatable) {
     const blocker = {
       kind: 'topology',
       apiCount,
       status: 'PLANNED',
-      reason: 'multiple backend applications are not materializable yet',
+      reason: distributedSupport?.reasons.join('; ')
+        ?? 'multiple backend applications are not materializable for this profile',
+      scope: distributedSupport?.scope,
     };
     architectureBlockers.push(blocker);
     diagnostics.push(diagnostic(
       RC.TOPOLOGY_NOT_GENERATABLE,
-      `${apiCount} backend applications are representable but not generatable`,
+      `${apiCount} backend applications are representable but outside the proven generation scope`,
       { path: 'applications', details: blocker },
     ));
   }
@@ -105,6 +111,9 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
       gates,
       resolvedCapabilities,
       consumes: [...app.consumes],
+      ownership: app.ownership
+        ? { team: app.ownership.team, domains: [...app.ownership.domains] }
+        : null,
     };
   });
 
@@ -146,6 +155,7 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     architecture: csm.architecture,
     applications,
     capabilities,
+    communications: csm.communications,
     domain: csm.domain,
     environments: csm.environments,
     policies: csm.policies,

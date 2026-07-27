@@ -55,9 +55,9 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   existent ; NestJS, Spring et FastAPI sont conformes sur les 28 invariants Common/API v2, avec boot et
   contrat HTTP vérifiés (ADR-061/062). Restent **non implémentés** : Blueprint V2 complet et génération
   polyglotte des contrats.
-- **P1** — Lifecycle Manager absent ; profil distribué non générable ; primitives non modélisées ;
-  capabilities cibles manquantes (notamment user-management, events, notifications). Observability et
-  Technical Audit relèvent désormais du baseline.
+- **P1** — Lifecycle Manager absent ; distribution limitée au slice Spring +
+  NestJS sync HTTP ; primitives non modélisées ; framework Capability v2
+  incomplet. Observability et Technical Audit relèvent désormais du baseline.
 
 ## Statut des chantiers V2
 
@@ -65,11 +65,12 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
 - `Resolved System Model` : **IMPLEMENTED_AND_USED** (ADR-046).
 - `Single Factory Pipeline` : **IMPLEMENTED_AND_TESTED** (ADR-046).
 - `Legacy Internal Pipeline` : **REMOVED** (ADR-046).
-- `System profile taxonomy` : **EXECUTABLE_PARTIAL** (ADR-060/065) ;
+- `System profile taxonomy` : **EXECUTABLE_PARTIAL** (ADR-060/065/066) ;
   `backend-service` et `product-platform` traversent CLI/resolver/génération,
-  `distributed-platform` traverse la représentation et le plan bloqué,
-  `service-ecosystem` reste TARGET. Les six dimensions sont validées et les
-  alias historiques restent limités à la frontière Blueprint v1.
+  `distributed-platform` génère le slice Spring + NestJS avec ownership,
+  communications et ordre de déploiement/rollback ; ses autres variantes
+  restent bloquées. `service-ecosystem` reste TARGET. Les six dimensions sont
+  validées et les alias historiques restent limités à la frontière Blueprint v1.
 - `Full Blueprint V2` : **PARTIAL** ; primitives et sections complètes restent TARGET.
 - `Platform Contract executable (API minimal v1)` : **HISTORIQUE** (ADR-047, ADR-048, ADR-049) — suite de conformité
   calculée (`factory/conformance/`, émet `enistere.conformance.json`) ; NestJS↔Spring en **parité** sur

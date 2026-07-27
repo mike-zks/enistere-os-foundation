@@ -73,7 +73,7 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## 7. Architecture Profiles
 
-- **État : IN_PROGRESS** (ADR-065 : deux profils générables, profil distribué représentable/planifiable).
+- **État : COMPLETE pour le scope initial** (ADR-065/066).
 - **Objectifs :** matérialiser `backend-service` et `product-platform`, puis `distributed-platform` ;
   conserver `service-ecosystem` représentable sans support fictif.
 - **Dépendances :** runtimes convergés.
@@ -81,9 +81,10 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 - **Sortie :** trois profils générables/bootables avec refus justifiés ; `service-ecosystem` reste honnête.
 - **Risques :** presets concurrents du CSM ; **preuves :** normalisation identique et graph tests.
 - **Preuves acquises :** initialisation system-first, dimensions cohérentes,
-  support/presets séparés, plans distribués bloqués avec diagnostics.
-- **Prochaine mission :** contrat de graphe/ownership et golden
-  `distributed-platform` Spring + NestJS.
+  support/presets séparés, ownership/communications, ordre de
+  déploiement/rollback et golden `distributed-spring-nestjs`. Les variantes
+  distribuées hors scope et `service-ecosystem` restent bloquées.
+- **Prochaine mission :** stabiliser le manifeste Capability v2 et ses coutures.
 
 ## 8. Capability Framework
 
@@ -182,8 +183,8 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 
 ## Action unique courante
 
-Le contrat exécutable, la conformité des sept runtimes et les profils simples
-exécutables (ADR-061 à ADR-065) sont acquis.
+Le contrat exécutable, la conformité des sept runtimes et trois profils
+exécutables par scope (ADR-061 à ADR-066) sont acquis.
 
-> **Définir le graphe/ownership minimal de `distributed-platform` et le prouver
-> par un golden Spring + NestJS, sans promouvoir `service-ecosystem`.**
+> **Définir le manifeste Capability v2 et son graphe déterministe, sans
+> implémenter une nouvelle capability.**

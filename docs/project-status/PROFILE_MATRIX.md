@@ -63,6 +63,9 @@ Deux champs distincts portent cette nuance :
 - `runtimeProven` — un golden exerce cette sélection ;
 - `compositionExact` — la livraison ne dépasse pas la sélection.
 
+Le golden topologique `distributed-spring-nestjs` prouve un profil système et
+ne constitue pas un preset de composition mono-slot enregistré dans cette matrice.
+
 ## Profils enregistrés
 
 ### `ready` — composables, prouvés et exacts (23)
@@ -140,17 +143,19 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 
 ## Couverture des goldens
 
-R8A puis Capability Packs 2 et l'adapter FastAPI portent le golden runtime à **23 compositions** :
+R8A, Capability Packs 2, FastAPI et ADR-066 portent le golden runtime à **24 compositions** :
 les 10 compositions NestJS des capability packs, les 10 compositions sans capability optionnelle,
-`spring-auth`, `spring-auth-rbac` et `spring-files`.
+`spring-auth`, `spring-auth-rbac`, `spring-files` et le golden topologique
+`distributed-spring-nestjs`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
 le golden est bien celle que le profil épingle.
 
-En revanche, **un golden n'est pas une promotion** : les 21 profils `ready` combinent golden
+En revanche, **un golden n'est pas une promotion** : les 23 profils `ready` combinent golden
 vert et composition exacte. Aucun profil `supported` baseline-copy ni profil `planned` n'a été
-promu par cette extraction.
+promu par cette extraction. Le golden distribué prouve un profil système, pas
+un preset historique supplémentaire.
 
 ## CLI
 

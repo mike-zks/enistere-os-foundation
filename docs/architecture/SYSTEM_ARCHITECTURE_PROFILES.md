@@ -176,13 +176,20 @@ architectureProfile:
 compositionPreset: null # plusieurs clients : aucun preset mono-slot déduit
 ```
 
-Pour une `distributed-platform`, `enistere validate` confirme la représentation
-et conserve l’avertissement de topologie. `enistere plan --explain` produit un
-plan bloqué avec diagnostics structurés. `generate` reste refusé.
+Pour une `distributed-platform`, `enistere validate` confirme la
+représentation. Le slice exact Spring + NestJS avec ownership et communication
+HTTP versionnée produit un plan `ready`; les autres graphes produisent un
+blocker structuré. `service-ecosystem` reste toujours refusé.
 
 | Profil | Représentation | Génération actuelle |
 |---|---|---|
 | `backend-service` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées |
 | `product-platform` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées |
-| `distributed-platform` | `IMPLEMENTED` | `PLANNED` |
+| `distributed-platform` | `IMPLEMENTED` | `GENERATABLE` pour le slice Spring + NestJS d’ADR-066 |
 | `service-ecosystem` | `IMPLEMENTED` | `PLANNED`, statut global `TARGET` |
+
+Le slice distribué initial exige deux owners, des domaines de données
+exclusifs, une arête `synchronous/http` explicite et un graphe acyclique. Le
+plan publie l’ordre de déploiement et l’ordre inverse de rollback. Cette preuve
+ne généralise pas le support aux clients, capabilities, communications async ou
+autres paires de runtimes.

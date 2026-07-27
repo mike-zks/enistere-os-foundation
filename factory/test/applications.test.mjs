@@ -76,7 +76,7 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     assert.deepEqual(validateBlueprint(multiWeb), []);
   });
 
-  it('refuses unmodelled kinds but lets multi-backend intent reach the resolver', async () => {
+  it('refuses unmodelled kinds and generates the proven multi-backend slice', async () => {
     const withWorker = blueprint({ applications: [
       { id: 'api', kind: 'api', runtime: 'nestjs' },
       { id: 'notifier', kind: 'worker', runtime: 'nestjs' },
@@ -84,9 +84,31 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     assert.ok(validateBlueprint(withWorker).some((m) => m.includes('worker) is planned and not generatable')));
 
     const multiApi = blueprint({ applications: [
-      { id: 'core-api', kind: 'api', runtime: 'nestjs' },
-      { id: 'billing-api', kind: 'api', runtime: 'spring' },
-    ], architecture: { profile: 'distributed-platform' } });
+      {
+        id: 'core-api',
+        kind: 'api',
+        runtime: 'nestjs',
+        consumes: ['billing-api'],
+        ownership: { team: 'core-team', domains: ['core'] },
+      },
+      {
+        id: 'billing-api',
+        kind: 'api',
+        runtime: 'spring',
+        ownership: { team: 'billing-team', domains: ['billing'] },
+      },
+    ], architecture: { profile: 'distributed-platform' }, communications: [{
+      id: 'core-to-billing',
+      from: 'core-api',
+      to: 'billing-api',
+      mode: 'synchronous',
+      protocol: 'http',
+      contract: 'billing-api.v1',
+      timeoutMs: 2000,
+      maxAttempts: 2,
+      identity: 'workload',
+      failurePolicy: 'fail-fast',
+    }] });
     assert.deepEqual(validateBlueprint(multiApi), []);
     const starters = await loadStarterManifests(FOUNDATION_ROOT);
     const plan = buildGenerationPlan(multiApi, {
@@ -94,9 +116,9 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
       starters,
     });
     assert.equal(plan.architectureProfile.id, 'distributed-platform');
-    assert.equal(plan.architectureProfile.generatable, false);
-    assert.equal(plan.support.level, 'blocked');
-    assert.ok(plan.diagnostics.some((item) => item.code === 'RESOLUTION_TOPOLOGY_NOT_GENERATABLE'));
+    assert.equal(plan.architectureProfile.generatable, true);
+    assert.equal(plan.support.level, 'ready');
+    assert.deepEqual(plan.applications.map((application) => application.appDir), ['apps/core-api', 'apps/billing-api']);
   });
 
   it('generates a multi-surface project (two web apps on one API)', async () => {
@@ -120,6 +142,55 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     assert.ok(verify.includes('apps/shop-web') && verify.includes('apps/admin-web'));
     const readme = await readFile(join(out, 'README.md'), 'utf8');
     assert.ok(readme.includes('`apps/shop-web`') && readme.includes('`apps/admin-web`'));
+  });
+
+  it('materializes the distributed ownership and communication graph', async () => {
+    const { mkdtemp, readFile } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { generateProject } = await import('../engine/generator.mjs');
+    const root = await mkdtemp(join(tmpdir(), 'enistere-distributed-'));
+    const out = join(root, 'p');
+    const bp = blueprint({
+      applications: [
+        {
+          id: 'core-api',
+          kind: 'api',
+          runtime: 'spring',
+          ownership: { team: 'core-team', domains: ['core'] },
+        },
+        {
+          id: 'engagement-api',
+          kind: 'api',
+          runtime: 'nestjs',
+          consumes: ['core-api'],
+          ownership: { team: 'engagement-team', domains: ['engagement'] },
+        },
+      ],
+      architecture: { profile: 'distributed-platform' },
+      communications: [{
+        id: 'engagement-to-core',
+        from: 'engagement-api',
+        to: 'core-api',
+        mode: 'synchronous',
+        protocol: 'http',
+        contract: 'core-api.v1',
+        timeoutMs: 2000,
+        maxAttempts: 2,
+        identity: 'workload',
+        failurePolicy: 'degrade',
+      }],
+    });
+    const plan = await generateProject(bp, out, { materialize: false });
+    assert.equal(plan.architectureProfile.generatable, true);
+    assert.deepEqual(plan.applications.map((application) => application.appDir), [
+      'apps/core-api',
+      'apps/engagement-api',
+    ]);
+    const ownership = JSON.parse(await readFile(join(out, 'packages/contracts/ownership.json'), 'utf8'));
+    const communications = JSON.parse(await readFile(join(out, 'packages/contracts/communications.json'), 'utf8'));
+    assert.deepEqual(ownership.authorities.map((authority) => authority.application), ['core-api', 'engagement-api']);
+    assert.deepEqual(communications.edges.map((edge) => edge.id), ['engagement-to-core']);
   });
 
   it('rejects an invalid runtime for a kind and unknown fields', () => {

@@ -65,6 +65,50 @@ async function materializeFoundation(plan, output) {
   }
 }
 
+function ownershipContract(plan) {
+  return {
+    mode: plan.architecture.data.ownership,
+    authorities: plan.applications
+      .filter((application) => application.ownership)
+      .map((application) => ({
+        application: application.id,
+        team: application.ownership.team,
+        domains: [...application.ownership.domains],
+      })),
+  };
+}
+
+function architectureDocument(plan) {
+  const applicationLines = plan.applications.map((application) => {
+    const owner = application.ownership
+      ? `; owner=${application.ownership.team}; domains=${application.ownership.domains.join(',')}`
+      : '';
+    return `- \`${application.id}\` (${application.runtime}/${application.kind})${owner}`;
+  });
+  const communicationLines = plan.communications.length > 0
+    ? plan.communications.map((communication) =>
+      `- \`${communication.from} -> ${communication.to}\`: ${communication.mode}/${communication.protocol}, contract \`${communication.contract}\`, timeout ${communication.timeoutMs}ms, max attempts ${communication.maxAttempts}, failure \`${communication.failurePolicy}\``)
+    : ['- aucune arête inter-application déclarée'];
+  return [
+    '# Architecture',
+    '',
+    `Profil : \`${plan.architectureProfile.id}\`.`,
+    '',
+    '## Applications et ownership',
+    '',
+    ...applicationLines,
+    '',
+    '## Communications',
+    '',
+    ...communicationLines,
+    '',
+    'Les fichiers `packages/contracts/communications.json` et `packages/contracts/ownership.json`',
+    'sont les artefacts déterministes consommables par l’outillage. Ils ne prouvent pas une intégration',
+    'métier entre les runtimes.',
+    '',
+  ].join('\n');
+}
+
 // Starters that are npm packages (become workspace members of the generated
 // monorepo). Spring (Maven) and Flutter (pub) are not npm workspaces.
 const NPM_STARTERS = new Set(['nestjs', 'nextjs', 'angular', 'react-native']);
@@ -331,7 +375,10 @@ export async function materializeProject(plan, output, options = {}) {
   await writeFile(join(output, 'packages/contracts/README.md'), '# Contracts\n\nGenerated from the neutral blueprint.\n');
   await writeFile(join(output, 'packages/contracts/domain.json'), stable({ entities: plan.domain.entities }));
   await writeFile(join(output, 'packages/contracts/openapi.json'), stable(generateOpenApi({ name: plan.displayName, entities: plan.domain.entities })));
+  await writeFile(join(output, 'packages/contracts/communications.json'), stable({ edges: plan.communications }));
+  await writeFile(join(output, 'packages/contracts/ownership.json'), stable(ownershipContract(plan)));
   await writeFile(join(output, 'infrastructure/local/README.md'), '# Local deployment\n');
+  await writeFile(join(output, 'infrastructure/deployment-plan.json'), stable(plan.deploymentPlan));
   await writeFile(join(output, 'infrastructure/local/compose.yaml'), localCompose(plan));
   await writeFile(join(output, 'infrastructure/local/.env.example'), 'POSTGRES_PASSWORD=change-me\nMINIO_ROOT_USER=change-me\nMINIO_ROOT_PASSWORD=change-me\n');
   if (plan.environments.some((environment) => environment.id === 'staging')) {
@@ -339,7 +386,7 @@ export async function materializeProject(plan, output, options = {}) {
     await writeFile(join(output, 'infrastructure/staging/compose.yaml'), stagingCompose(plan));
     await writeFile(join(output, 'infrastructure/staging/.env.example'), 'STAGING_DOMAIN=staging.example.com\n');
   }
-  await writeFile(join(output, 'docs/ARCHITECTURE.md'), `# Architecture\n\nCapabilities: ${plan.capabilities.join(', ')}\n`);
+  await writeFile(join(output, 'docs/ARCHITECTURE.md'), architectureDocument(plan));
   return plan;
 }
 

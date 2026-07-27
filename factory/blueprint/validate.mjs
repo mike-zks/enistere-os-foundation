@@ -29,6 +29,7 @@ const RUNTIME_SET = new Set(RUNTIMES);
 const KIND_SET = new Set(APPLICATION_KINDS);
 const ENVIRONMENT_KIND_SET = new Set(ENVIRONMENT_KINDS);
 const MANDATORY_KIND = 'api';
+const SLUG = /^[a-z][a-z0-9-]{1,62}$/;
 
 const ARCHITECTURE_DIMENSIONS = Object.freeze([
   ['clients.mode', CLIENT_MODES],
@@ -50,6 +51,36 @@ function profileMismatch(diagnostics, profile, path, actual, expected, rationale
     `${profile} requires architecture.${path} to be ${expected.join(' or ')}, got '${actual}': ${rationale}`,
     { path: `architecture.${path}`, details: { profile, actual, expected } },
   ));
+}
+
+function communicationCycle(applications) {
+  const dependencies = new Map(applications.map((application) => [
+    application.id,
+    (application.consumes ?? []).filter((target) =>
+      applications.some((candidate) => candidate.id === target)),
+  ]));
+  const visiting = new Set();
+  const visited = new Set();
+  const path = [];
+  function visit(id) {
+    if (visiting.has(id)) return [...path.slice(path.indexOf(id)), id];
+    if (visited.has(id)) return null;
+    visiting.add(id);
+    path.push(id);
+    for (const dependency of dependencies.get(id) ?? []) {
+      const cycle = visit(dependency);
+      if (cycle) return cycle;
+    }
+    path.pop();
+    visiting.delete(id);
+    visited.add(id);
+    return null;
+  }
+  for (const application of applications) {
+    const cycle = visit(application.id);
+    if (cycle) return cycle;
+  }
+  return null;
 }
 
 /**
@@ -96,6 +127,7 @@ export function validateCanonicalSystem(system) {
 
   const seenIds = new Set();
   const ids = new Set(applications.map((app) => app?.id).filter(Boolean));
+  const domainOwners = new Map();
   applications.forEach((app, index) => {
     const path = `applications[${index}]`;
     if (!app || typeof app !== 'object') {
@@ -123,23 +155,42 @@ export function validateCanonicalSystem(system) {
         diagnostics.push(diagnostic(CODES.INCOHERENT_STRUCTURE, `application ${app.id} consumes unknown application ${target}`, { path: `${path}.consumes`, details: { target } }));
       }
     }
+
+    if (app.ownership !== null && app.ownership !== undefined) {
+      if (typeof app.ownership?.team !== 'string' || !SLUG.test(app.ownership.team)
+        || !Array.isArray(app.ownership.domains) || app.ownership.domains.length === 0) {
+        diagnostics.push(diagnostic(
+          CODES.INVALID_OWNERSHIP,
+          `application ${app.id} ownership requires a team and at least one domain`,
+          { path: `${path}.ownership`, details: { application: app.id } },
+        ));
+      } else {
+        for (const domain of app.ownership.domains) {
+          if (typeof domain !== 'string' || !SLUG.test(domain)) {
+            diagnostics.push(diagnostic(
+              CODES.INVALID_OWNERSHIP,
+              `application ${app.id} owns an invalid domain`,
+              { path: `${path}.ownership.domains`, details: { application: app.id, domain } },
+            ));
+          } else if (domainOwners.has(domain)) {
+            diagnostics.push(diagnostic(
+              CODES.INVALID_OWNERSHIP,
+              `data domain ${domain} has multiple authorities: ${domainOwners.get(domain)} and ${app.id}`,
+              { path: `${path}.ownership.domains`, details: { domain, owners: [domainOwners.get(domain), app.id] } },
+            ));
+          } else {
+            domainOwners.set(domain, app.id);
+          }
+        }
+      }
+    }
   });
 
   if (applications.length > 0 && !applications.some((app) => app.kind === MANDATORY_KIND)) {
     diagnostics.push(diagnostic(CODES.MISSING_API, 'a system must compose at least one API application', { path: 'applications' }));
   }
 
-  // Multi-app strategy (hybrid): multi-surface (several web/mobile on one API) is
-  // generatable; several APIs are not yet. Refuse the non-generatable topology
-  // explicitly rather than accepting it and generating a partial project.
   const apiCount = applications.filter((app) => app.kind === MANDATORY_KIND).length;
-  if (apiCount > 1) {
-    diagnostics.push(diagnostic(
-      CODES.TOPOLOGY_NOT_GENERATABLE,
-      `multiple API applications are not generatable yet (${apiCount} declared)`,
-      { path: 'applications', severity: 'warning', details: { apiCount } },
-    ));
-  }
 
   const clientCount = applications.filter((app) => app.kind === 'web' || app.kind === 'mobile').length;
   const declaredClientMode = system?.architecture?.clients?.mode;
@@ -219,6 +270,15 @@ export function validateCanonicalSystem(system) {
       ['advanced', 'distributed'],
       'several deployable authorities require distributed operational controls',
     );
+    for (const [index, app] of applications.entries()) {
+      if (app.kind === 'api' && app.ownership === null) {
+        diagnostics.push(diagnostic(
+          CODES.INVALID_OWNERSHIP,
+          `distributed backend authority ${app.id} must declare its team and owned data domains`,
+          { path: `applications[${index}].ownership`, details: { application: app.id } },
+        ));
+      }
+    }
   }
   if (architectureProfile === 'service-ecosystem') {
     profileMismatch(
@@ -266,6 +326,86 @@ export function validateCanonicalSystem(system) {
       }
     }
   });
+
+  const communications = Array.isArray(system?.communications) ? system.communications : [];
+  const communicationIds = new Set();
+  communications.forEach((communication, index) => {
+    const path = `communications[${index}]`;
+    if (!communication || typeof communication !== 'object') {
+      diagnostics.push(diagnostic(CODES.INVALID_COMMUNICATION, 'communication must be an object', { path }));
+      return;
+    }
+    if (typeof communication.id !== 'string' || communication.id === '' || communicationIds.has(communication.id)) {
+      diagnostics.push(diagnostic(
+        CODES.INVALID_COMMUNICATION,
+        `communication id '${communication.id}' must be non-empty and unique`,
+        { path: `${path}.id`, details: { id: communication.id } },
+      ));
+    }
+    communicationIds.add(communication.id);
+    if (!ids.has(communication.from) || !ids.has(communication.to) || communication.from === communication.to) {
+      diagnostics.push(diagnostic(
+        CODES.INVALID_COMMUNICATION,
+        `communication ${communication.id} must connect two distinct existing applications`,
+        { path, details: { from: communication.from, to: communication.to } },
+      ));
+    }
+    const source = applications.find((app) => app.id === communication.from);
+    if (source && !(source.consumes ?? []).includes(communication.to)) {
+      diagnostics.push(diagnostic(
+        CODES.INCOHERENT_COMMUNICATION_GRAPH,
+        `communication ${communication.id} is not declared by ${communication.from}.consumes`,
+        { path, details: { from: communication.from, to: communication.to } },
+      ));
+    }
+    if (!['synchronous', 'asynchronous'].includes(communication.mode)
+      || !['http', 'amqp'].includes(communication.protocol)
+      || typeof communication.contract !== 'string'
+      || !/^[a-z][a-z0-9.-]*\.v[1-9][0-9]*$/.test(communication.contract)
+      || !Number.isInteger(communication.timeoutMs)
+      || communication.timeoutMs < 1
+      || !Number.isInteger(communication.maxAttempts)
+      || communication.maxAttempts < 1
+      || communication.maxAttempts > 5
+      || communication.identity !== 'workload'
+      || !['fail-fast', 'degrade', 'queue'].includes(communication.failurePolicy)) {
+      diagnostics.push(diagnostic(
+        CODES.INVALID_COMMUNICATION,
+        `communication ${communication.id} has an invalid policy contract`,
+        { path, details: { communication: communication.id } },
+      ));
+    }
+  });
+
+  if (architectureProfile === 'distributed-platform') {
+    const declaredEdges = new Set(communications.map((communication) => `${communication.from}->${communication.to}`));
+    for (const [index, app] of applications.entries()) {
+      for (const target of app.consumes ?? []) {
+        if (!declaredEdges.has(`${app.id}->${target}`)) {
+          diagnostics.push(diagnostic(
+            CODES.INCOHERENT_COMMUNICATION_GRAPH,
+            `distributed dependency ${app.id} -> ${target} requires an explicit communication contract`,
+            { path: `applications[${index}].consumes`, details: { from: app.id, to: target } },
+          ));
+        }
+      }
+    }
+    if (communications.length === 0) {
+      diagnostics.push(diagnostic(
+        CODES.INCOHERENT_COMMUNICATION_GRAPH,
+        'distributed-platform requires at least one explicit communication edge',
+        { path: 'communications' },
+      ));
+    }
+    const cycle = communicationCycle(applications);
+    if (cycle) {
+      diagnostics.push(diagnostic(
+        CODES.INCOHERENT_COMMUNICATION_GRAPH,
+        `the first distributed slice requires an acyclic deployment graph; cycle: ${cycle.join(' -> ')}`,
+        { path: 'applications', details: { cycle } },
+      ));
+    }
+  }
 
   (system?.environments ?? []).forEach((environment, index) => {
     if (!ENVIRONMENT_KIND_SET.has(environment.kind)) {

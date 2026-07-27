@@ -163,7 +163,14 @@ Le golden installe l'arbre transitif depuis `requirements.lock`, vérifie le loc
 npm partagé, démarre le processus et exerce health/live/ready, correlation,
 continuation W3C et en-têtes de sécurité.
 
-### 2.12 deployment
+### 2.12 `distributed-platform` initial
+
+| Gate | Commande | Environnement | CI | Fréquence |
+|---|---|---|---|---|
+| graphe + ownership + ordre | `node factory/quality/scripts/golden-runtime.mjs distributed-spring-nestjs` | Node 24 + Java 21 + PostgreSQL | **golden-runtime** | chaque PR |
+| boot + HTTP des deux APIs | même golden avec `GOLDEN_RUNTIME_START=1` | processus séquentiels | **golden-runtime** | chaque PR |
+
+### 2.13 deployment
 
 | Gate | Commande | Environnement | CI | Fréquence |
 |---|---|---|---|---|

@@ -108,9 +108,9 @@ structure Blueprint
 
 Plusieurs autorités backend sont valides pour la représentation d’une
 `distributed-platform` ou d’un `service-ecosystem`. Elles NE DOIVENT PAS être
-rejetées à la frontière Blueprint. Tant que leur matérialisation n’est pas
-prouvée, le resolver DOIT produire
-`RESOLUTION_TOPOLOGY_NOT_GENERATABLE` et le plan DOIT être bloqué.
+rejetées à la frontière Blueprint. Le resolver DOIT comparer le graphe à un
+scope de génération prouvé et produire `RESOLUTION_TOPOLOGY_NOT_GENERATABLE`
+hors de ce scope.
 
 Les cohérences minimales suivantes sont obligatoires :
 
@@ -135,6 +135,26 @@ Les cohérences minimales suivantes sont obligatoires :
 
 `service-ecosystem` DOIT fournir une justification organisationnelle et une politique de dépréciation des
 contrats. L’absence de ces preuves produit un refus de recommandation ou de génération.
+
+### 7.1 Slice exécutable initial
+
+Le seul slice `distributed-platform` actuellement `GENERATABLE` DOIT contenir :
+
+- deux autorités API exactement, une Spring Boot et une NestJS ;
+- `ownership.team` et au moins un `ownership.domains[]` exclusif par autorité ;
+- aucune capability optionnelle ni client officiel ;
+- une arête explicite pour chaque dépendance `consumes` ;
+- uniquement des communications `synchronous`/`http` ;
+- un graphe acyclique.
+
+Chaque arête DOIT porter `id`, `from`, `to`, `mode`, `protocol`, `contract`,
+`timeoutMs`, `maxAttempts`, `identity` et `failurePolicy`. Le plan DOIT émettre
+un ordre topologique de déploiement et son inverse pour le rollback.
+
+Ce scope est défini par
+[ADR-066](../adr/ADR-066-distributed-platform-minimal-graph.md). Toute autre
+paire de runtimes, présence de clients/capabilities, communication async ou
+topologie plus large reste `PLANNED`. `service-ecosystem` reste `TARGET`.
 
 ## 8. Recommandation
 
@@ -179,6 +199,7 @@ status:
   evidence: []
 ```
 
-Un profil représentable NE DOIT PAS être présenté comme `GENERATABLE`. Les preuves minimales sont :
+Un profil représentable NE DOIT PAS être présenté comme `GENERATABLE` hors du
+scope exact couvert par ses preuves. Les preuves minimales sont :
 schema/normalization tests, graph validation, plan déterministe, golden topologique, boot, contract tests,
 security gates, assertions observability/audit et scénario de défaillance adapté.

@@ -13,12 +13,13 @@ import { materializeProfileInput } from '../engine/profiles.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 
-function blueprint({ stack, applications, capabilities = ['base'], architecture } = {}) {
+function blueprint({ stack, applications, capabilities = ['base'], architecture, communications = [] } = {}) {
   const bp = {
     version: '1', project: { name: 'Sample', slug: 'sample' }, topology: 'monorepo',
     designSystem: true, domain: { entities: [] }, capabilities, deployment: { environments: ['local'] },
   };
   if (architecture) bp.architecture = architecture;
+  bp.communications = communications;
   if (applications) bp.applications = applications; else bp.stack = stack ?? { api: 'nestjs', web: null, mobile: null };
   return bp;
 }
@@ -73,22 +74,35 @@ describe('canonical pipeline — multi-application strategy', () => {
     assert.equal(plan.compositionPreset, null);
   });
 
-  it('refuses multiple API applications explicitly', () => {
+  it('requires explicit ownership and communication contracts for multiple APIs', () => {
     const bp = blueprint({ applications: [
       { id: 'api-a', kind: 'api', runtime: 'nestjs' },
       { id: 'api-b', kind: 'api', runtime: 'spring' },
     ] });
     const diagnostics = validateCanonicalSystem(normalizeBlueprint(bp));
-    assert.ok(diagnostics.some((d) => d.code === CSM_DIAGNOSTIC_CODES.TOPOLOGY_NOT_GENERATABLE));
+    assert.ok(diagnostics.some((d) => d.code === CSM_DIAGNOSTIC_CODES.INVALID_OWNERSHIP));
+    assert.ok(diagnostics.some((d) => d.code === CSM_DIAGNOSTIC_CODES.INCOHERENT_COMMUNICATION_GRAPH));
   });
 
-  it('keeps a future profile representable but blocks its generation during resolution', async () => {
+  it('generates only the evidence-bound Spring + NestJS distributed slice', async () => {
     const bp = blueprint({
       applications: [
-        { id: 'identity', kind: 'api', runtime: 'spring' },
-        { id: 'business', kind: 'api', runtime: 'nestjs' },
+        { id: 'identity', kind: 'api', runtime: 'spring', ownership: { team: 'identity-team', domains: ['identity'] } },
+        { id: 'business', kind: 'api', runtime: 'nestjs', consumes: ['identity'], ownership: { team: 'business-team', domains: ['business'] } },
       ],
       architecture: { profile: 'distributed-platform' },
+      communications: [{
+        id: 'business-to-identity',
+        from: 'business',
+        to: 'identity',
+        mode: 'synchronous',
+        protocol: 'http',
+        contract: 'identity-api.v1',
+        timeoutMs: 2000,
+        maxAttempts: 2,
+        identity: 'workload',
+        failurePolicy: 'fail-fast',
+      }],
     });
     const csm = normalizeBlueprint(bp);
     assert.equal(csm.architecture.profile, 'distributed-platform');
@@ -97,17 +111,48 @@ describe('canonical pipeline — multi-application strategy', () => {
     assert.equal(plan.architecture.profile, 'distributed-platform');
     assert.deepEqual(plan.architectureProfile, {
       id: 'distributed-platform',
-      status: 'PLANNED',
+      status: 'GENERATABLE',
       representation: 'IMPLEMENTED',
-      generation: 'PLANNED',
-      generationScope: 'representation only; multiple backends are refused',
-      generatable: false,
+      generation: 'GENERATABLE',
+      generationScope: 'proven Spring + NestJS two-authority slice only',
+      generatable: true,
     });
     assert.equal(plan.compositionPreset, null);
     assert.equal(plan.profile, null);
+    assert.equal(plan.support.level, 'ready');
+    assert.equal(plan.diagnostics.length, 0);
+    assert.deepEqual(plan.communications.map((communication) => communication.id), ['business-to-identity']);
+    assert.deepEqual(plan.applications.map((application) => application.ownership.team), ['identity-team', 'business-team']);
+    assert.deepEqual(plan.deploymentPlan.order, ['identity', 'business']);
+    assert.deepEqual(plan.deploymentPlan.rollbackOrder, ['business', 'identity']);
+  });
+
+  it('keeps an unproven distributed runtime pair represented but blocked', async () => {
+    const bp = blueprint({
+      applications: [
+        { id: 'identity', kind: 'api', runtime: 'spring', ownership: { team: 'identity-team', domains: ['identity'] } },
+        { id: 'insight', kind: 'api', runtime: 'fastapi', consumes: ['identity'], ownership: { team: 'insight-team', domains: ['insight'] } },
+      ],
+      architecture: { profile: 'distributed-platform' },
+      communications: [{
+        id: 'insight-to-identity',
+        from: 'insight',
+        to: 'identity',
+        mode: 'synchronous',
+        protocol: 'http',
+        contract: 'identity-api.v1',
+        timeoutMs: 2000,
+        maxAttempts: 2,
+        identity: 'workload',
+        failurePolicy: 'degrade',
+      }],
+    });
+    const csm = normalizeBlueprint(bp);
+    assert.equal(hasErrors(validateCanonicalSystem(csm)), false);
+    const plan = buildPlan(resolveSystem(csm, await registryFor(['base'])));
+    assert.equal(plan.architectureProfile.generation, 'GENERATABLE');
+    assert.equal(plan.architectureProfile.generatable, false);
     assert.equal(plan.support.level, 'blocked');
-    assert.ok(plan.diagnostics.some((diagnostic) =>
-      diagnostic.code === 'RESOLUTION_ARCHITECTURE_PROFILE_NOT_GENERATABLE'));
     assert.ok(plan.diagnostics.some((diagnostic) =>
       diagnostic.code === 'RESOLUTION_TOPOLOGY_NOT_GENERATABLE'));
   });

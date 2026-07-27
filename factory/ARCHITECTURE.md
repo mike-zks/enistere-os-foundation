@@ -33,8 +33,8 @@ Projet généré
 | Entrée | `engine/blueprint.mjs` | fichier | parse + schéma (`BLUEPRINT_*`) |
 | Ingestion | `blueprint/normalize.mjs` | blueprint | traduction pure → CSM |
 | Modèle d'intention | `model/canonical-system.mjs` | — | forme immuable + digest CSM |
-| Validation modèle | `blueprint/validate.mjs` | CSM | invariants (`CSM_*`), refus des topologies non générables |
-| Résolution | `engine/resolver.mjs` | **CSM** | adapters, targets résolues, dépendances, support (`RESOLUTION_*`) |
+| Validation modèle | `blueprint/validate.mjs` | CSM | invariants de représentation, ownership et graphe (`CSM_*`) |
+| Résolution | `engine/resolver.mjs` | **CSM** | adapters, targets, support et scope distribué (`RESOLUTION_*`) |
 | Modèle de résolution | `model/resolved-system.mjs` | — | immuable + `resolutionDigest` |
 | Planification | `model/generation-plan.mjs` | **ResolvedSystem** | plan complet immuable + `planDigest` (`PLAN_*`) |
 | Génération | `engine/generator.mjs` | **GenerationPlan** | matérialisation, aucune lecture blueprint |

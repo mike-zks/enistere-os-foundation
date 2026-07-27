@@ -31,6 +31,7 @@
  *   nestjs-react-native-base    nestjs + react-native
  *   nestjs-angular-base         nestjs + angular
  *   nestjs-flutter-base         nestjs + flutter
+ *   distributed-spring-nestjs   distributed-platform, Spring + NestJS
  *
  * Gates DB (prisma migrate, e2e NestJS) exécutés uniquement si DATABASE_URL est
  * défini. Aucun secret réel : la CI fournit des valeurs jetables via l'env.
@@ -115,6 +116,38 @@ export const COMPOSITIONS = {
   'nestjs-react-native-base': { stack: { api: 'nestjs', web: null, mobile: 'react-native' }, capabilities: [] },
   'nestjs-angular-base': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: [] },
   'nestjs-flutter-base': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: [] },
+  'distributed-spring-nestjs': {
+    applications: [
+      {
+        id: 'core-api',
+        kind: 'api',
+        runtime: 'spring',
+        consumes: [],
+        ownership: { team: 'core-team', domains: ['core'] },
+      },
+      {
+        id: 'engagement-api',
+        kind: 'api',
+        runtime: 'nestjs',
+        consumes: ['core-api'],
+        ownership: { team: 'engagement-team', domains: ['engagement'] },
+      },
+    ],
+    architecture: { profile: 'distributed-platform' },
+    communications: [{
+      id: 'engagement-to-core',
+      from: 'engagement-api',
+      to: 'core-api',
+      mode: 'synchronous',
+      protocol: 'http',
+      contract: 'core-api.v1',
+      timeoutMs: 2000,
+      maxAttempts: 2,
+      identity: 'workload',
+      failurePolicy: 'fail-fast',
+    }],
+    capabilities: [],
+  },
 };
 
 /** argv of the npm-audit-by-exception gate applied to every golden. */
@@ -127,16 +160,23 @@ export function compositionBlueprint(composition, slug = `golden-${composition}`
   const spec = COMPOSITIONS[composition];
   if (!spec) throw new Error(`Unknown composition: ${composition}`);
   const blueprint = createDefaultBlueprint(slug);
-  blueprint.stack = spec.stack;
+  if (spec.applications) {
+    delete blueprint.stack;
+    blueprint.applications = spec.applications;
+    blueprint.architecture = spec.architecture;
+    blueprint.communications = spec.communications;
+  } else {
+    blueprint.stack = spec.stack;
+  }
   blueprint.capabilities = spec.capabilities;
   blueprint.designSystem = true;
   blueprint.deployment = { environments: ['local'] };
   return blueprint;
 }
 
-function run(label, cmd, args, cwd) {
+function run(label, cmd, args, cwd, environment = process.env) {
   process.stdout.write(`\n── ${label}\n   $ ${cmd} ${args.join(' ')}  (cwd: ${cwd})\n`);
-  const result = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false, env: process.env });
+  const result = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false, env: environment });
   if (result.status !== 0) {
     process.stdout.write(`\n❌ FAILED: ${label} (exit ${result.status ?? 'signal ' + result.signal})\n`);
     return false;
@@ -145,89 +185,129 @@ function run(label, cmd, args, cwd) {
   return true;
 }
 
+function dataNamespace(application) {
+  return `authority_${application.id.replaceAll('-', '_')}`;
+}
+
+function withJdbcSchema(connection, schema) {
+  if (!connection) return connection;
+  const [base, query = ''] = connection.split('?', 2);
+  const parameters = new URLSearchParams(query);
+  parameters.set('currentSchema', schema);
+  return `${base}?${parameters.toString()}`;
+}
+
+/**
+ * Gives each distributed authority its own physical PostgreSQL namespace.
+ * Sharing a server remains possible for the minimal golden, but sharing a
+ * schema would violate bounded-context ownership and makes Prisma/Flyway
+ * migration histories collide.
+ */
+export function runtimeEnvironmentFor(application, architectureProfileId, baseEnvironment = process.env) {
+  const environment = { ...baseEnvironment };
+  if (architectureProfileId !== 'distributed-platform' || !application.ownership) {
+    return environment;
+  }
+
+  const namespace = dataNamespace(application);
+  environment.ENISTERE_DATA_NAMESPACE = namespace;
+  if (application.runtime === 'nestjs' && environment.DATABASE_URL) {
+    const database = new URL(environment.DATABASE_URL);
+    database.searchParams.set('schema', namespace);
+    environment.DATABASE_URL = database.toString();
+  }
+  if (application.runtime === 'spring' && environment.SPRING_DATASOURCE_URL) {
+    environment.SPRING_DATASOURCE_URL = withJdbcSchema(
+      environment.SPRING_DATASOURCE_URL,
+      namespace,
+    );
+  }
+  return environment;
+}
+
 /**
  * Database/schema preparation for the NestJS app. Runs BEFORE the OpenAPI
  * generation (which needs the Prisma client) and before the verification gates.
  */
-function prepareGatesFor(kind, hasDb, capabilities = []) {
+function prepareGatesFor(kind, hasDb, capabilities = [], appDir = 'apps/api') {
   // Flutter resolves its own dependencies through pub, outside the npm workspace.
-  if (kind === 'flutter') return [['mobile: flutter pub get', 'flutter', ['pub', 'get'], 'apps/mobile']];
+  if (kind === 'flutter') return [['mobile: flutter pub get', 'flutter', ['pub', 'get'], appDir]];
   if (kind === 'fastapi') {
     return [
-      ['api: create Python virtual environment', 'python', ['-m', 'venv', '.venv'], 'apps/api'],
-      ['api: install locked Python dependencies', '.venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.lock'], 'apps/api'],
-      ['api: create production-only Python environment', 'python', ['-m', 'venv', '.runtime-venv'], 'apps/api'],
-      ['api: install production-only Python lock', '.runtime-venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.runtime.lock'], 'apps/api'],
+      ['api: create Python virtual environment', 'python', ['-m', 'venv', '.venv'], appDir],
+      ['api: install locked Python dependencies', '.venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.lock'], appDir],
+      ['api: create production-only Python environment', 'python', ['-m', 'venv', '.runtime-venv'], appDir],
+      ['api: install production-only Python lock', '.runtime-venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.runtime.lock'], appDir],
     ];
   }
   if (kind !== 'nestjs') return [];
   return [
-    ['api: prisma generate', 'npm', ['run', 'prisma:generate', '--workspace=apps/api']],
-    ['api: prisma validate', 'npm', ['run', 'prisma:validate', '--workspace=apps/api']],
-    ...(hasDb ? [['api: prisma migrate deploy', 'npm', ['run', 'prisma:migrate:deploy', '--workspace=apps/api']]] : []),
+    ['api: prisma generate', 'npm', ['run', 'prisma:generate', `--workspace=${appDir}`]],
+    ['api: prisma validate', 'npm', ['run', 'prisma:validate', `--workspace=${appDir}`]],
+    ...(hasDb ? [['api: prisma migrate deploy', 'npm', ['run', 'prisma:migrate:deploy', `--workspace=${appDir}`]]] : []),
     // Seed structurel gouverné : composé via `nestjs.prisma-seed`, idempotent,
     // sans identité ni donnée métier.
     ...(hasDb && capabilities.includes('rbac')
-      ? [['api: prisma seed (composed, idempotent)', 'npm', ['run', 'prisma:seed', '--workspace=apps/api']]]
+      ? [['api: prisma seed (composed, idempotent)', 'npm', ['run', 'prisma:seed', `--workspace=${appDir}`]]]
       : []),
   ];
 }
 
-function gatesFor(kind, hasDb, capabilities = []) {
+function gatesFor(kind, hasDb, capabilities = [], appDir = 'apps/api') {
   if (kind === 'nestjs') {
     return [
-      ['api: lint', 'npm', ['run', 'lint', '--workspace=apps/api']],
-      ['api: unit tests', 'npm', ['run', 'test', '--workspace=apps/api']],
-      ...(hasDb ? [['api: e2e (Auth)', 'npm', ['run', 'test:e2e', '--workspace=apps/api']]] : []),
-      ['api: build', 'npm', ['run', 'build', '--workspace=apps/api']],
+      ['api: lint', 'npm', ['run', 'lint', `--workspace=${appDir}`]],
+      ['api: unit tests', 'npm', ['run', 'test', `--workspace=${appDir}`]],
+      ...(hasDb ? [['api: e2e (Auth)', 'npm', ['run', 'test:e2e', `--workspace=${appDir}`]]] : []),
+      ['api: build', 'npm', ['run', 'build', `--workspace=${appDir}`]],
     ];
   }
   if (kind === 'nextjs') {
     return [
-      ['web: typecheck', 'npm', ['run', 'typecheck', '--workspace=apps/web']],
-      ['web: lint', 'npm', ['run', 'lint', '--workspace=apps/web']],
-      ['web: tests', 'npm', ['run', 'test', '--workspace=apps/web']],
-      ['web: build', 'npm', ['run', 'build', '--workspace=apps/web']],
+      ['web: typecheck', 'npm', ['run', 'typecheck', `--workspace=${appDir}`]],
+      ['web: lint', 'npm', ['run', 'lint', `--workspace=${appDir}`]],
+      ['web: tests', 'npm', ['run', 'test', `--workspace=${appDir}`]],
+      ['web: build', 'npm', ['run', 'build', `--workspace=${appDir}`]],
     ];
   }
   if (kind === 'react-native') {
     return [
-      ['mobile: typecheck', 'npm', ['run', 'typecheck', '--workspace=apps/mobile']],
-      ['mobile: lint', 'npm', ['run', 'lint', '--workspace=apps/mobile']],
-      ['mobile: tests', 'npm', ['run', 'test', '--workspace=apps/mobile']],
-      ['mobile: expo doctor', 'npm', ['run', 'doctor', '--workspace=apps/mobile']],
-      ['mobile: expo export (ios, no simulator)', 'npx', ['expo', 'export', '-p', 'ios'], 'apps/mobile'],
+      ['mobile: typecheck', 'npm', ['run', 'typecheck', `--workspace=${appDir}`]],
+      ['mobile: lint', 'npm', ['run', 'lint', `--workspace=${appDir}`]],
+      ['mobile: tests', 'npm', ['run', 'test', `--workspace=${appDir}`]],
+      ['mobile: expo doctor', 'npm', ['run', 'doctor', `--workspace=${appDir}`]],
+      ['mobile: expo export (ios, no simulator)', 'npx', ['expo', 'export', '-p', 'ios'], appDir],
     ];
   }
   if (kind === 'spring') {
     // `verify` covers compile, unit tests and Testcontainers integration tests.
     // Docker must be reachable; the driver refuses to claim a pass without it.
-    return [['api: mvnw verify', './mvnw', ['verify', '--no-transfer-progress', '-B'], 'apps/api']];
+    return [['api: mvnw verify', './mvnw', ['verify', '--no-transfer-progress', '-B'], appDir]];
   }
   if (kind === 'fastapi') {
     return [
-      ['api: ruff', '.venv/bin/python', ['-m', 'ruff', 'check', '.'], 'apps/api'],
-      ['api: tests', '.venv/bin/python', ['-m', 'pytest', '-q'], 'apps/api'],
-      ['api: compile', '.venv/bin/python', ['-m', 'compileall', '-q', 'app'], 'apps/api'],
-      ['api: dependency consistency', '.venv/bin/python', ['-m', 'pip', 'check'], 'apps/api'],
-      ['api: dependency audit', '.venv/bin/python', ['-m', 'pip_audit', '--strict', '--progress-spinner', 'off'], 'apps/api'],
-      ['api: production dependency smoke', '.runtime-venv/bin/python', ['-c', 'import fastapi, pydantic_settings, uvicorn; print("production dependencies: ok")'], 'apps/api'],
-      ['api: production dependency consistency', '.runtime-venv/bin/python', ['-m', 'pip', 'check'], 'apps/api'],
+      ['api: ruff', '.venv/bin/python', ['-m', 'ruff', 'check', '.'], appDir],
+      ['api: tests', '.venv/bin/python', ['-m', 'pytest', '-q'], appDir],
+      ['api: compile', '.venv/bin/python', ['-m', 'compileall', '-q', 'app'], appDir],
+      ['api: dependency consistency', '.venv/bin/python', ['-m', 'pip', 'check'], appDir],
+      ['api: dependency audit', '.venv/bin/python', ['-m', 'pip_audit', '--strict', '--progress-spinner', 'off'], appDir],
+      ['api: production dependency smoke', '.runtime-venv/bin/python', ['-c', 'import fastapi, pydantic_settings, uvicorn; print("production dependencies: ok")'], appDir],
+      ['api: production dependency consistency', '.runtime-venv/bin/python', ['-m', 'pip', 'check'], appDir],
     ];
   }
   if (kind === 'angular') {
     // Angular publishes no `typecheck` script: `build` is the compilation gate.
     return [
-      ['web: tests (Karma, ChromeHeadless)', 'npm', ['run', 'test:ci', '--workspace=apps/web']],
-      ['web: build', 'npm', ['run', 'build', '--workspace=apps/web']],
+      ['web: tests (Karma, ChromeHeadless)', 'npm', ['run', 'test:ci', `--workspace=${appDir}`]],
+      ['web: build', 'npm', ['run', 'build', `--workspace=${appDir}`]],
     ];
   }
   if (kind === 'flutter') {
     return [
-      ['mobile: flutter analyze', 'flutter', ['analyze'], 'apps/mobile'],
-      ['mobile: flutter test', 'flutter', ['test'], 'apps/mobile'],
-      ['mobile: dart format', 'dart', ['format', '--output=none', '--set-exit-if-changed', '.'], 'apps/mobile'],
-      ['mobile: flutter build apk (debug, no emulator)', 'flutter', ['build', 'apk', '--debug'], 'apps/mobile'],
+      ['mobile: flutter analyze', 'flutter', ['analyze'], appDir],
+      ['mobile: flutter test', 'flutter', ['test'], appDir],
+      ['mobile: dart format', 'dart', ['format', '--output=none', '--set-exit-if-changed', '.'], appDir],
+      ['mobile: flutter build apk (debug, no emulator)', 'flutter', ['build', 'apk', '--debug'], appDir],
     ];
   }
   return [];
@@ -239,34 +319,34 @@ function gatesFor(kind, hasDb, capabilities = []) {
  * startup — a mobile app needs an emulator, so its absence is declared, never
  * silently counted as a pass.
  */
-export function startupProbeFor(kind) {
+export function startupProbeFor(kind, appDir) {
   if (kind === 'spring') {
     return {
-      slot: 'api', runtime: 'spring', cwd: 'apps/api', cmd: './mvnw',
+      slot: 'api', runtime: 'spring', cwd: appDir ?? 'apps/api', cmd: './mvnw',
       args: ['spring-boot:run', '-q'], url: 'http://127.0.0.1:8080/health', needsDb: true,
     };
   }
   if (kind === 'nestjs') {
     return {
-      slot: 'api', runtime: 'nestjs', cwd: 'apps/api', cmd: 'npm',
+      slot: 'api', runtime: 'nestjs', cwd: appDir ?? 'apps/api', cmd: 'npm',
       args: ['run', 'start:prod'], url: 'http://127.0.0.1:3000/health', needsDb: true,
     };
   }
   if (kind === 'fastapi') {
     return {
-      slot: 'api', runtime: 'fastapi', cwd: 'apps/api', cmd: '.venv/bin/python',
+      slot: 'api', runtime: 'fastapi', cwd: appDir ?? 'apps/api', cmd: '.venv/bin/python',
       args: ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000'],
       url: 'http://127.0.0.1:8000/health', needsDb: false,
     };
   }
   if (kind === 'nextjs') {
-    return { slot: 'web', runtime: 'nextjs', cwd: 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3100/', needsDb: false };
+    return { slot: 'web', runtime: 'nextjs', cwd: appDir ?? 'apps/web', cmd: 'npm', args: ['run', 'start'], url: 'http://127.0.0.1:3100/', needsDb: false };
   }
   if (kind === 'angular') {
     return {
       slot: 'web',
       runtime: 'angular',
-      cwd: 'apps/web',
+      cwd: appDir ?? 'apps/web',
       cmd: 'npm',
       args: ['start', '--', '--host', '127.0.0.1', '--port', '4200'],
       url: 'http://127.0.0.1:4200/',
@@ -348,7 +428,7 @@ function operationIds(document) {
  * the composed capabilities (declared by each overlay in `contract.openapiOperations`)
  * and proves reproducibility by regenerating and comparing digests.
  */
-async function verifyComposedOpenApi(out, blueprint) {
+async function verifyComposedOpenApi(out, blueprint, application, environment = process.env) {
   console.log('\n── OpenAPI generated from the composed application');
   const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
   const expected = [...new Set([
@@ -356,9 +436,9 @@ async function verifyComposedOpenApi(out, blueprint) {
     ...lock.overlays.filter((o) => o.target === 'nestjs').flatMap((o) => o.openapiOperations ?? []),
   ])].sort();
 
-  const snapshot = join(out, 'apps/api/openapi/openapi.json');
-  const generate = () => spawnSync('npm', ['run', 'openapi:generate', '--workspace=apps/api'], {
-    cwd: out, stdio: 'inherit', shell: false, env: process.env,
+  const snapshot = join(out, application.appDir, 'openapi/openapi.json');
+  const generate = () => spawnSync('npm', ['run', 'openapi:generate', `--workspace=${application.appDir}`], {
+    cwd: out, stdio: 'inherit', shell: false, env: environment,
   });
   if (generate().status !== 0) { console.log('\n❌ FAILED: openapi:generate'); return false; }
 
@@ -398,11 +478,11 @@ async function waitForHttp(url, timeoutMs) {
  * Launches a generated application and proves it answers on its health endpoint.
  * The process is always terminated, including on failure.
  */
-async function verifyStartup(out, probe, timeoutMs = 180000) {
+async function verifyStartup(out, probe, environment = process.env, timeoutMs = 180000) {
   const { spawn } = await import('node:child_process');
   console.log(`\n── startup: ${probe.slot} (${probe.cmd} ${probe.args.join(' ')}) → ${probe.url}`);
   const child = spawn(probe.cmd, probe.args, {
-    cwd: join(out, probe.cwd), env: process.env, shell: false, stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: join(out, probe.cwd), env: environment, shell: false, stdio: ['ignore', 'pipe', 'pipe'],
     detached: true,
   });
   let output = '';
@@ -425,7 +505,7 @@ async function verifyStartup(out, probe, timeoutMs = 180000) {
         cwd: join(out, probe.cwd),
         stdio: 'inherit',
         shell: false,
-        env: { ...process.env, E2E_WEB_URL: probe.url },
+        env: { ...environment, E2E_WEB_URL: probe.url },
       });
       if (e2e.status !== 0) {
         console.log('\n❌ FAILED: Angular runtime E2E contract');
@@ -439,6 +519,41 @@ async function verifyStartup(out, probe, timeoutMs = 180000) {
     await new Promise((done) => setTimeout(done, 1500));
     try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already gone */ }
   }
+}
+
+/** Proves that the distributed graph and ownership contracts were materialized. */
+export async function verifyDistributedContracts(out, plan) {
+  if (plan.architectureProfile.id !== 'distributed-platform') return [];
+  const communications = JSON.parse(await readFile(join(out, 'packages/contracts/communications.json'), 'utf8'));
+  const ownership = JSON.parse(await readFile(join(out, 'packages/contracts/ownership.json'), 'utf8'));
+  const deployment = JSON.parse(await readFile(join(out, 'infrastructure/deployment-plan.json'), 'utf8'));
+  const applicationIds = new Set(plan.applications.map((application) => application.id));
+  if (plan.architectureProfile.generatable !== true || plan.support.level !== 'ready') {
+    throw new Error('distributed plan is not marked generatable and ready');
+  }
+  if (ownership.authorities.length !== 2) throw new Error('distributed golden requires two owned authorities');
+  const domains = ownership.authorities.flatMap((authority) => authority.domains);
+  if (new Set(domains).size !== domains.length) throw new Error('distributed data domains are not exclusive');
+  if (communications.edges.length === 0) throw new Error('distributed communication graph is empty');
+  for (const edge of communications.edges) {
+    if (!applicationIds.has(edge.from) || !applicationIds.has(edge.to)) {
+      throw new Error(`communication ${edge.id} references an unknown application`);
+    }
+    if (edge.mode !== 'synchronous' || edge.protocol !== 'http' || !edge.contract.endsWith('.v1')) {
+      throw new Error(`communication ${edge.id} is outside the proven contract`);
+    }
+  }
+  if (deployment.order.length !== 2
+    || JSON.stringify(deployment.rollbackOrder) !== JSON.stringify([...deployment.order].reverse())) {
+    throw new Error('distributed deployment and rollback order is not deterministic');
+  }
+  return [
+    `authorities=${ownership.authorities.length}`,
+    `ownedDomains=${domains.length}`,
+    `communicationEdges=${communications.edges.length}`,
+    `deploymentOrder=${deployment.order.join('>')}`,
+    `dataNamespaces=${ownership.authorities.map((authority) => `authority_${authority.application.replaceAll('-', '_')}`).join(',')}`,
+  ];
 }
 
 async function main() {
@@ -455,14 +570,24 @@ async function main() {
   const blueprint = compositionBlueprint(composition);
 
   console.log(`Golden runtime: ${composition}\n  output: ${out}`);
-  await generateProject(blueprint, out);
+  const plan = await generateProject(blueprint, out);
 
   // Live DB gates (migrate deploy, NestJS e2e) require a real, reachable
   // PostgreSQL — signalled explicitly by the CI. Schema-only gates always run.
   const hasDb = process.env.GOLDEN_RUNTIME_DB === '1';
-  const kinds = Object.entries(blueprint.stack).filter(([, v]) => v).map(([, v]) => v);
+  const applications = plan.applications;
+  const kinds = [...new Set(applications.map((application) => application.runtime))];
 
   let ok = true;
+  if (plan.architectureProfile.id === 'distributed-platform') {
+    try {
+      const evidence = await verifyDistributedContracts(out, plan);
+      for (const proof of evidence) console.log(`✓ distributed contract ${proof}`);
+    } catch (error) {
+      console.log(`\n❌ FAILED: distributed contracts — ${error.message}`);
+      ok = false;
+    }
+  }
   // 1) Dependency finalization through the engine used by `enistere install`:
   //    resolve the root lock WITHOUT lifecycle scripts, then install from it (npm ci).
   try {
@@ -487,9 +612,18 @@ async function main() {
   if (ok) ok = run('build:packages', 'npm', ['run', 'build:packages'], out) && ok;
   // 4) Schema/database preparation (Prisma client needed by the OpenAPI generation).
   if (ok) {
-    for (const kind of kinds) {
-      for (const [label, cmd, args, cwd] of prepareGatesFor(kind, hasDb, blueprint.capabilities)) {
-        ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
+    for (const application of applications) {
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
+      for (const [label, cmd, args, cwd] of prepareGatesFor(
+        application.runtime,
+        hasDb,
+        blueprint.capabilities,
+        application.appDir,
+      )) {
+        ok = run(label, cmd, args, cwd ? join(out, cwd) : out, environment) && ok;
         if (!ok) break;
       }
       if (!ok) break;
@@ -499,14 +633,30 @@ async function main() {
   //     gates, so the e2e freshness invariant checks THIS composition's contract
   //     (never a copied snapshot). Also asserts the declared operation set and
   //     proves the generated contract is reproducible.
-  if (ok && kinds.includes('nestjs')) {
-    ok = await verifyComposedOpenApi(out, blueprint) && ok;
+  if (ok) {
+    for (const application of applications.filter((item) => item.runtime === 'nestjs')) {
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
+      ok = await verifyComposedOpenApi(out, blueprint, application, environment) && ok;
+      if (!ok) break;
+    }
   }
   // 6) Per-application verification gates.
   if (ok) {
-    for (const kind of kinds) {
-      for (const [label, cmd, args, cwd] of gatesFor(kind, hasDb, blueprint.capabilities)) {
-        ok = run(label, cmd, args, cwd ? join(out, cwd) : out) && ok;
+    for (const application of applications) {
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
+      for (const [label, cmd, args, cwd] of gatesFor(
+        application.runtime,
+        hasDb,
+        blueprint.capabilities,
+        application.appDir,
+      )) {
+        ok = run(label, cmd, args, cwd ? join(out, cwd) : out, environment) && ok;
         if (!ok) break;
       }
       if (!ok) break;
@@ -517,17 +667,21 @@ async function main() {
   //     database for the API and real ports. Targets without a headless startup
   //     (mobile) are declared as such — never counted as a silent pass.
   if (ok && process.env.GOLDEN_RUNTIME_START === '1') {
-    for (const kind of kinds) {
-      const probe = startupProbeFor(kind);
+    for (const application of applications) {
+      const probe = startupProbeFor(application.runtime, application.appDir);
       if (!probe) {
-        console.log(`\n── startup: ${kind} has no headless startup proof (emulator required) — not claimed`);
+        console.log(`\n── startup: ${application.runtime} has no headless startup proof (emulator required) — not claimed`);
         continue;
       }
       if (probe.needsDb && !hasDb) {
-        console.log(`\n── startup: ${kind} needs a database (GOLDEN_RUNTIME_DB=1) — not claimed`);
+        console.log(`\n── startup: ${application.runtime} needs a database (GOLDEN_RUNTIME_DB=1) — not claimed`);
         continue;
       }
-      ok = await verifyStartup(out, probe) && ok;
+      const environment = runtimeEnvironmentFor(
+        application,
+        plan.architectureProfile.id,
+      );
+      ok = await verifyStartup(out, probe, environment) && ok;
       if (!ok) break;
     }
   }
