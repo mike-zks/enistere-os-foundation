@@ -25,6 +25,8 @@ export interface AuthApi {
   login(input: SignInInput): Promise<AuthSessionData>;
   /** Exchanges a refresh token for a fresh session. Throws if invalid/expired. */
   refresh(refreshToken: string): Promise<AuthSessionData>;
+  /** Requests best-effort server-side revocation of the refresh session. */
+  logout(refreshToken: string): Promise<void>;
 }
 
 /** Error raised by the placeholder when a refresh token is not acceptable. */
@@ -60,6 +62,11 @@ export class PlaceholderAuthApi implements AuthApi {
       throw new AuthApiError('Invalid refresh token.');
     }
     return this.mint(null);
+  }
+
+  async logout(_refreshToken: string): Promise<void> {
+    // The local placeholder owns no remote session. Keeping the method explicit
+    // preserves the same lifecycle as the real adapter.
   }
 
   private mint(displayName: string | null): AuthSessionData {

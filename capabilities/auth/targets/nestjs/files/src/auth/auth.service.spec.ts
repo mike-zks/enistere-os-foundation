@@ -255,6 +255,8 @@ describe('AuthService', () => {
       expect(errorCode(error)).toBe('AUTH_REFRESH_TOKEN_INVALID');
       expect(refreshSessionService.findById).not.toHaveBeenCalled();
       expect(refreshSessionService.rotate).not.toHaveBeenCalled();
+      const events = recordedEvents(auditService.record);
+      expect(events).toContain('AUTH_REFRESH_FAILED');
     });
 
     it('rejects an unknown session without revoking any family', async () => {
@@ -344,6 +346,8 @@ describe('AuthService', () => {
         'family-1',
         SessionRevocationReason.LOGOUT,
       );
+      const events = recordedEvents(auditService.record);
+      expect(events).toContain('AUTH_LOGOUT');
     });
 
     it('is idempotent and silent for an invalid token format', async () => {

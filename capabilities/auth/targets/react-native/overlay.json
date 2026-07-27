@@ -18,6 +18,7 @@
     { "source": "files/app/(public)", "destination": "app/(public)" },
     { "source": "files/app/(app)", "destination": "app/(app)" },
     { "source": "files/test/auth-engine.test.ts", "destination": "test/auth-engine.test.ts" },
+    { "source": "files/test/enistere-auth-api.test.ts", "destination": "test/enistere-auth-api.test.ts" },
     { "source": "files/test/session-store.test.ts", "destination": "test/session-store.test.ts" },
     { "source": "files/test/token-mapping.test.ts", "destination": "test/token-mapping.test.ts" },
     { "source": "files/test/with-auth-retry.test.ts", "destination": "test/with-auth-retry.test.ts" },

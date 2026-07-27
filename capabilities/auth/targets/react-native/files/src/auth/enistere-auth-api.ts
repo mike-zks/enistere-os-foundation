@@ -47,4 +47,13 @@ export class EnistereAuthApi implements AuthApi {
     }
     return toAuthSessionData(data.data, this.now());
   }
+
+  async logout(refreshToken: string): Promise<void> {
+    const { error } = await this.client.raw.POST('/auth/logout', {
+      body: { refreshToken },
+    });
+    if (error !== undefined) {
+      throw new AuthApiError('Logout failed.');
+    }
+  }
 }

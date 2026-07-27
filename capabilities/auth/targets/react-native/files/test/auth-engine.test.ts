@@ -74,10 +74,24 @@ test('signIn failure → unauthenticated + error', async () => {
   assert.equal(engine.getAccessToken(), null);
 });
 
-test('signOut purges storage and memory', async () => {
-  const { engine, sessionStore } = setup();
+test('signOut requests remote revocation then purges storage and memory', async () => {
+  const { engine, sessionStore, api } = setup();
   await engine.signIn({ email: 'demo@example.com' });
   await engine.signOut();
+  assert.equal(api.logoutCalls, 1);
+  assert.match(api.lastLogoutToken ?? '', /^placeholder-refresh-token\./);
+  assert.equal(engine.getSnapshot().status, 'unauthenticated');
+  assert.equal(engine.getAccessToken(), null);
+  assert.equal(await sessionStore.load(), null);
+});
+
+test('signOut purges storage even when remote logout fails', async () => {
+  const api = new MockAuthApi();
+  api.failLogout = true;
+  const { engine, sessionStore } = setup({ api });
+  await engine.signIn({ email: 'demo@example.com' });
+  await assert.doesNotReject(() => engine.signOut());
+  assert.equal(api.logoutCalls, 1);
   assert.equal(engine.getSnapshot().status, 'unauthenticated');
   assert.equal(engine.getAccessToken(), null);
   assert.equal(await sessionStore.load(), null);
