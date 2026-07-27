@@ -66,6 +66,12 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), "UNSUPPORTED_MEDIA_TYPE", "Content type not supported", null, request);
     }
 
+    @ExceptionHandler(CodedException.class)
+    public ResponseEntity<ApiError> handleCoded(CodedException ex, HttpServletRequest request) {
+        String message = ex.getReason() != null ? ex.getReason() : "Error";
+        return respond(ex.getStatusCode().value(), ex.getErrorCode(), message, null, request);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiError> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
         int statusValue = ex.getStatusCode().value();
