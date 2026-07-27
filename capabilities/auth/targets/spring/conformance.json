@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "spring",
+  "contract": {
+    "id": "authentication-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "authority"
+  ],
+  "suite": "auth-spring-integration",
+  "golden": "spring-auth",
+  "invariants": {
+    "AUTH-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "login_validCredentials_returnsCanonicalSession",
+          "accessTokenExpiresIn",
+          "refreshTokenExpiresIn",
+          "user"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "login_wrongPassword_returnsGeneric401",
+          "login_unknownEmail_returnsSameGeneric401",
+          "AUTH_INVALID_CREDENTIALS"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "me_withValidToken_returns200WithoutPasswordHash",
+          "me_withoutToken_returns401"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "refresh_withValidToken_rotatesTokenPair",
+          "refresh_afterRotation_returnsGeneric401"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "logout_isIdempotentAndRevokesRefreshToken"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "login_persistsOnlyRefreshFingerprint",
+          "passwordHash",
+          "tokenHash"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-007": [
+      {
+        "kind": "source",
+        "source": "files/src/main/java/com/enistere/core/infrastructure/ratelimit/AuthRateLimitInterceptor.java",
+        "materialized": "src/main/java/com/enistere/core/infrastructure/ratelimit/AuthRateLimitInterceptor.java",
+        "contains": [
+          "TOO_MANY_REQUESTS",
+          "AUTH_RATE_LIMITED"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-008": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/auth/AuthIntegrationTest.java",
+        "contains": [
+          "audit_events_coverAuthenticationLifecycle",
+          "AUTH_LOGIN_SUCCEEDED",
+          "AUTH_LOGIN_FAILED",
+          "AUTH_REFRESH_SUCCEEDED",
+          "AUTH_REFRESH_FAILED",
+          "AUTH_LOGOUT"
+        ]
+      }
+    ]
+  }
+}

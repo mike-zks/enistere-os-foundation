@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "contract": {
+    "id": "authentication-product",
+    "version": "1.0.0"
+  },
+  "evaluation": "foundation-registry",
+  "status": "CONFORMANT",
+  "readyTargets": [
+    "nestjs",
+    "nextjs",
+    "react-native",
+    "spring"
+  ],
+  "targets": {
+    "nestjs": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "suite": "auth-nestjs-contract",
+      "golden": "nestjs-auth",
+      "invariants": [
+        "AUTH-AUTHORITY-001",
+        "AUTH-AUTHORITY-002",
+        "AUTH-AUTHORITY-003",
+        "AUTH-AUTHORITY-004",
+        "AUTH-AUTHORITY-005",
+        "AUTH-AUTHORITY-006",
+        "AUTH-AUTHORITY-007",
+        "AUTH-AUTHORITY-008"
+      ],
+      "proofCount": 9,
+      "materialized": false,
+      "issues": []
+    },
+    "spring": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "suite": "auth-spring-integration",
+      "golden": "spring-auth",
+      "invariants": [
+        "AUTH-AUTHORITY-001",
+        "AUTH-AUTHORITY-002",
+        "AUTH-AUTHORITY-003",
+        "AUTH-AUTHORITY-004",
+        "AUTH-AUTHORITY-005",
+        "AUTH-AUTHORITY-006",
+        "AUTH-AUTHORITY-007",
+        "AUTH-AUTHORITY-008"
+      ],
+      "proofCount": 8,
+      "materialized": false,
+      "issues": []
+    },
+    "fastapi": {
+      "status": "UNSUPPORTED",
+      "manifestStatus": "unsupported",
+      "roles": [],
+      "invariants": [],
+      "issues": []
+    },
+    "nextjs": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client",
+        "web-client"
+      ],
+      "suite": "auth-nextjs-e2e",
+      "golden": "nest-next-auth",
+      "invariants": [
+        "AUTH-CLIENT-001",
+        "AUTH-CLIENT-002",
+        "AUTH-CLIENT-003",
+        "AUTH-CLIENT-004",
+        "AUTH-CLIENT-005",
+        "AUTH-WEB-001"
+      ],
+      "proofCount": 7,
+      "materialized": false,
+      "issues": []
+    },
+    "angular": {
+      "status": "PLANNED",
+      "manifestStatus": "planned",
+      "roles": [],
+      "invariants": [],
+      "issues": []
+    },
+    "react-native": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client",
+        "mobile-client"
+      ],
+      "suite": "auth-react-native-integration",
+      "golden": "triple-auth",
+      "invariants": [
+        "AUTH-CLIENT-001",
+        "AUTH-CLIENT-002",
+        "AUTH-CLIENT-003",
+        "AUTH-CLIENT-004",
+        "AUTH-CLIENT-005",
+        "AUTH-MOBILE-001"
+      ],
+      "proofCount": 6,
+      "materialized": false,
+      "issues": []
+    },
+    "flutter": {
+      "status": "PLANNED",
+      "manifestStatus": "planned",
+      "roles": [],
+      "invariants": [],
+      "issues": []
+    }
+  }
+}

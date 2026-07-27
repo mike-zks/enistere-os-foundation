@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "nestjs",
+  "contract": {
+    "id": "authentication-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "authority"
+  ],
+  "suite": "auth-nestjs-contract",
+  "golden": "nestjs-auth",
+  "invariants": {
+    "AUTH-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-login.e2e-spec.ts",
+        "materialized": "test/auth-login.e2e-spec.ts",
+        "contains": [
+          "logs in a valid user",
+          "accessToken",
+          "refreshToken",
+          "passwordHash"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-login.e2e-spec.ts",
+        "materialized": "test/auth-login.e2e-spec.ts",
+        "contains": [
+          "rejects a wrong password with a generic error",
+          "rejects an unknown email with the same generic error",
+          "AUTH_INVALID_CREDENTIALS"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-me.e2e-spec.ts",
+        "materialized": "test/auth-me.e2e-spec.ts",
+        "contains": [
+          "rejects /auth/me without a token",
+          "returns the public profile for a valid token"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-refresh.e2e-spec.ts",
+        "materialized": "test/auth-refresh.e2e-spec.ts",
+        "contains": [
+          "rotates the refresh token",
+          "detects reuse",
+          "AUTH_REFRESH_REUSE_DETECTED"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-refresh.e2e-spec.ts",
+        "materialized": "test/auth-refresh.e2e-spec.ts",
+        "contains": [
+          "logs out idempotently",
+          "refuses subsequent refresh"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-login.e2e-spec.ts",
+        "materialized": "test/auth-login.e2e-spec.ts",
+        "contains": [
+          "persists a session with the hash only",
+          "tokenHash"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-007": [
+      {
+        "kind": "test",
+        "source": "files/src/auth/auth.controller.spec.ts",
+        "materialized": "src/auth/auth.controller.spec.ts",
+        "contains": [
+          "throttles the login route independently",
+          "AUTH_RATE_LIMITED"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/src/auth/guards/auth-throttler.guard.ts",
+        "materialized": "src/auth/guards/auth-throttler.guard.ts",
+        "contains": [
+          "AUTH_RATE_LIMITED",
+          "ThrottlerGuard"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-008": [
+      {
+        "kind": "test",
+        "source": "files/src/auth/auth.service.spec.ts",
+        "materialized": "src/auth/auth.service.spec.ts",
+        "contains": [
+          "AUTH_LOGIN_SUCCEEDED",
+          "AUTH_LOGIN_FAILED",
+          "AUTH_REFRESH_SUCCEEDED",
+          "AUTH_REFRESH_FAILED",
+          "AUTH_LOGOUT"
+        ]
+      }
+    ]
+  }
+}
