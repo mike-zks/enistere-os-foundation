@@ -34,7 +34,7 @@ Projet généré
 | Ingestion | `blueprint/normalize.mjs` | blueprint | traduction pure → CSM |
 | Modèle d'intention | `model/canonical-system.mjs` | — | forme immuable + digest CSM |
 | Validation modèle | `blueprint/validate.mjs` | CSM | invariants de représentation, ownership et graphe (`CSM_*`) |
-| Résolution | `engine/resolver.mjs` | **CSM** | adapters, targets, support et scope distribué (`RESOLUTION_*`) |
+| Résolution | `engine/resolver.mjs` | **CSM** | adapters, Capability Graph v2, targets par application, support et scope distribué (`RESOLUTION_*`) |
 | Modèle de résolution | `model/resolved-system.mjs` | — | immuable + `resolutionDigest` |
 | Planification | `model/generation-plan.mjs` | **ResolvedSystem** | plan complet immuable + `planDigest` (`PLAN_*`) |
 | Génération | `engine/generator.mjs` | **GenerationPlan** | matérialisation, aucune lecture blueprint |
@@ -61,6 +61,14 @@ aléatoire ; chaque digest exclut son propre champ.
 Les profils sont des **presets** (`engine/profiles.mjs`) : `materializeProfileInput(profileId)` produit
 un blueprint d'entrée qui suit la chaîne normale. Ni le planner ni le générateur ne lisent un profil ;
 `plan.profile` est une étiquette descriptive de traçabilité.
+
+## Capabilities
+
+`engine/capabilities.mjs` découvre le registre local, valide le Manifest v2 et
+calcule une closure topologique stable depuis `requires`. Le ResolvedSystem et
+le plan tracent les inclusions automatiques et résolvent adapter, contrats,
+primitives, modes, migrations et conformité par application. Le générateur
+consomme cet ordre ; il ne maintient aucun second graphe.
 
 ## Frontière d'entrée
 

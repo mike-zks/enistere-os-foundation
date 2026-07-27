@@ -2,15 +2,157 @@
   "schemaVersion": "2",
   "id": "rbac",
   "version": "0.2.0",
-  "requires": ["auth"],
-  "responsibilities": ["roles", "permissions", "authorization-context", "authorization-summary"],
+  "requires": [
+    "auth"
+  ],
+  "conflicts": [],
+  "responsibilities": [
+    "roles",
+    "permissions",
+    "authorization-context",
+    "authorization-summary"
+  ],
+  "contracts": [
+    {
+      "id": "authorization-context",
+      "version": "1.0.0",
+      "kind": "schema"
+    },
+    {
+      "id": "authorization-decision",
+      "version": "1.0.0",
+      "kind": "api"
+    }
+  ],
+  "primitives": [
+    {
+      "id": "authorization-store",
+      "kind": "relational-database",
+      "requirement": "required",
+      "purposes": [
+        "roles",
+        "permissions"
+      ]
+    }
+  ],
+  "configuration": {},
   "targets": {
-    "nestjs": { "status": "ready", "mode": "overlay" },
-    "spring": { "status": "ready", "mode": "overlay" },
-    "fastapi": { "status": "unsupported" },
-    "nextjs": { "status": "ready", "mode": "overlay" },
-    "angular": { "status": "planned" },
-    "react-native": { "status": "not-applicable" },
-    "flutter": { "status": "planned" }
-  }
+    "nestjs": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "nestjs",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "authorization-context",
+        "authorization-decision"
+      ],
+      "primitives": [
+        "authorization-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "rbac-nestjs-database"
+      ],
+      "conformance": [
+        "rbac-nestjs-contract"
+      ]
+    },
+    "spring": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "spring",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "authorization-context",
+        "authorization-decision"
+      ],
+      "primitives": [
+        "authorization-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "rbac-spring-database"
+      ],
+      "conformance": [
+        "rbac-spring-integration"
+      ]
+    },
+    "fastapi": {
+      "status": "unsupported"
+    },
+    "nextjs": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "nextjs",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "authorization-context"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "rbac-nextjs-e2e"
+      ]
+    },
+    "angular": {
+      "status": "planned"
+    },
+    "react-native": {
+      "status": "not-applicable"
+    },
+    "flutter": {
+      "status": "planned"
+    }
+  },
+  "migrations": [
+    {
+      "id": "rbac-nestjs-database",
+      "target": "nestjs",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/nestjs/files/prisma/migrations/20260719000200_rbac_init/migration.sql",
+      "order": 200
+    },
+    {
+      "id": "rbac-spring-database",
+      "target": "spring",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/spring/files/src/main/resources/db/migration/V2__add_rbac.sql",
+      "order": 200
+    }
+  ],
+  "conformance": [
+    {
+      "id": "rbac-nestjs-contract",
+      "target": "nestjs",
+      "level": "contract",
+      "evidence": "golden-runtime"
+    },
+    {
+      "id": "rbac-spring-integration",
+      "target": "spring",
+      "level": "integration",
+      "evidence": "overlay-verification"
+    },
+    {
+      "id": "rbac-nextjs-e2e",
+      "target": "nextjs",
+      "level": "e2e",
+      "evidence": "golden-runtime"
+    }
+  ]
 }

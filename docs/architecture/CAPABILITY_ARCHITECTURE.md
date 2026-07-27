@@ -72,21 +72,46 @@ Capability
 └── conformance suites
 ```
 
-Une target absente est non supportée. Un adapter `planned` ne rend pas la capability générable. Les
+Chaque runtime possède un statut explicite. Une target `planned` ou `unsupported`
+ne rend pas la capability générable. Les
 dépendances sont une source unique résolue par graphe ; les inclusions automatiques sont expliquées.
+
+Le contrat exécutable courant est
+[Capability Manifest v2](../specifications/CAPABILITY_SPECIFICATION.md). Il
+ferme la forme du manifest et résout adapters, contrats, primitives, modes,
+migrations et conformité par application. Le registre est découvert depuis les
+répertoires de capabilities ; le moteur n’embarque aucune liste d’arêtes.
 
 ## Graphe initial indicatif
 
 ```text
 Authorization ──requires──> Authentication
 User Management ──────────> Authentication + Authorization
-Files ────────────────────> Authorization + object-storage|content-repository
+Files ────────────────────> Authorization + object-storage
 Notifications ────────────> Events + mail|push
 Automation ───────────────> Events
 Realtime/Search/Flags/Multitenancy/Workflow → dépendances déclarées par mode
 ```
 
 Le graphe réel appartient aux manifests versionnés, pas à ce diagramme.
+`content-repository` est une primitive distincte qui ne remplace pas
+implicitement `object-storage`.
+
+## Graphe implémenté
+
+Le catalogue actuel reste limité à trois capabilities :
+
+```text
+auth
+  ↑
+rbac
+  ↑
+files ──requires──> auth
+```
+
+La demande atomique `files` est résolue en `auth → rbac → files`. Le plan trace
+`auth` et `rbac` comme inclusions de dépendance. Aucun catalogue cible non
+implémenté n’est injecté dans ce graphe.
 
 ## Audit métier et observabilité
 

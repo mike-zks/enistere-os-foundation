@@ -22,7 +22,12 @@ describe('architecture fitness functions', () => {
   it('flags a capability that both requires and conflicts the same capability', async () => {
     const starters = await loadStarterManifests(REPO_ROOT);
     const capabilities = await loadCapabilityManifests(REPO_ROOT);
-    const poisoned = capabilities.map((cap) => (cap.id === 'rbac' ? { ...cap, conflicts: ['auth'] } : cap));
+    const reason = 'test-only conflict';
+    const poisoned = capabilities.map((cap) => {
+      if (cap.id === 'rbac') return { ...cap, conflicts: [{ id: 'auth', reason }] };
+      if (cap.id === 'auth') return { ...cap, conflicts: [{ id: 'rbac', reason }] };
+      return cap;
+    });
     const report = runFitnessFunctions({ starters, capabilities: poisoned });
     assert.equal(report.passed, false);
     assert.ok(report.findings.some((f) => f.rule === 'capability-contradiction' && f.detail.includes('rbac')));

@@ -225,7 +225,9 @@ function projectReadme(plan, overlays) {
     '',
     '## Capabilities',
     '',
-    `Sélection : ${plan.capabilities.map((c) => `\`${c}\``).join(', ')}.`,
+    `Demandées : ${plan.capabilityGraph.requested.map((c) => `\`${c}\``).join(', ') || 'aucune'}.`,
+    `Closure résolue : ${plan.capabilities.map((c) => `\`${c}\``).join(', ') || 'aucune'}.`,
+    `Ajoutées par dépendance : ${plan.capabilityGraph.autoIncluded.map((c) => `\`${c}\``).join(', ') || 'aucune'}.`,
     '',
     'Overlays appliqués :',
     '',
@@ -377,6 +379,10 @@ export async function materializeProject(plan, output, options = {}) {
   await writeFile(join(output, 'packages/contracts/openapi.json'), stable(generateOpenApi({ name: plan.displayName, entities: plan.domain.entities })));
   await writeFile(join(output, 'packages/contracts/communications.json'), stable({ edges: plan.communications }));
   await writeFile(join(output, 'packages/contracts/ownership.json'), stable(ownershipContract(plan)));
+  await writeFile(join(output, 'packages/contracts/capabilities.json'), stable({
+    graph: plan.capabilityGraph,
+    targets: plan.capabilityTargets,
+  }));
   await writeFile(join(output, 'infrastructure/local/README.md'), '# Local deployment\n');
   await writeFile(join(output, 'infrastructure/deployment-plan.json'), stable(plan.deploymentPlan));
   await writeFile(join(output, 'infrastructure/local/compose.yaml'), localCompose(plan));
@@ -398,7 +404,9 @@ export async function materializeProject(plan, output, options = {}) {
  */
 export async function generateProject(blueprint, output, options = {}) {
   const starterManifests = await loadStarterManifests(FOUNDATION_ROOT);
-  const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
+  // Resolve against the complete local registry so a requested capability can
+  // auto-include its transitive requirements without a second pipeline.
+  const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT);
   const plan = buildGenerationPlan(blueprint, {
     modularStarters: modularStarterIds(starterManifests),
     starters: starterManifests,

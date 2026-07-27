@@ -3,14 +3,176 @@
   "id": "auth",
   "version": "0.2.0",
   "requires": [],
-  "responsibilities": ["login", "refresh", "logout", "session"],
+  "conflicts": [],
+  "responsibilities": [
+    "login",
+    "refresh",
+    "logout",
+    "session"
+  ],
+  "contracts": [
+    {
+      "id": "auth-identity",
+      "version": "1.0.0",
+      "kind": "schema"
+    },
+    {
+      "id": "auth-session",
+      "version": "1.0.0",
+      "kind": "api"
+    }
+  ],
+  "primitives": [
+    {
+      "id": "auth-store",
+      "kind": "relational-database",
+      "requirement": "required",
+      "purposes": [
+        "identity",
+        "sessions"
+      ]
+    }
+  ],
+  "configuration": {},
   "targets": {
-    "nestjs": { "status": "ready", "mode": "overlay" },
-    "spring": { "status": "ready", "mode": "overlay" },
-    "fastapi": { "status": "unsupported" },
-    "nextjs": { "status": "ready", "mode": "overlay" },
-    "angular": { "status": "planned" },
-    "react-native": { "status": "ready", "mode": "overlay" },
-    "flutter": { "status": "planned" }
-  }
+    "nestjs": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "nestjs",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "auth-identity",
+        "auth-session"
+      ],
+      "primitives": [
+        "auth-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "auth-nestjs-database"
+      ],
+      "conformance": [
+        "auth-nestjs-contract"
+      ]
+    },
+    "spring": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "spring",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "auth-identity",
+        "auth-session"
+      ],
+      "primitives": [
+        "auth-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "auth-spring-database"
+      ],
+      "conformance": [
+        "auth-spring-integration"
+      ]
+    },
+    "fastapi": {
+      "status": "unsupported"
+    },
+    "nextjs": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "nextjs",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "auth-session"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "auth-nextjs-e2e"
+      ]
+    },
+    "angular": {
+      "status": "planned"
+    },
+    "react-native": {
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "react-native",
+        "version": "1.0.0"
+      },
+      "contracts": [
+        "auth-session"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "auth-react-native-integration"
+      ]
+    },
+    "flutter": {
+      "status": "planned"
+    }
+  },
+  "migrations": [
+    {
+      "id": "auth-nestjs-database",
+      "target": "nestjs",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/nestjs/files/prisma/migrations/20260718000100_auth_init/migration.sql",
+      "order": 100
+    },
+    {
+      "id": "auth-spring-database",
+      "target": "spring",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/spring/files/src/main/resources/db/migration/V1__init_schema.sql",
+      "order": 100
+    }
+  ],
+  "conformance": [
+    {
+      "id": "auth-nestjs-contract",
+      "target": "nestjs",
+      "level": "contract",
+      "evidence": "overlay-verification"
+    },
+    {
+      "id": "auth-spring-integration",
+      "target": "spring",
+      "level": "integration",
+      "evidence": "overlay-verification"
+    },
+    {
+      "id": "auth-nextjs-e2e",
+      "target": "nextjs",
+      "level": "e2e",
+      "evidence": "golden-runtime"
+    },
+    {
+      "id": "auth-react-native-integration",
+      "target": "react-native",
+      "level": "integration",
+      "evidence": "overlay-verification"
+    }
+  ]
 }

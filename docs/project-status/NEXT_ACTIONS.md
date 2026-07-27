@@ -2,54 +2,64 @@
 
 ## Mission achevée
 
-Le contrat minimal de `distributed-platform` est exécutable
-([ADR-066](../adr/ADR-066-distributed-platform-minimal-graph.md)).
-
-| Profil | Représentation | Génération | Statut global |
-|---|---|---|---|
-| `backend-service` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées | exécutable |
-| `product-platform` | `IMPLEMENTED` | `GENERATABLE` sur compositions prouvées | exécutable |
-| `distributed-platform` | `IMPLEMENTED` | `GENERATABLE` sur Spring + NestJS sync HTTP | scope borné |
-| `service-ecosystem` | `IMPLEMENTED` | `PLANNED` | `TARGET` |
+Le Capability Manifest v2 et son graphe déterministe sont exécutables
+([ADR-067](../adr/ADR-067-capability-manifest-v2-and-deterministic-graph.md)).
 
 Preuves :
 
-- ownership d’équipe et domaines de données exclusifs dans le CSM ;
-- arêtes explicites et versionnées avec timeout, retry borné, identité workload
-  et stratégie de panne ;
-- incohérences, domaines multi-owners et cycles refusés ;
-- support accordé uniquement à deux autorités Spring + NestJS sans client ni
-  capability ;
-- ordre topologique de déploiement et ordre inverse de rollback dans le plan ;
-- artefacts déterministes ownership/communications/deployment ;
-- golden `distributed-spring-nestjs` branché sur le pipeline existant, avec
-  gates, boot/HTTP des deux runtimes, audit et lock reproductible ;
-- autres paires, clients, capabilities et async toujours bloqués ;
-- `service-ecosystem` non promu ;
-- aucune source `starters/*/base/`, aucun `composition.baseSource`.
+- schéma fermé et versionné unique ;
+- registre local découvert depuis `capabilities/*`, sans liste de dépendances
+  codée dans le moteur ;
+- `requires` résolu par closure transitive, tri topologique stable et refus des
+  cycles ;
+- `requested`, `autoIncluded`, `order` et `edges` portés jusqu’au plan et au
+  lock ;
+- conflits obligatoirement symétriques, expliqués et bloquants ;
+- targets `ready` liées à un adapter/version réel ;
+- contrats, primitives provider-neutral, modes de déploiement, migrations et
+  suites de conformité résolus par application ;
+- résolution testée sur deux autorités backend Spring et NestJS, sans
+  revendiquer leur génération avec capability ;
+- artefact généré `packages/contracts/capabilities.json` ;
+- CLI `capability list` et `capability describe` ;
+- manifests Auth/RBAC/Files migrés sans modifier la matrice produit ;
+- overlays Spring alignés sur la version `0.2.0` ;
+- aucun bundle, aucun pipeline parallèle, aucune capability nouvelle ;
+- aucune source `starters/*/base/`, aucune `composition.baseSource`.
+
+## Limites honnêtes
+
+- le lifecycle add/remove/upgrade/migrate in-place n’est pas livré ;
+- les providers d’infrastructure ne sont pas sélectionnés ;
+- la conformité produit entre adapters n’est pas encore mesurée par une suite
+  commune ;
+- `distributed-platform` avec capabilities reste bloqué ;
+- aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` n’est revendiqué.
 
 ## Prochaine mission unique
 
-> **Définir le manifeste Capability v2 et son graphe déterministe, sans
-> implémenter une nouvelle capability.**
+> **Rendre Authentication conforme au contrat Capability v2 sur ses targets
+> actuellement `ready`, avec une suite produit commune, sans ajouter de target
+> ni de nouvelle capability.**
 
 ### Justification de l’ordre
 
-Les trois profils nécessaires avant le framework de capabilities possèdent
-maintenant un scope de génération réel. Les capabilities existantes restent
-fondées sur des manifests plus étroits que la cible : targets, dépendances,
-conflits, primitives, modes de déploiement, migrations et conformité doivent
-être unifiés avant d’étendre Authentication ou d’ajouter une capability.
+Le framework sait désormais décrire et résoudre une capability, mais les
+preuves Auth restent distribuées entre overlays et goldens. Avant User
+Management, Events ou toute nouvelle capability, il faut démontrer que le même
+contrat produit Authentication est satisfait sur NestJS, Spring, Next.js et
+React Native selon le rôle de chaque target.
 
 ### Critères de sortie
 
-- une spécification et un schéma versionnés uniques ;
-- `requires` forme une closure déterministe et acyclique ;
-- `conflicts` est symétrique et expliqué ;
-- targets et adapters sont résolus par application, y compris multi-backend ;
-- primitives et modes de déploiement sont déclarables sans provider fictif ;
-- migrations et tests de conformité appartiennent au manifest ;
-- les manifests Auth/RBAC/Files sont audités et migrés sans changer leur
-  comportement produit ;
-- aucun bundle implicite, aucun pipeline parallèle, aucune nouvelle capability ;
+- cas d’usage et erreurs Authentication versionnés dans une source neutre ;
+- matrice autorité API / client officiel explicite ;
+- suite de conformité commune branchée sur les preuves existantes ;
+- NestJS et Spring évalués contre les mêmes invariants serveur ;
+- Next.js et React Native évalués contre les mêmes invariants client
+  applicables ;
+- audit métier Authentication déclaré sans dupliquer l’infrastructure d’audit ;
+- statuts `CONFORMANT` uniquement là où les preuves passent ;
+- Angular, Flutter et FastAPI inchangés et honnêtement non `ready` ;
+- aucun nouveau runtime, provider ou capability ;
 - aucun dossier `base/`.

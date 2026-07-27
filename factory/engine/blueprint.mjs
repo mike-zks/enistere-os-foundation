@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { CAPABILITY_IDS, validateCapabilityDependencies } from './capabilities.mjs';
+import { CAPABILITY_IDS } from './capabilities.mjs';
 import { validateEntities } from './contracts.mjs';
 import { validateBlueprintProfile } from './profiles.mjs';
 import { APPLICATION_KINDS } from './topologies.mjs';
@@ -138,7 +138,9 @@ export function validateBlueprint(value) {
     for (const item of value.capabilities) {
       if (!CAPABILITIES.has(item) && !LEGACY_INPUT_CAPABILITIES.has(item)) issues.push(`unknown capability: ${item}`);
     }
-    issues.push(...validateCapabilityDependencies(value.capabilities.filter((id) => id !== 'base')));
+    // Dependency closure belongs to registry-backed resolution. The Blueprint
+    // records user intent only; `files` may therefore be requested alone and
+    // its requirements will be auto-included and traced in the plan.
   }
   const environments = value.deployment?.environments;
   if (!Array.isArray(environments)) issues.push('deployment.environments must be an array');

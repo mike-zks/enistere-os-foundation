@@ -50,7 +50,11 @@
           "kind": { "enum": ["api", "web", "mobile", "worker", "gateway", "bff"] },
           "runtime": { "enum": ["nestjs", "spring", "fastapi", "nextjs", "angular", "react-native", "flutter"] },
           "audience": { "type": "string", "minLength": 1 },
-          "consumes": { "type": "array", "items": { "type": "string", "minLength": 1 },
+          "consumes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
           "ownership": {
             "type": "object",
             "additionalProperties": false,
@@ -144,7 +148,12 @@
     "capabilities": {
       "type": "array",
       "description": "Optional product capabilities. Legacy v1 input may contain base; ingestion removes it because the Platform Baseline is implicit.",
-      "items": { "enum": ["base", "auth", "rbac", "files"] },
+      "items": {
+        "anyOf": [
+          { "const": "base", "description": "Legacy Blueprint v1 input only; erased at ingestion." },
+          { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" }
+        ]
+      },
       "uniqueItems": true
     },
     "deployment": {

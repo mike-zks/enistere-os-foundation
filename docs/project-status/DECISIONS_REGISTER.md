@@ -30,6 +30,7 @@
 | 064 | Convergence Common/Mobile v2 | React Native/Flutter 25/0/0 ; hooks neutres ; aucun flux Auth/Files/Notifications embarqué |
 | 065 | Profils système exécutables | initialisation system-first ; représentation séparée de la génération ; presets distincts ; profils distribués bloqués honnêtement |
 | 066 | Graphe minimal `distributed-platform` | ownership/domaines exclusifs, communications versionnées, ordre de déploiement/rollback ; slice Spring + NestJS générable |
+| 067 | Capability Manifest v2 et graphe déterministe | contrat fermé ; closure et conflits exécutables ; résolution par application ; Auth/RBAC/Files migrées sans nouvelle capability |
 
 ## Règles
 

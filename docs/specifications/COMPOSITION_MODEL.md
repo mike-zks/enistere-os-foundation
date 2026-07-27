@@ -6,7 +6,7 @@
 2. validation ;
 3. normalisation ;
 4. résolution des runtimes ;
-5. résolution des capabilities ;
+5. closure, ordre et résolution par application des capabilities ;
 6. résolution des primitives ;
 7. vérification des contrats ;
 8. détection des conflits ;
@@ -20,7 +20,7 @@
 La composition est refusée lorsque :
 
 - un adapter requis est absent ;
-- une dépendance manque ;
+- une dépendance déclarée référence un manifest absent ou forme un cycle ;
 - un conflit est déclaré ;
 - les versions sont incompatibles ;
 - un owner de données est ambigu ;
@@ -40,6 +40,9 @@ Il contient :
 - options ;
 - migrations ;
 - digest du blueprint.
+
+Pour les capabilities, le lock porte `requested`, `autoIncluded`, l’ordre
+topologique, les arêtes et la résolution target/adapter par application.
 
 ## Idempotence
 

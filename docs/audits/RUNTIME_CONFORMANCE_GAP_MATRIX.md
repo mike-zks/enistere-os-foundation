@@ -38,6 +38,7 @@ jamais classés comme capabilities.
 
 ## Action
 
-Les sept runtimes sont conformes et trois profils possèdent désormais un scope
-générable. La prochaine mission unique est le manifeste Capability v2 et son
-graphe déterministe, sans nouvelle capability.
+Les sept runtimes sont conformes, trois profils possèdent un scope générable et
+le Manifest Capability v2 est résolu par application. La prochaine mission
+unique est la conformité produit Authentication sur ses targets `ready`, sans
+nouvelle target ni nouvelle capability.

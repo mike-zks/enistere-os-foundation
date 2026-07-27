@@ -10,7 +10,11 @@
  */
 
 import { adapterVersionsFor, getTargetAdapter } from './target-adapters.mjs';
-import { assessCapabilitySupport, buildCapabilityMatrix, validateCapabilityDependencies } from './capabilities.mjs';
+import {
+  assessCapabilitySupport,
+  buildCapabilityMatrix,
+  resolveCapabilityGraph,
+} from './capabilities.mjs';
 import { matchProfileSelection } from './profiles.mjs';
 import { RESOLUTION_DIAGNOSTIC_CODES as RC, diagnostic } from '../model/diagnostics.mjs';
 import { resolvedSystem } from '../model/resolved-system.mjs';
@@ -39,12 +43,27 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
   const stack = { api: null, web: null, mobile: null };
   for (const app of apps) if (SLOTS.includes(app.kind) && stack[app.kind] === null) stack[app.kind] = app.runtime;
 
-  const capabilityIds = csm.capabilities.map((capability) => capability.id);
-  for (const issue of validateCapabilityDependencies(capabilityIds)) {
-    diagnostics.push(diagnostic(RC.CAPABILITY_DEPENDENCY, issue, { path: 'capabilities' }));
+  const requestedCapabilityIds = csm.capabilities.map((capability) => capability.id);
+  const capabilityGraph = capabilityManifests.length > 0
+    ? resolveCapabilityGraph(requestedCapabilityIds, capabilityManifests)
+    : {
+      requested: [...requestedCapabilityIds],
+      order: [...requestedCapabilityIds],
+      autoIncluded: [],
+      edges: [],
+      issues: [],
+    };
+  const capabilityIds = capabilityGraph.order;
+  for (const issue of capabilityGraph.issues) {
+    const code = issue.startsWith('capability conflict')
+      ? RC.CAPABILITY_CONFLICT
+      : RC.CAPABILITY_DEPENDENCY;
+    diagnostics.push(diagnostic(code, issue, { path: 'capabilities' }));
   }
 
-  const support = assessCapabilitySupport(runtimes, capabilityManifests);
+  const manifestById = new Map(capabilityManifests.map((manifest) => [manifest.id, manifest]));
+  const selectedManifests = capabilityIds.map((id) => manifestById.get(id)).filter(Boolean);
+  const support = assessCapabilitySupport(runtimes, selectedManifests);
   for (const blocker of support.blockers) {
     diagnostics.push(diagnostic(RC.CAPABILITY_NOT_READY, `${blocker.capability} on ${blocker.starter} is ${blocker.status}`, { details: blocker }));
   }
@@ -83,8 +102,43 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     ));
   }
 
-  const matrix = buildCapabilityMatrix(capabilityManifests);
+  const matrix = buildCapabilityMatrix(selectedManifests);
   const composable = (status) => status === 'ready' || status === 'not-applicable';
+  const csmCapabilityById = new Map(csm.capabilities.map((capability) => [capability.id, capability]));
+  const targetsByCapability = new Map(capabilityIds.map((id) => [
+    id,
+    new Set(csmCapabilityById.get(id)?.requestedTargets ?? []),
+  ]));
+  // Dependency-first order reversed means a dependent propagates its requested
+  // application targets to its requirements before those requirements resolve.
+  for (const id of [...capabilityIds].reverse()) {
+    for (const edge of capabilityGraph.edges.filter((candidate) => candidate.from === id)) {
+      const dependencyTargets = targetsByCapability.get(edge.to);
+      for (const target of targetsByCapability.get(id) ?? []) dependencyTargets?.add(target);
+    }
+  }
+  const requiredBy = Object.fromEntries(capabilityIds.map((id) => [
+    id,
+    capabilityGraph.edges.filter((edge) => edge.to === id).map((edge) => edge.from).sort(),
+  ]));
+
+  const targetResolution = (manifest, runtimeId, status) => {
+    if (!manifest) return { status };
+    const target = manifest.targets[runtimeId];
+    if (target.status === 'not-applicable') return { status: target.status };
+    if (target.status !== 'ready') return { status: target.status };
+    const definitions = (ids, items) => ids.map((id) => ({ ...items.find((item) => item.id === id) }));
+    return {
+      status: target.status,
+      mode: target.mode,
+      adapter: { ...target.adapter },
+      deploymentModes: [...target.deploymentModes],
+      contracts: definitions(target.contracts, manifest.contracts),
+      primitives: definitions(target.primitives, manifest.primitives),
+      migrations: definitions(target.migrations, manifest.migrations),
+      conformance: definitions(target.conformance, manifest.conformance),
+    };
+  };
 
   const applications = apps.map((app) => {
     if (!getTargetAdapter(app.runtime)) {
@@ -95,7 +149,12 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
       .filter((command) => starter?.commands?.[command])
       .map((command) => ({ gate: command, command: starter.commands[command].join(' ') }));
     const resolvedCapabilities = capabilityIds
-      .map((id) => ({ id, status: matrix[id]?.[app.runtime] }))
+      .filter((id) => targetsByCapability.get(id)?.has(app.id))
+      .map((id) => ({
+        id,
+        inclusion: capabilityGraph.autoIncluded.includes(id) ? 'dependency' : 'requested',
+        ...targetResolution(manifestById.get(id), app.runtime, matrix[id]?.[app.runtime]),
+      }))
       .filter((capability) => composable(capability.status));
     return {
       id: app.id,
@@ -119,15 +178,33 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
 
   const runtimeById = new Map(apps.map((app) => [app.id, app.runtime]));
   const appIds = apps.map((app) => app.id);
-  const capabilities = csm.capabilities.map((capability) => {
-    const resolvedTargets = appIds.filter((id) => composable(matrix[capability.id]?.[runtimeById.get(id)]));
-    const notApplicableTargets = appIds.filter((id) => matrix[capability.id]?.[runtimeById.get(id)] === 'not-applicable');
+  const capabilities = capabilityIds.map((id) => {
+    const intentTargets = [...(targetsByCapability.get(id) ?? [])];
+    const manifest = manifestById.get(id);
+    const resolvedTargets = intentTargets.filter((appId) =>
+      composable(matrix[id]?.[runtimeById.get(appId)]));
+    const notApplicableTargets = intentTargets.filter((appId) =>
+      matrix[id]?.[runtimeById.get(appId)] === 'not-applicable');
     // Only diagnose an unresolvable capability when its manifest was provided
     // (i.e. it exists in the matrix): planner unit tests resolve without manifests.
-    if (matrix[capability.id] && resolvedTargets.length === 0 && capability.requestedTargets.length > 0) {
-      diagnostics.push(diagnostic(RC.NO_VALID_TARGET, `capability ${capability.id} resolves to no valid target`, { details: { capability: capability.id } }));
+    if (matrix[id] && resolvedTargets.length === 0 && intentTargets.length > 0) {
+      diagnostics.push(diagnostic(RC.NO_VALID_TARGET, `capability ${id} resolves to no valid target`, { details: { capability: id } }));
     }
-    return { id: capability.id, configuration: { ...capability.configuration }, requestedTargets: [...capability.requestedTargets], resolvedTargets, notApplicableTargets };
+    return {
+      id,
+      version: manifest?.version ?? csmCapabilityById.get(id)?.version ?? null,
+      inclusion: capabilityGraph.autoIncluded.includes(id) ? 'dependency' : 'requested',
+      requiredBy: requiredBy[id],
+      requires: [...(manifest?.requires ?? [])],
+      configuration: { ...(csmCapabilityById.get(id)?.configuration ?? {}) },
+      requestedTargets: intentTargets,
+      resolvedTargets,
+      notApplicableTargets,
+      targetResolutions: Object.fromEntries(intentTargets.map((appId) => [
+        appId,
+        targetResolution(manifest, runtimeById.get(appId), matrix[id]?.[runtimeById.get(appId)]),
+      ])),
+    };
   });
 
   // A composition preset describes exactly one application per historical
@@ -160,10 +237,18 @@ export function resolveSystem(csm, { starters, capabilityManifests, modularStart
     environments: csm.environments,
     policies: csm.policies,
     selection: { runtimes, stack, allModular, generationMode, targetAdapters: adapterVersions },
+    capabilityGraph: {
+      requested: [...capabilityGraph.requested],
+      order: [...capabilityGraph.order],
+      autoIncluded: [...capabilityGraph.autoIncluded],
+      edges: capabilityGraph.edges.map((edge) => ({ ...edge })),
+    },
     architectureProfile,
     compositionPreset,
     support: {
-      level: support.ready && architectureBlockers.length === 0 ? 'ready' : 'blocked',
+      level: support.ready && architectureBlockers.length === 0 && capabilityGraph.issues.length === 0
+        ? 'ready'
+        : 'blocked',
       blockers: [...support.blockers, ...architectureBlockers],
       notApplicable: support.notApplicable,
     },
