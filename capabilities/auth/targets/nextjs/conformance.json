@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "nextjs",
+  "contract": {
+    "id": "authentication-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client",
+    "web-client"
+  ],
+  "suite": "auth-nextjs-e2e",
+  "golden": "nest-next-auth",
+  "invariants": {
+    "AUTH-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/login-handler.test.ts",
+        "materialized": "test/login-handler.test.ts",
+        "contains": [
+          "aucun token dans le corps",
+          "cookies HttpOnly"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-bff-security.test.ts",
+        "materialized": "test/auth-bff-security.test.ts",
+        "contains": [
+          "Auth HttpOnly",
+          "SameSite=Lax"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/refresh-handler.test.ts",
+        "materialized": "test/refresh-handler.test.ts",
+        "contains": [
+          "rotation des deux cookies",
+          "un seul appel",
+          "cookies supprimés + 401, aucune boucle"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/resolve-server-session.test.ts",
+        "materialized": "test/resolve-server-session.test.ts",
+        "contains": [
+          "401 ne déclenche AUCUN refresh"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-004": [
+      {
+        "kind": "test",
+        "source": "files/test/logout-handler.test.ts",
+        "materialized": "test/logout-handler.test.ts",
+        "contains": [
+          "appel API",
+          "cookies locaux supprimés malgré tout"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-005": [
+      {
+        "kind": "test",
+        "source": "files/test/login-form.test.tsx",
+        "materialized": "test/login-form.test.tsx",
+        "contains": [
+          "message générique",
+          "requestId",
+          "aucune valeur de mot de passe"
+        ]
+      }
+    ],
+    "AUTH-WEB-001": [
+      {
+        "kind": "test",
+        "source": "files/test/logout-handler.test.ts",
+        "materialized": "test/logout-handler.test.ts",
+        "contains": [
+          "CSRF/Origin obligatoires",
+          "csrfCookieName"
+        ]
+      }
+    ]
+  }
+}

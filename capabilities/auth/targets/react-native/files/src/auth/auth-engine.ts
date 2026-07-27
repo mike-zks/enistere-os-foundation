@@ -122,9 +122,22 @@ export class AuthEngine {
     return this.inFlightRefresh;
   };
 
-  /** Signs out: purge storage + memory; no backend call. */
+  /**
+   * Signs out: request remote revocation when a refresh token exists, then
+   * always purge storage + memory. Authority unavailability must never trap a
+   * user in a local authenticated state.
+   */
   readonly signOut = async (): Promise<void> => {
-    await this.clearSession(null);
+    const refreshToken = this.refreshToken;
+    try {
+      if (refreshToken) {
+        await this.authApi.logout(refreshToken);
+      }
+    } catch {
+      // Best effort: local confidentiality and session termination win.
+    } finally {
+      await this.clearSession(null);
+    }
   };
 
   /** Clears the session (storage + memory) and resets to unauthenticated. */

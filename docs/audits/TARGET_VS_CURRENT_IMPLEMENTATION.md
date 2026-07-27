@@ -111,10 +111,11 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — conformité produit des capabilities absente :** le Manifest v2, la
-   closure, les conflits et la résolution par application sont implémentés
-   (ADR-067), mais aucune suite produit commune ne prouve encore l’équivalence
-   des adapters.
+1. **P0 — conformité produit partielle :** Authentication est désormais mesurée
+   par un contrat neutre commun et `CONFORMANT` sur ses quatre targets `ready`
+   (ADR-068) ; la mesure a d’ailleurs révélé et corrigé quatre divergences Spring
+   invisibles aux suites locales. RBAC et Files n’ont pas encore de contrat
+   produit équivalent : l’équivalence de leurs adapters reste non prouvée.
 2. **P0 — blueprint/CSM partiels :** sélection et résolution des providers de
    primitives et Blueprint V2 complet manquent.
 3. **P1 — distribution partielle :** async, clients, isolation des primitives et

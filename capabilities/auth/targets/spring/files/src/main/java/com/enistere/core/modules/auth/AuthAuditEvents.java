@@ -13,5 +13,6 @@ public final class AuthAuditEvents {
     public static final String LOGIN_SUCCEEDED = "AUTH_LOGIN_SUCCEEDED";
     public static final String LOGIN_FAILED = "AUTH_LOGIN_FAILED";
     public static final String REFRESH_SUCCEEDED = "AUTH_REFRESH_SUCCEEDED";
+    public static final String REFRESH_FAILED = "AUTH_REFRESH_FAILED";
     public static final String LOGOUT = "AUTH_LOGOUT";
 }

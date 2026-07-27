@@ -491,6 +491,13 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-068 — Conformité produit Authentication** : contrat produit neutre
+  versionné, invariants attachés à des rôles (autorité / client / web / mobile),
+  preuves vérifiées dans la Foundation et dans l'application matérialisée. La
+  mesure a révélé quatre divergences Spring invisibles aux suites locales
+  (forme de session, `AUTH_INVALID_CREDENTIALS`, `AUTH_RATE_LIMITED`,
+  `AUTH_REFRESH_FAILED`), corrigées ici. Le baseline gagne `CodedException` :
+  un seul chemin d'erreur, enveloppe plate d'ADR-048 inchangée.
 
 **Convergence par famille :**
 
@@ -511,13 +518,16 @@ calculé est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 # 11. Prochaine étape
 
-> Rendre **Authentication** conforme au contrat Capability v2 sur ses targets
-> actuellement `ready`, avec une suite produit commune, sans ajouter de target
-> ni de nouvelle capability.
+> Rendre **RBAC** conforme au contrat Capability v2 sur ses targets actuellement
+> `ready`, avec un contrat produit neutre, sans ajouter de target ni de nouvelle
+> capability.
 
-Le manifest et le graphe v2 sont désormais exécutables. La prochaine preuve
-doit porter sur l’équivalence fonctionnelle d’une capability existante, avant
-toute extension du catalogue.
+Authentication est désormais `CONFORMANT` sur ses quatre targets `ready`
+(ADR-068), et le mécanisme de conformité produit est éprouvé. RBAC vient
+ensuite parce que `files` en dépend (`auth → rbac → files`) : mesurer Files
+avant RBAC bâtirait une preuve sur une base non prouvée. RBAC introduira le cas
+`not-applicable`, qui doit rester une absence légitime de rôle et jamais une
+conformité implicite.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -853,6 +863,9 @@ graphes distribués.
 ADR-067 a rendu le Capability Manifest v2 et son graphe exécutables : closure
 topologique, auto-inclusions tracées, conflits symétriques, adapters/contrats/
 primitives/migrations/conformité résolus par application.
+ADR-068 a rendu la conformité **produit** d'une capability mesurable : contrat
+neutre versionné, invariants par rôle, preuves vérifiées jusque dans
+l'application matérialisée et branchées sur les goldens.
 
 État calculé au 2026-07-27 :
 
@@ -870,7 +883,23 @@ La présence d’un logger ne suffit jamais à prouver Observability. Pour les A
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à rendre Authentication conforme au
-contrat Capability v2 sur ses targets `ready`, sans nouvelle target ni nouvelle
+Conformité produit calculée au 2026-07-27
+(`factory/conformance/reports/authentication-v1.json`) :
+
+```text
+Authentication 1.0.0   CONFORMANT
+nestjs        CONFORMANT   8 invariants (authority)
+spring        CONFORMANT   8 invariants (authority)
+nextjs        CONFORMANT   6 invariants (client + web-client)
+react-native  CONFORMANT   6 invariants (client + mobile-client)
+fastapi       UNSUPPORTED  angular/flutter PLANNED
+```
+
+Une suite locale verte ne prouve jamais la parité : appliquer un contrat neutre
+commun a suffi à révéler quatre divergences Spring que ses propres tests
+validaient.
+
+La prochaine mission unique consiste à rendre RBAC conforme au contrat
+Capability v2 sur ses targets `ready`, sans nouvelle target ni nouvelle
 capability. Tout pipeline parallèle et tout dossier `base/` restent hors
 périmètre.

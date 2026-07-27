@@ -7,16 +7,19 @@ import type { SignInInput } from '../src/auth/session';
 
 /**
  * Controllable {@link AuthApi} mock:
- * - counts login/refresh calls (assert coalescing & wiring);
- * - `failLogin`/`failRefresh` simulate backend failures;
+ * - counts login/refresh/logout calls (assert coalescing & wiring);
+ * - `failLogin`/`failRefresh`/`failLogout` simulate backend failures;
  * - an optional gate lets a test hold a refresh in-flight to prove coalescing;
  * - issues `expiresAt` from an injectable clock to drive proactive-expiry tests.
  */
 export class MockAuthApi implements AuthApi {
   loginCalls = 0;
   refreshCalls = 0;
+  logoutCalls = 0;
   failLogin = false;
   failRefresh = false;
+  failLogout = false;
+  lastLogoutToken: string | null = null;
 
   private gate: { promise: Promise<void>; resolve: () => void } | null = null;
 
@@ -55,6 +58,14 @@ export class MockAuthApi implements AuthApi {
       throw new Error('refresh failed');
     }
     return this.mint(null);
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    this.logoutCalls += 1;
+    this.lastLogoutToken = refreshToken;
+    if (this.failLogout) {
+      throw new Error('logout failed');
+    }
   }
 
   private mint(displayName: string | null): AuthSessionData {

@@ -1,8 +1,10 @@
 package com.enistere.core.modules.auth;
 
+import com.enistere.core.common.exception.CodedException;
 import com.enistere.core.config.JwtConfig;
 import com.enistere.core.infrastructure.security.JwtTokenProvider;
 import com.enistere.core.modules.audit.AuditService;
+import com.enistere.core.modules.auth.dto.AuthUserDto;
 import com.enistere.core.modules.auth.dto.LoginResponseDto;
 import com.enistere.core.modules.auth.dto.MeResponseDto;
 import com.enistere.core.modules.users.User;
@@ -52,13 +54,15 @@ public class AuthService {
     public LoginResponseDto login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email).orElse(null);
 
+        // Unknown identity, wrong password and disabled account are indistinguishable
+        // to the caller: same code, same message. Only the audit trail separates them.
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
             auditService.record(AuthAuditEvents.LOGIN_FAILED, null, "auth", null, null, null);
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+            throw invalidCredentials();
         }
         if (!user.isActive()) {
             auditService.record(AuthAuditEvents.LOGIN_FAILED, user.getId(), "auth", null, null, null);
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account disabled");
+            throw invalidCredentials();
         }
 
         user.setLastLoginAt(Instant.now());
@@ -79,11 +83,16 @@ public class AuthService {
 
     public LoginResponseDto refresh(String rawRefreshToken) {
         String hash = hashToken(rawRefreshToken);
-        RefreshToken token = refreshTokenRepository.findByTokenHash(hash)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
+        RefreshToken token = refreshTokenRepository.findByTokenHash(hash).orElse(null);
 
+        if (token == null) {
+            auditService.record(AuthAuditEvents.REFRESH_FAILED, null, "auth", null, null, null);
+            throw invalidRefreshToken();
+        }
+        // A revoked token is also the reuse signal: rotation revokes on every use.
         if (token.isRevoked() || token.isExpired()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expired or revoked");
+            auditService.record(AuthAuditEvents.REFRESH_FAILED, token.getUser().getId(), "auth", null, null, null);
+            throw invalidRefreshToken();
         }
 
         token.revoke();
@@ -111,10 +120,37 @@ public class AuthService {
             user.getEmail(), user.getId().toString()
         );
         String rawRefresh = generateRawToken();
+        // Only the one-way fingerprint is persisted; the raw token exists solely in
+        // this response and is unrecoverable from the store.
         refreshTokenRepository.save(
             new RefreshToken(user, hashToken(rawRefresh), Instant.now().plus(REFRESH_EXPIRY))
         );
-        return new LoginResponseDto(accessToken, rawRefresh, "Bearer", jwtConfig.getExpiration());
+        return new LoginResponseDto(
+            toPublicUser(user),
+            accessToken,
+            rawRefresh,
+            "Bearer",
+            jwtConfig.getExpiration(),
+            REFRESH_EXPIRY.toSeconds()
+        );
+    }
+
+    private static AuthUserDto toPublicUser(User user) {
+        return new AuthUserDto(
+            user.getId().toString(),
+            user.getEmail(),
+            user.isActive() ? "ACTIVE" : "DISABLED"
+        );
+    }
+
+    private static CodedException invalidCredentials() {
+        return new CodedException(
+            HttpStatus.UNAUTHORIZED, AuthErrorCodes.AUTH_INVALID_CREDENTIALS, "Invalid credentials");
+    }
+
+    private static CodedException invalidRefreshToken() {
+        return new CodedException(
+            HttpStatus.UNAUTHORIZED, AuthErrorCodes.AUTH_REFRESH_TOKEN_INVALID, "Invalid refresh token");
     }
 
     private String generateRawToken() {

@@ -39,7 +39,9 @@ class AuthControllerTest extends AbstractIntegrationTest {
             .andExpect(jsonPath("$.accessToken").isNotEmpty())
             .andExpect(jsonPath("$.refreshToken").isNotEmpty())
             .andExpect(jsonPath("$.tokenType").value("Bearer"))
-            .andExpect(jsonPath("$.expiresIn").value(60));
+            .andExpect(jsonPath("$.accessTokenExpiresIn").value(60))
+            .andExpect(jsonPath("$.refreshTokenExpiresIn").isNumber())
+            .andExpect(jsonPath("$.user.email").value(email));
     }
 
     @Test
@@ -49,7 +51,7 @@ class AuthControllerTest extends AbstractIntegrationTest {
                 .content(loginBody(email, "wrong-password")))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.statusCode").value(401))
-            .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+            .andExpect(jsonPath("$.errorCode").value("AUTH_INVALID_CREDENTIALS"));
     }
 
     @Test

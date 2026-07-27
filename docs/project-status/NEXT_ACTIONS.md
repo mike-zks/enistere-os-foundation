@@ -2,64 +2,83 @@
 
 ## Mission achevée
 
-Le Capability Manifest v2 et son graphe déterministe sont exécutables
-([ADR-067](../adr/ADR-067-capability-manifest-v2-and-deterministic-graph.md)).
+Authentication est conforme au contrat Capability v2 sur ses quatre targets
+`ready`, mesurée par une suite produit commune
+([ADR-068](../adr/ADR-068-authentication-capability-product-conformance.md)).
 
 Preuves :
 
-- schéma fermé et versionné unique ;
-- registre local découvert depuis `capabilities/*`, sans liste de dépendances
-  codée dans le moteur ;
-- `requires` résolu par closure transitive, tri topologique stable et refus des
-  cycles ;
-- `requested`, `autoIncluded`, `order` et `edges` portés jusqu’au plan et au
-  lock ;
-- conflits obligatoirement symétriques, expliqués et bloquants ;
-- targets `ready` liées à un adapter/version réel ;
-- contrats, primitives provider-neutral, modes de déploiement, migrations et
-  suites de conformité résolus par application ;
-- résolution testée sur deux autorités backend Spring et NestJS, sans
-  revendiquer leur génération avec capability ;
-- artefact généré `packages/contracts/capabilities.json` ;
-- CLI `capability list` et `capability describe` ;
-- manifests Auth/RBAC/Files migrés sans modifier la matrice produit ;
-- overlays Spring alignés sur la version `0.2.0` ;
-- aucun bundle, aucun pipeline parallèle, aucune capability nouvelle ;
-- aucune source `starters/*/base/`, aucune `composition.baseSource`.
+- contrat produit neutre et versionné
+  `capabilities/auth/contracts/authentication.product.v1.json` : quatre rôles,
+  quinze invariants, aucune référence à un framework ;
+- matrice autorité/client explicite : `nestjs` et `spring` en `authority`,
+  `nextjs` en `client + web-client`, `react-native` en `client + mobile-client` ;
+- closure d’invariants calculée par rôle, refusée si incomplète ou excédentaire ;
+- chaque invariant applicable adossé à une preuve localisée et à des marqueurs
+  de contenu, vérifiés dans la Foundation **et** dans l’application matérialisée ;
+- vérification matérialisée branchée dans `golden-runtime.mjs`, après les gates
+  réels ;
+- audit métier Authentication déclaré et testé sur les deux autorités, en
+  s’appuyant sur l’infrastructure d’audit du baseline sans la dupliquer ;
+- quatre divergences Spring révélées par le contrat neutre et corrigées :
+  réponse de session canonique, `AUTH_INVALID_CREDENTIALS`, `AUTH_RATE_LIMITED`,
+  `AUTH_REFRESH_FAILED` ;
+- `CodedException` ajoutée au Platform Baseline : un seul chemin de mapping
+  d’erreur, enveloppe plate d’ADR-048 inchangée ;
+- Angular, Flutter et FastAPI inchangés et honnêtement non `ready` ;
+- aucune nouvelle target, aucune nouvelle capability, aucun dossier `base/`.
+
+État calculé (`factory/conformance/reports/authentication-v1.json`) :
+
+```text
+nestjs        CONFORMANT   8 invariants   9 preuves
+spring        CONFORMANT   8 invariants   8 preuves
+nextjs        CONFORMANT   6 invariants   7 preuves
+react-native  CONFORMANT   6 invariants   6 preuves
+fastapi       UNSUPPORTED  angular/flutter PLANNED
+```
 
 ## Limites honnêtes
 
-- le lifecycle add/remove/upgrade/migrate in-place n’est pas livré ;
+- la conformité porte sur Authentication seule : RBAC et Files n’ont pas de
+  contrat produit neutre ;
+- le contrat de session Spring change de forme : rupture assumée, sans
+  compatibilité ascendante ni migration in-place ;
+- le lifecycle add/remove/upgrade/migrate n’est toujours pas livré ;
 - les providers d’infrastructure ne sont pas sélectionnés ;
-- la conformité produit entre adapters n’est pas encore mesurée par une suite
-  commune ;
 - `distributed-platform` avec capabilities reste bloqué ;
-- aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` n’est revendiqué.
+- aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` n’est revendiqué ;
+- aucun test sur device réel.
 
 ## Prochaine mission unique
 
-> **Rendre Authentication conforme au contrat Capability v2 sur ses targets
-> actuellement `ready`, avec une suite produit commune, sans ajouter de target
-> ni de nouvelle capability.**
+> **Rendre RBAC conforme au contrat Capability v2 sur ses targets actuellement
+> `ready`, avec un contrat produit neutre, sans ajouter de target ni de nouvelle
+> capability.**
 
 ### Justification de l’ordre
 
-Le framework sait désormais décrire et résoudre une capability, mais les
-preuves Auth restent distribuées entre overlays et goldens. Avant User
-Management, Events ou toute nouvelle capability, il faut démontrer que le même
-contrat produit Authentication est satisfait sur NestJS, Spring, Next.js et
-React Native selon le rôle de chaque target.
+Le mécanisme de conformité produit est désormais éprouvé sur une capability
+réelle, et il a prouvé sa valeur en révélant quatre divergences Spring que les
+suites locales ne voyaient pas. RBAC est la suite naturelle : `files` en dépend
+(`auth → rbac → files`), donc mesurer RBAC avant Files évite de bâtir la preuve
+de Files sur une base non prouvée.
+
+RBAC pose une question que Authentication n’a pas posée : sa target
+React Native est `not-applicable`, pas `ready`. Le contrat produit devra donc
+distinguer un rôle absent d’un rôle non couvert, sans dégrader le statut global.
 
 ### Critères de sortie
 
-- cas d’usage et erreurs Authentication versionnés dans une source neutre ;
-- matrice autorité API / client officiel explicite ;
-- suite de conformité commune branchée sur les preuves existantes ;
-- NestJS et Spring évalués contre les mêmes invariants serveur ;
-- Next.js et React Native évalués contre les mêmes invariants client
-  applicables ;
-- audit métier Authentication déclaré sans dupliquer l’infrastructure d’audit ;
+- cas d’usage, règles de décision et erreurs RBAC versionnés dans une source
+  neutre ;
+- rôles explicites (autorité de décision vs consommateur de permissions) ;
+- `not-applicable` traité comme une absence légitime de rôle, jamais comme une
+  conformité implicite ;
+- NestJS et Spring évalués contre les mêmes invariants d’autorisation ;
+- Next.js évalué contre les invariants client applicables ;
+- audit métier RBAC déclaré sans dupliquer l’infrastructure d’audit ;
 - statuts `CONFORMANT` uniquement là où les preuves passent ;
-- Angular, Flutter et FastAPI inchangés et honnêtement non `ready` ;
+- Angular, Flutter et FastAPI inchangés ;
 - aucun nouveau runtime, provider ou capability ;
 - aucun dossier `base/`.

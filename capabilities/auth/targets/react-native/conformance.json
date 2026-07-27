@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "react-native",
+  "contract": {
+    "id": "authentication-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client",
+    "mobile-client"
+  ],
+  "suite": "auth-react-native-integration",
+  "golden": "triple-auth",
+  "invariants": {
+    "AUTH-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-engine.test.ts",
+        "materialized": "test/auth-engine.test.ts",
+        "contains": [
+          "signIn success",
+          "Snapshot is token-free"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/session-store.test.ts",
+        "materialized": "test/session-store.test.ts",
+        "contains": [
+          "refreshToken",
+          "invalid shape"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/with-auth-retry.test.ts",
+        "materialized": "test/with-auth-retry.test.ts",
+        "contains": [
+          "401 → refresh succeeds",
+          "never refreshes twice"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-004": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-engine.test.ts",
+        "materialized": "test/auth-engine.test.ts",
+        "contains": [
+          "signOut requests remote revocation",
+          "purges storage even when remote logout fails"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-005": [
+      {
+        "kind": "test",
+        "source": "files/test/enistere-auth-api.test.ts",
+        "materialized": "test/enistere-auth-api.test.ts",
+        "contains": [
+          "generic error",
+          "does not leak"
+        ]
+      }
+    ],
+    "AUTH-MOBILE-001": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-engine.test.ts",
+        "materialized": "test/auth-engine.test.ts",
+        "contains": [
+          "refresh token persisted",
+          "getAccessToken"
+        ]
+      }
+    ]
+  }
+}

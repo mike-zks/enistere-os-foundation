@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1",
+  "id": "authentication-product",
+  "version": "1.0.0",
+  "capability": "auth",
+  "roles": [
+    "authority",
+    "client",
+    "web-client",
+    "mobile-client"
+  ],
+  "invariants": [
+    {
+      "id": "AUTH-AUTHORITY-001",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Valid credentials issue a bearer access token, a revocable refresh token, explicit lifetimes and a public identity without password material."
+    },
+    {
+      "id": "AUTH-AUTHORITY-002",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Unknown identities, wrong passwords and unavailable accounts are rejected with the same public AUTH_INVALID_CREDENTIALS response."
+    },
+    {
+      "id": "AUTH-AUTHORITY-003",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "A protected profile endpoint requires a valid access token and returns public identity data without authentication secrets."
+    },
+    {
+      "id": "AUTH-AUTHORITY-004",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Refresh rotates the refresh token, rejects invalid, expired, revoked or already-used tokens and never returns a token hash."
+    },
+    {
+      "id": "AUTH-AUTHORITY-005",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Logout is non-revealing and idempotent and revokes the submitted valid refresh session before it can be refreshed again."
+    },
+    {
+      "id": "AUTH-AUTHORITY-006",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Refresh secrets are stored only as one-way fingerprints and password, token and hash material never appears in public responses."
+    },
+    {
+      "id": "AUTH-AUTHORITY-007",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Credential and refresh exchanges are rate-limited without weakening the Platform Baseline error contract."
+    },
+    {
+      "id": "AUTH-AUTHORITY-008",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Authentication declares and emits business audit events for login success/failure, refresh success/failure and logout through the baseline audit port without recording secrets."
+    },
+    {
+      "id": "AUTH-CLIENT-001",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Login establishes an authenticated session while keeping access and refresh tokens outside the public UI state and response surface."
+    },
+    {
+      "id": "AUTH-CLIENT-002",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "The access token uses transient protected storage and the refresh token uses platform-appropriate protected storage."
+    },
+    {
+      "id": "AUTH-CLIENT-003",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Session restoration and a 401 trigger one coalesced refresh and at most one retry; a failed refresh purges the local session."
+    },
+    {
+      "id": "AUTH-CLIENT-004",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Logout requests remote revocation when a refresh token exists and always purges the local session even when the authority is unavailable."
+    },
+    {
+      "id": "AUTH-CLIENT-005",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Authentication failures are generic, correlation-aware where available and never expose credentials or token values."
+    },
+    {
+      "id": "AUTH-WEB-001",
+      "appliesTo": [
+        "web-client"
+      ],
+      "requirement": "State-changing BFF authentication operations enforce same-origin and CSRF validation and rotate or clear CSRF state with the session."
+    },
+    {
+      "id": "AUTH-MOBILE-001",
+      "appliesTo": [
+        "mobile-client"
+      ],
+      "requirement": "The mobile refresh session is persisted only through the secure-storage abstraction while the access token remains memory-only."
+    }
+  ]
+}

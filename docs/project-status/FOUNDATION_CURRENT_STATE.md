@@ -28,6 +28,8 @@ Profils système exécutables :
 [`ADR-065`](../adr/ADR-065-executable-system-architecture-profiles.md).
 Capability Manifest v2 :
 [`ADR-067`](../adr/ADR-067-capability-manifest-v2-and-deterministic-graph.md).
+Conformité produit Authentication :
+[`ADR-068`](../adr/ADR-068-authentication-capability-product-conformance.md).
 
 ## Actifs existants à migrer
 
@@ -108,8 +110,20 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
 - `Capability Manifest v2` : **IMPLEMENTED** (ADR-067) — closure déterministe,
   auto-inclusions tracées, conflits symétriques, adapters/contrats/primitives/
   migrations/conformité résolus par application et artefact généré.
-  Reste, avant la parité **produit** : suites communes par capability, contrats
-  polyglottes générés et lifecycle.
+- `Conformité produit Authentication` : **CONFORMANT** (ADR-068) — contrat neutre
+  versionné, rôles autorité/client, closure d'invariants par rôle et preuves
+  vérifiées dans la Foundation comme dans l'application matérialisée.
+
+```text
+nestjs        CONFORMANT   8 invariants (authority)
+spring        CONFORMANT   8 invariants (authority)
+nextjs        CONFORMANT   6 invariants (client + web-client)
+react-native  CONFORMANT   6 invariants (client + mobile-client)
+fastapi       UNSUPPORTED  angular/flutter PLANNED
+```
+
+  Reste, avant la parité **produit** globale : même traitement pour RBAC et
+  Files, contrats polyglottes générés et lifecycle.
 
 Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
 

@@ -3,9 +3,10 @@ package com.enistere.core.infrastructure.ratelimit;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.enistere.core.common.exception.CodedException;
+import com.enistere.core.modules.auth.AuthErrorCodes;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -28,7 +29,8 @@ public class AuthRateLimitInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!rateLimiter.tryConsume("auth", request.getRemoteAddr(),
                 props.getAuthCapacity(), props.getAuthRefillSeconds())) {
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Rate limit exceeded");
+            throw new CodedException(
+                HttpStatus.TOO_MANY_REQUESTS, AuthErrorCodes.AUTH_RATE_LIMITED, "Rate limit exceeded");
         }
         return true;
     }
