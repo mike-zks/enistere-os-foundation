@@ -57,8 +57,17 @@ export function stableDigest(value) {
 }
 
 /** Une application canonique. L'intention `consumes` est conservée ici (résolue par le resolver). */
-export function canonicalApplication({ id, kind, runtime, consumes = [], options = {} }) {
-  return { id, kind, runtime, consumes: [...consumes], options: { ...options } };
+export function canonicalApplication({ id, kind, runtime, consumes = [], ownership = null, options = {} }) {
+  return {
+    id,
+    kind,
+    runtime,
+    consumes: [...consumes],
+    ownership: ownership
+      ? { team: ownership.team, domains: [...(ownership.domains ?? [])] }
+      : null,
+    options: { ...options },
+  };
 }
 
 /** Une capability canonique avec ses targets d'INTENTION (résolues par le resolver). */
@@ -73,11 +82,39 @@ export function canonicalEnvironment({ id, kind }) {
   return { id, kind };
 }
 
+/** A versioned, policy-bearing edge in the system communication graph. */
+export function canonicalCommunication({
+  id, from, to, mode, protocol, contract, timeoutMs, maxAttempts, identity, failurePolicy,
+}) {
+  return {
+    id,
+    from,
+    to,
+    mode,
+    protocol,
+    contract,
+    timeoutMs,
+    maxAttempts,
+    identity,
+    failurePolicy,
+  };
+}
+
 /**
  * Assemble un CanonicalSystem profondément immuable et estampille `source.digest`
  * (sha256 stable du modèle, le champ digest exclu de son propre calcul).
  */
-export function canonicalSystem({ metadata, architecture, applications, capabilities, domain = { entities: [] }, environments, policies = {}, source }) {
+export function canonicalSystem({
+  metadata,
+  architecture,
+  applications,
+  capabilities,
+  communications = [],
+  domain = { entities: [] },
+  environments,
+  policies = {},
+  source,
+}) {
   const base = {
     apiVersion: SYSTEM_API_VERSION,
     metadata: { ...metadata },
@@ -92,6 +129,7 @@ export function canonicalSystem({ metadata, architecture, applications, capabili
     },
     applications: applications.map((app) => canonicalApplication(app)),
     capabilities: capabilities.map((capability) => canonicalCapability(capability)),
+    communications: communications.map((communication) => canonicalCommunication(communication)),
     domain: { entities: [...(domain.entities ?? [])] },
     environments: environments.map((environment) => canonicalEnvironment(environment)),
     policies: { ...policies },

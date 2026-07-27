@@ -69,6 +69,7 @@ jobs:
           - nestjs-react-native-base
           - nestjs-angular-base
           - nestjs-flutter-base
+          - distributed-spring-nestjs
 
     services:
       postgres:
@@ -158,5 +159,5 @@ jobs:
         env:
           # La preuve de boot + contrat HTTP est obligatoire sur les trois
           # références API de base, sans multiplier inutilement les démarrages.
-          GOLDEN_RUNTIME_START: ${{ (matrix.composition == 'nestjs-base' || matrix.composition == 'spring-base' || matrix.composition == 'fastapi-base') && '1' || '0' }}
+          GOLDEN_RUNTIME_START: ${{ (matrix.composition == 'nestjs-base' || matrix.composition == 'spring-base' || matrix.composition == 'fastapi-base' || matrix.composition == 'distributed-spring-nestjs') && '1' || '0' }}
         run: node factory/quality/scripts/golden-runtime.mjs ${{ matrix.composition }}

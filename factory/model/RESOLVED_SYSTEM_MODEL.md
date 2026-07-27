@@ -2,8 +2,9 @@
 
 Modèle **unique de résolution** de la Factory. Décision : [ADR-046](../../docs/adr/ADR-046-single-canonical-factory-pipeline.md).
 
-> Ce fichier décrit l'implémentation actuelle. La cible ajoute graphes, primitives, communications,
-> contrats, policies effectives, modes de déploiement et statuts de preuve ; voir
+> Ce fichier décrit l'implémentation actuelle. Ownership et communications
+> minimales sont présents ; la cible ajoute primitives, contrats polyglottes,
+> policies effectives et statuts de preuve complets ; voir
 > [ADR-057](../../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md).
 
 ## Rôle
@@ -22,8 +23,10 @@ est distinct du CSM : le CSM n'est jamais surchargé d'informations de résoluti
 ```text
 ResolvedSystem
 ├── metadata, architecture, domain, environments, policies   (repris du CSM)
-├── applications[] { id, kind, runtime, adapter, baseline, source, appDir, gates[], resolvedCapabilities[], consumes[] }
+├── applications[] { id, kind, runtime, adapter, baseline, source, appDir,
+│                    gates[], resolvedCapabilities[], consumes[], ownership? }
 ├── capabilities[] { id, configuration, requestedTargets[], resolvedTargets[], notApplicableTargets[] }
+├── communications[]
 ├── selection { runtimes[], stack, allModular, generationMode, targetAdapters }
 ├── profile { id, status, golden, runtimeProven, compositionExact } | null   (descriptif)
 ├── support { level: ready|blocked, blockers[], notApplicable[] }
@@ -43,6 +46,9 @@ ResolvedSystem
 - **Support** : `assessCapabilitySupport` → `blocked` si une capability n'est pas composable
   (`RESOLUTION_CAPABILITY_NOT_READY`).
 - **Consumes** : l'intention `consumes` du CSM est reprise résolue par application.
+- **Support distribué** : le resolver accorde `ready` uniquement au scope Spring
+  + NestJS défini par ADR-066 ; les autres graphes reçoivent un blocker
+  `RESOLUTION_TOPOLOGY_NOT_GENERATABLE`.
 
 ## Diagnostics
 

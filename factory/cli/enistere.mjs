@@ -110,6 +110,21 @@ function applicationsFor(kind, runtimes) {
   }));
 }
 
+function communicationFor(from, to) {
+  return {
+    id: `${from}-to-${to}`,
+    from,
+    to,
+    mode: 'synchronous',
+    protocol: 'http',
+    contract: `${to}.v1`,
+    timeoutMs: 2000,
+    maxAttempts: 2,
+    identity: 'workload',
+    failurePolicy: 'fail-fast',
+  };
+}
+
 /**
  * Builds the initial blueprint from the system purpose first. This is the
  * non-interactive equivalent of the guided question; scripts must make the
@@ -129,7 +144,18 @@ export function createArchitectureBlueprint(slug, flags) {
   const apis = runtimeListFlag(flags, '--api', defaultApis);
   const webs = runtimeListFlag(flags, '--web', defaultWeb);
   const mobiles = runtimeListFlag(flags, '--mobile', []);
-  const apiIds = applicationsFor('api', apis).map((app) => app.id);
+  const distributed = ['distributed-platform', 'service-ecosystem'].includes(profile);
+  const apiApplications = applicationsFor('api', apis).map((application, index, all) => ({
+    ...application,
+    ...(distributed ? {
+      consumes: index === 0 ? [] : [all[0].id],
+      ownership: {
+        team: `${application.id}-team`,
+        domains: [`${application.id}-domain`],
+      },
+    } : {}),
+  }));
+  const apiIds = apiApplications.map((app) => app.id);
   const clients = [
     ...applicationsFor('web', webs),
     ...applicationsFor('mobile', mobiles),
@@ -137,7 +163,11 @@ export function createArchitectureBlueprint(slug, flags) {
 
   const blueprint = createDefaultBlueprint(slug);
   delete blueprint.stack;
-  blueprint.applications = [...applicationsFor('api', apis), ...clients];
+  blueprint.applications = [...apiApplications, ...clients];
+  blueprint.communications = distributed
+    ? blueprint.applications.flatMap((application) =>
+      (application.consumes ?? []).map((target) => communicationFor(application.id, target)))
+    : [];
   blueprint.architecture = { profile };
   assertBlueprint(blueprint);
   const diagnostics = validateCanonicalSystem(normalizeBlueprint(blueprint));

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   canonicalApplication,
   canonicalCapability,
+  canonicalCommunication,
   canonicalEnvironment,
   canonicalSystem,
   serializeCanonicalSystem,
@@ -14,7 +15,15 @@ import { validateCanonicalSystem } from '../blueprint/validate.mjs';
 import { resolveApplications } from '../engine/applications.mjs';
 
 /** A minimal valid blueprint; overrides replace the stack/capabilities/etc. */
-function blueprint({ stack, applications, capabilities = ['base'], environments = ['local'], architecture, profile } = {}) {
+function blueprint({
+  stack,
+  applications,
+  capabilities = ['base'],
+  environments = ['local'],
+  architecture,
+  profile,
+  communications = [],
+} = {}) {
   const bp = {
     version: '1',
     project: { name: 'Sample App', slug: 'sample-app' },
@@ -23,6 +32,7 @@ function blueprint({ stack, applications, capabilities = ['base'], environments 
     domain: { entities: [] },
     capabilities,
     deployment: { environments },
+    communications,
   };
   if (applications) bp.applications = applications;
   else bp.stack = stack ?? { api: 'nestjs', web: null, mobile: null };
@@ -35,6 +45,7 @@ function blueprint({ stack, applications, capabilities = ['base'], environments 
 function system({
   applications,
   capabilities = [],
+  communications = [],
   environments = [{ id: 'local', kind: 'local' }],
   architecture = {
     profile: 'backend-service',
@@ -48,7 +59,7 @@ function system({
   metadata = { name: 'sample-app', version: '1.0.0' },
 }) {
   return canonicalSystem({
-    metadata, architecture, applications, capabilities, environments, policies: {}, source: { blueprintVersion: '1' },
+    metadata, architecture, applications, capabilities, communications, environments, policies: {}, source: { blueprintVersion: '1' },
   });
 }
 
@@ -232,6 +243,103 @@ describe('canonical system — invariants', () => {
       canonicalApplication({ id: 'web', kind: 'web', runtime: 'nextjs', consumes: ['ghost'] }),
     ] });
     assert.ok(codes(validateCanonicalSystem(csm)).includes(CSM_DIAGNOSTIC_CODES.INCOHERENT_STRUCTURE));
+  });
+
+  it('rejects duplicate data authority and incoherent communication edges', () => {
+    const distributedArchitecture = {
+      profile: 'distributed-platform',
+      clients: { mode: 'none' },
+      backend: { style: 'distributed-services' },
+      deployment: { coupling: 'partially-independent' },
+      data: { ownership: 'bounded-context' },
+      communication: { primary: 'hybrid' },
+      operations: { maturity: 'advanced' },
+    };
+    const csm = system({
+      architecture: distributedArchitecture,
+      applications: [
+        canonicalApplication({
+          id: 'core-api',
+          kind: 'api',
+          runtime: 'spring',
+          ownership: { team: 'core-team', domains: ['shared-domain'] },
+        }),
+        canonicalApplication({
+          id: 'engagement-api',
+          kind: 'api',
+          runtime: 'nestjs',
+          consumes: ['core-api'],
+          ownership: { team: 'engagement-team', domains: ['shared-domain'] },
+        }),
+      ],
+      communications: [canonicalCommunication({
+        id: 'wrong-direction',
+        from: 'core-api',
+        to: 'engagement-api',
+        mode: 'synchronous',
+        protocol: 'http',
+        contract: 'engagement-api.v1',
+        timeoutMs: 2000,
+        maxAttempts: 2,
+        identity: 'workload',
+        failurePolicy: 'fail-fast',
+      })],
+    });
+    const diagnostics = validateCanonicalSystem(csm);
+    assert.ok(codes(diagnostics).includes(CSM_DIAGNOSTIC_CODES.INVALID_OWNERSHIP));
+    assert.ok(codes(diagnostics).includes(CSM_DIAGNOSTIC_CODES.INCOHERENT_COMMUNICATION_GRAPH));
+  });
+
+  it('rejects a cyclic distributed dependency graph', () => {
+    const csm = normalizeBlueprint(blueprint({
+      architecture: { profile: 'distributed-platform' },
+      applications: [
+        {
+          id: 'core-api',
+          kind: 'api',
+          runtime: 'spring',
+          consumes: ['engagement-api'],
+          ownership: { team: 'core-team', domains: ['core'] },
+        },
+        {
+          id: 'engagement-api',
+          kind: 'api',
+          runtime: 'nestjs',
+          consumes: ['core-api'],
+          ownership: { team: 'engagement-team', domains: ['engagement'] },
+        },
+      ],
+      communications: [
+        {
+          id: 'core-to-engagement',
+          from: 'core-api',
+          to: 'engagement-api',
+          mode: 'synchronous',
+          protocol: 'http',
+          contract: 'engagement-api.v1',
+          timeoutMs: 2000,
+          maxAttempts: 2,
+          identity: 'workload',
+          failurePolicy: 'fail-fast',
+        },
+        {
+          id: 'engagement-to-core',
+          from: 'engagement-api',
+          to: 'core-api',
+          mode: 'synchronous',
+          protocol: 'http',
+          contract: 'core-api.v1',
+          timeoutMs: 2000,
+          maxAttempts: 2,
+          identity: 'workload',
+          failurePolicy: 'fail-fast',
+        },
+      ],
+    }));
+    const diagnostics = validateCanonicalSystem(csm);
+    assert.ok(diagnostics.some((item) =>
+      item.code === CSM_DIAGNOSTIC_CODES.INCOHERENT_COMMUNICATION_GRAPH
+      && item.message.includes('cycle')));
   });
 
   it('represents a future profile without claiming it is generatable', () => {
