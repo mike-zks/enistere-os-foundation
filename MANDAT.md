@@ -439,7 +439,7 @@ Ne saute pas une couche fondatrice pour livrer rapidement une fonctionnalité vi
 
 ---
 
-# 10. État courant (au 2026-07-26)
+# 10. État courant (au 2026-07-27)
 
 Le **pipeline canonique unique** (`Blueprint → CSM → ResolvedSystem → GenerationPlan → Materialization`) est **fusionné sur `main`** et gardé par des fitness functions (FF6–FF8). Le socle V2 « contrats stables, plugins gated » est en place ; la vague CVE est couverte par exceptions documentées (`factory/quality/audit-exceptions.json`).
 
@@ -477,6 +477,12 @@ TARGET ou PLANNED selon les preuves.
 * **ADR-064 — Convergence Common/Mobile v2** : React Native et Flutter satisfont chacun les
   25 invariants Common/Mobile ; leurs goldens prouvent tests, build/export, audit et reproductibilité.
   Les hooks session/offline/push restent neutres et les flux Auth/Files/Notifications sont exclus.
+* **ADR-065 — Profils système exécutables** : `init` commence par le type de
+  système ; `validate` sépare représentation et génération ; le resolver et le
+  plan exposent distinctement profil système, preset de composition, support et
+  blockers. `backend-service`/`product-platform` sont générables sur les
+  compositions prouvées, `distributed-platform` reste PLANNED et
+  `service-ecosystem` TARGET.
 
 **Convergence par famille :**
 
@@ -497,13 +503,13 @@ calculé est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 # 11. Prochaine étape
 
-> Rendre les profils canoniques **`backend-service`** et
-> **`product-platform`** exécutables dans la CLI et le resolver, puis préparer
-> `distributed-platform` sans déclarer `service-ecosystem` générable.
+> Définir le contrat minimal de graphe, communications et ownership de
+> **`distributed-platform`**, puis prouver un golden Spring + NestJS sans
+> promouvoir `service-ecosystem`.
 
-Les phases Runtime Contracts et convergence API/Web/Mobile sont complètes.
-L’ordre de la roadmap impose maintenant Architecture Profiles avant le
-framework de capabilities.
+Les profils simples sont exécutables et la représentation distribuée est
+planifiable avec blockers. La phase Architecture Profiles doit maintenant
+prouver un premier slice multi-backend avant le framework de capabilities.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -830,8 +836,11 @@ obligatoires et supprimé les dernières représentations `base/`.
 ADR-064 a convergé React Native et Flutter, remplacé les placeholders évalués
 structurellement par des contrats testés et retiré le moteur Notifications
 embarqué de React Native.
+ADR-065 a rendu les profils système exécutables, séparé le support
+d’architecture des presets de composition et fait traverser les intentions
+multi-backend jusqu’au plan bloqué.
 
-État calculé au 2026-07-26 :
+État calculé au 2026-07-27 :
 
 ```text
 NestJS      28 COMPLIANT / 0 PARTIAL / 0 MISSING
@@ -847,6 +856,7 @@ La présence d’un logger ne suffit jamais à prouver Observability. Pour les A
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-La prochaine mission unique consiste à rendre `backend-service` et
-`product-platform` exécutables comme profils système canoniques, avec leurs six
-dimensions indépendantes. Les nouvelles capabilities restent hors périmètre.
+La prochaine mission unique consiste à définir le contrat minimal de
+graphe/communications/ownership de `distributed-platform` et à prouver un
+golden Spring + NestJS. Les nouvelles capabilities et tout dossier `base/`
+restent hors périmètre.

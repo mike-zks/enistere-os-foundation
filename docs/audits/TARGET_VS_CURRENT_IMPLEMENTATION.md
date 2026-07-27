@@ -1,9 +1,9 @@
 # Audit — Architecture cible vs implémentation actuelle
 
-- Date : 2026-07-26
-- Branche auditée : `feat/mobile-runtime-v2-convergence`
-- Référence de départ : merge de la PR #211 (`3f669ba`)
-- Nature : audit vivant cible/existant, actualisé par les preuves d'ADR-064
+- Date : 2026-07-27
+- Branche auditée : `feat/architecture-profiles-v2`
+- Référence de départ : merge de la PR #212 (`40640f2`)
+- Nature : audit vivant cible/existant, actualisé par les preuves d'ADR-065
 
 ## Méthode
 
@@ -36,8 +36,8 @@ polyglottes manquent encore. Les 27 « profils » historiques restent des preset
 | `factory/model/resolved-system.mjs` | ADAPT | graph/primitives/contracts/support complet | pipeline utilisé |
 | `factory/model/generation-plan.mjs` | ADAPT | opérations, risques, approvals, support | digests déjà présents |
 | blueprint schema v1 | REPLACE | enveloppe V2 + migration frontière | taxonomie système adaptée ; enveloppe/champs historiques restants |
-| profiles/topologies engine | REFACTOR | distinguer profils système et presets de composition | 27 presets stack, 23 générables |
-| CLI système + presets historiques | ADAPT | parcours cible complet | `architecture list/describe/recommend` initial ; lifecycle absent |
+| profiles/topologies engine | ADAPT | compléter graphe distribué | profils système et presets désormais séparés dans ResolvedSystem/Plan |
+| CLI système + presets historiques | ADAPT | lifecycle futur | `init/validate/plan --explain` orientés profil système ; presets conservés séparément |
 | lock/provenance/digests | ADAPT | registry resolution et lifecycle | fondations présentes |
 | conformance engine | ADAPT | remplacer progressivement probes critiques par comportements | baseline v2 exécutable depuis ADR-058 |
 | fitness functions FF6–FF8 | KEEP | préserver pipeline unique | preuves présentes |
@@ -72,9 +72,9 @@ polyglottes manquent encore. Les 27 « profils » historiques restent des preset
 
 | Profil cible | Représentation actuelle | Génération actuelle | Décision |
 |---|---|---|---|
-| `backend-service` | profil canonique + inférence | plusieurs backends bootables séparément | ADAPT |
-| `product-platform` | profil canonique + dimensions | compositions backend+client | ADAPT |
-| `distributed-platform` | représentable ; multi-backend refusé à la génération | non | CREATE |
+| `backend-service` | CLI/CSM/resolver/plan | compositions API prouvées | KEEP |
+| `product-platform` | CLI/CSM/resolver/plan, multi-client | compositions backend+clients prouvées | KEEP |
+| `distributed-platform` | représentable et planifiable avec blockers structurés | non | CREATE graph/ownership/golden |
 | `service-ecosystem` | représentable ; style `microservices` distinct | non | CREATE après lifecycle |
 
 ## Runtimes et baseline
@@ -111,8 +111,8 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — profils canoniques partiellement exécutables :** le vocabulaire
-   système adopté n’est pas encore le parcours principal CLI/resolver.
+1. **P0 — profil distribué non matérialisable :** graphe, ownership, contrats et
+   golden multi-backend restent absents.
 2. **P0 — blueprint/CSM partiels :** primitives et Blueprint V2 complet manquent.
 3. **P1 — contrats centrés TypeScript :** équivalence Java/Python/Dart non prouvable.
 4. **P2 — primitives/lifecycle distribués absents :** aucune génération distribuée crédible.
@@ -123,8 +123,10 @@ Les actifs du kernel et des runtimes justifient une convergence plutôt qu'une r
 ADR-061 a fermé les écarts des deux APIs existantes ; ADR-062 a ajouté FastAPI
 dans le même pipeline ; ADR-063 a fermé les écarts Web et supprimé les dernières
 représentations `base/` ; ADR-064 a fermé les écarts Mobile et retiré
-Notifications du runtime React Native.
+Notifications du runtime React Native ; ADR-065 rend les deux profils simples
+exécutables et fait traverser les profils distribués jusqu’au plan sans support
+fictif.
 
-> **Prochaine mission unique : rendre `backend-service` et `product-platform`
-> exécutables dans la CLI et le resolver, puis préparer honnêtement
-> `distributed-platform`.**
+> **Prochaine mission unique : définir le graphe/ownership minimal de
+> `distributed-platform` et le prouver par un golden Spring + NestJS, sans
+> promouvoir `service-ecosystem`.**

@@ -1,7 +1,7 @@
 # Systèmes de référence
 
 Ces exemples sont normatifs pour la capacité de représentation du modèle, pas des goldens exécutables.
-Chaque fichier sépare la cible et le statut prouvé au 2026-07-25. Deux variantes illustrent que le nombre
+Chaque fichier sépare la cible et le statut prouvé au 2026-07-27. Deux variantes illustrent que le nombre
 de clients ne change pas à lui seul le profil `product-platform`.
 
 | Profil | Exemple | Statut global actuel |
@@ -14,3 +14,9 @@ de clients ne change pas à lui seul le profil `product-platform`.
 
 Un statut local plus élevé dans un exemple ne promeut pas la composition globale. Les preuves réelles
 restent les matrices générées et les Conformance Reports.
+
+Depuis ADR-065, `backend-service` et `product-platform` sont générables sur les
+compositions de runtimes/capabilities déjà prouvées. Les statuts du tableau
+restent plus bas lorsque l’exemple complet sélectionne des capabilities ou
+primitives encore absentes. `distributed-platform` est représentable et
+planifiable avec blockers ; `service-ecosystem` reste TARGET.

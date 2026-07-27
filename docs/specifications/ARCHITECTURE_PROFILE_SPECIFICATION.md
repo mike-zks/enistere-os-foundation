@@ -97,6 +97,30 @@ Tout profil DOIT :
 un. Une topologie représentable mais non matérialisable DOIT conserver son CSM et recevoir un statut de
 génération `PLANNED` ou un diagnostic de plan explicite.
 
+La validation DOIT distinguer :
+
+```text
+structure Blueprint
+→ représentation CSM
+→ support de résolution
+→ autorisation de génération
+```
+
+Plusieurs autorités backend sont valides pour la représentation d’une
+`distributed-platform` ou d’un `service-ecosystem`. Elles NE DOIVENT PAS être
+rejetées à la frontière Blueprint. Tant que leur matérialisation n’est pas
+prouvée, le resolver DOIT produire
+`RESOLUTION_TOPOLOGY_NOT_GENERATABLE` et le plan DOIT être bloqué.
+
+Les cohérences minimales suivantes sont obligatoires :
+
+| Profil | Contraintes de dimensions |
+|---|---|
+| `backend-service` | `clients.mode: none`, `backend.style: modular-monolith` |
+| `product-platform` | `clients.mode: single|multiple`, `backend.style: modular-monolith` |
+| `distributed-platform` | `backend.style: distributed-services`, ownership non partagé, operations `advanced|distributed` |
+| `service-ecosystem` | `backend.style: microservices`, déploiement `independent`, données `per-service`, operations `distributed` |
+
 ## 7. Validations distribuées
 
 `distributed-platform` et `service-ecosystem` DOIVENT en plus :
@@ -124,7 +148,28 @@ contrats. L’absence de ces preuves produit un refus de recommandation ou de g�
 
 L’IA PEUT proposer. Le recommender et le resolver déterministes valident.
 
-## 9. Support et conformité
+## 9. Parcours CLI exécutable
+
+`enistere init` DOIT recevoir le profil système avant les runtimes :
+
+```bash
+enistere init enistere.yaml marketplace \
+  --architecture=product-platform \
+  --api=nestjs \
+  --web=nextjs,angular \
+  --mobile=react-native,flutter
+```
+
+En mode non interactif, l’absence de `--architecture` DOIT être refusée.
+`enistere validate` valide la représentation indépendamment du support de
+génération. `enistere plan --explain` DOIT exposer séparément
+`architectureProfile`, `compositionPreset`, `support` et les diagnostics.
+
+Un preset de composition mono-backend NE DOIT PAS être attribué à un système
+multi-client ou multi-backend uniquement parce que sa première application
+correspond au preset.
+
+## 10. Support et conformité
 
 ```yaml
 status:
