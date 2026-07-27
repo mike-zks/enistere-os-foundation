@@ -38,6 +38,8 @@ function help() {
     '                                      write a system-first blueprint',
     '    topology: --api=RUNTIME[,RUNTIME] --web=RUNTIME[,RUNTIME]',
     '              --mobile=RUNTIME[,RUNTIME]',
+    '  capability list                     list Capability Manifest v2 entries',
+    '  capability describe <id>            show one manifest and graph relations',
     '  validate <blueprint>                validate representation independently',
     '                                      from generation support',
     '  plan <blueprint> [--explain]        print the generation plan or its',
@@ -248,6 +250,38 @@ async function main() {
     throw new Error('architecture requires list, describe or recommend');
   }
 
+  if (command === 'capability') {
+    const manifests = await loadCapabilityManifests(FOUNDATION_ROOT);
+    if (first === 'list') {
+      console.log(JSON.stringify({
+        capabilities: manifests.map((manifest) => ({
+          id: manifest.id,
+          version: manifest.version,
+          requires: manifest.requires,
+          conflicts: manifest.conflicts,
+          readyTargets: Object.entries(manifest.targets)
+            .filter(([, target]) => target.status === 'ready')
+            .map(([runtime]) => runtime),
+        })),
+      }, null, 2));
+      return;
+    }
+    if (first === 'describe') {
+      if (!second) throw new Error('capability describe requires an id');
+      const manifest = manifests.find((candidate) => candidate.id === second);
+      if (!manifest) throw new Error(`Unknown capability: ${second}`);
+      console.log(JSON.stringify({
+        ...manifest,
+        requiredBy: manifests
+          .filter((candidate) => candidate.requires.includes(manifest.id))
+          .map((candidate) => candidate.id)
+          .sort(),
+      }, null, 2));
+      return;
+    }
+    throw new Error('capability requires list or describe');
+  }
+
   if (command === 'doctor') {
     const starters = await loadStarterManifests(FOUNDATION_ROOT);
     const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT);
@@ -288,7 +322,7 @@ async function main() {
     if (!first) throw new Error('profile requires a name');
     // Throws with the API-mandatory invariant for web-only and mobile-only names.
     const entry = getProfile(first);
-    const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT, entry.capabilities);
+    const capabilities = await loadCapabilityManifests(FOUNDATION_ROOT);
     const starters = await loadStarterManifests(FOUNDATION_ROOT);
     const assessment = assessProfile(entry, capabilities, starters);
     console.log(JSON.stringify({
@@ -345,7 +379,7 @@ async function main() {
       return;
     }
     const starters = await loadStarterManifests(FOUNDATION_ROOT);
-    const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, blueprint.capabilities);
+    const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT);
     // The single canonical pipeline: blueprint → CSM → ResolvedSystem → plan.
     const plan = buildGenerationPlan(blueprint, { modularStarters: modularStarterIds(starters), starters, capabilityManifests });
     const generatable = plan.support.level === 'ready' && !hasErrors(plan.diagnostics);
@@ -361,6 +395,8 @@ async function main() {
           architecture: plan.architecture,
           architectureProfile: plan.architectureProfile,
           compositionPreset: plan.compositionPreset,
+          capabilityGraph: plan.capabilityGraph,
+          capabilityTargets: plan.capabilityTargets,
           support: plan.support,
           diagnostics: plan.diagnostics,
         }, null, 2));

@@ -4,8 +4,10 @@
 
 > Ce fichier décrit le plan exécutable actuel. La cible adoptée par
 > [ADR-057](../../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md) étend ce plan aux
-> primitives, contrats polyglottes, opérations lifecycle, risques, approbations
-> et statuts. ADR-066 ajoute déjà communications et déploiement distribués minimaux.
+> sélection de providers de primitives, contrats polyglottes, opérations
+> lifecycle, risques, approbations et statuts. ADR-066 ajoute communications et
+> déploiement distribués minimaux ; ADR-067 ajoute Capability Graph v2 et les
+> exigences de primitives par application.
 
 ## Rôle
 
@@ -26,7 +28,10 @@ GenerationPlan
 ├── generationMode, bundledFeaturesMayExceedSelection
 ├── stack, targetAdapters
 ├── capabilities[]                 (ids)
-├── capabilityTargets { <id>: { resolved[], notApplicable[], configuration } }
+├── capabilityGraph { requested[], autoIncluded[], order[], edges[] }
+├── capabilityTargets { <id>: { version, inclusion, requiredBy[], requires[],
+│                                resolved[], notApplicable[], configuration,
+│                                byApplication{} } }
 ├── communications[]
 ├── deploymentPlan { units[], order[], rollbackOrder[] }
 ├── domain { entities[] }
@@ -36,7 +41,8 @@ GenerationPlan
 ├── support { level, blockers[], notApplicable[] }
 ├── gates { <appId>: [{ gate, command }] }
 ├── directories[], applications[] { id, kind, runtime, baseline, source, appDir,
-│                                   consumes[], ownership? }, starterSources
+│                                   consumes[], ownership?,
+│                                   resolvedCapabilities[] }, starterSources
 ├── diagnostics[]                  (RESOLUTION_* + PLAN_*)
 ├── systemDigest, resolutionDigest
 └── planDigest
@@ -48,6 +54,11 @@ Le générateur refuse une composition non générable **depuis le plan seul** :
 `support.level !== 'ready'` ou un diagnostic `error` (les diagnostics de résolution sont portés par le
 plan). Tous les fichiers générés (lock, README, `package.json`, contrats, compose, verify, docs)
 dérivent du plan.
+
+Les overlays sont appliqués exclusivement dans `capabilityGraph.order`. Le
+générateur ne possède ni liste d’arêtes ni ordre de registre secondaire.
+`packages/contracts/capabilities.json` matérialise le graphe et les résolutions
+par application.
 
 ## Sérialisation
 

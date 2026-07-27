@@ -41,6 +41,22 @@ function deploymentPlan(applications) {
   };
 }
 
+function copyTargetResolution(resolution) {
+  if (!resolution || resolution.status !== 'ready') return { ...resolution };
+  return {
+    ...resolution,
+    adapter: { ...resolution.adapter },
+    deploymentModes: [...resolution.deploymentModes],
+    contracts: resolution.contracts.map((contract) => ({ ...contract })),
+    primitives: resolution.primitives.map((primitive) => ({
+      ...primitive,
+      purposes: [...primitive.purposes],
+    })),
+    migrations: resolution.migrations.map((migration) => ({ ...migration })),
+    conformance: resolution.conformance.map((suite) => ({ ...suite })),
+  };
+}
+
 /** Builds the deeply-immutable GenerationPlan from a ResolvedSystem. */
 export function buildPlan(resolved) {
   const { selection } = resolved;
@@ -55,6 +71,11 @@ export function buildPlan(resolved) {
     ownership: app.ownership
       ? { team: app.ownership.team, domains: [...app.ownership.domains] }
       : null,
+    resolvedCapabilities: app.resolvedCapabilities.map((capability) => ({
+      ...copyTargetResolution(capability),
+      id: capability.id,
+      inclusion: capability.inclusion,
+    })),
   }));
 
   const apiDirs = applications.filter((app) => app.kind === 'api').map((app) => app.appDir);
@@ -92,9 +113,28 @@ export function buildPlan(resolved) {
     stack: { ...selection.stack },
     targetAdapters: { ...selection.targetAdapters },
     capabilities: resolved.capabilities.map((capability) => capability.id),
+    capabilityGraph: {
+      requested: [...resolved.capabilityGraph.requested],
+      order: [...resolved.capabilityGraph.order],
+      autoIncluded: [...resolved.capabilityGraph.autoIncluded],
+      edges: resolved.capabilityGraph.edges.map((edge) => ({ ...edge })),
+    },
     capabilityTargets: Object.fromEntries(resolved.capabilities.map((capability) => [
       capability.id,
-      { resolved: [...capability.resolvedTargets], notApplicable: [...capability.notApplicableTargets], configuration: { ...capability.configuration } },
+      {
+        version: capability.version,
+        inclusion: capability.inclusion,
+        requiredBy: [...capability.requiredBy],
+        requires: [...capability.requires],
+        resolved: [...capability.resolvedTargets],
+        notApplicable: [...capability.notApplicableTargets],
+        configuration: { ...capability.configuration },
+        byApplication: Object.fromEntries(Object.entries(capability.targetResolutions)
+          .map(([applicationId, resolution]) => [
+            applicationId,
+            copyTargetResolution(resolution),
+          ])),
+      },
     ])),
     communications: resolved.communications.map((communication) => ({ ...communication })),
     deploymentPlan: deploymentPlan(applications),

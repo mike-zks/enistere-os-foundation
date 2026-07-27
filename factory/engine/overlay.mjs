@@ -301,7 +301,10 @@ async function writePrismaComposition(appDirectory, composition, capabilities) {
  */
 export async function applyCapabilityOverlays({ repoRoot, plan, output, capabilityManifests }) {
   const byId = new Map(capabilityManifests.map((manifest) => [manifest.id, manifest]));
-  const orderedCapabilities = CAPABILITY_IDS.filter((id) => plan.capabilities.includes(id));
+  // The plan carries the dependency-first order produced by Capability Graph
+  // v2. Materialization consumes that order directly; no second registry order
+  // or dependency policy exists here.
+  const orderedCapabilities = [...plan.capabilityGraph.order];
   // Iterate the canonical per-application plan (keyed by app id). Falls back to
   // deriving apps from starterSources for callers that only build that map.
   const apps = plan.applications

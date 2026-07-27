@@ -2,9 +2,10 @@
 
 Modèle **unique de résolution** de la Factory. Décision : [ADR-046](../../docs/adr/ADR-046-single-canonical-factory-pipeline.md).
 
-> Ce fichier décrit l'implémentation actuelle. Ownership et communications
-> minimales sont présents ; la cible ajoute primitives, contrats polyglottes,
-> policies effectives et statuts de preuve complets ; voir
+> Ce fichier décrit l'implémentation actuelle. Ownership, communications
+> minimales et exigences de primitives par capability sont présents ; la cible
+> ajoute sélection de providers, contrats polyglottes, policies effectives et
+> statuts de preuve complets ; voir
 > [ADR-057](../../docs/adr/ADR-057-reference-architecture-and-platform-baseline.md).
 
 ## Rôle
@@ -25,7 +26,10 @@ ResolvedSystem
 ├── metadata, architecture, domain, environments, policies   (repris du CSM)
 ├── applications[] { id, kind, runtime, adapter, baseline, source, appDir,
 │                    gates[], resolvedCapabilities[], consumes[], ownership? }
-├── capabilities[] { id, configuration, requestedTargets[], resolvedTargets[], notApplicableTargets[] }
+├── capabilityGraph { requested[], autoIncluded[], order[], edges[] }
+├── capabilities[] { id, version, inclusion, requiredBy[], requires[],
+│                    configuration, requestedTargets[], resolvedTargets[],
+│                    notApplicableTargets[], targetResolutions{} }
 ├── communications[]
 ├── selection { runtimes[], stack, allModular, generationMode, targetAdapters }
 ├── profile { id, status, golden, runtimeProven, compositionExact } | null   (descriptif)
@@ -42,7 +46,14 @@ ResolvedSystem
 - **Targets résolues** : calculées ici, pas « toutes les applications ». `requestedTargets` (intention,
   CSM) → `resolvedTargets` (applications où la capability est `ready`/`not-applicable`), avec
   `notApplicableTargets` distinct. Le calcul appartient au resolver.
-- **Dépendances de capabilities** : `validateCapabilityDependencies` (`RESOLUTION_CAPABILITY_DEPENDENCY`).
+- **Dépendances de capabilities** : closure transitive et ordre topologique
+  dérivés des manifests ; inclusions automatiques tracées dans
+  `capabilityGraph` (`RESOLUTION_CAPABILITY_DEPENDENCY` en cas de graphe invalide).
+- **Conflits** : symétriques et expliqués dans les manifests ; une paire
+  sélectionnée produit `RESOLUTION_CAPABILITY_CONFLICT`.
+- **Résolution par application** : adapter/version, contrats, primitives,
+  modes de déploiement, migrations et conformité sont portés dans
+  `targetResolutions`.
 - **Support** : `assessCapabilitySupport` → `blocked` si une capability n'est pas composable
   (`RESOLUTION_CAPABILITY_NOT_READY`).
 - **Consumes** : l'intention `consumes` du CSM est reprise résolue par application.
@@ -52,7 +63,8 @@ ResolvedSystem
 
 ## Diagnostics
 
-`RESOLUTION_CAPABILITY_DEPENDENCY`, `RESOLUTION_CAPABILITY_NOT_READY`, `RESOLUTION_NO_VALID_TARGET`,
+`RESOLUTION_CAPABILITY_DEPENDENCY`, `RESOLUTION_CAPABILITY_CONFLICT`,
+`RESOLUTION_CAPABILITY_NOT_READY`, `RESOLUTION_NO_VALID_TARGET`,
 `RESOLUTION_UNKNOWN_RUNTIME_ADAPTER`.
 
 ## Immutabilité et déterminisme

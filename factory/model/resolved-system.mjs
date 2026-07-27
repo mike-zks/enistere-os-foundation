@@ -20,7 +20,7 @@ import { deepFreeze } from './immutable.mjs';
  */
 export function resolvedSystem({
   metadata, architecture, applications, capabilities, communications, domain, environments, policies,
-  selection, architectureProfile, compositionPreset, support, diagnostics, systemDigest,
+  selection, capabilityGraph, architectureProfile, compositionPreset, support, diagnostics, systemDigest,
 }) {
   const base = {
     metadata: { ...metadata },
@@ -35,12 +35,26 @@ export function resolvedSystem({
         ? { team: app.ownership.team, domains: [...app.ownership.domains] }
         : null,
     })),
-    capabilities: capabilities.map((c) => ({ ...c })),
+    capabilities: capabilities.map((capability) => ({
+      ...capability,
+      requiredBy: [...capability.requiredBy],
+      requires: [...capability.requires],
+      requestedTargets: [...capability.requestedTargets],
+      resolvedTargets: [...capability.resolvedTargets],
+      notApplicableTargets: [...capability.notApplicableTargets],
+      targetResolutions: { ...capability.targetResolutions },
+    })),
     communications: communications.map((communication) => ({ ...communication })),
     domain: { entities: [...(domain.entities ?? [])] },
     environments: environments.map((e) => ({ ...e })),
     policies: { ...policies },
     selection: { ...selection, runtimes: [...selection.runtimes], stack: { ...selection.stack } },
+    capabilityGraph: {
+      requested: [...capabilityGraph.requested],
+      order: [...capabilityGraph.order],
+      autoIncluded: [...capabilityGraph.autoIncluded],
+      edges: capabilityGraph.edges.map((edge) => ({ ...edge })),
+    },
     architectureProfile: { ...architectureProfile },
     compositionPreset: compositionPreset ? { ...compositionPreset } : null,
     support: { level: support.level, blockers: [...support.blockers], notApplicable: [...support.notApplicable] },

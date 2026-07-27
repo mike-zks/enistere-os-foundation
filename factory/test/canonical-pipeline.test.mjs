@@ -156,6 +156,49 @@ describe('canonical pipeline — multi-application strategy', () => {
     assert.ok(plan.diagnostics.some((diagnostic) =>
       diagnostic.code === 'RESOLUTION_TOPOLOGY_NOT_GENERATABLE'));
   });
+
+  it('resolves one capability through each backend authority adapter before generation support', async () => {
+    const bp = blueprint({
+      applications: [
+        {
+          id: 'identity',
+          kind: 'api',
+          runtime: 'spring',
+          ownership: { team: 'identity-team', domains: ['identity'] },
+        },
+        {
+          id: 'engagement',
+          kind: 'api',
+          runtime: 'nestjs',
+          consumes: ['identity'],
+          ownership: { team: 'engagement-team', domains: ['engagement'] },
+        },
+      ],
+      architecture: { profile: 'distributed-platform' },
+      capabilities: ['auth'],
+      communications: [{
+        id: 'engagement-to-identity',
+        from: 'engagement',
+        to: 'identity',
+        mode: 'synchronous',
+        protocol: 'http',
+        contract: 'identity-api.v1',
+        timeoutMs: 2000,
+        maxAttempts: 2,
+        identity: 'workload',
+        failurePolicy: 'fail-fast',
+      }],
+    });
+    const plan = buildGenerationPlan(bp, await registryFor());
+    assert.equal(plan.support.level, 'blocked', 'distributed capabilities are not claimed generatable yet');
+    assert.equal(plan.capabilityTargets.auth.byApplication.identity.adapter.id, 'spring');
+    assert.equal(plan.capabilityTargets.auth.byApplication.engagement.adapter.id, 'nestjs');
+    assert.deepEqual(
+      plan.applications.map((application) =>
+        application.resolvedCapabilities.map((capability) => capability.adapter.id)),
+      [['spring'], ['nestjs']],
+    );
+  });
 });
 
 describe('canonical pipeline — target resolution', () => {

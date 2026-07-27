@@ -220,11 +220,10 @@ describe('valid and invalid combinations', () => {
     assert.deepEqual(validateBlueprintProfile(blueprintFor(getProfile('nestjs-next-auth'))), []);
   });
 
-  it('refuses a capability selection that breaks its dependencies', () => {
-    // rbac without auth is not a profile question: the dependency contract refuses it.
+  it('accepts an atomic capability request whose closure is resolved later', () => {
     const blueprint = blueprintFor(getProfile('nestjs-next-base'));
     blueprint.capabilities = ['base', 'rbac'];
-    assert.ok(validateBlueprint(blueprint).some((issue) => /rbac requires auth/.test(issue)));
+    assert.deepEqual(validateBlueprint(blueprint), []);
   });
 });
 

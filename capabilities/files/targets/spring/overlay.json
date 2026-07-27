@@ -2,7 +2,7 @@
   "schemaVersion": "1",
   "capability": "files",
   "target": "spring",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Files Spring : upload multipart et URL de téléchargement présignée, stockage MinIO S3-compatible. Composé sur base + auth + rbac.",
   "operations": ["files", "dependencies", "environment", "integrations", "verification"],
   "files": [

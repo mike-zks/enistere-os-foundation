@@ -1,6 +1,7 @@
 # Contrat d'overlay de capability
 
-Un overlay est la **seule** façon dont une capability se compose sur une baseline `base`. Le moteur
+Un overlay est la **seule** façon dont une capability se compose sur le Platform Baseline matérialisé
+à la racine d’un runtime. Le moteur
 Factory (`factory/engine/overlay.mjs`) est l'unique interpréteur : il n'exécute jamais de script,
 hook, `eval` ni commande libre fournis par un manifeste. Schéma : `factory/schema/overlay.schema.json`.
 
@@ -113,11 +114,15 @@ le golden runtime :
 
 ## Résolution et lock
 
-Le moteur résout `base → auth → …` dans l'ordre du registre, copie la baseline puis les overlays,
+Le moteur consomme l’ordre topologique `capabilityGraph.order`, copie la racine
+du runtime puis applique les overlays,
 fusionne les dépendances sans doublon, génère les fichiers d'intégration centraux, puis inscrit dans
 `enistere.lock` (`overlays[]`) la `version` et le `digest` sha256 (manifeste + charge utile) de chaque
 overlay appliqué. `generationMode` devient `modular-overlay` (et `bundledFeaturesMayExceedSelection`
 `false`) uniquement lorsque **toutes** les targets sélectionnées déclarent `composition.model: "modular"`.
+
+Il n’existe aucun dossier `starters/*/base/`, aucune `composition.baseSource` et
+aucun ordre secondaire de capabilities dans le générateur.
 
 ## Reproductibilité et lockfiles (workspace unifié)
 

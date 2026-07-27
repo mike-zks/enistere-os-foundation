@@ -60,7 +60,11 @@ async function fixtureOutput() {
 function applyArguments(repoRoot, output) {
   return {
     repoRoot,
-    plan: { capabilities: ['auth'], starterSources: { api: 'starters/nestjs' } },
+    plan: {
+      capabilities: ['auth'],
+      capabilityGraph: { order: ['auth'] },
+      starterSources: { api: 'starters/nestjs' },
+    },
     output,
     capabilityManifests: CAPABILITY_MANIFESTS,
   };
@@ -222,16 +226,15 @@ describe('modular generation plan', () => {
   });
 });
 
-describe('capability refusals', () => {
-  it('requires RBAC before composing the full Files capability', async () => {
+describe('capability closure and refusals', () => {
+  it('auto-includes RBAC before composing the full Files capability', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
     const blueprint = createDefaultBlueprint('refused-app');
     blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
     blueprint.capabilities = ['base', 'auth', 'files'];
-    await assert.rejects(
-      generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /files requires rbac/,
-    );
+    const plan = await generateProject(blueprint, join(root, 'project'), { materialize: false });
+    assert.deepEqual(plan.capabilities, ['auth', 'rbac', 'files']);
+    assert.deepEqual(plan.capabilityGraph.autoIncluded, ['rbac']);
   });
   it('composes Files on the TypeScript vertical when RBAC is selected', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-files-ready-'));

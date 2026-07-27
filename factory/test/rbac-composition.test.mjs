@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { access, mkdtemp, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import {
   assessCapabilitySupport,
+  loadCapabilityManifests,
   validateCapabilityDependencies,
   validateCapabilityManifest,
   CAPABILITY_STATUSES,
@@ -36,6 +37,7 @@ function blueprint(slug, stack, capabilities) {
 }
 
 const manifest = (id, targets) => ({ id, targets });
+const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
 describe('capability status semantics', () => {
   it('registers the four statuses and their blocking behaviour', () => {
@@ -60,24 +62,17 @@ describe('capability status semantics', () => {
     }
   });
 
-  it('accepts not-applicable in a capability manifest', () => {
-    const value = {
-      schemaVersion: '2', id: 'rbac', version: '0.2.0', requires: ['auth'], responsibilities: ['roles'],
-      targets: {
-        nestjs: { status: 'ready', mode: 'overlay' }, spring: { status: 'planned' },
-        fastapi: { status: 'unsupported' },
-        nextjs: { status: 'ready', mode: 'overlay' }, angular: { status: 'planned' },
-        'react-native': { status: 'not-applicable' }, flutter: { status: 'planned' },
-      },
-    };
+  it('accepts not-applicable in the complete shipped capability manifest', async () => {
+    const value = JSON.parse(await readFile(new URL('../../capabilities/rbac/capability.json', import.meta.url), 'utf8'));
     assert.deepEqual(validateCapabilityManifest(value), []);
   });
 });
 
 describe('rbac dependency contract', () => {
-  it('requires auth before rbac', () => {
-    assert.match(validateCapabilityDependencies(['rbac']).join(' '), /rbac requires auth/);
-    assert.deepEqual(validateCapabilityDependencies(['auth', 'rbac']), []);
+  it('derives the auth requirement from the manifest graph', async () => {
+    const manifests = await loadCapabilityManifests(FOUNDATION_ROOT);
+    assert.match(validateCapabilityDependencies(['rbac'], manifests).join(' '), /rbac requires auth/);
+    assert.deepEqual(validateCapabilityDependencies(['auth', 'rbac'], manifests), []);
   });
 
   it('declares requires: [auth] in the shipped manifest', async () => {
@@ -90,12 +85,18 @@ describe('rbac dependency contract', () => {
     for (const planned of ['angular', 'flutter']) assert.equal(value.targets[planned].status, 'planned');
   });
 
-  it('rejects generating rbac without auth', async () => {
+  it('auto-includes and traces auth when rbac alone is requested', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-rbac-dep-'));
-    await assert.rejects(
-      generateProject(blueprint('no-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'rbac']), join(root, 'p'), { materialize: false }),
-      /rbac requires auth|Invalid blueprint/,
+    const output = join(root, 'p');
+    const plan = await generateProject(
+      blueprint('auto-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'rbac']),
+      output,
     );
+    assert.deepEqual(plan.capabilities, ['auth', 'rbac']);
+    assert.deepEqual(plan.capabilityGraph.autoIncluded, ['auth']);
+    const contract = JSON.parse(await readFile(join(output, 'packages/contracts/capabilities.json'), 'utf8'));
+    assert.deepEqual(contract.graph, plan.capabilityGraph);
+    assert.equal(contract.targets.auth.byApplication.api.adapter.id, 'nestjs');
   });
 });
 

@@ -19,7 +19,10 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { loadStarterManifests, validateManifestConsistency, STARTER_IDS } from '../../engine/starters.mjs';
-import { loadCapabilityManifests, CAPABILITY_IDS } from '../../engine/capabilities.mjs';
+import {
+  loadCapabilityManifests,
+  validateCapabilityRegistry,
+} from '../../engine/capabilities.mjs';
 import { getTargetAdapter } from '../../engine/target-adapters.mjs';
 import { APPLICATION_KINDS, GENERATABLE_KINDS, MANDATORY_KIND, isGeneratableKind } from '../../engine/topologies.mjs';
 import { validateProfileRegistry } from '../../engine/profiles.mjs';
@@ -51,14 +54,16 @@ export function runFitnessFunctions({
     }
   }
 
-  // FF3 — the capability graph is closed and non-contradictory: every requirement
-  // is a known capability, and nothing is both required and conflicting.
-  const knownCapability = (id) => CAPABILITY_IDS.includes(id) || capabilities.some((cap) => cap.id === id);
-  for (const cap of capabilities) {
-    for (const req of cap.requires ?? []) if (!knownCapability(req)) fail('capability-closure', `${cap.id} requires unknown capability ${req}`);
-    for (const conflict of cap.conflicts ?? []) {
-      if ((cap.requires ?? []).includes(conflict)) fail('capability-contradiction', `${cap.id} both requires and conflicts ${conflict}`);
-    }
+  // FF3 — Capability Manifest v2 is the only dependency-policy source. Registry
+  // validation covers closure, cycles, symmetric explained conflicts and target
+  // adapter compatibility.
+  for (const issue of validateCapabilityRegistry(capabilities)) {
+    const rule = issue.includes('both requires and conflicts')
+      ? 'capability-contradiction'
+      : issue.includes('conflict') && issue.includes('symmetric')
+        ? 'capability-conflict-symmetry'
+        : 'capability-closure';
+    fail(rule, issue);
   }
 
   // FF4 — starter and capability manifests agree on per-target support.

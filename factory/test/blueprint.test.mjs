@@ -13,9 +13,9 @@ describe('blueprint v1', () => {
     const value = createDefaultBlueprint(); value.capabilities = [];
     assert.deepEqual(validateBlueprint(value), []);
   });
-  it('enforces capability dependencies', () => {
+  it('keeps dependency closure out of the intent-only Blueprint boundary', () => {
     const value = createDefaultBlueprint(); value.capabilities = ['base', 'rbac'];
-    assert.match(validateBlueprint(value).join(' '), /rbac requires auth/);
+    assert.deepEqual(validateBlueprint(value), []);
   });
   it('supports all 27 API/web/mobile compositions', () => {
     for (const api of ['nestjs', 'spring', 'fastapi']) for (const web of [null, 'nextjs', 'angular']) for (const mobile of [null, 'react-native', 'flutter']) {
