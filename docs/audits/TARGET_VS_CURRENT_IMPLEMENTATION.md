@@ -113,11 +113,11 @@ classification ne revendique aucune amélioration d'implémentation.
 
 1. **P0 — parité API rompue sur `files` :** les trois capabilities sont
    désormais mesurées (ADR-068 → ADR-070). Authentication et RBAC sont
-   `CONFORMANT` ; `files` ne l’est pas. Spring tient 2 des 7 responsabilités que
+   `CONFORMANT` ; `files` ne l’est pas. Spring tient 5 des 7 responsabilités que
    NestJS tient, alors que les deux appartiennent à la **même famille API** et
-   sont censés être interchangeables : manquent `delete`, `metadata`,
-   `quarantine`, `quota`, `reconciliation`. C’est le seul écart de parité mesuré
-   du dépôt, et il est bloquant pour `files`.
+   sont censés être interchangeables : `metadata`, `delete` et `quarantine` ont
+   été portées, manquent `quota` et `reconciliation`. C’est le seul écart de
+   parité mesuré du dépôt, et il reste bloquant pour `files`.
 
    La mesure a aussi corrigé, en amont, quatre divergences Spring sur Auth puis
    un défaut plus grave sur RBAC — un refus d’autorisation répondait `500` au
