@@ -207,6 +207,50 @@ describe('capability product conformance', () => {
     assert.ok(issues.some((issue) => issue.includes('capability must be files')));
   });
 
+  it('detects a proof marker that no longer matches its source', async () => {
+    // The evaluator checks that markers are PRESENT; nothing checked that the
+    // markers still describe something. Renaming a test silently breaks the
+    // link, and the failure only surfaces later as a conformance regression
+    // with no hint of the cause. This walks every declared proof and reports
+    // the orphans directly.
+    const contracts = await discoverProductContracts(REPO_ROOT);
+    const orphans = [];
+
+    for (const { capability } of contracts) {
+      const manifest = JSON.parse(await readFile(
+        join(REPO_ROOT, 'capabilities', capability, 'capability.json'), 'utf8',
+      ));
+      for (const [target, targetManifest] of Object.entries(manifest.targets)) {
+        if (targetManifest.status !== 'ready') continue;
+        const descriptorPath = join(
+          REPO_ROOT, 'capabilities', capability, 'targets', target, 'conformance.json',
+        );
+        const descriptor = JSON.parse(await readFile(descriptorPath, 'utf8'));
+
+        for (const [invariant, proofs] of Object.entries(descriptor.invariants ?? {})) {
+          for (const proof of proofs) {
+            const owner = proof.owner ?? capability;
+            const source = join(REPO_ROOT, 'capabilities', owner, 'targets', target, proof.source);
+            let content;
+            try {
+              content = await readFile(source, 'utf8');
+            } catch {
+              orphans.push(`${capability}/${target} ${invariant}: source ${proof.source} is gone`);
+              continue;
+            }
+            for (const marker of proof.contains) {
+              if (!content.includes(marker)) {
+                orphans.push(`${capability}/${target} ${invariant}: "${marker}" no longer in ${proof.source}`);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    assert.deepEqual(orphans, [], 'every declared proof marker must still exist in its source');
+  });
+
   it('proves the same evidence exists in a materialized multi-client system', async () => {
     const blueprint = createDefaultBlueprint('capability-conformance-materialized');
     blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
