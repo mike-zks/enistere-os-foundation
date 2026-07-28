@@ -8,6 +8,7 @@
   "evaluation": "foundation-registry",
   "status": "NON_CONFORMANT",
   "readyTargets": [
+    "angular",
     "nestjs",
     "nextjs",
     "react-native",
@@ -136,27 +137,36 @@
       "issues": []
     },
     "angular": {
-      "status": "PLANNED",
-      "manifestStatus": "planned",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/4",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client",
+        "web-client"
+      ],
+      "responsibilities": [
+        "login",
+        "logout",
+        "refresh",
+        "session"
+      ],
+      "coverage": "4/4",
       "family": "web",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "login",
-          "logout",
-          "refresh",
-          "session"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "auth-angular-e2e",
+      "golden": "nestjs-angular-auth",
+      "invariants": [
+        "AUTH-CLIENT-001",
+        "AUTH-CLIENT-002",
+        "AUTH-CLIENT-003",
+        "AUTH-CLIENT-004",
+        "AUTH-CLIENT-005",
+        "AUTH-WEB-001"
+      ],
+      "proofCount": 9,
       "materialized": false,
-      "issues": [
-        "family parity: web runtimes must hold the same responsibilities; missing login, logout, refresh, session"
-      ]
+      "issues": []
     },
     "react-native": {
       "status": "CONFORMANT",

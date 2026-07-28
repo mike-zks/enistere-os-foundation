@@ -166,11 +166,10 @@ describe('capability product conformance', () => {
     assert.equal(report.targets['react-native'].coverage, '1/7');
   });
 
-  it('keeps Authentication measured on its four ready targets', async () => {
+  it('keeps Authentication measured on its five ready targets', async () => {
     const report = await evaluateCapabilityProduct({ capability: 'auth', repoRoot: REPO_ROOT });
-    assert.deepEqual(report.readyTargets, ['nestjs', 'nextjs', 'react-native', 'spring']);
+    assert.deepEqual(report.readyTargets, ['angular', 'nestjs', 'nextjs', 'react-native', 'spring']);
     assert.equal(report.targets.fastapi.status, 'UNSUPPORTED');
-    assert.equal(report.targets.angular.status, 'PLANNED');
     assert.equal(report.targets.flutter.status, 'PLANNED');
   });
 

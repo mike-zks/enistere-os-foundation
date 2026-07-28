@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "angular",
+  "contract": { "id": "authentication-product", "version": "1.1.0" },
+  "roles": ["client", "web-client"],
+  "suite": "auth-angular-e2e",
+  "golden": "nestjs-angular-auth",
+  "invariants": {
+    "AUTH-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth.service.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth.service.spec.ts",
+        "contains": [
+          "signIn établit la session sans exposer de jeton dans l’état observable",
+          "not.toContain('access-1')"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth.service.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth.service.spec.ts",
+        "contains": [
+          "garde le jeton d’accès hors du stockage et le refresh derrière la couture"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/auth/credential-store.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/credential-store.spec.ts",
+        "contains": [
+          "n’écrit dans aucun stockage du navigateur",
+          "Object.keys(localStorage)"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth.service.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth.service.spec.ts",
+        "contains": [
+          "coalesce plusieurs refresh concurrents en un seul appel",
+          "purge la session locale quand le refresh échoue"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth.interceptor.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth.interceptor.spec.ts",
+        "contains": [
+          "401 → un seul refresh puis un seul rejeu",
+          "refresh impossible → l’erreur 401 remonte, aucun rejeu"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-004": [
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth.service.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth.service.spec.ts",
+        "contains": [
+          "signOut demande la révocation distante puis purge",
+          "purge même si la révocation distante échoue"
+        ]
+      }
+    ],
+    "AUTH-CLIENT-005": [
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth-api.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth-api.spec.ts",
+        "contains": [
+          "mot de passe faux et compte inconnu donnent le MÊME message générique",
+          "conserve le requestId et ne divulgue jamais le secret soumis"
+        ]
+      }
+    ],
+    "AUTH-WEB-001": [
+      {
+        "kind": "test",
+        "source": "files/test/auth/auth-api.spec.ts",
+        "materialized": "src/app/core/auth/__tests__/auth-api.spec.ts",
+        "contains": [
+          "n’envoie aucun cookie : le SPA ne détient pas de créance ambiante",
+          "withCredentials"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/src/app/core/auth/credential-store.ts",
+        "materialized": "src/app/core/auth/credential-store.ts",
+        "contains": ["InMemoryCredentialStore", "localStorage"]
+      }
+    ]
+  }
+}
