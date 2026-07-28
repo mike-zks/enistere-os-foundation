@@ -2,12 +2,14 @@ package com.enistere.core.modules.files;
 
 import com.enistere.core.AbstractIntegrationTest;
 import com.enistere.core.TestDataFactory;
+import com.enistere.core.modules.users.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -22,6 +24,9 @@ class FilesUploadIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private TestDataFactory factory;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private final ObjectMapper objectMapper = new ObjectMapper()
         .findAndRegisterModules();
 
@@ -32,7 +37,8 @@ class FilesUploadIntegrationTest extends AbstractIntegrationTest {
     void setup() {
         email = factory.uniqueEmail();
         password = "upload-test-password";
-        factory.createUser(email, password);
+        User user = factory.createUser(email, password);
+        FilesTestAccess.grant(jdbcTemplate, user.getId(), "files.upload");
     }
 
     @Test

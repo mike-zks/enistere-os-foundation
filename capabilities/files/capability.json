@@ -93,7 +93,9 @@
       },
       "responsibilities": [
         "upload",
-        "download-url"
+        "metadata",
+        "download-url",
+        "delete"
       ],
       "contracts": [
         "files-api",

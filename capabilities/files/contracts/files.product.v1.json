@@ -87,6 +87,13 @@
       "requirement": "The per-owner active-file quota holds under concurrent uploads and cannot be exceeded by racing requests."
     },
     {
+      "id": "FILES-AUTHORITY-011",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Every file operation that creates, exposes or removes content emits a business audit event through the baseline audit port, without recording the object content, its storage key or a signed URL."
+    },
+    {
       "id": "FILES-CLIENT-001",
       "appliesTo": [
         "client"

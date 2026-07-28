@@ -497,7 +497,7 @@ TARGET ou PLANNED selon les preuves.
   même famille doivent déclarer le **même** ensemble — §8.4 appliqué de façon
   exécutable. La règle est portée par l'évaluateur et non par le validateur de
   manifeste : une divergence rend le composant non conforme, jamais illisible.
-  Un seul écart mesuré : `files/spring` tient 2 des 7 responsabilités de
+  Un seul écart mesuré : `files/spring` tient 4 des 7 responsabilités de
   `files/nestjs`.
 * **ADR-069 — Conformité produit RBAC et évaluateur générique** : contrats
   produit découverts par convention, évaluateur unique paramétré par capability,
@@ -904,7 +904,7 @@ Conformité produit calculée au 2026-07-28 :
 ```text
 auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
 rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
-files  api  nestjs 7/7 · spring 2/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
+files  api  nestjs 7/7 · spring 4/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
        fastapi UNSUPPORTED · angular/flutter PLANNED
 2/3 capabilities CONFORMANT
 ```
@@ -920,7 +920,7 @@ couverture déclarée n'est légitime que si les autres runtimes `ready` de la m
 famille déclarent la même. C'est ce qui distingue un périmètre assumé d'une
 divergence.
 
-La prochaine mission unique consiste à combler l'écart de parité API de `files`
-en portant `metadata`, `delete`, `quarantine`, `reconciliation` et `quota` sur
-Spring, sans nouvelle target ni nouvelle capability. Tout pipeline parallèle et
+`metadata` et `delete` sont portées sur Spring ; l'écart restant est
+`quarantine`, `quota` et `reconciliation`. La prochaine mission unique consiste
+à porter `quarantine` sur Spring, sans nouvelle target ni nouvelle capability. Tout pipeline parallèle et
 tout dossier `base/` restent hors périmètre.

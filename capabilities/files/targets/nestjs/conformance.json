@@ -145,6 +145,27 @@
           "enforces the per-owner active-file quota under concurrent uploads (no overflow)"
         ]
       }
+    ],
+    "FILES-AUTHORITY-011": [
+      {
+        "kind": "source",
+        "source": "files/src/audit/files-audit-events.ts",
+        "materialized": "src/audit/files-audit-events.ts",
+        "contains": [
+          "FILE_UPLOADED",
+          "FILE_DOWNLOAD_URL_ISSUED",
+          "FILE_METADATA_ACCESSED",
+          "FILE_DELETED"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files-lifecycle.e2e-spec.ts",
+        "materialized": "test/files-lifecycle.e2e-spec.ts",
+        "contains": [
+          "deletes a file (object + DB), invalidates a previously issued URL, and is anti-enumerable"
+        ]
+      }
     ]
   }
 }

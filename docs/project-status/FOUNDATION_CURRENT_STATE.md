@@ -121,14 +121,16 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
 ```text
 auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
 rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
-files  api  nestjs 7/7 · spring 2/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
+files  api  nestjs 7/7 · spring 4/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
        fastapi UNSUPPORTED · angular/flutter PLANNED
 ```
 
 - `Parité par famille` : **MESURÉE** (ADR-070) — les targets `ready` d'une même
   famille doivent déclarer les mêmes responsabilités. Un seul écart dans le
-  dépôt : `files/spring` tient 2 des 7 responsabilités de `files/nestjs`,
-  manquent `delete`, `metadata`, `quarantine`, `quota`, `reconciliation`.
+  dépôt : `files/spring` tient 4 des 7 responsabilités de `files/nestjs`.
+  `metadata` et `delete` ont été portées ; manquent `quarantine`, `quota`,
+  `reconciliation`. La surface Files de Spring est désormais gardée par les
+  permissions `files.*`, comme celle de NestJS.
 
 - `Conformité produit RBAC` : **CONFORMANT** (ADR-069) — évaluateur générique,
   contrats produit découverts par convention, `not-applicable` traité comme

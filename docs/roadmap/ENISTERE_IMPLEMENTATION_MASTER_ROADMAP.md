@@ -87,8 +87,8 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
 - **Prochaine mission :** acquise par ADR-067, ADR-068 (Authentication),
   ADR-069 (RBAC, évaluateur générique) et ADR-070 (responsabilités par target,
   parité par famille). Les trois capabilities sont mesurées ; `files` est non
-  conforme. Poursuivre en comblant l'écart de parité API de `files` sur Spring
-  (`metadata`, `delete`, `quarantine`, `reconciliation`, `quota`).
+  conforme. `metadata` et `delete` sont portées sur Spring ; poursuivre avec
+  `quarantine`, puis `reconciliation` et `quota`.
 
 ## 8. Capability Framework
 
