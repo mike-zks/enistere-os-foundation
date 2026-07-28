@@ -30,6 +30,7 @@
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
 | 27 combinaisons de stacks | Planifiées/testées | 3 API × 3 Web × 3 Mobile ; distinctes des profils |
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
+| Secret scanning | **Bloquant en CI** (ADR-073) | historique complet, binaire épinglé/vérifié, détections censurées, exceptions justifiées et datées. Le reste de §12 (SAST, SBOM, signatures, provenance) demeure documentaire |
 | Schéma de capability | **Normatif et exécuté** (ADR-072) | compilé par Ajv, source des énumérations du moteur ; le code ne garde que les références croisées. Les 4 autres schémas ne sont pas audités |
 | Capability Manifest v2 | **Implémenté** (ADR-067) | contrat fermé ; adapters, contrats, primitives, modes, migrations et conformité par target |
 | Graphe de capabilities | **Implémenté** (ADR-067) | closure/ordre déterministes, auto-inclusions tracées, cycles et conflits refusés |
