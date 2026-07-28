@@ -63,6 +63,8 @@
       "manifestStatus": "unsupported",
       "roles": [],
       "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
       "issues": []
     },
     "nextjs": {
@@ -91,6 +93,8 @@
       "manifestStatus": "planned",
       "roles": [],
       "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
       "issues": []
     },
     "react-native": {
@@ -119,6 +123,8 @@
       "manifestStatus": "planned",
       "roles": [],
       "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
       "issues": []
     }
   }
