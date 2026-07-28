@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "evaluation": "foundation-registry",
-  "status": "NON_CONFORMANT",
+  "status": "CONFORMANT",
   "readyTargets": [
     "nestjs",
     "nextjs",
@@ -54,7 +54,7 @@
       "issues": []
     },
     "spring": {
-      "status": "NON_CONFORMANT",
+      "status": "CONFORMANT",
       "manifestStatus": "ready",
       "roles": [
         "authority"
@@ -64,16 +64,14 @@
         "download-url",
         "metadata",
         "quarantine",
+        "quota",
+        "reconciliation",
         "upload"
       ],
-      "coverage": "5/7",
+      "coverage": "7/7",
       "family": "api",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "quota",
-          "reconciliation"
-        ]
+        "status": "OK"
       },
       "suite": "files-spring-integration",
       "golden": "spring-files",
@@ -86,13 +84,13 @@
         "FILES-AUTHORITY-006",
         "FILES-AUTHORITY-007",
         "FILES-AUTHORITY-008",
+        "FILES-AUTHORITY-009",
+        "FILES-AUTHORITY-010",
         "FILES-AUTHORITY-011"
       ],
-      "proofCount": 17,
+      "proofCount": 21,
       "materialized": false,
-      "issues": [
-        "family parity: api runtimes must hold the same responsibilities; missing quota, reconciliation"
-      ]
+      "issues": []
     },
     "fastapi": {
       "status": "UNSUPPORTED",
@@ -100,6 +98,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/7",
+      "family": "api",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -143,6 +145,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/7",
+      "family": "web",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -178,6 +184,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/7",
+      "family": "mobile",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,

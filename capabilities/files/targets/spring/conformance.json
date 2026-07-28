@@ -162,6 +162,39 @@
         ]
       }
     ],
+    "FILES-AUTHORITY-009": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesMaintenanceIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesMaintenanceIntegrationTest.java",
+        "contains": [
+          "refusesAConcurrentRunInsteadOfQueueingIt",
+          "purgesADeletedRecordOnlyWhenItsObjectIsAbsent",
+          "keepsRecordsWhoseRetentionHasNotElapsed"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-010": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesQuotaIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesQuotaIntegrationTest.java",
+        "contains": [
+          "quotaHoldsUnderConcurrentUploads",
+          "activeFileCountIsEnforced",
+          "deletedFilesStopConsumingQuota"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/src/main/java/com/enistere/core/modules/files/FileQuotaService.java",
+        "materialized": "src/main/java/com/enistere/core/modules/files/FileQuotaService.java",
+        "contains": [
+          "lockOwnerForQuota",
+          "ACTIVE_STATUSES"
+        ]
+      }
+    ],
     "FILES-AUTHORITY-011": [
       {
         "kind": "test",
@@ -192,6 +225,15 @@
           "quarantineAndRestore_recordBusinessAuditEvents",
           "FILE_QUARANTINED",
           "FILE_QUARANTINE_RELEASED"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesQuotaIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesQuotaIntegrationTest.java",
+        "contains": [
+          "quotaRejectionIsAudited",
+          "FILE_QUOTA_EXCEEDED"
         ]
       }
     ]
