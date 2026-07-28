@@ -97,31 +97,72 @@ teste rien. Aucun secret réel dans le dépôt.
 Vérifié par canari dans les deux sens : jeton factice → CI bloquée et valeur
 `REDACTED` au rapport ; historique réel → passe.
 
+## Recommandations de la revue finalisées
+
+Les cinq premières recommandations de la revue du 2026-07-28 sont traitées
+(D1 et secret scanning par ADR-072/073, puis en une PR) :
+
+- **audits périmés clos** — chaque analyse supersédée porte un bandeau daté
+  disant ce qui a changé ; le README distingue les analyses closes de l'audit
+  courant. Correction en passant : les rapports d'exécution de `deployment/docs/`
+  ne sont **pas** retirés comme la revue le recommandait — ils sont référencés
+  par la checklist de release et le runbook. Ce sont des preuves citées par un
+  processus actif, pas des visions concurrentes ; datés, gardés ;
+- **`FileQuarantineService` extrait** — la séparation suit l'autorité, pas la
+  taille : les opérations propriétaire sont autorisées par la possession, la
+  quarantaine par une permission **sans** possession ;
+- **appels au stockage bornés** — timeouts explicites (connect/write/read) : sans
+  eux, un stockage lent immobilisait le thread de requête et un incident de
+  stockage devenait une panne d'API. `objectExists` distingue désormais un objet
+  absent d'un stockage en panne ;
+- **marqueurs orphelins détectés** — un test parcourt chaque preuve déclarée et
+  signale celles dont le marqueur ne correspond plus à sa source.
+
+## Reste ouvert de la revue
+
+- **D3 — codes d'erreur générés** depuis la source neutre : relève de la phase 11
+  (Polyglot Contracts), plus large qu'une mission.
+- **Audit d'hermétisme des gates non mobiles** contre ADR-071.
+- **§12 largement documentaire** : SAST, SBOM, signatures, provenance, licence
+  scanning, threat modeling. Le secret scanning a fermé **un** point.
+- **Profondeur de preuve non bornée** entre runtimes d'une même famille : Flutter
+  tient 25 invariants avec 2 fichiers de test, React Native avec 95. Licite
+  aujourd'hui, friction garantie le jour où une capability visera Flutter.
+- **CLI** : ni mode interactif ni sortie `--json`, flags inconnus silencieux
+  (§14 partiellement couvert).
+
 ## Prochaine mission unique
 
-> **Clôturer les audits périmés de `docs/audits/`.**
+> **Rendre `angular` et `flutter` `ready` pour Authentication, ou déclarer
+> explicitement qu'ils ne le seront pas.**
 
 ### Justification de l'ordre
 
-Recommandation 3 de la revue, et la moins coûteuse des restantes.
-`RUNTIME_CONFORMANCE_GAP_MATRIX` affiche des runtimes « non conformes » qui le
-sont tous depuis, `CAPABILITY_PARITY_GAP_MATRIX` décrit des cellules non
-conformes refermées, et `deployment/docs/` conserve des rapports d'exécution
-historiques que §18 confie à Git.
+Le socle est désormais mesuré de bout en bout : trois capabilities conformes,
+parité par famille appliquée, schéma normatif exécuté, conformité et secrets
+gardés par la CI. Les recommandations de revue restantes sont soit des phases
+ultérieures, soit des dettes bornées et consignées.
 
-§18 est explicite : « ne laisse jamais deux visions actives ». Un lecteur qui
-ouvre ces matrices sans lire l'état courant repart avec une image fausse du
-projet — et le dépôt vient précisément de refermer les écarts qu'elles décrivent.
+Ce qui bloque réellement la suite est ailleurs : **deux runtimes cibles ne
+portent aucune capability**. Angular et Flutter sont `planned` sur les trois, ce
+qui veut dire qu'un produit généré avec eux n'a ni authentification, ni
+autorisation, ni fichiers. La plateforme annonce sept runtimes et en sert cinq.
 
-C'est de l'hygiène documentaire, pas de l'architecture : une PR docs, sans
-risque, qui supprime une source de confusion réelle.
+La revue a montré pourquoi c'est risqué de le faire naïvement : Flutter tient ses
+25 invariants de baseline avec **2 fichiers de test** quand React Native en a 95.
+La parité par famille (ADR-070) exigera de Flutter le niveau de preuve de React
+Native — un travail que ce starter n'a jamais pratiqué.
+
+D'où la formulation : soit on les rend `ready` avec les preuves que cela exige,
+soit on déclare `unsupported` et la plateforme cesse d'annoncer sept runtimes
+utilisables. Les deux sont honnêtes ; le statu quo ne l'est pas.
 
 ### Critères de sortie
 
-- chaque audit refermé porte un bandeau de clôture daté renvoyant à l'état
-  courant, ou est supprimé ;
-- `docs/audits/README.md` distingue sans ambiguïté l'audit courant des archives ;
-- les rapports d'exécution historiques quittent le dépôt actif ;
-- aucun constat encore valide n'est perdu : ce qui reste vrai est déplacé vers
-  l'état courant avant suppression ;
-- aucune modification de code.
+- décision explicite et argumentée pour Angular et Flutter sur Authentication ;
+- si `ready` : contrat produit satisfait, parité de famille respectée
+  (Angular vs Next.js, Flutter vs React Native), goldens verts ;
+- si `unsupported` : manifests, documentation et matrice alignés, sans
+  formulation laissant croire à un support à venir non planifié ;
+- aucune target déclarée `ready` sans preuve exécutée ;
+- aucun dossier `base/`.

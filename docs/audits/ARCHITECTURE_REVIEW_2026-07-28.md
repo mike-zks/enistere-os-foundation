@@ -216,8 +216,19 @@ est écrit, ou l'effacer.
 
 1. ~~Schéma capability exécutable (D1)~~ — **fait** (ADR-072).
 2. ~~Secret scanning en CI (§9)~~ — **fait** (ADR-073).
-3. Clôture des audits périmés (§10) — hygiène documentaire, une PR docs.
-4. `FileQuarantineService` Spring + timeout/log du port stockage (D4, §3).
-5. Marqueurs orphelins outillés (D2).
-6. Codes d'erreur générés (D3) et audit d'hermétisme des autres gates — phase
-   ultérieure.
+3. ~~Clôture des audits périmés (§10)~~ — **fait**. Correction en passant : les
+   rapports d'exécution de `deployment/docs/` ne sont **pas** sortis du dépôt
+   comme recommandé ici — ils sont référencés par la checklist de release, le
+   runbook et le README staging. Ce sont des preuves d'exécution citées par un
+   processus actif, pas des visions concurrentes de l'état courant. Datés, gardés.
+4. ~~`FileQuarantineService` Spring + timeout/log du port stockage (D4, §3)~~ —
+   **fait**.
+5. ~~Marqueurs orphelins outillés (D2)~~ — **fait**.
+6. Codes d'erreur générés (D3) et audit d'hermétisme des autres gates — **reste
+   ouvert**, phase ultérieure : D3 relève de la phase 11 (Polyglot Contracts) et
+   l'audit d'hermétisme demande de passer en revue chaque gate non mobile.
+
+Restent également ouverts, hors recommandations numérotées : la profondeur de
+preuve non bornée entre runtimes d'une même famille (§6), les exigences §14 non
+couvertes par le CLI (§7), et l'essentiel de §12 — SAST, SBOM, signatures,
+provenance, licence scanning, threat modeling (§9).
