@@ -36,7 +36,7 @@
 | Graphe de capabilities | **Implémenté** (ADR-067) | closure/ordre déterministes, auto-inclusions tracées, cycles et conflits refusés |
 | Conformité produit de capability | **Implémenté** — `auth`/`rbac` conformes, `files` non conforme (ADR-068 → ADR-070) | évaluateur générique, contrats découverts par convention, invariants par rôle et par responsabilité, `not-applicable` traité comme absence légitime |
 | Gates hermétiques | **Implémenté pour le mobile** (ADR-071) | le verdict d'un golden ne dépend plus d'une valeur distante mutable ; outil de vérification épinglé. Les autres gates ne sont pas audités |
-| Parité par famille de runtimes | **Mesurée** (ADR-070) | les targets `ready` d'une famille doivent déclarer les mêmes responsabilités ; un écart ouvert : `files/spring` 2/7 |
+| Parité par famille de runtimes | **Mesurée sur tous les runtimes** (ADR-070, ADR-074) | un runtime ne s'exonère plus par `unsupported` ; 8 écarts déclarés et datés (FastAPI, Angular, Flutter) dans `factory/quality/parity-gaps.json` |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
 | CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C/R8A/ADR-066) | inclut le golden topologique `distributed-spring-nestjs` |
