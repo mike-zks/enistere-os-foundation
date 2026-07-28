@@ -78,6 +78,9 @@ class MinioStorageIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private TestDataFactory factory;
 
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     private String token;
@@ -86,7 +89,8 @@ class MinioStorageIntegrationTest extends AbstractIntegrationTest {
     void setup() throws Exception {
         String email = factory.uniqueEmail();
         String password = "minio-tc-test-pwd-2026";
-        factory.createUser(email, password);
+        com.enistere.core.modules.users.User user = factory.createUser(email, password);
+        FilesTestAccess.grant(jdbcTemplate, user.getId(), "files.upload", "files.download");
         MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(String.format("{\"email\":\"%s\",\"password\":\"%s\"}", email, password)))
