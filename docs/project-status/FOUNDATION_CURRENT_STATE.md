@@ -38,6 +38,8 @@ Gates hermétiques :
 [`ADR-071`](../adr/ADR-071-hermetic-quality-gates.md).
 Schéma de capability normatif :
 [`ADR-072`](../adr/ADR-072-normative-capability-schema.md).
+Analyse de secrets bloquante :
+[`ADR-073`](../adr/ADR-073-secret-scanning.md).
 
 ## Actifs existants à migrer
 

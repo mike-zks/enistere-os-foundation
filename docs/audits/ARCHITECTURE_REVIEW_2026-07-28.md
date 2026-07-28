@@ -215,7 +215,7 @@ est écrit, ou l'effacer.
 ## 13. Recommandations consolidées (ordre proposé)
 
 1. ~~Schéma capability exécutable (D1)~~ — **fait** (ADR-072).
-2. Secret scanning en CI (§9) — une heure, gros angle mort.
+2. ~~Secret scanning en CI (§9)~~ — **fait** (ADR-073).
 3. Clôture des audits périmés (§10) — hygiène documentaire, une PR docs.
 4. `FileQuarantineService` Spring + timeout/log du port stockage (D4, §3).
 5. Marqueurs orphelins outillés (D2).

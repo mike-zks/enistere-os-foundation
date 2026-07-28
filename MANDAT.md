@@ -491,6 +491,11 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-073 — Analyse de secrets bloquante** : scan de l'historique complet sur
+  chaque PR, binaire épinglé et vérifié plutôt qu'une action tierce, détections
+  censurées, exceptions justifiées avec échéance ou permanence motivée. Premier
+  point §12 exécuté au-delà des exceptions npm ; SAST, SBOM, signatures et
+  provenance restent documentaires.
 * **ADR-072 — Schéma de capability normatif** : `capability.schema.json` est
   compilé et exécuté ; les énumérations du moteur en sont extraites au lieu
   d'être redéclarées, et le code ne conserve que les références croisées. Le

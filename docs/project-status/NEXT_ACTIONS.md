@@ -83,30 +83,45 @@ Non revendiqué : les quatre autres schémas du dépôt (`blueprint`, `overlay`,
 `conformance-report`, `platform-baseline-contract`) n'ont pas été audités pour
 cette propriété — le même défaut peut s'y trouver.
 
+## Mission secret scanning achevée
+
+Un scan de secrets bloquant s'exécute sur chaque PR
+([ADR-073](../adr/ADR-073-secret-scanning.md)) : historique complet (352 commits),
+binaire épinglé et vérifié par SHA-256 plutôt qu'une action tierce, détections
+censurées dans les journaux, et exceptions justifiées — jamais de désactivation.
+
+Quatre détections dans l'historique, toutes des fixtures de tests de censure :
+un test de censure doit contenir une chaîne ressemblant à un secret, sinon il ne
+teste rien. Aucun secret réel dans le dépôt.
+
+Vérifié par canari dans les deux sens : jeton factice → CI bloquée et valeur
+`REDACTED` au rapport ; historique réel → passe.
+
 ## Prochaine mission unique
 
-> **Ajouter un secret scanning bloquant à la CI.**
+> **Clôturer les audits périmés de `docs/audits/`.**
 
 ### Justification de l'ordre
 
-Recommandation n°2 de la revue d'architecture. §12 confie au projet le secret
-scanning, le SAST, le SBOM, les signatures et la provenance ; à ce jour seules
-les exceptions d'audit npm sont réellement exécutées — tout le reste est
-documentaire, dans `deployment/docs/`.
+Recommandation 3 de la revue, et la moins coûteuse des restantes.
+`RUNTIME_CONFORMANCE_GAP_MATRIX` affiche des runtimes « non conformes » qui le
+sont tous depuis, `CAPABILITY_PARITY_GAP_MATRIX` décrit des cellules non
+conformes refermées, et `deployment/docs/` conserve des rapports d'exécution
+historiques que §18 confie à Git.
 
-Le secret scanning est celui dont le rapport coût/valeur est le meilleur : une
-heure de travail, un angle mort fermé, et le même effet que le job `factory`
-ajouté aujourd'hui — faire exécuter ce qui n'était qu'écrit. C'est aussi le seul
-de la liste dont l'absence peut coûter immédiatement et irréversiblement.
+§18 est explicite : « ne laisse jamais deux visions actives ». Un lecteur qui
+ouvre ces matrices sans lire l'état courant repart avec une image fausse du
+projet — et le dépôt vient précisément de refermer les écarts qu'elles décrivent.
 
-Le reste de §12 (SBOM, signatures, provenance) demande une décision sur la
-chaîne de publication et relève d'une mission distincte.
+C'est de l'hygiène documentaire, pas de l'architecture : une PR docs, sans
+risque, qui supprime une source de confusion réelle.
 
 ### Critères de sortie
 
-- un scan de secrets s'exécute sur chaque PR et bloque en cas de détection ;
-- l'historique est couvert, pas seulement le diff ;
-- les faux positifs sont traités par une liste d'exceptions **scopée et datée**,
-  sur le modèle éprouvé de `audit-exceptions.json` — jamais par désactivation ;
-- aucun secret réel n'est révélé dans les journaux CI en cas de détection ;
-- aucune nouvelle dépendance applicative.
+- chaque audit refermé porte un bandeau de clôture daté renvoyant à l'état
+  courant, ou est supprimé ;
+- `docs/audits/README.md` distingue sans ambiguïté l'audit courant des archives ;
+- les rapports d'exécution historiques quittent le dépôt actif ;
+- aucun constat encore valide n'est perdu : ce qui reste vrai est déplacé vers
+  l'état courant avant suppression ;
+- aucune modification de code.
