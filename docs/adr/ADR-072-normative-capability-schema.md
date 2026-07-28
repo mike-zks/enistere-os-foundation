@@ -27,8 +27,20 @@ avait déjà commencé à coûter.
 ### 1. Le schéma est la forme normative, et il est compilé
 
 `factory/engine/capability-schema.mjs` charge `capability.schema.json`, le
-compile avec Ajv (draft 2020-12) et expose `validateManifestSchema`. Toute
-validation de manifest passe par lui.
+compile et expose `validateManifestSchema`. Toute validation de manifest passe
+par lui.
+
+La compilation est assurée par `factory/engine/json-schema.mjs`, un évaluateur
+du sous-ensemble draft 2020-12 réellement employé par les schémas du dépôt
+(18 mots-clés). Raison : **le moteur doit tourner sur un checkout nu**. Les jobs
+`dependency-contract` et `golden-runtime` — 25 exécutions — lancent
+`node factory/...` sans aucune installation. Une dépendance runtime les casse
+toutes ; la première version de cette décision l'a fait, et la CI l'a démontré.
+
+Ce n'est pas la duplication qu'ADR-072 supprime : l'évaluateur ne réénonce
+aucune règle, il **interprète le document**. Les règles restent en un seul
+endroit. Et il refuse de compiler un schéma employant un mot-clé qu'il
+n'appliquerait pas — ignorer serait désactiver une validation en silence.
 
 ### 2. Le vocabulaire du moteur est lu dans le schéma
 
@@ -58,7 +70,7 @@ désormais du schéma seul.
 
 ### 4. Les messages restent actionnables
 
-Ajv produit des erreurs structurées, pas des phrases. Un traducteur convertit
+L'évaluateur produit des erreurs structurées, pas des phrases. Un traducteur convertit
 `instancePath` en chemin pointé (`targets.nestjs.contracts[0].kind`) et rend les
 messages de l'ancien validateur. Les erreurs de branchement (`if`, `anyOf`,
 `allOf`) sont écartées : l'erreur concrète à l'intérieur de la branche est celle
@@ -84,11 +96,17 @@ suppression, jamais supposée.
 
 ### Assumé
 
-- **Une dépendance ajoutée** : `ajv` (devDependency). Le dépôt racine est
-  `private: true`, sans dépendance runtime, et la CI installe tout : le moteur
-  est un outillage de développement, jamais publié. §8.2 pèse une complexité
-  contre une exigence — ici l'exigence est §5, et l'alternative (écrire un
-  validateur JSON Schema) serait la duplication à un étage plus bas.
+- **~150 lignes d'évaluateur** plutôt qu'une dépendance runtime. C'est de la
+  complexité assumée au titre de §8.2 : l'exigence mesurée est que le moteur
+  démarre sans installation. `ajv` reste en devDependency, mais **uniquement
+  comme oracle de test** : `factory:test` compare chaque verdict — 3 manifests
+  réels et 28 manifests délibérément invalides — et échoue au premier désaccord.
+  L'évaluateur n'est donc jamais cru sur parole.
+- Deux écarts de forme avec Ajv, sans effet sur les verdicts : Ajv émet des
+  erreurs de branchement `if`/`allOf`/`anyOf` que le formateur de production
+  écarte déjà, et la détection de mots-clés non gérés est volontairement
+  conservatrice (elle peut sur-signaler à l'intérieur d'un mot-clé inconnu —
+  refuser est la direction sûre).
 - Un message change : `targets.<r>.responsibilities must be an array` devient
   `… is required when ready`, plus juste.
 
@@ -108,6 +126,10 @@ Le même défaut peut s'y trouver.
 - **Générer le validateur depuis le schéma à la compilation.** Supprime la
   dépendance runtime mais ajoute une étape de build et un artefact généré à
   committer, pour un gain nul ici.
+- **Ajouter `npm ci` aux jobs concernés.** Rétablirait Ajv au prix d'une
+  installation racine — les sept starters — sur 25 jobs, et surtout renoncerait
+  à une propriété que le dépôt tenait délibérément : le générateur démarre
+  partout avec Node seul.
 
 ## Migration
 
@@ -117,8 +139,12 @@ l'ensemble des règles antérieures reste appliqué.
 ## Tests
 
 ```bash
-npm run factory:test   # 452 tests
+npm run factory:test   # 458 tests
 ```
+
+Un test balaie `factory/{engine,conformance,quality,cli,ai}` et échoue si un
+module importe autre chose qu'un builtin Node — la régression exacte qui a cassé
+25 jobs, désormais attrapée avant la CI.
 
 Verrouillé : le schéma valide les trois manifests réels ; les enums du moteur
 sont égaux à ceux du document ; treize violations structurelles sont refusées

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Ajv2020 from 'ajv/dist/2020.js';
+import { compileSchema } from './json-schema.mjs';
 
 /**
  * The normative Capability Manifest contract (ADR-072).
@@ -17,7 +17,11 @@ const SCHEMA_PATH = join(
 
 export const capabilitySchema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
 
-const compiled = new Ajv2020({ allErrors: true }).compile(capabilitySchema);
+// Compiled by the Factory's own evaluator: the engine runs on a bare checkout
+// (the golden and dependency jobs execute `node factory/...` with nothing
+// installed), so it carries no runtime dependency. `factory:test` cross-checks
+// every verdict against Ajv, which the test environment does install.
+const compiled = compileSchema(capabilitySchema);
 
 /**
  * Reads an enum out of the schema document, failing fast if a reorganisation
