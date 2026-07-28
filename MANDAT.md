@@ -491,6 +491,11 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-072 — Schéma de capability normatif** : `capability.schema.json` est
+  compilé et exécuté ; les énumérations du moteur en sont extraites au lieu
+  d'être redéclarées, et le code ne conserve que les références croisées. Le
+  schéma était jusque-là décoratif — une seconde vérité morte qu'ADR-070
+  entretenait sans le voir.
 * **ADR-071 — Gates hermétiques** : un gate qui affirme la reproductibilité ne
   peut pas dépendre d'une valeur distante mutable. Les vérifications mobiles
   lisent l'attente de versions dans le paquet `expo` verrouillé et non plus dans

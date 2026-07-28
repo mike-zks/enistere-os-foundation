@@ -66,28 +66,47 @@ nulle part — la validation réelle est `validateCapabilityManifest`, à la mai
 Deux sources de vérité pour le même contrat, dont une morte, en violation de la
 hiérarchie §5 qui place les « schémas exécutables » au rang 3.
 
+## Mission schéma achevée
+
+`capability.schema.json` est désormais **normatif et exécuté**
+([ADR-072](../adr/ADR-072-normative-capability-schema.md)) : compilé par Ajv,
+appliqué à toute validation de manifest, et source des énumérations du moteur
+(statuts, primitives, modes de déploiement) au lieu qu'elles soient redéclarées.
+
+`capabilities.mjs` passe de 596 à 356 lignes ; le code ne garde que les règles
+inexprimables en JSON Schema — les références croisées entre parties d'un même
+document. Une lacune du schéma (motif des noms de clés `configuration`) a été
+comblée plutôt que conservée en code : la couverture a été vérifiée cas par cas
+avant suppression.
+
+Non revendiqué : les quatre autres schémas du dépôt (`blueprint`, `overlay`,
+`conformance-report`, `platform-baseline-contract`) n'ont pas été audités pour
+cette propriété — le même défaut peut s'y trouver.
+
 ## Prochaine mission unique
 
-> **Une seule vérité par contrat de capability : rendre
-> `capability.schema.json` normatif et exécuté par le test de registre, et
-> réduire `validateCapabilityManifest` à ce qu'un JSON Schema ne peut pas
-> exprimer (références croisées, symétrie des conflits, parité).**
+> **Ajouter un secret scanning bloquant à la CI.**
 
 ### Justification de l'ordre
 
-ADR-070 a mis à jour les deux validations en croyant le schéma normatif ; rien
-ne l'exécute. Chaque évolution du manifest paie deux fois et peut diverger
-silencieusement — la classe exacte de défaut que le mandat §8.1 interdit. La
-mission est petite, structurante, et débloque proprement les recommandations 2
-à 4 de la revue.
+Recommandation n°2 de la revue d'architecture. §12 confie au projet le secret
+scanning, le SAST, le SBOM, les signatures et la provenance ; à ce jour seules
+les exceptions d'audit npm sont réellement exécutées — tout le reste est
+documentaire, dans `deployment/docs/`.
+
+Le secret scanning est celui dont le rapport coût/valeur est le meilleur : une
+heure de travail, un angle mort fermé, et le même effet que le job `factory`
+ajouté aujourd'hui — faire exécuter ce qui n'était qu'écrit. C'est aussi le seul
+de la liste dont l'absence peut coûter immédiatement et irréversiblement.
+
+Le reste de §12 (SBOM, signatures, provenance) demande une décision sur la
+chaîne de publication et relève d'une mission distincte.
 
 ### Critères de sortie
 
-- le schéma est chargé et exécuté par un test factory sur tous les manifests
-  réels et sur les fixtures invalides existantes ;
-- `validateCapabilityManifest` ne duplique plus aucune règle exprimable en
-  JSON Schema ; les messages d'erreur restent actionnables ;
-- aucune règle actuelle n'est perdue (les tests de refus existants passent) ;
-- ADR consignant la décision « schéma normatif » ;
-- aucune nouvelle dépendance lourde (validateur JSON Schema léger ou déjà
-  présent).
+- un scan de secrets s'exécute sur chaque PR et bloque en cas de détection ;
+- l'historique est couvert, pas seulement le diff ;
+- les faux positifs sont traités par une liste d'exceptions **scopée et datée**,
+  sur le modèle éprouvé de `audit-exceptions.json` — jamais par désactivation ;
+- aucun secret réel n'est révélé dans les journaux CI en cas de détection ;
+- aucune nouvelle dépendance applicative.
