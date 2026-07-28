@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "spring",
+  "contract": {
+    "id": "files-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "authority"
+  ],
+  "suite": "files-spring-integration",
+  "golden": "spring-files",
+  "invariants": {
+    "FILES-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesUploadIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesUploadIntegrationTest.java",
+        "contains": [
+          "upload_withoutToken_returns401"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
+        "contains": [
+          "downloadUrl_withoutToken_returns401",
+          "downloadUrl_asOtherUser_returns404_antiEnumeration",
+          "downloadUrl_nonExistentFile_returns404"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesUploadIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesUploadIntegrationTest.java",
+        "contains": [
+          "upload_responseDoesNotLeakInternalFields",
+          "upload_withValidToken_returns201AndPublicDtoOnly"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
+        "contains": [
+          "downloadUrl_responseDoesNotLeakInternalFields"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FileValidationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FileValidationTest.java",
+        "contains": [
+          "blockedMimeTypes_shouldBeRejected",
+          "emptyFile_shouldBeRejected",
+          "oversizedFile_shouldBeRejected",
+          "nullContentType_shouldBeBlocked",
+          "wildcardContentType_shouldBeBlocked"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesUploadIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesUploadIntegrationTest.java",
+        "contains": [
+          "upload_blockedMimeType_returns415",
+          "upload_emptyFile_returns400",
+          "upload_invalidCategory_returns400"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/MinioStorageIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/MinioStorageIntegrationTest.java",
+        "contains": [
+          "upload_toRealMinio_objectExistsInBucket"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
+        "contains": [
+          "downloadUrl_asOwner_returns200WithUrlAndExpiresIn",
+          "downloadUrl_responseHasNoCacheHeader"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/MinioStorageIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/MinioStorageIntegrationTest.java",
+        "contains": [
+          "downloadUrl_fromRealMinio_isPresignedUrlNotFake",
+          "downloadUrl_fromRealMinio_hasNoCacheHeader"
+        ]
+      }
+    ]
+  }
+}

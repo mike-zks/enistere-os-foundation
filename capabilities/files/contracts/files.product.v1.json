@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1",
+  "id": "files-product",
+  "version": "1.0.0",
+  "capability": "files",
+  "roles": [
+    "authority",
+    "client"
+  ],
+  "invariants": [
+    {
+      "id": "FILES-AUTHORITY-001",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Every file operation requires an authenticated principal and is authorized per resource; a file the caller may not access is indistinguishable from one that does not exist."
+    },
+    {
+      "id": "FILES-AUTHORITY-002",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "No internal storage detail — bucket, storage key, checksum, owner identifier — appears in any public response."
+    },
+    {
+      "id": "FILES-AUTHORITY-003",
+      "responsibility": "upload",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Content type and size are validated server-side; empty, oversized and disallowed content is refused through the canonical error envelope, and the declared type never overrides the detected one."
+    },
+    {
+      "id": "FILES-AUTHORITY-004",
+      "responsibility": "upload",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Binary content is written to the object store and its metadata to the relational store; the stored object is never publicly readable."
+    },
+    {
+      "id": "FILES-AUTHORITY-005",
+      "responsibility": "download-url",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Download is granted through a short-lived signed URL that is never cacheable, issued only to an authorized principal, and never as a durable public path."
+    },
+    {
+      "id": "FILES-AUTHORITY-006",
+      "responsibility": "metadata",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Metadata listing returns only files owned by the requester, in a stable paginated order, excluding deleted entries."
+    },
+    {
+      "id": "FILES-AUTHORITY-007",
+      "responsibility": "delete",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Deletion removes both the object and its metadata, invalidates previously issued download URLs, is idempotent and requires its own permission."
+    },
+    {
+      "id": "FILES-AUTHORITY-008",
+      "responsibility": "quarantine",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Quarantine blocks download until an explicit restore and requires a permission distinct from ownership."
+    },
+    {
+      "id": "FILES-AUTHORITY-009",
+      "responsibility": "reconciliation",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Maintenance runs under an exclusive lock that refuses concurrent runs, and purges a deleted record only once its object is confirmed absent."
+    },
+    {
+      "id": "FILES-AUTHORITY-010",
+      "responsibility": "quota",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "The per-owner active-file quota holds under concurrent uploads and cannot be exceeded by racing requests."
+    },
+    {
+      "id": "FILES-CLIENT-001",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "File content, local device paths and raw file names never reach logs, telemetry or shared client state."
+    },
+    {
+      "id": "FILES-CLIENT-002",
+      "responsibility": "upload",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "The client validates the declared file shape and type before sending, and uploads only through the authenticated client with state-changing requests protected against cross-origin submission where the platform exposes one."
+    },
+    {
+      "id": "FILES-CLIENT-003",
+      "responsibility": "metadata",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Listing is rendered from server-provided data with explicit pagination, is never cached across sessions, and maps failures to distinct, non-revealing states."
+    },
+    {
+      "id": "FILES-CLIENT-004",
+      "responsibility": "download-url",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Download uses only a server-issued URL whose scheme is validated before use; no path is constructed client-side and no reference is left behind in the document."
+    },
+    {
+      "id": "FILES-CLIENT-005",
+      "responsibility": "delete",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Deletion is a protected state-changing operation, refused without a valid origin and CSRF proof, and never issued from an unvalidated identifier."
+    },
+    {
+      "id": "FILES-CLIENT-006",
+      "responsibility": "quarantine",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "Quarantine and restore are protected state-changing operations carrying the caller's authorization, refused without a valid origin and CSRF proof."
+    }
+  ]
+}
