@@ -149,6 +149,19 @@
         ]
       }
     ],
+    "FILES-AUTHORITY-008": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesQuarantineIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesQuarantineIntegrationTest.java",
+        "contains": [
+          "quarantine_byAdmin_blocksDownloadWithoutOwnership",
+          "quarantine_withoutPermission_returns403_evenForTheOwner",
+          "restore_returnsAccessToTheOwner",
+          "restore_isRefusedWhenTheObjectHasVanished"
+        ]
+      }
+    ],
     "FILES-AUTHORITY-011": [
       {
         "kind": "test",
@@ -169,6 +182,16 @@
           "FILE_UPLOADED",
           "FILE_DOWNLOAD_URL_ISSUED",
           "FILE_METADATA_ACCESSED"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesQuarantineIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesQuarantineIntegrationTest.java",
+        "contains": [
+          "quarantineAndRestore_recordBusinessAuditEvents",
+          "FILE_QUARANTINED",
+          "FILE_QUARANTINE_RELEASED"
         ]
       }
     ]

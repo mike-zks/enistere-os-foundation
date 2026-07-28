@@ -63,14 +63,14 @@
         "delete",
         "download-url",
         "metadata",
+        "quarantine",
         "upload"
       ],
-      "coverage": "4/7",
+      "coverage": "5/7",
       "family": "api",
       "familyParity": {
         "status": "BREACH",
         "missing": [
-          "quarantine",
           "quota",
           "reconciliation"
         ]
@@ -85,12 +85,13 @@
         "FILES-AUTHORITY-005",
         "FILES-AUTHORITY-006",
         "FILES-AUTHORITY-007",
+        "FILES-AUTHORITY-008",
         "FILES-AUTHORITY-011"
       ],
-      "proofCount": 15,
+      "proofCount": 17,
       "materialized": false,
       "issues": [
-        "family parity: api runtimes must hold the same responsibilities; missing quarantine, quota, reconciliation"
+        "family parity: api runtimes must hold the same responsibilities; missing quota, reconciliation"
       ]
     },
     "fastapi": {
