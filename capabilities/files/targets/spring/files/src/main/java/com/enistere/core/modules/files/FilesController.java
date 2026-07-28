@@ -157,4 +157,51 @@ public class FilesController {
         );
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PostMapping("/{id}/quarantine")
+    @PreAuthorize("@rbacAuthorization.hasPermission(authentication, 'files.quarantine')")
+    @Operation(
+        summary = "Quarantine a file (administrative)",
+        description = "Blocks download and signed-URL issuance until an explicit restore. "
+            + "Requires files.quarantine and, unlike the owner-facing endpoints, no ownership. "
+            + "Idempotent; a file that cannot transition from its current status returns 409 "
+            + "without disclosing that status.",
+        security = @SecurityRequirement(name = "Bearer")
+    )
+    public ResponseEntity<Void> quarantine(
+            @PathVariable UUID id,
+            Authentication auth,
+            HttpServletRequest httpRequest) {
+
+        fileService.quarantine(
+            id,
+            auth.getName(),
+            httpRequest.getRemoteAddr(),
+            httpRequest.getHeader("User-Agent")
+        );
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).build();
+    }
+
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("@rbacAuthorization.hasPermission(authentication, 'files.restore')")
+    @Operation(
+        summary = "Release a quarantine (administrative)",
+        description = "Restores normal access, and only while the stored object is still "
+            + "present. Requires files.restore and no ownership. No scan is re-run: the "
+            + "decision is manual.",
+        security = @SecurityRequirement(name = "Bearer")
+    )
+    public ResponseEntity<Void> restore(
+            @PathVariable UUID id,
+            Authentication auth,
+            HttpServletRequest httpRequest) {
+
+        fileService.restore(
+            id,
+            auth.getName(),
+            httpRequest.getRemoteAddr(),
+            httpRequest.getHeader("User-Agent")
+        );
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).build();
+    }
 }

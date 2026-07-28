@@ -22,4 +22,7 @@ public final class FilesAuditEvents {
     public static final String OBJECT_DELETED = "FILE_OBJECT_DELETED";
     public static final String DELETED = "FILE_DELETED";
     public static final String DELETION_FAILED = "FILE_DELETION_FAILED";
+    public static final String QUARANTINED = "FILE_QUARANTINED";
+    public static final String QUARANTINE_RELEASED = "FILE_QUARANTINE_RELEASED";
+    public static final String STORAGE_OBJECT_MISSING = "FILE_STORAGE_OBJECT_MISSING";
 }
