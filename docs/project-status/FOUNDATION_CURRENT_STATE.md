@@ -30,6 +30,8 @@ Capability Manifest v2 :
 [`ADR-067`](../adr/ADR-067-capability-manifest-v2-and-deterministic-graph.md).
 Conformité produit Authentication :
 [`ADR-068`](../adr/ADR-068-authentication-capability-product-conformance.md).
+Conformité produit RBAC et évaluateur générique :
+[`ADR-069`](../adr/ADR-069-authorization-capability-product-conformance.md).
 
 ## Actifs existants à migrer
 
@@ -115,15 +117,18 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   vérifiées dans la Foundation comme dans l'application matérialisée.
 
 ```text
-nestjs        CONFORMANT   8 invariants (authority)
-spring        CONFORMANT   8 invariants (authority)
-nextjs        CONFORMANT   6 invariants (client + web-client)
-react-native  CONFORMANT   6 invariants (client + mobile-client)
-fastapi       UNSUPPORTED  angular/flutter PLANNED
+auth   nestjs CONFORMANT 8 · spring CONFORMANT 8 · nextjs CONFORMANT 6 · react-native CONFORMANT 6
+rbac   nestjs CONFORMANT 6 · spring CONFORMANT 6 · nextjs CONFORMANT 3 · react-native NOT_APPLICABLE
+       fastapi UNSUPPORTED · angular/flutter PLANNED
 ```
 
-  Reste, avant la parité **produit** globale : même traitement pour RBAC et
-  Files, contrats polyglottes générés et lifecycle.
+- `Conformité produit RBAC` : **CONFORMANT** (ADR-069) — évaluateur générique,
+  contrats produit découverts par convention, `not-applicable` traité comme
+  absence légitime de rôle. La mesure a corrigé un défaut latent : un refus
+  d'autorisation Spring répondait `500` au lieu de `403`.
+
+  Reste, avant la parité **produit** globale : même traitement pour Files,
+  contrats polyglottes générés et lifecycle.
 
 Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
 

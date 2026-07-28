@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1",
-  "capability": "auth",
+  "capability": "rbac",
   "contract": {
-    "id": "authentication-product",
+    "id": "authorization-product",
     "version": "1.0.0"
   },
   "evaluation": "foundation-registry",
@@ -10,7 +10,6 @@
   "readyTargets": [
     "nestjs",
     "nextjs",
-    "react-native",
     "spring"
   ],
   "targets": {
@@ -20,19 +19,17 @@
       "roles": [
         "authority"
       ],
-      "suite": "auth-nestjs-contract",
-      "golden": "nestjs-auth",
+      "suite": "rbac-nestjs-contract",
+      "golden": "nestjs-auth-rbac",
       "invariants": [
-        "AUTH-AUTHORITY-001",
-        "AUTH-AUTHORITY-002",
-        "AUTH-AUTHORITY-003",
-        "AUTH-AUTHORITY-004",
-        "AUTH-AUTHORITY-005",
-        "AUTH-AUTHORITY-006",
-        "AUTH-AUTHORITY-007",
-        "AUTH-AUTHORITY-008"
+        "RBAC-AUTHORITY-001",
+        "RBAC-AUTHORITY-002",
+        "RBAC-AUTHORITY-003",
+        "RBAC-AUTHORITY-004",
+        "RBAC-AUTHORITY-005",
+        "RBAC-AUTHORITY-006"
       ],
-      "proofCount": 9,
+      "proofCount": 7,
       "materialized": false,
       "issues": []
     },
@@ -42,17 +39,15 @@
       "roles": [
         "authority"
       ],
-      "suite": "auth-spring-integration",
-      "golden": "spring-auth",
+      "suite": "rbac-spring-integration",
+      "golden": "spring-auth-rbac",
       "invariants": [
-        "AUTH-AUTHORITY-001",
-        "AUTH-AUTHORITY-002",
-        "AUTH-AUTHORITY-003",
-        "AUTH-AUTHORITY-004",
-        "AUTH-AUTHORITY-005",
-        "AUTH-AUTHORITY-006",
-        "AUTH-AUTHORITY-007",
-        "AUTH-AUTHORITY-008"
+        "RBAC-AUTHORITY-001",
+        "RBAC-AUTHORITY-002",
+        "RBAC-AUTHORITY-003",
+        "RBAC-AUTHORITY-004",
+        "RBAC-AUTHORITY-005",
+        "RBAC-AUTHORITY-006"
       ],
       "proofCount": 8,
       "materialized": false,
@@ -71,20 +66,16 @@
       "status": "CONFORMANT",
       "manifestStatus": "ready",
       "roles": [
-        "client",
-        "web-client"
+        "client"
       ],
-      "suite": "auth-nextjs-e2e",
-      "golden": "nest-next-auth",
+      "suite": "rbac-nextjs-e2e",
+      "golden": "nest-next-auth-rbac",
       "invariants": [
-        "AUTH-CLIENT-001",
-        "AUTH-CLIENT-002",
-        "AUTH-CLIENT-003",
-        "AUTH-CLIENT-004",
-        "AUTH-CLIENT-005",
-        "AUTH-WEB-001"
+        "RBAC-CLIENT-001",
+        "RBAC-CLIENT-002",
+        "RBAC-CLIENT-003"
       ],
-      "proofCount": 7,
+      "proofCount": 6,
       "materialized": false,
       "issues": []
     },
@@ -98,23 +89,11 @@
       "issues": []
     },
     "react-native": {
-      "status": "CONFORMANT",
-      "manifestStatus": "ready",
-      "roles": [
-        "client",
-        "mobile-client"
-      ],
-      "suite": "auth-react-native-integration",
-      "golden": "triple-auth",
-      "invariants": [
-        "AUTH-CLIENT-001",
-        "AUTH-CLIENT-002",
-        "AUTH-CLIENT-003",
-        "AUTH-CLIENT-004",
-        "AUTH-CLIENT-005",
-        "AUTH-MOBILE-001"
-      ],
-      "proofCount": 6,
+      "status": "NOT_APPLICABLE",
+      "manifestStatus": "not-applicable",
+      "roles": [],
+      "invariants": [],
+      "proofCount": 0,
       "materialized": false,
       "issues": []
     },

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "nextjs",
+  "contract": {
+    "id": "authorization-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client"
+  ],
+  "suite": "rbac-nextjs-e2e",
+  "golden": "nest-next-auth-rbac",
+  "invariants": {
+    "RBAC-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/use-authorization.test.tsx",
+        "materialized": "test/use-authorization.test.tsx",
+        "contains": [
+          "authentifié → rôles/permissions + helpers OR/AND (sans wildcard)"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/authorization-status-view.test.tsx",
+        "materialized": "test/authorization-status-view.test.tsx",
+        "contains": [
+          "AuthorizationStatusView — masqué si non visible"
+        ]
+      }
+    ],
+    "RBAC-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/get-authorization-handler.test.ts",
+        "materialized": "test/get-authorization-handler.test.ts",
+        "contains": [
+          "session valide → 200 rôles/permissions + no-store",
+          "session absente → 401, aucun refresh auto"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/use-authorization.test.tsx",
+        "materialized": "test/use-authorization.test.tsx",
+        "contains": [
+          "désactivé si session non authentifiée (aucun appel /authorization)"
+        ]
+      }
+    ],
+    "RBAC-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/get-authorization-handler.test.ts",
+        "materialized": "test/get-authorization-handler.test.ts",
+        "contains": [
+          "aucun token ni structure interne exposés"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/use-authorization.test.tsx",
+        "materialized": "test/use-authorization.test.tsx",
+        "contains": [
+          "erreur sur /authorization → error exposé"
+        ]
+      }
+    ]
+  }
+}

@@ -2,6 +2,8 @@ package com.enistere.core.modules.authorization;
 
 import com.enistere.core.AbstractIntegrationTest;
 import com.enistere.core.TestDataFactory;
+import com.enistere.core.modules.audit.AuditLog;
+import com.enistere.core.modules.audit.AuditLogRepository;
 import com.enistere.core.modules.permissions.Permission;
 import com.enistere.core.modules.permissions.PermissionRepository;
 import com.enistere.core.modules.roles.Role;
@@ -19,6 +21,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -30,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(AuthorizationIntegrationTest.ProtectedProbe.class)
+@Import({ AuthorizationIntegrationTest.ProtectedProbe.class, AuthorizationIntegrationTest.ProtectedEndpoint.class })
 class AuthorizationIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired private TestDataFactory factory;
@@ -38,6 +42,7 @@ class AuthorizationIntegrationTest extends AbstractIntegrationTest {
     @Autowired private PermissionRepository permissionRepository;
     @Autowired private JdbcTemplate jdbcTemplate;
     @Autowired private ProtectedProbe protectedProbe;
+    @Autowired private AuditLogRepository auditLogRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private String email;
@@ -95,6 +100,50 @@ class AuthorizationIntegrationTest extends AbstractIntegrationTest {
         SecurityContextHolder.clearContext();
     }
 
+    @Test
+    void denial_overHttp_returnsGenericForbiddenWithoutRevealingTheGrant() throws Exception {
+        String token = loginAndGetAccessToken();
+        MvcResult result = mockMvc.perform(get("/api/v1/test-authz/needs-files-read")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.statusCode").value(403))
+            .andExpect(jsonPath("$.errorCode").value("AUTH_FORBIDDEN"))
+            .andReturn();
+        // The refusal must not name the grant that would have unlocked the route.
+        assertThat(result.getResponse().getContentAsString()).doesNotContain("files.read");
+    }
+
+    @Test
+    void grant_takesEffectImmediatelyOnTheSameToken() throws Exception {
+        String token = loginAndGetAccessToken();
+        mockMvc.perform(get("/api/v1/test-authz/needs-files-read")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isForbidden());
+
+        assign("reader", "files.read");
+
+        // Same token, no re-login: the decision follows server state, not the JWT.
+        mockMvc.perform(get("/api/v1/test-authz/needs-files-read")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void denial_isRecordedAsBusinessAuditEvent() throws Exception {
+        auditLogRepository.deleteAll();
+        String token = loginAndGetAccessToken();
+        mockMvc.perform(get("/api/v1/test-authz/needs-files-read")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isForbidden());
+
+        List<AuditLog> logs = auditLogRepository.findAll();
+        assertThat(logs).extracting(AuditLog::getEventType).contains("AUTHORIZATION_DENIED");
+        // The trail records where it happened, never which grant was missing.
+        assertThat(logs)
+            .filteredOn(entry -> "AUTHORIZATION_DENIED".equals(entry.getEventType()))
+            .allSatisfy(entry -> assertThat(entry.getTargetId()).doesNotContain("files.read"));
+    }
+
     private void assign(String roleName, String permissionName) {
         Role role = roleRepository.findByName(roleName).orElseGet(() -> {
             Role value = new Role();
@@ -135,6 +184,16 @@ class AuthorizationIntegrationTest extends AbstractIntegrationTest {
     static class ProtectedProbe {
         @PreAuthorize("@rbacAuthorization.hasPermission(authentication, 'files.read')")
         public void readFiles() {
+        }
+    }
+
+    /** Real HTTP surface: proves what a caller actually observes when denied. */
+    @RestController
+    static class ProtectedEndpoint {
+        @GetMapping("/api/v1/test-authz/needs-files-read")
+        @PreAuthorize("@rbacAuthorization.hasPermission(authentication, 'files.read')")
+        public String needsFilesRead() {
+            return "granted";
         }
     }
 }

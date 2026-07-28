@@ -49,7 +49,7 @@ import { fileURLToPath } from 'node:url';
 import { generateProject } from '../../engine/generator.mjs';
 import { createDefaultBlueprint } from '../../engine/blueprint.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../../engine/dependencies.mjs';
-import { verifyMaterializedAuthentication } from '../../conformance/capability-product.mjs';
+import { verifyMaterializedCapabilities } from '../../conformance/capability-product.mjs';
 import { createHash } from 'node:crypto';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -663,18 +663,23 @@ async function main() {
       if (!ok) break;
     }
   }
-  // 6a) Capability product conformance (ADR-068): the neutral Authentication
-  //     contract is re-checked against the MATERIALIZED application, so the
-  //     evidence declared in the Foundation must still exist in the composed
-  //     project. Runs only after the real gates above passed — a green report on
-  //     a failing app would prove nothing.
-  if (ok && blueprint.capabilities.includes('auth')) {
-    console.log('\n── capability conformance: Authentication (materialized)');
+  // 6a) Capability product conformance (ADR-068, ADR-069): every neutral product
+  //     contract of the composed capabilities is re-checked against the
+  //     MATERIALIZED application, so the evidence declared in the Foundation must
+  //     still exist in the composed project. Runs only after the real gates above
+  //     passed — a green report on a failing app would prove nothing.
+  if (ok && blueprint.capabilities.length > 0) {
+    console.log('\n── capability conformance (materialized)');
     try {
-      const report = await verifyMaterializedAuthentication(out, plan, REPO_ROOT);
-      for (const [target, result] of Object.entries(report.targets)) {
-        if (result.materialized) {
-          console.log(`   ${target.padEnd(13)} ${result.status} (${result.invariants.length} invariants)`);
+      const reports = await verifyMaterializedCapabilities(out, plan, REPO_ROOT);
+      for (const report of reports) {
+        for (const [target, result] of Object.entries(report.targets)) {
+          if (result.materialized) {
+            console.log(
+              `   ${report.capability.padEnd(6)} ${target.padEnd(13)} ${result.status}`
+              + ` (${result.invariants.length} invariants)`,
+            );
+          }
         }
       }
     } catch (error) {

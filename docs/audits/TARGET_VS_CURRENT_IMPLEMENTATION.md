@@ -111,11 +111,13 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — conformité produit partielle :** Authentication est désormais mesurée
-   par un contrat neutre commun et `CONFORMANT` sur ses quatre targets `ready`
-   (ADR-068) ; la mesure a d’ailleurs révélé et corrigé quatre divergences Spring
-   invisibles aux suites locales. RBAC et Files n’ont pas encore de contrat
-   produit équivalent : l’équivalence de leurs adapters reste non prouvée.
+1. **P0 — conformité produit partielle :** Authentication et RBAC sont mesurées
+   par un évaluateur générique et des contrats neutres, et sont `CONFORMANT` sur
+   leurs targets `ready` (ADR-068, ADR-069). La mesure a révélé et corrigé quatre
+   divergences Spring sur Auth, puis un défaut plus grave sur RBAC — un refus
+   d’autorisation répondait `500` au lieu de `403`, invisible aux suites locales
+   qui n’exerçaient pas le refus via HTTP. `files` n’a pas encore de contrat
+   produit : l’équivalence de ses adapters reste non prouvée.
 2. **P0 — blueprint/CSM partiels :** sélection et résolution des providers de
    primitives et Blueprint V2 complet manquent.
 3. **P1 — distribution partielle :** async, clients, isolation des primitives et

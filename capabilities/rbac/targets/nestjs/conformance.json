@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "nestjs",
+  "contract": {
+    "id": "authorization-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "authority"
+  ],
+  "suite": "rbac-nestjs-contract",
+  "golden": "nestjs-auth-rbac",
+  "invariants": {
+    "RBAC-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-rbac.e2e-spec.ts",
+        "materialized": "test/auth-rbac.e2e-spec.ts",
+        "contains": [
+          "reflects a role change immediately without re-issuing the JWT",
+          "reflects a permission removal immediately",
+          "does not embed roles or permissions in the access token"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-rbac.e2e-spec.ts",
+        "materialized": "test/auth-rbac.e2e-spec.ts",
+        "contains": [
+          "denies (403) a route whose required role is missing",
+          "denies (403) a route with a missing permission without revealing it",
+          "AUTH_FORBIDDEN"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-rbac.e2e-spec.ts",
+        "materialized": "test/auth-rbac.e2e-spec.ts",
+        "contains": [
+          "returns 401 (not 403) before authorization guards when no token is provided",
+          "returns 401 (not 403) when the user is suspended"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-rbac.e2e-spec.ts",
+        "materialized": "test/auth-rbac.e2e-spec.ts",
+        "contains": [
+          "allows an authenticated user on a route without role/permission metadata",
+          "allows a route when all required permissions are held (AND)",
+          "never trusts a role or permission supplied by the client"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-rbac.e2e-spec.ts",
+        "materialized": "test/auth-rbac.e2e-spec.ts",
+        "contains": [
+          "records an authorization denial audit event"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/src/rbac/rbac-audit-events.ts",
+        "materialized": "src/rbac/rbac-audit-events.ts",
+        "contains": [
+          "AUTHORIZATION_ROLE_DENIED",
+          "AUTHORIZATION_PERMISSION_DENIED"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/test/auth-rbac.e2e-spec.ts",
+        "materialized": "test/auth-rbac.e2e-spec.ts",
+        "contains": [
+          "exposes roles and permissions via /auth/me/authorization",
+          "never leaks sensitive fields in protected responses",
+          "isolates authorization between users"
+        ]
+      }
+    ]
+  }
+}

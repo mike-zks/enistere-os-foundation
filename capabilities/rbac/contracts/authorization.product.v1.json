@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1",
+  "id": "authorization-product",
+  "version": "1.0.0",
+  "capability": "rbac",
+  "roles": [
+    "authority",
+    "client"
+  ],
+  "invariants": [
+    {
+      "id": "RBAC-AUTHORITY-001",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Every authorization decision is computed from current server-side grants at request time; a role or permission change takes effect immediately, without re-issuing or re-reading the access token."
+    },
+    {
+      "id": "RBAC-AUTHORITY-002",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "A missing role or permission is refused with the same generic AUTH_FORBIDDEN response in the canonical error envelope, without revealing which grant was required."
+    },
+    {
+      "id": "RBAC-AUTHORITY-003",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Authentication is resolved before authorization: an absent, invalid or unusable session yields 401, never 403."
+    },
+    {
+      "id": "RBAC-AUTHORITY-004",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Authorization is deny-by-default: a route declaring a requirement is refused unless the principal holds it, while a route declaring none stays available to any authenticated principal."
+    },
+    {
+      "id": "RBAC-AUTHORITY-005",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "Every authorization denial emits a business audit event through the baseline audit port, without recording the missing grant in the public response."
+    },
+    {
+      "id": "RBAC-AUTHORITY-006",
+      "appliesTo": [
+        "authority"
+      ],
+      "requirement": "The authorization summary exposes only the effective role and permission codes of the current principal, sorted and free of internal identifiers."
+    },
+    {
+      "id": "RBAC-CLIENT-001",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "The client consumes the authorization summary for conditional rendering only; it never treats it as an authorization proof, the authority remaining the API on every request."
+    },
+    {
+      "id": "RBAC-CLIENT-002",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "The summary is requested only for an authenticated session and is never stored in a shared or reusable cache across sessions."
+    },
+    {
+      "id": "RBAC-CLIENT-003",
+      "appliesTo": [
+        "client"
+      ],
+      "requirement": "No token and no internal server structure leaks through the authorization surface, including on error."
+    }
+  ]
+}
