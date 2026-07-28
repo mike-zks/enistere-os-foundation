@@ -51,28 +51,43 @@ l'évaluateur omettait `familyParity` : une target sans preuves masquait aussi s
 - `factory:test` n'est toujours invoqué par aucun workflow CI (dette héritée) ;
 - les gates autres que mobiles ne sont pas audités contre ADR-071.
 
+## Mission CI achevée dans la foulée
+
+`factory:test`, `factory:capability-conformance` et `factory:baseline-gap` sont
+exécutés par la CI sur chaque PR, en étapes bloquantes (~8 s, sans base ni
+Docker), avec un gate anti-péremption : les rapports de conformité committés
+doivent correspondre aux rapports calculés. Le CLI de `repository-gap` sort
+désormais en échec quand un runtime perd sa conformité.
+
+Une revue d'architecture a suivi
+([ARCHITECTURE_REVIEW_2026-07-28](../audits/ARCHITECTURE_REVIEW_2026-07-28.md)).
+Constat prioritaire : `factory/schema/capability.schema.json` n'est exécuté
+nulle part — la validation réelle est `validateCapabilityManifest`, à la main.
+Deux sources de vérité pour le même contrat, dont une morte, en violation de la
+hiérarchie §5 qui place les « schémas exécutables » au rang 3.
+
 ## Prochaine mission unique
 
-> **Faire exécuter `factory:test` par la CI.**
+> **Une seule vérité par contrat de capability : rendre
+> `capability.schema.json` normatif et exécuté par le test de registre, et
+> réduire `validateCapabilityManifest` à ce qu'un JSON Schema ne peut pas
+> exprimer (références croisées, symétrie des conflits, parité).**
 
 ### Justification de l'ordre
 
-C'est désormais la dette la plus coûteuse du dépôt. 452 tests — dont l'évaluateur de
-conformité produit lui-même, la règle de parité par famille et la découverte des
-contrats — ne sont rejoués par **aucun** workflow. Toute la mesure sur laquelle
-reposent ADR-068 à ADR-070 n'est vérifiée qu'en local.
-
-Autrement dit : la CI valide les applications générées, mais pas l'outil qui juge si
-elles sont conformes. Une régression de l'évaluateur passerait inaperçue et rendrait
-silencieusement fausses toutes les affirmations de conformité.
-
-Cette mission est petite et referme un angle mort structurel. Elle doit précéder
-toute nouvelle capability.
+ADR-070 a mis à jour les deux validations en croyant le schéma normatif ; rien
+ne l'exécute. Chaque évolution du manifest paie deux fois et peut diverger
+silencieusement — la classe exacte de défaut que le mandat §8.1 interdit. La
+mission est petite, structurante, et débloque proprement les recommandations 2
+à 4 de la revue.
 
 ### Critères de sortie
 
-- `npm run factory:test` exécuté par un workflow sur chaque PR ;
-- `factory:capability-conformance` et `factory:baseline-gap` exécutés et bloquants ;
-- durée d'exécution mesurée et acceptable ;
-- aucun assouplissement des gates existants ;
-- aucune nouvelle dépendance.
+- le schéma est chargé et exécuté par un test factory sur tous les manifests
+  réels et sur les fixtures invalides existantes ;
+- `validateCapabilityManifest` ne duplique plus aucune règle exprimable en
+  JSON Schema ; les messages d'erreur restent actionnables ;
+- aucune règle actuelle n'est perdue (les tests de refus existants passent) ;
+- ADR consignant la décision « schéma normatif » ;
+- aucune nouvelle dépendance lourde (validateur JSON Schema léger ou déjà
+  présent).
