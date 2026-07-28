@@ -1,0 +1,78 @@
+{
+  "$comment": "Écarts de parité de famille CONNUS et actés (ADR-074). Le gate échoue sur tout écart non listé ici, sur un écart plus large que déclaré, et sur une échéance dépassée. Aucune désactivation globale : un écart absent de ce fichier fait échouer la mesure. Ce socle rend la dette visible et bornée dans le temps — il ne l'excuse pas.",
+  "schemaVersion": "1",
+  "gaps": [
+    {
+      "capability": "auth",
+      "runtime": "fastapi",
+      "family": "api",
+      "missing": ["login", "logout", "refresh", "session"],
+      "justification": "ADR-062 a livré FastAPI comme troisième base API sans capability. ADR-074 établit que ce n'est pas un état final acceptable : un runtime de la famille API doit tenir ce que NestJS et Spring tiennent.",
+      "deadline": "2026-12-31",
+      "review": "Portage Authentication sur FastAPI, ou décision explicite de retirer FastAPI de la cible."
+    },
+    {
+      "capability": "rbac",
+      "runtime": "fastapi",
+      "family": "api",
+      "missing": ["authorization-context", "authorization-summary", "permissions", "roles"],
+      "justification": "Même cause que auth/fastapi : RBAC dépend d'Authentication, donc l'écart se referme après celui d'auth.",
+      "deadline": "2026-12-31",
+      "review": "Après Authentication sur FastAPI."
+    },
+    {
+      "capability": "files",
+      "runtime": "fastapi",
+      "family": "api",
+      "missing": ["delete", "download-url", "metadata", "quarantine", "quota", "reconciliation", "upload"],
+      "justification": "Même cause : Files dépend de auth + rbac, donc l'écart se referme en dernier dans la famille API.",
+      "deadline": "2026-12-31",
+      "review": "Après RBAC sur FastAPI."
+    },
+    {
+      "capability": "auth",
+      "runtime": "angular",
+      "family": "web",
+      "missing": ["login", "logout", "refresh", "session"],
+      "justification": "Angular est déclaré `planned` depuis l'origine sans échéance. Next.js tient 4/4 dans la même famille Web ; la promesse doit être honorée ou retirée.",
+      "deadline": "2026-12-31",
+      "review": "Portage Authentication sur Angular, ou passage explicite à unsupported."
+    },
+    {
+      "capability": "rbac",
+      "runtime": "angular",
+      "family": "web",
+      "missing": ["authorization-context", "authorization-summary"],
+      "justification": "Dépend d'Authentication sur Angular.",
+      "deadline": "2026-12-31",
+      "review": "Après Authentication sur Angular."
+    },
+    {
+      "capability": "files",
+      "runtime": "angular",
+      "family": "web",
+      "missing": ["delete", "download-url", "metadata", "quarantine", "upload"],
+      "justification": "Dépend de auth + rbac sur Angular.",
+      "deadline": "2026-12-31",
+      "review": "Après RBAC sur Angular."
+    },
+    {
+      "capability": "auth",
+      "runtime": "flutter",
+      "family": "mobile",
+      "missing": ["login", "logout", "refresh", "session"],
+      "justification": "Flutter est `planned` sans échéance. React Native tient 4/4 dans la même famille Mobile. Risque connu et mesuré : Flutter tient ses 25 invariants de baseline avec 2 fichiers de test là où React Native en a 95 — la parité exigera un niveau de preuve que ce starter n'a jamais pratiqué.",
+      "deadline": "2026-12-31",
+      "review": "Portage Authentication sur Flutter, ou passage explicite à unsupported."
+    },
+    {
+      "capability": "files",
+      "runtime": "flutter",
+      "family": "mobile",
+      "missing": ["upload"],
+      "justification": "React Native ne tient qu'`upload` dans la famille Mobile ; c'est donc la seule responsabilité due. Dépend d'Authentication sur Flutter.",
+      "deadline": "2026-12-31",
+      "review": "Après Authentication sur Flutter."
+    }
+  ]
+}
