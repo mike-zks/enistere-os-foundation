@@ -30,19 +30,48 @@ describe('capability product conformance', () => {
     const byCapability = Object.fromEntries(found.map((item) => [item.capability, item.path]));
     assert.equal(byCapability.auth, 'capabilities/auth/contracts/authentication.product.v1.json');
     assert.equal(byCapability.rbac, 'capabilities/rbac/contracts/authorization.product.v1.json');
+    assert.equal(byCapability.files, 'capabilities/files/contracts/files.product.v1.json');
   });
 
-  it('closes the neutral contract for every ready target of every capability', async () => {
+  it('closes the neutral contract for every ready target, and states where it does not', async () => {
     const reports = await evaluateAllCapabilityProducts({ repoRoot: REPO_ROOT });
-    assert.ok(reports.length >= 2);
-    for (const report of reports) {
-      assert.equal(report.status, 'CONFORMANT', `${report.capability} is not conformant`);
-      for (const target of report.readyTargets) {
-        assert.equal(report.targets[target].status, 'CONFORMANT');
-        assert.ok(report.targets[target].invariants.length > 0);
-        assert.ok(report.targets[target].proofCount > 0);
+    const byCapability = Object.fromEntries(reports.map((item) => [item.capability, item]));
+    assert.ok(reports.length >= 3);
+
+    for (const capability of ['auth', 'rbac']) {
+      assert.equal(byCapability[capability].status, 'CONFORMANT');
+      for (const target of byCapability[capability].readyTargets) {
+        assert.equal(byCapability[capability].targets[target].status, 'CONFORMANT');
+        assert.ok(byCapability[capability].targets[target].proofCount > 0);
       }
     }
+
+    // files is honestly NOT conformant: Spring holds two of the seven
+    // responsibilities NestJS holds, and both are API runtimes. Every proof it
+    // does declare passes — the only issue is the parity gap itself.
+    assert.equal(byCapability.files.status, 'NON_CONFORMANT');
+    const spring = byCapability.files.targets.spring;
+    assert.equal(spring.familyParity.status, 'BREACH');
+    assert.equal(spring.family, 'api');
+    assert.deepEqual(
+      spring.familyParity.missing,
+      ['delete', 'metadata', 'quarantine', 'quota', 'reconciliation'],
+    );
+    assert.deepEqual(
+      spring.issues.filter((issue) => !issue.startsWith('family parity:')),
+      [],
+    );
+    assert.equal(byCapability.files.targets.nestjs.status, 'CONFORMANT');
+  });
+
+  it('does not constrain a target that is alone in its family', async () => {
+    const report = await evaluateCapabilityProduct({ capability: 'files', repoRoot: REPO_ROOT });
+    // Angular and Flutter are not ready, so nextjs and react-native have nobody
+    // to match: partial coverage there is a scope decision, not a breach.
+    assert.equal(report.targets.nextjs.familyParity.status, 'OK');
+    assert.equal(report.targets.nextjs.coverage, '5/7');
+    assert.equal(report.targets['react-native'].familyParity.status, 'OK');
+    assert.equal(report.targets['react-native'].coverage, '1/7');
   });
 
   it('keeps Authentication measured on its four ready targets', async () => {
@@ -65,6 +94,29 @@ describe('capability product conformance', () => {
     assert.deepEqual(report.readyTargets, ['nestjs', 'nextjs', 'spring']);
   });
 
+  it('scopes invariants to the responsibilities a target actually holds', async () => {
+    const report = await evaluateCapabilityProduct({ capability: 'files', repoRoot: REPO_ROOT });
+
+    // Same role, very different surfaces: the contract must not ask Spring to
+    // prove quarantine or quota it never claimed, nor let it pass as full support.
+    assert.equal(report.targets.nestjs.coverage, '7/7');
+    assert.equal(report.targets.spring.coverage, '2/7');
+    assert.ok(report.targets.nestjs.invariants.length > report.targets.spring.invariants.length);
+    assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-003'));
+    assert.ok(!report.targets.spring.invariants.includes('FILES-AUTHORITY-008'));
+    // Cross-cutting invariants carry no responsibility, so every target proves them.
+    for (const target of ['nestjs', 'spring']) {
+      assert.ok(report.targets[target].invariants.includes('FILES-AUTHORITY-001'));
+      assert.ok(report.targets[target].invariants.includes('FILES-AUTHORITY-002'));
+    }
+    // A one-responsibility mobile client is conformant on exactly that one.
+    assert.equal(report.targets['react-native'].coverage, '1/7');
+    assert.deepEqual(
+      report.targets['react-native'].invariants,
+      ['FILES-CLIENT-001', 'FILES-CLIENT-002'],
+    );
+  });
+
   it('rejects unknown roles, duplicate invariant ids and a foreign capability', () => {
     const issues = validateProductContract({
       schemaVersion: '1',
@@ -85,7 +137,7 @@ describe('capability product conformance', () => {
   it('proves the same evidence exists in a materialized multi-client system', async () => {
     const blueprint = createDefaultBlueprint('capability-conformance-materialized');
     blueprint.stack = { api: 'nestjs', web: 'nextjs', mobile: 'react-native' };
-    blueprint.capabilities = ['auth', 'rbac'];
+    blueprint.capabilities = ['auth', 'rbac', 'files'];
     blueprint.designSystem = true;
     blueprint.deployment = { environments: ['local'] };
     const projectDir = join(root, 'project');
@@ -103,12 +155,19 @@ describe('capability product conformance', () => {
     }
     // RBAC owns no mobile surface: nothing is materialized, nothing is claimed.
     assert.equal(byCapability.rbac.targets['react-native'].materialized, false);
+    // Files materializes on all three, each measured on what it actually holds.
+    for (const target of ['nestjs', 'nextjs', 'react-native']) {
+      assert.equal(byCapability.files.targets[target].status, 'CONFORMANT');
+      assert.equal(byCapability.files.targets[target].materialized, true);
+    }
+    assert.equal(byCapability.files.targets['react-native'].coverage, '1/7');
+    assert.equal(byCapability.files.targets.nestjs.coverage, '7/7');
 
     const written = JSON.parse(await readFile(
       join(projectDir, 'enistere.capability-conformance.json'),
       'utf8',
     ));
-    assert.equal(written.capabilities.length, 2);
+    assert.equal(written.capabilities.length, 3);
   });
 
   it('fails when a materialized proof marker disappears', async () => {

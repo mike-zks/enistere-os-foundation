@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "nextjs",
+  "contract": {
+    "id": "files-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client"
+  ],
+  "suite": "files-nextjs-e2e",
+  "golden": "nest-next-files",
+  "invariants": {
+    "FILES-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/files-helpers.test.ts",
+        "materialized": "test/files-helpers.test.ts",
+        "contains": [
+          "classifyFileError : 404/403/401/503/network/409/500/inconnu"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files-download.test.tsx",
+        "materialized": "test/files-download.test.tsx",
+        "contains": [
+          "triggerDownload : ancre temporaire rel=noopener noreferrer, nettoyée, rien ne reste dans le DOM"
+        ]
+      }
+    ],
+    "FILES-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/upload-handler.test.ts",
+        "materialized": "test/upload-handler.test.ts",
+        "contains": [
+          "upload : Origin invalide → 403 sans appel API",
+          "upload : CSRF invalide → 403 sans appel API",
+          "upload : fichier absent → 400 sans appel API"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/upload-form.test.tsx",
+        "materialized": "test/upload-form.test.tsx",
+        "contains": [
+          "fichier requis : soumission sans sélection → erreur visible",
+          "catégorie requise : soumission sans catégorie → erreur visible"
+        ]
+      }
+    ],
+    "FILES-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/list-files-handler.test.ts",
+        "materialized": "test/list-files-handler.test.ts",
+        "contains": [
+          "liste : succès → 200 + données paginées + no-store",
+          "liste : limit invalide → 400 sans appel API",
+          "liste : erreurs API 401/403/429/503 mappées distinctement"
+        ]
+      }
+    ],
+    "FILES-CLIENT-004": [
+      {
+        "kind": "test",
+        "source": "files/test/files-download.test.tsx",
+        "materialized": "test/files-download.test.tsx",
+        "contains": [
+          "isSafeDownloadUrl : https ok ; http seulement si insecure ; schémas dangereux refusés",
+          "triggerDownload : URL dangereuse refusée (aucune ancre, retourne false)"
+        ]
+      }
+    ],
+    "FILES-CLIENT-005": [
+      {
+        "kind": "test",
+        "source": "files/test/delete-bff-client.test.ts",
+        "materialized": "test/delete-bff-client.test.ts",
+        "contains": [
+          "delete"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files-helpers.test.ts",
+        "materialized": "test/files-helpers.test.ts",
+        "contains": [
+          "isUuid : v4 valide, rejets divers"
+        ]
+      }
+    ],
+    "FILES-CLIENT-006": [
+      {
+        "kind": "test",
+        "source": "files/test/admin-file-handlers.test.ts",
+        "materialized": "test/admin-file-handlers.test.ts",
+        "contains": [
+          "quarantaine : Origin invalide → 403 sans appel API",
+          "quarantaine : CSRF invalide → 403 sans appel API",
+          "quarantaine : UUID invalide → 400 sans appel API",
+          "quarantaine : succès → 200 { success:true, data:null }, no-store, Authorization Bearer"
+        ]
+      }
+    ]
+  }
+}

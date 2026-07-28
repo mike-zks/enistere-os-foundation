@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "nestjs",
+  "contract": {
+    "id": "files-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "authority"
+  ],
+  "suite": "files-nestjs-contract",
+  "golden": "nestjs-files",
+  "invariants": {
+    "FILES-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/test/files-download.e2e-spec.ts",
+        "materialized": "test/files-download.e2e-spec.ts",
+        "contains": [
+          "GET metadata of another user file → 404 (anti-enumeration)",
+          "GET metadata without a token → 401"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files-upload.e2e-spec.ts",
+        "materialized": "test/files-upload.e2e-spec.ts",
+        "contains": [
+          "rejects an upload without files.upload permission (403)",
+          "rejects an upload without a token (401)"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/test/files-list.e2e-spec.ts",
+        "materialized": "test/files-list.e2e-spec.ts",
+        "contains": [
+          "items do not expose internal fields (storageKey, bucket, checksum, ownerId)"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files-upload.e2e-spec.ts",
+        "materialized": "test/files-upload.e2e-spec.ts",
+        "contains": [
+          "no internals exposed"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/test/files-upload.e2e-spec.ts",
+        "materialized": "test/files-upload.e2e-spec.ts",
+        "contains": [
+          "rejects content not matching the declared category (real type wins)",
+          "rejects unrecognized content"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/test/files-upload.e2e-spec.ts",
+        "materialized": "test/files-upload.e2e-spec.ts",
+        "contains": [
+          "stored privately"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files-download.e2e-spec.ts",
+        "materialized": "test/files-download.e2e-spec.ts",
+        "contains": [
+          "keeps the bucket private: the unsigned object URL is refused"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/test/files-download.e2e-spec.ts",
+        "materialized": "test/files-download.e2e-spec.ts",
+        "contains": [
+          "issues a short signed URL, not cacheable, that really downloads the object"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/test/files-list.e2e-spec.ts",
+        "materialized": "test/files-list.e2e-spec.ts",
+        "contains": [
+          "returns only files owned by the requesting user (ownership isolation)",
+          "excludes DELETED files from the list",
+          "returns files in stable createdAt desc order",
+          "respects limit and returns nextOffset when more results exist"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-007": [
+      {
+        "kind": "test",
+        "source": "files/test/files-lifecycle.e2e-spec.ts",
+        "materialized": "test/files-lifecycle.e2e-spec.ts",
+        "contains": [
+          "deletes a file (object + DB), invalidates a previously issued URL, and is anti-enumerable",
+          "deletion is idempotent (second DELETE → 204)",
+          "a user without files.delete cannot delete → 403"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-008": [
+      {
+        "kind": "test",
+        "source": "files/test/files-lifecycle.e2e-spec.ts",
+        "materialized": "test/files-lifecycle.e2e-spec.ts",
+        "contains": [
+          "quarantines a validated file (admin, no ownership), blocking download until restore",
+          "quarantine requires files.quarantine (owner without it → 403)"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-009": [
+      {
+        "kind": "test",
+        "source": "files/test/files-maintenance.e2e-spec.ts",
+        "materialized": "test/files-maintenance.e2e-spec.ts",
+        "contains": [
+          "withLock refuses a concurrent maintenance run (MaintenanceLockBusyError)",
+          "purges an old DELETED row only when its object is absent (keeps + signals otherwise)"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-010": [
+      {
+        "kind": "test",
+        "source": "files/test/files-maintenance.e2e-spec.ts",
+        "materialized": "test/files-maintenance.e2e-spec.ts",
+        "contains": [
+          "enforces the per-owner active-file quota under concurrent uploads (no overflow)"
+        ]
+      }
+    ]
+  }
+}

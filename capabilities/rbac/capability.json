@@ -44,6 +44,12 @@
         "id": "nestjs",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "roles",
+        "permissions",
+        "authorization-context",
+        "authorization-summary"
+      ],
       "contracts": [
         "authorization-context",
         "authorization-decision"
@@ -68,6 +74,12 @@
         "id": "spring",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "roles",
+        "permissions",
+        "authorization-context",
+        "authorization-summary"
+      ],
       "contracts": [
         "authorization-context",
         "authorization-decision"
@@ -95,6 +107,10 @@
         "id": "nextjs",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary"
+      ],
       "contracts": [
         "authorization-context"
       ],

@@ -80,6 +80,7 @@ const TARGET_KEYS = new Set([
   'status',
   'mode',
   'adapter',
+  'responsibilities',
   'contracts',
   'primitives',
   'deploymentModes',
@@ -266,6 +267,7 @@ function validateTargets(manifest) {
     if (!STARTER_IDS.includes(key)) issues.push(`targets.${key} is not a known runtime`);
   }
 
+  const responsibilityIds = new Set(manifest.responsibilities ?? []);
   const contractIds = new Set((manifest.contracts ?? []).map((item) => item.id));
   const primitiveIds = new Set((manifest.primitives ?? []).map((item) => item.id));
   const migrationIds = new Set((manifest.migrations ?? []).map((item) => item.id));
@@ -299,6 +301,18 @@ function validateTargets(manifest) {
       }
       if (target.adapter.id !== runtimeId) issues.push(`targets.${runtimeId}.adapter.id must be ${runtimeId}`);
       if (!SEMVER.test(target.adapter.version ?? '')) issues.push(`targets.${runtimeId}.adapter.version must use SemVer`);
+    }
+
+    // A ready target states WHICH of the capability's responsibilities it holds.
+    // Without this, `ready` collapses full and partial support into one word, and
+    // a target covering two of seven responsibilities reads like one covering all.
+    issues.push(...validateUniqueStrings(
+      target.responsibilities, `targets.${runtimeId}.responsibilities`,
+    ));
+    for (const responsibility of target.responsibilities ?? []) {
+      if (!responsibilityIds.has(responsibility)) {
+        issues.push(`targets.${runtimeId}.responsibilities references unknown ${responsibility}`);
+      }
     }
 
     for (const [field, known] of [

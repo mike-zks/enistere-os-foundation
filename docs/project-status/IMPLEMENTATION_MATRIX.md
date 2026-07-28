@@ -32,7 +32,8 @@
 | Moteur d'overlays déclaratifs | Implémenté (1A/1B/1C) | Auth, RBAC et Files livrés sur la verticale TypeScript |
 | Capability Manifest v2 | **Implémenté** (ADR-067) | contrat fermé ; adapters, contrats, primitives, modes, migrations et conformité par target |
 | Graphe de capabilities | **Implémenté** (ADR-067) | closure/ordre déterministes, auto-inclusions tracées, cycles et conflits refusés |
-| Conformité produit de capability | **Implémenté pour `auth` et `rbac`** (ADR-068, ADR-069) | évaluateur générique, contrats découverts par convention, invariants par rôle, `not-applicable` traité comme absence légitime ; Files non couvert |
+| Conformité produit de capability | **Implémenté** — `auth`/`rbac` conformes, `files` non conforme (ADR-068 → ADR-070) | évaluateur générique, contrats découverts par convention, invariants par rôle et par responsabilité, `not-applicable` traité comme absence légitime |
+| Parité par famille de runtimes | **Mesurée** (ADR-070) | les targets `ready` d'une famille doivent déclarer les mêmes responsabilités ; un écart ouvert : `files/spring` 2/7 |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
 | CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C/R8A/ADR-066) | inclut le golden topologique `distributed-spring-nestjs` |

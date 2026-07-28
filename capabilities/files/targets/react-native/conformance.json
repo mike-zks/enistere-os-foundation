@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "react-native",
+  "contract": {
+    "id": "files-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client"
+  ],
+  "suite": "files-react-native-integration",
+  "golden": "triple-files",
+  "invariants": {
+    "FILES-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/upload-file.test.ts",
+        "materialized": "test/upload-file.test.ts",
+        "contains": [
+          "describeFileForLog drops the uri AND the raw name (no device path / PII leak)"
+        ]
+      }
+    ],
+    "FILES-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/upload-file.test.ts",
+        "materialized": "test/upload-file.test.ts",
+        "contains": [
+          "isMobileFile guards the {uri,name,type} shape",
+          "isAllowedFileType: exact, wildcard subtype, */*, and empty = allow all"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/src/upload/use-upload.ts",
+        "materialized": "src/upload/use-upload.ts",
+        "contains": [
+          "useAuthedMutation",
+          "apiClient.files.upload"
+        ]
+      }
+    ]
+  }
+}

@@ -24,6 +24,7 @@ for (const report of reports) {
   for (const [target, result] of Object.entries(report.targets)) {
     console.log(
       `  ${target.padEnd(13)} ${result.status.padEnd(15)}`
+      + ` resp=${(result.coverage ?? '-').padEnd(5)}`
       + ` invariants=${result.invariants.length} proofs=${result.proofCount ?? 0}`,
     );
     for (const issue of result.issues) console.log(`    - ${issue}`);
