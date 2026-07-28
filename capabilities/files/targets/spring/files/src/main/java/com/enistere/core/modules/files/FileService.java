@@ -4,11 +4,13 @@ import com.enistere.core.config.FilesConfig;
 import com.enistere.core.infrastructure.storage.StorageService;
 import com.enistere.core.modules.audit.AuditService;
 import com.enistere.core.modules.files.dto.DownloadUrlResponseDto;
+import com.enistere.core.modules.files.dto.FileListResponseDto;
 import com.enistere.core.modules.files.dto.StoredFileResponseDto;
 import com.enistere.core.modules.users.User;
 import com.enistere.core.modules.users.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -102,8 +105,10 @@ public class FileService {
         User owner = userRepository.findByEmail(ownerEmail)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
-        StoredFile file = repository.findByIdAndOwnerId(fileId, owner.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found"));
+        // A deleted file must not still hand out a download URL: the row survives
+        // as a tombstone, so filtering on ownership alone would keep signing keys
+        // whose object is already gone.
+        StoredFile file = requireOwnedFile(fileId, owner.getId());
 
         // URL is never logged (ADR-040, §20)
         String url = storageService.generatePresignedDownloadUrl(
@@ -114,6 +119,93 @@ public class FileService {
         auditService.record(FilesAuditEvents.DOWNLOAD_URL_ISSUED, owner.getId(), "file",
             fileId.toString(), ipAddress, userAgent);
         return new DownloadUrlResponseDto(fileId, url, filesConfig.getPresignedUrlTtlSeconds());
+    }
+
+    /**
+     * One page of the caller's own files. Deleted rows are excluded rather than
+     * returned with a status: a soft-deleted file must be as invisible to its
+     * owner as one that never existed.
+     */
+    @Transactional(readOnly = true)
+    public FileListResponseDto listOwnedFiles(String ownerEmail, int limit, int offset) {
+        User owner = requireUser(ownerEmail);
+        List<StoredFileResponseDto> items = repository
+            .findByOwnerIdAndStatusNotOrderByCreatedAtDescIdDesc(
+                owner.getId(), FileStatus.DELETED, PageRequest.of(offset / limit, limit))
+            .stream()
+            .map(this::toDto)
+            .toList();
+        long total = repository.countByOwnerIdAndStatusNot(owner.getId(), FileStatus.DELETED);
+        Integer nextOffset = offset + items.size() < total ? offset + items.size() : null;
+        return new FileListResponseDto(items, nextOffset, total);
+    }
+
+    /**
+     * Public metadata of one owned file. A file owned by somebody else and a file
+     * that does not exist both yield 404 — the caller must not be able to probe
+     * for existence.
+     */
+    @Transactional(readOnly = true)
+    public StoredFileResponseDto getMetadata(UUID fileId, String ownerEmail,
+                                             String ipAddress, String userAgent) {
+        User owner = requireUser(ownerEmail);
+        StoredFile file = requireOwnedFile(fileId, owner.getId());
+        auditService.record(FilesAuditEvents.METADATA_ACCESSED, owner.getId(), "file",
+            fileId.toString(), ipAddress, userAgent);
+        return toDto(file);
+    }
+
+    /**
+     * Deletes an owned file: object first, then metadata.
+     *
+     * <p>The order matters. Removing the row first would strand the object with no
+     * record pointing at it — invisible, unbilled-for and unreclaimable. Removing
+     * the object first leaves at worst a row whose object is already gone, which
+     * reconciliation can detect and purge.
+     *
+     * <p>Idempotent: deleting an already-deleted file succeeds silently, so a
+     * retried request never turns into a 404 the caller has to special-case. The
+     * previously issued presigned URLs stop working because the object is gone.
+     */
+    public void delete(UUID fileId, String ownerEmail, String ipAddress, String userAgent) {
+        User owner = requireUser(ownerEmail);
+        auditService.record(FilesAuditEvents.DELETION_REQUESTED, owner.getId(), "file",
+            fileId.toString(), ipAddress, userAgent);
+
+        StoredFile file = repository.findByIdAndOwnerId(fileId, owner.getId()).orElse(null);
+        if (file == null || file.getStatus() == FileStatus.DELETED) {
+            return;
+        }
+
+        try {
+            storageService.delete(file.getStorageKey());
+        } catch (RuntimeException e) {
+            // The metadata is intentionally left intact: dropping it here would
+            // orphan the object for good.
+            auditService.record(FilesAuditEvents.DELETION_FAILED, owner.getId(), "file",
+                fileId.toString(), ipAddress, userAgent);
+            log.error("File object deletion failed: fileId={}", fileId);
+            throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR, "File deletion failed");
+        }
+        auditService.record(FilesAuditEvents.OBJECT_DELETED, owner.getId(), "file",
+            fileId.toString(), ipAddress, userAgent);
+
+        file.setStatus(FileStatus.DELETED);
+        repository.save(file);
+        auditService.record(FilesAuditEvents.DELETED, owner.getId(), "file",
+            fileId.toString(), ipAddress, userAgent);
+    }
+
+    private User requireUser(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    private StoredFile requireOwnedFile(UUID fileId, UUID ownerId) {
+        return repository.findByIdAndOwnerId(fileId, ownerId)
+            .filter(file -> file.getStatus() != FileStatus.DELETED)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found"));
     }
 
     private void validateMimeType(MultipartFile file) {
