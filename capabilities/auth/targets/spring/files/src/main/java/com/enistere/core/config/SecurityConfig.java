@@ -3,6 +3,7 @@ package com.enistere.core.config;
 import com.enistere.core.common.web.CorrelationIdFilter;
 import com.enistere.core.infrastructure.security.EnistereUserDetailsService;
 import com.enistere.core.infrastructure.security.JwtAuthenticationFilter;
+import com.enistere.core.modules.audit.AuditService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,6 +31,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity
@@ -36,7 +40,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
-                                            CorsConfig corsConfig) throws Exception {
+                                            CorsConfig corsConfig, AuditService auditService) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource(corsConfig)))
@@ -50,12 +54,37 @@ public class SecurityConfig {
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, e) ->
-                    writeError(request, response, 401, "UNAUTHORIZED", "Authentication required"))
-                .accessDeniedHandler((request, response, e) ->
-                    writeError(request, response, 403, "FORBIDDEN", "Access denied"))
+                    writeError(request, response, 401, SecurityErrorCodes.UNAUTHORIZED,
+                        "Authentication required"))
+                .accessDeniedHandler((request, response, e) -> {
+                    auditDenial(auditService, request);
+                    writeError(request, response, 403, SecurityErrorCodes.AUTH_FORBIDDEN,
+                        "Access denied");
+                })
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    /**
+     * Records an authorization denial (ADR-069). The decision is taken by Spring
+     * Security, so this is the only place that sees every refusal. The audit keeps
+     * who and where, never which grant was missing — that stays out of the public
+     * response and out of the trail.
+     */
+    static void auditDenial(AuditService auditService, HttpServletRequest request) {
+        UUID userId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getDetails() instanceof String raw) {
+            try {
+                userId = UUID.fromString(raw);
+            } catch (IllegalArgumentException ignored) {
+                userId = null;
+            }
+        }
+        auditService.record(
+            SecurityAuditEvents.AUTHORIZATION_DENIED, userId, "authorization",
+            request.getRequestURI(), null, null);
     }
 
     /**
