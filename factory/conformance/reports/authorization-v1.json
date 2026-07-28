@@ -81,6 +81,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/4",
+      "family": "api",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -118,6 +122,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/4",
+      "family": "web",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -129,6 +137,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/4",
+      "family": "mobile",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -140,6 +152,10 @@
       "roles": [],
       "responsibilities": [],
       "coverage": "0/4",
+      "family": "mobile",
+      "familyParity": {
+        "status": "OK"
+      },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
