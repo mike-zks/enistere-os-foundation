@@ -2,6 +2,8 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { APPLICATION_KINDS } from '../engine/topologies.mjs';
+
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = resolve(MODULE_DIR, '../..');
 const CAPABILITIES_DIR = 'capabilities';
@@ -117,6 +119,13 @@ export function validateProductContract(contract, capability) {
         if (!roleIds.has(role)) issues.push(`${invariant.id} references unknown role ${role}`);
       }
     }
+    // Optional: when present, the invariant only binds targets that declare this
+    // responsibility. That is what lets a partially-covering target be measured
+    // on what it actually holds instead of failing on what it never claimed.
+    if (invariant.responsibility !== undefined
+      && (typeof invariant.responsibility !== 'string' || invariant.responsibility === '')) {
+      issues.push(`${invariant.id}.responsibility must be a non-empty string`);
+    }
     if (typeof invariant.requirement !== 'string' || invariant.requirement.trim() === '') {
       issues.push(`${invariant.id}.requirement is required`);
     }
@@ -124,10 +133,55 @@ export function validateProductContract(contract, capability) {
   return issues;
 }
 
-function applicableInvariants(contract, roles) {
-  const selected = new Set(roles);
+/** Runtime → family, from the canonical application-kind registry. */
+const FAMILY_OF_RUNTIME = new Map(
+  ['api', 'web', 'mobile'].flatMap(
+    (family) => APPLICATION_KINDS[family].runtimes.map((runtime) => [runtime, family]),
+  ),
+);
+
+/**
+ * Family parity (mandate §8.4): runtimes of one family are interchangeable
+ * implementations of the same product, so every ready target of a family must
+ * hold the SAME responsibilities. A target alone in its family has nothing to
+ * match and is unconstrained; two targets that diverge are a parity breach, not
+ * a valid partial support.
+ *
+ * Returns, per target, the responsibilities its family holds but it does not.
+ */
+function familyParityGaps(manifest) {
+  const byFamily = new Map();
+  for (const [runtime, target] of Object.entries(manifest.targets)) {
+    if (target.status !== 'ready') continue;
+    const family = FAMILY_OF_RUNTIME.get(runtime);
+    if (!family) continue;
+    if (!byFamily.has(family)) byFamily.set(family, []);
+    byFamily.get(family).push([runtime, new Set(target.responsibilities ?? [])]);
+  }
+
+  const gaps = new Map();
+  for (const [family, members] of byFamily) {
+    if (members.length < 2) continue;
+    const expected = new Set(members.flatMap(([, held]) => [...held]));
+    for (const [runtime, held] of members) {
+      const missing = [...expected].filter((item) => !held.has(item)).sort();
+      if (missing.length > 0) gaps.set(runtime, { family, missing });
+    }
+  }
+  return gaps;
+}
+
+/**
+ * Invariants a target must prove: those matching one of its roles AND, when the
+ * invariant is scoped to a responsibility, only if the target declares holding
+ * that responsibility. An unscoped invariant binds every target of the role.
+ */
+function applicableInvariants(contract, roles, responsibilities) {
+  const selectedRoles = new Set(roles);
+  const held = new Set(responsibilities ?? []);
   return contract.invariants
-    .filter((invariant) => invariant.appliesTo.some((role) => selected.has(role)))
+    .filter((invariant) => invariant.appliesTo.some((role) => selectedRoles.has(role)))
+    .filter((invariant) => !invariant.responsibility || held.has(invariant.responsibility))
     .map((invariant) => invariant.id)
     .sort();
 }
@@ -250,6 +304,7 @@ export async function evaluateCapabilityProduct({
   const applicationsByRuntime = new Map(
     (plan?.applications ?? []).map((application) => [application.runtime, application]),
   );
+  const parityGaps = familyParityGaps(manifest);
   const targets = {};
 
   for (const [target, targetManifest] of Object.entries(manifest.targets)) {
@@ -258,6 +313,8 @@ export async function evaluateCapabilityProduct({
         status: TARGET_STATES[targetManifest.status],
         manifestStatus: targetManifest.status,
         roles: [],
+        responsibilities: [],
+        coverage: `0/${(manifest.responsibilities ?? []).length}`,
         invariants: [],
         proofCount: 0,
         materialized: false,
@@ -278,6 +335,8 @@ export async function evaluateCapabilityProduct({
         status: 'NON_CONFORMANT',
         manifestStatus: 'ready',
         roles: [],
+        responsibilities: [],
+        coverage: `0/${(manifest.responsibilities ?? []).length}`,
         invariants: [],
         proofCount: 0,
         materialized: false,
@@ -292,7 +351,15 @@ export async function evaluateCapabilityProduct({
       issues.push(`suite ${descriptor.suite} is not declared by target`);
     }
 
-    const expected = applicableInvariants(contract, descriptor.roles ?? []);
+    const held = targetManifest.responsibilities ?? [];
+    const parity = parityGaps.get(target);
+    if (parity) {
+      issues.push(
+        `family parity: ${parity.family} runtimes must hold the same responsibilities;`
+        + ` missing ${parity.missing.join(', ')}`,
+      );
+    }
+    const expected = applicableInvariants(contract, descriptor.roles ?? [], held);
     const actual = Object.keys(descriptor.invariants ?? {}).sort();
     if (JSON.stringify(expected) !== JSON.stringify(actual)) {
       issues.push(`invariant closure differs: expected ${expected.join(', ')}, got ${actual.join(', ')}`);
@@ -313,6 +380,12 @@ export async function evaluateCapabilityProduct({
       status: issues.length === 0 ? 'CONFORMANT' : 'NON_CONFORMANT',
       manifestStatus: 'ready',
       roles: [...(descriptor.roles ?? [])].sort(),
+      // Coverage is reported next to the verdict on purpose: CONFORMANT over two
+      // of seven responsibilities must never read like CONFORMANT over all seven.
+      responsibilities: [...held].sort(),
+      coverage: `${held.length}/${(manifest.responsibilities ?? []).length}`,
+      family: FAMILY_OF_RUNTIME.get(target) ?? null,
+      familyParity: parity ? { status: 'BREACH', missing: parity.missing } : { status: 'OK' },
       suite: descriptor.suite,
       golden: descriptor.golden,
       invariants: expected,
@@ -385,13 +458,26 @@ export async function verifyMaterializedCapabilities(projectDir, plan, repoRoot 
   const reports = await evaluateAllCapabilityProducts({
     repoRoot, projectDir, plan, only: composed.length > 0 ? composed : undefined,
   });
+  // A family-parity breach is a declared architectural gap carried by an ADR and
+  // the roadmap, not a regression of this build: it is reported loudly but does
+  // not fail the golden. Everything else — a missing or tampered proof — does,
+  // because that IS a regression of the application being verified.
   const failures = [];
+  const parityBreaches = [];
   for (const report of reports) {
     for (const [target, result] of Object.entries(report.targets)) {
-      if (result.materialized && result.status !== 'CONFORMANT') {
-        failures.push(`${report.capability}/${target}: ${result.issues.join('; ')}`);
+      if (!result.materialized) continue;
+      if (result.familyParity?.status === 'BREACH') {
+        parityBreaches.push(
+          `${report.capability}/${target} (${result.familyParity.missing.join(', ')})`,
+        );
       }
+      const blocking = result.issues.filter((issue) => !issue.startsWith('family parity:'));
+      if (blocking.length > 0) failures.push(`${report.capability}/${target}: ${blocking.join('; ')}`);
     }
+  }
+  if (parityBreaches.length > 0) {
+    console.warn(`   known family-parity gap (tracked): ${parityBreaches.join(' | ')}`);
   }
   if (failures.length > 0) {
     throw new Error(`capability product conformance failed: ${failures.join(' | ')}`);

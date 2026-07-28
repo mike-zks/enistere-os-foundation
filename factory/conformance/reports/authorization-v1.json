@@ -19,6 +19,17 @@
       "roles": [
         "authority"
       ],
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary",
+        "permissions",
+        "roles"
+      ],
+      "coverage": "4/4",
+      "family": "api",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "rbac-nestjs-contract",
       "golden": "nestjs-auth-rbac",
       "invariants": [
@@ -39,6 +50,17 @@
       "roles": [
         "authority"
       ],
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary",
+        "permissions",
+        "roles"
+      ],
+      "coverage": "4/4",
+      "family": "api",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "rbac-spring-integration",
       "golden": "spring-auth-rbac",
       "invariants": [
@@ -57,6 +79,8 @@
       "status": "UNSUPPORTED",
       "manifestStatus": "unsupported",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -68,6 +92,15 @@
       "roles": [
         "client"
       ],
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary"
+      ],
+      "coverage": "2/4",
+      "family": "web",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "rbac-nextjs-e2e",
       "golden": "nest-next-auth-rbac",
       "invariants": [
@@ -83,6 +116,8 @@
       "status": "PLANNED",
       "manifestStatus": "planned",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -92,6 +127,8 @@
       "status": "NOT_APPLICABLE",
       "manifestStatus": "not-applicable",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -101,6 +138,8 @@
       "status": "PLANNED",
       "manifestStatus": "planned",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,

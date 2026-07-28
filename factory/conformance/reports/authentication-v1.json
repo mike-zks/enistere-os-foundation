@@ -20,6 +20,17 @@
       "roles": [
         "authority"
       ],
+      "responsibilities": [
+        "login",
+        "logout",
+        "refresh",
+        "session"
+      ],
+      "coverage": "4/4",
+      "family": "api",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "auth-nestjs-contract",
       "golden": "nestjs-auth",
       "invariants": [
@@ -42,6 +53,17 @@
       "roles": [
         "authority"
       ],
+      "responsibilities": [
+        "login",
+        "logout",
+        "refresh",
+        "session"
+      ],
+      "coverage": "4/4",
+      "family": "api",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "auth-spring-integration",
       "golden": "spring-auth",
       "invariants": [
@@ -62,6 +84,8 @@
       "status": "UNSUPPORTED",
       "manifestStatus": "unsupported",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -74,6 +98,17 @@
         "client",
         "web-client"
       ],
+      "responsibilities": [
+        "login",
+        "logout",
+        "refresh",
+        "session"
+      ],
+      "coverage": "4/4",
+      "family": "web",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "auth-nextjs-e2e",
       "golden": "nest-next-auth",
       "invariants": [
@@ -92,6 +127,8 @@
       "status": "PLANNED",
       "manifestStatus": "planned",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
@@ -104,6 +141,17 @@
         "client",
         "mobile-client"
       ],
+      "responsibilities": [
+        "login",
+        "logout",
+        "refresh",
+        "session"
+      ],
+      "coverage": "4/4",
+      "family": "mobile",
+      "familyParity": {
+        "status": "OK"
+      },
       "suite": "auth-react-native-integration",
       "golden": "triple-auth",
       "invariants": [
@@ -122,6 +170,8 @@
       "status": "PLANNED",
       "manifestStatus": "planned",
       "roles": [],
+      "responsibilities": [],
+      "coverage": "0/4",
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
