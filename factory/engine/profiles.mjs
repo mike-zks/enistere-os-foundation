@@ -150,7 +150,10 @@ export const PROFILES = Object.freeze([
   profile('spring-auth', 'ready', { api: 'spring' }, ['auth'], { golden: 'spring-auth' }),
   profile('spring-rbac', 'ready', { api: 'spring' }, ['auth', 'rbac'], { golden: 'spring-auth-rbac' }),
   profile('spring-files', 'ready', { api: 'spring' }, ['auth', 'rbac', 'files'], { golden: 'spring-files' }),
-  profile('spring-angular-auth', 'planned', { api: 'spring', web: 'angular' }, ['auth']),
+  // Angular carries Authentication since ADR-075, so this preset is generatable.
+  // It stays `supported` rather than `ready`: no golden exercises this exact
+  // selection yet, and `ready` requires runtime proof, not just composability.
+  profile('spring-angular-auth', 'supported', { api: 'spring', web: 'angular' }, ['auth']),
   profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
   profile('spring-flutter-auth', 'planned', { api: 'spring', mobile: 'flutter' }, ['auth']),
   profile('spring-angular-flutter-files', 'planned', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['auth', 'rbac', 'files']),

@@ -101,12 +101,14 @@ Native : l'autorisation fine reste côté serveur et **aucune surface RBAC n'est
 mobile. Les deux profils triples réutilisent exactement les compositions golden existantes
 (`triple-auth`, `triple-auth-rbac`) : aucun renderer, overlay ou comportement runtime nouveau.
 
-### `supported` — aucun profil après extraction modulaire (0)
+### `supported` — générable, sans golden dédié (1)
 
-| Profil | API | Web | Mobile | Capabilities | Golden | Dépassement constaté |
+| Profil | API | Web | Mobile | Capabilities | Golden | Écart constaté |
 |---|---|---|---|---|---|---|
-Les quatre profils Angular/Flutter ont été promus `ready` après extraction de leurs baselines et
-goldens structurels/runtime. Aucun profil `supported` ne subsiste pour un dépassement de baseline.
+| `spring-angular-auth` | spring | angular | — | auth | aucun | composable depuis ADR-075, mais aucun golden n'exerce cette sélection |
+
+Angular porte Authentication depuis ADR-075, ce qui rend ce preset **générable**. Il reste
+`supported` et non `ready` : `ready` exige une preuve runtime, pas seulement la composabilité.
 
 Ces profils sont valides parce que le Platform Baseline est **implicite sur les sept runtimes** ; le suffixe
 historique `-base` signifie désormais « aucune capability optionnelle ». R8A prouve
@@ -117,12 +119,11 @@ Les overlays Auth/RBAC/Files restent une mission distincte sur Angular et Flutte
 prouve pas encore la parité métier de ces capabilities. Sur Spring, **Auth, RBAC et Files sont prêts**
 (overlays modulaires + golden `spring-files`).
 
-### `planned` — cibles de parité, génération refusée (4)
+### `planned` — cibles de parité, génération refusée (3)
 
 | Profil | API | Web | Mobile | Capabilities | Bloqué par |
 |---|---|---|---|---|---|
-| `spring-angular-auth` | spring | angular | — | auth | auth/spring, auth/angular |
-| `spring-angular-rbac` | spring | angular | — | auth + rbac | auth+rbac/spring, auth+rbac/angular |
+| `spring-angular-rbac` | spring | angular | — | auth + rbac | rbac/angular |
 | `spring-flutter-auth` | spring | — | flutter | auth | auth/spring, auth/flutter |
 | `spring-angular-flutter-files` | spring | angular | flutter | auth + rbac + files | toute la verticale non-TS |
 
