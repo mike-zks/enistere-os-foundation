@@ -17,4 +17,5 @@ public final class FilesErrorCodes {
     public static final String FILE_NOT_FOUND = "FILE_NOT_FOUND";
     public static final String FILE_QUARANTINE_INVALID_STATUS = "FILE_QUARANTINE_INVALID_STATUS";
     public static final String FILE_RESTORE_INVALID_STATUS = "FILE_RESTORE_INVALID_STATUS";
+    public static final String FILE_STORAGE_QUOTA_EXCEEDED = "FILE_STORAGE_QUOTA_EXCEEDED";
 }

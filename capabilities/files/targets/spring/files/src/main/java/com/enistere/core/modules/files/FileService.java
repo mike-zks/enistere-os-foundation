@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,10 +49,12 @@ public class FileService {
     private final UserRepository userRepository;
     private final FilesConfig filesConfig;
     private final AuditService auditService;
+    private final FileQuotaService quotaService;
 
     public FileService(StoredFileRepository repository, StorageService storageService,
                        UserRepository userRepository, FilesConfig filesConfig,
-                       AuditService auditService) {
+                       AuditService auditService, FileQuotaService quotaService) {
+        this.quotaService = quotaService;
         this.repository = repository;
         this.storageService = storageService;
         this.userRepository = userRepository;
@@ -59,6 +62,13 @@ public class FileService {
         this.auditService = auditService;
     }
 
+    /**
+     * Runs WITHOUT an ambient transaction: it performs network I/O, and holding a
+     * database transaction across an object-store upload would pin a connection
+     * for the duration of the transfer. Each database step below opens its own
+     * short transaction instead.
+     */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public StoredFileResponseDto upload(MultipartFile file, FileCategory category,
                                         String subjectId, String ownerEmail,
                                         String ipAddress, String userAgent) {
@@ -75,14 +85,6 @@ public class FileService {
         log.info("File upload requested: category={} size={} mimeType={}",
             category, file.getSize(), file.getContentType());
 
-        try {
-            storageService.upload(file.getInputStream(), storageKey, file.getContentType(), file.getSize());
-        } catch (IOException e) {
-            log.error("Storage upload failed: category={} size={} mimeType={}",
-                category, file.getSize(), file.getContentType());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Storage failure");
-        }
-
         StoredFile stored = new StoredFile();
         stored.setOriginalName(sanitizedName);
         stored.setStorageKey(storageKey);
@@ -91,10 +93,27 @@ public class FileService {
         stored.setExtension(extension);
         stored.setSize(file.getSize());
         stored.setCategory(category);
-        stored.setStatus(FileStatus.UPLOADED);
         stored.setOwnerId(owner.getId());
         stored.setSubjectId(subjectId);
-        stored = repository.save(stored);
+
+        // The slot is reserved BEFORE the bytes are written. Uploading first and
+        // checking after would let a rejected upload leave an object behind, and
+        // would spend the transfer only to refuse it.
+        stored = quotaService.reserveSlot(stored, owner.getId(), file.getSize(), ipAddress, userAgent);
+
+        try {
+            storageService.upload(file.getInputStream(), storageKey, file.getContentType(), file.getSize());
+        } catch (IOException | RuntimeException e) {
+            // The reservation is released rather than left as a phantom consuming
+            // the owner's quota for a file whose content never arrived.
+            quotaService.releaseReservation(stored.getId());
+            log.error("Storage upload failed: category={} size={} mimeType={}",
+                category, file.getSize(), file.getContentType());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Storage failure");
+        }
+
+        quotaService.markUploaded(stored.getId());
+        stored = repository.findById(stored.getId()).orElseThrow();
 
         auditService.record(FilesAuditEvents.FILE_UPLOADED, owner.getId(), "file",
             stored.getId().toString(), ipAddress, userAgent);

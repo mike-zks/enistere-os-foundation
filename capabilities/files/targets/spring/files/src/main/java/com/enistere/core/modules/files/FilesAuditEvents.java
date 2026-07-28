@@ -25,4 +25,7 @@ public final class FilesAuditEvents {
     public static final String QUARANTINED = "FILE_QUARANTINED";
     public static final String QUARANTINE_RELEASED = "FILE_QUARANTINE_RELEASED";
     public static final String STORAGE_OBJECT_MISSING = "FILE_STORAGE_OBJECT_MISSING";
+    public static final String QUOTA_EXCEEDED = "FILE_QUOTA_EXCEEDED";
+    public static final String RECONCILIATION_ACTION = "FILE_RECONCILIATION_ACTION";
+    public static final String PURGED = "FILE_ORPHAN_DELETED";
 }
