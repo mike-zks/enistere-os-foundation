@@ -8,6 +8,8 @@ import { WEB_RUNTIME_PROVIDERS } from './core/platform/runtime.providers';
 import { correlationInterceptor } from './core/interceptors/correlation.interceptor';
 import { logInterceptor } from './core/interceptors/log.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { CAPABILITY_INTERCEPTORS } from './core/composition/capability-interceptors';
+import { CAPABILITY_PROVIDERS } from './core/composition/capability-providers';
 
 // Base interceptor order: log starts the request timer → error maps failures to the
 // canonical AppApiError. The auth/refresh interceptors belong to the Auth capability.
@@ -16,11 +18,17 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([correlationInterceptor, logInterceptor, errorInterceptor]),
+      withInterceptors([
+        correlationInterceptor,
+        logInterceptor,
+        errorInterceptor,
+        ...CAPABILITY_INTERCEPTORS,
+      ]),
     ),
     provideAnimationsAsync(),
     // Relative URLs by default — override per-environment via Angular fileReplacements.
     { provide: APP_BASE_URL, useValue: '' },
     ...WEB_RUNTIME_PROVIDERS,
+    ...CAPABILITY_PROVIDERS,
   ],
 };

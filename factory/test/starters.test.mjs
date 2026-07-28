@@ -1,7 +1,9 @@
-import { it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
+import { getTargetAdapter } from '../engine/target-adapters.mjs';
 import { loadStarterManifests, STARTER_IDS, validateManifestConsistency, validateStarterManifest } from '../engine/starters.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
@@ -57,4 +59,59 @@ it('reports a truthful target support matrix', async () => {
   assert.equal(matrix.files.nextjs, 'ready');
   assert.equal(matrix.files['react-native'], 'ready');
   assert.equal(matrix.files.spring, 'ready');
+});
+
+describe('Angular composition seams', () => {
+  it('lets a capability contribute providers, routes and interceptors', () => {
+    const angular = getTargetAdapter('angular');
+    // Angular was a declared target with an empty adapter: no integration kind,
+    // no composition. That is why no capability could target it at all — the
+    // gap ADR-074 measured was a missing seam, not missing capability code.
+    assert.deepEqual(
+      Object.keys(angular.integrationKinds).sort(),
+      ['angular.http-interceptor', 'angular.provider', 'angular.route'],
+    );
+    assert.deepEqual(
+      angular.composition.map((entry) => entry.destination),
+      [
+        'src/app/core/composition/capability-providers.ts',
+        'src/app/core/composition/capability-routes.ts',
+        'src/app/core/composition/capability-interceptors.ts',
+      ],
+    );
+  });
+
+  it('orders contributed routes deterministically and refuses a collision', () => {
+    const render = getTargetAdapter('angular').composition
+      .find((entry) => entry.kinds.includes('angular.route')).render;
+
+    const output = render([
+      { kind: 'angular.route', path: 'z', importPath: './z', symbol: 'Z', title: 'Z', order: 2 },
+      { kind: 'angular.route', path: 'a', importPath: './a', symbol: 'A', title: 'A', order: 1 },
+    ]);
+    // Two capabilities resolved in either order must yield the same file.
+    assert.ok(output.indexOf("path: 'a'") < output.indexOf("path: 'z'"));
+
+    assert.throws(
+      () => render([
+        { kind: 'angular.route', path: 'same', importPath: './a', symbol: 'A', order: 1 },
+        { kind: 'angular.route', path: 'same', importPath: './b', symbol: 'B', order: 2 },
+      ]),
+      /two capabilities contribute the Angular route "same"/,
+    );
+  });
+
+  it('keeps the baseline seams empty and consumed by the app', async () => {
+    const seams = resolve(root, 'starters/angular/src/app');
+    for (const seam of ['capability-providers', 'capability-routes', 'capability-interceptors']) {
+      const source = await readFile(join(seams, 'core/composition', `${seam}.ts`), 'utf8');
+      assert.match(source, /\[\]/, `${seam} must ship empty`);
+    }
+    // A seam nothing consumes is decorative: assert the app actually wires them.
+    const config = await readFile(join(seams, 'app.config.ts'), 'utf8');
+    assert.match(config, /CAPABILITY_INTERCEPTORS/);
+    assert.match(config, /CAPABILITY_PROVIDERS/);
+    const routes = await readFile(join(seams, 'app.routes.ts'), 'utf8');
+    assert.match(routes, /CAPABILITY_ROUTES/);
+  });
 });
