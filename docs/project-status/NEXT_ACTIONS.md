@@ -2,91 +2,82 @@
 
 ## Mission achevée
 
-Le support partiel est déclarable et la parité par famille de runtimes est
-mesurée ([ADR-070](../adr/ADR-070-capability-responsibilities-and-family-parity.md)).
+`metadata` et `delete` sont portées sur Spring : l'écart de parité API de `files`
+passe de cinq responsabilités manquantes à trois.
 
 Preuves :
 
-- `responsibilities` obligatoire sur toute target `ready`, validé contre les
-  responsabilités déclarées par la capability ;
-- invariants attachables à une responsabilité ; les invariants transverses
-  (authentification, autorisation par ressource, absence de fuite) restent
-  imposés à toutes les targets d'un rôle ;
-- **parité par famille** : toutes les targets `ready` d'une famille doivent
-  déclarer le même ensemble de responsabilités ; familles issues du registre
-  canonique `APPLICATION_KINDS` ;
-- règle portée par l'évaluateur, pas par le validateur de manifeste — un
-  manifeste fidèle au réel reste chargeable (mandat §5) ;
-- contrat produit `files.product.v1.json` : deux rôles, seize invariants ;
-- `coverage`, `family` et `familyParity` publiés à côté du verdict ;
-- gate golden : une preuve disparue échoue, une rupture de parité connue est
-  affichée sans faire échouer le build.
+- `GET /files` — page de fichiers possédés, plus récents d'abord, sans les
+  supprimés, pagination bornée (`limit` 1–50, `offset` ≥ 0) et `nextOffset`
+  fermé sur la dernière page ;
+- `GET /files/{id}` — métadonnées publiques d'un fichier possédé ; un fichier
+  d'autrui, un fichier supprimé et un fichier inexistant renvoient tous `404` ;
+- `DELETE /files/{id}` — objet puis métadonnées, idempotent, invalide les URL
+  déjà émises, exige `files.delete` ;
+- **permissions RBAC sur toute la surface Files** — `files.upload`,
+  `files.download`, `files.read`, `files.delete` ; aucun endpoint Spring n'en
+  portait jusqu'ici, là où NestJS gardait chacun des siens ;
+- noms d'événements d'audit alignés sur NestJS (`FILE_*`, plus `FILES_*`) et
+  invariant d'audit ajouté au contrat produit — Auth et RBAC en avaient un,
+  Files n'en avait pas ;
+- 115/115 tests Spring sur PostgreSQL réel, dont 32 sur Files.
 
 État calculé :
 
 ```text
-auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
-rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
-files  api  nestjs 7/7 · spring 2/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
-2/3 capabilities CONFORMANT
+files  api  nestjs 7/7 · spring 4/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
+       écart de parité API restant : quarantine, quota, reconciliation
 ```
 
-## Ce que la mesure a révélé
+## Deux défauts trouvés par les nouveaux tests
 
-`files` est **non conforme**, et c'est le résultat attendu. Spring ne tient que
-`upload` et `download-url` là où NestJS tient les sept responsabilités — deux
-runtimes de la **même famille API**, donc deux implémentations censées être
-interchangeables.
+**Pagination invalide → `500` au lieu de `400`.** `@Validated` sur des
+paramètres de requête lève `ConstraintViolationException`, que le
+`GlobalExceptionHandler` ne traitait pas : le catch-all la classait en erreur
+interne. Même classe de défaut que l'`AccessDeniedException` d'ADR-069. Corrigé
+dans le baseline.
 
-Toutes les preuves que Spring déclare passent. Le seul écart est la parité
-elle-même, et il est nommé : `delete`, `metadata`, `quarantine`, `quota`,
-`reconciliation`.
-
-Une première version de cette décision autorisait la couverture partielle sans
-contrainte de famille : elle aurait déclaré Spring conforme à 2/7. C'est le
-mandat §8.4 qui l'a corrigée.
+**Une URL de téléchargement restait délivrée après suppression.**
+`getDownloadUrl` filtrait sur la possession mais pas sur le statut : la ligne
+survivant en tombstone, un fichier supprimé continuait de faire signer des URL
+dont l'objet n'existait plus. Bug préexistant, corrigé.
 
 ## Limites honnêtes
 
-- l'écart Files/API n'est pas comblé, seulement mesuré et chiffré ;
-- Next.js (5/7) et React Native (1/7) ne sont pas contraints : Angular et
-  Flutter ne sont pas `ready`, ces targets sont seules dans leur famille ;
-- le statut `ready` de `files/spring` est conservé — il livre réellement upload
-  et téléchargement ; le déclasser retirerait une surface qui fonctionne ;
-- le lifecycle add/remove/upgrade/migrate n'est pas livré ;
+- `files` reste **NON_CONFORMANT** : `quarantine`, `quota` et `reconciliation`
+  manquent toujours à Spring ;
+- les permissions `files.*` deviennent **obligatoires** sur les endpoints Spring
+  existants — un appelant sans permission reçoit désormais `403` là où il
+  passait ; c'est la parité avec NestJS, mais c'est une rupture ;
 - aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` ;
 - `factory:test` n'est toujours invoqué par aucun workflow CI (dette héritée).
 
 ## Prochaine mission unique
 
-> **Combler l'écart de parité Files sur la famille API : porter `metadata`,
-> `delete`, `quarantine`, `reconciliation` et `quota` sur Spring, sans ajouter
-> de target ni de capability.**
+> **Porter `quarantine` sur Spring : statut `QUARANTINED`, endpoints
+> quarantine/restore administratifs, sans ajouter de target ni de capability.**
 
 ### Justification de l'ordre
 
-C'est le seul écart de parité mesuré du dépôt, il est chiffré, et il bloque la
-conformité d'une capability déjà livrée sur quatre targets. Tant qu'il subsiste,
-`files` promet sur NestJS ce qu'elle ne tient pas sur Spring, alors que les deux
-sont censés être interchangeables.
+`quarantine` est la dernière responsabilité liée à une requête HTTP ; elle
+partage tout ce qui vient d'être posé — permissions, audit, anti-énumération.
+`reconciliation` et `quota` relèvent d'une autre nature : verrous consultatifs,
+tâches de maintenance et tenue sous concurrence. Les séparer garde deux unités
+architecturales lisibles plutôt qu'une PR qui mélange surface HTTP et
+infrastructure.
 
-L'ordre interne suit les dépendances réelles : `metadata` d'abord (le listing
-conditionne l'usage des autres), puis `delete`, puis `quarantine`, enfin
-`reconciliation` et `quota` qui exigent des verrous de maintenance et une
-tenue sous concurrence.
-
-Le périmètre est important — stockage objet, verrous, quotas concurrents. Il
-pourra être découpé en plusieurs missions, mais l'unité de mesure reste la
-parité API restaurée.
+`quarantine` introduit ce que les responsabilités déjà portées n'ont pas posé :
+une autorisation **administrative sans possession** — un administrateur agit sur
+le fichier d'autrui — et des transitions de statut à refuser explicitement.
 
 ### Critères de sortie
 
-- Spring déclare les sept responsabilités et les tient réellement ;
-- `files` atteint `CONFORMANT`, parité API `OK` ;
-- mêmes contrats, mêmes codes d'erreur et mêmes garanties observables que
-  NestJS, sans exiger un code identique ;
-- audit métier Files émis sur les nouvelles opérations ;
-- quota tenu sous uploads concurrents, réconciliation sous verrou exclusif ;
-- goldens `spring-files` et `triple-files` verts avec les preuves matérialisées ;
+- statut `QUARANTINED` ajouté, migration additive ;
+- `POST /files/{id}/quarantine` et `POST /files/{id}/restore`, permissions
+  `files.quarantine` et `files.restore`, sans exigence de possession ;
+- un fichier en quarantaine ne délivre plus d'URL de téléchargement ;
+- transition invalide refusée explicitement, sans révéler l'existence ;
+- audit métier émis sur la mise en quarantaine et la levée ;
+- `files/spring` atteint 5/7 ; écart restant `quota` et `reconciliation` ;
 - aucun nouveau runtime, provider ou capability ;
 - aucun dossier `base/`.
