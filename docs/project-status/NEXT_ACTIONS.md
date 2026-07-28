@@ -52,6 +52,19 @@ dont l'objet n'existait plus. Bug préexistant, corrigé.
 - aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` ;
 - `factory:test` n'est toujours invoqué par aucun workflow CI (dette héritée).
 
+## Correctif transverse livré en marge
+
+Les goldens React Native devenaient rouges sur des commits inchangés :
+`expo-doctor` demandait à `api.expo.dev` les versions attendues par le SDK, et
+cette valeur est servie côté serveur. Le 2026-07-28, elle a changé entre 13h31
+et 13h52 — même outil, même lock, même code, verdict inverse.
+
+Les gates mobiles s'exécutent désormais en mode hermétique et l'outil de
+vérification est épinglé
+([ADR-071](../adr/ADR-071-hermetic-quality-gates.md)). Le principe posé vaut
+au-delà d'Expo : un gate qui affirme la reproductibilité ne peut pas dépendre
+d'une valeur distante mutable. Les autres gates n'ont pas été audités.
+
 ## Prochaine mission unique
 
 > **Porter `quarantine` sur Spring : statut `QUARANTINED`, endpoints
