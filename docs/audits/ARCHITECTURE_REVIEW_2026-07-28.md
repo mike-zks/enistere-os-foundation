@@ -1,6 +1,7 @@
 # Revue d'architecture — 2026-07-28
 
-Périmètre : moteur Factory, chaîne de conformité, overlays Auth/RBAC/Files.
+Périmètre : projet complet — moteur Factory, chaîne de conformité, overlays,
+les sept starters, CLI, runtime IA, packages, déploiement, sécurité, docs.
 Méthode : inspection directe (tailles, couplage, cycles, exécution des schémas),
 pas de reprise des rapports existants. Les constats chiffrés sont reproduits
 par les commandes citées.
@@ -113,3 +114,109 @@ d'adapters en Strategy ; overlays déclaratifs sans héritage.
 
 Les points 2 et 3 peuvent accompagner une mission Files ultérieure ; le point 1
 est la seule action structurante immédiate.
+
+## 6. Starters — la disparité de profondeur intra-famille
+
+Fichiers source / fichiers de test par starter :
+
+```text
+API     nestjs 110/13   spring 53/13   fastapi 6/2
+Web     nextjs  85/46   angular 38/73
+Mobile  rn     172/95   flutter 32/2
+```
+
+Les sept satisfont leur contrat v2 — c'est mesuré et vrai. Mais la **profondeur
+de preuve** n'est pas homogène : Flutter tient 25 invariants avec 2 fichiers de
+test là où React Native en a 95 ; FastAPI tient 28 invariants en 6 fichiers.
+Ce n'est pas une violation (FastAPI n'a aucune capability, statut déclaré
+`unsupported` partout ; les invariants passent), mais c'est le prochain point de
+friction prévisible : le jour où une capability visera Flutter, la parité de
+famille ADR-070 exigera un niveau de preuve que ce starter n'a jamais pratiqué.
+Angular (73 tests pour 38 sources) montre l'inverse — plus testé que codé.
+
+**Constat** : le contrat v2 borne le minimum, rien ne borne l'écart. À garder en
+tête au moment de promouvoir `angular`/`flutter` en target de capability.
+
+## 7. CLI (§14)
+
+`enistere.mjs`, 426 lignes, une seule commande file, parsing des flags à la
+main. Défendable par §8.2 (aucun framework CLI, zéro dépendance), et les
+commandes expliquent ce qu'elles font. Limites réelles : le parsing manuel ne
+signale pas un flag inconnu, et il n'existe ni mode interactif ni sortie
+diagnostique structurée (`--json`) — deux exigences §14 non couvertes. Croît
+linéairement ; à découper quand une commande `lifecycle` arrivera.
+
+## 8. Runtime IA (§15)
+
+Meilleur que présumé : l'architecture cible est partiellement réelle, pas
+seulement déclarée. Providers interchangeables effectifs (`claude` et `codex`
+dans `local-agent.mjs`, contrat commun), et le runtime (2 208 lignes) couvre
+prompt-registry, context-builder, redaction, evaluation-harness,
+execution-report, approval-flow — chacun testé dans `factory:test`. Manquent du
+schéma cible : context policies formalisées et sandbox d'exécution dédiée
+(l'adapter délègue la sandbox au CLI appelé). Aucune autorité interdite (§15)
+n'est contournable : l'orchestration passe par approval-flow.
+
+## 9. Sécurité (§12) — le plus grand écart déclaré/exécuté du projet
+
+- **Exceptions d'audit npm : bien tenues.** 19 exceptions scopées et datées
+  (échéances jusqu'au 2026-10-31), vérifiées par la CI — le modèle du genre.
+- **Tout le reste de §12 est documentaire.** Secret scanning : aucun outil en
+  CI. SBOM, signatures, provenance : des politiques dans `deployment/docs/`,
+  aucune exécution. Threat model : absent.
+- Le mandat dit « intégrer progressivement » — la dette est donc licite, mais
+  il faut être lucide : au rythme actuel, `progressivement` signifie `jamais
+  déclenché`. Un secret scanning en CI est au même rapport coût/valeur que le
+  job factory qui vient d'être ajouté : une heure de travail, un angle mort
+  fermé.
+
+## 10. Documentation — l'accumulation d'audits contredit §18
+
+125 fichiers Markdown, 52 ADR : la gouvernance documentaire est réelle et le
+README des audits désigne un « audit courant ». Mais deux dérives :
+
+- **`docs/audits/` accumule des matrices d'écarts refermés.**
+  `RUNTIME_CONFORMANCE_GAP_MATRIX` (2026-07-27) affiche des « non conformes »
+  alors que les 7 runtimes sont conformes ; `CAPABILITY_PARITY_GAP_MATRIX`
+  (2026-07-25) décrit des cellules non conformes qui ne le sont plus. §18 :
+  « ne laisse jamais deux visions actives ». Un lecteur qui tombe sur ces
+  matrices sans lire l'état courant repart avec une image fausse.
+- **`deployment/docs/` contient des rapports d'exécution historiques**
+  (CC10/CC11 staging reports) — des archives, que §18 confie à Git.
+
+Recommandation : marquer chaque audit refermé d'un bandeau « clos le X, voir
+état courant », ou le supprimer ; déplacer les rapports d'exécution hors du
+dépôt actif.
+
+## 11. Workflows CI
+
+Six workflows, découpage net (contrats → client → ui-kit → web → factory →
+audit ; goldens en matrice de 24 compositions ; Angular/E2E/API séparés).
+Le job `factory` ajouté ce jour ferme le dernier angle mort structurel de la
+chaîne. Reste, hérité d'ADR-071 : seuls les gates mobiles sont audités contre
+le principe d'hermétisme.
+
+## 12. Synthèse générale
+
+Le projet est **au-dessus de la moyenne de sa catégorie** sur ce qui compte :
+une seule représentation interne, des statuts par preuves réellement exécutées,
+une gouvernance ADR vivante, et une chaîne de conformité qui a démontré sa
+valeur en attrapant cinq défauts réels que les suites locales validaient.
+
+Ses risques ne sont pas là où un audit superficiel les chercherait (le moteur
+est sain) mais dans les **écarts entre le déclaré et l'exécuté** : un schéma
+normatif que rien n'exécute (D1), une sécurité §12 restée documentaire (§9),
+des audits périmés qui contredisent l'état courant (§10), et une profondeur de
+preuve non bornée entre runtimes d'une même famille (§6). Tous partagent la
+même racine — l'écart déclaratif — et la même réponse : faire exécuter ce qui
+est écrit, ou l'effacer.
+
+## 13. Recommandations consolidées (ordre proposé)
+
+1. Schéma capability exécutable (D1) — mission suivante, actée.
+2. Secret scanning en CI (§9) — une heure, gros angle mort.
+3. Clôture des audits périmés (§10) — hygiène documentaire, une PR docs.
+4. `FileQuarantineService` Spring + timeout/log du port stockage (D4, §3).
+5. Marqueurs orphelins outillés (D2).
+6. Codes d'erreur générés (D3) et audit d'hermétisme des autres gates — phase
+   ultérieure.
