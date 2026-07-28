@@ -491,6 +491,11 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-071 — Gates hermétiques** : un gate qui affirme la reproductibilité ne
+  peut pas dépendre d'une valeur distante mutable. Les vérifications mobiles
+  lisent l'attente de versions dans le paquet `expo` verrouillé et non plus dans
+  l'API Expo, et l'outil de vérification est épinglé. Les autres gates ne sont
+  pas audités pour cette propriété.
 * **ADR-070 — Responsabilités par target et parité par famille** : une target
   `ready` déclare le sous-ensemble de responsabilités qu'elle tient ; les
   invariants peuvent y être attachés. Surtout, toutes les targets `ready` d'une

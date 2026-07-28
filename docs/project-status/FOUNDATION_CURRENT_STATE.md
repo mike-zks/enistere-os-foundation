@@ -34,6 +34,8 @@ Conformité produit RBAC et évaluateur générique :
 [`ADR-069`](../adr/ADR-069-authorization-capability-product-conformance.md).
 Responsabilités par target et parité par famille :
 [`ADR-070`](../adr/ADR-070-capability-responsibilities-and-family-parity.md).
+Gates hermétiques :
+[`ADR-071`](../adr/ADR-071-hermetic-quality-gates.md).
 
 ## Actifs existants à migrer
 
