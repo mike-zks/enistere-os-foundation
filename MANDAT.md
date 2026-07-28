@@ -491,6 +491,13 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-075 — Créance navigateur et Auth sur Angular** : le stockage de la
+  créance est une couture, jamais un mécanisme codé en dur ; le défaut est la
+  mémoire du processus — seule option navigateur qui ne promet rien qu'elle ne
+  tienne — et `localStorage` est proscrit, prouvé par test. Le rafraîchissement
+  coalescé est une exigence de correction, pas une optimisation : l'autorité
+  traite un rejeu comme une réutilisation et révoquerait la famille. `auth/angular`
+  est `ready` ; l'écart de parité Web est refermé.
 * **ADR-074 — Parité de famille sur tous les runtimes** : la parité ne se limite
   plus aux targets `ready`. Un runtime ne s'exonère plus en déclarant
   `unsupported` — FastAPI, Angular et Flutter ne portent aucune capability et la
