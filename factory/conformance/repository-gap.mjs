@@ -64,4 +64,8 @@ if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
     console.log(`${runtime.padEnd(13)} compliant=${summary.compliant} partial=${summary.partial} missing=${summary.missing} conformant=${summary.conformant}`);
   }
   console.log(`Wrote ${output}`);
+  // The library stays a measurement; the CLI is a gate. A runtime losing its
+  // baseline conformance must fail the pipeline that runs this, not just log it.
+  const conformant = Object.values(report.summary).every((summary) => summary.conformant);
+  process.exit(conformant ? 0 : 1);
 }

@@ -103,7 +103,30 @@ jobs:
       - name: build Web (sans API, sans base de données, sans stockage)
         run: npm run build --workspace=@enistere/web-nextjs
 
-  # 5) Audit & gardes de dépendances (ADR-011 Fetch / ADR-012 TanStack Query).
+  # 5) Moteur Factory et conformité (ADR-068 → ADR-071). Jusqu'ici la CI validait
+  #    les applications générées mais jamais l'outil qui juge leur conformité :
+  #    une régression de l'évaluateur rendait silencieusement fausses toutes les
+  #    affirmations de conformité. Indépendant des builds workspace (pas de `needs`).
+  factory:
+    name: factory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: factory:test (moteur, évaluateur de conformité, parité par famille)
+        run: npm run factory:test
+      - name: conformité produit des capabilities (bloquant)
+        run: npm run factory:capability-conformance
+      - name: Platform Baseline v2 (bloquant)
+        run: npm run factory:baseline-gap
+      - name: rapports de conformité committés à jour (anti-péremption)
+        run: git diff --exit-code factory/conformance/reports/
+
+  # 6) Audit & gardes de dépendances (ADR-011 Fetch / ADR-012 TanStack Query).
   audit:
     name: audit
     needs: web-nextjs
