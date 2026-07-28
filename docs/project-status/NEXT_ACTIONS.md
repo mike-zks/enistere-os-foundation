@@ -152,38 +152,58 @@ Huit écarts sont déclarés, justifiés et datés au 2026-12-31 dans
 expiré ; il échoue sur un écart non déclaré, plus large que déclaré, expiré, ou
 sur toute preuve manquante — vérifié par canari dans les deux sens.
 
+## Prérequis découvert et livré
+
+La mission « porter Authentication sur Angular » a buté sur un fait que personne
+n'avait relevé : **l'adapter Angular n'avait aucune couture de composition** —
+`integrationKinds: {}`, `composition: []`. Aucune capability ne pouvait cibler
+Angular, quelle qu'elle soit. Le statut `planned` sur les trois capabilities ne
+traduisait pas un code d'authentification manquant, mais une machinerie absente.
+
+Flutter est dans le même état.
+
+Trois coutures existent désormais — providers, routes, intercepteurs HTTP —
+sur le modèle des adapters Next.js et Expo, avec deux règles d'ordre qui comptent :
+les intercepteurs de capability s'exécutent **après** ceux de la baseline (un
+rejeu d'authentification doit voir une réponse déjà normalisée) et les routes
+s'insèrent **avant** le joker (sinon toute route apportée serait redirigée sans
+jamais s'ouvrir). Les collisions de route sont refusées.
+
+Vérifié sur une application Angular générée : coutures présentes, typecheck
+propre, 108/108 tests.
+
+## Contrat produit corrigé
+
+`AUTH-WEB-001` exigeait un **BFF avec CSRF** — le mécanisme de Next.js inscrit
+dans un contrat censé être neutre. Or le CSRF est une menace portée par les
+cookies : un SPA statique à jeton porteur en mémoire n'y est pas exposé.
+L'invariant énonce désormais la garantie observable, que chaque runtime tient par
+son moyen. Contrat en 1.1.0, quatre descripteurs alignés.
+
 ## Prochaine mission unique
 
-> **Porter Authentication sur Angular**, première fermeture d'écart de parité.
+> **Porter Authentication sur Angular**, désormais possible.
 
 ### Justification de l'ordre
 
-Trois écarts sont ouverts ; Angular est celui dont le risque est le plus faible
-et la référence la plus proche :
+Le prérequis est levé et le contrat est portable. Le modèle à suivre est **React
+Native, pas Next.js** : c'est déjà un client sans BFF — jeton d'accès en mémoire,
+refresh en stockage protégé derrière une couture remplaçable, refresh coalescé,
+purge de session à l'échec.
 
-- **Angular avant Flutter** : Angular compte 73 fichiers de test pour 38 sources
-  — le starter pratique déjà la preuve. Flutter tient ses 25 invariants de
-  baseline avec **2 fichiers de test** là où React Native en a 95 ; lui imposer
-  la parité d'abord reviendrait à découvrir en même temps la capability et une
-  culture de test absente.
-- **Angular avant FastAPI** : Next.js sert de référence directe dans la même
-  famille Web, avec un contrat produit déjà écrit et six invariants client
-  applicables. Côté API, la référence est double (NestJS et Spring à 4/4) et le
-  portage inclut la persistance, la cryptographie et l'émission de jetons.
-- **Authentication avant RBAC et Files** : le graphe l'impose
-  (`auth → rbac → files`).
-
-Fermer d'abord l'écart le mieux outillé donne un modèle de portage réutilisable
-pour les deux autres.
+Une décision reste à prendre et devra être argumentée dans l'ADR : le navigateur
+n'offre à un SPA statique **aucun** stockage protégé au sens de React Native. Le
+choix se joue entre un refresh gardé en mémoire — la session ne survit pas à un
+rechargement — et `sessionStorage`, lisible par XSS mais effacé à la fermeture de
+l'onglet. Ce compromis doit être documenté, pas masqué.
 
 ### Critères de sortie
 
 - `auth/angular` passe `planned` → `ready` avec les quatre responsabilités ;
 - parité Web `OK` : Angular tient ce que Next.js tient ;
-- contrat produit Authentication satisfait sur les invariants client
-  applicables, preuves vérifiées en Foundation **et** en application
-  matérialisée ;
-- l'écart `auth/angular` disparaît de `parity-gaps.json` — il est comblé, pas
-  reconduit ;
-- golden Angular vert avec démarrage prouvé ;
+- les six invariants client applicables sont prouvés, en Foundation **et** en
+  application matérialisée ;
+- l'écart `auth/angular` est retiré de `parity-gaps.json` — comblé, pas reconduit ;
+- le compromis de stockage du refresh est explicité dans un ADR ;
+- golden Angular vert ;
 - aucun nouveau runtime, provider ou capability ; aucun dossier `base/`.
