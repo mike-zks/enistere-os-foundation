@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "spring",
+  "contract": {
+    "id": "authorization-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "authority"
+  ],
+  "suite": "rbac-spring-integration",
+  "golden": "spring-auth-rbac",
+  "invariants": {
+    "RBAC-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "contains": [
+          "grant_takesEffectImmediatelyOnTheSameToken",
+          "methodSecurityUsesCurrentServerSidePermissionAndDeniesByDefault"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "contains": [
+          "denial_overHttp_returnsGenericForbiddenWithoutRevealingTheGrant",
+          "AUTH_FORBIDDEN"
+        ]
+      },
+      {
+        "kind": "source",
+        "owner": "auth",
+        "source": "files/src/main/java/com/enistere/core/config/SecurityExceptionHandler.java",
+        "materialized": "src/main/java/com/enistere/core/config/SecurityExceptionHandler.java",
+        "contains": [
+          "AccessDeniedException",
+          "SecurityErrorCodes.AUTH_FORBIDDEN",
+          "HIGHEST_PRECEDENCE"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "contains": [
+          "authorization_withoutToken_returns401"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "contains": [
+          "DeniesByDefault",
+          "PreAuthorize"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "contains": [
+          "denial_isRecordedAsBusinessAuditEvent",
+          "AUTHORIZATION_DENIED"
+        ]
+      },
+      {
+        "kind": "source",
+        "owner": "auth",
+        "source": "files/src/main/java/com/enistere/core/config/SecurityAuditEvents.java",
+        "materialized": "src/main/java/com/enistere/core/config/SecurityAuditEvents.java",
+        "contains": [
+          "AUTHORIZATION_DENIED"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/authorization/AuthorizationIntegrationTest.java",
+        "contains": [
+          "authorization_returnsSortedEffectiveCodesWithoutInternalFields",
+          "authorization_withoutAssignments_returnsEmptySummary"
+        ]
+      }
+    ]
+  }
+}
