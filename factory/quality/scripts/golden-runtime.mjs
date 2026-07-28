@@ -206,6 +206,18 @@ function withJdbcSchema(connection, schema) {
  */
 export function runtimeEnvironmentFor(application, architectureProfileId, baseEnvironment = process.env) {
   const environment = { ...baseEnvironment };
+
+  // Hermetic mobile gates. `expo-doctor` otherwise asks api.expo.dev which
+  // versions the SDK expects, and that answer is server-side: it changed under
+  // us on 2026-07-28, turning every React Native golden red on commits that had
+  // just passed — same code, same lock, same tool version, different verdict.
+  // Offline, the expectation is read from the locked `expo` package instead, so
+  // it only moves when we deliberately move the SDK. A gate that asserts
+  // reproducibility cannot itself depend on a mutable remote value.
+  if (application.runtime === 'react-native') {
+    environment.EXPO_OFFLINE = '1';
+  }
+
   if (architectureProfileId !== 'distributed-platform' || !application.ownership) {
     return environment;
   }
