@@ -38,9 +38,11 @@ import java.util.UUID;
 public class FilesController {
 
     private final FileService fileService;
+    private final FileQuarantineService quarantineService;
 
-    public FilesController(FileService fileService) {
+    public FilesController(FileService fileService, FileQuarantineService quarantineService) {
         this.fileService = fileService;
+        this.quarantineService = quarantineService;
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -173,7 +175,7 @@ public class FilesController {
             Authentication auth,
             HttpServletRequest httpRequest) {
 
-        fileService.quarantine(
+        quarantineService.quarantine(
             id,
             auth.getName(),
             httpRequest.getRemoteAddr(),
@@ -196,7 +198,7 @@ public class FilesController {
             Authentication auth,
             HttpServletRequest httpRequest) {
 
-        fileService.restore(
+        quarantineService.restore(
             id,
             auth.getName(),
             httpRequest.getRemoteAddr(),

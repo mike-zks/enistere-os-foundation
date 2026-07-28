@@ -1,5 +1,12 @@
 # Carte d'impact de migration
 
+> **CLOS — analyse historique, arrêtée au 2026-07-25.**
+> La migration décrite est achevée.
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 > Rapport antérieur à l'ADR-057. Toute classification d'Audit ou Observability comme capability est
 > supersédée par le Platform Baseline. Voir
 > [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).

@@ -1,5 +1,10 @@
 # CC11 — Rapport de durcissement opérationnel staging
 
+> **RAPPORT D'EXÉCUTION — daté du 2026-07-18.**
+> Trace d'une exécution réelle, conservée comme preuve et référencée par le
+> processus de release. Ce n'est ni une spécification ni une description de
+> l'état courant.
+
 > **Deployment 11** | Environnement : staging Enistere | Date : 2026-07-11
 >
 > **Contrainte sécurité :** aucun secret, token, credential, DATABASE_URL, cookie ou contenu

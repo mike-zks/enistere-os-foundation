@@ -1,5 +1,12 @@
 # Matrice d’écart de conformité des runtimes
 
+> **CLOS — analyse historique, arrêtée au 2026-07-27.**
+> Les sept runtimes satisfont désormais leur contrat Common + famille v2. Les « non conformes » de ce document sont tous refermés.
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Cette synthèse reflète le rapport calculé
 [`platform-baseline-v2-gap.json`](../../factory/conformance/reports/platform-baseline-v2-gap.json).
 Elle mesure le Platform Baseline `common/2.0.0` et le contrat de famille

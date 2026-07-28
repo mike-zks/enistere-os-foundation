@@ -1,5 +1,12 @@
 # Analyse d'écart — Blueprint
 
+> **CLOS — analyse historique, arrêtée au 2026-07-27.**
+> Le pipeline canonique et les profils système sont exécutables (ADR-065).
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Cible : [System Blueprint Specification](../specifications/SYSTEM_BLUEPRINT_SPECIFICATION.md).
 Réel : `factory/schema/blueprint.schema.json`, `factory/engine/applications.mjs`,
 `factory/engine/topologies.mjs`.

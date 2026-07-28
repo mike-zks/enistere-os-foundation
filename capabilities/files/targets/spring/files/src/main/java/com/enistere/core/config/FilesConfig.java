@@ -38,6 +38,11 @@ public class FilesConfig {
     /** How long a deleted record is kept before maintenance may purge it. */
     private long purgeRetentionSeconds = 604_800L;
 
+    /** Object-store budgets. Unbounded waits turn a storage incident into an outage. */
+    private long storageConnectTimeoutSeconds = 5L;
+    private long storageWriteTimeoutSeconds = 60L;
+    private long storageReadTimeoutSeconds = 30L;
+
     public String getEndpoint() { return endpoint; }
     public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
 
@@ -58,6 +63,15 @@ public class FilesConfig {
 
     public long getOwnerMaxTotalBytes() { return ownerMaxTotalBytes; }
     public void setOwnerMaxTotalBytes(long ownerMaxTotalBytes) { this.ownerMaxTotalBytes = ownerMaxTotalBytes; }
+
+    public long getStorageConnectTimeoutSeconds() { return storageConnectTimeoutSeconds; }
+    public void setStorageConnectTimeoutSeconds(long v) { this.storageConnectTimeoutSeconds = v; }
+
+    public long getStorageWriteTimeoutSeconds() { return storageWriteTimeoutSeconds; }
+    public void setStorageWriteTimeoutSeconds(long v) { this.storageWriteTimeoutSeconds = v; }
+
+    public long getStorageReadTimeoutSeconds() { return storageReadTimeoutSeconds; }
+    public void setStorageReadTimeoutSeconds(long v) { this.storageReadTimeoutSeconds = v; }
 
     public long getPurgeRetentionSeconds() { return purgeRetentionSeconds; }
     public void setPurgeRetentionSeconds(long purgeRetentionSeconds) { this.purgeRetentionSeconds = purgeRetentionSeconds; }

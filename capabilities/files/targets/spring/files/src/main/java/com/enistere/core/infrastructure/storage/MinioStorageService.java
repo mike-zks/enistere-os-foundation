@@ -6,6 +6,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
+import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,9 +75,15 @@ public class MinioStorageService implements StorageService {
                     .build()
             );
             return true;
+        } catch (ErrorResponseException e) {
+            // A genuine "not found" from the store: expected, not an incident.
+            log.debug("Object absent from bucket");
+            return false;
         } catch (Exception e) {
-            // Absent, unreachable or refused: treated the same way on purpose —
-            // the caller only releases a quarantine on a positive answer.
+            // Unreachable or refused. Still false — the caller only releases a
+            // quarantine on a positive answer — but logged, because a broken
+            // store must not be indistinguishable from a missing object.
+            log.warn("Object presence check failed; treating as absent: {}", e.getClass().getSimpleName());
             return false;
         }
     }

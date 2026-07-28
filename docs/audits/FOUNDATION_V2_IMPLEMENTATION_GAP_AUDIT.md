@@ -1,5 +1,12 @@
 # Audit d'écart — Foundation V2 : implémentation vs cible
 
+> **CLOS — analyse historique, arrêtée au 2026-07-25.**
+> ADR-057 a requalifié la cible ; les écarts listés ici ont été traités par ADR-058 à ADR-073.
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 > Rapport antérieur à l'ADR-057. Audit et Observability ne sont plus des capabilities. Le constat courant
 > est [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
 
