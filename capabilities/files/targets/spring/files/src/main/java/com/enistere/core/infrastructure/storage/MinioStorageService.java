@@ -5,6 +5,7 @@ import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.StatObjectArgs;
 import io.minio.http.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,23 @@ public class MinioStorageService implements StorageService {
         } catch (Exception e) {
             log.error("Storage delete failed");
             throw new RuntimeException("Storage delete failed", e);
+        }
+    }
+
+    @Override
+    public boolean objectExists(String storageKey) {
+        try {
+            minioClient.statObject(
+                StatObjectArgs.builder()
+                    .bucket(filesConfig.getBucket())
+                    .object(storageKey)
+                    .build()
+            );
+            return true;
+        } catch (Exception e) {
+            // Absent, unreachable or refused: treated the same way on purpose —
+            // the caller only releases a quarantine on a positive answer.
+            return false;
         }
     }
 

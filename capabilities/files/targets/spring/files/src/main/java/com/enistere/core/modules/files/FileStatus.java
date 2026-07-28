@@ -5,5 +5,6 @@ public enum FileStatus {
     UPLOADED,
     VALIDATED,
     REJECTED,
+    QUARANTINED,
     DELETED
 }

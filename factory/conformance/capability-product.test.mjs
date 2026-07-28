@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, before, describe, it } from 'node:test';
@@ -33,35 +33,99 @@ describe('capability product conformance', () => {
     assert.equal(byCapability.files, 'capabilities/files/contracts/files.product.v1.json');
   });
 
-  it('closes the neutral contract for every ready target, and states where it does not', async () => {
+  it('closes the neutral contract for every ready target of every capability', async () => {
     const reports = await evaluateAllCapabilityProducts({ repoRoot: REPO_ROOT });
-    const byCapability = Object.fromEntries(reports.map((item) => [item.capability, item]));
     assert.ok(reports.length >= 3);
 
-    for (const capability of ['auth', 'rbac']) {
-      assert.equal(byCapability[capability].status, 'CONFORMANT');
-      for (const target of byCapability[capability].readyTargets) {
-        assert.equal(byCapability[capability].targets[target].status, 'CONFORMANT');
-        assert.ok(byCapability[capability].targets[target].proofCount > 0);
+    for (const report of reports) {
+      assert.equal(report.status, 'CONFORMANT', `${report.capability} is not conformant`);
+      for (const target of report.readyTargets) {
+        const result = report.targets[target];
+        assert.equal(result.status, 'CONFORMANT', `${report.capability}/${target}`);
+        assert.ok(result.proofCount > 0);
+        assert.equal(result.familyParity.status, 'OK');
       }
     }
+  });
 
-    // files is honestly NOT conformant: Spring holds two of the seven
-    // responsibilities NestJS holds, and both are API runtimes. Every proof it
-    // does declare passes — the only issue is the parity gap itself.
-    assert.equal(byCapability.files.status, 'NON_CONFORMANT');
-    const spring = byCapability.files.targets.spring;
-    assert.equal(spring.familyParity.status, 'BREACH');
-    assert.equal(spring.family, 'api');
-    assert.deepEqual(
-      spring.familyParity.missing,
-      ['quarantine', 'quota', 'reconciliation'],
-    );
-    assert.deepEqual(
-      spring.issues.filter((issue) => !issue.startsWith('family parity:')),
-      [],
-    );
-    assert.equal(byCapability.files.targets.nestjs.status, 'CONFORMANT');
+  it('keeps the API family at equal responsibilities on files', async () => {
+    const report = await evaluateCapabilityProduct({ capability: 'files', repoRoot: REPO_ROOT });
+    // The gap ADR-070 measured is closed: both API runtimes now hold all seven.
+    assert.equal(report.targets.nestjs.coverage, '7/7');
+    assert.equal(report.targets.spring.coverage, '7/7');
+    assert.deepEqual(report.targets.spring.invariants, report.targets.nestjs.invariants);
+  });
+
+  it('still detects a family-parity breach when one appears', async () => {
+    // Reality is green, so the rule is exercised against a synthetic repository:
+    // otherwise the guarantee that a divergence is caught would stop being tested
+    // the moment the divergence was fixed.
+    const root = await mkdtemp(join(tmpdir(), 'enistere-parity-fixture-'));
+    try {
+      const capability = join(root, 'capabilities', 'sample');
+      await mkdir(join(capability, 'contracts'), { recursive: true });
+      await writeFile(join(capability, 'contracts', 'sample.product.v1.json'), JSON.stringify({
+        schemaVersion: '1',
+        id: 'sample-product',
+        version: '1.0.0',
+        capability: 'sample',
+        roles: ['authority'],
+        invariants: [
+          { id: 'SAMPLE-AUTHORITY-001', appliesTo: ['authority'], requirement: 'always' },
+          {
+            id: 'SAMPLE-AUTHORITY-002',
+            responsibility: 'extra',
+            appliesTo: ['authority'],
+            requirement: 'only with extra',
+          },
+        ],
+      }));
+      const target = (responsibilities) => ({
+        status: 'ready',
+        mode: 'overlay',
+        adapter: { id: 'placeholder', version: '1.0.0' },
+        responsibilities,
+        contracts: [],
+        primitives: [],
+        deploymentModes: ['embedded'],
+        migrations: [],
+        conformance: ['sample-suite'],
+      });
+      const manifest = {
+        schemaVersion: '2',
+        id: 'sample',
+        version: '1.0.0',
+        requires: [],
+        conflicts: [],
+        responsibilities: ['core', 'extra'],
+        contracts: [],
+        primitives: [],
+        configuration: {},
+        targets: {
+          nestjs: { ...target(['core', 'extra']), adapter: { id: 'nestjs', version: '1.0.0' } },
+          spring: { ...target(['core']), adapter: { id: 'spring', version: '1.0.0' } },
+          fastapi: { status: 'unsupported' },
+          nextjs: { status: 'planned' },
+          angular: { status: 'planned' },
+          'react-native': { status: 'planned' },
+          flutter: { status: 'planned' },
+        },
+        migrations: [],
+        conformance: [{ id: 'sample-suite', target: 'nestjs', level: 'contract', evidence: 'golden-runtime' }],
+      };
+      await writeFile(join(capability, 'capability.json'), JSON.stringify(manifest));
+
+      const report = await evaluateCapabilityProduct({ capability: 'sample', repoRoot: root });
+      const spring = report.targets.spring;
+      assert.equal(spring.familyParity.status, 'BREACH');
+      assert.equal(spring.family, 'api');
+      assert.deepEqual(spring.familyParity.missing, ['extra']);
+      assert.equal(report.status, 'NON_CONFORMANT');
+      // The breach alone is enough: it does not need a missing proof to fail.
+      assert.ok(spring.issues.some((issue) => issue.startsWith('family parity:')));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 
   it('does not constrain a target that is alone in its family', async () => {
@@ -99,15 +163,20 @@ describe('capability product conformance', () => {
 
     // Same role, very different surfaces: the contract must not ask Spring to
     // prove quarantine or quota it never claimed, nor let it pass as full support.
+    // A mobile client holding only `upload` is not asked to prove listing,
+    // deletion or quota — but still owes the cross-cutting client invariant.
+    const mobile = report.targets['react-native'];
+    assert.equal(mobile.coverage, '1/7');
+    assert.ok(mobile.invariants.includes('FILES-CLIENT-001'));
+    assert.ok(mobile.invariants.includes('FILES-CLIENT-002'));
+    assert.ok(!mobile.invariants.includes('FILES-CLIENT-003'));
+    assert.ok(!mobile.invariants.includes('FILES-CLIENT-005'));
+    // The API authorities hold everything, so they owe every scoped invariant.
     assert.equal(report.targets.nestjs.coverage, '7/7');
-    assert.equal(report.targets.spring.coverage, '4/7');
-    assert.ok(report.targets.nestjs.invariants.length > report.targets.spring.invariants.length);
-    assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-003'));
-    // Ported in this mission: metadata and delete are now measured on Spring too.
-    assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-006'));
-    assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-007'));
-    // Still absent, so still not demanded of it.
-    assert.ok(!report.targets.spring.invariants.includes('FILES-AUTHORITY-008'));
+    for (const id of ['FILES-AUTHORITY-003', 'FILES-AUTHORITY-008', 'FILES-AUTHORITY-010']) {
+      assert.ok(report.targets.nestjs.invariants.includes(id));
+      assert.ok(report.targets.spring.invariants.includes(id));
+    }
     // Cross-cutting invariants carry no responsibility, so every target proves them.
     for (const target of ['nestjs', 'spring']) {
       assert.ok(report.targets[target].invariants.includes('FILES-AUTHORITY-001'));

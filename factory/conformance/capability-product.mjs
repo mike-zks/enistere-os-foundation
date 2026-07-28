@@ -315,6 +315,8 @@ export async function evaluateCapabilityProduct({
         roles: [],
         responsibilities: [],
         coverage: `0/${(manifest.responsibilities ?? []).length}`,
+        family: FAMILY_OF_RUNTIME.get(target) ?? null,
+        familyParity: { status: 'OK' },
         invariants: [],
         proofCount: 0,
         materialized: false,
@@ -335,12 +337,26 @@ export async function evaluateCapabilityProduct({
         status: 'NON_CONFORMANT',
         manifestStatus: 'ready',
         roles: [],
-        responsibilities: [],
-        coverage: `0/${(manifest.responsibilities ?? []).length}`,
+        // Declared coverage and parity still hold even without a descriptor: a
+        // target that skips its evidence must not also hide its parity standing.
+        responsibilities: [...(targetManifest.responsibilities ?? [])].sort(),
+        coverage: `${(targetManifest.responsibilities ?? []).length}/${(manifest.responsibilities ?? []).length}`,
+        family: FAMILY_OF_RUNTIME.get(target) ?? null,
+        familyParity: parityGaps.has(target)
+          ? { status: 'BREACH', missing: parityGaps.get(target).missing }
+          : { status: 'OK' },
         invariants: [],
         proofCount: 0,
         materialized: false,
-        issues: ['conformance descriptor is missing'],
+        // A missing descriptor does not hide a parity breach: both are reported,
+        // so fixing one does not surface the other as a surprise.
+        issues: parityGaps.has(target)
+          ? [
+            'conformance descriptor is missing',
+            `family parity: ${parityGaps.get(target).family} runtimes must hold the same`
+            + ` responsibilities; missing ${parityGaps.get(target).missing.join(', ')}`,
+          ]
+          : ['conformance descriptor is missing'],
       };
       continue;
     }

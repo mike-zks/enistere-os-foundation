@@ -95,7 +95,10 @@
         "upload",
         "metadata",
         "download-url",
-        "delete"
+        "delete",
+        "quarantine",
+        "reconciliation",
+        "quota"
       ],
       "contracts": [
         "files-api",
