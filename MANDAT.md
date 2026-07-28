@@ -491,6 +491,13 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-074 — Parité de famille sur tous les runtimes** : la parité ne se limite
+  plus aux targets `ready`. Un runtime ne s'exonère plus en déclarant
+  `unsupported` — FastAPI, Angular et Flutter ne portent aucune capability et la
+  mesure le dit désormais. `not-applicable` reste la seule exemption et doit
+  porter une raison lisible par la machine. Les trois capabilities passent
+  `NON_CONFORMANT` : premier verdict honnête, pas régression. Huit écarts
+  déclarés et datés dans `factory/quality/parity-gaps.json`.
 * **ADR-073 — Analyse de secrets bloquante** : scan de l'historique complet sur
   chaque PR, binaire épinglé et vérifié plutôt qu'une action tierce, détections
   censurées, exceptions justifiées avec échéance ou permanence motivée. Premier

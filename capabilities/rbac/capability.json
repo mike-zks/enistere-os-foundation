@@ -127,7 +127,8 @@
       "status": "planned"
     },
     "react-native": {
-      "status": "not-applicable"
+      "status": "not-applicable",
+      "rationale": "L'autorisation fine est une préoccupation serveur : l'application mobile consomme les décisions de l'API (401/403) et ne possède aucune surface RBAC propre. Un overlay vide serait une surface factice."
     },
     "flutter": {
       "status": "planned"

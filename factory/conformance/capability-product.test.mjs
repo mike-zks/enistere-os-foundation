@@ -33,19 +33,47 @@ describe('capability product conformance', () => {
     assert.equal(byCapability.files, 'capabilities/files/contracts/files.product.v1.json');
   });
 
-  it('closes the neutral contract for every ready target of every capability', async () => {
+  it('proves every ready target, and counts the runtimes left behind', async () => {
     const reports = await evaluateAllCapabilityProducts({ repoRoot: REPO_ROOT });
     assert.ok(reports.length >= 3);
 
     for (const report of reports) {
-      assert.equal(report.status, 'CONFORMANT', `${report.capability} is not conformant`);
+      // Every target that claims readiness must still prove its invariants…
       for (const target of report.readyTargets) {
         const result = report.targets[target];
         assert.equal(result.status, 'CONFORMANT', `${report.capability}/${target}`);
         assert.ok(result.proofCount > 0);
-        assert.equal(result.familyParity.status, 'OK');
+        assert.deepEqual(
+          result.issues.filter((issue) => !issue.startsWith('family parity:')),
+          [],
+        );
       }
+      // …and the capability is only conformant when no served runtime is left
+      // behind. Today three are, which is why all three read NON_CONFORMANT
+      // (ADR-074) — the honest verdict, not a regression.
+      assert.equal(report.status, 'NON_CONFORMANT');
     }
+  });
+
+  it('exempts a not-applicable target only when it states why', async () => {
+    const report = await evaluateCapabilityProduct({ capability: 'rbac', repoRoot: REPO_ROOT });
+    const mobile = report.targets['react-native'];
+    assert.equal(mobile.manifestStatus, 'not-applicable');
+    // The exemption survives the stricter rule precisely because the manifest
+    // carries a machine-readable rationale; without one it would be the new
+    // escape hatch that `unsupported` used to be.
+    assert.equal(mobile.familyParity.status, 'OK');
+  });
+
+  it('holds a runtime to what its family peers actually implement', async () => {
+    const files = await evaluateCapabilityProduct({ capability: 'files', repoRoot: REPO_ROOT });
+    // React Native holds only `upload`, so Flutter owes only `upload` — the bar
+    // is peer coverage, not the capability's full scope.
+    assert.deepEqual(files.targets.flutter.familyParity.missing, ['upload']);
+
+    const rbac = await evaluateCapabilityProduct({ capability: 'rbac', repoRoot: REPO_ROOT });
+    // Nobody in the mobile family implements RBAC, so Flutter owes nothing.
+    assert.equal(rbac.targets.flutter.familyParity.status, 'OK');
   });
 
   it('keeps the API family at equal responsibilities on files', async () => {

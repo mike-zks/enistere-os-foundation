@@ -131,38 +131,59 @@ Les cinq premières recommandations de la revue du 2026-07-28 sont traitées
 - **CLI** : ni mode interactif ni sortie `--json`, flags inconnus silencieux
   (§14 partiellement couvert).
 
+## Décision prise : la parité couvre tous les runtimes
+
+ADR-070 ne mesurait la parité qu'entre targets `ready` ; un runtime s'exonérait
+donc en déclarant `unsupported`. C'est exactement ce que faisait FastAPI :
+conforme au baseline (28/28), annoncé comme runtime API, et ne portant rien.
+
+[ADR-074](../adr/ADR-074-family-parity-covers-every-runtime.md) étend la règle à
+**tous** les runtimes d'une famille servie. La barre reste la couverture des
+pairs, pas le périmètre total — `files/flutter` ne doit qu'`upload` parce que
+React Native ne tient qu'`upload` ; `rbac/flutter` ne doit rien parce qu'aucun
+mobile n'implémente RBAC.
+
+**Les trois capabilities passent `NON_CONFORMANT`.** Premier verdict honnête,
+pas régression : toutes les preuves des targets `ready` passent. Ce qui change,
+c'est que la mesure cesse d'ignorer les absents.
+
+Huit écarts sont déclarés, justifiés et datés au 2026-12-31 dans
+`factory/quality/parity-gaps.json`. Le gate tolère un écart déclaré et non
+expiré ; il échoue sur un écart non déclaré, plus large que déclaré, expiré, ou
+sur toute preuve manquante — vérifié par canari dans les deux sens.
+
 ## Prochaine mission unique
 
-> **Rendre `angular` et `flutter` `ready` pour Authentication, ou déclarer
-> explicitement qu'ils ne le seront pas.**
+> **Porter Authentication sur Angular**, première fermeture d'écart de parité.
 
 ### Justification de l'ordre
 
-Le socle est désormais mesuré de bout en bout : trois capabilities conformes,
-parité par famille appliquée, schéma normatif exécuté, conformité et secrets
-gardés par la CI. Les recommandations de revue restantes sont soit des phases
-ultérieures, soit des dettes bornées et consignées.
+Trois écarts sont ouverts ; Angular est celui dont le risque est le plus faible
+et la référence la plus proche :
 
-Ce qui bloque réellement la suite est ailleurs : **deux runtimes cibles ne
-portent aucune capability**. Angular et Flutter sont `planned` sur les trois, ce
-qui veut dire qu'un produit généré avec eux n'a ni authentification, ni
-autorisation, ni fichiers. La plateforme annonce sept runtimes et en sert cinq.
+- **Angular avant Flutter** : Angular compte 73 fichiers de test pour 38 sources
+  — le starter pratique déjà la preuve. Flutter tient ses 25 invariants de
+  baseline avec **2 fichiers de test** là où React Native en a 95 ; lui imposer
+  la parité d'abord reviendrait à découvrir en même temps la capability et une
+  culture de test absente.
+- **Angular avant FastAPI** : Next.js sert de référence directe dans la même
+  famille Web, avec un contrat produit déjà écrit et six invariants client
+  applicables. Côté API, la référence est double (NestJS et Spring à 4/4) et le
+  portage inclut la persistance, la cryptographie et l'émission de jetons.
+- **Authentication avant RBAC et Files** : le graphe l'impose
+  (`auth → rbac → files`).
 
-La revue a montré pourquoi c'est risqué de le faire naïvement : Flutter tient ses
-25 invariants de baseline avec **2 fichiers de test** quand React Native en a 95.
-La parité par famille (ADR-070) exigera de Flutter le niveau de preuve de React
-Native — un travail que ce starter n'a jamais pratiqué.
-
-D'où la formulation : soit on les rend `ready` avec les preuves que cela exige,
-soit on déclare `unsupported` et la plateforme cesse d'annoncer sept runtimes
-utilisables. Les deux sont honnêtes ; le statu quo ne l'est pas.
+Fermer d'abord l'écart le mieux outillé donne un modèle de portage réutilisable
+pour les deux autres.
 
 ### Critères de sortie
 
-- décision explicite et argumentée pour Angular et Flutter sur Authentication ;
-- si `ready` : contrat produit satisfait, parité de famille respectée
-  (Angular vs Next.js, Flutter vs React Native), goldens verts ;
-- si `unsupported` : manifests, documentation et matrice alignés, sans
-  formulation laissant croire à un support à venir non planifié ;
-- aucune target déclarée `ready` sans preuve exécutée ;
-- aucun dossier `base/`.
+- `auth/angular` passe `planned` → `ready` avec les quatre responsabilités ;
+- parité Web `OK` : Angular tient ce que Next.js tient ;
+- contrat produit Authentication satisfait sur les invariants client
+  applicables, preuves vérifiées en Foundation **et** en application
+  matérialisée ;
+- l'écart `auth/angular` disparaît de `parity-gaps.json` — il est comblé, pas
+  reconduit ;
+- golden Angular vert avec démarrage prouvé ;
+- aucun nouveau runtime, provider ou capability ; aucun dossier `base/`.

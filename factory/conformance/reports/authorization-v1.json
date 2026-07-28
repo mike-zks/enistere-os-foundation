@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "evaluation": "foundation-registry",
-  "status": "CONFORMANT",
+  "status": "NON_CONFORMANT",
   "readyTargets": [
     "nestjs",
     "nextjs",
@@ -83,12 +83,20 @@
       "coverage": "0/4",
       "family": "api",
       "familyParity": {
-        "status": "OK"
+        "status": "BREACH",
+        "missing": [
+          "authorization-context",
+          "authorization-summary",
+          "permissions",
+          "roles"
+        ]
       },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
-      "issues": []
+      "issues": [
+        "family parity: api runtimes must hold the same responsibilities; missing authorization-context, authorization-summary, permissions, roles"
+      ]
     },
     "nextjs": {
       "status": "CONFORMANT",
@@ -124,12 +132,18 @@
       "coverage": "0/4",
       "family": "web",
       "familyParity": {
-        "status": "OK"
+        "status": "BREACH",
+        "missing": [
+          "authorization-context",
+          "authorization-summary"
+        ]
       },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
-      "issues": []
+      "issues": [
+        "family parity: web runtimes must hold the same responsibilities; missing authorization-context, authorization-summary"
+      ]
     },
     "react-native": {
       "status": "NOT_APPLICABLE",

@@ -308,6 +308,11 @@
           "minItems": 1,
           "uniqueItems": true,
           "description": "Subset of the capability's responsibilities this target actually implements. Required when ready, so partial support is stated instead of implied."
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 40,
+          "description": "Pourquoi ce runtime n'a structurellement aucune surface pour cette capability. Obligatoire quand status vaut not-applicable : sans raison lisible, l'exemption devient une échappatoire à la parité de famille (ADR-074)."
         }
       },
       "allOf": [
@@ -377,6 +382,46 @@
                     "responsibilities"
                   ]
                 }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "const": "not-applicable"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "rationale"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "ready",
+                  "planned",
+                  "unsupported"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "rationale"
               ]
             }
           }

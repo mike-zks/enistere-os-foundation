@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "evaluation": "foundation-registry",
-  "status": "CONFORMANT",
+  "status": "NON_CONFORMANT",
   "readyTargets": [
     "nestjs",
     "nextjs",
@@ -88,12 +88,20 @@
       "coverage": "0/4",
       "family": "api",
       "familyParity": {
-        "status": "OK"
+        "status": "BREACH",
+        "missing": [
+          "login",
+          "logout",
+          "refresh",
+          "session"
+        ]
       },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
-      "issues": []
+      "issues": [
+        "family parity: api runtimes must hold the same responsibilities; missing login, logout, refresh, session"
+      ]
     },
     "nextjs": {
       "status": "CONFORMANT",
@@ -135,12 +143,20 @@
       "coverage": "0/4",
       "family": "web",
       "familyParity": {
-        "status": "OK"
+        "status": "BREACH",
+        "missing": [
+          "login",
+          "logout",
+          "refresh",
+          "session"
+        ]
       },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
-      "issues": []
+      "issues": [
+        "family parity: web runtimes must hold the same responsibilities; missing login, logout, refresh, session"
+      ]
     },
     "react-native": {
       "status": "CONFORMANT",
@@ -182,12 +198,20 @@
       "coverage": "0/4",
       "family": "mobile",
       "familyParity": {
-        "status": "OK"
+        "status": "BREACH",
+        "missing": [
+          "login",
+          "logout",
+          "refresh",
+          "session"
+        ]
       },
       "invariants": [],
       "proofCount": 0,
       "materialized": false,
-      "issues": []
+      "issues": [
+        "family parity: mobile runtimes must hold the same responsibilities; missing login, logout, refresh, session"
+      ]
     }
   }
 }
