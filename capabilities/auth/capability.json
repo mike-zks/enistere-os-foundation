@@ -42,6 +42,12 @@
         "id": "nestjs",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "login",
+        "refresh",
+        "logout",
+        "session"
+      ],
       "contracts": [
         "auth-identity",
         "auth-session"
@@ -66,6 +72,12 @@
         "id": "spring",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "login",
+        "refresh",
+        "logout",
+        "session"
+      ],
       "contracts": [
         "auth-identity",
         "auth-session"
@@ -93,6 +105,12 @@
         "id": "nextjs",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "login",
+        "refresh",
+        "logout",
+        "session"
+      ],
       "contracts": [
         "auth-session"
       ],
@@ -115,6 +133,12 @@
         "id": "react-native",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "login",
+        "refresh",
+        "logout",
+        "session"
+      ],
       "contracts": [
         "auth-session"
       ],

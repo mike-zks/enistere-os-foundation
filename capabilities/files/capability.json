@@ -57,6 +57,15 @@
         "id": "nestjs",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "upload",
+        "metadata",
+        "download-url",
+        "delete",
+        "quarantine",
+        "reconciliation",
+        "quota"
+      ],
       "contracts": [
         "files-api",
         "files-metadata"
@@ -82,6 +91,10 @@
         "id": "spring",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "upload",
+        "download-url"
+      ],
       "contracts": [
         "files-api",
         "files-metadata"
@@ -110,6 +123,13 @@
         "id": "nextjs",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "upload",
+        "metadata",
+        "download-url",
+        "delete",
+        "quarantine"
+      ],
       "contracts": [
         "files-api",
         "files-metadata"
@@ -133,6 +153,9 @@
         "id": "react-native",
         "version": "1.0.0"
       },
+      "responsibilities": [
+        "upload"
+      ],
       "contracts": [
         "files-api",
         "files-metadata"

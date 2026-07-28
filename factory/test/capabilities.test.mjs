@@ -16,6 +16,7 @@ function readyTarget(runtime) {
     status: 'ready',
     mode: 'overlay',
     adapter: { id: runtime, version: '1.0.0' },
+    responsibilities: ['sample'],
     contracts: [],
     primitives: [],
     deploymentModes: ['embedded'],
@@ -72,6 +73,30 @@ describe('Capability Manifest v2', () => {
     assert.ok(validateCapabilityManifest(missing).includes('primitives is required'));
     assert.ok(validateCapabilityManifest({ ...manifest('sample'), provider: 'minio' })
       .includes('unknown property: provider'));
+  });
+
+  it('makes a ready target state which responsibilities it actually holds', () => {
+    const missing = manifest('sample');
+    delete missing.targets.nestjs.responsibilities;
+    assert.ok(validateCapabilityManifest(missing)
+      .includes('targets.nestjs.responsibilities must be an array'));
+
+    const empty = manifest('sample');
+    empty.targets.nestjs.responsibilities = [];
+    assert.ok(validateCapabilityManifest(empty)
+      .includes('targets.nestjs.responsibilities must not be empty'));
+
+    // A target cannot claim a responsibility the capability never declared.
+    const foreign = manifest('sample');
+    foreign.targets.nestjs.responsibilities = ['sample', 'invented'];
+    assert.ok(validateCapabilityManifest(foreign)
+      .includes('targets.nestjs.responsibilities references unknown invented'));
+
+    // Partial coverage is legitimate — it just has to be stated.
+    const partial = manifest('sample');
+    partial.responsibilities = ['sample', 'extra'];
+    partial.targets.nestjs.responsibilities = ['sample'];
+    assert.deepEqual(validateCapabilityManifest(partial), []);
   });
 
   it('requires adapter, deployment, migration and conformance declarations on ready targets', () => {
