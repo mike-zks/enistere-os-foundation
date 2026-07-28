@@ -111,13 +111,13 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — parité API rompue sur `files` :** les trois capabilities sont
-   désormais mesurées (ADR-068 → ADR-070). Authentication et RBAC sont
-   `CONFORMANT` ; `files` ne l’est pas. Spring tient 5 des 7 responsabilités que
-   NestJS tient, alors que les deux appartiennent à la **même famille API** et
-   sont censés être interchangeables : `metadata`, `delete` et `quarantine` ont
-   été portées, manquent `quota` et `reconciliation`. C’est le seul écart de
-   parité mesuré du dépôt, et il reste bloquant pour `files`.
+1. **P0 — l’outillage de conformité n’est pas exécuté par la CI :** les trois
+   capabilities sont mesurées et `CONFORMANT` (ADR-068 → ADR-070), la parité API
+   de `files` étant refermée. Mais `factory:test` — 452 tests, dont l’évaluateur
+   de conformité produit et la règle de parité par famille — n’est rejoué par
+   aucun workflow. La CI valide les applications générées, pas l’outil qui juge
+   leur conformité : une régression de l’évaluateur rendrait silencieusement
+   fausses toutes les affirmations de conformité.
 
    La mesure a aussi corrigé, en amont, quatre divergences Spring sur Auth puis
    un défaut plus grave sur RBAC — un refus d’autorisation répondait `500` au

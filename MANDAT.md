@@ -909,9 +909,9 @@ Conformité produit calculée au 2026-07-28 :
 ```text
 auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
 rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
-files  api  nestjs 7/7 · spring 5/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
+files  api  nestjs 7/7 · spring 7/7     web nextjs 5/7   mobile rn 1/7    CONFORMANT
        fastapi UNSUPPORTED · angular/flutter PLANNED
-2/3 capabilities CONFORMANT
+3/3 capabilities CONFORMANT
 ```
 
 Une suite locale verte ne prouve jamais la parité. Un contrat neutre commun a
@@ -925,7 +925,10 @@ couverture déclarée n'est légitime que si les autres runtimes `ready` de la m
 famille déclarent la même. C'est ce qui distingue un périmètre assumé d'une
 divergence.
 
-`metadata`, `delete` et `quarantine` sont portées sur Spring ; l'écart restant
-est `quota` et `reconciliation`. La prochaine mission unique consiste à les
-porter, sans nouvelle target ni nouvelle capability. Tout pipeline parallèle et
+L'écart de parité API de `files` est refermé : les sept responsabilités sont
+portées sur Spring et les trois capabilities sont conformes. La prochaine mission
+unique consiste à faire exécuter `factory:test` par la CI — 452 tests, dont
+l'évaluateur de conformité lui-même, ne sont aujourd'hui rejoués par aucun
+workflow : la CI valide les applications générées, pas l'outil qui juge leur
+conformité. Tout pipeline parallèle et
 tout dossier `base/` restent hors périmètre.
