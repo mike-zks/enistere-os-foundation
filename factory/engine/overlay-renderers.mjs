@@ -138,6 +138,85 @@ function renderProviderComposition(providers, prefix) {
   ].join('\n');
 }
 
+/** src/app/core/composition/capability-providers.ts of the Angular app. */
+export function renderAngularCapabilityProviders(providers) {
+  assertKnown(providers, ['angular.provider']);
+  const imports = [...new Set(providers.map(
+    (item) => `import { ${item.symbol} } from '${item.importPath}';`,
+  ))];
+  return [
+    BANNER,
+    "import type { EnvironmentProviders, Provider } from '@angular/core';",
+    ...imports,
+    '',
+    '/** Providers contributed by the composed capabilities, in declared order. */',
+    'export const CAPABILITY_PROVIDERS: readonly (Provider | EnvironmentProviders)[] = [',
+    ...providers.map((item) => `  ${item.symbol},`),
+    '];',
+    '',
+  ].join('\n');
+}
+
+/** src/app/core/composition/capability-routes.ts of the Angular app. */
+export function renderAngularCapabilityRoutes(routes) {
+  assertKnown(routes, ['angular.route']);
+  const ordered = orderRoutes(routes);
+  return [
+    BANNER,
+    "import type { Routes } from '@angular/router';",
+    '',
+    '/** Routes contributed by the composed capabilities, ordered deterministically. */',
+    'export const CAPABILITY_ROUTES: Routes = [',
+    ...ordered.flatMap((item) => [
+      '  {',
+      `    path: '${item.path}',`,
+      `    loadComponent: () => import('${item.importPath}').then((m) => m.${item.symbol}),`,
+      ...(item.title ? [`    title: '${item.title.replace(/'/g, "\\'")}',`] : []),
+      '  },',
+    ]),
+    '];',
+    '',
+  ].join('\n');
+}
+
+/** src/app/core/composition/capability-interceptors.ts of the Angular app. */
+export function renderAngularCapabilityInterceptors(interceptors) {
+  assertKnown(interceptors, ['angular.http-interceptor']);
+  const ordered = [...interceptors].sort(
+    (a, b) => a.order - b.order || a.symbol.localeCompare(b.symbol),
+  );
+  const imports = [...new Set(ordered.map(
+    (item) => `import { ${item.symbol} } from '${item.importPath}';`,
+  ))];
+  return [
+    BANNER,
+    "import type { HttpInterceptorFn } from '@angular/common/http';",
+    ...imports,
+    '',
+    '/** HTTP interceptors contributed by the composed capabilities, ordered.',
+    ' * They run AFTER the baseline ones, so a retry sees a normalised response. */',
+    'export const CAPABILITY_INTERCEPTORS: readonly HttpInterceptorFn[] = [',
+    ...ordered.map((item) => `  ${item.symbol},`),
+    '];',
+    '',
+  ].join('\n');
+}
+
+/**
+ * Routes are ordered by `order` then `path`: two capabilities contributing
+ * routes must produce the same file whatever order the graph resolved them in,
+ * or the composition stops being reproducible.
+ */
+function orderRoutes(routes) {
+  const sorted = [...routes].sort((a, b) => a.order - b.order || a.path.localeCompare(b.path));
+  const paths = sorted.map((item) => item.path);
+  const duplicate = paths.find((path, index) => paths.indexOf(path) !== index);
+  if (duplicate !== undefined) {
+    throw new Error(`two capabilities contribute the Angular route "${duplicate}"`);
+  }
+  return sorted;
+}
+
 /** src/core/composition/public-nav.ts of the Next.js app. */
 export function renderNextjsPublicNav(links) {
   assertKnown(links, ['nextjs.public-nav-link']);

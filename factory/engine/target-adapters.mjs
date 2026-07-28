@@ -18,6 +18,9 @@ import {
   renderNextjsDashboardNav,
   renderNextjsStatusSections,
   renderExpoCapabilityProviders,
+  renderAngularCapabilityProviders,
+  renderAngularCapabilityRoutes,
+  renderAngularCapabilityInterceptors,
   renderExpoHomeActions,
 } from './overlay-renderers.mjs';
 import { renderNestjsDomain } from './domain-renderers/nestjs.mjs';
@@ -85,7 +88,18 @@ const BUILT_IN = [
     { kinds: ['spring.module'], destination: 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java', render: renderSpringComposition },
   ] },
   { id: 'fastapi', version: '1.0.0', dependencyManager: 'python', integrationKinds: {}, composition: [] },
-  { id: 'angular', version: '1.0.0', integrationKinds: {}, composition: [] },
+  {
+    id: 'angular', version: '1.0.0', integrationKinds: {
+      'angular.provider': { importPath: STRING, symbol: STRING },
+      'angular.route': { path: STRING, importPath: STRING, symbol: STRING, title: STRING, order: INTEGER },
+      'angular.http-interceptor': { importPath: STRING, symbol: STRING, order: INTEGER },
+    },
+    composition: [
+      { kinds: ['angular.provider'], destination: 'src/app/core/composition/capability-providers.ts', render: renderAngularCapabilityProviders },
+      { kinds: ['angular.route'], destination: 'src/app/core/composition/capability-routes.ts', render: renderAngularCapabilityRoutes },
+      { kinds: ['angular.http-interceptor'], destination: 'src/app/core/composition/capability-interceptors.ts', render: renderAngularCapabilityInterceptors },
+    ],
+  },
   { id: 'flutter', version: '1.0.0', integrationKinds: {}, composition: [] },
 ].map((adapter) => Object.freeze({
   ...adapter,
