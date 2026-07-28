@@ -1,5 +1,10 @@
 # Rapport — Staging HTTPS réel (Deployment 10)
 
+> **RAPPORT D'EXÉCUTION — daté du 2026-07-18.**
+> Trace d'une exécution réelle, conservée comme preuve et référencée par le
+> processus de release. Ce n'est ni une spécification ni une description de
+> l'état courant.
+
 > **Déploiement staging réel sur serveur Enistere** avec Docker Compose, images GHCR
 > immuables (`sha-5bf4c0f`), HTTPS via reverse proxy compatible Traefik + Let's Encrypt, DNS/CDN.
 > **Aucun secret dans ce document.** Exécuté le **2026-07-07 → 2026-07-10**.

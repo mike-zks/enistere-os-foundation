@@ -1,5 +1,12 @@
 # Analyse d'écart — Architecture des contrats
 
+> **CLOS — analyse historique, arrêtée au 2026-07-21.**
+> Les contrats produit neutres existent pour auth, rbac et files (ADR-068 à ADR-070).
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Cible : [Contract Architecture](../architecture/CONTRACT_ARCHITECTURE.md).
 
 ## Source canonique actuelle

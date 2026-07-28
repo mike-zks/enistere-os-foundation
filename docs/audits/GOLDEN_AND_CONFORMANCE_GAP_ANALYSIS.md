@@ -1,5 +1,12 @@
 # Analyse d'écart — Goldens et conformité
 
+> **CLOS — analyse historique, arrêtée au 2026-07-27.**
+> La chaîne de conformité est à trois étages et exécutée par la CI (ADR-068 à ADR-072).
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 > Rapport fondé sur l'ancien modèle de statuts. Depuis ADR-057, `TARGET` et `PLANNED` précèdent les niveaux
 > de preuve ; voir [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
 

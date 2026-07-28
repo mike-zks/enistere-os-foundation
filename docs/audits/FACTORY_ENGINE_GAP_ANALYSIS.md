@@ -1,5 +1,12 @@
 # Analyse d'écart — Moteur Factory
 
+> **CLOS — analyse historique, arrêtée au 2026-07-27.**
+> Le moteur a été refondu depuis (ADR-067, ADR-072).
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 Cible : [Architecture technique](../architecture/technical/ENISTERE_TECHNICAL_ARCHITECTURE.md),
 [Composition Model](../specifications/COMPOSITION_MODEL.md),
 [Lifecycle & Upgrade](../specifications/LIFECYCLE_AND_UPGRADE_SPECIFICATION.md).

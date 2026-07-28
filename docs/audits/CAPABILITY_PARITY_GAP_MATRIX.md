@@ -1,5 +1,12 @@
 # Matrice de parité des capabilities
 
+> **CLOS — analyse historique, arrêtée au 2026-07-25.**
+> La parité est désormais mesurée par famille de runtimes (ADR-070) et les trois capabilities sont CONFORMANT.
+> Ce document est conservé comme preuve de l'état observé à sa date : **il ne décrit
+> plus le dépôt**. L'état courant fait foi —
+> [`FOUNDATION_CURRENT_STATE`](../project-status/FOUNDATION_CURRENT_STATE.md),
+> [`TARGET_VS_CURRENT_IMPLEMENTATION`](TARGET_VS_CURRENT_IMPLEMENTATION.md).
+
 > Rapport de mesure antérieur à l'ADR-057. Le Platform Baseline et l'audit technique ne sont pas des
 > capabilities. Le constat courant est
 > [TARGET_VS_CURRENT_IMPLEMENTATION.md](TARGET_VS_CURRENT_IMPLEMENTATION.md).
