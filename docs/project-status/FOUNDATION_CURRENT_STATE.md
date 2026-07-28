@@ -32,6 +32,8 @@ Conformité produit Authentication :
 [`ADR-068`](../adr/ADR-068-authentication-capability-product-conformance.md).
 Conformité produit RBAC et évaluateur générique :
 [`ADR-069`](../adr/ADR-069-authorization-capability-product-conformance.md).
+Responsabilités par target et parité par famille :
+[`ADR-070`](../adr/ADR-070-capability-responsibilities-and-family-parity.md).
 
 ## Actifs existants à migrer
 
@@ -117,10 +119,16 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   vérifiées dans la Foundation comme dans l'application matérialisée.
 
 ```text
-auth   nestjs CONFORMANT 8 · spring CONFORMANT 8 · nextjs CONFORMANT 6 · react-native CONFORMANT 6
-rbac   nestjs CONFORMANT 6 · spring CONFORMANT 6 · nextjs CONFORMANT 3 · react-native NOT_APPLICABLE
+auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
+rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
+files  api  nestjs 7/7 · spring 2/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
        fastapi UNSUPPORTED · angular/flutter PLANNED
 ```
+
+- `Parité par famille` : **MESURÉE** (ADR-070) — les targets `ready` d'une même
+  famille doivent déclarer les mêmes responsabilités. Un seul écart dans le
+  dépôt : `files/spring` tient 2 des 7 responsabilités de `files/nestjs`,
+  manquent `delete`, `metadata`, `quarantine`, `quota`, `reconciliation`.
 
 - `Conformité produit RBAC` : **CONFORMANT** (ADR-069) — évaluateur générique,
   contrats produit découverts par convention, `not-applicable` traité comme

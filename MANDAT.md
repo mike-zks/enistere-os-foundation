@@ -491,6 +491,14 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-070 — Responsabilités par target et parité par famille** : une target
+  `ready` déclare le sous-ensemble de responsabilités qu'elle tient ; les
+  invariants peuvent y être attachés. Surtout, toutes les targets `ready` d'une
+  même famille doivent déclarer le **même** ensemble — §8.4 appliqué de façon
+  exécutable. La règle est portée par l'évaluateur et non par le validateur de
+  manifeste : une divergence rend le composant non conforme, jamais illisible.
+  Un seul écart mesuré : `files/spring` tient 2 des 7 responsabilités de
+  `files/nestjs`.
 * **ADR-069 — Conformité produit RBAC et évaluateur générique** : contrats
   produit découverts par convention, évaluateur unique paramétré par capability,
   `not-applicable` traité comme absence légitime de rôle. La mesure a corrigé un
@@ -894,10 +902,11 @@ hook OpenTelemetry versionné et tests comportementaux.
 Conformité produit calculée au 2026-07-28 :
 
 ```text
-auth   nestjs CONFORMANT 8 · spring CONFORMANT 8 · nextjs CONFORMANT 6 · react-native CONFORMANT 6
-rbac   nestjs CONFORMANT 6 · spring CONFORMANT 6 · nextjs CONFORMANT 3 · react-native NOT_APPLICABLE
+auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
+rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
+files  api  nestjs 7/7 · spring 2/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
        fastapi UNSUPPORTED · angular/flutter PLANNED
-2/2 capabilities CONFORMANT
+2/3 capabilities CONFORMANT
 ```
 
 Une suite locale verte ne prouve jamais la parité. Un contrat neutre commun a
@@ -906,7 +915,12 @@ un refus d'autorisation répondait `500` au lieu de `403`, invisible parce que
 les tests existants n'exerçaient jamais le refus via HTTP. Exiger une réponse
 **observable**, et non un comportement interne, est ce qui fait la différence.
 
-La prochaine mission unique consiste à rendre Files conforme au contrat
-Capability v2 sur ses targets `ready`, sans nouvelle target ni nouvelle
-capability. Tout pipeline parallèle et tout dossier `base/` restent hors
-périmètre.
+La parité s'apprécie **par famille de runtimes**, jamais par target isolée : une
+couverture déclarée n'est légitime que si les autres runtimes `ready` de la même
+famille déclarent la même. C'est ce qui distingue un périmètre assumé d'une
+divergence.
+
+La prochaine mission unique consiste à combler l'écart de parité API de `files`
+en portant `metadata`, `delete`, `quarantine`, `reconciliation` et `quota` sur
+Spring, sans nouvelle target ni nouvelle capability. Tout pipeline parallèle et
+tout dossier `base/` restent hors périmètre.

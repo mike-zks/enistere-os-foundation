@@ -111,13 +111,18 @@ classification ne revendique aucune amélioration d'implémentation.
 
 ## Risques prioritaires
 
-1. **P0 — conformité produit partielle :** Authentication et RBAC sont mesurées
-   par un évaluateur générique et des contrats neutres, et sont `CONFORMANT` sur
-   leurs targets `ready` (ADR-068, ADR-069). La mesure a révélé et corrigé quatre
-   divergences Spring sur Auth, puis un défaut plus grave sur RBAC — un refus
-   d’autorisation répondait `500` au lieu de `403`, invisible aux suites locales
-   qui n’exerçaient pas le refus via HTTP. `files` n’a pas encore de contrat
-   produit : l’équivalence de ses adapters reste non prouvée.
+1. **P0 — parité API rompue sur `files` :** les trois capabilities sont
+   désormais mesurées (ADR-068 → ADR-070). Authentication et RBAC sont
+   `CONFORMANT` ; `files` ne l’est pas. Spring tient 2 des 7 responsabilités que
+   NestJS tient, alors que les deux appartiennent à la **même famille API** et
+   sont censés être interchangeables : manquent `delete`, `metadata`,
+   `quarantine`, `quota`, `reconciliation`. C’est le seul écart de parité mesuré
+   du dépôt, et il est bloquant pour `files`.
+
+   La mesure a aussi corrigé, en amont, quatre divergences Spring sur Auth puis
+   un défaut plus grave sur RBAC — un refus d’autorisation répondait `500` au
+   lieu de `403`, invisible aux suites locales qui n’exerçaient pas le refus via
+   HTTP.
 2. **P0 — blueprint/CSM partiels :** sélection et résolution des providers de
    primitives et Blueprint V2 complet manquent.
 3. **P1 — distribution partielle :** async, clients, isolation des primitives et

@@ -2,87 +2,91 @@
 
 ## Mission achevée
 
-RBAC est conforme au contrat Capability v2 sur ses trois targets `ready`, et
-l'évaluateur de conformité produit est devenu générique
-([ADR-069](../adr/ADR-069-authorization-capability-product-conformance.md)).
+Le support partiel est déclarable et la parité par famille de runtimes est
+mesurée ([ADR-070](../adr/ADR-070-capability-responsibilities-and-family-parity.md)).
 
 Preuves :
 
-- contrat produit neutre `capabilities/rbac/contracts/authorization.product.v1.json` :
-  deux rôles, neuf invariants, aucune référence à un framework ;
-- évaluateur unique et paramétré : contrats **découverts par convention**
-  (`capabilities/<id>/contracts/*.product.v<major>.json`), sans liste centrale et
-  sans code moteur à modifier pour mesurer une capability de plus ;
-- `not-applicable` traité comme absence légitime de rôle : React Native n'a ni
-  rôle, ni invariant, ni preuve, et reste exclu du verdict — verrouillé par test ;
-- NestJS et Spring évalués contre les six mêmes invariants d'autorité ;
-  Next.js contre les trois invariants client applicables ;
-- audit métier RBAC déclaré et testé sur les deux autorités, via
-  l'infrastructure d'audit du baseline ;
-- un défaut latent révélé et corrigé : **un refus d'autorisation Spring
-  répondait `500 INTERNAL_ERROR` au lieu de `403`** ;
-- Auth reste `CONFORMANT`, mesurée par le même évaluateur ;
-- Angular, Flutter et FastAPI inchangés ;
-- aucune nouvelle target, aucune nouvelle capability, aucun dossier `base/`.
+- `responsibilities` obligatoire sur toute target `ready`, validé contre les
+  responsabilités déclarées par la capability ;
+- invariants attachables à une responsabilité ; les invariants transverses
+  (authentification, autorisation par ressource, absence de fuite) restent
+  imposés à toutes les targets d'un rôle ;
+- **parité par famille** : toutes les targets `ready` d'une famille doivent
+  déclarer le même ensemble de responsabilités ; familles issues du registre
+  canonique `APPLICATION_KINDS` ;
+- règle portée par l'évaluateur, pas par le validateur de manifeste — un
+  manifeste fidèle au réel reste chargeable (mandat §5) ;
+- contrat produit `files.product.v1.json` : deux rôles, seize invariants ;
+- `coverage`, `family` et `familyParity` publiés à côté du verdict ;
+- gate golden : une preuve disparue échoue, une rupture de parité connue est
+  affichée sans faire échouer le build.
 
-État calculé (`reports/authentication-v1.json`, `reports/authorization-v1.json`) :
+État calculé :
 
 ```text
-auth   nestjs CONFORMANT 8 · spring CONFORMANT 8 · nextjs CONFORMANT 6 · react-native CONFORMANT 6
-rbac   nestjs CONFORMANT 6 · spring CONFORMANT 6 · nextjs CONFORMANT 3 · react-native NOT_APPLICABLE
-       fastapi UNSUPPORTED · angular/flutter PLANNED
-2/2 capabilities CONFORMANT
+auth   api  nestjs 4/4 · spring 4/4     web nextjs 4/4   mobile rn 4/4    CONFORMANT
+rbac   api  nestjs 4/4 · spring 4/4     web nextjs 2/4                    CONFORMANT
+files  api  nestjs 7/7 · spring 2/7 ✗   web nextjs 5/7   mobile rn 1/7    NON_CONFORMANT
+2/3 capabilities CONFORMANT
 ```
 
-## Ce que la mesure a coûté et rapporté
+## Ce que la mesure a révélé
 
-Le défaut du `500` est le point important : il existait depuis l'introduction de
-RBAC sur Spring, et **aucune suite locale ne pouvait le voir** — elles
-invoquaient la méthode protégée directement, jamais via HTTP. Il a fallu un
-contrat neutre exigeant une réponse observable pour l'exposer.
+`files` est **non conforme**, et c'est le résultat attendu. Spring ne tient que
+`upload` et `download-url` là où NestJS tient les sept responsabilités — deux
+runtimes de la **même famille API**, donc deux implémentations censées être
+interchangeables.
+
+Toutes les preuves que Spring déclare passent. Le seul écart est la parité
+elle-même, et il est nommé : `delete`, `metadata`, `quarantine`, `quota`,
+`reconciliation`.
+
+Une première version de cette décision autorisait la couverture partielle sans
+contrainte de famille : elle aurait déclaré Spring conforme à 2/7. C'est le
+mandat §8.4 qui l'a corrigée.
 
 ## Limites honnêtes
 
-- `files` n'a pas de contrat produit neutre ;
-- la granularité d'audit diffère : NestJS distingue rôle et permission refusés,
-  Spring émet un événement unique ; l'invariant ne porte que sur la garantie
-  observable ;
-- le code d'erreur 403 de Spring change (`FORBIDDEN` → `AUTH_FORBIDDEN`), sans
-  compatibilité ascendante ni migration in-place ;
-- le lifecycle add/remove/upgrade/migrate n'est toujours pas livré ;
-- `distributed-platform` avec capabilities reste bloqué ;
+- l'écart Files/API n'est pas comblé, seulement mesuré et chiffré ;
+- Next.js (5/7) et React Native (1/7) ne sont pas contraints : Angular et
+  Flutter ne sont pas `ready`, ces targets sont seules dans leur famille ;
+- le statut `ready` de `files/spring` est conservé — il livre réellement upload
+  et téléchargement ; le déclasser retirerait une surface qui fonctionne ;
+- le lifecycle add/remove/upgrade/migrate n'est pas livré ;
 - aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` ;
 - `factory:test` n'est toujours invoqué par aucun workflow CI (dette héritée).
 
 ## Prochaine mission unique
 
-> **Rendre Files conforme au contrat Capability v2 sur ses targets actuellement
-> `ready`, avec un contrat produit neutre, sans ajouter de target ni de nouvelle
-> capability.**
+> **Combler l'écart de parité Files sur la famille API : porter `metadata`,
+> `delete`, `quarantine`, `reconciliation` et `quota` sur Spring, sans ajouter
+> de target ni de capability.**
 
 ### Justification de l'ordre
 
-`files` est la dernière capability livrée sans contrat produit, et la seule dont
-les quatre targets sont `ready` — y compris React Native, qui possède cette fois
-une vraie surface mobile (upload, téléchargement, cycle de vie de fichier). Elle
-dépend de `auth + rbac`, désormais tous deux prouvés : la preuve de Files
-reposera donc sur une base mesurée.
+C'est le seul écart de parité mesuré du dépôt, il est chiffré, et il bloque la
+conformité d'une capability déjà livrée sur quatre targets. Tant qu'il subsiste,
+`files` promet sur NestJS ce qu'elle ne tient pas sur Spring, alors que les deux
+sont censés être interchangeables.
 
-Files introduira ce que ni Auth ni RBAC n'ont posé : des invariants portant sur
-une **primitive d'infrastructure** (stockage d'objets) et sur des contenus
-binaires — validation de type, taille maximale, autorisation par ressource et
-non plus par route.
+L'ordre interne suit les dépendances réelles : `metadata` d'abord (le listing
+conditionne l'usage des autres), puis `delete`, puis `quarantine`, enfin
+`reconciliation` et `quota` qui exigent des verrous de maintenance et une
+tenue sous concurrence.
+
+Le périmètre est important — stockage objet, verrous, quotas concurrents. Il
+pourra être découpé en plusieurs missions, mais l'unité de mesure reste la
+parité API restaurée.
 
 ### Critères de sortie
 
-- cas d'usage, règles et erreurs Files versionnés dans une source neutre ;
-- rôles explicites (autorité de stockage vs client d'upload/téléchargement) ;
-- invariants couvrant validation de type/taille, autorisation par ressource et
-  absence de fuite d'URL ou de chemin interne ;
-- NestJS et Spring évalués contre les mêmes invariants d'autorité ;
-- Next.js et React Native contre les invariants client applicables ;
-- audit métier Files déclaré sans dupliquer l'infrastructure d'audit ;
-- statuts `CONFORMANT` uniquement là où les preuves passent ;
-- Angular, Flutter et FastAPI inchangés ;
+- Spring déclare les sept responsabilités et les tient réellement ;
+- `files` atteint `CONFORMANT`, parité API `OK` ;
+- mêmes contrats, mêmes codes d'erreur et mêmes garanties observables que
+  NestJS, sans exiger un code identique ;
+- audit métier Files émis sur les nouvelles opérations ;
+- quota tenu sous uploads concurrents, réconciliation sous verrou exclusif ;
+- goldens `spring-files` et `triple-files` verts avec les preuves matérialisées ;
 - aucun nouveau runtime, provider ou capability ;
 - aucun dossier `base/`.

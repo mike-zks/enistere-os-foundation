@@ -84,8 +84,11 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
   support/presets séparés, ownership/communications, ordre de
   déploiement/rollback et golden `distributed-spring-nestjs`. Les variantes
   distribuées hors scope et `service-ecosystem` restent bloquées.
-- **Prochaine mission :** acquise par ADR-067, ADR-068 (Authentication) et
-  ADR-069 (RBAC, évaluateur générique) ; poursuivre avec Files.
+- **Prochaine mission :** acquise par ADR-067, ADR-068 (Authentication),
+  ADR-069 (RBAC, évaluateur générique) et ADR-070 (responsabilités par target,
+  parité par famille). Les trois capabilities sont mesurées ; `files` est non
+  conforme. Poursuivre en comblant l'écart de parité API de `files` sur Spring
+  (`metadata`, `delete`, `quarantine`, `reconciliation`, `quota`).
 
 ## 8. Capability Framework
 
