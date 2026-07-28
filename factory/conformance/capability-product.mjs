@@ -151,21 +151,33 @@ const FAMILY_OF_RUNTIME = new Map(
  */
 function familyParityGaps(manifest) {
   const byFamily = new Map();
+
   for (const [runtime, target] of Object.entries(manifest.targets)) {
-    if (target.status !== 'ready') continue;
     const family = FAMILY_OF_RUNTIME.get(runtime);
     if (!family) continue;
     if (!byFamily.has(family)) byFamily.set(family, []);
-    byFamily.get(family).push([runtime, new Set(target.responsibilities ?? [])]);
+    byFamily.get(family).push([runtime, target]);
   }
 
   const gaps = new Map();
   for (const [family, members] of byFamily) {
     if (members.length < 2) continue;
-    const expected = new Set(members.flatMap(([, held]) => [...held]));
-    for (const [runtime, held] of members) {
+
+    // The bar is what the family's most complete member holds, whatever the
+    // others' status: a runtime does not escape parity by declaring it supports
+    // nothing. Only a structural absence does — and it has to say why.
+    const expected = new Set(
+      members.flatMap(([, target]) => target.responsibilities ?? []),
+    );
+    if (expected.size === 0) continue;
+
+    for (const [runtime, target] of members) {
+      if (target.status === 'not-applicable') continue;
+      const held = new Set(target.responsibilities ?? []);
       const missing = [...expected].filter((item) => !held.has(item)).sort();
-      if (missing.length > 0) gaps.set(runtime, { family, missing });
+      if (missing.length > 0) {
+        gaps.set(runtime, { family, missing, status: target.status });
+      }
     }
   }
   return gaps;
@@ -316,11 +328,16 @@ export async function evaluateCapabilityProduct({
         responsibilities: [],
         coverage: `0/${(manifest.responsibilities ?? []).length}`,
         family: FAMILY_OF_RUNTIME.get(target) ?? null,
-        familyParity: { status: 'OK' },
+        familyParity: parityGaps.has(target)
+          ? { status: 'BREACH', missing: parityGaps.get(target).missing }
+          : { status: 'OK' },
         invariants: [],
         proofCount: 0,
         materialized: false,
-        issues: [],
+        issues: parityGaps.has(target)
+          ? [`family parity: ${parityGaps.get(target).family} runtimes must hold the same`
+            + ` responsibilities; missing ${parityGaps.get(target).missing.join(', ')}`]
+          : [],
       };
       continue;
     }
@@ -414,7 +431,15 @@ export async function evaluateCapabilityProduct({
   const readyTargets = Object.entries(targets)
     .filter(([, result]) => result.manifestStatus === 'ready')
     .map(([target]) => target);
-  const conformant = readyTargets.every((target) => targets[target].status === 'CONFORMANT');
+
+  // A capability is conformant when its ready targets prove their invariants AND
+  // no runtime of a served family is left behind (ADR-074). Judging ready targets
+  // alone let a family member escape parity by declaring it supports nothing.
+  const parityBreaches = Object.entries(targets)
+    .filter(([, result]) => result.familyParity?.status === 'BREACH')
+    .map(([target]) => target);
+  const conformant = readyTargets.every((target) => targets[target].status === 'CONFORMANT')
+    && parityBreaches.length === 0;
 
   return {
     schemaVersion: '1',
