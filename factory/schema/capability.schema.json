@@ -67,6 +67,9 @@
       "type": "object",
       "additionalProperties": {
         "$ref": "#/$defs/configOption"
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]{1,63}$"
       }
     },
     "targets": {

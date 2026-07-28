@@ -36,6 +36,8 @@ Responsabilités par target et parité par famille :
 [`ADR-070`](../adr/ADR-070-capability-responsibilities-and-family-parity.md).
 Gates hermétiques :
 [`ADR-071`](../adr/ADR-071-hermetic-quality-gates.md).
+Schéma de capability normatif :
+[`ADR-072`](../adr/ADR-072-normative-capability-schema.md).
 
 ## Actifs existants à migrer
 
