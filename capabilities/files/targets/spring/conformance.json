@@ -30,6 +30,16 @@
           "downloadUrl_asOtherUser_returns404_antiEnumeration",
           "downloadUrl_nonExistentFile_returns404"
         ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesMetadataIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesMetadataIntegrationTest.java",
+        "contains": [
+          "metadata_ofAnotherUserFile_returns404_antiEnumeration",
+          "metadata_ofDeletedFile_returns404",
+          "list_withoutReadPermission_returns403"
+        ]
       }
     ],
     "FILES-AUTHORITY-002": [
@@ -48,6 +58,15 @@
         "materialized": "src/test/java/com/enistere/core/modules/files/FilesDownloadUrlIntegrationTest.java",
         "contains": [
           "downloadUrl_responseDoesNotLeakInternalFields"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesMetadataIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesMetadataIntegrationTest.java",
+        "contains": [
+          "list_doesNotLeakInternalFields",
+          "metadata_ofOwnedFile_returnsPublicFieldsOnly"
         ]
       }
     ],
@@ -102,6 +121,54 @@
         "contains": [
           "downloadUrl_fromRealMinio_isPresignedUrlNotFake",
           "downloadUrl_fromRealMinio_hasNoCacheHeader"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesMetadataIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesMetadataIntegrationTest.java",
+        "contains": [
+          "list_returnsOnlyOwnedFiles_ownershipIsolation",
+          "list_excludesDeletedFiles",
+          "list_isOrderedNewestFirst_andPaginates",
+          "list_invalidPagination_returns400"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-007": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesDeleteIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesDeleteIntegrationTest.java",
+        "contains": [
+          "delete_removesTheFileAndInvalidatesItsDownloadUrl",
+          "delete_isIdempotent",
+          "delete_withoutDeletePermission_returns403"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-011": [
+      {
+        "kind": "test",
+        "source": "files/src/test/java/com/enistere/core/modules/files/FilesDeleteIntegrationTest.java",
+        "materialized": "src/test/java/com/enistere/core/modules/files/FilesDeleteIntegrationTest.java",
+        "contains": [
+          "delete_recordsBusinessAuditEvents",
+          "FILE_DELETION_REQUESTED",
+          "FILE_OBJECT_DELETED",
+          "FILE_DELETED"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/src/main/java/com/enistere/core/modules/files/FilesAuditEvents.java",
+        "materialized": "src/main/java/com/enistere/core/modules/files/FilesAuditEvents.java",
+        "contains": [
+          "FILE_UPLOADED",
+          "FILE_DOWNLOAD_URL_ISSUED",
+          "FILE_METADATA_ACCESSED"
         ]
       }
     ]

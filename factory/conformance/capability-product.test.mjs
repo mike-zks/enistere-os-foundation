@@ -55,7 +55,7 @@ describe('capability product conformance', () => {
     assert.equal(spring.family, 'api');
     assert.deepEqual(
       spring.familyParity.missing,
-      ['delete', 'metadata', 'quarantine', 'quota', 'reconciliation'],
+      ['quarantine', 'quota', 'reconciliation'],
     );
     assert.deepEqual(
       spring.issues.filter((issue) => !issue.startsWith('family parity:')),
@@ -100,9 +100,13 @@ describe('capability product conformance', () => {
     // Same role, very different surfaces: the contract must not ask Spring to
     // prove quarantine or quota it never claimed, nor let it pass as full support.
     assert.equal(report.targets.nestjs.coverage, '7/7');
-    assert.equal(report.targets.spring.coverage, '2/7');
+    assert.equal(report.targets.spring.coverage, '4/7');
     assert.ok(report.targets.nestjs.invariants.length > report.targets.spring.invariants.length);
     assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-003'));
+    // Ported in this mission: metadata and delete are now measured on Spring too.
+    assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-006'));
+    assert.ok(report.targets.spring.invariants.includes('FILES-AUTHORITY-007'));
+    // Still absent, so still not demanded of it.
     assert.ok(!report.targets.spring.invariants.includes('FILES-AUTHORITY-008'));
     // Cross-cutting invariants carry no responsibility, so every target proves them.
     for (const target of ['nestjs', 'spring']) {
