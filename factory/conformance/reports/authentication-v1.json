@@ -3,7 +3,7 @@
   "capability": "auth",
   "contract": {
     "id": "authentication-product",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "evaluation": "foundation-registry",
   "status": "NON_CONFORMANT",

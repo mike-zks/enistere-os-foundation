@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1",
   "id": "authentication-product",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "capability": "auth",
   "roles": [
     "authority",
@@ -78,7 +78,7 @@
       "appliesTo": [
         "client"
       ],
-      "requirement": "The access token uses transient protected storage and the refresh token uses platform-appropriate protected storage."
+      "requirement": "The access token lives only in transient memory, and the refresh token in the most protected store the platform actually offers, reached through a replaceable seam rather than a hard-coded API."
     },
     {
       "id": "AUTH-CLIENT-003",
@@ -106,7 +106,7 @@
       "appliesTo": [
         "web-client"
       ],
-      "requirement": "State-changing BFF authentication operations enforce same-origin and CSRF validation and rotate or clear CSRF state with the session."
+      "requirement": "A state-changing authentication operation cannot be triggered by a third-party origin, and any ambient credential the runtime relies on is unreadable by page scripts. A runtime with a server surface satisfies this with same-origin and CSRF validation over HttpOnly cookies; a runtime without one satisfies it by holding no ambient credential at all."
     },
     {
       "id": "AUTH-MOBILE-001",
