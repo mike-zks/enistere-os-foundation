@@ -1,0 +1,46 @@
+# Secret scanning (ADR-073).
+#
+# Le gate échoue sur toute détection non listée ici. Aucune règle n'est
+# désactivée globalement : les règles par défaut de gitleaks sont conservées et
+# seules des exceptions nommées, justifiées et vérifiées sont ajoutées.
+#
+# Chaque exception porte une `description` au format contrôlé par
+# `factory/quality/scripts/secret-allowlist-check.mjs` :
+#
+#   <justification> | permanent: <raison>
+#   <justification> | expires: AAAA-MM-JJ
+#
+# `permanent` est réservé aux cas structurellement irréductibles — un test de
+# censure DOIT contenir une chaîne ressemblant à un secret, sinon il ne teste
+# rien. Toute autre exception est temporaire et son échéance est appliquée :
+# un secret réel en attente de rotation se traite par la rotation, pas par une
+# exception qui dort.
+
+title = "Enistere OS Foundation — secret scanning"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Fixtures des tests de censure : la valeur ressemblante EST le sujet du test — sans elle, la censure n'est pas vérifiée | permanent: le test perdrait tout pouvoir de détection"
+paths = [
+  '''factory/ai/runtime/test/redaction\.test\.mjs''',
+  '''factory/ai/runtime/test/provider\.test\.mjs''',
+  '''factory/ai/runtime/test/report-schema\.test\.mjs''',
+  '''starters/react-native/test/logger-redaction\.test\.ts''',
+  # Chemins historiques : l'analyse couvre tout l'historique Git, où ces mêmes
+  # fixtures vivaient avant la réorganisation du dépôt.
+  '''cores/ai-core/test/(redaction|provider|report-schema)\.test\.mjs''',
+  '''cores/mobile-react-native/test/logger-redaction\.test\.ts''',
+]
+
+[[allowlists]]
+description = "Artefacts de build non versionnés (.next, dist, node_modules) : hors du périmètre du dépôt, régénérés à chaque construction | permanent: jamais committés, donc jamais exposés par le dépôt"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
+  '''(^|/)dist/''',
+  '''(^|/)build/''',
+  '''(^|/)target/''',
+  '''(^|/)\.venv/''',
+]
