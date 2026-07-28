@@ -491,6 +491,12 @@ TARGET ou PLANNED selon les preuves.
   symétriques expliqués, résolution adapters/contrats/primitives/migrations/
   conformité par application. Auth/RBAC/Files sont migrées sans nouvelle
   capability ; aucun dossier `base/`.
+* **ADR-069 — Conformité produit RBAC et évaluateur générique** : contrats
+  produit découverts par convention, évaluateur unique paramétré par capability,
+  `not-applicable` traité comme absence légitime de rôle. La mesure a corrigé un
+  défaut latent : un refus d'autorisation Spring répondait `500` au lieu de
+  `403`, `@PreAuthorize` levant son exception là où le handler générique la
+  classait en erreur interne.
 * **ADR-068 — Conformité produit Authentication** : contrat produit neutre
   versionné, invariants attachés à des rôles (autorité / client / web / mobile),
   preuves vérifiées dans la Foundation et dans l'application matérialisée. La
@@ -518,16 +524,16 @@ calculé est dans `factory/conformance/reports/platform-baseline-v2-gap.json`.
 
 # 11. Prochaine étape
 
-> Rendre **RBAC** conforme au contrat Capability v2 sur ses targets actuellement
+> Rendre **Files** conforme au contrat Capability v2 sur ses targets actuellement
 > `ready`, avec un contrat produit neutre, sans ajouter de target ni de nouvelle
 > capability.
 
-Authentication est désormais `CONFORMANT` sur ses quatre targets `ready`
-(ADR-068), et le mécanisme de conformité produit est éprouvé. RBAC vient
-ensuite parce que `files` en dépend (`auth → rbac → files`) : mesurer Files
-avant RBAC bâtirait une preuve sur une base non prouvée. RBAC introduira le cas
-`not-applicable`, qui doit rester une absence légitime de rôle et jamais une
-conformité implicite.
+Authentication et RBAC sont `CONFORMANT` (ADR-068, ADR-069) et l'évaluateur est
+générique : mesurer une capability de plus ne demande plus de code moteur.
+`files` est la dernière capability livrée sans contrat produit, et la seule dont
+les quatre targets sont `ready`. Elle introduira des invariants portant sur une
+primitive d'infrastructure et sur des contenus binaires — validation de
+type/taille, autorisation par ressource et non par route.
 
 Commence toujours par une **analyse directe du dépôt** : ne suppose jamais qu’une base ou un contrat est complet — vérifie-le face au code réel, aux fitness functions et aux goldens.
 
@@ -866,6 +872,8 @@ primitives/migrations/conformité résolus par application.
 ADR-068 a rendu la conformité **produit** d'une capability mesurable : contrat
 neutre versionné, invariants par rôle, preuves vérifiées jusque dans
 l'application matérialisée et branchées sur les goldens.
+ADR-069 a généralisé cet évaluateur à toute capability déclarant un contrat
+produit, et rendu `not-applicable` explicitement distinct d'une conformité.
 
 État calculé au 2026-07-27 :
 
@@ -883,23 +891,22 @@ La présence d’un logger ne suffit jamais à prouver Observability. Pour les A
 la preuve exige désormais métriques, propagation W3C, instrumentation de requête,
 hook OpenTelemetry versionné et tests comportementaux.
 
-Conformité produit calculée au 2026-07-27
-(`factory/conformance/reports/authentication-v1.json`) :
+Conformité produit calculée au 2026-07-28 :
 
 ```text
-Authentication 1.0.0   CONFORMANT
-nestjs        CONFORMANT   8 invariants (authority)
-spring        CONFORMANT   8 invariants (authority)
-nextjs        CONFORMANT   6 invariants (client + web-client)
-react-native  CONFORMANT   6 invariants (client + mobile-client)
-fastapi       UNSUPPORTED  angular/flutter PLANNED
+auth   nestjs CONFORMANT 8 · spring CONFORMANT 8 · nextjs CONFORMANT 6 · react-native CONFORMANT 6
+rbac   nestjs CONFORMANT 6 · spring CONFORMANT 6 · nextjs CONFORMANT 3 · react-native NOT_APPLICABLE
+       fastapi UNSUPPORTED · angular/flutter PLANNED
+2/2 capabilities CONFORMANT
 ```
 
-Une suite locale verte ne prouve jamais la parité : appliquer un contrat neutre
-commun a suffi à révéler quatre divergences Spring que ses propres tests
-validaient.
+Une suite locale verte ne prouve jamais la parité. Un contrat neutre commun a
+révélé quatre divergences Spring sur Auth, puis un défaut plus grave sur RBAC :
+un refus d'autorisation répondait `500` au lieu de `403`, invisible parce que
+les tests existants n'exerçaient jamais le refus via HTTP. Exiger une réponse
+**observable**, et non un comportement interne, est ce qui fait la différence.
 
-La prochaine mission unique consiste à rendre RBAC conforme au contrat
+La prochaine mission unique consiste à rendre Files conforme au contrat
 Capability v2 sur ses targets `ready`, sans nouvelle target ni nouvelle
 capability. Tout pipeline parallèle et tout dossier `base/` restent hors
 périmètre.

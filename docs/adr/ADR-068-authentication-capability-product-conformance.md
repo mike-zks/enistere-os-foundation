@@ -158,8 +158,12 @@ l’autorité NestJS dans les goldens et ne sont pas affectés.
 
 ## Tests
 
+> Commande renommée depuis
+> [ADR-069](ADR-069-authorization-capability-product-conformance.md) :
+> `factory:auth-conformance` → `factory:capability-conformance`.
+
 ```bash
-npm run factory:auth-conformance   # 4 targets ready CONFORMANT
+npm run factory:capability-conformance auth   # 4 targets ready CONFORMANT
 npm run factory:test               # 444 tests, dont capability-product
 npm run factory:baseline-gap       # 7 runtimes inchangés
 ```

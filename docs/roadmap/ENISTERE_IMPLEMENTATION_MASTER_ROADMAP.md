@@ -84,8 +84,8 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
   support/presets séparés, ownership/communications, ordre de
   déploiement/rollback et golden `distributed-spring-nestjs`. Les variantes
   distribuées hors scope et `service-ecosystem` restent bloquées.
-- **Prochaine mission :** acquise par ADR-067, puis par ADR-068 (conformité
-  produit Authentication) ; poursuivre avec RBAC.
+- **Prochaine mission :** acquise par ADR-067, ADR-068 (Authentication) et
+  ADR-069 (RBAC, évaluateur générique) ; poursuivre avec Files.
 
 ## 8. Capability Framework
 

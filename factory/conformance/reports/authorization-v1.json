@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "contract": {
+    "id": "authorization-product",
+    "version": "1.0.0"
+  },
+  "evaluation": "foundation-registry",
+  "status": "CONFORMANT",
+  "readyTargets": [
+    "nestjs",
+    "nextjs",
+    "spring"
+  ],
+  "targets": {
+    "nestjs": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "suite": "rbac-nestjs-contract",
+      "golden": "nestjs-auth-rbac",
+      "invariants": [
+        "RBAC-AUTHORITY-001",
+        "RBAC-AUTHORITY-002",
+        "RBAC-AUTHORITY-003",
+        "RBAC-AUTHORITY-004",
+        "RBAC-AUTHORITY-005",
+        "RBAC-AUTHORITY-006"
+      ],
+      "proofCount": 7,
+      "materialized": false,
+      "issues": []
+    },
+    "spring": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "suite": "rbac-spring-integration",
+      "golden": "spring-auth-rbac",
+      "invariants": [
+        "RBAC-AUTHORITY-001",
+        "RBAC-AUTHORITY-002",
+        "RBAC-AUTHORITY-003",
+        "RBAC-AUTHORITY-004",
+        "RBAC-AUTHORITY-005",
+        "RBAC-AUTHORITY-006"
+      ],
+      "proofCount": 8,
+      "materialized": false,
+      "issues": []
+    },
+    "fastapi": {
+      "status": "UNSUPPORTED",
+      "manifestStatus": "unsupported",
+      "roles": [],
+      "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
+      "issues": []
+    },
+    "nextjs": {
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client"
+      ],
+      "suite": "rbac-nextjs-e2e",
+      "golden": "nest-next-auth-rbac",
+      "invariants": [
+        "RBAC-CLIENT-001",
+        "RBAC-CLIENT-002",
+        "RBAC-CLIENT-003"
+      ],
+      "proofCount": 6,
+      "materialized": false,
+      "issues": []
+    },
+    "angular": {
+      "status": "PLANNED",
+      "manifestStatus": "planned",
+      "roles": [],
+      "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
+      "issues": []
+    },
+    "react-native": {
+      "status": "NOT_APPLICABLE",
+      "manifestStatus": "not-applicable",
+      "roles": [],
+      "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
+      "issues": []
+    },
+    "flutter": {
+      "status": "PLANNED",
+      "manifestStatus": "planned",
+      "roles": [],
+      "invariants": [],
+      "proofCount": 0,
+      "materialized": false,
+      "issues": []
+    }
+  }
+}
