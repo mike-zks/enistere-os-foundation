@@ -28,6 +28,16 @@ public class FakeStorageService implements StorageService {
         return "https://fake-storage.test/presigned/" + storageKey + "?expires=" + ttlSeconds;
     }
 
+    @Override
+    public boolean objectExists(String storageKey) {
+        return uploaded.containsKey(storageKey);
+    }
+
+    /** Lets a test simulate an object that vanished from the bucket. */
+    public void forget(String storageKey) {
+        uploaded.remove(storageKey);
+    }
+
     public boolean wasUploaded(String storageKey) {
         return uploaded.containsKey(storageKey);
     }
