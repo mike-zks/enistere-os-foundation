@@ -2,6 +2,7 @@ package com.enistere.core.common.exception;
 
 import com.enistere.core.common.web.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -39,6 +40,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
+            .toList();
+        return respond(HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR", "Validation failed", errors, request);
+    }
+
+    /**
+     * Validation of request parameters and path variables (a {@code @Validated}
+     * controller) raises {@link ConstraintViolationException}, not
+     * {@link MethodArgumentNotValidException}, which only covers request bodies.
+     * Without this handler the catch-all below would answer 500 to a caller who
+     * merely sent an out-of-range page size.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        List<String> errors = ex.getConstraintViolations().stream()
+            .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+            .sorted()
             .toList();
         return respond(HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR", "Validation failed", errors, request);
     }
