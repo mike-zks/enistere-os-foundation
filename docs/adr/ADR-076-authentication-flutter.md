@@ -107,6 +107,22 @@ aspirationnel » corrigé pour Auth en début de chantier, réintroduit par le
 portage Angular. Les deux compositions `nestjs-angular-auth` et
 `nestjs-flutter-auth` sont créées et ajoutées à la matrice CI.
 
+Le golden ainsi créé a immédiatement rempli son office : **l'application Angular
+composée ne compilait pas**. `AUTH_PROVIDERS` était déclaré
+`readonly (Provider | EnvironmentProviders)[]`, alors que le fichier de
+composition liste chaque symbole comme **un** élément de ce même type ; un
+tableau `readonly` n'y est pas assignable. Le portage Angular avait donc été
+fusionné avec une composition qui ne construit pas.
+
+Les 127 tests Karma passaient : seul `ng build` compile `app.config.ts`. Une
+suite unitaire verte ne prouvait rien sur la composition — c'est précisément ce
+qu'un golden est là pour attraper, et pourquoi un descripteur qui ne pointe vers
+aucun golden est pire qu'un descripteur absent.
+
+Le correctif est celui qu'Angular prescrit : `makeEnvironmentProviders` regroupe
+un nombre quelconque de providers derrière **une** valeur, ce que retournent
+aussi les fonctions `provideX()`. Un test verrouille la contrainte.
+
 ## Conséquences
 
 ### Acquis

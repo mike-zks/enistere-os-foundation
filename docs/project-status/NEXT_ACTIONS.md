@@ -251,6 +251,12 @@ restant est FastAPI, et il concerne les trois capabilities.
   `nestjs-angular-auth`, **absent de `COMPOSITIONS`** : la preuve matérialisée
   d'Angular ne s'exécutait nulle part. Les compositions `nestjs-angular-auth` et
   `nestjs-flutter-auth` sont créées et ajoutées à la matrice CI.
+- Ce golden, dès sa première exécution, a montré que **l'application Angular
+  composée ne compilait pas** : `AUTH_PROVIDERS` était un tableau `readonly`, non
+  assignable là où le fichier de composition attend *un* provider. Les 127 tests
+  Karma passaient — seul `ng build` compile `app.config.ts`. Le portage Angular
+  avait donc été fusionné avec une composition qui ne construit pas. Corrigé par
+  `makeEnvironmentProviders`, et verrouillé par un test.
 
 ### Preuves
 

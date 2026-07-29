@@ -85,6 +85,20 @@ describe('Angular composition seams', () => {
     );
   });
 
+  it('requires a contributed provider to be one value, not an array', async () => {
+    // The composition file lists each symbol as ONE element of
+    // `readonly (Provider | EnvironmentProviders)[]`. A capability exporting an
+    // array does not type-check there — and Karma never noticed, because only
+    // `ng build` compiles app.config.ts. `makeEnvironmentProviders` is Angular's
+    // supported way to bundle any number of providers behind a single value.
+    const source = await readFile(
+      resolve(root, 'capabilities/auth/targets/angular/files/src/app/core/auth/auth.providers.ts'),
+      'utf8',
+    );
+    assert.match(source, /AUTH_PROVIDERS: EnvironmentProviders = makeEnvironmentProviders\(/);
+    assert.doesNotMatch(source, /AUTH_PROVIDERS:\s*readonly/);
+  });
+
   it('orders contributed routes deterministically and refuses a collision', () => {
     const render = getTargetAdapter('angular').composition
       .find((entry) => entry.kinds.includes('angular.route')).render;
