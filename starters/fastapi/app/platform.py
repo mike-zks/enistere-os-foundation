@@ -3,13 +3,15 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Protocol, TypeVar
 
 from fastapi import FastAPI
+
+from .composition.capability_lifespan import CAPABILITY_LIFESPANS
 
 API_EXTENSION_CONTRACT_VERSION = "api-extension/2.0.0"
 TELEMETRY_CONTRACT_VERSION = "opentelemetry-hook/2.0.0"
@@ -167,11 +169,22 @@ technical_audit = TechnicalAudit()
 
 
 @asynccontextmanager
-async def runtime_lifespan(_: FastAPI) -> AsyncIterator[None]:
+async def runtime_lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Baseline lifespan, wrapping the composed capability lifespans.
+
+    Capability hooks are entered AFTER the runtime is started and exited BEFORE
+    it stops, in reverse order: a capability may rely on the runtime, never the
+    other way round. `AsyncExitStack` guarantees that every hook already entered
+    is exited even when a later one fails to start — a half-open pool must not
+    survive a failed boot.
+    """
     await lifecycle.start()
     technical_audit.record("runtime.started", actor=None, request_id="lifecycle")
     try:
-        yield
+        async with AsyncExitStack() as stack:
+            for hook in CAPABILITY_LIFESPANS:
+                await stack.enter_async_context(hook(app))
+            yield
     finally:
         technical_audit.record("runtime.stopping", actor=None, request_id="lifecycle")
         await lifecycle.stop()

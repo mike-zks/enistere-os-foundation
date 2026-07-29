@@ -15,6 +15,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from .composition.capability_routers import CAPABILITY_ROUTERS
 from .config import settings
 from .platform import RequestMeasurement, diagnostics, runtime_lifespan, technical_audit, telemetry
 
@@ -26,6 +27,11 @@ logger = logging.getLogger("enistere.runtime")
 request_windows: dict[str, deque[float]] = defaultdict(deque)
 
 app = FastAPI(title="Enistere FastAPI Core", version="0.1.0", lifespan=runtime_lifespan)
+# Routes contributed by the composed capabilities. Registered before the baseline
+# middleware is added so every capability route goes through it too: correlation,
+# canonical errors and security headers are not opt-in.
+for capability_router in CAPABILITY_ROUTERS:
+    app.include_router(capability_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(config.cors_allowed_origins),

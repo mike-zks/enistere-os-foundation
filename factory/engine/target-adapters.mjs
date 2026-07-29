@@ -24,6 +24,8 @@ import {
   renderFlutterCapabilityOverrides,
   renderFlutterCapabilityRoutes,
   renderFlutterCapabilityInterceptors,
+  renderFastapiCapabilityRouters,
+  renderFastapiCapabilityLifespans,
   renderExpoHomeActions,
 } from './overlay-renderers.mjs';
 import { renderNestjsDomain } from './domain-renderers/nestjs.mjs';
@@ -90,7 +92,16 @@ const BUILT_IN = [
   }, composition: [
     { kinds: ['spring.module'], destination: 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java', render: renderSpringComposition },
   ] },
-  { id: 'fastapi', version: '1.0.0', dependencyManager: 'python', integrationKinds: {}, composition: [] },
+  {
+    id: 'fastapi', version: '1.0.0', dependencyManager: 'python', integrationKinds: {
+      'fastapi.router': { importPath: STRING, symbol: STRING, order: INTEGER },
+      'fastapi.lifespan': { importPath: STRING, symbol: STRING, order: INTEGER },
+    },
+    composition: [
+      { kinds: ['fastapi.router'], destination: 'app/composition/capability_routers.py', render: renderFastapiCapabilityRouters },
+      { kinds: ['fastapi.lifespan'], destination: 'app/composition/capability_lifespan.py', render: renderFastapiCapabilityLifespans },
+    ],
+  },
   {
     id: 'angular', version: '1.0.0', integrationKinds: {
       'angular.provider': { importPath: STRING, symbol: STRING },
