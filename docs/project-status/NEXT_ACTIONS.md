@@ -180,30 +180,62 @@ cookies : un SPA statique à jeton porteur en mémoire n'y est pas exposé.
 L'invariant énonce désormais la garantie observable, que chaque runtime tient par
 son moyen. Contrat en 1.1.0, quatre descripteurs alignés.
 
+## Mission achevée
+
+`auth/angular` est **`ready`** : quatre responsabilités, six invariants, neuf
+preuves ([ADR-075](../adr/ADR-075-browser-credential-storage.md)). **L'écart de
+parité Web est refermé** — Angular tient exactement ce que Next.js tient.
+
+Le compromis de stockage est tranché et écrit : la créance vit derrière une
+couture de la même forme que `SecureStorage` de React Native, et le défaut est la
+**mémoire du processus** — seule option navigateur qui ne promet rien qu'elle ne
+tienne. `localStorage` est proscrit, et un test le vérifie. Le prix est assumé :
+un rechargement complet déconnecte.
+
+Trois défauts trouvés par les tests en cours de route :
+
+- `signOut` s'appuyait sur `AuthApi` pour avaler les erreurs — si le transport
+  change, la purge locale n'avait jamais lieu. La garantie vit désormais dans le
+  service, là où l'invariant la place ;
+- un test **du starter** affirmait « aucune route Auth », vrai pour la baseline
+  et faux dès qu'une capability compose : il mesure maintenant ce que la baseline
+  possède, et vérifie en plus que les routes apportées précèdent le joker ;
+- `spring-angular-auth` a été promu `ready` puis corrigé en **`supported`** : la
+  composition est générable, mais aucun golden ne l'exerce et `ready` exige une
+  preuve runtime.
+
+127/127 tests sur l'application Angular composée réellement générée.
+
 ## Prochaine mission unique
 
-> **Porter Authentication sur Angular**, désormais possible.
+> **Porter Authentication sur Flutter**, dernier écart de parité d'Authentication.
 
 ### Justification de l'ordre
 
-Le prérequis est levé et le contrat est portable. Le modèle à suivre est **React
-Native, pas Next.js** : c'est déjà un client sans BFF — jeton d'accès en mémoire,
-refresh en stockage protégé derrière une couture remplaçable, refresh coalescé,
-purge de session à l'échec.
+Authentication est désormais tenue par cinq runtimes sur sept. Deux écarts
+restent sur cette capability : Flutter (famille mobile) et FastAPI (famille API).
 
-Une décision reste à prendre et devra être argumentée dans l'ADR : le navigateur
-n'offre à un SPA statique **aucun** stockage protégé au sens de React Native. Le
-choix se joue entre un refresh gardé en mémoire — la session ne survit pas à un
-rechargement — et `sessionStorage`, lisible par XSS mais effacé à la fermeture de
-l'onglet. Ce compromis doit être documenté, pas masqué.
+Flutter d'abord, pour la même raison qui a fait passer Angular avant : **React
+Native est la référence directe dans sa famille**, et le modèle client sans BFF
+vient d'être éprouvé deux fois — sur React Native puis sur Angular. FastAPI
+demande en plus la persistance, la cryptographie et l'émission de jetons, soit
+une autorité complète.
+
+Le risque est connu et mesuré, il ne doit pas être découvert en route : **Flutter
+tient ses 25 invariants de baseline avec 2 fichiers de test là où React Native en
+a 95**. La parité exigera de ce starter un niveau de preuve qu'il n'a jamais
+pratiqué, et l'adapter Flutter n'a — comme Angular avant cette semaine — **aucune
+couture de composition** : `integrationKinds: {}`, `composition: []`. Ce prérequis
+est à traiter en premier, exactement comme pour Angular.
 
 ### Critères de sortie
 
-- `auth/angular` passe `planned` → `ready` avec les quatre responsabilités ;
-- parité Web `OK` : Angular tient ce que Next.js tient ;
-- les six invariants client applicables sont prouvés, en Foundation **et** en
-  application matérialisée ;
-- l'écart `auth/angular` est retiré de `parity-gaps.json` — comblé, pas reconduit ;
-- le compromis de stockage du refresh est explicité dans un ADR ;
-- golden Angular vert ;
+- coutures de composition Flutter, sur le modèle de celles d'Angular ;
+- `auth/flutter` passe `planned` → `ready` avec les quatre responsabilités ;
+- parité Mobile `OK` : Flutter tient ce que React Native tient ;
+- créance derrière une couture, avec une implémentation réellement protégée
+  (Keychain/Keystore via `flutter_secure_storage`) — la contrainte navigateur
+  d'ADR-075 ne s'applique pas ici ;
+- l'écart `auth/flutter` est retiré de `parity-gaps.json` ;
+- golden Flutter vert ;
 - aucun nouveau runtime, provider ou capability ; aucun dossier `base/`.

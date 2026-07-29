@@ -42,6 +42,8 @@ Analyse de secrets bloquante :
 [`ADR-073`](../adr/ADR-073-secret-scanning.md).
 Parité de famille sur tous les runtimes :
 [`ADR-074`](../adr/ADR-074-family-parity-covers-every-runtime.md).
+Créance navigateur et Auth sur Angular :
+[`ADR-075`](../adr/ADR-075-browser-credential-storage.md).
 
 ## Actifs existants à migrer
 
@@ -127,7 +129,7 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   vérifiées dans la Foundation comme dans l'application matérialisée.
 
 ```text
-auth   api  nestjs 4/4 · spring 4/4 · fastapi 0/4 ✗   web nextjs 4/4 · angular 0/4 ✗
+auth   api  nestjs 4/4 · spring 4/4 · fastapi 0/4 ✗   web nextjs 4/4 · angular 4/4 ✓
        mobile rn 4/4 · flutter 0/4 ✗                     NON_CONFORMANT
 rbac   api  nestjs 4/4 · spring 4/4 · fastapi 0/4 ✗   web nextjs 2/4 · angular 0/4 ✗
        mobile rn n/a · flutter n/a                       NON_CONFORMANT

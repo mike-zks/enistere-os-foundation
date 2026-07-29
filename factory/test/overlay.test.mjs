@@ -250,14 +250,27 @@ describe('capability closure and refusals', () => {
     blueprint.capabilities = ['base', 'auth', 'rbac'];
     await generateProject(blueprint, join(root, 'project'), { materialize: false });
   });
-  it('refuses auth on Angular while that target is planned', async () => {
+  it('refuses a capability on a target that is still planned', async () => {
+    // Angular used to be the example here; it is ready since ADR-075, so the
+    // refusal is exercised on Flutter — the behaviour under test is the refusal,
+    // not the runtime that happens to be unfinished.
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
     const blueprint = createDefaultBlueprint('blocked-app');
-    blueprint.stack = { api: 'nestjs', web: 'angular', mobile: null };
+    blueprint.stack = { api: 'nestjs', web: null, mobile: 'flutter' };
     blueprint.capabilities = ['base', 'auth'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on angular is planned/,
+      /auth on flutter is planned/,
     );
+  });
+
+  it('composes auth on Angular now that the target is ready', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-angular-auth-'));
+    const blueprint = createDefaultBlueprint('angular-auth-app');
+    blueprint.stack = { api: 'nestjs', web: 'angular', mobile: null };
+    blueprint.capabilities = ['auth'];
+    const plan = await generateProject(blueprint, join(root, 'project'), { materialize: false });
+    const web = plan.applications.find((app) => app.runtime === 'angular');
+    assert.ok(web, 'the Angular application must be planned');
   });
 });

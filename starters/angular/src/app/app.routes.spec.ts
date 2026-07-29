@@ -1,3 +1,4 @@
+import { CAPABILITY_ROUTES } from './core/composition/capability-routes';
 import { APP_ROUTES, routes } from './app.routes';
 
 describe('App routes configuration', () => {
@@ -12,8 +13,20 @@ describe('App routes configuration', () => {
     expect(wildcardRoute?.redirectTo).toBe(APP_ROUTES.HOME);
   });
 
-  it('contains no Auth route in the base starter', () => {
-    expect(routes.some((route) => route.path === 'login')).toBeFalse();
-    expect(routes.some((route) => route.path === 'dashboard')).toBeFalse();
+  it('contributes no route of its own beyond home and the wildcard', () => {
+    // The baseline owns exactly two routes. Anything else in `routes` came from
+    // a composed capability through the seam — asserting their absence here
+    // would make the baseline test fail the moment composition does its job.
+    const ownRoutes = routes.filter((route) => !CAPABILITY_ROUTES.includes(route));
+    expect(ownRoutes.map((route) => route.path)).toEqual([APP_ROUTES.HOME, '**']);
+  });
+
+  it('places contributed routes before the wildcard', () => {
+    // After the wildcard they would be unreachable: every path would redirect
+    // home before ever matching.
+    const wildcardIndex = routes.findIndex((route) => route.path === '**');
+    for (const contributed of CAPABILITY_ROUTES) {
+      expect(routes.indexOf(contributed)).toBeLessThan(wildcardIndex);
+    }
   });
 });
