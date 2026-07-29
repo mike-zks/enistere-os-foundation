@@ -265,17 +265,33 @@ describe('pubspec dependency merging', () => {
 });
 
 describe('FastAPI composition seams', () => {
-  it('lets a capability contribute routers and lifespan hooks', () => {
+  it('lets a capability contribute routers, lifespans and error handlers', () => {
     const fastapi = getTargetAdapter('fastapi');
     // Third runtime with the same missing-seam gap as Angular and Flutter.
     assert.deepEqual(
       Object.keys(fastapi.integrationKinds).sort(),
-      ['fastapi.lifespan', 'fastapi.router'],
+      ['fastapi.exception-handler', 'fastapi.lifespan', 'fastapi.router'],
     );
     assert.deepEqual(
       fastapi.composition.map((entry) => entry.destination),
-      ['app/composition/capability_routers.py', 'app/composition/capability_lifespan.py'],
+      [
+        'app/composition/capability_routers.py',
+        'app/composition/capability_lifespan.py',
+        'app/composition/capability_exception_handlers.py',
+      ],
     );
+  });
+
+  it('registers contributed handlers before Starlette builds its stack', async () => {
+    const app = resolve(root, 'starters/fastapi/app');
+    const main = await readFile(join(app, 'main.py'), 'utf8');
+    // A handler added from a lifespan hook is never consulted: the exception
+    // middleware is already built. A capability error would then surface as a
+    // 500 — the very defect found on the Spring authority.
+    assert.match(main, /for capability_exception, capability_handler in CAPABILITY_EXCEPTION_HANDLERS:/);
+    assert.match(main, /app\.add_exception_handler\(capability_exception, capability_handler\)/);
+    const seam = await readFile(join(app, 'composition/capability_exception_handlers.py'), 'utf8');
+    assert.match(seam, /CAPABILITY_EXCEPTION_HANDLERS: tuple\[/);
   });
 
   it('orders contributed routers and hooks deterministically', () => {
@@ -364,5 +380,25 @@ describe('python lock merging', () => {
 
   it('routes FastAPI overlays to python rather than to npm', () => {
     assert.equal(getTargetAdapter('fastapi').dependencyManager, 'python');
+  });
+});
+
+describe('FastAPI golden environment', () => {
+  it('derives an asyncpg DSN from the shared Prisma-shaped URL', async () => {
+    const { asyncpgUrl, runtimeEnvironmentFor } = await import(
+      '../quality/scripts/golden-runtime.mjs'
+    );
+    // `?schema=` is a Prisma parameter; asyncpg rejects it as an unknown
+    // connection option, so the whole query string is dropped.
+    assert.equal(
+      asyncpgUrl('postgresql://u:p@localhost:5432/db?schema=public'),
+      'postgresql+asyncpg://u:p@localhost:5432/db',
+    );
+    const environment = runtimeEnvironmentFor(
+      { runtime: 'fastapi', id: 'api' },
+      'modular-monolith',
+      { DATABASE_URL: 'postgresql://u:p@localhost:5432/db?schema=public' },
+    );
+    assert.equal(environment.ENISTERE_DATABASE_URL, 'postgresql+asyncpg://u:p@localhost:5432/db');
   });
 });

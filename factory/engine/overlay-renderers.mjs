@@ -242,6 +242,9 @@ export function renderFastapiCapabilityRouters(routers) {
     'from __future__ import annotations',
     '',
     'from fastapi import APIRouter',
+    // Blank line between third-party and first-party imports: ruff's isort rule
+    // is part of the generated project's own lint gate.
+    '',
     ...imports,
     '',
     '#: Routers contributed by the composed capabilities, ordered deterministically.',
@@ -269,6 +272,7 @@ export function renderFastapiCapabilityLifespans(hooks) {
     'from contextlib import AbstractAsyncContextManager',
     '',
     'from fastapi import FastAPI',
+    '',
     ...imports,
     '',
     'CapabilityLifespan = Callable[[FastAPI], AbstractAsyncContextManager[None]]',
@@ -276,6 +280,38 @@ export function renderFastapiCapabilityLifespans(hooks) {
     '#: Lifespan hooks contributed by the composed capabilities, ordered deterministically.',
     'CAPABILITY_LIFESPANS: tuple[CapabilityLifespan, ...] = (',
     ...ordered.map((item) => `    ${item.symbol},`),
+    ')',
+    '',
+  ].join('\n');
+}
+
+/** app/composition/capability_exception_handlers.py of the FastAPI app. */
+export function renderFastapiCapabilityExceptionHandlers(handlers) {
+  assertKnown(handlers, ['fastapi.exception-handler']);
+  const ordered = [...handlers].sort(
+    (a, b) => a.order - b.order || a.exception.localeCompare(b.exception),
+  );
+  const imports = [...new Set(ordered.map(
+    (item) => `from ${item.importPath} import ${item.exception}, ${item.handler}`,
+  ))].sort();
+  return [
+    PYTHON_BANNER,
+    'from __future__ import annotations',
+    '',
+    'from collections.abc import Awaitable, Callable',
+    '',
+    'from fastapi import Request',
+    'from fastapi.responses import JSONResponse',
+    '',
+    ...imports,
+    '',
+    'CapabilityExceptionHandler = Callable[[Request, Exception], Awaitable[JSONResponse]]',
+    '',
+    '#: (exception, handler) pairs contributed by the composed capabilities.',
+    'CAPABILITY_EXCEPTION_HANDLERS: tuple[',
+    '    tuple[type[Exception], CapabilityExceptionHandler], ...',
+    '] = (',
+    ...ordered.map((item) => `    (${item.exception}, ${item.handler}),`),
     ')',
     '',
   ].join('\n');

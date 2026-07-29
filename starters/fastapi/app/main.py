@@ -15,6 +15,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from .composition.capability_exception_handlers import CAPABILITY_EXCEPTION_HANDLERS
 from .composition.capability_routers import CAPABILITY_ROUTERS
 from .config import settings
 from .platform import RequestMeasurement, diagnostics, runtime_lifespan, technical_audit, telemetry
@@ -32,6 +33,11 @@ app = FastAPI(title="Enistere FastAPI Core", version="0.1.0", lifespan=runtime_l
 # canonical errors and security headers are not opt-in.
 for capability_router in CAPABILITY_ROUTERS:
     app.include_router(capability_router)
+# Registered here, never from a lifespan hook: Starlette builds its exception
+# middleware before emitting the startup event, so a handler added later would
+# never be consulted and a capability error would fall into the 500 catch-all.
+for capability_exception, capability_handler in CAPABILITY_EXCEPTION_HANDLERS:
+    app.add_exception_handler(capability_exception, capability_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(config.cors_allowed_origins),

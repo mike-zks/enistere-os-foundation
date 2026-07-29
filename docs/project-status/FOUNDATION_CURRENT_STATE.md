@@ -129,16 +129,17 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   vérifiées dans la Foundation comme dans l'application matérialisée.
 
 ```text
-auth   api  nestjs 4/4 · spring 4/4 · fastapi 0/4 ✗   web nextjs 4/4 · angular 4/4 ✓
-       mobile rn 4/4 · flutter 4/4 ✓                     NON_CONFORMANT
+auth   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 4/4 · angular 4/4 ✓
+       mobile rn 4/4 · flutter 4/4 ✓                     CONFORMANT
 rbac   api  nestjs 4/4 · spring 4/4 · fastapi 0/4 ✗   web nextjs 2/4 · angular 0/4 ✗
        mobile rn n/a · flutter 0/4 ✗                     NON_CONFORMANT
 files  api  nestjs 7/7 · spring 7/7 · fastapi 0/7 ✗   web nextjs 5/7 · angular 0/7 ✗
        mobile rn 1/7 · flutter 0/7 ✗                     NON_CONFORMANT
        fastapi UNSUPPORTED · angular/flutter PLANNED sur rbac et files
 
-Authentication est tenue par six runtimes sur sept (ADR-075, ADR-076) : les
-familles Web et Mobile sont à parité, seule la famille API ne l'est pas.
+**Authentication est tenue par les sept runtimes** (ADR-075, ADR-076, ADR-077) :
+c'est la première capability CONFORMANT comme produit, les trois familles étant à
+parité. RBAC et Files restent la dette, sur les mêmes trois runtimes.
 ```
 
 - `Parité par famille` : **MESURÉE ET SATISFAITE** (ADR-070) — les targets

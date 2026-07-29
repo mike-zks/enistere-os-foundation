@@ -11,8 +11,6 @@ from typing import Protocol, TypeVar
 
 from fastapi import FastAPI
 
-from .composition.capability_lifespan import CAPABILITY_LIFESPANS
-
 API_EXTENSION_CONTRACT_VERSION = "api-extension/2.0.0"
 TELEMETRY_CONTRACT_VERSION = "opentelemetry-hook/2.0.0"
 Result = TypeVar("Result")
@@ -177,7 +175,14 @@ async def runtime_lifespan(app: FastAPI) -> AsyncIterator[None]:
     other way round. `AsyncExitStack` guarantees that every hook already entered
     is exited even when a later one fails to start — a half-open pool must not
     survive a failed boot.
+
+    The seam is imported here rather than at module level, and that is load
+    bearing: capabilities import this module, so importing their seam from it
+    would close a cycle the moment any capability is composed. A seam is consumed
+    at startup, not at import.
     """
+    from .composition.capability_lifespan import CAPABILITY_LIFESPANS
+
     await lifecycle.start()
     technical_audit.record("runtime.started", actor=None, request_id="lifecycle")
     try:

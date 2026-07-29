@@ -122,6 +122,7 @@ export const COMPOSITIONS = {
   // golden inexistant : une preuve matérialisée qui ne s'exécute jamais.
   'nestjs-angular-auth': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth'] },
   'nestjs-flutter-auth': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['auth'] },
+  'fastapi-auth': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth'] },
   'distributed-spring-nestjs': {
     applications: [
       {
@@ -195,6 +196,12 @@ function dataNamespace(application) {
   return `authority_${application.id.replaceAll('-', '_')}`;
 }
 
+/** Prisma-shaped URL → the async driver DSN SQLAlchemy needs. */
+export function asyncpgUrl(connection) {
+  const [base] = connection.split('?', 2);
+  return base.replace(/^postgresql:\/\//, 'postgresql+asyncpg://');
+}
+
 function withJdbcSchema(connection, schema) {
   if (!connection) return connection;
   const [base, query = ''] = connection.split('?', 2);
@@ -221,6 +228,13 @@ export function runtimeEnvironmentFor(application, architectureProfileId, baseEn
   // reproducibility cannot itself depend on a mutable remote value.
   if (application.runtime === 'react-native') {
     environment.EXPO_OFFLINE = '1';
+  }
+
+  // FastAPI reads its own namespaced variable and talks asyncpg. The shared
+  // DATABASE_URL is Prisma-shaped: its `?schema=` parameter is meaningless to
+  // asyncpg and would be rejected as an unknown connection option.
+  if (application.runtime === 'fastapi' && environment.DATABASE_URL) {
+    environment.ENISTERE_DATABASE_URL = asyncpgUrl(environment.DATABASE_URL);
   }
 
   if (architectureProfileId !== 'distributed-platform' || !application.ownership) {
@@ -256,6 +270,11 @@ function prepareGatesFor(kind, hasDb, capabilities = [], appDir = 'apps/api') {
       ['api: install locked Python dependencies', '.venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.lock'], appDir],
       ['api: create production-only Python environment', 'python', ['-m', 'venv', '.runtime-venv'], appDir],
       ['api: install production-only Python lock', '.runtime-venv/bin/python', ['-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.runtime.lock'], appDir],
+      // Applied before the suite so the authority proofs run against the schema a
+      // deployment would actually get, not one built from the models by a fixture.
+      ...(hasDb && capabilities.includes('auth')
+        ? [['api: alembic upgrade head', '.venv/bin/python', ['-m', 'alembic', 'upgrade', 'head'], appDir]]
+        : []),
     ];
   }
   if (kind !== 'nestjs') return [];
