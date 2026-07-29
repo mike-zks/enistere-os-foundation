@@ -5,6 +5,6 @@
   "framework": "Flutter",
   "baseline": { "contractVersion": "2.0.0", "familyContract": "mobile/2.0.0" },
   "commands": { "install": ["flutter", "pub", "get"], "dev": ["flutter", "run"], "test": ["flutter", "test"], "build": ["flutter", "build", "apk"], "verify": ["flutter", "analyze"] },
-  "composition": { "model": "modular", "readyCapabilities": [], "plannedCapabilities": ["auth", "rbac", "files", "notifications"] },
+  "composition": { "model": "modular", "readyCapabilities": ["auth"], "plannedCapabilities": ["rbac", "files", "notifications"] },
   "deployment": { "dockerfile": null, "healthPath": null }
 }

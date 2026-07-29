@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../composition/capability_interceptors.dart';
 import '../config/api_config.dart';
 import 'dio_client.dart';
 
@@ -9,10 +10,19 @@ final apiConfigProvider = Provider<ApiConfig>(
   (ref) => const ApiConfig(baseUrl: ''),
 );
 
-/// Base Dio client provider: structured logging + canonical error mapping, no
-/// auth. The Auth capability replaces this provider with a token/refresh-aware
-/// client built on the same base.
+/// Base Dio client provider: structured logging + canonical error mapping, with
+/// the composed capability interceptors slotted between the two — see
+/// [createDioClient] for why that position is the only correct one.
+///
+/// Capabilities are composed into this client rather than replacing it: two
+/// capabilities each wanting an interceptor would otherwise fight over one
+/// exclusive provider override.
 final dioClientProvider = Provider<Dio>((ref) {
   final config = ref.read(apiConfigProvider);
-  return createDioClient(config: config);
+  return createDioClient(
+    config: config,
+    capabilityInterceptors: [
+      for (final factory in capabilityInterceptors) factory(ref),
+    ],
+  );
 });

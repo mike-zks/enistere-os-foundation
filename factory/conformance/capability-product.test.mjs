@@ -166,11 +166,16 @@ describe('capability product conformance', () => {
     assert.equal(report.targets['react-native'].coverage, '1/7');
   });
 
-  it('keeps Authentication measured on its five ready targets', async () => {
+  it('keeps Authentication measured on its six ready targets', async () => {
     const report = await evaluateCapabilityProduct({ capability: 'auth', repoRoot: REPO_ROOT });
-    assert.deepEqual(report.readyTargets, ['angular', 'nestjs', 'nextjs', 'react-native', 'spring']);
+    assert.deepEqual(
+      report.readyTargets,
+      ['angular', 'flutter', 'nestjs', 'nextjs', 'react-native', 'spring'],
+    );
+    // Both Web runtimes and both Mobile runtimes now hold Authentication: the
+    // only family still short of parity is the API one.
     assert.equal(report.targets.fastapi.status, 'UNSUPPORTED');
-    assert.equal(report.targets.flutter.status, 'PLANNED');
+    assert.equal(report.targets.flutter.familyParity.status, 'OK');
   });
 
   it('treats a not-applicable target as a legitimate absence, never as conformance', async () => {

@@ -150,12 +150,19 @@ export const PROFILES = Object.freeze([
   profile('spring-auth', 'ready', { api: 'spring' }, ['auth'], { golden: 'spring-auth' }),
   profile('spring-rbac', 'ready', { api: 'spring' }, ['auth', 'rbac'], { golden: 'spring-auth-rbac' }),
   profile('spring-files', 'ready', { api: 'spring' }, ['auth', 'rbac', 'files'], { golden: 'spring-files' }),
-  // Angular carries Authentication since ADR-075, so this preset is generatable.
-  // It stays `supported` rather than `ready`: no golden exercises this exact
-  // selection yet, and `ready` requires runtime proof, not just composability.
+  // Angular carries Authentication since ADR-075, Flutter since ADR-076. On
+  // NestJS a golden now exercises each of these exact selections, so they are
+  // `ready`. On Spring the same compositions are generatable but unproven at
+  // runtime, and `ready` requires proof rather than mere composability.
+  profile('nestjs-angular-auth', 'ready', { api: 'nestjs', web: 'angular' }, ['auth'], {
+    golden: 'nestjs-angular-auth',
+  }),
+  profile('nestjs-flutter-auth', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['auth'], {
+    golden: 'nestjs-flutter-auth',
+  }),
   profile('spring-angular-auth', 'supported', { api: 'spring', web: 'angular' }, ['auth']),
   profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
-  profile('spring-flutter-auth', 'planned', { api: 'spring', mobile: 'flutter' }, ['auth']),
+  profile('spring-flutter-auth', 'supported', { api: 'spring', mobile: 'flutter' }, ['auth']),
   profile('spring-angular-flutter-files', 'planned', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['auth', 'rbac', 'files']),
 ]);
 
