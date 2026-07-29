@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "flutter",
+  "version": "0.2.0",
+  "description": "Authentification Flutter (Riverpod, go_router, Dio) : jeton d'accès en mémoire, refresh persisté dans le trousseau de la plateforme derrière la couture secure-storage de la baseline, rafraîchissement coalescé, intercepteur de rejeu unique composé devant le mapping d'erreur terminal, garde de route et page de connexion.",
+  "files": [
+    { "source": "files/lib/src/auth", "destination": "lib/src/auth" },
+    { "source": "files/lib/src/features/auth", "destination": "lib/src/features/auth" },
+    { "source": "files/test/auth", "destination": "test/auth" }
+  ],
+  "dependencies": {
+    "dependencies": {
+      "flutter_secure_storage": "^9.2.2"
+    }
+  },
+  "environment": [],
+  "integrations": [
+    { "kind": "flutter.provider-override", "importPath": "package:mobile_flutter/src/auth/auth_providers.dart", "symbol": "authSecureStorageOverride" },
+    { "kind": "flutter.interceptor", "importPath": "package:mobile_flutter/src/auth/auth_interceptor.dart", "symbol": "authInterceptorFactory", "order": 10 },
+    { "kind": "flutter.route", "path": "/login", "name": "login", "importPath": "package:mobile_flutter/src/features/auth/login_screen.dart", "symbol": "LoginScreen", "order": 10 }
+  ],
+  "verification": [
+    ["flutter", "test"]
+  ]
+}

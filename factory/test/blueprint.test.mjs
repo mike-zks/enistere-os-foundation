@@ -69,11 +69,14 @@ describe('blueprint v1', () => {
   it('rejects generation when a selected capability is only planned', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));
     const blueprint = createDefaultBlueprint('blocked-app');
+    // Authentication is ready on every runtime but FastAPI since ADR-076, so the
+    // refusal is exercised on RBAC. What is under test is the refusal itself,
+    // never the runtime that happens to be unfinished this week.
     blueprint.stack = { api: 'spring', web: 'angular', mobile: 'flutter' };
-    blueprint.capabilities = ['base', 'auth'];
+    blueprint.capabilities = ['base', 'auth', 'rbac'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /auth on (angular|flutter) is planned/,
+      /rbac on (angular|flutter) is planned/,
     );
   });
   it('plans every supported stack combination as a golden matrix', () => {

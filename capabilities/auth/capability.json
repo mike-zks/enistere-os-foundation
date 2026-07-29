@@ -174,7 +174,29 @@
       ]
     },
     "flutter": {
-      "status": "planned"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "flutter",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "login",
+        "refresh",
+        "logout",
+        "session"
+      ],
+      "contracts": [
+        "auth-session"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "auth-flutter-integration"
+      ]
     }
   },
   "migrations": [
@@ -225,6 +247,12 @@
       "target": "angular",
       "level": "e2e",
       "evidence": "golden-runtime"
+    },
+    {
+      "id": "auth-flutter-integration",
+      "target": "flutter",
+      "level": "integration",
+      "evidence": "overlay-verification"
     }
   ]
 }

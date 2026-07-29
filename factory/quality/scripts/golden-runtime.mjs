@@ -117,6 +117,11 @@ export const COMPOSITIONS = {
   'nestjs-react-native-base': { stack: { api: 'nestjs', web: null, mobile: 'react-native' }, capabilities: [] },
   'nestjs-angular-base': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: [] },
   'nestjs-flutter-base': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: [] },
+  // Compositions qui exercent réellement Auth sur les runtimes portés hors des
+  // deux références historiques. Sans elles, `conformance.json` désignerait un
+  // golden inexistant : une preuve matérialisée qui ne s'exécute jamais.
+  'nestjs-angular-auth': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth'] },
+  'nestjs-flutter-auth': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['auth'] },
   'distributed-spring-nestjs': {
     applications: [
       {

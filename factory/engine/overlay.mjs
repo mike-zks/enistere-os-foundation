@@ -66,6 +66,9 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
   else {
     const dependencyManager = adapter?.dependencyManager ?? 'npm';
     const allowedDependencyKeys = dependencyManager === 'maven' ? ['maven'] : ['dependencies', 'devDependencies'];
+    if (dependencyManager === 'python' && Object.keys(value.dependencies).length > 0) {
+      issues.push('dependencies are not supported for python targets yet');
+    }
     for (const key of Object.keys(value.dependencies)) if (!allowedDependencyKeys.includes(key)) issues.push(`dependencies.${key} is not supported for ${dependencyManager}`);
     if (dependencyManager === 'maven') {
       const entries = value.dependencies.maven;
@@ -225,6 +228,52 @@ async function copyOverlayEntry(overlay, entry, appDirectory) {
   await cp(source, destination, { recursive: true, force: true });
 }
 
+const PUBSPEC_SECTIONS = Object.freeze({ dependencies: 'dependencies', devDependencies: 'dev_dependencies' });
+
+/**
+ * Adds package constraints to one section of a pubspec.yaml.
+ *
+ * Deliberately line-based rather than a YAML round-trip: rewriting the document
+ * would reformat comments and ordering the starter owns, and the Factory ships
+ * no YAML dependency. The insertion point is the end of the named block — the
+ * next line that starts at column zero — and entries land sorted so two
+ * capabilities resolved in either order produce the same file.
+ *
+ * A package already present with a different constraint is a conflict, not a
+ * silent overwrite: the same rule package.json and pom.xml already follow.
+ */
+export function mergePubspecSection(pubspec, section, entries, label) {
+  const lines = pubspec.split('\n');
+  const header = lines.findIndex((line) => line === `${section}:`);
+  if (header < 0) throw new Error(`${label}: pubspec.yaml has no ${section} section`);
+
+  let end = header + 1;
+  while (end < lines.length && !/^[^\s#]/.test(lines[end])) end += 1;
+
+  const existing = new Map();
+  for (let index = header + 1; index < end; index += 1) {
+    const match = /^ {2}([A-Za-z_][A-Za-z0-9_]*):(.*)$/.exec(lines[index]);
+    if (match) existing.set(match[1], match[2].trim());
+  }
+
+  const additions = [];
+  for (const [name, spec] of Object.entries(entries).sort(([a], [b]) => a.localeCompare(b))) {
+    const current = existing.get(name);
+    if (current === undefined) {
+      additions.push(`  ${name}: ${spec}`);
+      continue;
+    }
+    if (current !== spec) throw new Error(`${label}: dependency conflict on ${name} (${current} vs ${spec})`);
+  }
+  if (additions.length === 0) return pubspec;
+
+  // Trailing blank lines belong to the separation between blocks, not to the block.
+  let insertion = end;
+  while (insertion > header + 1 && lines[insertion - 1].trim() === '') insertion -= 1;
+  lines.splice(insertion, 0, ...additions);
+  return lines.join('\n');
+}
+
 async function mergeDependencies(overlay, appDirectory) {
   const declared = overlay.manifest.dependencies;
   if (declared.maven !== undefined) {
@@ -251,6 +300,16 @@ async function mergeDependencies(overlay, appDirectory) {
   }
   const sections = ['dependencies', 'devDependencies'].filter((section) => Object.keys(declared[section] ?? {}).length > 0);
   if (sections.length === 0) return;
+  if (getTargetAdapter(overlay.manifest.target)?.dependencyManager === 'pub') {
+    const pubspecPath = join(appDirectory, 'pubspec.yaml');
+    const label = `${overlay.manifest.capability}/${overlay.manifest.target}`;
+    let pubspec = await readFile(pubspecPath, 'utf8');
+    for (const section of sections) {
+      pubspec = mergePubspecSection(pubspec, PUBSPEC_SECTIONS[section], declared[section], label);
+    }
+    await writeFile(pubspecPath, pubspec);
+    return;
+  }
   const packagePath = join(appDirectory, 'package.json');
   const packageJson = JSON.parse(await readFile(packagePath, 'utf8'));
   for (const section of sections) {

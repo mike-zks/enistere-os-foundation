@@ -69,6 +69,8 @@ jobs:
           - nestjs-react-native-base
           - nestjs-angular-base
           - nestjs-flutter-base
+          - nestjs-angular-auth
+          - nestjs-flutter-auth
           - distributed-spring-nestjs
 
     services:

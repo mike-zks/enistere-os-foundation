@@ -206,36 +206,106 @@ Trois défauts trouvés par les tests en cours de route :
 
 127/127 tests sur l'application Angular composée réellement générée.
 
+## Mission achevée — Authentication sur Flutter
+
+`auth/flutter` est **`ready`** : quatre responsabilités, six invariants, neuf
+preuves ([ADR-076](../adr/ADR-076-authentication-flutter.md)). **L'écart de
+parité Mobile d'Authentication est refermé** — Flutter tient ce que React Native
+tient.
+
+```text
+auth   api  nestjs 4/4 · spring 4/4 · fastapi 0/4 ✗   web nextjs 4/4 · angular 4/4 ✓
+       mobile rn 4/4 · flutter 4/4 ✓
+```
+
+Authentication est désormais tenue par **six runtimes sur sept**. Le seul écart
+restant est FastAPI, et il concerne les trois capabilities.
+
+### Trois manques en chaîne, chacun invisible tant que le précédent tenait
+
+1. **Aucune couture de composition** — `integrationKinds: {}`, `composition: []`,
+   exactement le blocage d'Angular. Trois coutures posées :
+   `flutter.provider-override`, `flutter.route`, `flutter.interceptor`.
+2. **Aucun gestionnaire de dépendances** — l'adapter retombait sur `npm` et aurait
+   écrit un `package.json` dans une application Dart. Fusion `pubspec.yaml`
+   ligne à ligne, avec conflit sur contrainte divergente.
+3. **L'ordre des intercepteurs était faux** — et silencieusement. `ErrorInterceptor`
+   appelle `handler.reject`, ce qui **termine** la chaîne : composés après lui,
+   les intercepteurs d'une capability n'auraient jamais vu un 401 et le rejeu
+   unique n'aurait jamais eu lieu. Ils se composent maintenant *devant* le mapping
+   terminal, et un test verrouille cet ordre.
+
+### Défauts trouvés par la vérification réelle
+
+- `Override` n'est pas exporté par l'entrée principale de Riverpod 3 mais par
+  `misc.dart` : **la couture posée au prérequis ne compilait pas**. Aucun gate ne
+  l'avait vu parce qu'aucun `flutter analyze` n'avait tourné sur un starter modifié.
+- Les fichiers générés n'étaient pas stables sous `dart format`, qui est un gate
+  du golden. Répliquer l'algorithme du formateur serait fragile : les fichiers
+  générés portent désormais `// dart format off` — leur mise en forme appartient
+  au renderer, et le gate continue de couvrir tout fichier écrit à la main.
+- Les coutures vides étaient `const`, ce qui rendait `ProviderScope` const-ifiable
+  dans la baseline mais pas dans une application composée : le lint passait dans
+  un état et échouait dans l'autre. Elles sont `final` dans les deux.
+- `capabilities/auth/targets/angular/conformance.json` désignait le golden
+  `nestjs-angular-auth`, **absent de `COMPOSITIONS`** : la preuve matérialisée
+  d'Angular ne s'exécutait nulle part. Les compositions `nestjs-angular-auth` et
+  `nestjs-flutter-auth` sont créées et ajoutées à la matrice CI.
+- Ce golden, dès sa première exécution, a montré que **l'application Angular
+  composée ne compilait pas** : `AUTH_PROVIDERS` était un tableau `readonly`, non
+  assignable là où le fichier de composition attend *un* provider. Les 127 tests
+  Karma passaient — seul `ng build` compile `app.config.ts`. Le portage Angular
+  avait donc été fusionné avec une composition qui ne construit pas. Corrigé par
+  `makeEnvironmentProviders`, et verrouillé par un test.
+
+### Preuves
+
+- 482/482 tests Foundation ;
+- application Flutter composée réellement générée : `flutter analyze` propre,
+  `dart format` stable, **26/26 tests** ;
+- baseline non composée revérifiée : propre, stable, **9/9** ;
+- `auth/flutter` **CONFORMANT**, parité Mobile `OK`, écart retiré de
+  `parity-gaps.json`.
+
+### Non revendiqué
+
+- La liaison keystore n'est pas exercée par un test : `flutter_secure_storage`
+  passe par des canaux de plateforme hors d'atteinte d'un test unitaire. Ce qui
+  est prouvé, c'est que la capability **ne parle qu'à la couture**.
+- Aucun golden runtime n'a été exécuté localement de bout en bout (il exige
+  PostgreSQL, l'API NestJS et un build APK) ; les gates Flutter, eux, l'ont été.
+
 ## Prochaine mission unique
 
-> **Porter Authentication sur Flutter**, dernier écart de parité d'Authentication.
+> **Porter Authentication sur FastAPI**, dernier écart de parité d'Authentication.
 
 ### Justification de l'ordre
 
-Authentication est désormais tenue par cinq runtimes sur sept. Deux écarts
-restent sur cette capability : Flutter (famille mobile) et FastAPI (famille API).
+Authentication est tenue par six runtimes sur sept. Les familles Web et Mobile
+sont à parité ; **seule la famille API ne l'est pas**, et c'est la famille où
+l'écart coûte le plus cher : NestJS et Spring tiennent 4/4, FastAPI 0/4, et RBAC
+puis Files en dépendent tous les deux.
 
-Flutter d'abord, pour la même raison qui a fait passer Angular avant : **React
-Native est la référence directe dans sa famille**, et le modèle client sans BFF
-vient d'être éprouvé deux fois — sur React Native puis sur Angular. FastAPI
-demande en plus la persistance, la cryptographie et l'émission de jetons, soit
-une autorité complète.
-
-Le risque est connu et mesuré, il ne doit pas être découvert en route : **Flutter
-tient ses 25 invariants de baseline avec 2 fichiers de test là où React Native en
-a 95**. La parité exigera de ce starter un niveau de preuve qu'il n'a jamais
-pratiqué, et l'adapter Flutter n'a — comme Angular avant cette semaine — **aucune
-couture de composition** : `integrationKinds: {}`, `composition: []`. Ce prérequis
-est à traiter en premier, exactement comme pour Angular.
+C'est aussi la mission la plus lourde des trois portages, et il faut le dire
+d'avance : Angular et Flutter étaient des **clients** — ils consomment une
+autorité. FastAPI doit **être** l'autorité : persistance, hachage de mot de passe,
+émission et rotation de jetons, détection de rejeu, limitation de débit, audit
+métier. Huit invariants `AUTH-AUTHORITY-*`, contre six côté client.
 
 ### Critères de sortie
 
-- coutures de composition Flutter, sur le modèle de celles d'Angular ;
-- `auth/flutter` passe `planned` → `ready` avec les quatre responsabilités ;
-- parité Mobile `OK` : Flutter tient ce que React Native tient ;
-- créance derrière une couture, avec une implémentation réellement protégée
-  (Keychain/Keystore via `flutter_secure_storage`) — la contrainte navigateur
-  d'ADR-075 ne s'applique pas ici ;
-- l'écart `auth/flutter` est retiré de `parity-gaps.json` ;
-- golden Flutter vert ;
+- `auth/fastapi` passe `unsupported` → `ready` avec les quatre responsabilités ;
+- parité API `OK` : FastAPI tient ce que NestJS et Spring tiennent ;
+- les huit invariants d'autorité prouvés, y compris la rotation avec détection de
+  rejeu et l'audit métier ;
+- migration de schéma livrée et exercée sur PostgreSQL réel ;
+- l'écart `auth/fastapi` est retiré de `parity-gaps.json` ;
+- golden FastAPI + Auth vert ;
 - aucun nouveau runtime, provider ou capability ; aucun dossier `base/`.
+
+### Ce qui reste ouvert après cette mission
+
+- RBAC et Files sur Angular, Flutter et FastAPI ;
+- le transport par cookie de refresh HttpOnly (ADR-075), mission distincte qui
+  bénéficiera aux trois clients ;
+- le reste de §12 : SAST, SBOM, signatures, provenance, licences, threat modeling.

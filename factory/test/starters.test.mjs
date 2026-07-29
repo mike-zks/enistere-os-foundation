@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
 import { getTargetAdapter } from '../engine/target-adapters.mjs';
 import { loadStarterManifests, STARTER_IDS, validateManifestConsistency, validateStarterManifest } from '../engine/starters.mjs';
+import { mergePubspecSection } from '../engine/overlay.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 
@@ -59,6 +60,9 @@ it('reports a truthful target support matrix', async () => {
   assert.equal(matrix.files.nextjs, 'ready');
   assert.equal(matrix.files['react-native'], 'ready');
   assert.equal(matrix.files.spring, 'ready');
+  // Mobile family parity: both runtimes hold Authentication, neither is planned.
+  assert.equal(matrix.auth['react-native'], 'ready');
+  assert.equal(matrix.auth.flutter, 'ready');
 });
 
 describe('Angular composition seams', () => {
@@ -79,6 +83,20 @@ describe('Angular composition seams', () => {
         'src/app/core/composition/capability-interceptors.ts',
       ],
     );
+  });
+
+  it('requires a contributed provider to be one value, not an array', async () => {
+    // The composition file lists each symbol as ONE element of
+    // `readonly (Provider | EnvironmentProviders)[]`. A capability exporting an
+    // array does not type-check there — and Karma never noticed, because only
+    // `ng build` compiles app.config.ts. `makeEnvironmentProviders` is Angular's
+    // supported way to bundle any number of providers behind a single value.
+    const source = await readFile(
+      resolve(root, 'capabilities/auth/targets/angular/files/src/app/core/auth/auth.providers.ts'),
+      'utf8',
+    );
+    assert.match(source, /AUTH_PROVIDERS: EnvironmentProviders = makeEnvironmentProviders\(/);
+    assert.doesNotMatch(source, /AUTH_PROVIDERS:\s*readonly/);
   });
 
   it('orders contributed routes deterministically and refuses a collision', () => {
@@ -113,5 +131,131 @@ describe('Angular composition seams', () => {
     assert.match(config, /CAPABILITY_PROVIDERS/);
     const routes = await readFile(join(seams, 'app.routes.ts'), 'utf8');
     assert.match(routes, /CAPABILITY_ROUTES/);
+  });
+});
+
+describe('Flutter composition seams', () => {
+  it('lets a capability contribute overrides, routes and interceptors', () => {
+    const flutter = getTargetAdapter('flutter');
+    // Same missing-seam gap as Angular, and the same remedy: the three points
+    // where a Riverpod app can be extended without a capability editing the
+    // baseline — provider overrides, routes, Dio interceptors.
+    assert.deepEqual(
+      Object.keys(flutter.integrationKinds).sort(),
+      ['flutter.interceptor', 'flutter.provider-override', 'flutter.route'],
+    );
+    assert.deepEqual(
+      flutter.composition.map((entry) => entry.destination),
+      [
+        'lib/src/core/composition/capability_overrides.dart',
+        'lib/src/core/composition/capability_routes.dart',
+        'lib/src/core/composition/capability_interceptors.dart',
+      ],
+    );
+  });
+
+  it('orders contributed routes deterministically and refuses a collision', () => {
+    const render = getTargetAdapter('flutter').composition
+      .find((entry) => entry.kinds.includes('flutter.route')).render;
+
+    const output = render([
+      { kind: 'flutter.route', path: '/z', name: 'z', importPath: 'p:z', symbol: 'Z', order: 2 },
+      { kind: 'flutter.route', path: '/a', name: 'a', importPath: 'p:a', symbol: 'A', order: 1 },
+    ]);
+    assert.ok(output.indexOf("path: '/a'") < output.indexOf("path: '/z'"));
+
+    assert.throws(
+      () => render([
+        { kind: 'flutter.route', path: '/same', name: 'a', importPath: 'p:a', symbol: 'A', order: 1 },
+        { kind: 'flutter.route', path: '/same', name: 'b', importPath: 'p:b', symbol: 'B', order: 2 },
+      ]),
+      /two capabilities contribute the Flutter route "\/same"/,
+    );
+  });
+
+  it('appends contributed interceptors after the baseline ones', () => {
+    const render = getTargetAdapter('flutter').composition
+      .find((entry) => entry.kinds.includes('flutter.interceptor')).render;
+    const output = render([
+      { kind: 'flutter.interceptor', importPath: 'p:b', symbol: 'b', order: 2 },
+      { kind: 'flutter.interceptor', importPath: 'p:a', symbol: 'a', order: 1 },
+    ]);
+    assert.ok(output.indexOf('  a,') < output.indexOf('  b,'));
+    // The factory receives the Ref: an interceptor that must read a credential
+    // has no other way to reach it without the capability owning the client.
+    assert.match(output, /typedef CapabilityInterceptorFactory = Interceptor Function\(Ref ref\);/);
+  });
+
+  it('keeps the baseline seams empty and consumed by the app', async () => {
+    const lib = resolve(root, 'starters/flutter/lib');
+    for (const seam of ['capability_overrides', 'capability_routes', 'capability_interceptors']) {
+      const source = await readFile(join(lib, 'src/core/composition', `${seam}.dart`), 'utf8');
+      assert.match(source, /\[\];/, `${seam} must ship empty`);
+    }
+    const main = await readFile(join(lib, 'main.dart'), 'utf8');
+    assert.match(main, /ProviderScope\(\s*overrides: capabilityOverrides/);
+    const router = await readFile(join(lib, 'src/core/navigation/router.dart'), 'utf8');
+    assert.match(router, /\.\.\.capabilityRoutes/);
+    const dio = await readFile(join(lib, 'src/core/api/dio_provider.dart'), 'utf8');
+    assert.match(dio, /capabilityInterceptors/);
+  });
+
+  it('composes capability interceptors before the terminal error mapping', async () => {
+    const lib = resolve(root, 'starters/flutter/lib');
+    const client = await readFile(join(lib, 'src/core/api/dio_client.dart'), 'utf8');
+    const logging = client.indexOf('LoggingInterceptor');
+    const contributed = client.indexOf('...capabilityInterceptors');
+    const mapping = client.indexOf('ErrorInterceptor()');
+    // ErrorInterceptor calls handler.reject, which ends the chain: an interceptor
+    // composed after it would never observe a 401 and could never recover.
+    assert.ok(logging < contributed && contributed < mapping);
+  });
+
+  it('exposes the router as a provider so a guard can ask something', async () => {
+    const router = await readFile(
+      resolve(root, 'starters/flutter/lib/src/core/navigation/router.dart'), 'utf8',
+    );
+    assert.match(router, /final routerProvider = Provider<GoRouter>/);
+  });
+});
+
+describe('pubspec dependency merging', () => {
+  const pubspec = [
+    'name: mobile_flutter', '', 'dependencies:', '  flutter:', '    sdk: flutter',
+    '  dio: ^5.10.0', '', 'dev_dependencies:', '  flutter_test:', '    sdk: flutter',
+    '', 'flutter:', '  uses-material-design: true', '',
+  ].join('\n');
+
+  it('adds constraints to the right block, sorted, without touching the rest', () => {
+    const merged = mergePubspecSection(
+      pubspec, 'dependencies', { flutter_secure_storage: '^9.2.2', collection: '^1.19.0' }, 'auth/flutter',
+    );
+    // Sorted so two capabilities resolved in either order produce the same file.
+    assert.ok(merged.indexOf('collection:') < merged.indexOf('flutter_secure_storage:'));
+    // The insertion stops at the next top-level key: dev_dependencies and the
+    // flutter section are untouched, and so is the blank line separating them.
+    assert.match(merged, /  flutter_secure_storage: \^9\.2\.2\n\ndev_dependencies:/);
+    assert.match(merged, /\nflutter:\n  uses-material-design: true/);
+  });
+
+  it('is a no-op on an identical constraint and refuses a conflicting one', () => {
+    assert.equal(mergePubspecSection(pubspec, 'dependencies', { dio: '^5.10.0' }, 'x'), pubspec);
+    assert.throws(
+      () => mergePubspecSection(pubspec, 'dependencies', { dio: '^4.0.0' }, 'auth/flutter'),
+      /auth\/flutter: dependency conflict on dio \(\^5\.10\.0 vs \^4\.0\.0\)/,
+    );
+  });
+
+  it('refuses to invent a section that the pubspec does not declare', () => {
+    assert.throws(
+      () => mergePubspecSection('name: x\n', 'dependencies', { dio: '^5.10.0' }, 'auth/flutter'),
+      /pubspec\.yaml has no dependencies section/,
+    );
+  });
+
+  it('routes Flutter overlays to pub rather than to npm', () => {
+    // Without this the adapter would default to npm and write a package.json
+    // into a Dart application.
+    assert.equal(getTargetAdapter('flutter').dependencyManager, 'pub');
   });
 });

@@ -21,6 +21,9 @@ import {
   renderAngularCapabilityProviders,
   renderAngularCapabilityRoutes,
   renderAngularCapabilityInterceptors,
+  renderFlutterCapabilityOverrides,
+  renderFlutterCapabilityRoutes,
+  renderFlutterCapabilityInterceptors,
   renderExpoHomeActions,
 } from './overlay-renderers.mjs';
 import { renderNestjsDomain } from './domain-renderers/nestjs.mjs';
@@ -100,7 +103,18 @@ const BUILT_IN = [
       { kinds: ['angular.http-interceptor'], destination: 'src/app/core/composition/capability-interceptors.ts', render: renderAngularCapabilityInterceptors },
     ],
   },
-  { id: 'flutter', version: '1.0.0', integrationKinds: {}, composition: [] },
+  {
+    id: 'flutter', version: '1.0.0', dependencyManager: 'pub', integrationKinds: {
+      'flutter.provider-override': { importPath: STRING, symbol: STRING },
+      'flutter.route': { path: STRING, name: STRING, importPath: STRING, symbol: STRING, order: INTEGER },
+      'flutter.interceptor': { importPath: STRING, symbol: STRING, order: INTEGER },
+    },
+    composition: [
+      { kinds: ['flutter.provider-override'], destination: 'lib/src/core/composition/capability_overrides.dart', render: renderFlutterCapabilityOverrides },
+      { kinds: ['flutter.route'], destination: 'lib/src/core/composition/capability_routes.dart', render: renderFlutterCapabilityRoutes },
+      { kinds: ['flutter.interceptor'], destination: 'lib/src/core/composition/capability_interceptors.dart', render: renderFlutterCapabilityInterceptors },
+    ],
+  },
 ].map((adapter) => Object.freeze({
   ...adapter,
   operations: Object.freeze([...(adapter.operations ?? COMMON_OPERATIONS)]),

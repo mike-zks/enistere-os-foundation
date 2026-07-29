@@ -75,29 +75,15 @@
       "review": "Après RBAC sur Angular."
     },
     {
-      "capability": "auth",
-      "runtime": "flutter",
-      "family": "mobile",
-      "missing": [
-        "login",
-        "logout",
-        "refresh",
-        "session"
-      ],
-      "justification": "Flutter est `planned` sans échéance. React Native tient 4/4 dans la même famille Mobile. Risque connu et mesuré : Flutter tient ses 25 invariants de baseline avec 2 fichiers de test là où React Native en a 95 — la parité exigera un niveau de preuve que ce starter n'a jamais pratiqué.",
-      "deadline": "2026-12-31",
-      "review": "Portage Authentication sur Flutter, ou passage explicite à unsupported."
-    },
-    {
       "capability": "files",
       "runtime": "flutter",
       "family": "mobile",
       "missing": [
         "upload"
       ],
-      "justification": "React Native ne tient qu'`upload` dans la famille Mobile ; c'est donc la seule responsabilité due. Dépend d'Authentication sur Flutter.",
+      "justification": "React Native ne tient qu'`upload` dans la famille Mobile ; c'est donc la seule responsabilité due. Authentication est désormais portée sur Flutter (ADR-076), l'écart restant est celui de Files.",
       "deadline": "2026-12-31",
-      "review": "Après Authentication sur Flutter."
+      "review": "Portage Files sur Flutter."
     }
   ]
 }

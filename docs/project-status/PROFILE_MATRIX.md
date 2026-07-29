@@ -68,7 +68,7 @@ ne constitue pas un preset de composition mono-slot enregistré dans cette matri
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (23)
+### `ready` — composables, prouvés et exacts (25)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -95,36 +95,41 @@ ne constitue pas un preset de composition mono-slot enregistré dans cette matri
 | `nestjs-flutter-base` | nestjs | — | flutter | aucune | `nestjs-flutter-base` |
 | `spring-angular-base` | spring | angular | — | aucune | `spring-angular-base` |
 | `spring-flutter-base` | spring | — | flutter | aucune | `spring-flutter-base` |
+| `nestjs-angular-auth` | nestjs | angular | — | auth | `nestjs-angular-auth` |
+| `nestjs-flutter-auth` | nestjs | — | flutter | auth | `nestjs-flutter-auth` |
 
 Sur `nestjs-next-react-native-rbac` et `nestjs-next-react-native-files`, `rbac` est `not-applicable` sur React
 Native : l'autorisation fine reste côté serveur et **aucune surface RBAC n'est injectée** sur le
 mobile. Les deux profils triples réutilisent exactement les compositions golden existantes
 (`triple-auth`, `triple-auth-rbac`) : aucun renderer, overlay ou comportement runtime nouveau.
 
-### `supported` — générable, sans golden dédié (1)
+### `supported` — générable, sans golden dédié (2)
 
 | Profil | API | Web | Mobile | Capabilities | Golden | Écart constaté |
 |---|---|---|---|---|---|---|
 | `spring-angular-auth` | spring | angular | — | auth | aucun | composable depuis ADR-075, mais aucun golden n'exerce cette sélection |
+| `spring-flutter-auth` | spring | — | flutter | auth | aucun | composable depuis ADR-076, mais aucun golden n'exerce cette sélection |
 
-Angular porte Authentication depuis ADR-075, ce qui rend ce preset **générable**. Il reste
-`supported` et non `ready` : `ready` exige une preuve runtime, pas seulement la composabilité.
+Angular porte Authentication depuis ADR-075, Flutter depuis ADR-076, ce qui rend ces presets
+**générables**. Ils restent `supported` et non `ready` : `ready` exige une preuve runtime, pas
+seulement la composabilité — et les goldens qui exercent ces deux sélections sont adossés à NestJS,
+pas à Spring.
 
 Ces profils sont valides parce que le Platform Baseline est **implicite sur les sept runtimes** ; le suffixe
 historique `-base` signifie désormais « aucune capability optionnelle ». R8A prouve
 que leurs gates passent réellement. Angular et Flutter suivent désormais le contrat modulaire :
 la génération utilise `modular-overlay` (`bundledFeaturesMayExceedSelection: false`).
 
-Les overlays Auth/RBAC/Files restent une mission distincte sur Angular et Flutter : la base exacte ne
-prouve pas encore la parité métier de ces capabilities. Sur Spring, **Auth, RBAC et Files sont prêts**
-(overlays modulaires + golden `spring-files`).
+Authentication est portée sur Angular (ADR-075) et sur Flutter (ADR-076) : les deux familles Web et
+Mobile sont à parité sur cette capability. **RBAC et Files** restent une mission distincte sur ces
+deux runtimes. Sur Spring, **Auth, RBAC et Files sont prêts** (overlays modulaires + golden
+`spring-files`).
 
-### `planned` — cibles de parité, génération refusée (3)
+### `planned` — cibles de parité, génération refusée (2)
 
 | Profil | API | Web | Mobile | Capabilities | Bloqué par |
 |---|---|---|---|---|---|
 | `spring-angular-rbac` | spring | angular | — | auth + rbac | rbac/angular |
-| `spring-flutter-auth` | spring | — | flutter | auth | auth/spring, auth/flutter |
 | `spring-angular-flutter-files` | spring | angular | flutter | auth + rbac + files | toute la verticale non-TS |
 
 Ces profils déclarent la cible de parité **sans jamais être présentés comme prêts**. Le refus actuel
@@ -144,16 +149,17 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 
 ## Couverture des goldens
 
-R8A, Capability Packs 2, FastAPI et ADR-066 portent le golden runtime à **24 compositions** :
-les 10 compositions NestJS des capability packs, les 10 compositions sans capability optionnelle,
-`spring-auth`, `spring-auth-rbac`, `spring-files` et le golden topologique
-`distributed-spring-nestjs`.
+R8A, Capability Packs 2, FastAPI, ADR-066 puis ADR-076 portent le golden runtime à
+**26 compositions** : les 10 compositions NestJS des capability packs, les 10 compositions sans
+capability optionnelle, `spring-auth`, `spring-auth-rbac`, `spring-files`, les deux compositions
+`nestjs-angular-auth` et `nestjs-flutter-auth` qui prouvent Authentication hors de la verticale
+TypeScript historique, et le golden topologique `distributed-spring-nestjs`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
 le golden est bien celle que le profil épingle.
 
-En revanche, **un golden n'est pas une promotion** : les 23 profils `ready` combinent golden
+En revanche, **un golden n'est pas une promotion** : les 25 profils `ready` combinent golden
 vert et composition exacte. Aucun profil `supported` baseline-copy ni profil `planned` n'a été
 promu par cette extraction. Le golden distribué prouve un profil système, pas
 un preset historique supplémentaire.
