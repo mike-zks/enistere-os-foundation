@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from app.auth import audit_events as events
+from app.auth.config import auth_settings
 from app.auth.ratelimit import reset as reset_rate_limits
 from app.main import app
 from app.persistence.database import Database
@@ -235,17 +236,35 @@ async def test_login_persists_only_a_refresh_fingerprint(database: Database) -> 
 async def test_credential_exchanges_are_rate_limited_with_the_canonical_envelope(
     database: Database,
 ) -> None:
+    """Asserts the mechanism, never the deployment's configured number.
+
+    The golden environment deliberately raises the credential budget so that
+    functional end-to-end suites are not throttled by it. A test that counted on
+    the ambient value would therefore prove nothing there — and would keep
+    passing locally, which is worse than failing. The limit is pinned for the
+    duration of the test instead.
+    """
     await make_user(database)
+    previous = os.environ.get("AUTH_LOGIN_RATE_LIMIT")
+    os.environ["AUTH_LOGIN_RATE_LIMIT"] = "3"
+    auth_settings.cache_clear()
     reset_rate_limits()
 
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        limited = None
-        for _ in range(12):
-            limited = await client.post(
-                "/api/v1/auth/login",
-                json={"email": "ada@example.test", "password": "wrong"},
-            )
+    try:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            limited = None
+            for _ in range(4):
+                limited = await client.post(
+                    "/api/v1/auth/login",
+                    json={"email": "ada@example.test", "password": "wrong"},
+                )
+    finally:
+        if previous is None:
+            os.environ.pop("AUTH_LOGIN_RATE_LIMIT", None)
+        else:
+            os.environ["AUTH_LOGIN_RATE_LIMIT"] = previous
+        auth_settings.cache_clear()
 
     assert limited is not None
     assert limited.status_code == 429
