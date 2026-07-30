@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../core/storage/secure_storage.dart';
+import '../../core/storage/secure_storage.dart';
 
 /// Binds the baseline secure-storage contract to the platform keystore.
 ///

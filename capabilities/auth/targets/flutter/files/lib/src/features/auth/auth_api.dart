@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/api/dio_client.dart';
-import '../core/api/dio_provider.dart';
+import '../../core/api/dio_client.dart';
+import '../../core/api/dio_provider.dart';
 import 'auth_errors.dart';
 import 'auth_session.dart';
 

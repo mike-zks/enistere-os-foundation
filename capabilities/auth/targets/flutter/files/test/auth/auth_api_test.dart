@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_flutter/src/auth/auth_api.dart';
-import 'package:mobile_flutter/src/auth/auth_errors.dart';
+import 'package:mobile_flutter/src/features/auth/auth_api.dart';
+import 'package:mobile_flutter/src/features/auth/auth_errors.dart';
 import 'package:mobile_flutter/src/core/api/dio_client.dart';
 import 'package:mobile_flutter/src/core/config/api_config.dart';
 

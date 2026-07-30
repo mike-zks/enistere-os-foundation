@@ -5,18 +5,43 @@
   "version": "0.2.0",
   "description": "Authentification Angular (SPA statique) : jeton d'accès en mémoire, refresh derrière une couture remplaçable, rafraîchissement coalescé, intercepteur de rejeu unique, garde de route et page de connexion. Sans BFF — le SPA ne détient aucune créance ambiante.",
   "files": [
-    { "source": "files/src/app/core/auth", "destination": "src/app/core/auth" },
-    { "source": "files/src/app/pages/login", "destination": "src/app/pages/login" },
-    { "source": "files/test/auth", "destination": "src/app/core/auth/__tests__" }
+    {
+      "source": "files/src/app/features/auth",
+      "destination": "src/app/features/auth"
+    },
+    {
+      "source": "files/test/auth",
+      "destination": "src/app/features/auth/__tests__"
+    }
   ],
   "dependencies": {},
   "environment": [],
   "integrations": [
-    { "kind": "angular.provider", "importPath": "../auth/auth.providers", "symbol": "AUTH_PROVIDERS" },
-    { "kind": "angular.http-interceptor", "importPath": "../auth/auth.interceptor", "symbol": "authInterceptor", "order": 10 },
-    { "kind": "angular.route", "path": "login", "importPath": "../../pages/login/login.component", "symbol": "LoginComponent", "title": "Connexion", "order": 10 }
+    {
+      "kind": "angular.provider",
+      "importPath": "../../features/auth/auth.providers",
+      "symbol": "AUTH_PROVIDERS"
+    },
+    {
+      "kind": "angular.http-interceptor",
+      "importPath": "../../features/auth/auth.interceptor",
+      "symbol": "authInterceptor",
+      "order": 10
+    },
+    {
+      "kind": "angular.route",
+      "path": "login",
+      "importPath": "../../features/auth/login/login.component",
+      "symbol": "LoginComponent",
+      "title": "Connexion",
+      "order": 10
+    }
   ],
   "verification": [
-    ["npm", "run", "test:ci"]
+    [
+      "npm",
+      "run",
+      "test:ci"
+    ]
   ]
 }

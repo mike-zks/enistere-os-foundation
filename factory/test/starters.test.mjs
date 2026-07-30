@@ -96,7 +96,7 @@ describe('Angular composition seams', () => {
     // `ng build` compiles app.config.ts. `makeEnvironmentProviders` is Angular's
     // supported way to bundle any number of providers behind a single value.
     const source = await readFile(
-      resolve(root, 'capabilities/auth/targets/angular/files/src/app/core/auth/auth.providers.ts'),
+      resolve(root, 'capabilities/auth/targets/angular/files/src/app/features/auth/auth.providers.ts'),
       'utf8',
     );
     assert.match(source, /AUTH_PROVIDERS: EnvironmentProviders = makeEnvironmentProviders\(/);

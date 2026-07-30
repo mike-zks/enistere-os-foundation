@@ -27,6 +27,36 @@ import { getTargetAdapter } from '../../engine/target-adapters.mjs';
 import { APPLICATION_KINDS, GENERATABLE_KINDS, MANDATORY_KIND, isGeneratableKind } from '../../engine/topologies.mjs';
 import { validateProfileRegistry } from '../../engine/profiles.mjs';
 
+/** Declared, dated exceptions to FF5d. Absent file means no exception at all. */
+function loadLayoutGaps(repoRoot) {
+  const path = join(repoRoot, 'factory/quality/layout-gaps.json');
+  if (!existsSync(path)) return new Map();
+  const document = JSON.parse(readFileSync(path, 'utf8'));
+  return new Map((document.gaps ?? []).map((gap) => [
+    `${gap.capability}/${gap.runtime}`,
+    { destinations: gap.destinations ?? [], deadline: gap.deadline ?? '1970-01-01' },
+  ]));
+}
+
+/** Every overlay manifest in the registry, as `[capability, target, manifest]`. */
+function overlayManifests(repoRoot) {
+  const found = [];
+  const capabilitiesDir = join(repoRoot, 'capabilities');
+  if (!existsSync(capabilitiesDir)) return found;
+  for (const capability of readdirSync(capabilitiesDir, { withFileTypes: true })) {
+    if (!capability.isDirectory()) continue;
+    const targetsDir = join(capabilitiesDir, capability.name, 'targets');
+    if (!existsSync(targetsDir)) continue;
+    for (const target of readdirSync(targetsDir, { withFileTypes: true })) {
+      if (!target.isDirectory()) continue;
+      const manifest = join(targetsDir, target.name, 'overlay.json');
+      if (!existsSync(manifest)) continue;
+      found.push([capability.name, target.name, JSON.parse(readFileSync(manifest, 'utf8'))]);
+    }
+  }
+  return found;
+}
+
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 /**
@@ -38,6 +68,10 @@ export function runFitnessFunctions({
   capabilities,
   repoRoot = REPO_ROOT,
   pathExists = existsSync,
+  // Injectable so the zone rule can be exercised in both directions without
+  // writing a broken overlay into the repository to test it.
+  overlays = overlayManifests(repoRoot),
+  layoutGaps = loadLayoutGaps(repoRoot),
 }) {
   const findings = [];
   const fail = (rule, detail) => findings.push({ rule, detail });
@@ -98,6 +132,7 @@ export function runFitnessFunctions({
       'app/(app)',
     ],
     flutter: [
+      'lib/src/auth',
       'lib/src/core/auth',
       'lib/src/core/upload',
       'lib/src/core/notifications',
@@ -105,11 +140,65 @@ export function runFitnessFunctions({
       'lib/src/features/upload',
       'lib/src/features/notifications',
     ],
+    angular: [
+      'src/app/core/auth',
+      'src/app/core/upload',
+      'src/app/core/notifications',
+      'src/app/features',
+    ],
   };
   for (const [runtime, roots] of Object.entries(forbiddenCapabilityRoots)) {
     for (const relative of roots) {
       if (pathExists(join(repoRoot, 'starters', runtime, relative))) {
         fail('capability-free-runtime', `starter ${runtime} embeds forbidden capability source ${relative}`);
+      }
+    }
+  }
+
+  // FF5d — a capability is business code and belongs in the business zone of the
+  // runtime it targets, never inside the zone the Factory owns and replaces.
+  // Enforced on the runtimes whose starter actually declares two zones; the
+  // others are measured by the layout mission that will give them one.
+  const businessZone = {
+    angular: { core: 'src/app/core/', business: 'src/app/features/' },
+    flutter: { core: 'lib/src/core/', business: 'lib/src/features/' },
+    nextjs: { core: 'src/core/', business: 'src/features/' },
+  };
+  const declaredLayoutGaps = layoutGaps;
+  const today = new Date().toISOString().slice(0, 10);
+  for (const [capability, target, overlay] of overlays) {
+    const zone = businessZone[target];
+    if (!zone) continue;
+    const declared = declaredLayoutGaps.get(`${capability}/${target}`);
+    for (const entry of overlay.files ?? []) {
+      const destination = entry.destination ?? '';
+      if (!destination.startsWith(zone.core)) continue;
+      if (!declared?.destinations.includes(destination)) {
+        fail(
+          'capability-business-zone',
+          `${capability}/${target} writes ${destination} into the core zone (${zone.core})`,
+        );
+      } else if (declared.deadline < today) {
+        fail(
+          'capability-business-zone',
+          `${capability}/${target} layout gap expired on ${declared.deadline} (${destination})`,
+        );
+      }
+    }
+  }
+  // A declaration nobody violates is stale: it would quietly authorise a
+  // regression that has already been fixed.
+  for (const [key, gap] of declaredLayoutGaps) {
+    const [capability, target] = key.split('/');
+    const zone = businessZone[target];
+    const written = new Set(
+      overlays
+        .filter(([id, runtime]) => id === capability && runtime === target)
+        .flatMap(([, , overlay]) => (overlay.files ?? []).map((entry) => entry.destination)),
+    );
+    for (const destination of gap.destinations) {
+      if (!zone || !written.has(destination)) {
+        fail('capability-business-zone', `${key} declares a layout gap that no longer exists: ${destination}`);
       }
     }
   }

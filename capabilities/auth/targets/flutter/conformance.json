@@ -91,8 +91,8 @@
       },
       {
         "kind": "source",
-        "source": "files/lib/src/auth/flutter_secure_storage_adapter.dart",
-        "materialized": "lib/src/auth/flutter_secure_storage_adapter.dart",
+        "source": "files/lib/src/features/auth/flutter_secure_storage_adapter.dart",
+        "materialized": "lib/src/features/auth/flutter_secure_storage_adapter.dart",
         "contains": [
           "encryptedSharedPreferences: true",
           "first_unlock_this_device"

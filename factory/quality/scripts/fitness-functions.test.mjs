@@ -19,6 +19,48 @@ describe('architecture fitness functions', () => {
     assert.equal(report.passed, true);
   });
 
+  it('keeps every capability out of the zone the Factory owns', async () => {
+    const starters = await loadStarterManifests(REPO_ROOT);
+    const capabilities = await loadCapabilityManifests(REPO_ROOT);
+
+    // The rule has to bite in both directions, or it proves nothing: an
+    // undeclared write into the core zone must fail, and a declaration nobody
+    // violates must fail too — a stale exception silently re-authorises the
+    // regression it was written for.
+    const undeclared = runFitnessFunctions({
+      starters,
+      capabilities,
+      overlays: [['auth', 'angular', { files: [{ destination: 'src/app/core/auth' }] }]],
+    });
+    assert.ok(undeclared.findings.some(
+      (finding) => finding.rule === 'capability-business-zone'
+        && finding.detail.includes('src/app/core/auth into the core zone'),
+    ));
+
+    const stale = runFitnessFunctions({
+      starters,
+      capabilities,
+      layoutGaps: new Map([
+        ['auth/angular', { destinations: ['src/app/core/gone'], deadline: '2999-01-01' }],
+      ]),
+      overlays: [],
+    });
+    assert.ok(stale.findings.some(
+      (finding) => finding.detail.includes('declares a layout gap that no longer exists'),
+    ));
+
+    // And an expired declaration stops excusing anything.
+    const expired = runFitnessFunctions({
+      starters,
+      capabilities,
+      layoutGaps: new Map([
+        ['auth/angular', { destinations: ['src/app/core/auth'], deadline: '2000-01-01' }],
+      ]),
+      overlays: [['auth', 'angular', { files: [{ destination: 'src/app/core/auth' }] }]],
+    });
+    assert.ok(expired.findings.some((finding) => finding.detail.includes('layout gap expired')));
+  });
+
   it('flags a capability that both requires and conflicts the same capability', async () => {
     const starters = await loadStarterManifests(REPO_ROOT);
     const capabilities = await loadCapabilityManifests(REPO_ROOT);

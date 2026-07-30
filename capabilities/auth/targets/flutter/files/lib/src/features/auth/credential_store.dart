@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/storage/secure_storage.dart';
-import '../core/storage/secure_storage_provider.dart';
+import '../../core/storage/secure_storage.dart';
+import '../../core/storage/secure_storage_provider.dart';
 
 /// Key of the refresh credential in the platform keystore. Scoped and stable —
 /// [SecureStorage] rejects anything else.
