@@ -8,6 +8,7 @@
   "evaluation": "foundation-registry",
   "status": "NON_CONFORMANT",
   "readyTargets": [
+    "fastapi",
     "nestjs",
     "nextjs",
     "spring"
@@ -76,27 +77,35 @@
       "issues": []
     },
     "fastapi": {
-      "status": "UNSUPPORTED",
-      "manifestStatus": "unsupported",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/4",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary",
+        "permissions",
+        "roles"
+      ],
+      "coverage": "4/4",
       "family": "api",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "authorization-context",
-          "authorization-summary",
-          "permissions",
-          "roles"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "rbac-fastapi-integration",
+      "golden": "fastapi-rbac",
+      "invariants": [
+        "RBAC-AUTHORITY-001",
+        "RBAC-AUTHORITY-002",
+        "RBAC-AUTHORITY-003",
+        "RBAC-AUTHORITY-004",
+        "RBAC-AUTHORITY-005",
+        "RBAC-AUTHORITY-006"
+      ],
+      "proofCount": 10,
       "materialized": false,
-      "issues": [
-        "family parity: api runtimes must hold the same responsibilities; missing authorization-context, authorization-summary, permissions, roles"
-      ]
+      "issues": []
     },
     "nextjs": {
       "status": "CONFORMANT",

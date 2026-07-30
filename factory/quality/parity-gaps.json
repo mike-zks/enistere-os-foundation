@@ -3,20 +3,6 @@
   "schemaVersion": "1",
   "gaps": [
     {
-      "capability": "rbac",
-      "runtime": "fastapi",
-      "family": "api",
-      "missing": [
-        "authorization-context",
-        "authorization-summary",
-        "permissions",
-        "roles"
-      ],
-      "justification": "RBAC dépend d'Authentication, désormais portée sur FastAPI (ADR-077). L'écart restant est celui de RBAC lui-même.",
-      "deadline": "2026-12-31",
-      "review": "Portage RBAC sur FastAPI."
-    },
-    {
       "capability": "files",
       "runtime": "fastapi",
       "family": "api",
@@ -29,9 +15,9 @@
         "reconciliation",
         "upload"
       ],
-      "justification": "Files dépend de auth + rbac. Authentication est portée (ADR-077) ; l'écart se referme après RBAC.",
+      "justification": "Files dépend de auth + rbac, désormais tous deux portés sur FastAPI (ADR-077, ADR-078). L'écart restant est celui de Files.",
       "deadline": "2026-12-31",
-      "review": "Après RBAC sur FastAPI."
+      "review": "Portage Files sur FastAPI."
     },
     {
       "capability": "rbac",

@@ -13,7 +13,7 @@
   },
   "composition": {
     "model": "modular",
-    "readyCapabilities": ["auth"],
+    "readyCapabilities": ["auth", "rbac"],
     "plannedCapabilities": []
   },
   "deployment": { "dockerfile": "Dockerfile", "healthPath": "/health" }

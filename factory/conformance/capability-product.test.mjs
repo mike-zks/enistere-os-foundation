@@ -193,7 +193,7 @@ describe('capability product conformance', () => {
     assert.deepEqual(mobile.roles, []);
     assert.deepEqual(mobile.invariants, []);
     assert.ok(!report.readyTargets.includes('react-native'));
-    assert.deepEqual(report.readyTargets, ['nestjs', 'nextjs', 'spring']);
+    assert.deepEqual(report.readyTargets, ['fastapi', 'nestjs', 'nextjs', 'spring']);
   });
 
   it('scopes invariants to the responsibilities a target actually holds', async () => {

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "fastapi",
+  "version": "0.2.0",
+  "description": "Autorisation FastAPI : rôles et permissions lus en base à chaque requête, gardes de route deny-by-default résolvant l'authentification avant l'autorisation, refus générique AUTH_FORBIDDEN, audit métier de chaque déni, résumé des codes effectifs triés. Migration additive sans aucun rôle ni permission amorcés.",
+  "files": [
+    { "source": "files/app/authorization", "destination": "app/authorization" },
+    { "source": "files/migrations/versions", "destination": "migrations/versions" },
+    { "source": "files/tests/authorization", "destination": "tests/authorization" }
+  ],
+  "dependencies": {},
+  "environment": [],
+  "integrations": [
+    { "kind": "fastapi.router", "importPath": "app.authorization", "symbol": "router", "order": 20 }
+  ],
+  "verification": [
+    ["python", "-m", "pytest", "-q"]
+  ]
+}

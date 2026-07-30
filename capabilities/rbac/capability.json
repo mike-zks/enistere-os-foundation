@@ -98,7 +98,34 @@
       ]
     },
     "fastapi": {
-      "status": "unsupported"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "fastapi",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "roles",
+        "permissions",
+        "authorization-context",
+        "authorization-summary"
+      ],
+      "contracts": [
+        "authorization-context",
+        "authorization-decision"
+      ],
+      "primitives": [
+        "authorization-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "rbac-fastapi-database"
+      ],
+      "conformance": [
+        "rbac-fastapi-integration"
+      ]
     },
     "nextjs": {
       "status": "ready",
@@ -150,6 +177,14 @@
       "strategy": "additive",
       "path": "targets/spring/files/src/main/resources/db/migration/V2__add_rbac.sql",
       "order": 200
+    },
+    {
+      "id": "rbac-fastapi-database",
+      "target": "fastapi",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/fastapi/files/migrations/versions/0002_rbac.py",
+      "order": 200
     }
   ],
   "conformance": [
@@ -157,6 +192,12 @@
       "id": "rbac-nestjs-contract",
       "target": "nestjs",
       "level": "contract",
+      "evidence": "golden-runtime"
+    },
+    {
+      "id": "rbac-fastapi-integration",
+      "target": "fastapi",
+      "level": "integration",
       "evidence": "golden-runtime"
     },
     {

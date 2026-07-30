@@ -123,6 +123,7 @@ export const COMPOSITIONS = {
   'nestjs-angular-auth': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth'] },
   'nestjs-flutter-auth': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['auth'] },
   'fastapi-auth': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth'] },
+  'fastapi-rbac': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },
   'distributed-spring-nestjs': {
     applications: [
       {

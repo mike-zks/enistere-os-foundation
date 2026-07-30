@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { loadCapabilityManifests } from '../engine/capabilities.mjs';
 import { loadStarterManifests, modularStarterIds, STARTER_IDS } from '../engine/starters.mjs';
 import { validateBlueprint } from '../engine/blueprint.mjs';
@@ -349,5 +349,54 @@ describe('the plan reports capabilities and gates', () => {
     // Slots the blueprint does not select carry no gates.
     const apiOnly = buildGenerationPlan(blueprintFor(getProfile('nestjs-auth')), { starters });
     assert.deepEqual(Object.keys(apiOnly.gates), ['api']);
+  });
+});
+
+describe('goldens named elsewhere actually exist and actually run', () => {
+  it('binds every conformance descriptor to a real composition', async () => {
+    // `nestjs-angular-auth` was named by the Angular descriptor while existing
+    // nowhere: the materialized proof ran on no machine, which is how a composed
+    // Angular application that did not compile reached main.
+    const { readdir } = await import('node:fs/promises');
+    const capabilities = await readdir(resolve(root, 'capabilities'), { withFileTypes: true });
+    let checked = 0;
+    for (const capability of capabilities.filter((entry) => entry.isDirectory())) {
+      const targetsDir = resolve(root, 'capabilities', capability.name, 'targets');
+      let targets = [];
+      try {
+        targets = await readdir(targetsDir, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const target of targets.filter((entry) => entry.isDirectory())) {
+        const path = join(targetsDir, target.name, 'conformance.json');
+        let descriptor;
+        try {
+          descriptor = JSON.parse(await readFile(path, 'utf8'));
+        } catch {
+          continue;
+        }
+        checked += 1;
+        assert.ok(
+          COMPOSITIONS[descriptor.golden],
+          `${capability.name}/${target.name} names an unknown golden: ${descriptor.golden}`,
+        );
+      }
+    }
+    assert.ok(checked >= 10, 'expected the descriptors to be discovered');
+  });
+
+  it('runs every declared composition in the CI matrix', async () => {
+    // A composition absent from the matrix is a golden that never runs — the
+    // same silence, one layer further out.
+    const workflow = await readFile(
+      resolve(root, '.github/workflows/factory-golden-runtime.yml'), 'utf8',
+    );
+    const scheduled = new Set(
+      [...workflow.matchAll(/^\s+- ([a-z0-9-]+)\s*$/gm)].map((match) => match[1]),
+    );
+    for (const composition of Object.keys(COMPOSITIONS)) {
+      assert.ok(scheduled.has(composition), `${composition} is never run by the CI matrix`);
+    }
   });
 });

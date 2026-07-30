@@ -302,8 +302,25 @@ describe('FastAPI composition seams', () => {
         { kind, importPath: 'app.z', symbol: 'z_thing', order: 2 },
         { kind, importPath: 'app.a', symbol: 'a_thing', order: 1 },
       ]);
-      assert.ok(output.indexOf('    a_thing,') < output.indexOf('    z_thing,'));
+      assert.ok(output.indexOf('    a_a_thing,') < output.indexOf('    z_z_thing,'));
     }
+  });
+
+  it('aliases imported symbols so two capabilities cannot shadow each other', () => {
+    const render = getTargetAdapter('fastapi').composition
+      .find((entry) => entry.kinds.includes('fastapi.router')).render;
+
+    // Both Auth and RBAC export `router`. A bare `from a import router` followed
+    // by `from b import router` binds the second over the first: the composed
+    // application would register one capability twice and lose the other, with
+    // no error anywhere.
+    const output = render([
+      { kind: 'fastapi.router', importPath: 'app.auth', symbol: 'router', order: 10 },
+      { kind: 'fastapi.router', importPath: 'app.authorization', symbol: 'router', order: 20 },
+    ]);
+    assert.match(output, /from app\.auth import router as auth_router/);
+    assert.match(output, /from app\.authorization import router as authorization_router/);
+    assert.ok(output.includes('    auth_router,') && output.includes('    authorization_router,'));
   });
 
   it('keeps the baseline seams empty and consumed by the app', async () => {
