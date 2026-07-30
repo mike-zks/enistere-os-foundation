@@ -2,7 +2,7 @@ import { ApiClientError } from "@enistere/api-client-fetch";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { errorResponse, jsonError, jsonOk } from "../src/core/auth/http/web-response.js";
+import { errorResponse, jsonError, jsonOk } from "../src/features/auth/http/web-response.js";
 
 const http = (status: number) => ApiClientError.fromHttp(status, undefined, null);
 

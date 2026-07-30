@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { BffAuthError } from "../src/core/auth/client/bff-error.js";
-import { listFiles } from "../src/core/files/client/files-bff-client.js";
+import { BffAuthError } from "../src/features/auth/client/bff-error.js";
+import { listFiles } from "../src/features/files/client/files-bff-client.js";
 import { createBrowserFetch } from "./helpers/browser-fetch.js";
 
 const FILE = {

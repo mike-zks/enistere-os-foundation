@@ -3,7 +3,7 @@ import "./helpers/dom-setup.js";
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { isSafeDownloadUrl, triggerDownload } from "../src/core/files/download.js";
+import { isSafeDownloadUrl, triggerDownload } from "../src/features/files/download.js";
 
 afterEach(() => {
   document.body.innerHTML = "";

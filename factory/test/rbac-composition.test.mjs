@@ -291,7 +291,7 @@ describe('rbac golden compositions (structural)', () => {
     );
 
     assert.ok(await exists(join(out, 'apps/web/src/app/api/auth/authorization/route.ts')));
-    assert.ok(await exists(join(out, 'apps/web/src/core/authorization/authorization-client.ts')));
+    assert.ok(await exists(join(out, 'apps/web/src/features/authorization/authorization-client.ts')));
     assert.ok(await exists(join(out, 'apps/web/src/features/authorization/use-authorization.ts')));
 
     // Mobile stays on base + auth: no RBAC surface at all.

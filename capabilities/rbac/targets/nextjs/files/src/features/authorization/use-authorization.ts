@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { toPublicAuthError, type PublicAuthError } from "../../core/auth/session-state.js";
-import { authorizationQueryOptions } from "../../core/authorization/authorization-queries.js";
+import { toPublicAuthError, type PublicAuthError } from "../auth/session-state.js";
+import { authorizationQueryOptions } from "./authorization-queries.js";
 import { useSession } from "../auth/use-session.js";
 
 export interface UseAuthorizationResult {

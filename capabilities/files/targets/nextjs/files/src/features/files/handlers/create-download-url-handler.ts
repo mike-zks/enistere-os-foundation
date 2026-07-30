@@ -1,4 +1,4 @@
-import { createAuthenticatedServerApiClient } from "../../api/server/create-authenticated-server-api-client.js";
+import { createAuthenticatedServerApiClient } from "../../auth/api/create-authenticated-server-api-client.js";
 import { assertPost, checkOriginAndCsrf, resolveRequestId } from "../../auth/handlers/security.js";
 import type { AuthHandlerDeps } from "../../auth/handlers/types.js";
 import { jsonError, jsonOk } from "../../auth/http/web-response.js";

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { CookieAttributes } from "../src/core/auth/cookie-config.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import type { CookieAttributes } from "../src/features/auth/cookie-config.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 
 const OPTS: CookieAttributes = { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 900 };
 

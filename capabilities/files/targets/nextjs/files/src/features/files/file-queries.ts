@@ -2,9 +2,9 @@
 
 import { queryOptions, useQuery, type UseQueryResult } from "@tanstack/react-query";
 
-import { getFileMetadata, type PublicStoredFile } from "../../core/files/client/files-bff-client.js";
-import { isUuid } from "../../core/files/uuid.js";
-import { fileKeys } from "../../core/query/keys/file-keys.js";
+import { getFileMetadata, type PublicStoredFile } from "./client/files-bff-client.js";
+import { isUuid } from "./uuid.js";
+import { fileKeys } from "./file-keys.js";
 
 /**
  * Options de la query de **métadonnées** d'un fichier (source : `GET /api/files/:id`). **Désactivée** si

@@ -3,9 +3,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { getCsrfToken } from "../../core/auth/client/csrf-client.js";
-import { restoreFile } from "../../core/files/client/files-bff-client.js";
-import { fileKeys } from "../../core/query/keys/file-keys.js";
+import { getCsrfToken } from "../auth/client/csrf-client.js";
+import { restoreFile } from "./client/files-bff-client.js";
+import { fileKeys } from "./file-keys.js";
 import { classifyFileError, type FileError } from "./file-error.js";
 
 export interface UseRestoreFileResult {

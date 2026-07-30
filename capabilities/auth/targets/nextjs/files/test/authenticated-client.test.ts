@@ -2,9 +2,9 @@ import { ApiClientError } from "@enistere/api-client-fetch";
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { createAuthenticatedServerApiClient } from "../src/core/api/server/create-authenticated-server-api-client.js";
-import { buildAuthCookieOptions, cookieName, type CookieEnv } from "../src/core/auth/cookie-config.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { createAuthenticatedServerApiClient } from "../src/features/auth/api/create-authenticated-server-api-client.js";
+import { buildAuthCookieOptions, cookieName, type CookieEnv } from "../src/features/auth/cookie-config.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch, envelope, forbidRealFetch } from "./helpers/api-test-kit.js";
 
 const ENV: CookieEnv = "development";

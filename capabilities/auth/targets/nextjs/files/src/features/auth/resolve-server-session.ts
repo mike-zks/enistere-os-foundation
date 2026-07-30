@@ -3,7 +3,7 @@ import {
   type EnistereApiClientOptions,
 } from "@enistere/api-client-fetch";
 
-import { createAuthenticatedServerApiClient } from "../api/server/create-authenticated-server-api-client.js";
+import { createAuthenticatedServerApiClient } from "./api/create-authenticated-server-api-client.js";
 import type { UserProfile } from "./client/auth-bff-client.js";
 import type { CookieEnv } from "./cookie-config.js";
 import { guardReadOnly, type ReadOnlyServerCookieStore } from "./read-only-cookie-store.js";

@@ -1,5 +1,5 @@
-import { handleRefresh } from "../../../../core/auth/handlers/refresh-handler.js";
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
+import { handleRefresh } from "../../../../features/auth/handlers/refresh-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
 
 export const dynamic = "force-dynamic";
 

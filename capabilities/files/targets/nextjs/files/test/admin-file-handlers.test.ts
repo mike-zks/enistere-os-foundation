@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { handleQuarantineFile } from "../src/core/files/handlers/quarantine-file-handler.js";
-import { handleRestoreFile } from "../src/core/files/handlers/restore-file-handler.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { handleQuarantineFile } from "../src/features/files/handlers/quarantine-file-handler.js";
+import { handleRestoreFile } from "../src/features/files/handlers/restore-file-handler.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch, type MockResponseSpec } from "./helpers/api-test-kit.js";
 import { makeDeps, makeRequest, seedAuth, seedCsrf } from "./helpers/auth-test-kit.js";
 

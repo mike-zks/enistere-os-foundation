@@ -1,5 +1,5 @@
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
-import { handleUploadFile } from "../../../../core/files/handlers/upload-file-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
+import { handleUploadFile } from "../../../../features/files/handlers/upload-file-handler.js";
 
 export const dynamic = "force-dynamic";
 

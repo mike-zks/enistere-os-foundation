@@ -1,4 +1,4 @@
-import { createAuthenticatedServerApiClient } from "../../api/server/create-authenticated-server-api-client.js";
+import { createAuthenticatedServerApiClient } from "../api/create-authenticated-server-api-client.js";
 import { jsonOk } from "../http/web-response.js";
 import { WebAuthSessionAdapter } from "../web-session-adapter.js";
 import { assertPost, checkOriginAndCsrf, clearCsrfCookie, resolveRequestId } from "./security.js";

@@ -6,7 +6,7 @@ import { afterEach, test } from "node:test";
 import type { QueryClient } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 
-import { authKeys } from "../src/core/query/keys/auth-keys.js";
+import { authKeys } from "../src/features/auth/auth-keys.js";
 import { healthKeys } from "../src/core/query/keys/health-keys.js";
 import { useLogin } from "../src/features/auth/use-login.js";
 import { createTestQueryClient, createWrapper } from "./helpers/api-test-kit.js";

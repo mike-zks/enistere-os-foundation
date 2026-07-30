@@ -143,7 +143,7 @@ describe('auth golden compositions', () => {
 
   it('NestJS + Next.js base carries no web Auth surface', async () => {
     const out = await gen('nest-next-base', { api: 'nestjs', web: 'nextjs', mobile: null }, ['base']);
-    assert.equal(await exists(join(out, 'apps/web/src/core/auth')), false);
+    assert.equal(await exists(join(out, 'apps/web/src/features/auth')), false);
     assert.equal(await exists(join(out, 'apps/web/src/app/login')), false);
     assert.equal(await exists(join(out, 'apps/web/src/app/(protected)')), false);
     assert.equal(await exists(join(out, 'apps/web/src/app/api/auth')), false);
@@ -155,7 +155,7 @@ describe('auth golden compositions', () => {
 
   it('NestJS + Next.js base+auth composes web Auth without Files', async () => {
     const out = await gen('nest-next-auth', { api: 'nestjs', web: 'nextjs', mobile: null }, ['base', 'auth']);
-    assert.ok(await exists(join(out, 'apps/web/src/core/auth/session-state.ts')));
+    assert.ok(await exists(join(out, 'apps/web/src/features/auth/session-state.ts')));
     assert.ok(await exists(join(out, 'apps/web/src/app/login/page.tsx')));
     assert.ok(await exists(join(out, 'apps/web/src/app/(protected)/layout.tsx')));
     assert.ok(await exists(join(out, 'apps/web/src/app/api/auth/login/route.ts')));
@@ -163,7 +163,7 @@ describe('auth golden compositions', () => {
     assert.match(nav, /\/login/);
     const env = await readFile(join(out, 'apps/web/.env.example'), 'utf8');
     assert.match(env, /WEB_ALLOWED_ORIGINS=/);
-    assert.equal(await exists(join(out, 'apps/web/src/core/files')), false);
+    assert.equal(await exists(join(out, 'apps/web/src/features/files')), false);
     assert.equal(await exists(join(out, 'apps/web/src/app/api/files')), false);
     assert.ok(await exists(join(out, 'apps/api/src/auth/auth.module.ts')));
   });

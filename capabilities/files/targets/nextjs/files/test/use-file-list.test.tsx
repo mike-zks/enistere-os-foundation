@@ -6,8 +6,8 @@ import { afterEach, test } from "node:test";
 import type { QueryClient } from "@tanstack/react-query";
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 
-import { fileKeys } from "../src/core/query/keys/file-keys.js";
-import { authKeys } from "../src/core/query/keys/auth-keys.js";
+import { fileKeys } from "../src/features/files/file-keys.js";
+import { authKeys } from "../src/features/auth/auth-keys.js";
 import { useFileList } from "../src/features/files/use-file-list.js";
 import { createTestQueryClient, createWrapper } from "./helpers/api-test-kit.js";
 import { createBrowserFetch } from "./helpers/browser-fetch.js";

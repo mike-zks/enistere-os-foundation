@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { buildAuthCookieOptions } from "../src/core/auth/cookie-config.js";
+import { buildAuthCookieOptions } from "../src/features/auth/cookie-config.js";
 import {
   ReadOnlyCookieViolationError,
   guardReadOnly,
   inMemoryReadOnlyCookieStore,
-} from "../src/core/auth/read-only-cookie-store.js";
+} from "../src/features/auth/read-only-cookie-store.js";
 
 test("vue lecture seule : get renvoie la valeur, aucune méthode d'écriture exposée", () => {
   const store = inMemoryReadOnlyCookieStore({ a: "1" });

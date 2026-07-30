@@ -1,5 +1,5 @@
-import { handleLogout } from "../../../../core/auth/handlers/logout-handler.js";
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
+import { handleLogout } from "../../../../features/auth/handlers/logout-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
 
 export const dynamic = "force-dynamic";
 

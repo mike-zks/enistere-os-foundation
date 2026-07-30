@@ -9,7 +9,7 @@ import type { EnistereApiClient } from "@enistere/api-client-fetch";
 import {
   createAuthenticatedServerApiClient,
   type AuthClientMode,
-} from "../../api/server/create-authenticated-server-api-client.js";
+} from "../api/create-authenticated-server-api-client.js";
 import { resolveCookieEnv } from "../cookie-config.js";
 import { createNextCookieStore } from "./next-cookie-store.js";
 

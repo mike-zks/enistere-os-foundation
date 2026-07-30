@@ -25,13 +25,13 @@ const CLIENT_REACHABLE = [
   "features/auth/session-panel.tsx",
   "features/auth/service-unavailable-view.tsx",
   "features/auth/protected-notice.tsx",
-  "core/auth/session-state.ts",
-  "core/auth/client/auth-bff-client.ts",
-  "core/auth/client/bff-error.ts",
+  "features/auth/session-state.ts",
+  "features/auth/client/auth-bff-client.ts",
+  "features/auth/client/bff-error.ts",
   // Surface login navigateur (Web Auth 5). NB : `login-client.ts` est exclu de cette liste car sa
   // docstring cite `/api/auth/csrf` (faux positif du filtre par sous-chaîne) ; il est couvert par
   // `login-client.test.ts` (same-origin, aucun appel direct API).
-  "core/auth/return-to.ts",
+  "features/auth/return-to.ts",
   "features/auth/login-validation.ts",
   "features/auth/login-error.ts",
   "features/auth/use-login.ts",
@@ -73,15 +73,15 @@ test("aucun module atteignable côté client n'importe un module serveur/sensibl
 });
 
 test("les modules serveur Auth importent bien next/headers (frontière serveur)", () => {
-  assert.ok(source("core/auth/server/next-cookie-store.ts").includes("next/headers"));
+  assert.ok(source("features/auth/server/next-cookie-store.ts").includes("next/headers"));
 });
 
 test("aucune variable NEXT_PUBLIC_ ne porte de token/secret", () => {
   for (const mod of [
     "core/config/public-config.ts",
     "core/api/public/public-api-client.ts",
-    "core/auth/cookie-config.ts",
-    "core/auth/web-session-adapter.ts",
+    "features/auth/cookie-config.ts",
+    "features/auth/web-session-adapter.ts",
   ]) {
     const src = source(mod);
     assert.ok(!/NEXT_PUBLIC_[A-Z_]*(TOKEN|SECRET|PASSWORD|KEY)/.test(src), `${mod} : NEXT_PUBLIC_ sensible`);

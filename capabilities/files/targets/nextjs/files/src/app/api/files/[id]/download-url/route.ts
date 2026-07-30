@@ -1,5 +1,5 @@
-import { buildAuthHandlerDeps } from "../../../../../core/auth/server/route-deps.js";
-import { handleCreateDownloadUrl } from "../../../../../core/files/handlers/create-download-url-handler.js";
+import { buildAuthHandlerDeps } from "../../../../../features/auth/server/route-deps.js";
+import { handleCreateDownloadUrl } from "../../../../../features/files/handlers/create-download-url-handler.js";
 
 export const dynamic = "force-dynamic";
 

@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { cookieName, type CookieEnv } from "../src/core/auth/cookie-config.js";
-import { inMemoryReadOnlyCookieStore } from "../src/core/auth/read-only-cookie-store.js";
+import { cookieName, type CookieEnv } from "../src/features/auth/cookie-config.js";
+import { inMemoryReadOnlyCookieStore } from "../src/features/auth/read-only-cookie-store.js";
 import {
   PROTECTED_ANONYMOUS_REDIRECT,
   decideProtectedRender,
   resolveServerSession,
   type ServerSessionResolution,
-} from "../src/core/auth/resolve-server-session.js";
+} from "../src/features/auth/resolve-server-session.js";
 import { createMockFetch, envelope } from "./helpers/api-test-kit.js";
 
 const ENV: CookieEnv = "development";

@@ -2,8 +2,8 @@ import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import type { ReactElement, ReactNode } from "react";
 
-import { decideProtectedRender } from "../../core/auth/resolve-server-session.js";
-import { resolveNextServerSession } from "../../core/auth/server/protected-session.js";
+import { decideProtectedRender } from "../../features/auth/resolve-server-session.js";
+import { resolveNextServerSession } from "../../features/auth/server/protected-session.js";
 import { createQueryClient } from "../../core/query/query-client.js";
 import { prefillSessionQuery } from "../../features/auth/auth-queries.js";
 import { ServiceUnavailableView } from "../../features/auth/service-unavailable-view.js";

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { BffAuthError } from "../src/core/auth/client/bff-error.js";
-import { createFileDownloadUrl, getFileMetadata } from "../src/core/files/client/files-bff-client.js";
+import { BffAuthError } from "../src/features/auth/client/bff-error.js";
+import { createFileDownloadUrl, getFileMetadata } from "../src/features/files/client/files-bff-client.js";
 import { createBrowserFetch, type BrowserResponseSpec } from "./helpers/browser-fetch.js";
 
 const ID = "b3f1c2d4-5e6f-4a8b-9c0d-1e2f3a4b5c6d";

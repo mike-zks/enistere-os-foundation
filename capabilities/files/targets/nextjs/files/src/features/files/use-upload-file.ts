@@ -5,10 +5,10 @@ import { useRef } from "react";
 
 import type { FileCategory } from "@enistere/api-client-fetch";
 
-import { getCsrfToken } from "../../core/auth/client/csrf-client.js";
-import { uploadFile } from "../../core/files/client/files-bff-client.js";
-import type { PublicStoredFile } from "../../core/files/client/files-bff-client.js";
-import { fileKeys } from "../../core/query/keys/file-keys.js";
+import { getCsrfToken } from "../auth/client/csrf-client.js";
+import { uploadFile } from "./client/files-bff-client.js";
+import type { PublicStoredFile } from "./client/files-bff-client.js";
+import { fileKeys } from "./file-keys.js";
 import { classifyFileError, type FileError } from "./file-error.js";
 
 export interface UploadFileInput {

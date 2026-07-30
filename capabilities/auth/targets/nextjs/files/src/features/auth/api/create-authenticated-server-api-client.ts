@@ -5,10 +5,10 @@ import {
   type EnistereApiClientOptions,
 } from "@enistere/api-client-fetch";
 
-import { resolveCookieEnv, type CookieEnv } from "../../auth/cookie-config.js";
-import type { ServerCookieStore } from "../../auth/server-cookie-store.js";
-import { WebAuthSessionAdapter } from "../../auth/web-session-adapter.js";
-import { getServerApiUrl } from "../../config/server-config.js";
+import { resolveCookieEnv, type CookieEnv } from "../cookie-config.js";
+import type { ServerCookieStore } from "../server-cookie-store.js";
+import { WebAuthSessionAdapter } from "../web-session-adapter.js";
+import { getServerApiUrl } from "../../../core/config/server-config.js";
 
 type InjectedFetch = NonNullable<EnistereApiClientOptions["fetch"]>;
 

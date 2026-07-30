@@ -1,5 +1,5 @@
-import { handleGetProfile } from "../../../../core/auth/handlers/get-profile-handler.js";
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
+import { handleGetProfile } from "../../../../features/auth/handlers/get-profile-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
 
 export const dynamic = "force-dynamic";
 

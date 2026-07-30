@@ -398,34 +398,63 @@ laissant passer une composition Angular qui ne compilait pas.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
+## Mission en cours — refonte des zones, Next.js migré
+
+[ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
+les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
+son corollaire opérant — *le cœur ne doit jamais savoir qu'une capability
+existe*.
+
+Le nom suit la famille : **API → `modules/`**, **Web et Mobile → `features/`**.
+
+### Fait
+
+- **Next.js : les trois capabilities ont quitté la zone cœur.** Les sept
+  violations déclarées sont refermées, `layout-gaps.json` est vide.
+- Le cas des clés de requête est tranché : `auth-keys.ts`, `file-keys.ts`,
+  `authorization-keys.ts` sont du métier ; le cœur garde l'infrastructure de
+  cache et `health-keys.ts`.
+
+### Deux couplages cachés que seul le déplacement pouvait montrer
+
+- **`tsconfig.test.json` excluait `src/core/auth/server`** — des modules liant
+  `next/headers`, invérifiables sous `node:test`. Le code déplacé, l'exclusion
+  ne portait plus et la suite compilait du code Next-only.
+- **Des tests de frontière énuméraient des chemins en dur** : ils vérifiaient
+  qu'aucun module client n'importe un module serveur en listant `core/auth/...`
+  littéralement, et passaient donc **par vacuité** sur des fichiers devenus
+  introuvables. Un test de frontière qui ne trouve plus sa frontière ne la
+  vérifie plus.
+
+### Preuves
+
+- 497/497 tests Foundation, aucune dérive de conformance ;
+- application Next.js composée avec **les trois capabilities** : `lint` propre,
+  `typecheck` propre, **457/457 tests**, `next build` réussi.
+
 ## Prochaine mission unique
 
-> **La refonte des zones** : séparer partout le cœur possédé par la Factory du
-> code métier des capabilities et des équipes.
+> **Donner une zone métier à NestJS**, deuxième des quatre runtimes à migrer.
 
 ### Justification de l'ordre
 
-C'est la troisième étape convenue, et elle est mûre : `layout-gaps.json` porte
-déjà la liste exacte des sept violations restantes, toutes sur Next.js, et FF5d
-mesure la règle sur les runtimes qui déclarent deux zones.
-
-L'enjeu n'est pas cosmétique. Une équipe qui reçoit un projet généré y écrit ses
-propres modules ; sans frontière nommée, « régénérer pour prendre le socle 2.1 »
-est une opération que la Factory ne peut pas mener sans risquer d'écraser du code
-qu'elle n'a pas écrit.
+NestJS est le runtime le plus chargé — trois capabilities y écrivent `src/auth`,
+`src/users`, `src/rbac`, `src/roles`, `src/permissions`, `src/authorization` et
+`src/files` à plat, mêlés à `src/platform`, `src/common`, `src/database`. C'est
+donc là que la frontière manque le plus, et c'est aussi le runtime dont les
+goldens sont les plus nombreux, donc la migration la mieux couverte.
 
 ### Critères de sortie
 
-- une ADR nomme les trois zones — cœur, composition, métier — et énonce que la
-  zone dépend de la **nature** du code, non de qui le livre ;
-- les sept violations Next.js sont refermées et `layout-gaps.json` disparaît ;
-- NestJS, FastAPI et React Native reçoivent une zone métier, et FF5d les couvre ;
-- le cas des clés de requête est tranché explicitement ;
-- chaque runtime migre derrière son golden, sans régression.
+- `src/modules/` accueille les sept répertoires métier ;
+- FF5d couvre NestJS ;
+- les goldens NestJS passent sans régression, y compris `triple-files` ;
+- aucun descripteur de conformance ne pointe dans le vide.
 
 ### Ce qui reste ouvert après cette mission
 
+- zones métier pour FastAPI (`app/modules/`) et React Native (`src/features/`) ;
+- l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
+- **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
-- le transport par cookie de refresh HttpOnly (ADR-075) ;
-- la limitation de débit distribuée sur FastAPI ;
-- le reste de §12 : SAST, SBOM, signatures, provenance, licences, threat modeling.
+- transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

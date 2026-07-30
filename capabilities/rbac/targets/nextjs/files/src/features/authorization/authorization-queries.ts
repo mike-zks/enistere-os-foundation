@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { authorizationKeys } from "../query/keys/authorization-keys.js";
+import { authorizationKeys } from "./authorization-keys.js";
 import { fetchAuthorization } from "./authorization-client.js";
 
 /**

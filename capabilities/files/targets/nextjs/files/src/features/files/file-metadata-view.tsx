@@ -1,8 +1,8 @@
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle, Text } from "@enistere/ui-kit";
 import type { ReactElement } from "react";
 
-import type { PublicStoredFile } from "../../core/files/client/files-bff-client.js";
-import { formatDateTime, formatFileSize } from "../../core/files/format.js";
+import type { PublicStoredFile } from "./client/files-bff-client.js";
+import { formatDateTime, formatFileSize } from "./format.js";
 import { PageHeader } from "../../shared/components/page-header.js";
 
 export interface FileMetadataViewProps {

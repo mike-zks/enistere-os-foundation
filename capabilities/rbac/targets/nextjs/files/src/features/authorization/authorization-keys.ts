@@ -1,4 +1,4 @@
-import { authKeys } from "./auth-keys.js";
+import { authKeys } from "../auth/auth-keys.js";
 
 /**
  * Query keys RBAC. Volontairement **dérivées de `authKeys.all`** : la purge du cache

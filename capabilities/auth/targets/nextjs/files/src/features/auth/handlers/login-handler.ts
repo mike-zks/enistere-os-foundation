@@ -1,4 +1,4 @@
-import { createAuthenticatedServerApiClient } from "../../api/server/create-authenticated-server-api-client.js";
+import { createAuthenticatedServerApiClient } from "../api/create-authenticated-server-api-client.js";
 import { BodyError, readBoundedJsonBody } from "../http/read-body.js";
 import { LoginValidationError, parseLoginInput, type LoginInput } from "../http/validate-login.js";
 import { errorResponse, jsonError, jsonOk } from "../http/web-response.js";

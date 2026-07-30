@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { BffAuthError } from "../src/core/auth/client/bff-error.js";
-import { performBffLogin } from "../src/core/auth/client/login-client.js";
+import { BffAuthError } from "../src/features/auth/client/bff-error.js";
+import { performBffLogin } from "../src/features/auth/client/login-client.js";
 
 interface Spec {
   status?: number;

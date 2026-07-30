@@ -5,7 +5,7 @@ import {
   generateCsrfToken,
   isValidCsrfFormat,
   validateCsrfToken,
-} from "../src/core/auth/csrf/csrf-token.js";
+} from "../src/features/auth/csrf/csrf-token.js";
 
 test("génération : format base64url, longueur 256 bits (43 caractères)", () => {
   const token = generateCsrfToken();

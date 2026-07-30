@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { BffAuthError } from "../src/core/auth/client/bff-error.js";
-import { formatDateTime, formatFileSize } from "../src/core/files/format.js";
-import { isUuid } from "../src/core/files/uuid.js";
+import { BffAuthError } from "../src/features/auth/client/bff-error.js";
+import { formatDateTime, formatFileSize } from "../src/features/files/format.js";
+import { isUuid } from "../src/features/files/uuid.js";
 import { classifyFileError } from "../src/features/files/file-error.js";
 
 test("isUuid : v4 valide, rejets divers", () => {

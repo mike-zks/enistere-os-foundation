@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { BodyError, readBoundedJsonBody } from "../src/core/auth/http/read-body.js";
-import { LoginValidationError, parseLoginInput } from "../src/core/auth/http/validate-login.js";
+import { BodyError, readBoundedJsonBody } from "../src/features/auth/http/read-body.js";
+import { LoginValidationError, parseLoginInput } from "../src/features/auth/http/validate-login.js";
 
 // --- parseLoginInput ---
 

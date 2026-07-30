@@ -1,40 +1,5 @@
 {
-  "$comment": "Violations CONNUES et actées de la zone métier (FF5d). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier et sur une échéance dépassée. Ce socle rend la dette visible et bornée — il ne l'excuse pas.",
+  "$comment": "Violations CONNUES et actées de la zone métier (FF5d). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier et sur une échéance dépassée. Ce socle rend la dette visible et bornée — il ne l'excuse pas. Aucun écart déclaré : la refonte des zones a refermé les sept violations Next.js.",
   "schemaVersion": "1",
-  "gaps": [
-    {
-      "capability": "auth",
-      "runtime": "nextjs",
-      "destinations": [
-        "src/core/api/server/create-authenticated-server-api-client.ts",
-        "src/core/auth",
-        "src/core/query/keys/auth-keys.ts"
-      ],
-      "justification": "Next.js sépare déjà `src/core` de `src/features`, mais les trois capabilities écrivent une partie de leur surface dans `core/`. Corrigé par la mission de refonte des zones, qui doit aussi trancher le cas des clés de requête : elles sont à la frontière entre infrastructure de cache et connaissance métier.",
-      "deadline": "2026-12-31",
-      "review": "Mission refonte des zones (cœur / composition / métier)."
-    },
-    {
-      "capability": "rbac",
-      "runtime": "nextjs",
-      "destinations": [
-        "src/core/authorization",
-        "src/core/query/keys/authorization-keys.ts"
-      ],
-      "justification": "Même cause que auth/nextjs.",
-      "deadline": "2026-12-31",
-      "review": "Mission refonte des zones."
-    },
-    {
-      "capability": "files",
-      "runtime": "nextjs",
-      "destinations": [
-        "src/core/files",
-        "src/core/query/keys/file-keys.ts"
-      ],
-      "justification": "Même cause que auth/nextjs.",
-      "deadline": "2026-12-31",
-      "review": "Mission refonte des zones."
-    }
-  ]
+  "gaps": []
 }

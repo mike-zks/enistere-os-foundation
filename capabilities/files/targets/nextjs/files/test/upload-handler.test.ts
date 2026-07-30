@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { handleUploadFile } from "../src/core/files/handlers/upload-file-handler.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { handleUploadFile } from "../src/features/files/handlers/upload-file-handler.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch, type MockResponseSpec } from "./helpers/api-test-kit.js";
 import { apiEnvelope, makeDeps, makeRequest, seedAuth, seedCsrf } from "./helpers/auth-test-kit.js";
 

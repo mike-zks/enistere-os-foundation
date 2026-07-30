@@ -2,8 +2,8 @@
 
 import { queryOptions, useQuery, type UseQueryResult } from "@tanstack/react-query";
 
-import { listFiles, type FileListResponse } from "../../core/files/client/files-bff-client.js";
-import { fileKeys } from "../../core/query/keys/file-keys.js";
+import { listFiles, type FileListResponse } from "./client/files-bff-client.js";
+import { fileKeys } from "./file-keys.js";
 
 const LIST_DEFAULT_LIMIT = 20;
 const LIST_DEFAULT_OFFSET = 0;
