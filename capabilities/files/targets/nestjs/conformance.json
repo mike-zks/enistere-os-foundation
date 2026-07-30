@@ -149,8 +149,8 @@
     "FILES-AUTHORITY-011": [
       {
         "kind": "source",
-        "source": "files/src/audit/files-audit-events.ts",
-        "materialized": "src/audit/files-audit-events.ts",
+        "source": "files/src/modules/files/files-audit-events.ts",
+        "materialized": "src/modules/files/files-audit-events.ts",
         "contains": [
           "FILE_UPLOADED",
           "FILE_DOWNLOAD_URL_ISSUED",

@@ -398,7 +398,7 @@ laissant passer une composition Angular qui ne compilait pas.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
-## Mission en cours — refonte des zones, Next.js migré
+## Mission en cours — refonte des zones, Next.js et NestJS migrés
 
 [ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
 les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
@@ -426,34 +426,57 @@ Le nom suit la famille : **API → `modules/`**, **Web et Mobile → `features/`
   introuvables. Un test de frontière qui ne trouve plus sa frontière ne la
   vérifie plus.
 
+### NestJS aussi
+
+Sept répertoires métier — `auth`, `users`, `files`, `authorization`, `roles`,
+`permissions`, `rbac` — vivaient à plat, mêlés à `platform`, `common`,
+`database`. Ils sont sous `src/modules/`. Trois fichiers de Files logeaient dans
+le cœur (`config/files.configuration.ts`, `common/errors/files-error-codes.ts`,
+`audit/files-audit-events.ts`) : même critère, ils ont suivi leur domaine.
+
+**NestJS n'a pas de `core/` unique** : sa zone cœur est l'ensemble des
+répertoires que le starter possède, et FF5d les énumère plutôt que d'inventer un
+répertoire que le framework n'a jamais eu.
+
+### Ce que la règle a révélé sur Spring
+
+En étendant FF5d à Spring — que j'avais qualifié de « net » parce qu'il avait
+déjà `modules/` — la mesure a montré **neuf violations** : toutes ses classes
+`@Configuration` de capability siègent dans `core/config/`. Avoir une zone métier
+ne prouve pas qu'on l'utilise partout. Les neuf sont déclarés et datés ; **Spring
+devient une migration non prévue**.
+
 ### Preuves
 
 - 497/497 tests Foundation, aucune dérive de conformance ;
-- application Next.js composée avec **les trois capabilities** : `lint` propre,
-  `typecheck` propre, **457/457 tests**, `next build` réussi.
+- application Next.js composée (trois capabilities) : `lint` propre, `typecheck`
+  propre, **457/457 tests**, `next build` réussi ;
+- application NestJS composée (trois capabilities) : `lint` et `build` verts,
+  **387 tests sur 52 suites**.
 
 ## Prochaine mission unique
 
-> **Donner une zone métier à NestJS**, deuxième des quatre runtimes à migrer.
+> **Donner une zone métier à FastAPI** (`app/modules/`), troisième des cinq
+> runtimes à migrer.
 
 ### Justification de l'ordre
 
-NestJS est le runtime le plus chargé — trois capabilities y écrivent `src/auth`,
-`src/users`, `src/rbac`, `src/roles`, `src/permissions`, `src/authorization` et
-`src/files` à plat, mêlés à `src/platform`, `src/common`, `src/database`. C'est
-donc là que la frontière manque le plus, et c'est aussi le runtime dont les
-goldens sont les plus nombreux, donc la migration la mieux couverte.
+FastAPI est le plus petit des trois restants — deux capabilities, `app/auth` et
+`app/authorization`, que j'ai écrites cette semaine — et le seul dont la zone
+cœur contient un cas déjà tranché : `app/persistence/` est de l'infrastructure
+apportée par une capability, donc il **reste** dans le cœur. C'est la
+démonstration la plus directe du critère « la nature, pas le livreur ».
 
 ### Critères de sortie
 
-- `src/modules/` accueille les sept répertoires métier ;
-- FF5d couvre NestJS ;
-- les goldens NestJS passent sans régression, y compris `triple-files` ;
-- aucun descripteur de conformance ne pointe dans le vide.
+- `app/modules/` accueille `auth` et `authorization` ; `app/persistence` reste ;
+- FF5d couvre FastAPI ;
+- les goldens `fastapi-auth` et `fastapi-rbac` passent sans régression.
 
 ### Ce qui reste ouvert après cette mission
 
-- zones métier pour FastAPI (`app/modules/`) et React Native (`src/features/`) ;
+- zones métier pour React Native (`src/features/`) et **Spring** (neuf classes
+  `@Configuration` déclarées) ;
 - l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
 - **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;

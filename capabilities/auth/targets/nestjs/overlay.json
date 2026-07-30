@@ -6,12 +6,12 @@
   "description": "Authentification NestJS : login, refresh (rotation), logout, sessions révocables et utilisateurs techniques (ADR-004, ADR-039). Sans RBAC ni Files.",
   "files": [
     {
-      "source": "files/src/auth",
-      "destination": "src/auth"
+      "source": "files/src/modules/auth",
+      "destination": "src/modules/auth"
     },
     {
-      "source": "files/src/users",
-      "destination": "src/users"
+      "source": "files/src/modules/users",
+      "destination": "src/modules/users"
     },
     {
       "source": "files/prisma/migrations/20260718000100_auth_init",
@@ -111,12 +111,12 @@
   "integrations": [
     {
       "kind": "nestjs.module",
-      "importPath": "../auth/auth.module",
+      "importPath": "../modules/auth/auth.module",
       "symbol": "AuthModule"
     },
     {
       "kind": "nestjs.global-guard",
-      "importPath": "../auth/guards/jwt-auth.guard",
+      "importPath": "../modules/auth/guards/jwt-auth.guard",
       "symbol": "JwtAuthGuard",
       "order": 10
     },

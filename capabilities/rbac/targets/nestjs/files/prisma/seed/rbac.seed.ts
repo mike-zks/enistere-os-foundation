@@ -21,7 +21,7 @@ import {
   SYSTEM_PERMISSION_CODES,
   SYSTEM_ROLE_CODES,
   parsePermissionCode,
-} from '../../src/permissions/permissions.constants';
+} from '../../src/modules/permissions/permissions.constants';
 
 export async function seedRbac({ prisma }: SeedContext): Promise<void> {
   for (const code of SYSTEM_PERMISSION_CODES) {

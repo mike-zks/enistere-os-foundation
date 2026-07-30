@@ -38,8 +38,8 @@ describe('auth golden compositions', () => {
 
   it('NestJS base carries no Auth surface', async () => {
     const out = await gen('nestjs-base', { api: 'nestjs', web: null, mobile: null }, ['base']);
-    assert.equal(await exists(join(out, 'apps/api/src/auth')), false, 'src/auth must be absent');
-    assert.equal(await exists(join(out, 'apps/api/src/users')), false, 'src/users must be absent');
+    assert.equal(await exists(join(out, 'apps/api/src/modules/auth')), false, 'src/auth must be absent');
+    assert.equal(await exists(join(out, 'apps/api/src/modules/users')), false, 'src/users must be absent');
     const appModule = await readFile(join(out, 'apps/api/src/app.module.ts'), 'utf8');
     assert.ok(!/AuthModule/.test(appModule), 'app.module must not reference AuthModule');
     const comp = await readFile(join(out, 'apps/api/src/composition/capabilities.ts'), 'utf8');
@@ -118,9 +118,9 @@ describe('auth golden compositions', () => {
 
   it('NestJS base+auth composes Auth without RBAC or Files', async () => {
     const out = await gen('nestjs-auth', { api: 'nestjs', web: null, mobile: null }, ['base', 'auth']);
-    assert.ok(await exists(join(out, 'apps/api/src/auth/auth.module.ts')));
-    assert.ok(await exists(join(out, 'apps/api/src/users/users.service.ts')));
-    const authModule = await readFile(join(out, 'apps/api/src/auth/auth.module.ts'), 'utf8');
+    assert.ok(await exists(join(out, 'apps/api/src/modules/auth/auth.module.ts')));
+    assert.ok(await exists(join(out, 'apps/api/src/modules/users/users.service.ts')));
+    const authModule = await readFile(join(out, 'apps/api/src/modules/auth/auth.module.ts'), 'utf8');
     assert.ok(!/AuthorizationModule|RolesModule|PermissionsModule/.test(authModule), 'Auth must not depend on RBAC');
     const comp = await readFile(join(out, 'apps/api/src/composition/capabilities.ts'), 'utf8');
     assert.match(comp, /AuthModule/);
@@ -133,9 +133,9 @@ describe('auth golden compositions', () => {
     assert.match(schema, /model User \{/);
     assert.match(schema, /model RefreshSession \{/);
     assert.ok(await exists(join(out, 'apps/api/prisma/migrations/20260718000100_auth_init/migration.sql')));
-    assert.equal(await exists(join(out, 'apps/api/src/roles')), false, 'no RBAC');
-    assert.equal(await exists(join(out, 'apps/api/src/permissions')), false, 'no RBAC');
-    assert.equal(await exists(join(out, 'apps/api/src/files')), false, 'no Files');
+    assert.equal(await exists(join(out, 'apps/api/src/modules/roles')), false, 'no RBAC');
+    assert.equal(await exists(join(out, 'apps/api/src/modules/permissions')), false, 'no RBAC');
+    assert.equal(await exists(join(out, 'apps/api/src/modules/files')), false, 'no Files');
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     assert.equal(lock.overlays.length, 1);
     assert.match(lock.overlays[0].digest, /^[0-9a-f]{64}$/);
@@ -165,7 +165,7 @@ describe('auth golden compositions', () => {
     assert.match(env, /WEB_ALLOWED_ORIGINS=/);
     assert.equal(await exists(join(out, 'apps/web/src/features/files')), false);
     assert.equal(await exists(join(out, 'apps/web/src/app/api/files')), false);
-    assert.ok(await exists(join(out, 'apps/api/src/auth/auth.module.ts')));
+    assert.ok(await exists(join(out, 'apps/api/src/modules/auth/auth.module.ts')));
   });
 
   it('NestJS + Next.js + React Native base carries no mobile Auth surface', async () => {

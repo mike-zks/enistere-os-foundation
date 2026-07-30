@@ -1,5 +1,42 @@
 {
-  "$comment": "Violations CONNUES et actées de la zone métier (FF5d). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier et sur une échéance dépassée. Ce socle rend la dette visible et bornée — il ne l'excuse pas. Aucun écart déclaré : la refonte des zones a refermé les sept violations Next.js.",
+  "$comment": "Violations CONNUES et actées de la zone métier (FF5d, ADR-079). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier, sur une déclaration que plus personne ne viole, et sur une échéance dépassée.",
   "schemaVersion": "1",
-  "gaps": []
+  "gaps": [
+    {
+      "capability": "auth",
+      "runtime": "spring",
+      "destinations": [
+        "src/main/java/com/enistere/core/config/Argon2Config.java",
+        "src/main/java/com/enistere/core/config/JwtConfig.java",
+        "src/main/java/com/enistere/core/config/SecurityConfig.java",
+        "src/main/java/com/enistere/core/config/SecurityErrorCodes.java",
+        "src/main/java/com/enistere/core/config/SecurityAuditEvents.java",
+        "src/main/java/com/enistere/core/config/SecurityExceptionHandler.java"
+      ],
+      "justification": "Spring a une zone métier (`modules/`) et l'utilise pour ses entités et services, mais ses classes @Configuration de capability sont restées dans `core/config/`. Même nature que `files.configuration.ts` déplacé sur NestJS : une configuration qui nomme un domaine métier apprend au cœur que ce domaine existe.",
+      "deadline": "2026-12-31",
+      "review": "Migration de zone du runtime Spring."
+    },
+    {
+      "capability": "rbac",
+      "runtime": "spring",
+      "destinations": [
+        "src/main/java/com/enistere/core/config/RbacConfiguration.java"
+      ],
+      "justification": "Même cause que auth/spring.",
+      "deadline": "2026-12-31",
+      "review": "Migration de zone du runtime Spring."
+    },
+    {
+      "capability": "files",
+      "runtime": "spring",
+      "destinations": [
+        "src/main/java/com/enistere/core/config/FilesConfig.java",
+        "src/main/java/com/enistere/core/config/StorageConfig.java"
+      ],
+      "justification": "Même cause que auth/spring.",
+      "deadline": "2026-12-31",
+      "review": "Migration de zone du runtime Spring."
+    }
+  ]
 }

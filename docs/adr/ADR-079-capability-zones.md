@@ -1,6 +1,6 @@
 # ADR-079 — Trois zones : ce que la Factory possède, ce qu'elle génère, ce qui est métier
 
-- Statut : Validé — Next.js migré, quatre runtimes restants
+- Statut : Validé — Next.js et NestJS migrés, trois runtimes restants
 - Date : 2026-07-30
 - Décideur : Owner Foundation
 - Complète : ADR-055 et ADR-074
@@ -59,6 +59,33 @@ client, le provider — et `health-keys.ts`, qui nomme une préoccupation du soc
 Le test décisif est le corollaire ci-dessus : si `core/query/keys/auth-keys.ts`
 reste, alors le cœur sait qu'« auth » existe.
 
+## Ce que la migration NestJS a ajouté
+
+NestJS n'avait aucune zone métier : sept répertoires — `auth`, `users`, `files`,
+`authorization`, `roles`, `permissions`, `rbac` — vivaient à plat, mêlés à
+`platform`, `common`, `database`. Ils sont désormais sous `src/modules/`.
+
+Trois fichiers de Files logeaient dans le cœur — `src/config/files.configuration.ts`,
+`src/common/errors/files-error-codes.ts`, `src/audit/files-audit-events.ts`. Ils
+appliquent exactement le critère : une configuration qui nomme un domaine métier
+apprend au cœur que ce domaine existe. Aucun fichier du cœur ne les référençait,
+seulement Files lui-même — le déplacement était donc net.
+
+**NestJS n'a pas de répertoire `core/` unique.** Sa zone cœur est l'ensemble des
+répertoires de premier niveau que le starter possède, et FF5d les énumère. C'est
+l'encodage honnête : inventer un `core/` que le framework n'a jamais eu aurait
+été plus élégant à écrire et étranger à l'idiome.
+
+## Ce que la règle a révélé sur Spring
+
+En étendant FF5d à Spring — réputé « net » parce qu'il avait déjà `modules/` — la
+mesure a montré **neuf violations** : toutes ses classes `@Configuration` de
+capability siègent dans `core/config/`. Le diagnostic initial était trop
+généreux : avoir une zone métier ne prouve pas qu'on l'utilise partout.
+
+Ces neuf écarts sont déclarés et datés ; le runtime Spring devient une migration
+à part entière, qui n'était pas prévue.
+
 ## Ce que la migration Next.js a révélé
 
 Next.js déclarait déjà les deux zones, et les trois capabilities écrivaient dans
@@ -82,21 +109,22 @@ précisément ce qu'une zone nommée rend explicite.
 
 ### Acquis
 
-* **Next.js n'a plus aucune capability dans sa zone cœur.** Les sept violations
-  déclarées sont refermées et `layout-gaps.json` est vide.
-* Angular, Flutter, Next.js et Spring respectent la règle ; FF5d la mesure sur
-  les trois qui déclarent deux zones.
+* **Next.js et NestJS n'ont plus aucune capability dans leur zone cœur.** Les
+  sept violations Next.js déclarées sont refermées.
+* FF5d couvre désormais cinq runtimes : Angular, Flutter, Next.js, NestJS et
+  Spring.
 * Le vocabulaire est fixé, donc les migrations restantes sont mécaniques.
 
 ### Assumé
 
-* **La migration est incomplète et le reste sciemment.** NestJS, FastAPI et
-  React Native n'ont pas encore de zone métier. Chacun est une migration à part
+* **La migration est incomplète et le reste sciemment.** FastAPI et React Native
+  n'ont pas encore de zone métier, et Spring garde neuf classes `@Configuration`
+  dans son cœur — écarts déclarés et datés. Chacun est une migration à part
   entière, derrière son golden : les grouper multiplierait le risque sans rien
   accélérer.
-* NestJS aura `src/modules/`, ce qui est légèrement à contre-courant de son
-  idiome usuel (`src/<feature>` à plat). C'est un coût accepté au bénéfice de la
-  cohérence de famille avec Spring.
+* NestJS prend `src/modules/`, légèrement à contre-courant de son idiome usuel
+  (`src/<feature>` à plat). Coût accepté au bénéfice de la cohérence de famille
+  avec Spring.
 
 ### Non revendiqué
 
@@ -122,14 +150,17 @@ précisément ce qu'une zone nommée rend explicite.
 npm run factory:test                      # 497
 npm run factory:capability-conformance    # aucune dérive
 node factory/quality/scripts/golden-runtime.mjs nest-next-files
+node factory/quality/scripts/golden-runtime.mjs nestjs-files
 ```
 
-Application Next.js composée avec **les trois capabilities**, réellement
-générée : `lint` propre, `typecheck` propre, **457/457 tests**, `next build`
-réussi.
+Applications réellement générées, chacune composant **les trois capabilities** :
+
+* **Next.js** — `lint` propre, `typecheck` propre, **457/457 tests**,
+  `next build` réussi ;
+* **NestJS** — `lint` et `build` verts, **387 tests sur 52 suites**.
 
 ## Rollback
 
-Révoquer le commit remet les capabilities Next.js dans la zone cœur et réactive
-les sept écarts déclarés. La règle FF5d et le vocabulaire restent valides : ils
-ne dépendent d'aucun runtime en particulier.
+Révoquer les commits remet les capabilities Next.js et NestJS dans la zone cœur.
+La règle FF5d et le vocabulaire restent valides : ils ne dépendent d'aucun
+runtime en particulier.

@@ -277,9 +277,9 @@ describe('rbac golden compositions (structural)', () => {
       assert.ok(new RegExp(`^model ${model} \\{`, 'm').test(schema), `${model} present`);
     }
     assert.ok(await exists(join(out, 'apps/api/prisma/migrations/20260719000200_rbac_init/migration.sql')));
-    assert.ok(await exists(join(out, 'apps/api/src/authorization/authorization.controller.ts')));
+    assert.ok(await exists(join(out, 'apps/api/src/modules/authorization/authorization.controller.ts')));
     // No Files surface is injected.
-    assert.equal(await exists(join(out, 'apps/api/src/files')), false);
+    assert.equal(await exists(join(out, 'apps/api/src/modules/files')), false);
   });
 
   it('composes RBAC on the web and never on mobile (not-applicable)', async () => {
@@ -309,12 +309,12 @@ describe('rbac golden compositions (structural)', () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-rbac-absence-'));
     const baseOnly = join(root, 'base');
     await generateProject(blueprint('rbac-absent', { api: 'nestjs', web: null, mobile: null }, ['base']), baseOnly);
-    assert.equal(await exists(join(baseOnly, 'apps/api/src/auth')), false);
-    assert.equal(await exists(join(baseOnly, 'apps/api/src/roles')), false);
+    assert.equal(await exists(join(baseOnly, 'apps/api/src/modules/auth')), false);
+    assert.equal(await exists(join(baseOnly, 'apps/api/src/modules/roles')), false);
 
     const withAuth = join(root, 'auth');
     await generateProject(blueprint('rbac-absent2', { api: 'nestjs', web: null, mobile: null }, ['base', 'auth']), withAuth);
-    assert.ok(await exists(join(withAuth, 'apps/api/src/auth/auth.module.ts')));
+    assert.ok(await exists(join(withAuth, 'apps/api/src/modules/auth/auth.module.ts')));
     for (const path of ['src/roles', 'src/permissions', 'src/authorization']) {
       assert.equal(await exists(join(withAuth, 'apps/api', path)), false, `base+auth must not contain ${path}`);
     }

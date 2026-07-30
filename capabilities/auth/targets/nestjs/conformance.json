@@ -85,8 +85,8 @@
     "AUTH-AUTHORITY-007": [
       {
         "kind": "test",
-        "source": "files/src/auth/auth.controller.spec.ts",
-        "materialized": "src/auth/auth.controller.spec.ts",
+        "source": "files/src/modules/auth/auth.controller.spec.ts",
+        "materialized": "src/modules/auth/auth.controller.spec.ts",
         "contains": [
           "throttles the login route independently",
           "AUTH_RATE_LIMITED"
@@ -94,8 +94,8 @@
       },
       {
         "kind": "source",
-        "source": "files/src/auth/guards/auth-throttler.guard.ts",
-        "materialized": "src/auth/guards/auth-throttler.guard.ts",
+        "source": "files/src/modules/auth/guards/auth-throttler.guard.ts",
+        "materialized": "src/modules/auth/guards/auth-throttler.guard.ts",
         "contains": [
           "AUTH_RATE_LIMITED",
           "ThrottlerGuard"
@@ -105,8 +105,8 @@
     "AUTH-AUTHORITY-008": [
       {
         "kind": "test",
-        "source": "files/src/auth/auth.service.spec.ts",
-        "materialized": "src/auth/auth.service.spec.ts",
+        "source": "files/src/modules/auth/auth.service.spec.ts",
+        "materialized": "src/modules/auth/auth.service.spec.ts",
         "contains": [
           "AUTH_LOGIN_SUCCEEDED",
           "AUTH_LOGIN_FAILED",

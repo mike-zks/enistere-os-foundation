@@ -8,12 +8,12 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
-import { PASSWORD_HASHER, PasswordHasher } from '../src/auth/password/password-hasher';
+import { PASSWORD_HASHER, PasswordHasher } from '../src/modules/auth/password/password-hasher';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { PrismaService } from '../src/database/prisma.service';
-import { FileReconciliationService } from '../src/files/reconciliation/file-reconciliation.service';
-import { ObjectStorage } from '../src/files/storage/object-storage';
-import { OBJECT_STORAGE } from '../src/files/storage/object-storage.token';
+import { FileReconciliationService } from '../src/modules/files/reconciliation/file-reconciliation.service';
+import { ObjectStorage } from '../src/modules/files/storage/object-storage';
+import { OBJECT_STORAGE } from '../src/modules/files/storage/object-storage.token';
 
 const OWNER_EMAIL = 'files-lifecycle-owner-e2e@example.test';
 const ADMIN_EMAIL = 'files-lifecycle-admin-e2e@example.test';

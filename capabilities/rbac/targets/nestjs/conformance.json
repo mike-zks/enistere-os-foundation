@@ -70,8 +70,8 @@
       },
       {
         "kind": "source",
-        "source": "files/src/rbac/rbac-audit-events.ts",
-        "materialized": "src/rbac/rbac-audit-events.ts",
+        "source": "files/src/modules/rbac/rbac-audit-events.ts",
+        "materialized": "src/modules/rbac/rbac-audit-events.ts",
         "contains": [
           "AUTHORIZATION_ROLE_DENIED",
           "AUTHORIZATION_PERMISSION_DENIED"

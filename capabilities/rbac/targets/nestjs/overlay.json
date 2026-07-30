@@ -6,20 +6,20 @@
   "description": "Autorisation RBAC NestJS : rôles, permissions fines, contexte d'autorisation par requête, guards globaux ordonnés après l'authentification et résumé d'autorisation de l'utilisateur courant (ADR-006). Composée par-dessus base + auth.",
   "files": [
     {
-      "source": "files/src/authorization",
-      "destination": "src/authorization"
+      "source": "files/src/modules/authorization",
+      "destination": "src/modules/authorization"
     },
     {
-      "source": "files/src/roles",
-      "destination": "src/roles"
+      "source": "files/src/modules/roles",
+      "destination": "src/modules/roles"
     },
     {
-      "source": "files/src/permissions",
-      "destination": "src/permissions"
+      "source": "files/src/modules/permissions",
+      "destination": "src/modules/permissions"
     },
     {
-      "source": "files/src/rbac",
-      "destination": "src/rbac"
+      "source": "files/src/modules/rbac",
+      "destination": "src/modules/rbac"
     },
     {
       "source": "files/prisma/migrations/20260719000200_rbac_init",
@@ -39,18 +39,18 @@
   "integrations": [
     {
       "kind": "nestjs.module",
-      "importPath": "../authorization/authorization.module",
+      "importPath": "../modules/authorization/authorization.module",
       "symbol": "AuthorizationModule"
     },
     {
       "kind": "nestjs.global-guard",
-      "importPath": "../roles/guards/roles.guard",
+      "importPath": "../modules/roles/guards/roles.guard",
       "symbol": "RolesGuard",
       "order": 20
     },
     {
       "kind": "nestjs.global-guard",
-      "importPath": "../permissions/guards/permissions.guard",
+      "importPath": "../modules/permissions/guards/permissions.guard",
       "symbol": "PermissionsGuard",
       "order": 30
     },

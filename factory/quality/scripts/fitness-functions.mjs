@@ -163,6 +163,19 @@ export function runFitnessFunctions({
     angular: { core: 'src/app/core/', business: 'src/app/features/' },
     flutter: { core: 'lib/src/core/', business: 'lib/src/features/' },
     nextjs: { core: 'src/core/', business: 'src/features/' },
+    // NestJS has no single `core/` directory: its core zone is every top-level
+    // source directory the starter owns. Listing them is the honest encoding —
+    // the alternative would be to invent a `core/` the framework never had.
+    nestjs: {
+      core: ['src/audit/', 'src/bootstrap/', 'src/common/', 'src/config/', 'src/database/',
+        'src/health/', 'src/platform/'],
+      business: 'src/modules/',
+    },
+    spring: {
+      core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
+        'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/'],
+      business: 'src/main/java/com/enistere/core/modules/',
+    },
   };
   const declaredLayoutGaps = layoutGaps;
   const today = new Date().toISOString().slice(0, 10);
@@ -172,11 +185,13 @@ export function runFitnessFunctions({
     const declared = declaredLayoutGaps.get(`${capability}/${target}`);
     for (const entry of overlay.files ?? []) {
       const destination = entry.destination ?? '';
-      if (!destination.startsWith(zone.core)) continue;
+      const cores = Array.isArray(zone.core) ? zone.core : [zone.core];
+      const breached = cores.find((prefix) => destination.startsWith(prefix));
+      if (breached === undefined) continue;
       if (!declared?.destinations.includes(destination)) {
         fail(
           'capability-business-zone',
-          `${capability}/${target} writes ${destination} into the core zone (${zone.core})`,
+          `${capability}/${target} writes ${destination} into the core zone (${breached})`,
         );
       } else if (declared.deadline < today) {
         fail(

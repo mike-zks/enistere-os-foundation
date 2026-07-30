@@ -6,8 +6,8 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { PrismaService } from '../src/database/prisma.service';
-import { FilesService } from '../src/files/files.service';
-import { FilesRepository } from '../src/files/files.repository';
+import { FilesService } from '../src/modules/files/files.service';
+import { FilesRepository } from '../src/modules/files/files.repository';
 
 const EMAIL_A = 'files-list-a@example.test';
 const EMAIL_B = 'files-list-b@example.test';
