@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_flutter/src/auth/auth_api.dart';
-import 'package:mobile_flutter/src/auth/auth_controller.dart';
-import 'package:mobile_flutter/src/auth/auth_errors.dart';
-import 'package:mobile_flutter/src/auth/auth_session.dart';
-import 'package:mobile_flutter/src/auth/credential_store.dart';
+import 'package:mobile_flutter/src/features/auth/auth_api.dart';
+import 'package:mobile_flutter/src/features/auth/auth_controller.dart';
+import 'package:mobile_flutter/src/features/auth/auth_errors.dart';
+import 'package:mobile_flutter/src/features/auth/auth_session.dart';
+import 'package:mobile_flutter/src/features/auth/credential_store.dart';
 import 'package:mobile_flutter/src/core/storage/secure_storage.dart';
 import 'package:mobile_flutter/src/core/storage/secure_storage_provider.dart';
 

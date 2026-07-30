@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { APP_BASE_URL } from '../config/api-config';
+import { APP_BASE_URL } from '../../core/config/api-config';
 import { AuthError, GENERIC_CREDENTIALS_MESSAGE, GENERIC_UNAVAILABLE_MESSAGE } from './auth-errors';
 import type { AuthSession } from './auth-session';
 

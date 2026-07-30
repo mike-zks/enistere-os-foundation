@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_flutter/src/auth/auth_api.dart';
-import 'package:mobile_flutter/src/auth/auth_controller.dart';
-import 'package:mobile_flutter/src/auth/credential_store.dart';
+import 'package:mobile_flutter/src/features/auth/auth_api.dart';
+import 'package:mobile_flutter/src/features/auth/auth_controller.dart';
+import 'package:mobile_flutter/src/features/auth/credential_store.dart';
 import 'package:mobile_flutter/src/core/api/app_api_error.dart';
 import 'package:mobile_flutter/src/core/api/dio_provider.dart';
 

@@ -1,7 +1,7 @@
 import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { APP_BASE_URL } from '../../config/api-config';
+import { APP_BASE_URL } from '../../../core/config/api-config';
 import { AuthApi } from '../auth-api';
 import { AuthError } from '../auth-errors';
 

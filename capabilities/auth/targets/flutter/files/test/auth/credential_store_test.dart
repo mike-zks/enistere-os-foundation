@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_flutter/src/auth/credential_store.dart';
+import 'package:mobile_flutter/src/features/auth/credential_store.dart';
 import 'package:mobile_flutter/src/core/storage/secure_storage.dart';
 
 final class _RecordingAdapter implements SecureStorageAdapter {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../auth/auth_controller.dart';
-import '../../auth/auth_errors.dart';
+import 'auth_controller.dart';
+import 'auth_errors.dart';
 
 /// Sign-in page contributed by the Authentication capability.
 ///

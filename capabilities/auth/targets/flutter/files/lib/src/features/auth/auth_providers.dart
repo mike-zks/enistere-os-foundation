@@ -2,8 +2,8 @@
 // export it.
 import 'package:flutter_riverpod/misc.dart';
 
-import '../core/storage/secure_storage.dart';
-import '../core/storage/secure_storage_provider.dart';
+import '../../core/storage/secure_storage.dart';
+import '../../core/storage/secure_storage_provider.dart';
 import 'flutter_secure_storage_adapter.dart';
 
 /// Binds the baseline secure-storage seam to the platform keystore.
