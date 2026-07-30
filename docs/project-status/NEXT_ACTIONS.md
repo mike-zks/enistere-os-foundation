@@ -275,37 +275,100 @@ restant est FastAPI, et il concerne les trois capabilities.
 - Aucun golden runtime n'a été exécuté localement de bout en bout (il exige
   PostgreSQL, l'API NestJS et un build APK) ; les gates Flutter, eux, l'ont été.
 
+## Mission achevée — Authentication sur FastAPI
+
+`auth/fastapi` est **`ready`** : quatre responsabilités, huit invariants, onze
+preuves ([ADR-077](../adr/ADR-077-authentication-fastapi.md)).
+
+```text
+auth   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 4/4 · angular 4/4 ✓
+       mobile rn 4/4 · flutter 4/4 ✓                     CONFORMANT
+```
+
+**Authentication est la première capability CONFORMANT comme produit** : les sept
+runtimes la tiennent, les trois familles sont à parité.
+
+Angular et Flutter étaient des clients ; FastAPI devait *être* l'autorité :
+persistance, Argon2id, émission et rotation de jetons, détection de rejeu,
+limitation de débit, audit métier, migrations.
+
+### Trois défauts trouvés par la vérification réelle
+
+Aucun n'aurait été vu sans exécuter l'application générée contre un PostgreSQL
+réel.
+
+- **La révocation de la famille était annulée par le rollback qui la motivait.**
+  À la détection d'un rejeu, le confinement s'exécutait dans la transaction sur
+  le point d'être annulée par l'erreur : la famille survivait au vol qui venait
+  d'être détecté. Elle committe désormais dans sa propre transaction.
+- **Le chemin de rejeu n'était jamais atteint** : un jeton révoqué était classé
+  « inutilisable » avant d'être reconnu comme rejeu. Inconnu, expiré et révoqué
+  sont maintenant trois cas distincts.
+- **`EmailStr` refusait des adresses que NestJS et Spring acceptent** (`.test`,
+  `.internal` — TLD à usage réservé). Un utilisateur aurait pu s'inscrire contre
+  une autorité et être refusé par une autre. La validation est syntaxique, comme
+  chez les deux autres, et la dépendance disparaît avec le problème.
+
+### Deux prérequis d'outillage
+
+- **Handler d'erreur composé, pas enregistré au démarrage.** Starlette construit
+  sa pile d'exceptions *avant* l'événement de démarrage : un handler ajouté depuis
+  un `lifespan` ne serait jamais consulté et un refus d'identifiants répondrait
+  **500** — le défaut déjà rencontré sur Spring, ici évité par construction.
+- **Cycle d'imports** : `app.platform` importait la couture, qui importe la
+  capability, qui importe `app.platform`. Une couture se consomme au démarrage,
+  pas à l'import.
+
+### Preuves
+
+- 493/493 tests Foundation ; `auth` **CONFORMANT** sur les sept runtimes ;
+- application FastAPI composée réellement générée : `ruff` propre, **32/32
+  pytest** contre un PostgreSQL réel, `compileall` et `pip check` verts ;
+- migration Alembic appliquée sur une base vide, puis autorité exercée **sur ce
+  schéma migré** : connexion, `/me`, rotation, rejeu détecté, famille révoquée,
+  audit persisté ;
+- l'écart `auth/fastapi` est retiré de `parity-gaps.json` (5 restants).
+
+### Non revendiqué
+
+- La limitation de débit reste **en mémoire**, comme celle du baseline : elle
+  prouve le mécanisme sur une instance, pas sur un déploiement multi-processus.
+- La rotation n'est pas prouvée sous concurrence réelle ; la garantie repose sur
+  un `UPDATE … WHERE revoked_at IS NULL` conditionnel et le test couvre le rejeu
+  séquentiel.
+- Aucune preuve de démarrage headless pour `fastapi-auth`.
+
 ## Prochaine mission unique
 
-> **Porter Authentication sur FastAPI**, dernier écart de parité d'Authentication.
+> **Porter RBAC sur FastAPI**, pour rouvrir la parité API sur la deuxième
+> capability.
 
 ### Justification de l'ordre
 
-Authentication est tenue par six runtimes sur sept. Les familles Web et Mobile
-sont à parité ; **seule la famille API ne l'est pas**, et c'est la famille où
-l'écart coûte le plus cher : NestJS et Spring tiennent 4/4, FastAPI 0/4, et RBAC
-puis Files en dépendent tous les deux.
+Trois écarts de parité restent, et ils sont ordonnés par dépendance :
+`rbac/fastapi`, `rbac/angular`, puis Files sur les trois runtimes. RBAC vient
+avant Files partout, et FastAPI avant Angular parce que l'autorisation est
+d'abord une décision d'autorité : un client Web ne fait qu'en afficher le
+résultat.
 
-C'est aussi la mission la plus lourde des trois portages, et il faut le dire
-d'avance : Angular et Flutter étaient des **clients** — ils consomment une
-autorité. FastAPI doit **être** l'autorité : persistance, hachage de mot de passe,
-émission et rotation de jetons, détection de rejeu, limitation de débit, audit
-métier. Huit invariants `AUTH-AUTHORITY-*`, contre six côté client.
+Le terrain est préparé : `require_user` est exporté par la capability
+Authentication, les trois coutures FastAPI existent, et la persistance est en
+place avec ses migrations.
 
 ### Critères de sortie
 
-- `auth/fastapi` passe `unsupported` → `ready` avec les quatre responsabilités ;
-- parité API `OK` : FastAPI tient ce que NestJS et Spring tiennent ;
-- les huit invariants d'autorité prouvés, y compris la rotation avec détection de
-  rejeu et l'audit métier ;
-- migration de schéma livrée et exercée sur PostgreSQL réel ;
-- l'écart `auth/fastapi` est retiré de `parity-gaps.json` ;
-- golden FastAPI + Auth vert ;
-- aucun nouveau runtime, provider ou capability ; aucun dossier `base/`.
+- `rbac/fastapi` passe `unsupported` → `ready` avec les quatre responsabilités ;
+- parité API `OK` sur RBAC : FastAPI tient ce que NestJS et Spring tiennent ;
+- un refus d'autorisation répond **403**, jamais 500 — le défaut Spring ne doit
+  pas se reproduire sur un troisième runtime ;
+- migration additive livrée et exercée sur PostgreSQL réel ;
+- l'écart `rbac/fastapi` est retiré de `parity-gaps.json` ;
+- golden FastAPI + RBAC vert.
 
 ### Ce qui reste ouvert après cette mission
 
-- RBAC et Files sur Angular, Flutter et FastAPI ;
-- le transport par cookie de refresh HttpOnly (ADR-075), mission distincte qui
-  bénéficiera aux trois clients ;
+- RBAC sur Angular ; Files sur FastAPI, Angular et Flutter ;
+- le transport par cookie de refresh HttpOnly (ADR-075) ;
+- la limitation de débit distribuée, prérequis de toute revendication
+  `PRODUCTION_READY` sur FastAPI ;
 - le reste de §12 : SAST, SBOM, signatures, provenance, licences, threat modeling.

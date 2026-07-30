@@ -71,6 +71,7 @@ jobs:
           - nestjs-flutter-base
           - nestjs-angular-auth
           - nestjs-flutter-auth
+          - fastapi-auth
           - distributed-spring-nestjs
 
     services:

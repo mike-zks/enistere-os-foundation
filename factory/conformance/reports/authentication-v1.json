@@ -6,9 +6,10 @@
     "version": "1.1.0"
   },
   "evaluation": "foundation-registry",
-  "status": "NON_CONFORMANT",
+  "status": "CONFORMANT",
   "readyTargets": [
     "angular",
+    "fastapi",
     "flutter",
     "nestjs",
     "nextjs",
@@ -83,27 +84,37 @@
       "issues": []
     },
     "fastapi": {
-      "status": "UNSUPPORTED",
-      "manifestStatus": "unsupported",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/4",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "responsibilities": [
+        "login",
+        "logout",
+        "refresh",
+        "session"
+      ],
+      "coverage": "4/4",
       "family": "api",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "login",
-          "logout",
-          "refresh",
-          "session"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "auth-fastapi-integration",
+      "golden": "fastapi-auth",
+      "invariants": [
+        "AUTH-AUTHORITY-001",
+        "AUTH-AUTHORITY-002",
+        "AUTH-AUTHORITY-003",
+        "AUTH-AUTHORITY-004",
+        "AUTH-AUTHORITY-005",
+        "AUTH-AUTHORITY-006",
+        "AUTH-AUTHORITY-007",
+        "AUTH-AUTHORITY-008"
+      ],
+      "proofCount": 11,
       "materialized": false,
-      "issues": [
-        "family parity: api runtimes must hold the same responsibilities; missing login, logout, refresh, session"
-      ]
+      "issues": []
     },
     "nextjs": {
       "status": "CONFORMANT",

@@ -49,9 +49,13 @@ describe('capability product conformance', () => {
         );
       }
       // …and the capability is only conformant when no served runtime is left
-      // behind. Today three are, which is why all three read NON_CONFORMANT
-      // (ADR-074) — the honest verdict, not a regression.
-      assert.equal(report.status, 'NON_CONFORMANT');
+      // behind. Authentication is now held by all seven; RBAC and Files are not,
+      // and read NON_CONFORMANT — the honest verdict, not a regression.
+      assert.equal(
+        report.status,
+        report.capability === 'auth' ? 'CONFORMANT' : 'NON_CONFORMANT',
+        report.capability,
+      );
     }
   });
 
@@ -166,16 +170,18 @@ describe('capability product conformance', () => {
     assert.equal(report.targets['react-native'].coverage, '1/7');
   });
 
-  it('keeps Authentication measured on its six ready targets', async () => {
+  it('keeps Authentication measured on all seven targets', async () => {
     const report = await evaluateCapabilityProduct({ capability: 'auth', repoRoot: REPO_ROOT });
     assert.deepEqual(
       report.readyTargets,
-      ['angular', 'flutter', 'nestjs', 'nextjs', 'react-native', 'spring'],
+      ['angular', 'fastapi', 'flutter', 'nestjs', 'nextjs', 'react-native', 'spring'],
     );
-    // Both Web runtimes and both Mobile runtimes now hold Authentication: the
-    // only family still short of parity is the API one.
-    assert.equal(report.targets.fastapi.status, 'UNSUPPORTED');
-    assert.equal(report.targets.flutter.familyParity.status, 'OK');
+    // Every family is now at parity on Authentication, so the capability is
+    // conformant as a product rather than only on its strongest runtimes.
+    for (const runtime of ['fastapi', 'flutter', 'angular']) {
+      assert.equal(report.targets[runtime].familyParity.status, 'OK', runtime);
+    }
+    assert.equal(report.status, 'CONFORMANT');
   });
 
   it('treats a not-applicable target as a legitimate absence, never as conformance', async () => {

@@ -5,7 +5,11 @@ import { join, resolve } from 'node:path';
 import { buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabilities.mjs';
 import { getTargetAdapter } from '../engine/target-adapters.mjs';
 import { loadStarterManifests, STARTER_IDS, validateManifestConsistency, validateStarterManifest } from '../engine/starters.mjs';
-import { mergePubspecSection } from '../engine/overlay.mjs';
+import {
+  mergePubspecSection,
+  mergeRequirementsLock,
+  validatePythonDependencies,
+} from '../engine/overlay.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 
@@ -257,5 +261,144 @@ describe('pubspec dependency merging', () => {
     // Without this the adapter would default to npm and write a package.json
     // into a Dart application.
     assert.equal(getTargetAdapter('flutter').dependencyManager, 'pub');
+  });
+});
+
+describe('FastAPI composition seams', () => {
+  it('lets a capability contribute routers, lifespans and error handlers', () => {
+    const fastapi = getTargetAdapter('fastapi');
+    // Third runtime with the same missing-seam gap as Angular and Flutter.
+    assert.deepEqual(
+      Object.keys(fastapi.integrationKinds).sort(),
+      ['fastapi.exception-handler', 'fastapi.lifespan', 'fastapi.router'],
+    );
+    assert.deepEqual(
+      fastapi.composition.map((entry) => entry.destination),
+      [
+        'app/composition/capability_routers.py',
+        'app/composition/capability_lifespan.py',
+        'app/composition/capability_exception_handlers.py',
+      ],
+    );
+  });
+
+  it('registers contributed handlers before Starlette builds its stack', async () => {
+    const app = resolve(root, 'starters/fastapi/app');
+    const main = await readFile(join(app, 'main.py'), 'utf8');
+    // A handler added from a lifespan hook is never consulted: the exception
+    // middleware is already built. A capability error would then surface as a
+    // 500 — the very defect found on the Spring authority.
+    assert.match(main, /for capability_exception, capability_handler in CAPABILITY_EXCEPTION_HANDLERS:/);
+    assert.match(main, /app\.add_exception_handler\(capability_exception, capability_handler\)/);
+    const seam = await readFile(join(app, 'composition/capability_exception_handlers.py'), 'utf8');
+    assert.match(seam, /CAPABILITY_EXCEPTION_HANDLERS: tuple\[/);
+  });
+
+  it('orders contributed routers and hooks deterministically', () => {
+    const { composition } = getTargetAdapter('fastapi');
+    for (const kind of ['fastapi.router', 'fastapi.lifespan']) {
+      const render = composition.find((entry) => entry.kinds.includes(kind)).render;
+      const output = render([
+        { kind, importPath: 'app.z', symbol: 'z_thing', order: 2 },
+        { kind, importPath: 'app.a', symbol: 'a_thing', order: 1 },
+      ]);
+      assert.ok(output.indexOf('    a_thing,') < output.indexOf('    z_thing,'));
+    }
+  });
+
+  it('keeps the baseline seams empty and consumed by the app', async () => {
+    const app = resolve(root, 'starters/fastapi/app');
+    const routers = await readFile(join(app, 'composition/capability_routers.py'), 'utf8');
+    assert.match(routers, /CAPABILITY_ROUTERS: tuple\[APIRouter, \.\.\.\] = \(\)/);
+    const lifespans = await readFile(join(app, 'composition/capability_lifespan.py'), 'utf8');
+    assert.match(lifespans, /CAPABILITY_LIFESPANS: tuple\[CapabilityLifespan, \.\.\.\] = \(\)/);
+
+    // A seam nothing consumes is decorative.
+    const main = await readFile(join(app, 'main.py'), 'utf8');
+    assert.match(main, /for capability_router in CAPABILITY_ROUTERS:/);
+    const platform = await readFile(join(app, 'platform.py'), 'utf8');
+    // AsyncExitStack, not a plain loop: a hook that fails to start must not leave
+    // the ones already entered open.
+    assert.match(platform, /async with AsyncExitStack\(\) as stack:/);
+    assert.match(platform, /for hook in CAPABILITY_LIFESPANS:/);
+  });
+});
+
+describe('python lock merging', () => {
+  // Sorted case-insensitively, exactly like the baseline locks.
+  const lock = 'fastapi==0.139.2\ntyping_extensions==4.16.0\nuvicorn==0.51.0\n';
+
+  it('requires a pinned transitive closure with its two subsets', () => {
+    assert.deepEqual(
+      validatePythonDependencies({ all: ['a==1', 'b==2'], runtime: ['a==1'], direct: ['a==1'] }),
+      [],
+    );
+    // The starter installs from a lock: a range would resolve differently later.
+    assert.deepEqual(
+      validatePythonDependencies({ all: ['a>=1'], runtime: ['a>=1'], direct: ['a>=1'] }),
+      [
+        'dependencies.python.all entry is not a pinned requirement: a>=1',
+        'dependencies.python.runtime entry is not a pinned requirement: a>=1',
+        'dependencies.python.direct entry is not a pinned requirement: a>=1',
+      ],
+    );
+    assert.deepEqual(
+      validatePythonDependencies({ all: ['a==1'], runtime: ['c==3'], direct: ['a==1'] }),
+      ['dependencies.python.runtime c==3 is missing from dependencies.python.all'],
+    );
+  });
+
+  it('inserts pins sorted like the baseline locks', () => {
+    const merged = mergeRequirementsLock(lock, ['SQLAlchemy==2.0.44', 'alembic==1.18.1'], 'x');
+    // Case-insensitive, so `SQLAlchemy` lands between `fastapi` and
+    // `typing_extensions` rather than ahead of every lowercase name.
+    assert.equal(
+      merged,
+      'alembic==1.18.1\nfastapi==0.139.2\nSQLAlchemy==2.0.44\ntyping_extensions==4.16.0\nuvicorn==0.51.0\n',
+    );
+  });
+
+  it('normalises package names the way PEP 503 does before comparing', () => {
+    // `typing_extensions` and `typing-extensions` are one package: comparing the
+    // raw strings would let an overlay pin the same distribution twice.
+    assert.equal(mergeRequirementsLock(lock, ['typing-extensions==4.16.0'], 'x'), lock);
+    assert.throws(
+      () => mergeRequirementsLock(lock, ['typing-extensions==4.0.0'], 'auth/fastapi'),
+      /auth\/fastapi: dependency conflict on typing-extensions \(4\.16\.0 vs 4\.0\.0\)/,
+    );
+  });
+
+  it('reproduces the order pip itself produced in the real locks', async () => {
+    // Adding nothing must return the file byte for byte. This is what proves the
+    // comparator is pip's — sorting by the raw line would reorder
+    // `pydantic_core` and `pydantic-settings`, rewriting a lock nobody touched.
+    for (const file of ['requirements.lock', 'requirements.runtime.lock']) {
+      const current = await readFile(resolve(root, 'starters/fastapi', file), 'utf8');
+      assert.equal(mergeRequirementsLock(current, [], 'identity'), current, file);
+    }
+  });
+
+  it('routes FastAPI overlays to python rather than to npm', () => {
+    assert.equal(getTargetAdapter('fastapi').dependencyManager, 'python');
+  });
+});
+
+describe('FastAPI golden environment', () => {
+  it('derives an asyncpg DSN from the shared Prisma-shaped URL', async () => {
+    const { asyncpgUrl, runtimeEnvironmentFor } = await import(
+      '../quality/scripts/golden-runtime.mjs'
+    );
+    // `?schema=` is a Prisma parameter; asyncpg rejects it as an unknown
+    // connection option, so the whole query string is dropped.
+    assert.equal(
+      asyncpgUrl('postgresql://u:p@localhost:5432/db?schema=public'),
+      'postgresql+asyncpg://u:p@localhost:5432/db',
+    );
+    const environment = runtimeEnvironmentFor(
+      { runtime: 'fastapi', id: 'api' },
+      'modular-monolith',
+      { DATABASE_URL: 'postgresql://u:p@localhost:5432/db?schema=public' },
+    );
+    assert.equal(environment.ENISTERE_DATABASE_URL, 'postgresql+asyncpg://u:p@localhost:5432/db');
   });
 });

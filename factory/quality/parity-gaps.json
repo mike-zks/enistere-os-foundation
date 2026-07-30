@@ -3,20 +3,6 @@
   "schemaVersion": "1",
   "gaps": [
     {
-      "capability": "auth",
-      "runtime": "fastapi",
-      "family": "api",
-      "missing": [
-        "login",
-        "logout",
-        "refresh",
-        "session"
-      ],
-      "justification": "ADR-062 a livré FastAPI comme troisième base API sans capability. ADR-074 établit que ce n'est pas un état final acceptable : un runtime de la famille API doit tenir ce que NestJS et Spring tiennent.",
-      "deadline": "2026-12-31",
-      "review": "Portage Authentication sur FastAPI, ou décision explicite de retirer FastAPI de la cible."
-    },
-    {
       "capability": "rbac",
       "runtime": "fastapi",
       "family": "api",
@@ -26,9 +12,9 @@
         "permissions",
         "roles"
       ],
-      "justification": "Même cause que auth/fastapi : RBAC dépend d'Authentication, donc l'écart se referme après celui d'auth.",
+      "justification": "RBAC dépend d'Authentication, désormais portée sur FastAPI (ADR-077). L'écart restant est celui de RBAC lui-même.",
       "deadline": "2026-12-31",
-      "review": "Après Authentication sur FastAPI."
+      "review": "Portage RBAC sur FastAPI."
     },
     {
       "capability": "files",
@@ -43,7 +29,7 @@
         "reconciliation",
         "upload"
       ],
-      "justification": "Même cause : Files dépend de auth + rbac, donc l'écart se referme en dernier dans la famille API.",
+      "justification": "Files dépend de auth + rbac. Authentication est portée (ADR-077) ; l'écart se referme après RBAC.",
       "deadline": "2026-12-31",
       "review": "Après RBAC sur FastAPI."
     },

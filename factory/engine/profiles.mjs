@@ -160,6 +160,7 @@ export const PROFILES = Object.freeze([
   profile('nestjs-flutter-auth', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['auth'], {
     golden: 'nestjs-flutter-auth',
   }),
+  profile('fastapi-auth', 'ready', { api: 'fastapi' }, ['auth'], { golden: 'fastapi-auth' }),
   profile('spring-angular-auth', 'supported', { api: 'spring', web: 'angular' }, ['auth']),
   profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
   profile('spring-flutter-auth', 'supported', { api: 'spring', mobile: 'flutter' }, ['auth']),

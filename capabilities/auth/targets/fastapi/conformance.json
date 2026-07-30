@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1",
+  "capability": "auth",
+  "target": "fastapi",
+  "contract": { "id": "authentication-product", "version": "1.1.0" },
+  "roles": ["authority"],
+  "suite": "auth-fastapi-integration",
+  "golden": "fastapi-auth",
+  "invariants": {
+    "AUTH-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_login_valid_credentials_returns_canonical_session",
+          "accessTokenExpiresIn",
+          "refreshTokenExpiresIn",
+          "passwordHash"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_login_wrong_password_and_unknown_email_return_the_same_generic_401",
+          "AUTH_INVALID_CREDENTIALS",
+          "disabled_account"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_me_requires_a_valid_token_and_returns_the_public_profile",
+          "test_me_rejects_a_token_whose_account_was_disabled_after_issuance"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_refresh_rotates_the_token_pair",
+          "test_refresh_after_rotation_detects_reuse_and_revokes_the_family",
+          "test_refresh_rejects_unknown_and_revoked_tokens_without_leaking_a_hash"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/app/auth/repository.py",
+        "materialized": "app/auth/repository.py",
+        "contains": [
+          "RefreshToken.revoked_at.is_(None)",
+          "revoke_user_sessions"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_logout_is_idempotent_and_revokes_the_refresh_session"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_login_persists_only_a_refresh_fingerprint",
+          "$argon2id$",
+          "token_hash"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_units.py",
+        "materialized": "tests/auth/test_auth_units.py",
+        "contains": [
+          "test_refresh_tokens_are_opaque_and_stored_as_a_keyed_fingerprint",
+          "test_password_hashing_is_argon2id_and_salted"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-007": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_credential_exchanges_are_rate_limited_with_the_canonical_envelope",
+          "AUTH_RATE_LIMITED"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/app/auth/ratelimit.py",
+        "materialized": "app/auth/ratelimit.py",
+        "contains": [
+          "WINDOW_SECONDS",
+          "rate_limited"
+        ]
+      }
+    ],
+    "AUTH-AUTHORITY-008": [
+      {
+        "kind": "test",
+        "source": "files/tests/auth/test_auth_authority.py",
+        "materialized": "tests/auth/test_auth_authority.py",
+        "contains": [
+          "test_audit_events_cover_the_authentication_lifecycle",
+          "LOGIN_SUCCEEDED",
+          "LOGIN_FAILED",
+          "REFRESH_SUCCEEDED",
+          "REFRESH_FAILED",
+          "LOGOUT"
+        ]
+      }
+    ]
+  }
+}

@@ -96,7 +96,34 @@
       ]
     },
     "fastapi": {
-      "status": "unsupported"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "fastapi",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "login",
+        "refresh",
+        "logout",
+        "session"
+      ],
+      "contracts": [
+        "auth-identity",
+        "auth-session"
+      ],
+      "primitives": [
+        "auth-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "auth-fastapi-database"
+      ],
+      "conformance": [
+        "auth-fastapi-integration"
+      ]
     },
     "nextjs": {
       "status": "ready",
@@ -215,6 +242,14 @@
       "strategy": "additive",
       "path": "targets/spring/files/src/main/resources/db/migration/V1__init_schema.sql",
       "order": 100
+    },
+    {
+      "id": "auth-fastapi-database",
+      "target": "fastapi",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/fastapi/files/migrations/versions/0001_auth_and_audit.py",
+      "order": 100
     }
   ],
   "conformance": [
@@ -246,6 +281,12 @@
       "id": "auth-angular-e2e",
       "target": "angular",
       "level": "e2e",
+      "evidence": "golden-runtime"
+    },
+    {
+      "id": "auth-fastapi-integration",
+      "target": "fastapi",
+      "level": "integration",
       "evidence": "golden-runtime"
     },
     {

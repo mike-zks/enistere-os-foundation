@@ -65,11 +65,15 @@ export function validateOverlayManifest(value, { capability, target } = {}) {
   if (!value.dependencies || typeof value.dependencies !== 'object' || Array.isArray(value.dependencies)) issues.push('dependencies must be an object');
   else {
     const dependencyManager = adapter?.dependencyManager ?? 'npm';
-    const allowedDependencyKeys = dependencyManager === 'maven' ? ['maven'] : ['dependencies', 'devDependencies'];
-    if (dependencyManager === 'python' && Object.keys(value.dependencies).length > 0) {
-      issues.push('dependencies are not supported for python targets yet');
-    }
+    const allowedDependencyKeys = dependencyManager === 'maven'
+      ? ['maven']
+      : dependencyManager === 'python'
+        ? ['python']
+        : ['dependencies', 'devDependencies'];
     for (const key of Object.keys(value.dependencies)) if (!allowedDependencyKeys.includes(key)) issues.push(`dependencies.${key} is not supported for ${dependencyManager}`);
+    if (dependencyManager === 'python' && value.dependencies.python !== undefined) {
+      issues.push(...validatePythonDependencies(value.dependencies.python));
+    }
     if (dependencyManager === 'maven') {
       const entries = value.dependencies.maven;
       if (!Array.isArray(entries)) issues.push('dependencies.maven must be an array for maven targets');
@@ -228,6 +232,102 @@ async function copyOverlayEntry(overlay, entry, appDirectory) {
   await cp(source, destination, { recursive: true, force: true });
 }
 
+/** `name==version` exactly: a lock holds pins, never ranges. */
+const PYTHON_PIN = /^[A-Za-z0-9][A-Za-z0-9._-]*==[A-Za-z0-9][A-Za-z0-9.*+!-]*$/;
+
+/**
+ * Validates the python dependency block of an overlay.
+ *
+ * The FastAPI starter installs from fully-resolved lock files, not from ranges:
+ * `requirements.lock` for the development environment and
+ * `requirements.runtime.lock` for the production image. An overlay must
+ * therefore declare the **complete transitive closure** it adds, pinned — the
+ * Factory resolves nothing, and a lock that is not a closure would install a
+ * different set on the next run.
+ *
+ * Three sections, all required: `all` is that closure, `runtime` the subset the
+ * production image installs, and `direct` the packages actually asked for —
+ * `requirements.txt` stays readable instead of becoming a second lock. Both
+ * subsets must be contained in `all`.
+ */
+export function validatePythonDependencies(block) {
+  const issues = [];
+  if (!block || typeof block !== 'object' || Array.isArray(block)) {
+    return ['dependencies.python must be an object'];
+  }
+  for (const key of Object.keys(block)) {
+    if (!['all', 'runtime', 'direct'].includes(key)) issues.push(`dependencies.python.${key} is not a known section`);
+  }
+  for (const section of ['all', 'runtime', 'direct']) {
+    const pins = block[section];
+    if (pins === undefined) {
+      issues.push(`dependencies.python.${section} is required`);
+      continue;
+    }
+    if (!Array.isArray(pins) || pins.length === 0) {
+      issues.push(`dependencies.python.${section} must be a non-empty array`);
+      continue;
+    }
+    for (const pin of pins) {
+      if (typeof pin !== 'string' || !PYTHON_PIN.test(pin)) {
+        issues.push(`dependencies.python.${section} entry is not a pinned requirement: ${pin}`);
+      }
+    }
+    if (new Set(pins).size !== pins.length) issues.push(`dependencies.python.${section} must not repeat a package`);
+  }
+  // `all` is the closure; the other two name subsets of it. A pin that appears
+  // nowhere in `all` would be installed by one path and not the other.
+  if (Array.isArray(block.all)) {
+    const closure = new Set(block.all);
+    for (const section of ['runtime', 'direct']) {
+      if (!Array.isArray(block[section])) continue;
+      for (const pin of block[section]) {
+        if (!closure.has(pin)) issues.push(`dependencies.python.${section} ${pin} is missing from dependencies.python.all`);
+      }
+    }
+  }
+  return issues;
+}
+
+/**
+ * Adds pinned requirements to one lock file, sorted case-insensitively like the
+ * baseline locks. A package already pinned at another version is a conflict, not
+ * a silent overwrite — the same rule package.json, pom.xml and pubspec follow.
+ */
+export function mergeRequirementsLock(lock, pins, label) {
+  const existing = new Map();
+  for (const line of lock.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed === '' || trimmed.startsWith('#')) continue;
+    const [name, version] = trimmed.split('==');
+    existing.set(normalizePythonName(name), { version, line: trimmed });
+  }
+  for (const pin of pins) {
+    const [name, version] = pin.split('==');
+    const key = normalizePythonName(name);
+    const current = existing.get(key);
+    if (current === undefined) {
+      existing.set(key, { version, line: pin });
+      continue;
+    }
+    if (current.version !== version) {
+      throw new Error(`${label}: dependency conflict on ${name} (${current.version} vs ${version})`);
+    }
+  }
+  // Sorted by NORMALISED name, which is the order pip itself produces: it is why
+  // `pydantic_core` precedes `pydantic-settings` in the baseline locks, where a
+  // raw string sort would put them the other way round.
+  const lines = [...existing.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, entry]) => entry.line);
+  return `${lines.join('\n')}\n`;
+}
+
+/** PEP 503 normalisation: `typing_extensions` and `typing-extensions` are one package. */
+function normalizePythonName(name) {
+  return name.toLowerCase().replace(/[-_.]+/g, '-');
+}
+
 const PUBSPEC_SECTIONS = Object.freeze({ dependencies: 'dependencies', devDependencies: 'dev_dependencies' });
 
 /**
@@ -276,6 +376,21 @@ export function mergePubspecSection(pubspec, section, entries, label) {
 
 async function mergeDependencies(overlay, appDirectory) {
   const declared = overlay.manifest.dependencies;
+  if (declared.python !== undefined) {
+    const label = `${overlay.manifest.capability}/${overlay.manifest.target}`;
+    // Both locks and the human-readable direct list are kept in step: the image
+    // installs the runtime lock, CI installs the full lock, and requirements.txt
+    // is what a reader consults to know what was actually asked for.
+    for (const [file, pins] of [
+      ['requirements.lock', declared.python.all],
+      ['requirements.runtime.lock', declared.python.runtime],
+      ['requirements.txt', declared.python.direct],
+    ]) {
+      const path = join(appDirectory, file);
+      await writeFile(path, mergeRequirementsLock(await readFile(path, 'utf8'), pins, label));
+    }
+    return;
+  }
   if (declared.maven !== undefined) {
     const pomPath = join(appDirectory, 'pom.xml');
     let pom = await readFile(pomPath, 'utf8');
