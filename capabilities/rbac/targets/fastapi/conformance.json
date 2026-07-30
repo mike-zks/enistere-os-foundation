@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "fastapi",
+  "contract": { "id": "authorization-product", "version": "1.0.0" },
+  "roles": ["authority"],
+  "suite": "rbac-fastapi-integration",
+  "golden": "fastapi-rbac",
+  "invariants": {
+    "RBAC-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/tests/authorization/test_authorization_authority.py",
+        "materialized": "tests/authorization/test_authorization_authority.py",
+        "contains": [
+          "test_a_revoked_grant_takes_effect_on_the_same_access_token",
+          "test_a_new_grant_takes_effect_on_the_same_access_token"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/app/authorization/repository.py",
+        "materialized": "app/authorization/repository.py",
+        "contains": [
+          "Read at request time, never cached and never carried in a token"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/tests/authorization/test_authorization_authority.py",
+        "materialized": "tests/authorization/test_authorization_authority.py",
+        "contains": [
+          "test_a_denial_is_generic_and_never_names_the_missing_grant",
+          "AUTH_FORBIDDEN"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/app/authorization/errors.py",
+        "materialized": "app/authorization/errors.py",
+        "contains": ["AUTH_FORBIDDEN", "def forbidden()"]
+      }
+    ],
+    "RBAC-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/tests/authorization/test_authorization_authority.py",
+        "materialized": "tests/authorization/test_authorization_authority.py",
+        "contains": [
+          "test_authentication_is_resolved_before_authorization"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/app/authorization/dependencies.py",
+        "materialized": "app/authorization/dependencies.py",
+        "contains": ["Depends(require_user)"]
+      }
+    ],
+    "RBAC-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/tests/authorization/test_authorization_authority.py",
+        "materialized": "tests/authorization/test_authorization_authority.py",
+        "contains": [
+          "test_authorization_is_deny_by_default"
+        ]
+      }
+    ],
+    "RBAC-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/tests/authorization/test_authorization_authority.py",
+        "materialized": "tests/authorization/test_authorization_authority.py",
+        "contains": [
+          "test_every_denial_is_recorded_as_a_business_audit_event",
+          "AUTHORIZATION_DENIED"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/app/authorization/service.py",
+        "materialized": "app/authorization/service.py",
+        "contains": ["audit_events.AUTHORIZATION_DENIED", "_record_denial"]
+      }
+    ],
+    "RBAC-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/tests/authorization/test_authorization_authority.py",
+        "materialized": "tests/authorization/test_authorization_authority.py",
+        "contains": [
+          "test_the_summary_exposes_sorted_effective_codes_only",
+          "test_the_summary_of_a_principal_without_grants_is_empty"
+        ]
+      }
+    ]
+  }
+}

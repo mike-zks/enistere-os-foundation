@@ -68,7 +68,7 @@ ne constitue pas un preset de composition mono-slot enregistré dans cette matri
 
 ## Profils enregistrés
 
-### `ready` — composables, prouvés et exacts (26)
+### `ready` — composables, prouvés et exacts (27)
 
 | Profil | API | Web | Mobile | Capabilities | Golden |
 |---|---|---|---|---|---|
@@ -98,6 +98,7 @@ ne constitue pas un preset de composition mono-slot enregistré dans cette matri
 | `nestjs-angular-auth` | nestjs | angular | — | auth | `nestjs-angular-auth` |
 | `nestjs-flutter-auth` | nestjs | — | flutter | auth | `nestjs-flutter-auth` |
 | `fastapi-auth` | fastapi | — | — | auth | `fastapi-auth` |
+| `fastapi-rbac` | fastapi | — | — | auth + rbac | `fastapi-rbac` |
 
 Sur `nestjs-next-react-native-rbac` et `nestjs-next-react-native-files`, `rbac` est `not-applicable` sur React
 Native : l'autorisation fine reste côté serveur et **aucune surface RBAC n'est injectée** sur le
@@ -151,17 +152,18 @@ portent aucun profil. La matrice des profils n'est donc pas une énumération de
 
 ## Couverture des goldens
 
-R8A, Capability Packs 2, FastAPI, ADR-066, ADR-076 puis ADR-077 portent le golden runtime à
-**27 compositions** : les 10 compositions NestJS des capability packs, les 10 compositions sans
+R8A, Capability Packs 2, FastAPI, ADR-066, ADR-076, ADR-077 puis ADR-078 portent le golden runtime
+à **28 compositions** : les 10 compositions NestJS des capability packs, les 10 compositions sans
 capability optionnelle, `spring-auth`, `spring-auth-rbac`, `spring-files`, les deux compositions
 `nestjs-angular-auth`, `nestjs-flutter-auth` et `fastapi-auth` qui prouvent Authentication hors de
-la verticale TypeScript historique, et le golden topologique `distributed-spring-nestjs`.
+la verticale TypeScript historique, `fastapi-rbac` qui y prouve l'autorisation, et le golden
+topologique `distributed-spring-nestjs`.
 
 Chaque golden est adossé à exactement un profil, et deux profils ne peuvent pas revendiquer le même.
 La correspondance n'est pas une convention de nommage : un test vérifie que la sélection générée par
 le golden est bien celle que le profil épingle.
 
-En revanche, **un golden n'est pas une promotion** : les 26 profils `ready` combinent golden
+En revanche, **un golden n'est pas une promotion** : les 27 profils `ready` combinent golden
 vert et composition exacte. Aucun profil `supported` baseline-copy ni profil `planned` n'a été
 promu par cette extraction. Le golden distribué prouve un profil système, pas
 un preset historique supplémentaire.

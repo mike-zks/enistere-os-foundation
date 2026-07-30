@@ -338,37 +338,94 @@ réel.
   séquentiel.
 - Aucune preuve de démarrage headless pour `fastapi-auth`.
 
+## Mission achevée — RBAC sur FastAPI
+
+`rbac/fastapi` est **`ready`** : quatre responsabilités, six invariants, dix
+preuves ([ADR-078](../adr/ADR-078-authorization-fastapi.md)). **La parité API est
+refermée sur RBAC** — les trois autorités tiennent 4/4.
+
+Le portage lui-même n'a rien révélé. **La composition à deux capabilities, si.**
+
+### Le défaut que seule la composition pouvait montrer
+
+Auth et RBAC exportent tous deux `router`. Le renderer FastAPI importait sans
+alias :
+
+```python
+from app.auth import router
+from app.authorization import router   # écrase le premier
+CAPABILITY_ROUTERS = (router, router)  # le même, deux fois
+```
+
+L'application aurait enregistré RBAC deux fois et **perdu entièrement les routes
+d'authentification** — sans erreur à l'import, au démarrage ni au lint. Le seul
+symptôme aurait été un 404 sur `/api/v1/auth/login` dans un projet livré.
+
+Angular et Flutter y échappaient **par chance**, leurs symboles étant distincts.
+Les trois renderers Python aliasent désormais et lèvent sur collision résiduelle.
+
+### Deux défauts de test, révélés de la même façon
+
+- le test de migration d'Authentication supposait posséder tout le schéma et
+  échouait dès qu'une seconde capability contribuait des tables ; il parcourt
+  maintenant toutes les révisions ;
+- le harnais RBAC recréait une permission existante, alors que deux rôles
+  accordant le même code est le cas ordinaire que le résumé doit dédupliquer.
+
+### Deux gates dus depuis la semaine dernière
+
+- le `golden` d'un descripteur de conformance doit exister dans `COMPOSITIONS` ;
+- toute composition de `COMPOSITIONS` doit figurer dans la matrice CI.
+
+C'est par ce trou que `nestjs-angular-auth` avait pu être nommé sans exister,
+laissant passer une composition Angular qui ne compilait pas.
+
+### Preuves
+
+- 497/497 tests Foundation ; `rbac/fastapi` **CONFORMANT**, parité API `OK` ;
+- application composée : `ruff` propre, **40/40 pytest** sur PostgreSQL réel,
+  `compileall` et `pip check` verts ;
+- deux révisions Alembic enchaînées sur base vide (8 tables), puis autorisation
+  exercée **sur ce schéma migré** : résumé vide, refus 403, octroi, puis **200
+  avec le même jeton d'accès**, déni enregistré avec l'habilitation manquante ;
+- l'écart `rbac/fastapi` est retiré de `parity-gaps.json` (4 restants).
+
+### Non revendiqué
+
+- **Aucune API d'administration des rôles** : créer, accorder, révoquer se fait
+  hors de la capability, comme sur les deux autres autorités.
+- Une lecture en base par requête gardée, sans cache — un cache rouvrirait une
+  fenêtre pendant laquelle une révocation n'a pas pris effet.
+- La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
+
 ## Prochaine mission unique
 
-> **Porter RBAC sur FastAPI**, pour rouvrir la parité API sur la deuxième
-> capability.
+> **La refonte des zones** : séparer partout le cœur possédé par la Factory du
+> code métier des capabilities et des équipes.
 
 ### Justification de l'ordre
 
-Trois écarts de parité restent, et ils sont ordonnés par dépendance :
-`rbac/fastapi`, `rbac/angular`, puis Files sur les trois runtimes. RBAC vient
-avant Files partout, et FastAPI avant Angular parce que l'autorisation est
-d'abord une décision d'autorité : un client Web ne fait qu'en afficher le
-résultat.
+C'est la troisième étape convenue, et elle est mûre : `layout-gaps.json` porte
+déjà la liste exacte des sept violations restantes, toutes sur Next.js, et FF5d
+mesure la règle sur les runtimes qui déclarent deux zones.
 
-Le terrain est préparé : `require_user` est exporté par la capability
-Authentication, les trois coutures FastAPI existent, et la persistance est en
-place avec ses migrations.
+L'enjeu n'est pas cosmétique. Une équipe qui reçoit un projet généré y écrit ses
+propres modules ; sans frontière nommée, « régénérer pour prendre le socle 2.1 »
+est une opération que la Factory ne peut pas mener sans risquer d'écraser du code
+qu'elle n'a pas écrit.
 
 ### Critères de sortie
 
-- `rbac/fastapi` passe `unsupported` → `ready` avec les quatre responsabilités ;
-- parité API `OK` sur RBAC : FastAPI tient ce que NestJS et Spring tiennent ;
-- un refus d'autorisation répond **403**, jamais 500 — le défaut Spring ne doit
-  pas se reproduire sur un troisième runtime ;
-- migration additive livrée et exercée sur PostgreSQL réel ;
-- l'écart `rbac/fastapi` est retiré de `parity-gaps.json` ;
-- golden FastAPI + RBAC vert.
+- une ADR nomme les trois zones — cœur, composition, métier — et énonce que la
+  zone dépend de la **nature** du code, non de qui le livre ;
+- les sept violations Next.js sont refermées et `layout-gaps.json` disparaît ;
+- NestJS, FastAPI et React Native reçoivent une zone métier, et FF5d les couvre ;
+- le cas des clés de requête est tranché explicitement ;
+- chaque runtime migre derrière son golden, sans régression.
 
 ### Ce qui reste ouvert après cette mission
 
-- RBAC sur Angular ; Files sur FastAPI, Angular et Flutter ;
+- RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - le transport par cookie de refresh HttpOnly (ADR-075) ;
-- la limitation de débit distribuée, prérequis de toute revendication
-  `PRODUCTION_READY` sur FastAPI ;
+- la limitation de débit distribuée sur FastAPI ;
 - le reste de §12 : SAST, SBOM, signatures, provenance, licences, threat modeling.

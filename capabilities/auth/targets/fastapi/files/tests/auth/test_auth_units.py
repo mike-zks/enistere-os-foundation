@@ -101,20 +101,24 @@ def test_persistence_settings_normalise_a_synchronous_dsn() -> None:
     assert str(settings.database_url).startswith("postgresql+asyncpg://")
 
 
-def test_the_migration_creates_exactly_what_the_models_declare() -> None:
-    """Pins the migration against the metadata the application actually uses.
+def test_every_declared_table_is_actually_migrated() -> None:
+    """Pins the declared schema against the migrations that build it.
 
-    The integration suite builds its schema from the metadata, so without this
-    the migration could drift indefinitely and every test would still pass —
-    until a real deployment ran the migration and met a different database.
+    The integration suites create their schema from the metadata, so without this
+    a migration could drift indefinitely and every test would still pass — until
+    a real deployment ran the migrations and met a different database.
+
+    Deliberately scanning *all* revisions rather than Authentication's own: the
+    metadata is shared, so a second composed capability contributes tables that
+    its own migration creates. Scoping this to one file made the test pass alone
+    and fail the moment anything else was composed — which is exactly backwards.
     """
-    migration = (
-        Path(__file__).resolve().parents[2] / "migrations" / "versions" / "0001_auth_and_audit.py"
-    ).read_text(encoding="utf-8")
-
-    for table in Base.metadata.tables:
-        assert f'"{table}"' in migration, f"{table} is declared but never migrated"
+    versions = Path(__file__).resolve().parents[2] / "migrations" / "versions"
+    migrations = "\n".join(
+        path.read_text(encoding="utf-8") for path in sorted(versions.glob("*.py"))
+    )
 
     for table, model in Base.metadata.tables.items():
+        assert f'"{table}"' in migrations, f"{table} is declared but never migrated"
         for column in model.columns:
-            assert f'"{column.name}"' in migration, f"{table}.{column.name} is missing"
+            assert f'"{column.name}"' in migrations, f"{table}.{column.name} is missing"
