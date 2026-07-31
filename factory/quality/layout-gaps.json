@@ -3,18 +3,6 @@
   "schemaVersion": "1",
   "gaps": [
     {
-      "capability": "auth",
-      "runtime": "react-native",
-      "destinations": [
-        "src/api",
-        "src/query/query-client.ts",
-        "src/query/index.ts"
-      ],
-      "justification": "Défaut d'une autre nature que le placement : React Native compose en ÉCRASANT des barils du cœur (`overwrite: true`) au lieu de passer par une couture. `src/api/index.ts` importe la capability pour câbler l'adaptateur de session ; `src/query/index.ts` ré-expose les hooks authentifiés. Déplacer ces fichiers ne corrigerait rien — ils doivent rester au cœur — le correctif est une couture de composition, comme les six autres runtimes en ont une.",
-      "deadline": "2026-12-31",
-      "review": "Coutures de composition pour React Native (client API, état serveur), puis retrait des écrasements."
-    },
-    {
       "capability": "files",
       "runtime": "spring",
       "destinations": [

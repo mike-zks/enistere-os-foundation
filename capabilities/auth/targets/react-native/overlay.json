@@ -10,26 +10,12 @@
       "destination": "src/features/auth"
     },
     {
-      "source": "files/src/api",
-      "destination": "src/api"
-    },
-    {
       "source": "files/src/storage",
       "destination": "src/storage"
     },
     {
       "source": "files/src/forms",
       "destination": "src/forms"
-    },
-    {
-      "source": "files/src/query/query-client.ts",
-      "destination": "src/query/query-client.ts",
-      "overwrite": true
-    },
-    {
-      "source": "files/src/query/index.ts",
-      "destination": "src/query/index.ts",
-      "overwrite": true
     },
     {
       "source": "files/app/index.tsx",
@@ -104,6 +90,12 @@
       "kind": "expo.home-action",
       "href": "/settings",
       "label": "Open settings",
+      "order": 10
+    },
+    {
+      "kind": "expo.query-retry-guard",
+      "importPath": "@/features/auth/no-retry-on-unauthorized",
+      "symbol": "stopRetryOnUnauthorized",
       "order": 10
     }
   ],

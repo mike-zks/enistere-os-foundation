@@ -17,7 +17,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query';
 
-import { authedRequest } from '../../api';
+import { authedRequest } from '../../features/auth/api-client';
 
 export type AuthedMutationOptions<TData, TVariables, TContext> = Omit<
   UseMutationOptions<TData, Error, TVariables, TContext>,

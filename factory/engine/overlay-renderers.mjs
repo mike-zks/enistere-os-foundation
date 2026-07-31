@@ -138,6 +138,30 @@ function renderProviderComposition(providers, prefix) {
   ].join('\n');
 }
 
+/** src/composition/capability-query-retry.ts of the Expo app. */
+export function renderExpoQueryRetryGuards(guards) {
+  assertKnown(guards, ['expo.query-retry-guard']);
+  const ordered = [...guards].sort(
+    (a, b) => a.order - b.order || a.symbol.localeCompare(b.symbol),
+  );
+  const imports = [...new Set(ordered.map(
+    (item) => `import { ${item.symbol} } from '${item.importPath}';`,
+  ))].sort();
+  return [
+    BANNER,
+    ...imports,
+    '',
+    '/** Returns `true` when the error must NOT be retried. */',
+    'export type CapabilityRetryGuard = (error: unknown) => boolean;',
+    '',
+    '/** Guards contributed by the composed capabilities, ordered deterministically. */',
+    'export const CAPABILITY_RETRY_GUARDS: readonly CapabilityRetryGuard[] = [',
+    ...ordered.map((item) => `  ${item.symbol},`),
+    '];',
+    '',
+  ].join('\n');
+}
+
 /** src/app/core/composition/capability-providers.ts of the Angular app. */
 export function renderAngularCapabilityProviders(providers) {
   assertKnown(providers, ['angular.provider']);

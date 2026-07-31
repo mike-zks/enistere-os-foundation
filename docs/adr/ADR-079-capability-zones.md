@@ -104,13 +104,28 @@ La répartition retenue :
 * **cœur**, laissé en place — le port `SecureStorage` et ses adaptateurs, la
   fondation de formulaires, le client de requêtes : ils ne nomment aucun domaine.
 
-La règle a aussi mis au jour **un défaut d'une autre nature**. React Native
-compose en **écrasant des barils du cœur** (`overwrite: true`) plutôt que par une
-couture : `src/api/index.ts` importe la capability pour câbler l'adaptateur de
-session, `src/query/index.ts` ré-expose les hooks authentifiés. Déplacer ces
-fichiers ne corrigerait rien — ils doivent rester au cœur. Le correctif est une
-couture de composition, comme les six autres runtimes en ont une. Trois écarts
-déclarés et datés.
+La règle a aussi mis au jour **un défaut d'une autre nature**, depuis corrigé.
+React Native composait en **écrasant des barils du cœur** : `src/api/index.ts`
+importait la capability pour câbler l'adaptateur de session, `src/query/index.ts`
+ré-exposait les hooks authentifiés, `query-client.ts` était remplacé pour une
+seule exception de réessai.
+
+Les trois demandaient trois traitements différents, et c'est ce qui rendait le
+diagnostic « écrasement » insuffisant à lui seul :
+
+* `src/api/index.ts` **n'appartenait pas au cœur** — c'est le client assemblé
+  avec la session d'Auth. Il rejoint `features/auth/api-client.ts` : aucune
+  couture nécessaire, seulement un placement juste ;
+* `query-client.ts` portait une vraie extension — « ne jamais réessayer un
+  401 ». D'où la couture `expo.query-retry-guard` : la politique de réessai reste
+  au socle, la capability n'y ajoute qu'une exception ;
+* `src/query/index.ts` ne faisait que **ré-exporter** les hooks authentifiés.
+  Confort, pas contrat : l'écrasement est supprimé sans couture, les
+  consommateurs important depuis la feature qui les possède.
+
+Une garde est formulée en « arrêter le réessai », jamais en « continuer » : une
+garde qui se tromperait de sens échouerait du côté sûr — un réessai de moins,
+jamais une boucle.
 
 Enfin, la mesure elle-même avait un trou : `destination.startsWith('src/api/')`
 laissait passer une entrée écrivant `src/api` **en entier**, alors que remplacer
@@ -168,18 +183,15 @@ précisément ce qu'une zone nommée rend explicite.
 * **Les sept runtimes ont une zone métier et n'y laissent aucune capability
   ailleurs.** FF5d les mesure tous, et **plus aucune violation de placement**
   n'existe.
-* Les deux écarts restants ne sont pas des dettes de placement : ils sont
-  déclarés avec leur nature propre — une contribution de cœur légitime, et une
-  composition par écrasement.
+* **Les sept composent par coutures.** React Native était le dernier à écraser
+  des fichiers du cœur ; il ne le fait plus.
 * Le vocabulaire est fixé, donc les migrations restantes sont mécaniques.
 
 ### Assumé
 
-* **Deux dettes restent, déclarées et datées, et aucune n'est un placement.**
-  React Native compose par écrasement de barils au lieu de coutures ; Files sur
-  Spring contribue un port de stockage au cœur. Ni l'une ni l'autre ne se règle
-  par un déplacement — la première demande des coutures, la seconde que le
-  baseline porte le port.
+* **Une seule dette reste, déclarée et datée** : Files sur Spring contribue un
+  port de stockage au cœur. Elle ne se règle pas par un déplacement mais en
+  faisant porter le port par le Platform Baseline.
 * NestJS prend `src/modules/`, légèrement à contre-courant de son idiome usuel
   (`src/<feature>` à plat). Coût accepté au bénéfice de la cohérence de famille
   avec Spring.
@@ -231,7 +243,7 @@ Applications réellement générées, chacune composant **les trois capabilities
 * **NestJS** — `lint` et `build` verts, **387 tests sur 52 suites** ;
 * **FastAPI** — `ruff` propre, **40/40 pytest** sur PostgreSQL réel, `compileall`
   et `pip check` verts, deux révisions Alembic appliquées (8 tables) ;
-* **React Native** (composition triple) — `typecheck` et `lint` verts,
+* **React Native** (composition triple, coutures) — `typecheck` et `lint` verts,
   **362/362 tests** ;
 * **Spring** (trois capabilities) — `mvn verify` réussi, **139 tests**,
   Testcontainers compris.

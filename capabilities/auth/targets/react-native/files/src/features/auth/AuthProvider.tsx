@@ -14,7 +14,7 @@
  */
 import { useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
 
-import { apiClient } from '../../api';
+import { apiClient } from '../../features/auth/api-client';
 import { purgeServerState, queryClient } from '../../query';
 import { sessionStore } from '../../storage';
 import { AuthContext, type AuthContextValue } from './auth-context';
