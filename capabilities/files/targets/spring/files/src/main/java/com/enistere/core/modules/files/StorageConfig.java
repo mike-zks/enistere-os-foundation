@@ -1,4 +1,4 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.files;
 
 import io.minio.MinioClient;
 import org.springframework.context.annotation.Bean;

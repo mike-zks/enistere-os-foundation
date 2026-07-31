@@ -1,4 +1,4 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

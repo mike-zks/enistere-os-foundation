@@ -1,7 +1,7 @@
 package com.enistere.core.modules.files;
 
 import com.enistere.core.common.exception.CodedException;
-import com.enistere.core.config.FilesConfig;
+import com.enistere.core.modules.files.FilesConfig;
 import com.enistere.core.modules.audit.AuditService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

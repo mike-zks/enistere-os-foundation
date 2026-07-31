@@ -36,8 +36,8 @@
       {
         "kind": "source",
         "owner": "auth",
-        "source": "files/src/main/java/com/enistere/core/config/SecurityExceptionHandler.java",
-        "materialized": "src/main/java/com/enistere/core/config/SecurityExceptionHandler.java",
+        "source": "files/src/main/java/com/enistere/core/modules/auth/SecurityExceptionHandler.java",
+        "materialized": "src/main/java/com/enistere/core/modules/auth/SecurityExceptionHandler.java",
         "contains": [
           "AccessDeniedException",
           "SecurityErrorCodes.AUTH_FORBIDDEN",
@@ -79,8 +79,8 @@
       {
         "kind": "source",
         "owner": "auth",
-        "source": "files/src/main/java/com/enistere/core/config/SecurityAuditEvents.java",
-        "materialized": "src/main/java/com/enistere/core/config/SecurityAuditEvents.java",
+        "source": "files/src/main/java/com/enistere/core/modules/auth/SecurityAuditEvents.java",
+        "materialized": "src/main/java/com/enistere/core/modules/auth/SecurityAuditEvents.java",
         "contains": [
           "AUTHORIZATION_DENIED"
         ]

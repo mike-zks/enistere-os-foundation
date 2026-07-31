@@ -258,6 +258,23 @@ restant est FastAPI, et il concerne les trois capabilities.
   avait donc été fusionné avec une composition qui ne construit pas. Corrigé par
   `makeEnvironmentProviders`, et verrouillé par un test.
 
+### Spring : la mesure d'abord fausse, puis la migration
+
+Mon premier inventaire annonçait neuf violations. **Il était incomplet** : j'avais
+omis `infrastructure/` de la zone cœur. L'y ajouter en a révélé cinq de plus.
+*Une règle ne mesure que ce qu'on lui donne à mesurer.*
+
+Quatorze destinations, réparties selon le critère : les neuf `@Configuration`, la
+chaîne de sécurité JWT et les limiteurs par capability passent sous `modules/` ;
+`infrastructure/storage` reste au cœur — `StorageService` est un port neutre.
+
+**Java rend le déplacement plus intrusif qu'ailleurs** : chaque fichier change de
+`package`, et une classe qui était voisine cesse de l'être. Le compilateur a
+trouvé trois vagues d'imports manquants que rien d'autre n'aurait signalées
+(`RateLimiter`, `CorsConfig`, `GlobalExceptionHandler`), plus deux `importPath`
+d'intégration encore pointés sur `core.config`. Seule migration où compiler était
+indispensable, pas seulement prudent.
+
 ### Preuves
 
 - 482/482 tests Foundation ;
@@ -318,6 +335,23 @@ réel.
 - **Cycle d'imports** : `app.platform` importait la couture, qui importe la
   capability, qui importe `app.platform`. Une couture se consomme au démarrage,
   pas à l'import.
+
+### Spring : la mesure d'abord fausse, puis la migration
+
+Mon premier inventaire annonçait neuf violations. **Il était incomplet** : j'avais
+omis `infrastructure/` de la zone cœur. L'y ajouter en a révélé cinq de plus.
+*Une règle ne mesure que ce qu'on lui donne à mesurer.*
+
+Quatorze destinations, réparties selon le critère : les neuf `@Configuration`, la
+chaîne de sécurité JWT et les limiteurs par capability passent sous `modules/` ;
+`infrastructure/storage` reste au cœur — `StorageService` est un port neutre.
+
+**Java rend le déplacement plus intrusif qu'ailleurs** : chaque fichier change de
+`package`, et une classe qui était voisine cesse de l'être. Le compilateur a
+trouvé trois vagues d'imports manquants que rien d'autre n'aurait signalées
+(`RateLimiter`, `CorsConfig`, `GlobalExceptionHandler`), plus deux `importPath`
+d'intégration encore pointés sur `core.config`. Seule migration où compiler était
+indispensable, pas seulement prudent.
 
 ### Preuves
 
@@ -380,6 +414,23 @@ Les trois renderers Python aliasent désormais et lèvent sur collision résidue
 C'est par ce trou que `nestjs-angular-auth` avait pu être nommé sans exister,
 laissant passer une composition Angular qui ne compilait pas.
 
+### Spring : la mesure d'abord fausse, puis la migration
+
+Mon premier inventaire annonçait neuf violations. **Il était incomplet** : j'avais
+omis `infrastructure/` de la zone cœur. L'y ajouter en a révélé cinq de plus.
+*Une règle ne mesure que ce qu'on lui donne à mesurer.*
+
+Quatorze destinations, réparties selon le critère : les neuf `@Configuration`, la
+chaîne de sécurité JWT et les limiteurs par capability passent sous `modules/` ;
+`infrastructure/storage` reste au cœur — `StorageService` est un port neutre.
+
+**Java rend le déplacement plus intrusif qu'ailleurs** : chaque fichier change de
+`package`, et une classe qui était voisine cesse de l'être. Le compilateur a
+trouvé trois vagues d'imports manquants que rien d'autre n'aurait signalées
+(`RateLimiter`, `CorsConfig`, `GlobalExceptionHandler`), plus deux `importPath`
+d'intégration encore pointés sur `core.config`. Seule migration où compiler était
+indispensable, pas seulement prudent.
+
 ### Preuves
 
 - 497/497 tests Foundation ; `rbac/fastapi` **CONFORMANT**, parité API `OK` ;
@@ -398,7 +449,7 @@ laissant passer une composition Angular qui ne compilait pas.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
-## Mission en cours — refonte des zones : six runtimes sur sept
+## Mission achevée — refonte des zones sur les sept runtimes
 
 [ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
 les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
@@ -490,6 +541,23 @@ les six autres runtimes en ont une. Trois écarts déclarés et datés.
 une entrée écrivant `src/api` **en entier**. Remplacer le répertoire est la
 brèche la plus large, pas une exemption.
 
+### Spring : la mesure d'abord fausse, puis la migration
+
+Mon premier inventaire annonçait neuf violations. **Il était incomplet** : j'avais
+omis `infrastructure/` de la zone cœur. L'y ajouter en a révélé cinq de plus.
+*Une règle ne mesure que ce qu'on lui donne à mesurer.*
+
+Quatorze destinations, réparties selon le critère : les neuf `@Configuration`, la
+chaîne de sécurité JWT et les limiteurs par capability passent sous `modules/` ;
+`infrastructure/storage` reste au cœur — `StorageService` est un port neutre.
+
+**Java rend le déplacement plus intrusif qu'ailleurs** : chaque fichier change de
+`package`, et une classe qui était voisine cesse de l'être. Le compilateur a
+trouvé trois vagues d'imports manquants que rien d'autre n'aurait signalées
+(`RateLimiter`, `CorsConfig`, `GlobalExceptionHandler`), plus deux `importPath`
+d'intégration encore pointés sur `core.config`. Seule migration où compiler était
+indispensable, pas seulement prudent.
+
 ### Preuves
 
 - 497/497 tests Foundation, aucune dérive de conformance ;
@@ -501,33 +569,51 @@ brèche la plus large, pas une exemption.
   pytest** sur PostgreSQL réel, `compileall` et `pip check` verts, deux révisions
   Alembic appliquées sur base vide (8 tables) ;
 - application React Native composée (composition triple) : `typecheck` et `lint`
-  verts, **362/362 tests**.
+  verts, **362/362 tests** ;
+- application Spring composée (trois capabilities) : `mvn verify` réussi,
+  **139 tests**, Testcontainers compris.
+
+### Ce qui reste, et qui n'est pas du placement
+
+`layout-gaps.json` ne contient plus **aucune** violation de placement. Les deux
+entrées restantes ont chacune leur nature propre :
+
+- **React Native compose par écrasement de barils** (`src/api`,
+  `src/query/index.ts`, `src/query/query-client.ts`) au lieu de coutures. Les
+  déplacer ne corrigerait rien : ils doivent rester au cœur.
+- **Files sur Spring contribue un port de stockage au cœur**
+  (`infrastructure/storage`). Même motif que `app/persistence` sur FastAPI : une
+  capability apporte un port neutre parce que le baseline n'a pas choisi de
+  fournisseur.
 
 ## Prochaine mission unique
 
-> **Sortir les neuf classes `@Configuration` du cœur de Spring**, dernier
-> runtime dont la zone métier existe mais n'est pas utilisée partout.
+> **Des coutures de composition pour React Native**, pour remplacer les trois
+> écrasements de barils du cœur.
 
 ### Justification de l'ordre
 
-C'est le dernier écart de *placement* — les trois autres écarts déclarés (React
-Native) relèvent d'un défaut différent, la composition par écrasement, qui exige
-des coutures et non un déplacement.
+C'est le dernier défaut structurel que la refonte des zones a mis au jour, et le
+seul runtime qui compose encore par écrasement. Les six autres passent par des
+coutures ; React Native écrit `src/api/index.ts` et `src/query/index.ts`
+par-dessus ceux du starter pour y câbler l'adaptateur de session et ré-exposer
+les hooks authentifiés.
 
-Spring est aussi le plus simple des six : `modules/` existe déjà et accueille
-entités, dépôts et services ; seules les classes `@Configuration` sont restées
-dans `core/config/`.
+C'est aussi le prérequis d'une régénération sûre : un fichier de cœur écrasé est
+un fichier que la Factory ne peut ni remplacer ni préserver sans arbitrage.
 
 ### Critères de sortie
 
-- les neuf classes rejoignent le module de leur capability ;
-- `layout-gaps.json` ne contient plus que les trois écarts React Native ;
-- les goldens `spring-auth`, `spring-auth-rbac` et `spring-files` passent.
+- deux coutures — extension du client API, extension de l'état serveur — sur le
+  modèle de celles des six autres runtimes ;
+- les trois écrasements disparaissent et `layout-gaps.json` ne garde que la
+  contribution de cœur de Spring ;
+- les goldens `triple-auth` et `triple-files` passent sans régression.
 
 ### Ce qui reste ouvert après cette mission
 
-- **coutures de composition pour React Native** (client API, état serveur), pour
-  remplacer les trois écrasements de barils ;
+- faire porter par le Platform Baseline API un **port de stockage d'objets** et
+  la **persistance**, pour supprimer les deux contributions de cœur ;
 - l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
 - la couture de composition pour les modules de modèles Alembic ;
 - **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;

@@ -197,7 +197,9 @@ export function runFitnessFunctions({
     },
     spring: {
       core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
-        'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/'],
+        'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/',
+        'src/main/java/com/enistere/core/infrastructure/',
+        'src/test/java/com/enistere/core/infrastructure/'],
       business: 'src/main/java/com/enistere/core/modules/',
     },
   };

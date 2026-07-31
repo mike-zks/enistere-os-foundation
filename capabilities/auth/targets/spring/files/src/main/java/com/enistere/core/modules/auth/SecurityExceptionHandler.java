@@ -1,4 +1,4 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.auth;
 
 import com.enistere.core.common.exception.ApiError;
 import com.enistere.core.common.web.CorrelationIdFilter;

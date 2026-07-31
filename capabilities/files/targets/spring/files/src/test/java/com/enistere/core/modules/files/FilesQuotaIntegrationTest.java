@@ -2,7 +2,7 @@ package com.enistere.core.modules.files;
 
 import com.enistere.core.AbstractIntegrationTest;
 import com.enistere.core.TestDataFactory;
-import com.enistere.core.config.FilesConfig;
+import com.enistere.core.modules.files.FilesConfig;
 import com.enistere.core.modules.audit.AuditLog;
 import com.enistere.core.modules.audit.AuditLogRepository;
 import com.enistere.core.modules.users.User;

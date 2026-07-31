@@ -1,6 +1,6 @@
 # ADR-079 — Trois zones : ce que la Factory possède, ce qu'elle génère, ce qui est métier
 
-- Statut : Validé — six runtimes migrés, Spring restant
+- Statut : Validé et implémenté sur les sept runtimes
 - Date : 2026-07-30
 - Décideur : Owner Foundation
 - Complète : ADR-055 et ADR-074
@@ -116,15 +116,31 @@ Enfin, la mesure elle-même avait un trou : `destination.startsWith('src/api/')`
 laissait passer une entrée écrivant `src/api` **en entier**, alors que remplacer
 le répertoire est la brèche la plus large, pas une exemption.
 
-## Ce que la règle a révélé sur Spring
+## Spring : la mesure d'abord fausse, puis la migration
 
 En étendant FF5d à Spring — réputé « net » parce qu'il avait déjà `modules/` — la
-mesure a montré **neuf violations** : toutes ses classes `@Configuration` de
-capability siègent dans `core/config/`. Le diagnostic initial était trop
-généreux : avoir une zone métier ne prouve pas qu'on l'utilise partout.
+mesure a montré **neuf violations** : ses classes `@Configuration` de capability
+siégeaient dans `core/config/`. Avoir une zone métier ne prouve pas qu'on
+l'utilise partout.
 
-Ces neuf écarts sont déclarés et datés ; le runtime Spring devient une migration
-à part entière, qui n'était pas prévue.
+**Et le premier inventaire était lui-même incomplet.** J'avais omis
+`infrastructure/` de la zone cœur ; l'y ajouter a révélé cinq destinations de
+plus. Une règle ne mesure que ce qu'on lui donne à mesurer.
+
+Quatorze destinations au total, réparties selon le critère :
+
+* **métier**, déplacé sous `modules/` — les neuf `@Configuration`, la chaîne de
+  sécurité JWT (`infrastructure/security`) et les limiteurs de débit par
+  capability (`infrastructure/ratelimit`) ;
+* **cœur**, laissé en place — `infrastructure/storage` : `StorageService` est un
+  port neutre, MinIO et Fake ses adaptateurs.
+
+Java rend le déplacement plus intrusif qu'ailleurs : chaque fichier change de
+`package`, et **une classe qui était voisine de package cesse de l'être**. Le
+compilateur a trouvé trois vagues d'imports manquants que rien d'autre n'aurait
+signalées — `RateLimiter`, `CorsConfig`, `GlobalExceptionHandler` — plus deux
+`importPath` d'intégration encore pointés sur `core.config`. C'est la seule
+migration où compiler était indispensable, pas seulement prudent.
 
 ## Ce que la migration Next.js a révélé
 
@@ -149,19 +165,21 @@ précisément ce qu'une zone nommée rend explicite.
 
 ### Acquis
 
-* **Six runtimes ont une zone métier et n'y laissent aucune capability
-  ailleurs** : Next.js, NestJS, FastAPI, React Native, Angular, Flutter.
-* **FF5d couvre les sept runtimes.** Les écarts restants — neuf classes
-  `@Configuration` sur Spring, trois écrasements de barils sur React Native —
-  sont déclarés et datés, pas invisibles.
+* **Les sept runtimes ont une zone métier et n'y laissent aucune capability
+  ailleurs.** FF5d les mesure tous, et **plus aucune violation de placement**
+  n'existe.
+* Les deux écarts restants ne sont pas des dettes de placement : ils sont
+  déclarés avec leur nature propre — une contribution de cœur légitime, et une
+  composition par écrasement.
 * Le vocabulaire est fixé, donc les migrations restantes sont mécaniques.
 
 ### Assumé
 
-* **Deux dettes restent, déclarées et datées.** Spring garde neuf classes
-  `@Configuration` dans son cœur ; React Native compose par écrasement de barils
-  au lieu de coutures. La seconde n'est pas un problème de placement et ne se
-  règle pas par un déplacement.
+* **Deux dettes restent, déclarées et datées, et aucune n'est un placement.**
+  React Native compose par écrasement de barils au lieu de coutures ; Files sur
+  Spring contribue un port de stockage au cœur. Ni l'une ni l'autre ne se règle
+  par un déplacement — la première demande des coutures, la seconde que le
+  baseline porte le port.
 * NestJS prend `src/modules/`, légèrement à contre-courant de son idiome usuel
   (`src/<feature>` à plat). Coût accepté au bénéfice de la cohérence de famille
   avec Spring.
@@ -171,9 +189,11 @@ précisément ce qu'une zone nommée rend explicite.
 * **La règle mesure les destinations d'overlay, pas les imports.** Interdire à
   `core/**` d'importer `features/**` est l'invariant complémentaire, et il n'est
   pas encore posé.
-* **Elle ne sait pas exprimer une contribution de cœur par une capability**
-  (cas `app/persistence`), et mesure donc, pour FastAPI, le cœur possédé par le
-  starter seulement.
+* **Elle ne sait pas exprimer une contribution de cœur par une capability.**
+  Le motif s'est répété — `app/persistence` sur FastAPI, `infrastructure/storage`
+  sur Spring — et mérite d'être nommé : une capability apporte un port neutre et
+  ses adaptateurs parce que le baseline n'a pas choisi de fournisseur. Le
+  correctif n'est pas d'assouplir la règle mais que le baseline porte le port.
 * `migrations/env.py` **énumère en dur les modules de modèles à importer** pour
   l'autogénération Alembic — il ne voit pas ceux de RBAC. Sans effet aujourd'hui,
   les révisions étant écrites à la main, mais un `--autogenerate` proposerait de
@@ -201,6 +221,7 @@ node factory/quality/scripts/golden-runtime.mjs nest-next-files
 node factory/quality/scripts/golden-runtime.mjs nestjs-files
 node factory/quality/scripts/golden-runtime.mjs fastapi-rbac
 node factory/quality/scripts/golden-runtime.mjs triple-files
+node factory/quality/scripts/golden-runtime.mjs spring-files
 ```
 
 Applications réellement générées, chacune composant **les trois capabilities** :
@@ -211,7 +232,9 @@ Applications réellement générées, chacune composant **les trois capabilities
 * **FastAPI** — `ruff` propre, **40/40 pytest** sur PostgreSQL réel, `compileall`
   et `pip check` verts, deux révisions Alembic appliquées (8 tables) ;
 * **React Native** (composition triple) — `typecheck` et `lint` verts,
-  **362/362 tests**.
+  **362/362 tests** ;
+* **Spring** (trois capabilities) — `mvn verify` réussi, **139 tests**,
+  Testcontainers compris.
 
 ## Rollback
 
