@@ -1,7 +1,7 @@
 package com.enistere.core.modules.files;
 
 import com.enistere.core.common.exception.CodedException;
-import com.enistere.core.infrastructure.storage.StorageService;
+import com.enistere.core.modules.files.storage.StorageService;
 import com.enistere.core.modules.audit.AuditService;
 import com.enistere.core.modules.users.User;
 import com.enistere.core.modules.users.UserRepository;

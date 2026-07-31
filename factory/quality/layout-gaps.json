@@ -1,17 +1,5 @@
 {
-  "$comment": "Violations CONNUES et actées de la zone métier (FF5d, ADR-079). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier, sur une déclaration que plus personne ne viole, et sur une échéance dépassée.",
+  "$comment": "Violations CONNUES et actées de la zone métier (FF5d, ADR-079). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Aucun écart : les sept runtimes placent leurs capabilities dans leur zone métier et composent par coutures. Le gate échoue sur toute violation absente de ce fichier, sur une déclaration que plus personne ne viole, et sur une échéance dépassée.",
   "schemaVersion": "1",
-  "gaps": [
-    {
-      "capability": "files",
-      "runtime": "spring",
-      "destinations": [
-        "src/main/java/com/enistere/core/infrastructure/storage",
-        "src/test/java/com/enistere/core/infrastructure/storage"
-      ],
-      "justification": "CONTRIBUTION DE CŒUR, pas dette de placement. `StorageService` est un port neutre et MinIO/Fake ses adaptateurs : de l'infrastructure par nature, que la capability livre parce que le baseline Spring n'a pas choisi de fournisseur d'objets. Même forme que `app/persistence` sur FastAPI. La règle ne sait pas exprimer « une capability contribue légitimement du cœur » ; le correctif n'est pas un déplacement mais que le baseline porte ce port.",
-      "deadline": "2026-12-31",
-      "review": "Faire porter un port de stockage d'objets par le Platform Baseline API."
-    }
-  ]
+  "gaps": []
 }

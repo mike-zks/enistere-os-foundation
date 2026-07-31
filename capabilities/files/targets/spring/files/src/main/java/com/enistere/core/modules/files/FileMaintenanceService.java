@@ -1,7 +1,7 @@
 package com.enistere.core.modules.files;
 
 import com.enistere.core.modules.files.FilesConfig;
-import com.enistere.core.infrastructure.storage.StorageService;
+import com.enistere.core.modules.files.storage.StorageService;
 import com.enistere.core.modules.audit.AuditService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

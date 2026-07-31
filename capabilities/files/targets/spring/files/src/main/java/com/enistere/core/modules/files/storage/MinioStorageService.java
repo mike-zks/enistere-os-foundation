@@ -1,4 +1,4 @@
-package com.enistere.core.infrastructure.storage;
+package com.enistere.core.modules.files.storage;
 
 import com.enistere.core.modules.files.FilesConfig;
 import io.minio.GetPresignedObjectUrlArgs;

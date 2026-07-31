@@ -189,9 +189,7 @@ précisément ce qu'une zone nommée rend explicite.
 
 ### Assumé
 
-* **Une seule dette reste, déclarée et datée** : Files sur Spring contribue un
-  port de stockage au cœur. Elle ne se règle pas par un déplacement mais en
-  faisant porter le port par le Platform Baseline.
+* **Aucune dette ne reste.** `layout-gaps.json` est vide.
 * NestJS prend `src/modules/`, légèrement à contre-courant de son idiome usuel
   (`src/<feature>` à plat). Coût accepté au bénéfice de la cohérence de famille
   avec Spring.
@@ -201,11 +199,10 @@ précisément ce qu'une zone nommée rend explicite.
 * **La règle mesure les destinations d'overlay, pas les imports.** Interdire à
   `core/**` d'importer `features/**` est l'invariant complémentaire, et il n'est
   pas encore posé.
-* **Elle ne sait pas exprimer une contribution de cœur par une capability.**
-  Le motif s'est répété — `app/persistence` sur FastAPI, `infrastructure/storage`
-  sur Spring — et mérite d'être nommé : une capability apporte un port neutre et
-  ses adaptateurs parce que le baseline n'a pas choisi de fournisseur. Le
-  correctif n'est pas d'assouplir la règle mais que le baseline porte le port.
+* **Elle ne sait pas exprimer une contribution de cœur par une capability**,
+  et il reste un cas : `app/persistence` sur FastAPI, non mesuré parce que la
+  zone cœur retenue pour ce runtime est celle que le starter possède. Voir
+  ci-dessous pourquoi ce n'est pas la même chose que le cas du stockage.
 * `migrations/env.py` **énumère en dur les modules de modèles à importer** pour
   l'autogénération Alembic — il ne voit pas ceux de RBAC. Sans effet aujourd'hui,
   les révisions étant écrites à la main, mais un `--autogenerate` proposerait de
@@ -245,8 +242,8 @@ Applications réellement générées, chacune composant **les trois capabilities
   et `pip check` verts, deux révisions Alembic appliquées (8 tables) ;
 * **React Native** (composition triple, coutures) — `typecheck` et `lint` verts,
   **362/362 tests** ;
-* **Spring** (trois capabilities) — `mvn verify` réussi, **139 tests**,
-  Testcontainers compris.
+* **Spring** (trois capabilities, stockage dans son module) — `mvn verify`
+  réussi, **139 tests**, Testcontainers compris.
 
 ## Rollback
 
