@@ -19,8 +19,8 @@
       },
       {
         "kind": "source",
-        "source": "files/app/authorization/repository.py",
-        "materialized": "app/authorization/repository.py",
+        "source": "files/app/modules/authorization/repository.py",
+        "materialized": "app/modules/authorization/repository.py",
         "contains": [
           "Read at request time, never cached and never carried in a token"
         ]
@@ -38,8 +38,8 @@
       },
       {
         "kind": "source",
-        "source": "files/app/authorization/errors.py",
-        "materialized": "app/authorization/errors.py",
+        "source": "files/app/modules/authorization/errors.py",
+        "materialized": "app/modules/authorization/errors.py",
         "contains": ["AUTH_FORBIDDEN", "def forbidden()"]
       }
     ],
@@ -54,8 +54,8 @@
       },
       {
         "kind": "source",
-        "source": "files/app/authorization/dependencies.py",
-        "materialized": "app/authorization/dependencies.py",
+        "source": "files/app/modules/authorization/dependencies.py",
+        "materialized": "app/modules/authorization/dependencies.py",
         "contains": ["Depends(require_user)"]
       }
     ],
@@ -81,8 +81,8 @@
       },
       {
         "kind": "source",
-        "source": "files/app/authorization/service.py",
-        "materialized": "app/authorization/service.py",
+        "source": "files/app/modules/authorization/service.py",
+        "materialized": "app/modules/authorization/service.py",
         "contains": ["audit_events.AUTHORIZATION_DENIED", "_record_denial"]
       }
     ],

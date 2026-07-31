@@ -171,6 +171,13 @@ export function runFitnessFunctions({
         'src/health/', 'src/platform/'],
       business: 'src/modules/',
     },
+    // FastAPI's core zone is what the STARTER owns. `app/persistence/` is core by
+    // nature but is contributed by Authentication, because the FastAPI baseline
+    // deliberately picks no data provider (ADR-077). The rule as stated cannot
+    // express "a capability legitimately contributes core infrastructure", so
+    // that directory is not measured here; the real fix is for the baseline to
+    // own persistence, which is the asymmetry ADR-077 already declared.
+    fastapi: { core: ['app/composition/'], business: 'app/modules/' },
     spring: {
       core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
         'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/'],

@@ -7,7 +7,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Index, String, Table, Text,
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from ..persistence.database import Base
+from ...persistence.database import Base
 
 #: Join tables, declared as plain tables rather than models: they carry no
 #: attribute of their own, and giving them an identity would invite code to

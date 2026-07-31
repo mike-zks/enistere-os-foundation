@@ -1,6 +1,6 @@
 # ADR-079 — Trois zones : ce que la Factory possède, ce qu'elle génère, ce qui est métier
 
-- Statut : Validé — Next.js et NestJS migrés, trois runtimes restants
+- Statut : Validé — Next.js, NestJS et FastAPI migrés, deux runtimes restants
 - Date : 2026-07-30
 - Décideur : Owner Foundation
 - Complète : ADR-055 et ADR-074
@@ -76,6 +76,21 @@ répertoires de premier niveau que le starter possède, et FF5d les énumère. C
 l'encodage honnête : inventer un `core/` que le framework n'a jamais eu aurait
 été plus élégant à écrire et étranger à l'idiome.
 
+## Ce que la migration FastAPI a mis à l'épreuve
+
+FastAPI est le cas qui teste le critère plutôt que de l'illustrer.
+`app/auth` et `app/authorization` passent sous `app/modules/` ; **`app/persistence`
+reste dans le cœur** alors qu'il est apporté par Authentication. C'est
+exactement « la nature, pas le livreur ».
+
+Cette décision expose une limite de la règle telle qu'énoncée : FF5d vérifie
+qu'aucun overlay n'écrit dans la zone cœur, et ne sait donc pas exprimer *« une
+capability contribue légitimement de l'infrastructure de cœur »*. La zone cœur
+mesurée pour FastAPI est donc celle que **le starter possède**, et
+`app/persistence/` n'y est pas mesuré. Le vrai correctif n'est pas d'assouplir la
+règle mais de faire porter la persistance par le baseline — l'asymétrie
+qu'ADR-077 avait déjà déclarée assumée.
+
 ## Ce que la règle a révélé sur Spring
 
 En étendant FF5d à Spring — réputé « net » parce qu'il avait déjà `modules/` — la
@@ -109,16 +124,16 @@ précisément ce qu'une zone nommée rend explicite.
 
 ### Acquis
 
-* **Next.js et NestJS n'ont plus aucune capability dans leur zone cœur.** Les
-  sept violations Next.js déclarées sont refermées.
-* FF5d couvre désormais cinq runtimes : Angular, Flutter, Next.js, NestJS et
-  Spring.
+* **Next.js, NestJS et FastAPI n'ont plus aucune capability dans leur zone
+  cœur.** Les sept violations Next.js déclarées sont refermées.
+* FF5d couvre désormais six runtimes : Angular, Flutter, Next.js, NestJS,
+  FastAPI et Spring. Seul React Native n'est pas mesuré.
 * Le vocabulaire est fixé, donc les migrations restantes sont mécaniques.
 
 ### Assumé
 
-* **La migration est incomplète et le reste sciemment.** FastAPI et React Native
-  n'ont pas encore de zone métier, et Spring garde neuf classes `@Configuration`
+* **La migration est incomplète et le reste sciemment.** React Native n'a pas
+  encore de zone métier, et Spring garde neuf classes `@Configuration`
   dans son cœur — écarts déclarés et datés. Chacun est une migration à part
   entière, derrière son golden : les grouper multiplierait le risque sans rien
   accélérer.
@@ -131,6 +146,14 @@ précisément ce qu'une zone nommée rend explicite.
 * **La règle mesure les destinations d'overlay, pas les imports.** Interdire à
   `core/**` d'importer `features/**` est l'invariant complémentaire, et il n'est
   pas encore posé.
+* **Elle ne sait pas exprimer une contribution de cœur par une capability**
+  (cas `app/persistence`), et mesure donc, pour FastAPI, le cœur possédé par le
+  starter seulement.
+* `migrations/env.py` **énumère en dur les modules de modèles à importer** pour
+  l'autogénération Alembic — il ne voit pas ceux de RBAC. Sans effet aujourd'hui,
+  les révisions étant écrites à la main, mais un `--autogenerate` proposerait de
+  supprimer les tables RBAC. C'est un défaut antérieur à cette migration, mis au
+  jour par elle.
 * Rien n'est fait, à ce stade, du bénéfice visé : la Factory ne sait toujours pas
   **régénérer** un projet existant. La zone est le prérequis de cette capacité,
   pas la capacité.
@@ -151,16 +174,20 @@ npm run factory:test                      # 497
 npm run factory:capability-conformance    # aucune dérive
 node factory/quality/scripts/golden-runtime.mjs nest-next-files
 node factory/quality/scripts/golden-runtime.mjs nestjs-files
+node factory/quality/scripts/golden-runtime.mjs fastapi-rbac
 ```
 
 Applications réellement générées, chacune composant **les trois capabilities** :
 
 * **Next.js** — `lint` propre, `typecheck` propre, **457/457 tests**,
   `next build` réussi ;
-* **NestJS** — `lint` et `build` verts, **387 tests sur 52 suites**.
+* **NestJS** — `lint` et `build` verts, **387 tests sur 52 suites** ;
+* **FastAPI** — `ruff` propre, **40/40 pytest** sur PostgreSQL réel, `compileall`
+  et `pip check` verts, deux révisions Alembic appliquées (8 tables).
 
 ## Rollback
 
-Révoquer les commits remet les capabilities Next.js et NestJS dans la zone cœur.
+Révoquer les commits remet les capabilities Next.js, NestJS et FastAPI dans la
+zone cœur.
 La règle FF5d et le vocabulaire restent valides : ils ne dépendent d'aucun
 runtime en particulier.

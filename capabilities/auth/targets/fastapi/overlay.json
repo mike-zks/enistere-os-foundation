@@ -10,8 +10,8 @@
       "destination": "app/persistence"
     },
     {
-      "source": "files/app/auth",
-      "destination": "app/auth"
+      "source": "files/app/modules/auth",
+      "destination": "app/modules/auth"
     },
     {
       "source": "files/migrations/env.py",
@@ -88,7 +88,7 @@
   "integrations": [
     {
       "kind": "fastapi.router",
-      "importPath": "app.auth",
+      "importPath": "app.modules.auth",
       "symbol": "router",
       "order": 10
     },
@@ -100,7 +100,7 @@
     },
     {
       "kind": "fastapi.exception-handler",
-      "importPath": "app.auth",
+      "importPath": "app.modules.auth",
       "exception": "AuthError",
       "handler": "auth_error_handler",
       "order": 10

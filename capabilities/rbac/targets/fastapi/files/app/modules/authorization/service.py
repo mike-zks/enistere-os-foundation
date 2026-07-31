@@ -5,8 +5,8 @@ from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..persistence.audit import business_audit
-from ..persistence.database import require_database
+from ...persistence.audit import business_audit
+from ...persistence.database import require_database
 from . import audit_events, repository
 from .errors import forbidden
 

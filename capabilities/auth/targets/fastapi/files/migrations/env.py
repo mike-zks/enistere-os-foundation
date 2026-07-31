@@ -31,7 +31,7 @@ def _import_capability_models() -> None:
     migrates its baseline tables instead of failing on a missing module.
     """
     try:
-        from app.auth import models  # noqa: F401
+        from app.modules.auth import models  # noqa: F401
     except ImportError:  # pragma: no cover — depends on the composition.
         pass
 

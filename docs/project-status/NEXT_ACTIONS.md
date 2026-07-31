@@ -398,7 +398,7 @@ laissant passer une composition Angular qui ne compilait pas.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
-## Mission en cours — refonte des zones, Next.js et NestJS migrés
+## Mission en cours — refonte des zones : Next.js, NestJS et FastAPI migrés
 
 [ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
 les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
@@ -446,38 +446,65 @@ déjà `modules/` — la mesure a montré **neuf violations** : toutes ses class
 ne prouve pas qu'on l'utilise partout. Les neuf sont déclarés et datés ; **Spring
 devient une migration non prévue**.
 
+### FastAPI : le cas qui met le critère à l'épreuve
+
+`app/auth` et `app/authorization` passent sous `app/modules/`, mais
+**`app/persistence` reste dans le cœur** bien qu'apporté par Authentication.
+C'est « la nature, pas le livreur » appliqué au cas qui le teste.
+
+Cela expose une limite : FF5d vérifie qu'aucun overlay n'écrit dans le cœur, et
+ne sait pas dire *« une capability contribue légitimement de l'infrastructure de
+cœur »*. La zone mesurée pour FastAPI est donc celle que **le starter possède**.
+Le vrai correctif n'est pas d'assouplir la règle mais de faire porter la
+persistance par le baseline — l'asymétrie qu'ADR-077 déclarait déjà assumée.
+
+### Un défaut antérieur mis au jour
+
+`migrations/env.py` **énumère en dur** les modules de modèles à importer pour
+l'autogénération Alembic, et ne voit pas ceux de RBAC. Sans effet aujourd'hui —
+les révisions sont écrites à la main — mais un `alembic revision --autogenerate`
+proposerait de **supprimer les tables RBAC**. Le correctif propre est une couture
+de composition pour les modules de modèles, pas un import en dur de plus : auth
+ne doit pas dépendre de rbac, la dépendance allant dans l'autre sens.
+
 ### Preuves
 
 - 497/497 tests Foundation, aucune dérive de conformance ;
 - application Next.js composée (trois capabilities) : `lint` propre, `typecheck`
   propre, **457/457 tests**, `next build` réussi ;
 - application NestJS composée (trois capabilities) : `lint` et `build` verts,
-  **387 tests sur 52 suites**.
+  **387 tests sur 52 suites** ;
+- application FastAPI composée (deux capabilities) : `ruff` propre, **40/40
+  pytest** sur PostgreSQL réel, `compileall` et `pip check` verts, deux révisions
+  Alembic appliquées sur base vide (8 tables).
 
 ## Prochaine mission unique
 
-> **Donner une zone métier à FastAPI** (`app/modules/`), troisième des cinq
+> **Donner une zone métier à React Native** (`src/features/`), quatrième des cinq
 > runtimes à migrer.
 
 ### Justification de l'ordre
 
-FastAPI est le plus petit des trois restants — deux capabilities, `app/auth` et
-`app/authorization`, que j'ai écrites cette semaine — et le seul dont la zone
-cœur contient un cas déjà tranché : `app/persistence/` est de l'infrastructure
-apportée par une capability, donc il **reste** dans le cœur. C'est la
-démonstration la plus directe du critère « la nature, pas le livreur ».
+React Native est le dernier runtime sans zone métier : `src/auth` et `src/upload`
+vivent à plat parmi vingt-sept répertoires de premier niveau. C'est aussi le seul
+des sept que FF5d ne mesure pas encore.
+
+Spring vient ensuite : ses neuf classes `@Configuration` sont déclarées et
+datées, et sa migration est de nature différente — déplacer des fichiers **dans**
+une zone métier qui existe déjà.
 
 ### Critères de sortie
 
-- `app/modules/` accueille `auth` et `authorization` ; `app/persistence` reste ;
-- FF5d couvre FastAPI ;
-- les goldens `fastapi-auth` et `fastapi-rbac` passent sans régression.
+- `src/features/` accueille `auth` et `upload` ; FF5d couvre React Native ;
+- les goldens `triple-auth` et `triple-files` passent sans régression ;
+- FF5c, qui énumérait `src/auth` et `src/upload` comme racines interdites du
+  starter, est remplacée par la règle positive là où elle fait doublon.
 
 ### Ce qui reste ouvert après cette mission
 
-- zones métier pour React Native (`src/features/`) et **Spring** (neuf classes
-  `@Configuration` déclarées) ;
+- **Spring** : neuf classes `@Configuration` à sortir de `core/config/` ;
 - l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
+- la couture de composition pour les modules de modèles Alembic ;
 - **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.
