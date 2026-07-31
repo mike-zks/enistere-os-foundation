@@ -3,9 +3,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { getCsrfToken } from "../../core/auth/client/csrf-client.js";
-import { createFileDownloadUrl } from "../../core/files/client/files-bff-client.js";
-import { currentContextAllowsInsecure, triggerDownload } from "../../core/files/download.js";
+import { getCsrfToken } from "../auth/client/csrf-client.js";
+import { createFileDownloadUrl } from "./client/files-bff-client.js";
+import { currentContextAllowsInsecure, triggerDownload } from "./download.js";
 import { classifyFileError, type FileError } from "./file-error.js";
 
 export interface UseCreateDownloadUrlResult {

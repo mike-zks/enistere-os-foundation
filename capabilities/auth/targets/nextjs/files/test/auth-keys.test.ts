@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { authKeys } from "../src/core/query/keys/auth-keys.js";
+import { authKeys } from "../src/features/auth/auth-keys.js";
 import { healthKeys } from "../src/core/query/keys/health-keys.js";
 
 test("clés Auth stables", () => {

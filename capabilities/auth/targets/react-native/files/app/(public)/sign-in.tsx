@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 
-import { useAuth } from '@/auth';
+import { useAuth } from '@/features/auth';
 import { TextInputField, createZodResolver, emailField, requiredText } from '@/forms';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';

@@ -1,5 +1,5 @@
-import { handleCsrf } from "../../../../core/auth/handlers/csrf-handler.js";
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
+import { handleCsrf } from "../../../../features/auth/handlers/csrf-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
 
 export const dynamic = "force-dynamic";
 

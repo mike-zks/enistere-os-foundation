@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { UserProfile } from "../../core/auth/client/auth-bff-client.js";
-import { toPublicAuthError, type PublicAuthError } from "../../core/auth/session-state.js";
+import type { UserProfile } from "./client/auth-bff-client.js";
+import { toPublicAuthError, type PublicAuthError } from "./session-state.js";
 import { sessionQueryOptions } from "./auth-queries.js";
 
 export interface UseSessionResult {

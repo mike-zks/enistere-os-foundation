@@ -6,13 +6,13 @@ import httpx
 import pytest
 from fastapi import Depends, FastAPI
 
-from app.auth.errors import AuthError
-from app.auth.handlers import auth_error_handler
-from app.auth.ratelimit import reset as reset_rate_limits
-from app.auth.service import PublicUser
-from app.authorization import audit_events as events
-from app.authorization import requires_permission, requires_role
 from app.main import app
+from app.modules.auth.errors import AuthError
+from app.modules.auth.handlers import auth_error_handler
+from app.modules.auth.ratelimit import reset as reset_rate_limits
+from app.modules.auth.service import PublicUser
+from app.modules.authorization import audit_events as events
+from app.modules.authorization import requires_permission, requires_role
 from app.persistence.database import Database
 
 from .conftest import DATABASE_CONFIGURED, audit_events, grant, make_user, revoke_all, rows_of

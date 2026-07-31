@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { isUnauthorizedError, withAuthRetry } from '../src/api/with-auth-retry';
+import { isUnauthorizedError, withAuthRetry } from '../src/features/auth/with-auth-retry';
 
 /** A stand-in for `ApiClientError` — `isUnauthorized` is what the bridge reads. */
 function unauthorized(): unknown {

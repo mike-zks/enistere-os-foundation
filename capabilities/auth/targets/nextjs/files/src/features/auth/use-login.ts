@@ -3,9 +3,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { performBffLogin } from "../../core/auth/client/login-client.js";
-import type { PublicAuthError } from "../../core/auth/session-state.js";
-import { authKeys } from "../../core/query/keys/auth-keys.js";
+import { performBffLogin } from "./client/login-client.js";
+import type { PublicAuthError } from "./session-state.js";
+import { authKeys } from "./auth-keys.js";
 import { toLoginError } from "./login-error.js";
 import type { LoginInput } from "./login-validation.js";
 

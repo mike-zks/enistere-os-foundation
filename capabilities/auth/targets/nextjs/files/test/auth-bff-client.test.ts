@@ -3,8 +3,8 @@ import "./helpers/dom-setup.js";
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { fetchSessionProfile } from "../src/core/auth/client/auth-bff-client.js";
-import { BffAuthError } from "../src/core/auth/client/bff-error.js";
+import { fetchSessionProfile } from "../src/features/auth/client/auth-bff-client.js";
+import { BffAuthError } from "../src/features/auth/client/bff-error.js";
 import { createBrowserFetch } from "./helpers/browser-fetch.js";
 
 const PROFILE = { id: "u1", email: "user@example.test", status: "ACTIVE", createdAt: "t", updatedAt: "t" };

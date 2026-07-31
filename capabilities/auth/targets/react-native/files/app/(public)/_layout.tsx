@@ -4,8 +4,8 @@
  */
 import { Redirect, Stack } from 'expo-router';
 
-import { useAuth } from '@/auth';
-import { ROUTES } from '@/navigation';
+import { useAuth } from '@/features/auth';
+import { ROUTES } from '@/features/auth/navigation';
 
 export default function PublicLayout(): React.JSX.Element {
   const { status } = useAuth();

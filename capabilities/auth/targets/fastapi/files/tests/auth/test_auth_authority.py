@@ -5,10 +5,10 @@ import os
 import httpx
 import pytest
 
-from app.auth import audit_events as events
-from app.auth.config import auth_settings
-from app.auth.ratelimit import reset as reset_rate_limits
 from app.main import app
+from app.modules.auth import audit_events as events
+from app.modules.auth.config import auth_settings
+from app.modules.auth.ratelimit import reset as reset_rate_limits
 from app.persistence.database import Database
 
 from .conftest import DATABASE_CONFIGURED, REQUIRE_DATABASE, audit_events, make_user, rows_of

@@ -5,14 +5,14 @@ import { UserStatus } from '@prisma/client';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
-import { PASSWORD_HASHER, PasswordHasher } from '../src/auth/password/password-hasher';
+import { PASSWORD_HASHER, PasswordHasher } from '../src/modules/auth/password/password-hasher';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { PrismaService } from '../src/database/prisma.service';
-import { Permissions } from '../src/permissions/decorators/permissions.decorator';
-import { PermissionsService } from '../src/permissions/permissions.service';
-import { Roles } from '../src/roles/decorators/roles.decorator';
-import { RolesService } from '../src/roles/roles.service';
+import { Permissions } from '../src/modules/permissions/decorators/permissions.decorator';
+import { PermissionsService } from '../src/modules/permissions/permissions.service';
+import { Roles } from '../src/modules/roles/decorators/roles.decorator';
+import { RolesService } from '../src/modules/roles/roles.service';
 
 // Contrôleur de test, présent uniquement dans la suite e2e (pas dans le dépôt applicatif).
 @Controller('test-authz')

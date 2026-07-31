@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 os.environ.setdefault("JWT_ACCESS_SECRET", "fastapi_test_access_secret_32_characters")
 os.environ.setdefault("REFRESH_TOKEN_HASH_SECRET", "fastapi_test_fingerprint_secret_32_chars")
 
-from app.authorization.models import (  # noqa: E402 — must follow the secrets above.
+from app.modules.authorization.models import (  # noqa: E402 — must follow the secrets above.
     Permission,
     Role,
     role_permissions,

@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { handleCreateDownloadUrl } from "../src/core/files/handlers/create-download-url-handler.js";
-import { handleDeleteFile } from "../src/core/files/handlers/delete-file-handler.js";
-import { handleGetFileMetadata } from "../src/core/files/handlers/get-file-metadata-handler.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { handleCreateDownloadUrl } from "../src/features/files/handlers/create-download-url-handler.js";
+import { handleDeleteFile } from "../src/features/files/handlers/delete-file-handler.js";
+import { handleGetFileMetadata } from "../src/features/files/handlers/get-file-metadata-handler.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch, type MockResponseSpec } from "./helpers/api-test-kit.js";
 import { apiEnvelope, makeDeps, makeRequest, seedAuth, seedCsrf } from "./helpers/auth-test-kit.js";
 

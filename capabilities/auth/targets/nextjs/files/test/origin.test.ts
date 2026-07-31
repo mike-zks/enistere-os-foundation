@@ -5,7 +5,7 @@ import {
   normalizeOrigin,
   parseAllowedOrigins,
   validateRequestOrigin,
-} from "../src/core/auth/http/allowed-origins.js";
+} from "../src/features/auth/http/allowed-origins.js";
 
 const ALLOWED = ["http://localhost:3100", "https://app.enistere.test"];
 const ORIG_ENV = process.env.WEB_ALLOWED_ORIGINS;

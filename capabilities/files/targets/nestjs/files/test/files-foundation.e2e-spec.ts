@@ -5,8 +5,8 @@ import { FileCategory, FileStatus } from '@prisma/client';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { PrismaService } from '../src/database/prisma.service';
-import { FilesRepository } from '../src/files/files.repository';
-import { FilesService } from '../src/files/files.service';
+import { FilesRepository } from '../src/modules/files/files.repository';
+import { FilesService } from '../src/modules/files/files.service';
 
 const EMAIL = 'files-e2e@example.test';
 const SUBJECT = 'files-e2e-fixture';

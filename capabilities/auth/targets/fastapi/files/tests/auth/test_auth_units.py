@@ -7,9 +7,9 @@ from pathlib import Path
 import jwt
 import pytest
 
-from app.auth.config import AuthSettings
-from app.auth.passwords import hash_password, verify_password
-from app.auth.tokens import (
+from app.modules.auth.config import AuthSettings
+from app.modules.auth.passwords import hash_password, verify_password
+from app.modules.auth.tokens import (
     fingerprint_refresh_token,
     issue_access_token,
     issue_refresh_token,

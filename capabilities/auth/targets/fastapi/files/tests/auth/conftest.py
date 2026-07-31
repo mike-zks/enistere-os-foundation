@@ -14,8 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 os.environ.setdefault("JWT_ACCESS_SECRET", "fastapi_test_access_secret_32_characters")
 os.environ.setdefault("REFRESH_TOKEN_HASH_SECRET", "fastapi_test_fingerprint_secret_32_chars")
 
-from app.auth.models import User  # noqa: E402 — must follow the secrets above.
-from app.auth.passwords import hash_password  # noqa: E402
+from app.modules.auth.models import User  # noqa: E402 — must follow the secrets above.
+from app.modules.auth.passwords import hash_password  # noqa: E402
 from app.persistence.audit import AuditLog  # noqa: E402, F401 — registers audit_logs.
 from app.persistence.database import Base, Database, set_database  # noqa: E402
 

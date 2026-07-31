@@ -3,7 +3,7 @@
 import { Alert, Text } from "@enistere/ui-kit";
 import type { ReactElement } from "react";
 
-import { formatDateTime, formatFileSize } from "../../core/files/format.js";
+import { formatDateTime, formatFileSize } from "./format.js";
 import { EmptyState } from "../../shared/components/empty-state.js";
 import { classifyFileError } from "./file-error.js";
 import { useFileList } from "./use-file-list.js";

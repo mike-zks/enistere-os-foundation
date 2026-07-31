@@ -125,9 +125,14 @@ export function runFitnessFunctions({
   // overlays after materialization.
   const forbiddenCapabilityRoots = {
     'react-native': [
+      // Both the old flat location and the business zone: a starter must embed a
+      // capability at neither.
       'src/auth',
       'src/upload',
       'src/notifications',
+      'src/features/auth',
+      'src/features/upload',
+      'src/features/notifications',
       'app/(public)',
       'app/(app)',
     ],
@@ -163,6 +168,38 @@ export function runFitnessFunctions({
     angular: { core: 'src/app/core/', business: 'src/app/features/' },
     flutter: { core: 'lib/src/core/', business: 'lib/src/features/' },
     nextjs: { core: 'src/core/', business: 'src/features/' },
+    // NestJS has no single `core/` directory: its core zone is every top-level
+    // source directory the starter owns. Listing them is the honest encoding —
+    // the alternative would be to invent a `core/` the framework never had.
+    nestjs: {
+      core: ['src/audit/', 'src/bootstrap/', 'src/common/', 'src/config/', 'src/database/',
+        'src/health/', 'src/platform/'],
+      business: 'src/modules/',
+    },
+    // FastAPI's core zone is what the STARTER owns. `app/persistence/` is core by
+    // nature but is contributed by Authentication, because the FastAPI baseline
+    // deliberately picks no data provider (ADR-077). The rule as stated cannot
+    // express "a capability legitimately contributes core infrastructure", so
+    // that directory is not measured here; the real fix is for the baseline to
+    // own persistence, which is the asymmetry ADR-077 already declared.
+    fastapi: { core: ['app/composition/'], business: 'app/modules/' },
+    // React Native's core zone is the set of directories the starter owns. The
+    // secure-storage port, the form foundation and the query client stay there
+    // even though Authentication ships them: they name no domain.
+    'react-native': {
+      core: ['src/a11y/', 'src/analytics/', 'src/api/', 'src/app-environment/',
+        'src/app-lifecycle/', 'src/biometrics/', 'src/clipboard/', 'src/composition/',
+        'src/config/', 'src/consent/', 'src/crash-reporting/', 'src/i18n/', 'src/linking/',
+        'src/logger/', 'src/offline/', 'src/permissions/', 'src/platform/', 'src/preferences/',
+        'src/push/', 'src/query/', 'src/retry/', 'src/session/', 'src/states/', 'src/store/',
+        'src/telemetry/', 'src/theme/', 'src/types/', 'src/ui/'],
+      business: 'src/features/',
+    },
+    spring: {
+      core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
+        'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/'],
+      business: 'src/main/java/com/enistere/core/modules/',
+    },
   };
   const declaredLayoutGaps = layoutGaps;
   const today = new Date().toISOString().slice(0, 10);
@@ -172,11 +209,18 @@ export function runFitnessFunctions({
     const declared = declaredLayoutGaps.get(`${capability}/${target}`);
     for (const entry of overlay.files ?? []) {
       const destination = entry.destination ?? '';
-      if (!destination.startsWith(zone.core)) continue;
+      const cores = Array.isArray(zone.core) ? zone.core : [zone.core];
+      // `startsWith(prefix)` alone lets an overlay that writes a whole core
+      // directory through: `src/api` does not start with `src/api/`. Replacing
+      // the directory wholesale is the *larger* breach, not an exemption.
+      const breached = cores.find(
+        (prefix) => destination.startsWith(prefix) || destination === prefix.replace(/\/$/, ''),
+      );
+      if (breached === undefined) continue;
       if (!declared?.destinations.includes(destination)) {
         fail(
           'capability-business-zone',
-          `${capability}/${target} writes ${destination} into the core zone (${zone.core})`,
+          `${capability}/${target} writes ${destination} into the core zone (${breached})`,
         );
       } else if (declared.deadline < today) {
         fail(

@@ -8,11 +8,11 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
-import { PASSWORD_HASHER, PasswordHasher } from '../src/auth/password/password-hasher';
+import { PASSWORD_HASHER, PasswordHasher } from '../src/modules/auth/password/password-hasher';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { PrismaService } from '../src/database/prisma.service';
-import { ObjectStorage } from '../src/files/storage/object-storage';
-import { OBJECT_STORAGE } from '../src/files/storage/object-storage.token';
+import { ObjectStorage } from '../src/modules/files/storage/object-storage';
+import { OBJECT_STORAGE } from '../src/modules/files/storage/object-storage.token';
 
 const OWNER_EMAIL = 'files-download-owner-e2e@example.test';
 const OTHER_EMAIL = 'files-download-other-e2e@example.test';

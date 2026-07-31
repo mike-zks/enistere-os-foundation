@@ -21,9 +21,9 @@ export type { QueryKey, QueryKeyId, QueryKeyParams, QueryKeys } from './query-ke
 export { toQueryError } from './query-errors';
 export type { QueryError, QueryErrorKind } from './query-errors';
 
-export { useAuthedQuery } from './use-authed-query';
-export type { AuthedQueryOptions } from './use-authed-query';
-export { useAuthedMutation } from './use-authed-mutation';
-export type { AuthedMutationOptions } from './use-authed-mutation';
+export { useAuthedQuery } from '../features/auth/use-authed-query';
+export type { AuthedQueryOptions } from '../features/auth/use-authed-query';
+export { useAuthedMutation } from '../features/auth/use-authed-mutation';
+export type { AuthedMutationOptions } from '../features/auth/use-authed-mutation';
 
 export { invalidateScope, removeScope, purgeServerState } from './invalidation';

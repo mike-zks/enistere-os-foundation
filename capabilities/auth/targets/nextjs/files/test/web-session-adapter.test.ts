@@ -2,9 +2,9 @@ import type { AuthTokens } from "@enistere/api-client-fetch";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { CookieConfigError } from "../src/core/auth/cookie-config.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
-import { WebAuthSessionAdapter } from "../src/core/auth/web-session-adapter.js";
+import { CookieConfigError } from "../src/features/auth/cookie-config.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
+import { WebAuthSessionAdapter } from "../src/features/auth/web-session-adapter.js";
 
 const TOKENS: AuthTokens = {
   accessToken: "access-value",

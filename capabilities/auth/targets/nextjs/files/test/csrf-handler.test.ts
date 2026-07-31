@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { csrfCookieName } from "../src/core/auth/csrf/csrf-cookie.js";
-import { handleCsrf } from "../src/core/auth/handlers/csrf-handler.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { csrfCookieName } from "../src/features/auth/csrf/csrf-cookie.js";
+import { handleCsrf } from "../src/features/auth/handlers/csrf-handler.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch } from "./helpers/api-test-kit.js";
 import { makeDeps, makeRequest, RecordingCookieStore, TEST_ENV } from "./helpers/auth-test-kit.js";
 

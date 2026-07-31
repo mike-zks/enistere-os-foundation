@@ -6,7 +6,7 @@ import { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
-import { PASSWORD_HASHER, PasswordHasher } from '../src/auth/password/password-hasher';
+import { PASSWORD_HASHER, PasswordHasher } from '../src/modules/auth/password/password-hasher';
 import { PrismaService } from '../src/database/prisma.service';
 
 const ACTIVE_EMAIL = 'auth-login-active@example.test';

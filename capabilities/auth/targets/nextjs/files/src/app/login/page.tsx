@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import type { ReactElement } from "react";
 
-import { sanitizeReturnTo } from "../../core/auth/return-to.js";
-import { resolveNextServerSession } from "../../core/auth/server/protected-session.js";
+import { sanitizeReturnTo } from "../../features/auth/return-to.js";
+import { resolveNextServerSession } from "../../features/auth/server/protected-session.js";
 import { LoginPanel } from "./login-panel.js";
 
 // Page **publique** mais **dynamique** : elle résout la session par requête (cookies) pour rediriger un

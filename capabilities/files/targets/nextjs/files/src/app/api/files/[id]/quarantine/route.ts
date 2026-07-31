@@ -1,5 +1,5 @@
-import { buildAuthHandlerDeps } from "../../../../../core/auth/server/route-deps.js";
-import { handleQuarantineFile } from "../../../../../core/files/handlers/quarantine-file-handler.js";
+import { buildAuthHandlerDeps } from "../../../../../features/auth/server/route-deps.js";
+import { handleQuarantineFile } from "../../../../../features/files/handlers/quarantine-file-handler.js";
 
 export const dynamic = "force-dynamic";
 

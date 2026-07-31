@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { AuthEngine } from '../src/auth/auth-engine';
+import { AuthEngine } from '../src/features/auth/auth-engine';
 import { InMemorySecureStorage } from '../src/storage/memory-secure-storage';
-import { SessionStore, type PersistedSession } from '../src/storage/session-store';
+import { SessionStore, type PersistedSession } from '../src/features/auth/session-store';
 import { MockAuthApi } from './helpers';
 
 function setup(opts?: { api?: MockAuthApi; now?: () => number }): {

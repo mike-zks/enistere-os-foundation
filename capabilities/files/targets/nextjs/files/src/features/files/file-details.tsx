@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@enistere/ui-kit";
 
-import { isUuid } from "../../core/files/uuid.js";
+import { isUuid } from "./uuid.js";
 import { EmptyState } from "../../shared/components/empty-state.js";
 import { ErrorState } from "../../shared/components/error-state.js";
 import { ForbiddenState } from "../../shared/components/forbidden-state.js";

@@ -8,20 +8,20 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
-import { PASSWORD_HASHER, PasswordHasher } from '../src/auth/password/password-hasher';
+import { PASSWORD_HASHER, PasswordHasher } from '../src/modules/auth/password/password-hasher';
 import { configureApp } from '../src/bootstrap/configure-app';
 import { PrismaService } from '../src/database/prisma.service';
 import { AppLogger } from '../src/common/logging/logging.service';
 import {
   MaintenanceLockBusyError,
   MaintenanceLockService,
-} from '../src/files/maintenance/maintenance-lock.service';
-import { FilePurgeService } from '../src/files/reconciliation/file-purge.service';
+} from '../src/modules/files/maintenance/maintenance-lock.service';
+import { FilePurgeService } from '../src/modules/files/reconciliation/file-purge.service';
 
 // Logger no-op pour les instances de verrou créées directement (deux sessions PostgreSQL).
 const lockLogger = { warn: () => undefined } as unknown as AppLogger;
-import { ObjectStorage } from '../src/files/storage/object-storage';
-import { OBJECT_STORAGE } from '../src/files/storage/object-storage.token';
+import { ObjectStorage } from '../src/modules/files/storage/object-storage';
+import { OBJECT_STORAGE } from '../src/modules/files/storage/object-storage.token';
 
 const UPLOADER_EMAIL = 'files-quota-uploader-e2e@example.test';
 const PASSWORD = 'Sup3rSecret-quota!';

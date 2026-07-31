@@ -19,7 +19,7 @@ class AuditLog(Base):
     Spring baselines ship: the infrastructure imposes no event registry, and each
     composed capability declares its own stable SCREAMING_SNAKE_CASE identifiers.
 
-    It lives here rather than in `app.auth` because it is a *baseline* concern on
+    It lives here rather than in `app.modules.auth` because it is a *baseline* concern on
     the two other API runtimes. FastAPI's baseline could not create it without
     choosing a data provider, so the persistence primitive supplies it — and the
     day the baseline picks one, this table moves with the package.

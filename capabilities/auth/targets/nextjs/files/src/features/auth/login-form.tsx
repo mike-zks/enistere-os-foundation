@@ -3,7 +3,7 @@
 import { Button, Input, Label, Text } from "@enistere/ui-kit";
 import { useId, useState, type FormEvent, type ReactElement } from "react";
 
-import type { PublicAuthError } from "../../core/auth/session-state.js";
+import type { PublicAuthError } from "./session-state.js";
 import { isLoginFormValid, validateLoginForm, type LoginFieldErrors } from "./login-validation.js";
 
 export interface LoginFormProps {

@@ -398,34 +398,138 @@ laissant passer une composition Angular qui ne compilait pas.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
+## Mission en cours — refonte des zones : six runtimes sur sept
+
+[ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
+les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
+son corollaire opérant — *le cœur ne doit jamais savoir qu'une capability
+existe*.
+
+Le nom suit la famille : **API → `modules/`**, **Web et Mobile → `features/`**.
+
+### Fait
+
+- **Next.js : les trois capabilities ont quitté la zone cœur.** Les sept
+  violations déclarées sont refermées, `layout-gaps.json` est vide.
+- Le cas des clés de requête est tranché : `auth-keys.ts`, `file-keys.ts`,
+  `authorization-keys.ts` sont du métier ; le cœur garde l'infrastructure de
+  cache et `health-keys.ts`.
+
+### Deux couplages cachés que seul le déplacement pouvait montrer
+
+- **`tsconfig.test.json` excluait `src/core/auth/server`** — des modules liant
+  `next/headers`, invérifiables sous `node:test`. Le code déplacé, l'exclusion
+  ne portait plus et la suite compilait du code Next-only.
+- **Des tests de frontière énuméraient des chemins en dur** : ils vérifiaient
+  qu'aucun module client n'importe un module serveur en listant `core/auth/...`
+  littéralement, et passaient donc **par vacuité** sur des fichiers devenus
+  introuvables. Un test de frontière qui ne trouve plus sa frontière ne la
+  vérifie plus.
+
+### NestJS aussi
+
+Sept répertoires métier — `auth`, `users`, `files`, `authorization`, `roles`,
+`permissions`, `rbac` — vivaient à plat, mêlés à `platform`, `common`,
+`database`. Ils sont sous `src/modules/`. Trois fichiers de Files logeaient dans
+le cœur (`config/files.configuration.ts`, `common/errors/files-error-codes.ts`,
+`audit/files-audit-events.ts`) : même critère, ils ont suivi leur domaine.
+
+**NestJS n'a pas de `core/` unique** : sa zone cœur est l'ensemble des
+répertoires que le starter possède, et FF5d les énumère plutôt que d'inventer un
+répertoire que le framework n'a jamais eu.
+
+### Ce que la règle a révélé sur Spring
+
+En étendant FF5d à Spring — que j'avais qualifié de « net » parce qu'il avait
+déjà `modules/` — la mesure a montré **neuf violations** : toutes ses classes
+`@Configuration` de capability siègent dans `core/config/`. Avoir une zone métier
+ne prouve pas qu'on l'utilise partout. Les neuf sont déclarés et datés ; **Spring
+devient une migration non prévue**.
+
+### FastAPI : le cas qui met le critère à l'épreuve
+
+`app/auth` et `app/authorization` passent sous `app/modules/`, mais
+**`app/persistence` reste dans le cœur** bien qu'apporté par Authentication.
+C'est « la nature, pas le livreur » appliqué au cas qui le teste.
+
+Cela expose une limite : FF5d vérifie qu'aucun overlay n'écrit dans le cœur, et
+ne sait pas dire *« une capability contribue légitimement de l'infrastructure de
+cœur »*. La zone mesurée pour FastAPI est donc celle que **le starter possède**.
+Le vrai correctif n'est pas d'assouplir la règle mais de faire porter la
+persistance par le baseline — l'asymétrie qu'ADR-077 déclarait déjà assumée.
+
+### Un défaut antérieur mis au jour
+
+`migrations/env.py` **énumère en dur** les modules de modèles à importer pour
+l'autogénération Alembic, et ne voit pas ceux de RBAC. Sans effet aujourd'hui —
+les révisions sont écrites à la main — mais un `alembic revision --autogenerate`
+proposerait de **supprimer les tables RBAC**. Le correctif propre est une couture
+de composition pour les modules de modèles, pas un import en dur de plus : auth
+ne doit pas dépendre de rbac, la dépendance allant dans l'autre sens.
+
+### React Native : le runtime qui demande le plus de jugement
+
+Son overlay Auth contribue **beaucoup d'infrastructure** en plus du métier. La
+répartition retenue :
+
+- **métier**, sous `src/features/` — `auth`, `upload`, le pont 401
+  (`with-auth-retry`), le magasin de session et ses clés, les hooks
+  `useAuthedQuery`/`useAuthedMutation`, et `navigation/` dont
+  `resolveAuthRedirect` prend un `AuthStatus` ;
+- **cœur**, laissé en place — le port `SecureStorage` et ses adaptateurs, la
+  fondation de formulaires, le client de requêtes : ils ne nomment aucun domaine.
+
+**Un défaut d'une autre nature** est apparu : React Native compose en
+**écrasant des barils du cœur** (`overwrite: true`) plutôt que par une couture.
+`src/api/index.ts` importe la capability pour câbler l'adaptateur de session ;
+`src/query/index.ts` ré-expose les hooks authentifiés. Les déplacer ne
+corrigerait rien — ils doivent rester au cœur. Le correctif est une couture, comme
+les six autres runtimes en ont une. Trois écarts déclarés et datés.
+
+**La mesure elle-même avait un trou** : `startsWith('src/api/')` laissait passer
+une entrée écrivant `src/api` **en entier**. Remplacer le répertoire est la
+brèche la plus large, pas une exemption.
+
+### Preuves
+
+- 497/497 tests Foundation, aucune dérive de conformance ;
+- application Next.js composée (trois capabilities) : `lint` propre, `typecheck`
+  propre, **457/457 tests**, `next build` réussi ;
+- application NestJS composée (trois capabilities) : `lint` et `build` verts,
+  **387 tests sur 52 suites** ;
+- application FastAPI composée (deux capabilities) : `ruff` propre, **40/40
+  pytest** sur PostgreSQL réel, `compileall` et `pip check` verts, deux révisions
+  Alembic appliquées sur base vide (8 tables) ;
+- application React Native composée (composition triple) : `typecheck` et `lint`
+  verts, **362/362 tests**.
+
 ## Prochaine mission unique
 
-> **La refonte des zones** : séparer partout le cœur possédé par la Factory du
-> code métier des capabilities et des équipes.
+> **Sortir les neuf classes `@Configuration` du cœur de Spring**, dernier
+> runtime dont la zone métier existe mais n'est pas utilisée partout.
 
 ### Justification de l'ordre
 
-C'est la troisième étape convenue, et elle est mûre : `layout-gaps.json` porte
-déjà la liste exacte des sept violations restantes, toutes sur Next.js, et FF5d
-mesure la règle sur les runtimes qui déclarent deux zones.
+C'est le dernier écart de *placement* — les trois autres écarts déclarés (React
+Native) relèvent d'un défaut différent, la composition par écrasement, qui exige
+des coutures et non un déplacement.
 
-L'enjeu n'est pas cosmétique. Une équipe qui reçoit un projet généré y écrit ses
-propres modules ; sans frontière nommée, « régénérer pour prendre le socle 2.1 »
-est une opération que la Factory ne peut pas mener sans risquer d'écraser du code
-qu'elle n'a pas écrit.
+Spring est aussi le plus simple des six : `modules/` existe déjà et accueille
+entités, dépôts et services ; seules les classes `@Configuration` sont restées
+dans `core/config/`.
 
 ### Critères de sortie
 
-- une ADR nomme les trois zones — cœur, composition, métier — et énonce que la
-  zone dépend de la **nature** du code, non de qui le livre ;
-- les sept violations Next.js sont refermées et `layout-gaps.json` disparaît ;
-- NestJS, FastAPI et React Native reçoivent une zone métier, et FF5d les couvre ;
-- le cas des clés de requête est tranché explicitement ;
-- chaque runtime migre derrière son golden, sans régression.
+- les neuf classes rejoignent le module de leur capability ;
+- `layout-gaps.json` ne contient plus que les trois écarts React Native ;
+- les goldens `spring-auth`, `spring-auth-rbac` et `spring-files` passent.
 
 ### Ce qui reste ouvert après cette mission
 
+- **coutures de composition pour React Native** (client API, état serveur), pour
+  remplacer les trois écrasements de barils ;
+- l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
+- la couture de composition pour les modules de modèles Alembic ;
+- **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
-- le transport par cookie de refresh HttpOnly (ADR-075) ;
-- la limitation de débit distribuée sur FastAPI ;
-- le reste de §12 : SAST, SBOM, signatures, provenance, licences, threat modeling.
+- transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

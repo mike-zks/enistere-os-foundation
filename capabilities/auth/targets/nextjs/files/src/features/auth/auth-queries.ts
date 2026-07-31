@@ -1,8 +1,8 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
-import { fetchSessionProfile, type UserProfile } from "../../core/auth/client/auth-bff-client.js";
-import { BffAuthError } from "../../core/auth/client/bff-error.js";
-import { authKeys } from "../../core/query/keys/auth-keys.js";
+import { fetchSessionProfile, type UserProfile } from "./client/auth-bff-client.js";
+import { BffAuthError } from "./client/bff-error.js";
+import { authKeys } from "./auth-keys.js";
 
 /** Résultat de la query de session : authentifié (profil) ou anonyme (401). */
 export type SessionResult =

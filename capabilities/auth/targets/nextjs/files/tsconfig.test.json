@@ -1,8 +1,8 @@
 {
   // Compilation des tests sous node:test (runtime Node ESM, nodenext). Distinct de tsconfig.json
   // (build Next, moduleResolution bundler). Émet vers build-test/ . EXCLUS : `src/app` (App Router,
-  // validé via `next build` + sonde HTTP). Variante `base + auth` : exclut `src/core/auth/server` (modules SERVER-ONLY liant `next/headers`,
-  // validés par typecheck/build ; non exécutables sous node:test).
+  // validé via `next build` + sonde HTTP). Variante `base + auth` : exclut `src/features/auth/server` (modules SERVER-ONLY liant
+  // `next/headers`, validés par typecheck/build ; non exécutables sous node:test).
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
@@ -26,5 +26,5 @@
     "noEmitOnError": true
   },
   "include": ["src/core/**/*", "src/shared/**/*", "src/features/**/*", "test/**/*"],
-  "exclude": ["node_modules", ".next", "build-test", "src/app", "src/core/auth/server"]
+  "exclude": ["node_modules", ".next", "build-test", "src/app", "src/features/auth/server"]
 }

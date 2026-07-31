@@ -21,8 +21,8 @@ import {
   FILES_MAINTENANCE_LOCK,
   MaintenanceLockBusyError,
   MaintenanceLockService,
-} from '../src/files/maintenance/maintenance-lock.service';
-import { FilePurgeService } from '../src/files/reconciliation/file-purge.service';
+} from '../src/modules/files/maintenance/maintenance-lock.service';
+import { FilePurgeService } from '../src/modules/files/reconciliation/file-purge.service';
 
 interface CliOptions {
   dryRun: boolean;

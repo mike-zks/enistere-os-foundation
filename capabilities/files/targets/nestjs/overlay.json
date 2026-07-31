@@ -5,14 +5,27 @@
   "version": "0.2.0",
   "description": "Files V1 NestJS : upload multipart, métadonnées, URL signée, suppression, quarantaine, quotas et maintenance S3/MinIO (ADR-007). Requiert Auth et RBAC.",
   "files": [
-    { "source": "files/src/files", "destination": "src/files" },
-    { "source": "files/src/config/files.configuration.ts", "destination": "src/config/files.configuration.ts" },
-    { "source": "files/src/common/errors/files-error-codes.ts", "destination": "src/common/errors/files-error-codes.ts" },
-    { "source": "files/src/audit/files-audit-events.ts", "destination": "src/audit/files-audit-events.ts" },
-    { "source": "files/prisma/migrations/20260719000300_files_init", "destination": "prisma/migrations/20260719000300_files_init" },
-    { "source": "files/scripts", "destination": "scripts" },
-    { "source": "files/test", "destination": "test" },
-    { "source": "files/test-setup/setup-e2e.ts", "destination": "test/setup-e2e.ts", "overwrite": true }
+    {
+      "source": "files/src/modules/files",
+      "destination": "src/modules/files"
+    },
+    {
+      "source": "files/prisma/migrations/20260719000300_files_init",
+      "destination": "prisma/migrations/20260719000300_files_init"
+    },
+    {
+      "source": "files/scripts",
+      "destination": "scripts"
+    },
+    {
+      "source": "files/test",
+      "destination": "test"
+    },
+    {
+      "source": "files/test-setup/setup-e2e.ts",
+      "destination": "test/setup-e2e.ts",
+      "overwrite": true
+    }
   ],
   "dependencies": {
     "dependencies": {
@@ -24,34 +37,130 @@
     }
   },
   "environment": [
-    { "name": "FILE_MAX_SIZE_BYTES", "example": "10485760", "comment": "Taille maximale d'un fichier en octets." },
-    { "name": "FILE_ORIGINAL_NAME_MAX_LENGTH", "example": "255", "comment": "Borne UX du nom original non fiable." },
-    { "name": "S3_ENDPOINT", "example": "http://localhost:9000", "comment": "Endpoint S3-compatible ; valeur locale MinIO, jamais un credential." },
-    { "name": "S3_REGION", "example": "us-east-1" },
-    { "name": "S3_ACCESS_KEY_ID", "example": "replace-with-local-access-key", "comment": "Secret injecté par environnement en staging/production." },
-    { "name": "S3_SECRET_ACCESS_KEY", "example": "replace-with-local-secret-key", "comment": "Secret injecté par environnement en staging/production." },
-    { "name": "S3_BUCKET", "example": "enistere-files" },
-    { "name": "S3_FORCE_PATH_STYLE", "example": "true", "comment": "Requis pour MinIO." },
-    { "name": "FILES_UPLOAD_RATE_LIMIT", "example": "20" },
-    { "name": "FILES_UPLOAD_RATE_TTL", "example": "60" },
-    { "name": "FILES_SIGNED_READ_URL_TTL_SECONDS", "example": "300", "comment": "Durée bornée entre 30 et 900 secondes." },
-    { "name": "FILES_DOWNLOAD_URL_RATE_LIMIT", "example": "30" },
-    { "name": "FILES_DOWNLOAD_URL_RATE_TTL", "example": "60" },
-    { "name": "FILES_PENDING_EXPIRATION_SECONDS", "example": "86400" },
-    { "name": "FILES_REJECTED_RETENTION_SECONDS", "example": "604800" },
-    { "name": "FILES_DELETED_METADATA_RETENTION_SECONDS", "example": "7776000" },
-    { "name": "FILES_ORPHAN_MIN_AGE_SECONDS", "example": "86400" },
-    { "name": "FILES_RECONCILIATION_BATCH_SIZE", "example": "100" },
-    { "name": "FILES_OWNER_MAX_ACTIVE_FILES", "example": "0", "comment": "0 désactive le quota de nombre." },
-    { "name": "FILES_OWNER_MAX_TOTAL_BYTES", "example": "0", "comment": "0 désactive le quota d'octets." }
+    {
+      "name": "FILE_MAX_SIZE_BYTES",
+      "example": "10485760",
+      "comment": "Taille maximale d'un fichier en octets."
+    },
+    {
+      "name": "FILE_ORIGINAL_NAME_MAX_LENGTH",
+      "example": "255",
+      "comment": "Borne UX du nom original non fiable."
+    },
+    {
+      "name": "S3_ENDPOINT",
+      "example": "http://localhost:9000",
+      "comment": "Endpoint S3-compatible ; valeur locale MinIO, jamais un credential."
+    },
+    {
+      "name": "S3_REGION",
+      "example": "us-east-1"
+    },
+    {
+      "name": "S3_ACCESS_KEY_ID",
+      "example": "replace-with-local-access-key",
+      "comment": "Secret injecté par environnement en staging/production."
+    },
+    {
+      "name": "S3_SECRET_ACCESS_KEY",
+      "example": "replace-with-local-secret-key",
+      "comment": "Secret injecté par environnement en staging/production."
+    },
+    {
+      "name": "S3_BUCKET",
+      "example": "enistere-files"
+    },
+    {
+      "name": "S3_FORCE_PATH_STYLE",
+      "example": "true",
+      "comment": "Requis pour MinIO."
+    },
+    {
+      "name": "FILES_UPLOAD_RATE_LIMIT",
+      "example": "20"
+    },
+    {
+      "name": "FILES_UPLOAD_RATE_TTL",
+      "example": "60"
+    },
+    {
+      "name": "FILES_SIGNED_READ_URL_TTL_SECONDS",
+      "example": "300",
+      "comment": "Durée bornée entre 30 et 900 secondes."
+    },
+    {
+      "name": "FILES_DOWNLOAD_URL_RATE_LIMIT",
+      "example": "30"
+    },
+    {
+      "name": "FILES_DOWNLOAD_URL_RATE_TTL",
+      "example": "60"
+    },
+    {
+      "name": "FILES_PENDING_EXPIRATION_SECONDS",
+      "example": "86400"
+    },
+    {
+      "name": "FILES_REJECTED_RETENTION_SECONDS",
+      "example": "604800"
+    },
+    {
+      "name": "FILES_DELETED_METADATA_RETENTION_SECONDS",
+      "example": "7776000"
+    },
+    {
+      "name": "FILES_ORPHAN_MIN_AGE_SECONDS",
+      "example": "86400"
+    },
+    {
+      "name": "FILES_RECONCILIATION_BATCH_SIZE",
+      "example": "100"
+    },
+    {
+      "name": "FILES_OWNER_MAX_ACTIVE_FILES",
+      "example": "0",
+      "comment": "0 désactive le quota de nombre."
+    },
+    {
+      "name": "FILES_OWNER_MAX_TOTAL_BYTES",
+      "example": "0",
+      "comment": "0 désactive le quota d'octets."
+    }
   ],
   "integrations": [
-    { "kind": "nestjs.module", "importPath": "../files/files.module", "symbol": "FilesModule" },
-    { "kind": "nestjs.throttler", "name": "upload", "limitEnv": "FILES_UPLOAD_RATE_LIMIT", "defaultLimit": 20, "ttlSecondsEnv": "FILES_UPLOAD_RATE_TTL", "defaultTtlSeconds": 60 },
-    { "kind": "nestjs.throttler", "name": "download", "limitEnv": "FILES_DOWNLOAD_URL_RATE_LIMIT", "defaultLimit": 30, "ttlSecondsEnv": "FILES_DOWNLOAD_URL_RATE_TTL", "defaultTtlSeconds": 60 },
-    { "kind": "nestjs.prisma-schema", "source": "fragments/files.prisma.json" }
+    {
+      "kind": "nestjs.module",
+      "importPath": "../modules/files/files.module",
+      "symbol": "FilesModule"
+    },
+    {
+      "kind": "nestjs.throttler",
+      "name": "upload",
+      "limitEnv": "FILES_UPLOAD_RATE_LIMIT",
+      "defaultLimit": 20,
+      "ttlSecondsEnv": "FILES_UPLOAD_RATE_TTL",
+      "defaultTtlSeconds": 60
+    },
+    {
+      "kind": "nestjs.throttler",
+      "name": "download",
+      "limitEnv": "FILES_DOWNLOAD_URL_RATE_LIMIT",
+      "defaultLimit": 30,
+      "ttlSecondsEnv": "FILES_DOWNLOAD_URL_RATE_TTL",
+      "defaultTtlSeconds": 60
+    },
+    {
+      "kind": "nestjs.prisma-schema",
+      "source": "fragments/files.prisma.json"
+    }
   ],
-  "verification": [["npm", "run", "test"]],
+  "verification": [
+    [
+      "npm",
+      "run",
+      "test"
+    ]
+  ],
   "contract": {
     "openapiOperations": [
       "files_list",

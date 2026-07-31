@@ -6,18 +6,6 @@
   "description": "Authentification Next.js : BFF (login/refresh/logout/csrf), cookies HttpOnly, CSRF/Origin, session, layout protégé et page de connexion (ADR-004, ADR-005). Sans Files ni RBAC.",
   "files": [
     {
-      "source": "files/src/core/auth",
-      "destination": "src/core/auth"
-    },
-    {
-      "source": "files/src/core/api/server/create-authenticated-server-api-client.ts",
-      "destination": "src/core/api/server/create-authenticated-server-api-client.ts"
-    },
-    {
-      "source": "files/src/core/query/keys/auth-keys.ts",
-      "destination": "src/core/query/keys/auth-keys.ts"
-    },
-    {
       "source": "files/src/features/auth",
       "destination": "src/features/auth"
     },

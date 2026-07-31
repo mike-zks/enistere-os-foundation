@@ -1,5 +1,5 @@
-import { handleLogin } from "../../../../core/auth/handlers/login-handler.js";
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
+import { handleLogin } from "../../../../features/auth/handlers/login-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
 
 export const dynamic = "force-dynamic";
 

@@ -3,12 +3,12 @@ import {
   type CookieAttributes,
   cookieName,
   type CookieEnv,
-} from "../../src/core/auth/cookie-config.js";
-import type { ServerCookieStore } from "../../src/core/auth/server-cookie-store.js";
-import { buildCsrfCookieOptions, csrfCookieName } from "../../src/core/auth/csrf/csrf-cookie.js";
-import { generateCsrfToken } from "../../src/core/auth/csrf/csrf-token.js";
-import type { AuthHandlerDeps } from "../../src/core/auth/handlers/types.js";
-import { InMemoryCookieStore } from "../../src/core/auth/server-cookie-store.js";
+} from "../../src/features/auth/cookie-config.js";
+import type { ServerCookieStore } from "../../src/features/auth/server-cookie-store.js";
+import { buildCsrfCookieOptions, csrfCookieName } from "../../src/features/auth/csrf/csrf-cookie.js";
+import { generateCsrfToken } from "../../src/features/auth/csrf/csrf-token.js";
+import type { AuthHandlerDeps } from "../../src/features/auth/handlers/types.js";
+import { InMemoryCookieStore } from "../../src/features/auth/server-cookie-store.js";
 import type { MockFetch } from "./api-test-kit.js";
 
 export const TEST_ENV: CookieEnv = "development";

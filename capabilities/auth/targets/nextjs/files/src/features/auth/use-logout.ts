@@ -3,8 +3,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
-import { performBffLogout } from "../../core/auth/client/logout-client.js";
-import { authKeys } from "../../core/query/keys/auth-keys.js";
+import { performBffLogout } from "./client/logout-client.js";
+import { authKeys } from "./auth-keys.js";
 
 export interface UseLogoutResult {
   readonly logout: () => Promise<void>;

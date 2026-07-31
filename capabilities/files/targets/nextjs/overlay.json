@@ -5,14 +5,30 @@
   "version": "0.2.0",
   "description": "Files V1 Next.js : BFF same-origin, pages protégées, upload/list/detail/download/delete et actions admin gouvernées.",
   "files": [
-    { "source": "files/src/core/files", "destination": "src/core/files" },
-    { "source": "files/src/core/query/keys/file-keys.ts", "destination": "src/core/query/keys/file-keys.ts" },
-    { "source": "files/src/features/files", "destination": "src/features/files" },
-    { "source": "files/src/app/api/files", "destination": "src/app/api/files" },
-    { "source": "files/src/app/(protected)/protected/files", "destination": "src/app/(protected)/protected/files" },
-    { "source": "files/test", "destination": "test" },
-    { "source": "files/e2e/files.spec.ts", "destination": "e2e/files.spec.ts" },
-    { "source": "files/e2e/helpers-full-composition.ts", "destination": "e2e/files-helpers.ts" }
+    {
+      "source": "files/src/features/files",
+      "destination": "src/features/files"
+    },
+    {
+      "source": "files/src/app/api/files",
+      "destination": "src/app/api/files"
+    },
+    {
+      "source": "files/src/app/(protected)/protected/files",
+      "destination": "src/app/(protected)/protected/files"
+    },
+    {
+      "source": "files/test",
+      "destination": "test"
+    },
+    {
+      "source": "files/e2e/files.spec.ts",
+      "destination": "e2e/files.spec.ts"
+    },
+    {
+      "source": "files/e2e/helpers-full-composition.ts",
+      "destination": "e2e/files-helpers.ts"
+    }
   ],
   "dependencies": {
     "dependencies": {
@@ -23,8 +39,24 @@
   },
   "environment": [],
   "integrations": [
-    { "kind": "nextjs.dashboard-nav-link", "href": "/protected/files", "label": "Fichiers", "order": 20 },
-    { "kind": "nextjs.dashboard-nav-link", "href": "/protected/files/upload", "label": "Envoyer un fichier", "order": 30 }
+    {
+      "kind": "nextjs.dashboard-nav-link",
+      "href": "/protected/files",
+      "label": "Fichiers",
+      "order": 20
+    },
+    {
+      "kind": "nextjs.dashboard-nav-link",
+      "href": "/protected/files/upload",
+      "label": "Envoyer un fichier",
+      "order": 30
+    }
   ],
-  "verification": [["npm", "run", "test"]]
+  "verification": [
+    [
+      "npm",
+      "run",
+      "test"
+    ]
+  ]
 }

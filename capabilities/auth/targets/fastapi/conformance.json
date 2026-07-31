@@ -56,8 +56,8 @@
       },
       {
         "kind": "source",
-        "source": "files/app/auth/repository.py",
-        "materialized": "app/auth/repository.py",
+        "source": "files/app/modules/auth/repository.py",
+        "materialized": "app/modules/auth/repository.py",
         "contains": [
           "RefreshToken.revoked_at.is_(None)",
           "revoke_user_sessions"
@@ -107,8 +107,8 @@
       },
       {
         "kind": "source",
-        "source": "files/app/auth/ratelimit.py",
-        "materialized": "app/auth/ratelimit.py",
+        "source": "files/app/modules/auth/ratelimit.py",
+        "materialized": "app/modules/auth/ratelimit.py",
         "contains": [
           "WINDOW_SECONDS",
           "rate_limited"

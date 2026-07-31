@@ -12,7 +12,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { createPlaceholderAppEnvironmentAdapter, createAppEnvironmentService } from '@/app-environment';
 import { CONSENT_CATEGORIES, createConsentService, createPlaceholderConsentStore } from '@/consent';
 import type { ConsentCategory, ConsentStatus } from '@/consent';
-import { useAuth } from '@/auth';
+import { useAuth } from '@/features/auth';
 import { useUiStore } from '@/store/ui-store';
 import type { ThemePreference } from '@/store';
 import { useTheme } from '@/theme';

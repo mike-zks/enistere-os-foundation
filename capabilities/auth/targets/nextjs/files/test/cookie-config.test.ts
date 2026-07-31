@@ -9,7 +9,7 @@ import {
   CookieConfigError,
   resolveCookieEnv,
   type CookieAttributes,
-} from "../src/core/auth/cookie-config.js";
+} from "../src/features/auth/cookie-config.js";
 
 const ORIG_APP_ENV = process.env.APP_ENV;
 afterEach(() => {

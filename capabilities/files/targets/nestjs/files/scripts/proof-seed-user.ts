@@ -11,9 +11,9 @@
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from '../src/app.module';
-import { PASSWORD_HASHER, PasswordHasher } from '../src/auth/password/password-hasher';
+import { PASSWORD_HASHER, PasswordHasher } from '../src/modules/auth/password/password-hasher';
 import { PrismaService } from '../src/database/prisma.service';
-import { RolesService } from '../src/roles/roles.service';
+import { RolesService } from '../src/modules/roles/roles.service';
 
 const ADMIN_EMAIL = 'openapi-proof-admin@example.test';
 const NOPERM_EMAIL = 'openapi-proof-noperm@example.test';

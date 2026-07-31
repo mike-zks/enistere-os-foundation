@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { isValidRequestId, resolveRequestId } from "../src/core/auth/request-id.js";
+import { isValidRequestId, resolveRequestId } from "../src/features/auth/request-id.js";
 
 test("request id entrant valide réutilisé", () => {
   assert.equal(resolveRequestId("abc-123_DEF.456"), "abc-123_DEF.456");

@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { toAuthSessionData } from '../src/auth/token-mapping';
+import { toAuthSessionData } from '../src/features/auth/token-mapping';
 
 test('maps tokens and converts expiresIn (seconds) to an absolute ms expiry', () => {
   const now = 1_000_000;

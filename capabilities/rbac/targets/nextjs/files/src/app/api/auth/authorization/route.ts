@@ -1,5 +1,5 @@
-import { handleGetAuthorization } from "../../../../core/authorization/get-authorization-handler.js";
-import { buildAuthHandlerDeps } from "../../../../core/auth/server/route-deps.js";
+import { handleGetAuthorization } from "../../../../features/authorization/get-authorization-handler.js";
+import { buildAuthHandlerDeps } from "../../../../features/auth/server/route-deps.js";
 
 export const dynamic = "force-dynamic";
 

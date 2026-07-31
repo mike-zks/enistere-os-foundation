@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { cookieName } from "../src/core/auth/cookie-config.js";
-import { csrfCookieName } from "../src/core/auth/csrf/csrf-cookie.js";
-import { handleLogout } from "../src/core/auth/handlers/logout-handler.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { cookieName } from "../src/features/auth/cookie-config.js";
+import { csrfCookieName } from "../src/features/auth/csrf/csrf-cookie.js";
+import { handleLogout } from "../src/features/auth/handlers/logout-handler.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch } from "./helpers/api-test-kit.js";
 import { apiEnvelope, makeDeps, makeRequest, seedAuth, seedCsrf, TEST_ENV } from "./helpers/auth-test-kit.js";
 

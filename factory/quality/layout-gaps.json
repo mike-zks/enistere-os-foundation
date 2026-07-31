@@ -1,40 +1,54 @@
 {
-  "$comment": "Violations CONNUES et actées de la zone métier (FF5d). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier et sur une échéance dépassée. Ce socle rend la dette visible et bornée — il ne l'excuse pas.",
+  "$comment": "Violations CONNUES et actées de la zone métier (FF5d, ADR-079). Une capability est du code métier : elle appartient à la zone métier du runtime, jamais à celle que la Factory possède et remplace. Le gate échoue sur toute violation absente de ce fichier, sur une déclaration que plus personne ne viole, et sur une échéance dépassée.",
   "schemaVersion": "1",
   "gaps": [
     {
       "capability": "auth",
-      "runtime": "nextjs",
+      "runtime": "spring",
       "destinations": [
-        "src/core/api/server/create-authenticated-server-api-client.ts",
-        "src/core/auth",
-        "src/core/query/keys/auth-keys.ts"
+        "src/main/java/com/enistere/core/config/Argon2Config.java",
+        "src/main/java/com/enistere/core/config/JwtConfig.java",
+        "src/main/java/com/enistere/core/config/SecurityConfig.java",
+        "src/main/java/com/enistere/core/config/SecurityErrorCodes.java",
+        "src/main/java/com/enistere/core/config/SecurityAuditEvents.java",
+        "src/main/java/com/enistere/core/config/SecurityExceptionHandler.java"
       ],
-      "justification": "Next.js sépare déjà `src/core` de `src/features`, mais les trois capabilities écrivent une partie de leur surface dans `core/`. Corrigé par la mission de refonte des zones, qui doit aussi trancher le cas des clés de requête : elles sont à la frontière entre infrastructure de cache et connaissance métier.",
+      "justification": "Spring a une zone métier (`modules/`) et l'utilise pour ses entités et services, mais ses classes @Configuration de capability sont restées dans `core/config/`. Même nature que `files.configuration.ts` déplacé sur NestJS : une configuration qui nomme un domaine métier apprend au cœur que ce domaine existe.",
       "deadline": "2026-12-31",
-      "review": "Mission refonte des zones (cœur / composition / métier)."
+      "review": "Migration de zone du runtime Spring."
     },
     {
       "capability": "rbac",
-      "runtime": "nextjs",
+      "runtime": "spring",
       "destinations": [
-        "src/core/authorization",
-        "src/core/query/keys/authorization-keys.ts"
+        "src/main/java/com/enistere/core/config/RbacConfiguration.java"
       ],
-      "justification": "Même cause que auth/nextjs.",
+      "justification": "Même cause que auth/spring.",
       "deadline": "2026-12-31",
-      "review": "Mission refonte des zones."
+      "review": "Migration de zone du runtime Spring."
     },
     {
       "capability": "files",
-      "runtime": "nextjs",
+      "runtime": "spring",
       "destinations": [
-        "src/core/files",
-        "src/core/query/keys/file-keys.ts"
+        "src/main/java/com/enistere/core/config/FilesConfig.java",
+        "src/main/java/com/enistere/core/config/StorageConfig.java"
       ],
-      "justification": "Même cause que auth/nextjs.",
+      "justification": "Même cause que auth/spring.",
       "deadline": "2026-12-31",
-      "review": "Mission refonte des zones."
+      "review": "Migration de zone du runtime Spring."
+    },
+    {
+      "capability": "auth",
+      "runtime": "react-native",
+      "destinations": [
+        "src/api",
+        "src/query/query-client.ts",
+        "src/query/index.ts"
+      ],
+      "justification": "Défaut d'une autre nature que le placement : React Native compose en ÉCRASANT des barils du cœur (`overwrite: true`) au lieu de passer par une couture. `src/api/index.ts` importe la capability pour câbler l'adaptateur de session ; `src/query/index.ts` ré-expose les hooks authentifiés. Déplacer ces fichiers ne corrigerait rien — ils doivent rester au cœur — le correctif est une couture de composition, comme les six autres runtimes en ont une.",
+      "deadline": "2026-12-31",
+      "review": "Coutures de composition pour React Native (client API, état serveur), puis retrait des écrasements."
     }
   ]
 }

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { cookieName } from "../src/core/auth/cookie-config.js";
-import { handleRefresh } from "../src/core/auth/handlers/refresh-handler.js";
-import { InMemoryCookieStore } from "../src/core/auth/server-cookie-store.js";
+import { cookieName } from "../src/features/auth/cookie-config.js";
+import { handleRefresh } from "../src/features/auth/handlers/refresh-handler.js";
+import { InMemoryCookieStore } from "../src/features/auth/server-cookie-store.js";
 import { createMockFetch, type MockResponseSpec } from "./helpers/api-test-kit.js";
 import {
   apiEnvelope,

@@ -1,5 +1,5 @@
-import { BffAuthError } from "../../core/auth/client/bff-error.js";
-import type { PublicAuthError } from "../../core/auth/session-state.js";
+import { BffAuthError } from "./client/bff-error.js";
+import type { PublicAuthError } from "./session-state.js";
 
 /**
  * Mappe une erreur de connexion en `PublicAuthError` **générique** (jamais de cause/stack/réponse brute/

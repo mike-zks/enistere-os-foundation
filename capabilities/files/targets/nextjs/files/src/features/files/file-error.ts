@@ -1,4 +1,4 @@
-import { BffAuthError } from "../../core/auth/client/bff-error.js";
+import { BffAuthError } from "../auth/client/bff-error.js";
 
 /** Classe d'état UI dérivée d'une erreur Files (mappe vers les états standardisés du Web Core). */
 export type FileErrorKind =

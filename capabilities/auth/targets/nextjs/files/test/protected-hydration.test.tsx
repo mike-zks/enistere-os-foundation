@@ -6,7 +6,7 @@ import { afterEach, test } from "node:test";
 import { dehydrate, hydrate, type QueryClient } from "@tanstack/react-query";
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 
-import { authKeys } from "../src/core/query/keys/auth-keys.js";
+import { authKeys } from "../src/features/auth/auth-keys.js";
 import { createQueryClient } from "../src/core/query/query-client.js";
 import { prefillSessionQuery } from "../src/features/auth/auth-queries.js";
 import { useSession } from "../src/features/auth/use-session.js";

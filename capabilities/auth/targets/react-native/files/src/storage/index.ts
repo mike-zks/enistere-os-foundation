@@ -6,16 +6,16 @@
  * `SecureStorage` (e.g. {@link InMemorySecureStorage}) and `SessionStore`.
  */
 import { ExpoSecureStorage } from './expo-secure-storage';
-import { SessionStore } from './session-store';
+import { SessionStore } from '../features/auth/session-store';
 
 export { SecureStorageError } from './secure-storage';
 export type { SecureStorage } from './secure-storage';
 export { ExpoSecureStorage } from './expo-secure-storage';
 export { InMemorySecureStorage } from './memory-secure-storage';
-export { STORAGE_KEYS } from './keys';
-export type { StorageKey } from './keys';
-export { SessionStore } from './session-store';
-export type { PersistedSession } from './session-store';
+export { STORAGE_KEYS } from '../features/auth/storage-keys';
+export type { StorageKey } from '../features/auth/storage-keys';
+export { SessionStore } from '../features/auth/session-store';
+export type { PersistedSession } from '../features/auth/session-store';
 
 /** Default secure storage backed by Expo SecureStore. */
 export const secureStorage = new ExpoSecureStorage();
