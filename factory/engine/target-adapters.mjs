@@ -28,6 +28,7 @@ import {
   renderFastapiCapabilityLifespans,
   renderFastapiCapabilityExceptionHandlers,
   renderExpoHomeActions,
+  renderExpoQueryRetryGuards,
 } from './overlay-renderers.mjs';
 import { renderNestjsDomain } from './domain-renderers/nestjs.mjs';
 
@@ -82,10 +83,12 @@ const BUILT_IN = [
     id: 'react-native', version: '1.0.0', integrationKinds: {
       'expo.provider': { importPath: STRING, symbol: STRING },
       'expo.home-action': { href: STRING, label: STRING, order: INTEGER },
+      'expo.query-retry-guard': { importPath: STRING, symbol: STRING, order: INTEGER },
     },
     composition: [
       { kinds: ['expo.provider'], destination: 'src/composition/capability-providers.tsx', render: renderExpoCapabilityProviders },
       { kinds: ['expo.home-action'], destination: 'src/composition/home-actions.ts', render: renderExpoHomeActions },
+      { kinds: ['expo.query-retry-guard'], destination: 'src/composition/capability-query-retry.ts', render: renderExpoQueryRetryGuards },
     ],
   },
   { id: 'spring', version: '1.0.0', dependencyManager: 'maven', integrationKinds: {

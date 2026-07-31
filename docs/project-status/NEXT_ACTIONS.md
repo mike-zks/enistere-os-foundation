@@ -449,7 +449,7 @@ indispensable, pas seulement prudent.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
-## Mission achevée — refonte des zones sur les sept runtimes
+## Mission achevée — zones et coutures sur les sept runtimes
 
 [ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
 les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
@@ -573,49 +573,66 @@ indispensable, pas seulement prudent.
 - application Spring composée (trois capabilities) : `mvn verify` réussi,
   **139 tests**, Testcontainers compris.
 
-### Ce qui reste, et qui n'est pas du placement
+### Les écrasements React Native sont supprimés
 
-`layout-gaps.json` ne contient plus **aucune** violation de placement. Les deux
-entrées restantes ont chacune leur nature propre :
+Trois fichiers du cœur étaient remplacés par l'overlay Auth. Ils demandaient
+**trois traitements différents** — c'est ce qui rendait le diagnostic
+« écrasement » insuffisant à lui seul :
 
-- **React Native compose par écrasement de barils** (`src/api`,
-  `src/query/index.ts`, `src/query/query-client.ts`) au lieu de coutures. Les
-  déplacer ne corrigerait rien : ils doivent rester au cœur.
-- **Files sur Spring contribue un port de stockage au cœur**
-  (`infrastructure/storage`). Même motif que `app/persistence` sur FastAPI : une
-  capability apporte un port neutre parce que le baseline n'a pas choisi de
-  fournisseur.
+- `src/api/index.ts` **n'appartenait pas au cœur** : c'est le client assemblé
+  avec la session d'Auth. Il rejoint `features/auth/api-client.ts` — aucune
+  couture, seulement un placement juste ;
+- `query-client.ts` portait une vraie extension, « ne jamais réessayer un 401 ».
+  D'où la couture **`expo.query-retry-guard`** : la politique de réessai reste au
+  socle, la capability n'y ajoute qu'une exception ;
+- `src/query/index.ts` ne faisait que **ré-exporter** les hooks authentifiés.
+  Confort, pas contrat : supprimé sans couture, les consommateurs important
+  depuis la feature qui les possède.
+
+Une garde se formule en « arrêter le réessai », jamais en « continuer » : une
+garde qui se tromperait de sens échouerait du côté sûr — un réessai de moins,
+jamais une boucle.
+
+**Les sept runtimes composent désormais par coutures.**
+
+### Ce qui reste : une seule entrée, et ce n'est pas du placement
+
+**Files sur Spring contribue un port de stockage au cœur**
+(`infrastructure/storage`). Même motif que `app/persistence` sur FastAPI : une
+capability apporte un port neutre et ses adaptateurs parce que le baseline n'a
+choisi aucun fournisseur. Le correctif est que le Platform Baseline porte le
+port, pas un déplacement.
 
 ## Prochaine mission unique
 
-> **Des coutures de composition pour React Native**, pour remplacer les trois
-> écrasements de barils du cœur.
+> **Faire porter la persistance et le stockage d'objets par le Platform Baseline
+> API**, pour supprimer les deux contributions de cœur.
 
 ### Justification de l'ordre
 
-C'est le dernier défaut structurel que la refonte des zones a mis au jour, et le
-seul runtime qui compose encore par écrasement. Les six autres passent par des
-coutures ; React Native écrit `src/api/index.ts` et `src/query/index.ts`
-par-dessus ceux du starter pour y câbler l'adaptateur de session et ré-exposer
-les hooks authentifiés.
+C'est le dernier motif que la refonte a laissé ouvert, et le seul qui reste dans
+`layout-gaps.json`. Il s'est manifesté deux fois — `app/persistence` sur FastAPI,
+`infrastructure/storage` sur Spring — donc ce n'est pas un accident mais une
+lacune du contrat de baseline : celui-ci exige des *ports* de persistance mais
+laisse chaque capability apporter l'adaptateur.
 
-C'est aussi le prérequis d'une régénération sûre : un fichier de cœur écrasé est
-un fichier que la Factory ne peut ni remplacer ni préserver sans arbitrage.
+C'est aussi ce qui débloque le reste : tant qu'une capability porte
+l'infrastructure, une régénération ne peut pas remplacer le socle sans toucher à
+ce qu'une capability a livré.
 
 ### Critères de sortie
 
-- deux coutures — extension du client API, extension de l'état serveur — sur le
-  modèle de celles des six autres runtimes ;
-- les trois écrasements disparaissent et `layout-gaps.json` ne garde que la
-  contribution de cœur de Spring ;
-- les goldens `triple-auth` et `triple-files` passent sans régression.
+- le Platform Baseline API porte un adaptateur de persistance et un port de
+  stockage d'objets, sur les trois runtimes API ;
+- `layout-gaps.json` est vide ;
+- les capabilities cessent de livrer `app/persistence` et
+  `infrastructure/storage` ;
+- aucun golden ne régresse.
 
 ### Ce qui reste ouvert après cette mission
 
-- faire porter par le Platform Baseline API un **port de stockage d'objets** et
-  la **persistance**, pour supprimer les deux contributions de cœur ;
 - l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
 - la couture de composition pour les modules de modèles Alembic ;
-- **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;
+- **la régénération elle-même** — la zone et les coutures en sont les prérequis ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

@@ -264,6 +264,44 @@ describe('pubspec dependency merging', () => {
   });
 });
 
+describe('React Native composition seams', () => {
+  it('lets a capability contribute a retry guard instead of overwriting the client', () => {
+    const expo = getTargetAdapter('react-native');
+    assert.ok(Object.keys(expo.integrationKinds).includes('expo.query-retry-guard'));
+    assert.ok(expo.composition.some(
+      (entry) => entry.destination === 'src/composition/capability-query-retry.ts',
+    ));
+  });
+
+  it('keeps the query client and its barrel owned by the starter', async () => {
+    // Auth used to REPLACE both, which is how a core file came to import a
+    // capability. A file the Factory owns but a capability rewrites is a file
+    // the Factory can neither replace nor preserve on regeneration.
+    const overlay = JSON.parse(await readFile(
+      resolve(root, 'capabilities/auth/targets/react-native/overlay.json'), 'utf8',
+    ));
+    const destinations = overlay.files.map((entry) => entry.destination);
+    for (const owned of ['src/api', 'src/query/index.ts', 'src/query/query-client.ts']) {
+      assert.ok(!destinations.includes(owned), `${owned} must stay the starter's`);
+    }
+
+    const client = await readFile(
+      resolve(root, 'starters/react-native/src/query/query-client.ts'), 'utf8',
+    );
+    assert.match(client, /CAPABILITY_RETRY_GUARDS\.some\(\(stops\) => stops\(error\)\)/);
+  });
+
+  it('orders contributed guards deterministically', () => {
+    const render = getTargetAdapter('react-native').composition
+      .find((entry) => entry.kinds.includes('expo.query-retry-guard')).render;
+    const output = render([
+      { kind: 'expo.query-retry-guard', importPath: '@/z', symbol: 'zGuard', order: 2 },
+      { kind: 'expo.query-retry-guard', importPath: '@/a', symbol: 'aGuard', order: 1 },
+    ]);
+    assert.ok(output.indexOf('  aGuard,') < output.indexOf('  zGuard,'));
+  });
+});
+
 describe('FastAPI composition seams', () => {
   it('lets a capability contribute routers, lifespans and error handlers', () => {
     const fastapi = getTargetAdapter('fastapi');

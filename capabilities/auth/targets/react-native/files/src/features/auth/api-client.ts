@@ -18,9 +18,9 @@
  */
 import { ApiClientError, createEnistereApiClient } from '@enistere/api-client-fetch';
 
-import { mobileAuthSession } from '../features/auth/session-adapter';
-import { appConfig } from '../config';
-import { withAuthRetry } from '../features/auth/with-auth-retry';
+import { mobileAuthSession } from './session-adapter';
+import { appConfig } from '../../config';
+import { withAuthRetry } from './with-auth-retry';
 
 /** App-wide official client. Authenticated requests get the in-memory Bearer token. */
 export const apiClient = createEnistereApiClient({
@@ -42,6 +42,6 @@ export function authedRequest<T>(request: () => Promise<T>): Promise<T> {
 
 /** Typed transport error surfaced by the official client (kind/status/errorCode). */
 export { ApiClientError };
-export { withAuthRetry, isUnauthorizedError } from '../features/auth/with-auth-retry';
-export type { SessionRefresher } from '../features/auth/with-auth-retry';
+export { withAuthRetry, isUnauthorizedError } from './with-auth-retry';
+export type { SessionRefresher } from './with-auth-retry';
 export type { EnistereApiClient } from '@enistere/api-client-fetch';

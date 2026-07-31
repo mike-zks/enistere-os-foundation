@@ -2,11 +2,12 @@
  * TanStack Query client factory + default singleton du runtime neutre.
  *
  * Defaults are conservative and mobile-friendly. No business queries or query
- * keys live here. The baseline has no authenticated transport, so retry is a
- * simple bounded policy; the capability Auth composée remplace ce fichier via
- * son overlay pour ne jamais réessayer un 401 (pont 401 possédé par l'AuthEngine).
+ * keys live here. Retry is a bounded policy, plus whatever exceptions the
+ * composed capabilities declare through `CAPABILITY_RETRY_GUARDS` — Auth uses it
+ * so a 401 is never retried, because it needs a re-auth and not another attempt.
  */
 import { QueryClient } from '@tanstack/react-query';
+import { CAPABILITY_RETRY_GUARDS } from '../composition/capability-query-retry';
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -14,7 +15,10 @@ export function createQueryClient(): QueryClient {
       queries: {
         staleTime: 30_000,
         gcTime: 5 * 60_000,
-        retry: (failureCount) => failureCount < 2,
+        retry: (failureCount, error) => {
+          if (CAPABILITY_RETRY_GUARDS.some((stops) => stops(error))) return false;
+          return failureCount < 2;
+        },
         refetchOnWindowFocus: false,
       },
       mutations: {
