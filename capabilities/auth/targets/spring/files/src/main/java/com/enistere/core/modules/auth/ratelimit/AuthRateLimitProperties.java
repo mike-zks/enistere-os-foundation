@@ -1,4 +1,4 @@
-package com.enistere.core.infrastructure.ratelimit;
+package com.enistere.core.modules.auth.ratelimit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

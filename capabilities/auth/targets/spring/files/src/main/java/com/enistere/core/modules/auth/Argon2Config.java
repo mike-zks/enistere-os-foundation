@@ -1,4 +1,4 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.auth;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;

@@ -2,7 +2,7 @@ package com.enistere.core.modules.files;
 
 import com.enistere.core.AbstractIntegrationTest;
 import com.enistere.core.TestDataFactory;
-import com.enistere.core.config.FilesConfig;
+import com.enistere.core.modules.files.FilesConfig;
 import com.enistere.core.infrastructure.storage.MinioStorageService;
 import com.enistere.core.infrastructure.storage.StorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;

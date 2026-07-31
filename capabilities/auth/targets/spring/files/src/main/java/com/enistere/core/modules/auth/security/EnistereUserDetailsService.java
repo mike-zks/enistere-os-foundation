@@ -1,4 +1,4 @@
-package com.enistere.core.infrastructure.security;
+package com.enistere.core.modules.auth.security;
 
 import com.enistere.core.modules.users.User;
 import com.enistere.core.modules.users.UserRepository;

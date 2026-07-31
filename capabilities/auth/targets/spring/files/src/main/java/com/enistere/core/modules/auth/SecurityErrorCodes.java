@@ -1,4 +1,4 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.auth;
 
 /**
  * Public error codes emitted by the shared security filter chain (ADR-069).

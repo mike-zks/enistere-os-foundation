@@ -4,28 +4,68 @@
   "target": "spring",
   "version": "0.2.0",
   "description": "Files Spring : upload multipart et URL de téléchargement présignée, stockage MinIO S3-compatible. Composé sur base + auth + rbac.",
-  "operations": ["files", "dependencies", "environment", "integrations", "verification"],
+  "operations": [
+    "files",
+    "dependencies",
+    "environment",
+    "integrations",
+    "verification"
+  ],
   "files": [
-    { "source": "files/src/main/java/com/enistere/core/modules/files", "destination": "src/main/java/com/enistere/core/modules/files" },
-    { "source": "files/src/main/java/com/enistere/core/infrastructure/ratelimit", "destination": "src/main/java/com/enistere/core/infrastructure/ratelimit" },
-    { "source": "files/src/main/java/com/enistere/core/infrastructure/storage", "destination": "src/main/java/com/enistere/core/infrastructure/storage" },
-    { "source": "files/src/main/java/com/enistere/core/config/FilesConfig.java", "destination": "src/main/java/com/enistere/core/config/FilesConfig.java" },
-    { "source": "files/src/main/java/com/enistere/core/config/StorageConfig.java", "destination": "src/main/java/com/enistere/core/config/StorageConfig.java" },
-    { "source": "files/src/main/resources/db/migration/V3__add_stored_files.sql", "destination": "src/main/resources/db/migration/V3__add_stored_files.sql" },
-    { "source": "files/src/test/java/com/enistere/core/modules/files", "destination": "src/test/java/com/enistere/core/modules/files" },
-    { "source": "files/src/test/java/com/enistere/core/infrastructure/storage", "destination": "src/test/java/com/enistere/core/infrastructure/storage" }
+    {
+      "source": "files/src/main/java/com/enistere/core/modules/files",
+      "destination": "src/main/java/com/enistere/core/modules/files"
+    },
+    {
+      "source": "files/src/main/java/com/enistere/core/infrastructure/storage",
+      "destination": "src/main/java/com/enistere/core/infrastructure/storage"
+    },
+    {
+      "source": "files/src/main/resources/db/migration/V3__add_stored_files.sql",
+      "destination": "src/main/resources/db/migration/V3__add_stored_files.sql"
+    },
+    {
+      "source": "files/src/test/java/com/enistere/core/modules/files",
+      "destination": "src/test/java/com/enistere/core/modules/files"
+    },
+    {
+      "source": "files/src/test/java/com/enistere/core/infrastructure/storage",
+      "destination": "src/test/java/com/enistere/core/infrastructure/storage"
+    }
   ],
   "dependencies": {
     "maven": [
-      { "groupId": "io.minio", "artifactId": "minio", "version": "8.5.17" }
+      {
+        "groupId": "io.minio",
+        "artifactId": "minio",
+        "version": "8.5.17"
+      }
     ]
   },
   "environment": [
-    { "name": "ENISTERE_FILES_ENDPOINT", "example": "http://localhost:9000" },
-    { "name": "ENISTERE_FILES_BUCKET", "example": "enistere-files" },
-    { "name": "ENISTERE_FILES_ACCESS_KEY", "example": "change-me" },
-    { "name": "ENISTERE_FILES_SECRET_KEY", "example": "change-me" }
+    {
+      "name": "ENISTERE_FILES_ENDPOINT",
+      "example": "http://localhost:9000"
+    },
+    {
+      "name": "ENISTERE_FILES_BUCKET",
+      "example": "enistere-files"
+    },
+    {
+      "name": "ENISTERE_FILES_ACCESS_KEY",
+      "example": "change-me"
+    },
+    {
+      "name": "ENISTERE_FILES_SECRET_KEY",
+      "example": "change-me"
+    }
   ],
   "integrations": [],
-  "verification": [["./mvnw", "verify", "--no-transfer-progress"]]
+  "verification": [
+    [
+      "./mvnw",
+      "verify",
+      "--no-transfer-progress"
+    ]
+  ]
 }

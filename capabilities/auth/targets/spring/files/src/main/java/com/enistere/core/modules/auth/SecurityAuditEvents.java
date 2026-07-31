@@ -1,4 +1,4 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.auth;
 
 /**
  * Business audit events emitted by the shared security filter chain (ADR-069).

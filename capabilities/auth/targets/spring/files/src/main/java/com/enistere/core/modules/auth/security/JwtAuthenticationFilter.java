@@ -1,4 +1,4 @@
-package com.enistere.core.infrastructure.security;
+package com.enistere.core.modules.auth.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

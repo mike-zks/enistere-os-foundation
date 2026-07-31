@@ -1,4 +1,4 @@
-package com.enistere.core.infrastructure.ratelimit;
+package com.enistere.core.modules.files.ratelimit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

@@ -84,8 +84,8 @@
     "AUTH-AUTHORITY-007": [
       {
         "kind": "source",
-        "source": "files/src/main/java/com/enistere/core/infrastructure/ratelimit/AuthRateLimitInterceptor.java",
-        "materialized": "src/main/java/com/enistere/core/infrastructure/ratelimit/AuthRateLimitInterceptor.java",
+        "source": "files/src/main/java/com/enistere/core/modules/auth/ratelimit/AuthRateLimitInterceptor.java",
+        "materialized": "src/main/java/com/enistere/core/modules/auth/ratelimit/AuthRateLimitInterceptor.java",
         "contains": [
           "TOO_MANY_REQUESTS",
           "AUTH_RATE_LIMITED"

@@ -1,8 +1,9 @@
-package com.enistere.core.config;
+package com.enistere.core.modules.auth;
 
+import com.enistere.core.config.CorsConfig;
 import com.enistere.core.common.web.CorrelationIdFilter;
-import com.enistere.core.infrastructure.security.EnistereUserDetailsService;
-import com.enistere.core.infrastructure.security.JwtAuthenticationFilter;
+import com.enistere.core.modules.auth.security.EnistereUserDetailsService;
+import com.enistere.core.modules.auth.security.JwtAuthenticationFilter;
 import com.enistere.core.modules.audit.AuditService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

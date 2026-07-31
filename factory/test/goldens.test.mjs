@@ -110,7 +110,7 @@ describe('auth golden compositions', () => {
       assert.match(migration, new RegExp(`CREATE TABLE ${table}`));
     }
     assert.ok(!/INSERT INTO/.test(migration), 'RBAC must not grant roles or permissions implicitly');
-    const jwtFilter = await readFile(join(javaRoot, 'infrastructure/security/JwtAuthenticationFilter.java'), 'utf8');
+    const jwtFilter = await readFile(join(javaRoot, 'modules/auth/security/JwtAuthenticationFilter.java'), 'utf8');
     assert.ok(!/PermissionRepository|RoleRepository|extractPermissions/.test(jwtFilter), 'JWT filter stays Auth-only');
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     assert.deepEqual(lock.overlays.map((item) => item.capability), ['auth', 'rbac']);

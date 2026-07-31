@@ -1,8 +1,8 @@
 package com.enistere.core.modules.auth;
 
 import com.enistere.core.common.exception.CodedException;
-import com.enistere.core.config.JwtConfig;
-import com.enistere.core.infrastructure.security.JwtTokenProvider;
+import com.enistere.core.modules.auth.JwtConfig;
+import com.enistere.core.modules.auth.security.JwtTokenProvider;
 import com.enistere.core.modules.audit.AuditService;
 import com.enistere.core.modules.auth.dto.AuthUserDto;
 import com.enistere.core.modules.auth.dto.LoginResponseDto;

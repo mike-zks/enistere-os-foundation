@@ -1,6 +1,6 @@
-package com.enistere.core.infrastructure.security;
+package com.enistere.core.modules.auth.security;
 
-import com.enistere.core.config.JwtConfig;
+import com.enistere.core.modules.auth.JwtConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

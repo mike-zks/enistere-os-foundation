@@ -1,5 +1,6 @@
-package com.enistere.core.infrastructure.ratelimit;
+package com.enistere.core.modules.files.ratelimit;
 
+import com.enistere.core.infrastructure.ratelimit.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

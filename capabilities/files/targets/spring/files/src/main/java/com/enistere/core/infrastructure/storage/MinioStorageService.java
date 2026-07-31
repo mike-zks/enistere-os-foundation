@@ -1,6 +1,6 @@
 package com.enistere.core.infrastructure.storage;
 
-import com.enistere.core.config.FilesConfig;
+import com.enistere.core.modules.files.FilesConfig;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
