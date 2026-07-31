@@ -1,6 +1,6 @@
 # ADR-079 — Trois zones : ce que la Factory possède, ce qu'elle génère, ce qui est métier
 
-- Statut : Validé — Next.js, NestJS et FastAPI migrés, deux runtimes restants
+- Statut : Validé — six runtimes migrés, Spring restant
 - Date : 2026-07-30
 - Décideur : Owner Foundation
 - Complète : ADR-055 et ADR-074
@@ -91,6 +91,31 @@ mesurée pour FastAPI est donc celle que **le starter possède**, et
 règle mais de faire porter la persistance par le baseline — l'asymétrie
 qu'ADR-077 avait déjà déclarée assumée.
 
+## Ce que la migration React Native a révélé
+
+React Native est le runtime où le critère demande le plus de jugement, parce que
+son overlay Auth contribue **beaucoup d'infrastructure** en plus du métier.
+La répartition retenue :
+
+* **métier**, déplacé sous `src/features/` — `auth`, `upload`, le pont 401
+  (`with-auth-retry`), le magasin de session et ses clés, les hooks
+  `useAuthedQuery`/`useAuthedMutation`, et `navigation/` dont `resolveAuthRedirect`
+  prend un `AuthStatus` en paramètre ;
+* **cœur**, laissé en place — le port `SecureStorage` et ses adaptateurs, la
+  fondation de formulaires, le client de requêtes : ils ne nomment aucun domaine.
+
+La règle a aussi mis au jour **un défaut d'une autre nature**. React Native
+compose en **écrasant des barils du cœur** (`overwrite: true`) plutôt que par une
+couture : `src/api/index.ts` importe la capability pour câbler l'adaptateur de
+session, `src/query/index.ts` ré-expose les hooks authentifiés. Déplacer ces
+fichiers ne corrigerait rien — ils doivent rester au cœur. Le correctif est une
+couture de composition, comme les six autres runtimes en ont une. Trois écarts
+déclarés et datés.
+
+Enfin, la mesure elle-même avait un trou : `destination.startsWith('src/api/')`
+laissait passer une entrée écrivant `src/api` **en entier**, alors que remplacer
+le répertoire est la brèche la plus large, pas une exemption.
+
 ## Ce que la règle a révélé sur Spring
 
 En étendant FF5d à Spring — réputé « net » parce qu'il avait déjà `modules/` — la
@@ -124,19 +149,19 @@ précisément ce qu'une zone nommée rend explicite.
 
 ### Acquis
 
-* **Next.js, NestJS et FastAPI n'ont plus aucune capability dans leur zone
-  cœur.** Les sept violations Next.js déclarées sont refermées.
-* FF5d couvre désormais six runtimes : Angular, Flutter, Next.js, NestJS,
-  FastAPI et Spring. Seul React Native n'est pas mesuré.
+* **Six runtimes ont une zone métier et n'y laissent aucune capability
+  ailleurs** : Next.js, NestJS, FastAPI, React Native, Angular, Flutter.
+* **FF5d couvre les sept runtimes.** Les écarts restants — neuf classes
+  `@Configuration` sur Spring, trois écrasements de barils sur React Native —
+  sont déclarés et datés, pas invisibles.
 * Le vocabulaire est fixé, donc les migrations restantes sont mécaniques.
 
 ### Assumé
 
-* **La migration est incomplète et le reste sciemment.** React Native n'a pas
-  encore de zone métier, et Spring garde neuf classes `@Configuration`
-  dans son cœur — écarts déclarés et datés. Chacun est une migration à part
-  entière, derrière son golden : les grouper multiplierait le risque sans rien
-  accélérer.
+* **Deux dettes restent, déclarées et datées.** Spring garde neuf classes
+  `@Configuration` dans son cœur ; React Native compose par écrasement de barils
+  au lieu de coutures. La seconde n'est pas un problème de placement et ne se
+  règle pas par un déplacement.
 * NestJS prend `src/modules/`, légèrement à contre-courant de son idiome usuel
   (`src/<feature>` à plat). Coût accepté au bénéfice de la cohérence de famille
   avec Spring.
@@ -175,6 +200,7 @@ npm run factory:capability-conformance    # aucune dérive
 node factory/quality/scripts/golden-runtime.mjs nest-next-files
 node factory/quality/scripts/golden-runtime.mjs nestjs-files
 node factory/quality/scripts/golden-runtime.mjs fastapi-rbac
+node factory/quality/scripts/golden-runtime.mjs triple-files
 ```
 
 Applications réellement générées, chacune composant **les trois capabilities** :
@@ -183,11 +209,12 @@ Applications réellement générées, chacune composant **les trois capabilities
   `next build` réussi ;
 * **NestJS** — `lint` et `build` verts, **387 tests sur 52 suites** ;
 * **FastAPI** — `ruff` propre, **40/40 pytest** sur PostgreSQL réel, `compileall`
-  et `pip check` verts, deux révisions Alembic appliquées (8 tables).
+  et `pip check` verts, deux révisions Alembic appliquées (8 tables) ;
+* **React Native** (composition triple) — `typecheck` et `lint` verts,
+  **362/362 tests**.
 
 ## Rollback
 
-Révoquer les commits remet les capabilities Next.js, NestJS et FastAPI dans la
-zone cœur.
+Révoquer les commits remet les capabilities dans la zone cœur.
 La règle FF5d et le vocabulaire restent valides : ils ne dépendent d'aucun
 runtime en particulier.

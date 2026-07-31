@@ -17,7 +17,7 @@
  * Concurrency: `refreshSession()` is coalesced — concurrent callers share one
  * in-flight refresh (prevents double refresh / token stampede).
  */
-import { SessionStore } from '../storage/session-store';
+import { SessionStore } from './session-store';
 import { AuthApi, AuthSessionData } from './auth-api';
 import { AuthState, AuthUser, SessionSnapshot, SignInInput, initialAuthState } from './session';
 

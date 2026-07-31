@@ -125,9 +125,14 @@ export function runFitnessFunctions({
   // overlays after materialization.
   const forbiddenCapabilityRoots = {
     'react-native': [
+      // Both the old flat location and the business zone: a starter must embed a
+      // capability at neither.
       'src/auth',
       'src/upload',
       'src/notifications',
+      'src/features/auth',
+      'src/features/upload',
+      'src/features/notifications',
       'app/(public)',
       'app/(app)',
     ],
@@ -178,6 +183,18 @@ export function runFitnessFunctions({
     // that directory is not measured here; the real fix is for the baseline to
     // own persistence, which is the asymmetry ADR-077 already declared.
     fastapi: { core: ['app/composition/'], business: 'app/modules/' },
+    // React Native's core zone is the set of directories the starter owns. The
+    // secure-storage port, the form foundation and the query client stay there
+    // even though Authentication ships them: they name no domain.
+    'react-native': {
+      core: ['src/a11y/', 'src/analytics/', 'src/api/', 'src/app-environment/',
+        'src/app-lifecycle/', 'src/biometrics/', 'src/clipboard/', 'src/composition/',
+        'src/config/', 'src/consent/', 'src/crash-reporting/', 'src/i18n/', 'src/linking/',
+        'src/logger/', 'src/offline/', 'src/permissions/', 'src/platform/', 'src/preferences/',
+        'src/push/', 'src/query/', 'src/retry/', 'src/session/', 'src/states/', 'src/store/',
+        'src/telemetry/', 'src/theme/', 'src/types/', 'src/ui/'],
+      business: 'src/features/',
+    },
     spring: {
       core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
         'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/'],
@@ -193,7 +210,12 @@ export function runFitnessFunctions({
     for (const entry of overlay.files ?? []) {
       const destination = entry.destination ?? '';
       const cores = Array.isArray(zone.core) ? zone.core : [zone.core];
-      const breached = cores.find((prefix) => destination.startsWith(prefix));
+      // `startsWith(prefix)` alone lets an overlay that writes a whole core
+      // directory through: `src/api` does not start with `src/api/`. Replacing
+      // the directory wholesale is the *larger* breach, not an exemption.
+      const breached = cores.find(
+        (prefix) => destination.startsWith(prefix) || destination === prefix.replace(/\/$/, ''),
+      );
       if (breached === undefined) continue;
       if (!declared?.destinations.includes(destination)) {
         fail(

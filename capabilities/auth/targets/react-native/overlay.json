@@ -5,27 +5,82 @@
   "version": "0.2.0",
   "description": "Authentification React Native (Expo Router) : AuthEngine, session, SecureStore seam (ADR-015), login/logout/refresh, pont 401 possédé par l'AuthEngine, routes publique/protégée. Sans Files, télémétrie ni permissions métier.",
   "files": [
-    { "source": "files/src/auth", "destination": "src/auth" },
-    { "source": "files/src/api", "destination": "src/api" },
-    { "source": "files/src/storage", "destination": "src/storage" },
-    { "source": "files/src/navigation", "destination": "src/navigation" },
-    { "source": "files/src/forms", "destination": "src/forms" },
-    { "source": "files/src/query/use-authed-query.ts", "destination": "src/query/use-authed-query.ts" },
-    { "source": "files/src/query/use-authed-mutation.ts", "destination": "src/query/use-authed-mutation.ts" },
-    { "source": "files/src/query/query-client.ts", "destination": "src/query/query-client.ts", "overwrite": true },
-    { "source": "files/src/query/index.ts", "destination": "src/query/index.ts", "overwrite": true },
-    { "source": "files/app/index.tsx", "destination": "app/index.tsx", "overwrite": true },
-    { "source": "files/app/(public)", "destination": "app/(public)" },
-    { "source": "files/app/(app)", "destination": "app/(app)" },
-    { "source": "files/test/auth-engine.test.ts", "destination": "test/auth-engine.test.ts" },
-    { "source": "files/test/enistere-auth-api.test.ts", "destination": "test/enistere-auth-api.test.ts" },
-    { "source": "files/test/session-store.test.ts", "destination": "test/session-store.test.ts" },
-    { "source": "files/test/token-mapping.test.ts", "destination": "test/token-mapping.test.ts" },
-    { "source": "files/test/with-auth-retry.test.ts", "destination": "test/with-auth-retry.test.ts" },
-    { "source": "files/test/form-errors.test.ts", "destination": "test/form-errors.test.ts" },
-    { "source": "files/test/validation.test.ts", "destination": "test/validation.test.ts" },
-    { "source": "files/test/helpers.ts", "destination": "test/helpers.ts" },
-    { "source": "files/tsconfig.test.json", "destination": "tsconfig.test.json", "overwrite": true }
+    {
+      "source": "files/src/features/auth",
+      "destination": "src/features/auth"
+    },
+    {
+      "source": "files/src/api",
+      "destination": "src/api"
+    },
+    {
+      "source": "files/src/storage",
+      "destination": "src/storage"
+    },
+    {
+      "source": "files/src/forms",
+      "destination": "src/forms"
+    },
+    {
+      "source": "files/src/query/query-client.ts",
+      "destination": "src/query/query-client.ts",
+      "overwrite": true
+    },
+    {
+      "source": "files/src/query/index.ts",
+      "destination": "src/query/index.ts",
+      "overwrite": true
+    },
+    {
+      "source": "files/app/index.tsx",
+      "destination": "app/index.tsx",
+      "overwrite": true
+    },
+    {
+      "source": "files/app/(public)",
+      "destination": "app/(public)"
+    },
+    {
+      "source": "files/app/(app)",
+      "destination": "app/(app)"
+    },
+    {
+      "source": "files/test/auth-engine.test.ts",
+      "destination": "test/auth-engine.test.ts"
+    },
+    {
+      "source": "files/test/enistere-auth-api.test.ts",
+      "destination": "test/enistere-auth-api.test.ts"
+    },
+    {
+      "source": "files/test/session-store.test.ts",
+      "destination": "test/session-store.test.ts"
+    },
+    {
+      "source": "files/test/token-mapping.test.ts",
+      "destination": "test/token-mapping.test.ts"
+    },
+    {
+      "source": "files/test/with-auth-retry.test.ts",
+      "destination": "test/with-auth-retry.test.ts"
+    },
+    {
+      "source": "files/test/form-errors.test.ts",
+      "destination": "test/form-errors.test.ts"
+    },
+    {
+      "source": "files/test/validation.test.ts",
+      "destination": "test/validation.test.ts"
+    },
+    {
+      "source": "files/test/helpers.ts",
+      "destination": "test/helpers.ts"
+    },
+    {
+      "source": "files/tsconfig.test.json",
+      "destination": "tsconfig.test.json",
+      "overwrite": true
+    }
   ],
   "dependencies": {
     "dependencies": {
@@ -40,10 +95,23 @@
   },
   "environment": [],
   "integrations": [
-    { "kind": "expo.provider", "importPath": "@/auth", "symbol": "AuthProvider" },
-    { "kind": "expo.home-action", "href": "/settings", "label": "Open settings", "order": 10 }
+    {
+      "kind": "expo.provider",
+      "importPath": "@/features/auth",
+      "symbol": "AuthProvider"
+    },
+    {
+      "kind": "expo.home-action",
+      "href": "/settings",
+      "label": "Open settings",
+      "order": 10
+    }
   ],
   "verification": [
-    ["npm", "run", "test"]
+    [
+      "npm",
+      "run",
+      "test"
+    ]
   ]
 }

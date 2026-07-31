@@ -22,8 +22,8 @@
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { FileCategory } from '@enistere/api-client-fetch';
 
-import { apiClient } from '../api';
-import { useAuthedMutation, type AuthedMutationOptions } from '../query';
+import { apiClient } from '../../api';
+import { useAuthedMutation, type AuthedMutationOptions } from '../../query';
 import type { MobileFile } from './file';
 
 /** Upload result — the PUBLIC file metadata DTO (no signed URL, no secret). */

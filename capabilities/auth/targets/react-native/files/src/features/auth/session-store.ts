@@ -12,9 +12,9 @@
  *
  * No business fields cross this boundary.
  */
-import { AuthUser } from '../auth/session';
-import { SecureStorage } from './secure-storage';
-import { STORAGE_KEYS } from './keys';
+import { AuthUser } from './session';
+import { SecureStorage } from '../../storage/secure-storage';
+import { STORAGE_KEYS } from './storage-keys';
 
 export interface PersistedSession {
   readonly refreshToken: string;

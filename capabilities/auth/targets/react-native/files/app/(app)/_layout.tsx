@@ -7,8 +7,8 @@
  */
 import { Redirect, Stack } from 'expo-router';
 
-import { useAuth } from '@/auth';
-import { ROUTES, isAuthBusy } from '@/navigation';
+import { useAuth } from '@/features/auth';
+import { ROUTES, isAuthBusy } from '@/features/auth/navigation';
 import { LoadingState } from '@/states';
 import { Screen } from '@/ui';
 

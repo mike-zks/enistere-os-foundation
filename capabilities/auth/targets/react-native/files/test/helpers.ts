@@ -2,8 +2,8 @@
  * Test helpers (compiled by tsconfig.test.json, run via `node --test`).
  * Not a test file itself (no `.test.ts` suffix).
  */
-import type { AuthApi, AuthSessionData } from '../src/auth/auth-api';
-import type { SignInInput } from '../src/auth/session';
+import type { AuthApi, AuthSessionData } from '../src/features/auth/auth-api';
+import type { SignInInput } from '../src/features/auth/session';
 
 /**
  * Controllable {@link AuthApi} mock:

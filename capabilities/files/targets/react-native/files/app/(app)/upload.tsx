@@ -16,8 +16,8 @@ import type { FileCategory } from '@enistere/api-client-fetch';
 import { ErrorState, LoadingState, MessageState } from '@/states';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
-import { useUploadMutation } from '@/upload';
-import type { MobileFile } from '@/upload';
+import { useUploadMutation } from '@/features/upload';
+import type { MobileFile } from '@/features/upload';
 
 const FILE_CATEGORIES = [
   'DOCUMENT',

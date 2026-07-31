@@ -3,8 +3,8 @@ import { test } from 'node:test';
 
 import type { EnistereApiClient } from '@enistere/api-client-fetch';
 
-import { AuthApiError } from '../src/auth/auth-api';
-import { EnistereAuthApi } from '../src/auth/enistere-auth-api';
+import { AuthApiError } from '../src/features/auth/auth-api';
+import { EnistereAuthApi } from '../src/features/auth/enistere-auth-api';
 
 type PostResult = {
   data?: {

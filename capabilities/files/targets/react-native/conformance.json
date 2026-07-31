@@ -34,8 +34,8 @@
       },
       {
         "kind": "source",
-        "source": "files/src/upload/use-upload.ts",
-        "materialized": "src/upload/use-upload.ts",
+        "source": "files/src/features/upload/use-upload.ts",
+        "materialized": "src/features/upload/use-upload.ts",
         "contains": [
           "useAuthedMutation",
           "apiClient.files.upload"

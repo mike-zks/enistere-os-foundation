@@ -398,7 +398,7 @@ laissant passer une composition Angular qui ne compilait pas.
   fenêtre pendant laquelle une révocation n'a pas pris effet.
 - La décision n'est pas prouvée sous concurrence ; aucun démarrage headless.
 
-## Mission en cours — refonte des zones : Next.js, NestJS et FastAPI migrés
+## Mission en cours — refonte des zones : six runtimes sur sept
 
 [ADR-079](../adr/ADR-079-capability-zones.md) fixe trois zones et la règle qui
 les départage : **la zone dépend de la nature du code, pas de qui le livre**, et
@@ -467,6 +467,29 @@ proposerait de **supprimer les tables RBAC**. Le correctif propre est une coutur
 de composition pour les modules de modèles, pas un import en dur de plus : auth
 ne doit pas dépendre de rbac, la dépendance allant dans l'autre sens.
 
+### React Native : le runtime qui demande le plus de jugement
+
+Son overlay Auth contribue **beaucoup d'infrastructure** en plus du métier. La
+répartition retenue :
+
+- **métier**, sous `src/features/` — `auth`, `upload`, le pont 401
+  (`with-auth-retry`), le magasin de session et ses clés, les hooks
+  `useAuthedQuery`/`useAuthedMutation`, et `navigation/` dont
+  `resolveAuthRedirect` prend un `AuthStatus` ;
+- **cœur**, laissé en place — le port `SecureStorage` et ses adaptateurs, la
+  fondation de formulaires, le client de requêtes : ils ne nomment aucun domaine.
+
+**Un défaut d'une autre nature** est apparu : React Native compose en
+**écrasant des barils du cœur** (`overwrite: true`) plutôt que par une couture.
+`src/api/index.ts` importe la capability pour câbler l'adaptateur de session ;
+`src/query/index.ts` ré-expose les hooks authentifiés. Les déplacer ne
+corrigerait rien — ils doivent rester au cœur. Le correctif est une couture, comme
+les six autres runtimes en ont une. Trois écarts déclarés et datés.
+
+**La mesure elle-même avait un trou** : `startsWith('src/api/')` laissait passer
+une entrée écrivant `src/api` **en entier**. Remplacer le répertoire est la
+brèche la plus large, pas une exemption.
+
 ### Preuves
 
 - 497/497 tests Foundation, aucune dérive de conformance ;
@@ -476,33 +499,35 @@ ne doit pas dépendre de rbac, la dépendance allant dans l'autre sens.
   **387 tests sur 52 suites** ;
 - application FastAPI composée (deux capabilities) : `ruff` propre, **40/40
   pytest** sur PostgreSQL réel, `compileall` et `pip check` verts, deux révisions
-  Alembic appliquées sur base vide (8 tables).
+  Alembic appliquées sur base vide (8 tables) ;
+- application React Native composée (composition triple) : `typecheck` et `lint`
+  verts, **362/362 tests**.
 
 ## Prochaine mission unique
 
-> **Donner une zone métier à React Native** (`src/features/`), quatrième des cinq
-> runtimes à migrer.
+> **Sortir les neuf classes `@Configuration` du cœur de Spring**, dernier
+> runtime dont la zone métier existe mais n'est pas utilisée partout.
 
 ### Justification de l'ordre
 
-React Native est le dernier runtime sans zone métier : `src/auth` et `src/upload`
-vivent à plat parmi vingt-sept répertoires de premier niveau. C'est aussi le seul
-des sept que FF5d ne mesure pas encore.
+C'est le dernier écart de *placement* — les trois autres écarts déclarés (React
+Native) relèvent d'un défaut différent, la composition par écrasement, qui exige
+des coutures et non un déplacement.
 
-Spring vient ensuite : ses neuf classes `@Configuration` sont déclarées et
-datées, et sa migration est de nature différente — déplacer des fichiers **dans**
-une zone métier qui existe déjà.
+Spring est aussi le plus simple des six : `modules/` existe déjà et accueille
+entités, dépôts et services ; seules les classes `@Configuration` sont restées
+dans `core/config/`.
 
 ### Critères de sortie
 
-- `src/features/` accueille `auth` et `upload` ; FF5d couvre React Native ;
-- les goldens `triple-auth` et `triple-files` passent sans régression ;
-- FF5c, qui énumérait `src/auth` et `src/upload` comme racines interdites du
-  starter, est remplacée par la règle positive là où elle fait doublon.
+- les neuf classes rejoignent le module de leur capability ;
+- `layout-gaps.json` ne contient plus que les trois écarts React Native ;
+- les goldens `spring-auth`, `spring-auth-rbac` et `spring-files` passent.
 
 ### Ce qui reste ouvert après cette mission
 
-- **Spring** : neuf classes `@Configuration` à sortir de `core/config/` ;
+- **coutures de composition pour React Native** (client API, état serveur), pour
+  remplacer les trois écrasements de barils ;
 - l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
 - la couture de composition pour les modules de modèles Alembic ;
 - **la régénération elle-même** — la zone en est le prérequis, pas la capacité ;

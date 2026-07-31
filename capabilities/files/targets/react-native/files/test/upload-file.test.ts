@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { describeFileForLog, isAllowedFileType, isMobileFile } from '../src/upload/file';
+import { describeFileForLog, isAllowedFileType, isMobileFile } from '../src/features/upload/file';
 
 const file = { uri: 'file:///tmp/IMG_0001.jpg', name: 'photo.jpg', type: 'image/jpeg' };
 

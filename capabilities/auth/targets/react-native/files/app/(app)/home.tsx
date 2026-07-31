@@ -5,7 +5,7 @@
 import { Stack, router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { useAuth } from '@/auth';
+import { useAuth } from '@/features/auth';
 import { CAPABILITY_HOME_ACTIONS } from '@/composition/home-actions';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';

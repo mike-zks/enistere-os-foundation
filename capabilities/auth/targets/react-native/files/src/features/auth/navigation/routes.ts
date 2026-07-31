@@ -6,7 +6,7 @@
  * route strings out of components, and `resolveAuthRedirect` centralizes the
  * "where should this auth state land" rule used by the layouts.
  */
-import type { AuthStatus } from '../auth';
+import type { AuthStatus } from '..';
 
 export const ROUTES = {
   /** Public placeholder screen (unauthenticated stack). */

@@ -170,7 +170,7 @@ describe('auth golden compositions', () => {
 
   it('NestJS + Next.js + React Native base carries no mobile Auth surface', async () => {
     const out = await gen('triple-base', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base']);
-    assert.equal(await exists(join(out, 'apps/mobile/src/auth')), false);
+    assert.equal(await exists(join(out, 'apps/mobile/src/features/auth')), false);
     assert.equal(await exists(join(out, 'apps/mobile/app/(app)')), false);
     assert.equal(await exists(join(out, 'apps/mobile/app/(public)')), false);
     const layout = await readFile(join(out, 'apps/mobile/app/_layout.tsx'), 'utf8');
@@ -183,17 +183,17 @@ describe('auth golden compositions', () => {
 
   it('NestJS + Next.js + React Native base+auth composes mobile Auth without Files/telemetry business surface', async () => {
     const out = await gen('triple-auth', { api: 'nestjs', web: 'nextjs', mobile: 'react-native' }, ['base', 'auth']);
-    assert.ok(await exists(join(out, 'apps/mobile/src/auth/auth-engine.ts')));
-    assert.ok(await exists(join(out, 'apps/mobile/src/auth/AuthProvider.tsx')));
+    assert.ok(await exists(join(out, 'apps/mobile/src/features/auth/auth-engine.ts')));
+    assert.ok(await exists(join(out, 'apps/mobile/src/features/auth/AuthProvider.tsx')));
     assert.ok(await exists(join(out, 'apps/mobile/app/(app)/home.tsx')));
     assert.ok(await exists(join(out, 'apps/mobile/app/(public)/sign-in.tsx')));
-    assert.ok(await exists(join(out, 'apps/mobile/src/api/with-auth-retry.ts')), '401 bridge present');
+    assert.ok(await exists(join(out, 'apps/mobile/src/features/auth/with-auth-retry.ts')), '401 bridge present');
     assert.ok(await exists(join(out, 'apps/mobile/src/storage/expo-secure-storage.ts')), 'SecureStore seam present');
     const capProv = await readFile(join(out, 'apps/mobile/src/composition/capability-providers.tsx'), 'utf8');
     assert.match(capProv, /AuthProvider/);
     const pkg = JSON.parse(await readFile(join(out, 'apps/mobile/package.json'), 'utf8'));
     assert.ok(pkg.dependencies['expo-secure-store']);
-    assert.equal(await exists(join(out, 'apps/mobile/src/upload')), false, 'no Files upload');
+    assert.equal(await exists(join(out, 'apps/mobile/src/features/upload')), false, 'no Files upload');
     assert.equal(await exists(join(out, 'apps/mobile/app/(app)/upload.tsx')), false, 'no Files upload route');
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     assert.equal(lock.overlays.length, 3);

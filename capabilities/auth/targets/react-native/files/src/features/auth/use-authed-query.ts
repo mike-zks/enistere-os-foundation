@@ -23,7 +23,7 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 
-import { authedRequest } from '../api';
+import { authedRequest } from '../../api';
 
 export type AuthedQueryOptions<TData, TKey extends QueryKey> = Omit<
   UseQueryOptions<TData, Error, TData, TKey>,

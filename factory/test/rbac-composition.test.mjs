@@ -298,7 +298,7 @@ describe('rbac golden compositions (structural)', () => {
     for (const path of ['src/roles', 'src/authorization', 'src/rbac', 'src/permissions/permissions.constants.ts']) {
       assert.equal(await exists(join(out, 'apps/mobile', path)), false, `mobile must not receive ${path}`);
     }
-    assert.ok(await exists(join(out, 'apps/mobile/src/auth/auth-engine.ts')), 'mobile keeps Auth');
+    assert.ok(await exists(join(out, 'apps/mobile/src/features/auth/auth-engine.ts')), 'mobile keeps Auth');
 
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     const applied = lock.overlays.map((o) => `${o.capability}/${o.target}`).sort();

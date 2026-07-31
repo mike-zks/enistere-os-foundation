@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { InMemorySecureStorage } from '../src/storage/memory-secure-storage';
-import { SessionStore, type PersistedSession } from '../src/storage/session-store';
-import { STORAGE_KEYS } from '../src/storage/keys';
+import { SessionStore, type PersistedSession } from '../src/features/auth/session-store';
+import { STORAGE_KEYS } from '../src/features/auth/storage-keys';
 
 function makeStore(): { storage: InMemorySecureStorage; store: SessionStore } {
   const storage = new InMemorySecureStorage();
