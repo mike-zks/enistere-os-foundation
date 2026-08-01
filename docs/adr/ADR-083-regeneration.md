@@ -58,6 +58,19 @@ différentes : ce qui était prévu, et ce qui est sur le disque.
 | non inventorié, présent | fichier du propriétaire | **jamais touché** |
 | non inventorié, à générer | nouveau | créé |
 
+**Correction après audit.** La table ne portait que sur les fichiers réguliers.
+Un répertoire n'est pas inventorié ; un lien symbolique propriétaire placé à
+`apps/api/src/modules/auth` était donc vu comme un fichier préservé, tandis que
+les fichiers Auth à créer sous ce chemin restaient classés `create`. `mkdir` et
+`cp` suivaient ensuite le lien et écrivaient **hors du projet**, sans conflit.
+
+Mesuré après fusion : 45 entrées Auth ont été écrites dans la cible extérieure.
+La régénération distingue désormais fichiers réguliers et entrées non régulières
+(liens, sockets, devices, FIFOs). Une telle entrée située sur un fichier Factory
+ou sur l'ancêtre d'un chemin à générer devient un conflit unique ; aucun de ses
+descendants n'est ordonnancé, y compris en mode `keep`. La frontière est
+revérifiée avant la première mutation.
+
 ### 3. Aucun mode n'écrase un conflit
 
 `onConflict: 'abort'` (défaut) **n'écrit rien du tout** dès qu'un conflit
@@ -105,6 +118,14 @@ pas : un répertoire contenant quoi que ce soit du propriétaire survit.
 * **Aucune fusion.** Un fichier du cœur que vous avez modifié reste un conflit ;
   la Factory ne propose ni patch à trois voies ni résolution. Elle dit quoi, et
   s'arrête.
+* **Aucune transaction multi-fichiers.** Les conflits et les obstructions
+  persistantes sont détectés avant la première écriture, mais une panne I/O ou un
+  processus local échangeant les chemins entre deux appels système peut laisser
+  une application partiellement régénérée. Aucune garantie `openat` ou rollback
+  de répertoire complet n'est revendiquée.
+* `enistere.lock` et `enistere.inventory.json` sont des fichiers de contrôle
+  réservés à la Factory et réécrits en bloc. Une modification manuelle de leur
+  contenu n'est pas fusionnée ni conservée.
 * **Aucune migration de données ni de schéma.** Retirer une capability supprime
   son code, pas ses tables ni ses migrations déjà appliquées.
 
@@ -134,11 +155,11 @@ pas : un répertoire contenant quoi que ce soit du propriétaire survit.
 ## Tests
 
 ```bash
-npm run factory:test                      # 513
+npm run factory:test                      # 520
 node factory/quality/scripts/golden-runtime.mjs nestjs-auth --regenerate-from nestjs-base
 ```
 
-Dix tests, tous sur un projet **modifié par son propriétaire** — sur une copie
+Quinze tests, tous sur un projet **modifié par son propriétaire** — sur une copie
 vierge, une implémentation qui écrase tout passerait :
 
 * un projet intact reste identique au bit près, et le rapport le dit ;
@@ -153,7 +174,10 @@ vierge, une implémentation qui écrase tout passerait :
 * retirer une capability supprime ce qu'elle avait livré — sauf ce qui a été
   modifié depuis ;
 * `--dry-run` n'écrit rien ;
-* un projet sans inventaire est refusé.
+* un projet sans inventaire est refusé ;
+* un lien symbolique vers un répertoire propriétaire extérieur est un conflit en
+  modes `abort` et `keep`, et sa cible reste identique ;
+* la même garantie vaut pour un fichier de contrôle réécrit en bloc.
 
 Le golden va plus loin que la comptabilité de fichiers : il génère
 `nestjs-base`, y plante du travail du propriétaire, réécrit le blueprint,

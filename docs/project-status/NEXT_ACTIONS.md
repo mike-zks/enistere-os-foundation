@@ -971,6 +971,26 @@ d'architecture n'a été nécessaire.
 
 Preuves : link checker sur 148 fichiers, fitness functions sans finding et diff documentaire uniquement.
 
+## Mission achevée — la régénération ne suit plus les liens du propriétaire
+
+L'audit d'ADR-083 a démenti sa classification à quatre cas : elle ne classait
+que les fichiers, pas les répertoires ni les entrées non régulières. Un lien
+symbolique
+propriétaire placée sur le futur module Auth laissait `regenerate` écrire 45
+entrées hors du projet sans signaler de conflit.
+
+Le parcours distingue désormais fichiers réguliers et obstructions. Une
+obstruction sur un chemin Factory ou l'ancêtre d'un chemin à générer devient un
+conflit ; ses descendants ne sont jamais écrits, même avec `--keep-conflicts`.
+La même frontière protège les fichiers de contrôle réécrits en bloc et elle est
+revérifiée avant mutation.
+
+Preuves : 15/15 tests de régénération, 520/520 Foundation, fitness functions sans
+finding et golden `nestjs-base` → `nestjs-auth` complet (154/154 tests
+applicatifs, build, conformité, audit à zéro, lock reproductible). Non revendiqué :
+aucune transaction multi-fichiers contre une panne I/O ou un processus local
+échangeant les chemins entre deux appels système.
+
 ## Prochaine mission unique
 
 > **RBAC sur Angular et Flutter**, les deux derniers écarts de parité déclarés
