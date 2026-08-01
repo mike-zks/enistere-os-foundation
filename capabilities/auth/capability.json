@@ -248,7 +248,7 @@
       "target": "fastapi",
       "kind": "database",
       "strategy": "additive",
-      "path": "targets/fastapi/files/migrations/versions/0001_auth_and_audit.py",
+      "path": "targets/fastapi/files/migrations/versions/0002_auth.py",
       "order": 100
     }
   ],

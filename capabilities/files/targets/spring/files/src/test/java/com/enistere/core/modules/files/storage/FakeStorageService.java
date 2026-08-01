@@ -1,4 +1,4 @@
-package com.enistere.core.infrastructure.storage;
+package com.enistere.core.modules.files.storage;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;

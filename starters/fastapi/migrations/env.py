@@ -27,13 +27,17 @@ target_metadata = Base.metadata
 def _import_capability_models() -> None:
     """Imports the models of composed capabilities so autogenerate sees them.
 
-    Guarded: a project that composed persistence without Authentication still
-    migrates its baseline tables instead of failing on a missing module.
+    Guarded, and deliberately enumerated: a base project has none of these, and a
+    project that composed only Authentication has no authorization module. The
+    enumeration is a known limitation — a capability added later is invisible to
+    `--autogenerate` until it is listed here — and the clean fix is a composition
+    seam for model modules (ADR-079).
     """
-    try:
-        from app.modules.auth import models  # noqa: F401
-    except ImportError:  # pragma: no cover — depends on the composition.
-        pass
+    for module in ("app.modules.auth.models", "app.modules.authorization.models"):
+        try:
+            __import__(module)
+        except ImportError:  # pragma: no cover — depends on the composition.
+            pass
 
 
 _import_capability_models()

@@ -4,8 +4,8 @@ Additive, and seeds nothing. Which roles exist, what they grant and who holds
 them are product decisions; a capability that shipped an `admin` role would be
 shipping an authorization policy nobody chose.
 
-Revision ID: 0002_rbac
-Revises: 0001_auth_and_audit
+Revision ID: 0003_rbac
+Revises: 0002_auth
 Create Date: 2026-07-30
 """
 
@@ -15,8 +15,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision = "0002_rbac"
-down_revision = "0001_auth_and_audit"
+revision = "0003_rbac"
+down_revision = "0002_auth"
 branch_labels = None
 depends_on = None
 

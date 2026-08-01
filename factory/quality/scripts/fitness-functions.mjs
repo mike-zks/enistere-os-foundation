@@ -176,13 +176,11 @@ export function runFitnessFunctions({
         'src/health/', 'src/platform/'],
       business: 'src/modules/',
     },
-    // FastAPI's core zone is what the STARTER owns. `app/persistence/` is core by
-    // nature but is contributed by Authentication, because the FastAPI baseline
-    // deliberately picks no data provider (ADR-077). The rule as stated cannot
-    // express "a capability legitimately contributes core infrastructure", so
-    // that directory is not measured here; the real fix is for the baseline to
-    // own persistence, which is the asymmetry ADR-077 already declared.
-    fastapi: { core: ['app/composition/'], business: 'app/modules/' },
+    // `app/persistence/` is measured like any other core directory since the
+    // baseline owns it (ADR-080). The blind spot the rule used to carry — a
+    // capability contributing core infrastructure — no longer exists on any
+    // runtime.
+    fastapi: { core: ['app/composition/', 'app/persistence/'], business: 'app/modules/' },
     // React Native's core zone is the set of directories the starter owns. The
     // secure-storage port, the form foundation and the query client stay there
     // even though Authentication ships them: they name no domain.

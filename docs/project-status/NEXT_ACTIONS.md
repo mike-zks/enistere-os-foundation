@@ -595,44 +595,112 @@ jamais une boucle.
 
 **Les sept runtimes composent désormais par coutures.**
 
-### Ce qui reste : une seule entrée, et ce n'est pas du placement
+### Le stockage : une déclaration que j'avais mal qualifiée
 
-**Files sur Spring contribue un port de stockage au cœur**
-(`infrastructure/storage`). Même motif que `app/persistence` sur FastAPI : une
-capability apporte un port neutre et ses adaptateurs parce que le baseline n'a
-choisi aucun fournisseur. Le correctif est que le Platform Baseline porte le
-port, pas un déplacement.
+J'avais déclaré `infrastructure/storage` sur Spring comme une **contribution de
+cœur légitime**, à corriger en faisant porter le port par le baseline.
+
+**NestJS a démenti cette analyse.** Son overlay Files place tout son stockage —
+port, adaptateur S3, adaptateur mémoire — dans `modules/files/storage/`, sans
+rien écrire dans le cœur. Le port n'est donc pas une chose que le baseline doit
+porter : c'est une chose que la capability possède, et **Spring était simplement
+incohérent avec son pair de famille**.
+
+Le correctif n'était pas d'enrichir le baseline mais de déplacer. Ce que le
+critère « la nature, pas le livreur » ne tranchait pas seul, la **parité de
+famille** le tranchait : l'un des deux runtimes avait déjà répondu.
+
+`layout-gaps.json` est **vide**.
+
+Le cas FastAPI reste distinct : `app/persistence` est une infrastructure
+**partagée** par plusieurs capabilities, pas un port possédé par une seule. Le
+confondre avec le stockage aurait produit un mauvais correctif.
+
+## Mission achevée — le baseline FastAPI porte la persistance
+
+[ADR-080](../adr/ADR-080-baseline-owns-persistence.md). C'était le dernier cas
+ouvert de la refonte, et le seul angle mort de mesure du dépôt.
+
+### Ce que les faits disaient
+
+NestJS embarque Prisma dans son baseline, Spring embarque JPA et Flyway. FastAPI
+n'avait que des `Protocol`, et son starter écrivait deux fois qu'aucun provider
+ne devait être imposé — en renvoyant à une « primitive persistence » qui **n'existe
+pas** : la Factory modélise les primitives comme des *besoins* déclarés par une
+capability, jamais comme des fournisseurs.
+
+**La parité de famille a tranché pour la troisième fois** dans ce chantier, après
+le placement des capabilities et le port de stockage de Spring.
+
+### Ce qui bouge, et ce qui ne bouge pas
+
+`app/persistence/`, l'outillage Alembic et la table `audit_logs` — devenue la
+révision `0001_baseline` — passent au starter ; les capabilities se rebasent en
+`0002_auth` et `0003_rbac`.
+
+**L'activation reste composée** : le baseline possède le code, le hook
+`persistence_lifespan` n'est branché que par la couture `fastapi.lifespan`. Une
+application de base **n'ouvre jamais de pool**. C'est ce qui distingue cette
+décision d'un simple ajout de dépendance.
+
+### Le coût, énoncé
+
+`fastapi-base` installe SQLAlchemy, asyncpg et Alembic sans les utiliser : le
+lock de développement passe de 48 à 54 lignes, celui de production de 16 à 22.
+NestJS et Spring paient déjà le même prix.
+
+La position écrite du starter est **révisée**, pas contournée : les deux README
+sont corrigés. Une décision qu'on contredit sans réécrire est une décision qu'on
+trahit.
+
+### Preuves
+
+- **`fastapi-base`** : `ruff` propre, **12/12 pytest**, `compileall` vert, et
+  l'application **démarre sans base de données** — `/health/ready` répond 200,
+  aucun hook de persistance composé ;
+- **`fastapi-rbac`** : `ruff` propre, **40/40 pytest** sur PostgreSQL réel, les
+  trois révisions enchaînées `0001_baseline → 0002_auth → 0003_rbac` ;
+- **FF5d : zéro violation sur les sept runtimes**, sans zone exclue de la mesure ;
+  `layout-gaps.json` est vide ;
+- 500/500 tests Foundation.
+
+### Non revendiqué
+
+- **La primitive fournisseuse n'existe toujours pas.** L'ADR choisit le baseline
+  *faute* de ce mécanisme, pas contre lui ; si la Factory l'acquiert, la décision
+  devra être rouverte.
+- `migrations/env.py` énumère toujours en dur les modules de modèles.
+- **La régénération n'existe pas.** Cette mission lève le dernier obstacle
+  structurel connu, elle ne la livre pas.
 
 ## Prochaine mission unique
 
-> **Faire porter la persistance et le stockage d'objets par le Platform Baseline
-> API**, pour supprimer les deux contributions de cœur.
+> **Interdire au cœur d'importer la zone métier**, l'invariant complémentaire que
+> la refonte a laissé de côté.
 
 ### Justification de l'ordre
 
-C'est le dernier motif que la refonte a laissé ouvert, et le seul qui reste dans
-`layout-gaps.json`. Il s'est manifesté deux fois — `app/persistence` sur FastAPI,
-`infrastructure/storage` sur Spring — donc ce n'est pas un accident mais une
-lacune du contrat de baseline : celui-ci exige des *ports* de persistance mais
-laisse chaque capability apporter l'adaptateur.
+FF5d mesure *où les fichiers atterrissent*, jamais *ce qu'ils importent*. Rien
+n'empêche aujourd'hui un fichier du cœur d'importer `modules/` ou `features/` :
+la frontière est vérifiée en écriture, pas en dépendance.
 
-C'est aussi ce qui débloque le reste : tant qu'une capability porte
-l'infrastructure, une régénération ne peut pas remplacer le socle sans toucher à
-ce qu'une capability a livré.
+C'est ce qui rendrait la garantie complète. Une régénération peut remplacer le
+cœur parce qu'aucune capability n'y écrit ; elle ne le peut vraiment que si aucun
+fichier du cœur ne dépend de ce qu'une capability a livré.
+
+Le chantier est aussi le bon moment pour cela : les sept runtimes viennent d'être
+rangés, donc toute violation trouvée sera récente et rare.
 
 ### Critères de sortie
 
-- le Platform Baseline API porte un adaptateur de persistance et un port de
-  stockage d'objets, sur les trois runtimes API ;
-- `layout-gaps.json` est vide ;
-- les capabilities cessent de livrer `app/persistence` et
-  `infrastructure/storage` ;
-- aucun golden ne régresse.
+- une fitness function lit les imports des fichiers de la zone cœur de chaque
+  runtime et refuse toute dépendance vers la zone métier ;
+- éprouvée dans les deux sens, comme FF5d ;
+- les violations trouvées sont corrigées, ou déclarées et datées.
 
 ### Ce qui reste ouvert après cette mission
 
-- l'invariant complémentaire : interdire à `core/**` d'importer la zone métier ;
 - la couture de composition pour les modules de modèles Alembic ;
-- **la régénération elle-même** — la zone et les coutures en sont les prérequis ;
+- **la régénération elle-même** ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.
