@@ -177,6 +177,33 @@ describe('architecture fitness functions', () => {
     }
   });
 
+  it('requires a FastAPI capability to declare the models it ships', async () => {
+    const starters = await loadStarterManifests(REPO_ROOT);
+    const capabilities = await loadCapabilityManifests(REPO_ROOT);
+
+    // The rule reads the capability's own files, so it cannot be exercised by
+    // injection: it is proven against the real registry, then against a manifest
+    // stripped of the declaration the files on disk demand.
+    const asShipped = runFitnessFunctions({ starters, capabilities });
+    assert.deepEqual(
+      asShipped.findings.filter((finding) => finding.rule === 'capability-model-seam'),
+      [],
+    );
+
+    const stripped = runFitnessFunctions({
+      starters,
+      capabilities,
+      overlays: [['rbac', 'fastapi', { files: [], integrations: [] }]],
+    });
+    assert.ok(
+      stripped.findings.some(
+        (finding) => finding.rule === 'capability-model-seam'
+          && finding.detail.includes('app.modules.authorization.models'),
+      ),
+      `undeclared models went unnoticed: ${JSON.stringify(stripped.findings)}`,
+    );
+  });
+
   it('flags a capability that both requires and conflicts the same capability', async () => {
     const starters = await loadStarterManifests(REPO_ROOT);
     const capabilities = await loadCapabilityManifests(REPO_ROOT);

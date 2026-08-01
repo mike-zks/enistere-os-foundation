@@ -900,31 +900,86 @@ et elle appartient au propriétaire.
 - `migrations/env.py` énumère toujours en dur les modules de modèles.
 - La régénération ne reverrouille toujours pas les dépendances.
 
+## Mission achevée — les modules de modèles passent par une couture
+
+[ADR-085](../adr/ADR-085-alembic-model-seam.md). La mission devait refermer le
+dernier défaut nommé de la famille API. **Elle a surtout démenti la description
+que trois ADR en donnaient.**
+
+### Ce que la mesure a montré
+
+ADR-079, ADR-080 et ADR-084 décrivaient toutes le même défaut : *« un
+`--autogenerate` proposerait de supprimer les tables RBAC »*. Il a suffi de
+lancer Alembic contre une vraie base pour voir que c'était faux, de deux façons.
+
+| situation | ce qu'`--autogenerate` propose vraiment |
+|---|---|
+| tel que livré | **rien** |
+| une capability tierce, non énumérée | **rien non plus** |
+| un module énuméré retiré | `drop_table` sur `users`, `roles`, `permissions`, `refresh_tokens`, `user_roles`, `role_permissions` |
+
+**Le défaut était latent, pas actif** : l'énumération nommait exactement les deux
+seules capabilities FastAPI existantes. **Et le mode de panne n'était pas celui
+décrit** : une capability non énumérée n'est pas vue comme *à supprimer*, elle
+est **invisible** — son module n'étant jamais importé, ses tables ne sont pas
+dans `Base.metadata`. Les suppressions n'arrivent qu'une fois les tables
+réellement en base, et emportent alors aussi celles d'Authentication.
+
+Le danger est réel ; il arrive plus tard qu'annoncé et frappe plus large.
+
+### Ce qui a été livré
+
+- intégration **`fastapi.model-module`** et destination générée
+  `app/composition/capability_models.py`, comme pour les routeurs ;
+- `env.py` importe la couture au lieu d'énumérer : la couture étant générée à
+  partir des intégrations déclarées, elle ne peut pas prendre de retard sur la
+  composition ;
+- **FF5f — `capability-model-seam`** : une capability FastAPI qui livre un
+  `models.py` doit le déclarer. La réserve que l'ADR allait énoncer est
+  vérifiable par machine, donc elle appartient à une gate.
+
+### Preuves
+
+- **contre une vraie base** : projet composé migré, puis `alembic revision
+  --autogenerate` → **zéro opération, zéro suppression** ;
+- **le cas que l'énumération ne pouvait pas couvrir** : une troisième capability
+  déclarée par la couture est détectée (`Detected added table 'invoices'`) ;
+- FF5f éprouvée dans les deux sens ; rendu trié et dédupliqué ;
+- goldens `fastapi-base`, `fastapi-rbac` et la régénération `fastapi-base →
+  fastapi-auth` : verts. 518/518 Foundation.
+
+### Non revendiqué
+
+- **`--autogenerate` n'est toujours pas un outil de production ici** : les
+  révisions restent écrites à la main. L'ADR rend l'outil honnête, pas
+  obligatoire.
+- FF5f lit `files/app/modules/*/models.py` : un modèle rangé ailleurs lui
+  échappe.
+- Les projets déjà générés gardent leur `env.py` énuméré jusqu'à régénération.
+
 ## Prochaine mission unique
 
-> **La couture de composition pour les modules de modèles Alembic**, le dernier
-> défaut nommé et jamais corrigé de la famille API.
+> **RBAC sur Angular et Flutter**, les deux derniers écarts de parité déclarés
+> qui restent ouverts sur une capability déjà portée ailleurs.
 
 ### Justification de l'ordre
 
-Il est cité dans ADR-079, ADR-080 et ADR-084 sans jamais avoir été traité :
-`migrations/env.py` énumère en dur `app.modules.auth.models` et
-`app.modules.authorization.models`. Une capability ajoutée plus tard est
-invisible pour `--autogenerate`, qui proposerait donc de **supprimer ses
-tables**.
+Le socle n'a plus de défaut structurel nommé : les zones sont mesurées dans les
+deux sens, la régénération existe et est prouvée sur les trois familles, et la
+famille API n'a plus de couture manquante.
 
-La régénération rend ce défaut plus dangereux qu'avant : ajouter une capability
-à un projet existant est désormais une opération courante, et c'est exactement le
-cas que l'énumération ne couvre pas.
+Ce qui reste est du **portage**, et `parity-gaps.json` en tient le compte daté.
+RBAC est porté sur les trois runtimes API et sur Next.js ; Angular et Flutter
+sont les deux qui manquent, et la parité de famille exige qu'ils soient
+interchangeables avec leurs pairs.
 
 ### Critères de sortie
 
-- les modules de modèles sont composés par une couture, comme les routers et les
-  lifespans, et non énumérés ;
-- `--autogenerate` sur un projet composé ne propose la suppression d'aucune table
-  d'une capability présente — vérifié contre une vraie base, pas déduit.
+- RBAC sur Angular et Flutter, avec descripteur de conformité et golden nommé
+  dans la matrice CI ;
+- les écarts correspondants retirés de `parity-gaps.json`.
 
 ### Ce qui reste ouvert après cette mission
 
-- RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
+- Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

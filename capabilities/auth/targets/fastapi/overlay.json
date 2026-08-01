@@ -3,7 +3,7 @@
   "capability": "auth",
   "target": "fastapi",
   "version": "0.2.0",
-  "description": "Autorité d'authentification FastAPI : Argon2id, jetons d'accès JWT signés HS256, refresh opaques persistés en empreinte HMAC-SHA256, rotation atomique avec détection de rejeu révoquant la famille, limitation de débit par route, audit métier, migrations Alembic. Apporte aussi l'adapter de persistance que le baseline refuse délibérément de choisir.",
+  "description": "Autorit\u00e9 d'authentification FastAPI : Argon2id, jetons d'acc\u00e8s JWT sign\u00e9s HS256, refresh opaques persist\u00e9s en empreinte HMAC-SHA256, rotation atomique avec d\u00e9tection de rejeu r\u00e9voquant la famille, limitation de d\u00e9bit par route, audit m\u00e9tier, migrations Alembic. Apporte aussi l'adapter de persistance que le baseline refuse d\u00e9lib\u00e9r\u00e9ment de choisir.",
   "files": [
     {
       "source": "files/app/modules/auth",
@@ -73,6 +73,10 @@
       "exception": "AuthError",
       "handler": "auth_error_handler",
       "order": 10
+    },
+    {
+      "kind": "fastapi.model-module",
+      "importPath": "app.modules.auth.models"
     }
   ],
   "verification": [
