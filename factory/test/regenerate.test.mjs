@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, readFile, writeFile, mkdir, cp } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile, mkdir, cp, readdir, symlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -104,6 +104,58 @@ describe('regeneration of an existing project', () => {
       'an owner file must be reported as preserved, not as unchanged',
     );
     assert.equal(await readFile(mine, 'utf8'), 'export class BillingService {}\n');
+  });
+
+  it('never follows an owner symlink outside the project, even in keep mode', async () => {
+    const project = await freshCopy();
+    const outside = join(scratch, 'owner-outside');
+    await mkdir(outside);
+    await writeFile(join(outside, 'OWNER.txt'), 'mine\n');
+    await mkdir(join(project, 'apps/api/src/modules'), { recursive: true });
+    await symlink(outside, join(project, 'apps/api/src/modules/auth'), 'dir');
+
+    const blueprintPath = join(project, 'enistere.yaml');
+    const blueprint = JSON.parse(await readFile(blueprintPath, 'utf8'));
+    blueprint.capabilities = ['auth'];
+    await writeFile(blueprintPath, `${JSON.stringify(blueprint, null, 2)}\n`);
+
+    const refused = await regenerateProject(project);
+    assert.equal(refused.applied, false);
+    assert.ok(refused.conflicts.some(
+      (conflict) => conflict.path === 'apps/api/src/modules/auth'
+        && conflict.reason === 'owner-created',
+    ));
+    assert.deepEqual(await readdir(outside), ['OWNER.txt']);
+
+    const kept = await regenerateProject(project, { onConflict: 'keep' });
+    assert.equal(kept.applied, true);
+    assert.ok(kept.conflicts.some(
+      (conflict) => conflict.path === 'apps/api/src/modules/auth'
+        && conflict.reason === 'owner-created',
+    ));
+    assert.ok(!kept.create.some((path) => path.startsWith('apps/api/src/modules/auth/')));
+    assert.deepEqual(await readdir(outside), ['OWNER.txt']);
+  });
+
+  it('never follows a symlink when rewriting Factory control files', async () => {
+    const project = await freshCopy();
+    assert.match(
+      await readFile(join(project, 'README.md'), 'utf8'),
+      /enistere\.lock.*enistere\.inventory\.json.*fichiers de contrôle/s,
+    );
+    const outsideLock = join(scratch, 'OWNER-LOCK.json');
+    const mine = '{"owner":"mine"}\n';
+    await writeFile(outsideLock, mine);
+    await rm(join(project, 'enistere.lock'));
+    await symlink(outsideLock, join(project, 'enistere.lock'));
+
+    const report = await regenerateProject(project, { onConflict: 'keep' });
+
+    assert.equal(report.applied, true);
+    assert.ok(report.conflicts.some(
+      (conflict) => conflict.path === 'enistere.lock' && conflict.reason === 'owner-created',
+    ));
+    assert.equal(await readFile(outsideLock, 'utf8'), mine);
   });
 
   it('reports a Factory file the owner deleted instead of resurrecting it', async () => {

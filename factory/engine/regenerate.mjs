@@ -21,7 +21,7 @@
  * leaves conflicting files exactly as they are. A regeneration that could
  * destroy work would be worse than no regeneration at all.
  */
-import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, lstat, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -70,8 +70,15 @@ async function digestOf(path) {
   return createHash('sha256').update(await readFile(path)).digest('hex');
 }
 
-/** Every file under `root`, project-relative, ignoring build output. */
-async function filesUnder(root, prefix = '', accumulator = []) {
+/**
+ * Every regular file and non-regular obstruction under `root`, project-relative.
+ *
+ * A symlink is deliberately not a file here. Reading or copying through it
+ * would let a path that appears project-relative reach outside the project.
+ * Sockets, devices and FIFOs receive the same conservative treatment: none is
+ * a file the Factory may digest or replace.
+ */
+async function entriesUnder(root, prefix = '', accumulator = { files: [], obstructions: [] }) {
   let entries;
   try {
     entries = await readdir(prefix ? join(root, prefix) : root, { withFileTypes: true });
@@ -82,10 +89,44 @@ async function filesUnder(root, prefix = '', accumulator = []) {
     const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
       if (IGNORED_DIRECTORIES.has(entry.name)) continue;
-      await filesUnder(root, relativePath, accumulator);
-    } else accumulator.push(relativePath);
+      await entriesUnder(root, relativePath, accumulator);
+    } else if (entry.isFile()) accumulator.files.push(relativePath);
+    else accumulator.obstructions.push(relativePath);
   }
   return accumulator;
+}
+
+function atOrBelow(path, root) {
+  return path === root || path.startsWith(`${root}/`);
+}
+
+function obstructionFor(path, obstructions) {
+  return obstructions.find((obstruction) => atOrBelow(path, obstruction));
+}
+
+function blockedByConflict(path, conflicts) {
+  return conflicts.some((conflict) => atOrBelow(path, conflict.path));
+}
+
+/** Refuses a mutation path whose current destination or ancestor is not regular. */
+async function assertSafeMutationPath(project, path) {
+  const parts = path.split('/');
+  let current = project;
+  for (const [index, part] of parts.entries()) {
+    current = join(current, part);
+    let status;
+    try {
+      status = await lstat(current);
+    } catch (error) {
+      if (error.code === 'ENOENT') return;
+      throw error;
+    }
+    const destination = index === parts.length - 1;
+    if (status.isSymbolicLink() || (!destination && !status.isDirectory())
+      || (destination && !status.isFile())) {
+      throw new Error(`Unsafe regeneration path: ${path} crosses non-regular entry ${parts.slice(0, index + 1).join('/')}`);
+    }
+  }
 }
 
 /**
@@ -93,9 +134,15 @@ async function filesUnder(root, prefix = '', accumulator = []) {
  * Returns the changes a regeneration would make and the conflicts that stop it.
  */
 export async function planRegeneration({ project, fresh, inventory, keepUnder = [] }) {
-  const onDisk = new Set(await filesUnder(project));
-  const generated = new Set(await filesUnder(fresh));
+  const diskEntries = await entriesUnder(project);
+  const freshEntries = await entriesUnder(fresh);
+  if (freshEntries.obstructions.length > 0) {
+    throw new Error(`Generated project contains non-regular entries: ${freshEntries.obstructions.join(', ')}`);
+  }
+  const onDisk = new Set(diskEntries.files);
+  const generated = new Set(freshEntries.files);
   const recorded = inventory.files ?? {};
+  const recordedPaths = Object.keys(recorded);
 
   const conflicts = [];
   const replace = [];
@@ -105,8 +152,26 @@ export async function planRegeneration({ project, fresh, inventory, keepUnder = 
   const preserved = [];
   const retained = [];
 
-  for (const path of new Set([...Object.keys(recorded), ...generated, ...onDisk])) {
+  // Directories are not inventoried, so a symlink placed where the next
+  // generation wants a directory used to be invisible: every descendant was
+  // classified as `create`, and mkdir/cp followed the link outside the project.
+  // Collapse that whole subtree to one conflict and never schedule its files.
+  for (const path of diskEntries.obstructions) {
+    const replacesFactoryWork = path in recorded
+      || recordedPaths.some((recordedPath) => atOrBelow(recordedPath, path));
+    const collidesWithGeneration = generated.has(path)
+      || [...generated].some((generatedPath) => atOrBelow(generatedPath, path));
+    if (replacesFactoryWork || collidesWithGeneration) {
+      conflicts.push({
+        path,
+        reason: replacesFactoryWork ? 'owner-modified' : 'owner-created',
+      });
+    } else preserved.push(path);
+  }
+
+  for (const path of new Set([...recordedPaths, ...generated, ...onDisk])) {
     if (NOT_REGENERATED.has(path) || REWRITTEN_WHOLESALE.has(path)) continue;
+    if (obstructionFor(path, diskEntries.obstructions)) continue;
     const wasGenerated = path in recorded;
     const exists = onDisk.has(path);
     const willGenerate = generated.has(path);
@@ -221,12 +286,22 @@ export async function regenerateProject(project, options = {}) {
     const applied = !dryRun && (changes.conflicts.length === 0 || onConflict === 'keep');
 
     if (applied) {
+      const wholesale = [...REWRITTEN_WHOLESALE]
+        .filter((path) => !blockedByConflict(path, changes.conflicts));
+      // Repeat the boundary check after planning and before the first write.
+      // This does not claim a multi-file transaction; it prevents a persistent
+      // obstruction (or one introduced during planning) from being followed.
+      for (const path of [
+        ...changes.remove, ...changes.replace, ...changes.create, ...wholesale,
+      ]) {
+        await assertSafeMutationPath(project, path);
+      }
       for (const path of changes.remove) await rm(join(project, path), { force: true });
       for (const path of [...changes.replace, ...changes.create]) await copyInto(fresh, project, path);
       await pruneEmptyDirectories(project, changes.remove);
       // The lock and the inventory describe the run that just happened, so they
       // are taken from it wholesale rather than compared.
-      for (const path of REWRITTEN_WHOLESALE) await copyInto(fresh, project, path);
+      for (const path of wholesale) await copyInto(fresh, project, path);
     }
 
     return {
