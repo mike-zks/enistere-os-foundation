@@ -169,3 +169,11 @@ jobs:
           # références API de base, sans multiplier inutilement les démarrages.
           GOLDEN_RUNTIME_START: ${{ (matrix.composition == 'nestjs-base' || matrix.composition == 'spring-base' || matrix.composition == 'fastapi-base' || matrix.composition == 'distributed-spring-nestjs') && '1' || '0' }}
         run: node factory/quality/scripts/golden-runtime.mjs ${{ matrix.composition }}
+
+      # La régénération n'est prouvée que si elle l'est à chaque changement.
+      # `nestjs-auth` est la composition qui exerce le cas complet : un projet
+      # existant, du travail de son propriétaire, une capability ajoutée — puis
+      # les mêmes gates qu'un projet généré directement (ADR-083).
+      - name: Golden runtime — regenerate an existing project
+        if: matrix.composition == 'nestjs-auth'
+        run: node factory/quality/scripts/golden-runtime.mjs nestjs-auth --regenerate-from nestjs-base

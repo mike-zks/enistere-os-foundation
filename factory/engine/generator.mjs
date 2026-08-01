@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join, resolve } from 'node:path';
@@ -33,6 +33,50 @@ function copyFilter(source) {
 
 async function copyTree(source, destination) {
   await cp(source, destination, { recursive: true, filter: copyFilter });
+}
+
+/**
+ * Files the Factory writes but must not inventory.
+ *
+ * `enistere.lock` is rewritten by dependency finalization after this runs, and
+ * the inventory cannot record its own digest. `enistere.yaml` is left out for a
+ * different reason, and the important one: it is the *input*. Editing it to add
+ * a capability and regenerating is the intended workflow, so a regeneration
+ * must never treat a changed blueprint as a conflict.
+ */
+const UNINVENTORIED = new Set(['enistere.lock', 'enistere.inventory.json', 'enistere.yaml']);
+
+/**
+ * The digest of every file the Factory just wrote, keyed by project-relative
+ * path — the record without which a regeneration cannot tell its own output
+ * from the work of whoever received the project.
+ *
+ * Taken by walking the output rather than by bookkeeping each write: a project
+ * is materialized into an empty directory, so what is on disk afterwards is
+ * exactly what the Factory produced. Bookkeeping would have to be added to
+ * every writer and would drift from the first one that forgot.
+ */
+async function inventoryOf(output) {
+  const collected = [];
+  const walk = async (directory, prefix) => {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        if (EXCLUDED_NAMES.has(entry.name)) continue;
+        await walk(join(directory, entry.name), relativePath);
+      } else if (!UNINVENTORIED.has(relativePath)) {
+        collected.push([
+          relativePath,
+          createHash('sha256').update(await readFile(join(directory, entry.name))).digest('hex'),
+        ]);
+      }
+    }
+  };
+  await walk(output, '');
+  // Sorted flat, not per-directory: this file is read by a human diffing what a
+  // regeneration is about to touch.
+  collected.sort(([a], [b]) => (a < b ? -1 : 1));
+  return { schemaVersion: '1', algorithm: 'sha256', files: Object.fromEntries(collected) };
 }
 
 async function runtimeDependencyLocks(plan, output) {
@@ -280,6 +324,23 @@ function projectReadme(plan, overlays) {
     '',
     'Aucune valeur réelle n\'est committée : les fichiers `.env*` sont ignorés par git.',
     '',
+    '## Régénérer ce projet',
+    '',
+    'Éditez `enistere.yaml` — pour ajouter ou retirer une capability, par exemple — puis :',
+    '',
+    '```bash',
+    'enistere regenerate . --dry-run   # ce qui serait fait, sans rien écrire',
+    'enistere regenerate .',
+    'enistere install .                # la régénération ne reverrouille pas les dépendances',
+    '```',
+    '',
+    'La régénération remplace ce que la Factory possède et **ne touche jamais à ce que vous avez',
+    'écrit**. `enistere.inventory.json` porte un digest par fichier généré : un fichier que vous avez',
+    'modifié, supprimé, ou créé là où la Factory en veut un est signalé comme conflit — et par défaut',
+    'rien n\'est écrit tant qu\'un conflit subsiste. Aucun mode n\'écrase un conflit.',
+    '',
+    'Ce fichier fait donc partie du projet : le supprimer rend toute régénération impossible.',
+    '',
     '## Infrastructure locale',
     '',
     '```bash',
@@ -393,6 +454,8 @@ export async function materializeProject(plan, output, options = {}) {
     await writeFile(join(output, 'infrastructure/staging/.env.example'), 'STAGING_DOMAIN=staging.example.com\n');
   }
   await writeFile(join(output, 'docs/ARCHITECTURE.md'), architectureDocument(plan));
+  // Last, so it describes everything above it.
+  await writeFile(join(output, 'enistere.inventory.json'), stable(await inventoryOf(output)));
   return plan;
 }
 

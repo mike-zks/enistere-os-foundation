@@ -793,28 +793,79 @@ d'une capability n'y apparaissent jamais.
 - **La régénération n'existe toujours pas.** Cette mission ne lève plus
   d'obstacle : elle referme la dernière zone non mesurée.
 
+## Mission achevée — la régénération
+
+[ADR-083](../adr/ADR-083-regeneration.md). Quatre ADR consécutives se terminaient
+par *la régénération n'existe pas*. Elle existe.
+
+### L'obstacle réel n'était pas celui qu'on avait nommé
+
+Les trois missions précédentes avaient levé des obstacles de *zone*. La mesure a
+montré que le blocage était ailleurs : **`enistere.lock` enregistrait un digest
+par overlay, jamais par fichier**. Les zones disent *où* les choses vont ; elles
+ne disent pas *qui* a écrit le fichier qui s'y trouve aujourd'hui.
+
+Un projet `nest-next-files` compte 1 271 fichiers, dont **220 seulement — 17 % —
+en zone métier**. Les 1 051 autres appartiennent à la Factory.
+
+### Ce qui a été livré
+
+- **`enistere.inventory.json`** : un digest SHA-256 par fichier produit, pris en
+  parcourant la sortie plutôt qu'en comptabilisant chaque écriture — une
+  comptabilité aurait divergé au premier oubli. 169 KiB, fichier à part du lock.
+- **`enistere regenerate <projet> [--dry-run] [--keep-conflicts]`**.
+- Classification : intact → remplaçable ; modifié ou supprimé → **conflit** ;
+  non inventorié → **jamais touché**.
+- **Aucun mode n'écrase un conflit.** `abort` (défaut) n'écrit rien du tout ;
+  `keep` applique le sûr et laisse le reste. Une régénération capable d'effacer
+  ce qu'elle n'a pas écrit serait pire que pas de régénération.
+
+### Preuves
+
+Dix tests, tous sur un projet **modifié par son propriétaire** — sur une copie
+vierge, une implémentation qui écrase tout passerait. Dont : ajouter
+Authentication à un projet portant déjà du code du propriétaire, avec seconde
+exécution sans effet ; retirer une capability sans toucher à ce qui a été modifié
+depuis ; refus d'un projet sans inventaire.
+
+Le golden va plus loin que la comptabilité : `nestjs-base` → travail du
+propriétaire → blueprint réécrit → régénération vers `nestjs-auth`, puis **les
+mêmes gates qu'un projet généré directement**.
+
+Un défaut trouvé en chemin : la suppression laissait `src/modules/auth/` debout
+et vide — le projet aurait continué d'en avoir l'air.
+
+### Non revendiqué
+
+- **Les dépendances ne sont pas reverrouillées** : `enistere install` reste
+  l'étape suivante, explicitement.
+- **Aucune fusion** : un fichier du cœur modifié reste un conflit, sans patch à
+  trois voies.
+- **Aucune migration de données** : retirer une capability supprime son code, pas
+  ses tables.
+- Un projet généré avant cette ADR ne peut pas être régénéré.
+- Le golden couvre une composition, pas les vingt-sept.
+
 ## Prochaine mission unique
 
-> **La régénération elle-même** — la capacité que tout ce chantier préparait.
+> **Étendre la preuve de régénération au-delà d'une composition**, en commençant
+> par les runtimes non-JS.
 
 ### Justification de l'ordre
 
-Les trois missions précédentes ont refermé, dans l'ordre, le dernier angle mort
-de placement (ADR-080), l'invariant d'import du cœur (ADR-081) et celui des
-racines de routage (ADR-082). **Plus aucun obstacle structurel connu ne subsiste**,
-et chacune de ces ADR se termine par la même phrase : *la régénération n'existe
-pas*.
+La régénération est prouvée sur `nestjs-base → nestjs-auth`. Rien ne dit qu'elle
+se comporte de même sur FastAPI, où une capability apporte des **migrations
+Alembic chaînées** (`0002_auth`, `0003_rbac`) : les retirer laisse la base en
+avance sur le code, et l'ADR-083 déclare explicitement ne rien faire des données.
 
-Continuer à durcir la frontière sans jamais s'en servir reviendrait à préparer
-indéfiniment.
+C'est le premier endroit où « supprimer le code d'une capability » n'est pas
+suffisant, et il vaut mieux le mesurer que de le supposer.
 
 ### Critères de sortie
 
-- une régénération remplace le cœur et la composition d'un projet existant sans
-  toucher à sa zone métier, et le prouve sur un projet **modifié** par son
-  propriétaire — pas sur une copie fraîche ;
-- ce qu'elle refuse de faire est aussi explicite que ce qu'elle fait ;
-- la preuve est un golden, pas une démonstration manuelle.
+- un golden de régénération par famille, API comprise sur un runtime non-JS ;
+- le comportement vis-à-vis des migrations déjà appliquées est tranché et écrit,
+  qu'il soit outillé ou explicitement refusé.
 
 ### Ce qui reste ouvert après cette mission
 
