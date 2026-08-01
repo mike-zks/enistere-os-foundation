@@ -418,6 +418,33 @@ export function runFitnessFunctions({
     }
   }
 
+  // FF5f — a capability that ships SQLAlchemy models declares them through the
+  // composition seam (ADR-085). Nothing else forces it, and an overlay that
+  // forgets falls back into the defect the seam was written for: models nobody
+  // imports are absent from `Base.metadata`, so `--autogenerate` proposes to
+  // drop their tables once a migration has created them.
+  for (const [capability, target, overlay] of overlays) {
+    if (target !== 'fastapi') continue;
+    const declared = new Set(
+      (overlay.integrations ?? [])
+        .filter((integration) => integration.kind === 'fastapi.model-module')
+        .map((integration) => integration.importPath),
+    );
+    const modulesDir = join(repoRoot, 'capabilities', capability, 'targets/fastapi/files/app/modules');
+    if (!existsSync(modulesDir)) continue;
+    for (const entry of readdirSync(modulesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (!existsSync(join(modulesDir, entry.name, 'models.py'))) continue;
+      const importPath = `app.modules.${entry.name}.models`;
+      if (!declared.has(importPath)) {
+        fail(
+          'capability-model-seam',
+          `${capability}/fastapi ships ${entry.name}/models.py without declaring ${importPath}`,
+        );
+      }
+    }
+  }
+
   return { passed: findings.length === 0, findings };
 }
 

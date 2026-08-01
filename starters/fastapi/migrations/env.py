@@ -13,6 +13,13 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
+# Importing the seam registers the composed capabilities' tables on
+# `Base.metadata`, and that registration is what `--autogenerate` compares to
+# the database. This used to be a hardcoded list of module names; a capability
+# it did not name had tables Alembic proposed to **drop** — measured, not
+# supposed. The seam is generated from the `fastapi.model-module` integrations,
+# so it cannot fall behind the composition (ADR-085).
+from app.composition import capability_models  # noqa: F401 — registers capability tables.
 from app.persistence.audit import AuditLog  # noqa: F401 — registers the table.
 from app.persistence.config import persistence_settings
 from app.persistence.database import Base
@@ -22,25 +29,6 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-
-
-def _import_capability_models() -> None:
-    """Imports the models of composed capabilities so autogenerate sees them.
-
-    Guarded, and deliberately enumerated: a base project has none of these, and a
-    project that composed only Authentication has no authorization module. The
-    enumeration is a known limitation — a capability added later is invisible to
-    `--autogenerate` until it is listed here — and the clean fix is a composition
-    seam for model modules (ADR-079).
-    """
-    for module in ("app.modules.auth.models", "app.modules.authorization.models"):
-        try:
-            __import__(module)
-        except ImportError:  # pragma: no cover — depends on the composition.
-            pass
-
-
-_import_capability_models()
 
 
 def run_migrations_offline() -> None:

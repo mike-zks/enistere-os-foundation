@@ -24,6 +24,7 @@ import {
   renderFlutterCapabilityOverrides,
   renderFlutterCapabilityRoutes,
   renderFlutterCapabilityInterceptors,
+  renderFastapiCapabilityModels,
   renderFastapiCapabilityRouters,
   renderFastapiCapabilityLifespans,
   renderFastapiCapabilityExceptionHandlers,
@@ -103,11 +104,13 @@ const BUILT_IN = [
       'fastapi.router': { importPath: STRING, symbol: STRING, order: INTEGER },
       'fastapi.lifespan': { importPath: STRING, symbol: STRING, order: INTEGER },
       'fastapi.exception-handler': { importPath: STRING, exception: STRING, handler: STRING, order: INTEGER },
+      'fastapi.model-module': { importPath: STRING },
     },
     composition: [
       { kinds: ['fastapi.router'], destination: 'app/composition/capability_routers.py', render: renderFastapiCapabilityRouters },
       { kinds: ['fastapi.lifespan'], destination: 'app/composition/capability_lifespan.py', render: renderFastapiCapabilityLifespans },
       { kinds: ['fastapi.exception-handler'], destination: 'app/composition/capability_exception_handlers.py', render: renderFastapiCapabilityExceptionHandlers },
+      { kinds: ['fastapi.model-module'], destination: 'app/composition/capability_models.py', render: renderFastapiCapabilityModels },
     ],
   },
   {

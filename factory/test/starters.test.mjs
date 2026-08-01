@@ -308,7 +308,7 @@ describe('FastAPI composition seams', () => {
     // Third runtime with the same missing-seam gap as Angular and Flutter.
     assert.deepEqual(
       Object.keys(fastapi.integrationKinds).sort(),
-      ['fastapi.exception-handler', 'fastapi.lifespan', 'fastapi.router'],
+      ['fastapi.exception-handler', 'fastapi.lifespan', 'fastapi.model-module', 'fastapi.router'],
     );
     assert.deepEqual(
       fastapi.composition.map((entry) => entry.destination),
@@ -316,8 +316,27 @@ describe('FastAPI composition seams', () => {
         'app/composition/capability_routers.py',
         'app/composition/capability_lifespan.py',
         'app/composition/capability_exception_handlers.py',
+        'app/composition/capability_models.py',
       ],
     );
+  });
+
+  it('imports contributed model modules, sorted and deduplicated', () => {
+    const render = getTargetAdapter('fastapi').composition
+      .find((entry) => entry.kinds.includes('fastapi.model-module')).render;
+    const output = render([
+      { kind: 'fastapi.model-module', importPath: 'app.modules.z.models' },
+      { kind: 'fastapi.model-module', importPath: 'app.modules.a.models' },
+      { kind: 'fastapi.model-module', importPath: 'app.modules.a.models' },
+    ]);
+    // The import is what registers the tables on `Base.metadata`; a duplicate
+    // import is harmless at runtime but makes the generated file non-canonical,
+    // and the lock digest is compared byte for byte.
+    assert.equal(output.match(/^import app\.modules\.a\.models/gm).length, 1);
+    assert.ok(
+      output.indexOf('import app.modules.a.models') < output.indexOf('import app.modules.z.models'),
+    );
+    assert.match(output, /CAPABILITY_MODEL_MODULES: tuple\[str, \.\.\.\] = \(/);
   });
 
   it('registers contributed handlers before Starlette builds its stack', async () => {

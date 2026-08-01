@@ -3,18 +3,41 @@
   "capability": "rbac",
   "target": "fastapi",
   "version": "0.2.0",
-  "description": "Autorisation FastAPI : rôles et permissions lus en base à chaque requête, gardes de route deny-by-default résolvant l'authentification avant l'autorisation, refus générique AUTH_FORBIDDEN, audit métier de chaque déni, résumé des codes effectifs triés. Migration additive sans aucun rôle ni permission amorcés.",
+  "description": "Autorisation FastAPI : r\u00f4les et permissions lus en base \u00e0 chaque requ\u00eate, gardes de route deny-by-default r\u00e9solvant l'authentification avant l'autorisation, refus g\u00e9n\u00e9rique AUTH_FORBIDDEN, audit m\u00e9tier de chaque d\u00e9ni, r\u00e9sum\u00e9 des codes effectifs tri\u00e9s. Migration additive sans aucun r\u00f4le ni permission amorc\u00e9s.",
   "files": [
-    { "source": "files/app/modules/authorization", "destination": "app/modules/authorization" },
-    { "source": "files/migrations/versions", "destination": "migrations/versions" },
-    { "source": "files/tests/authorization", "destination": "tests/authorization" }
+    {
+      "source": "files/app/modules/authorization",
+      "destination": "app/modules/authorization"
+    },
+    {
+      "source": "files/migrations/versions",
+      "destination": "migrations/versions"
+    },
+    {
+      "source": "files/tests/authorization",
+      "destination": "tests/authorization"
+    }
   ],
   "dependencies": {},
   "environment": [],
   "integrations": [
-    { "kind": "fastapi.router", "importPath": "app.modules.authorization", "symbol": "router", "order": 20 }
+    {
+      "kind": "fastapi.router",
+      "importPath": "app.modules.authorization",
+      "symbol": "router",
+      "order": 20
+    },
+    {
+      "kind": "fastapi.model-module",
+      "importPath": "app.modules.authorization.models"
+    }
   ],
   "verification": [
-    ["python", "-m", "pytest", "-q"]
+    [
+      "python",
+      "-m",
+      "pytest",
+      "-q"
+    ]
   ]
 }
