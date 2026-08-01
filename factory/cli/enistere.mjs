@@ -10,6 +10,7 @@ import { buildCapabilityMatrix, loadCapabilityManifests } from '../engine/capabi
 import { assessProfile, getProfile, listProfiles, profileStarterIds } from '../engine/profiles.mjs';
 import { loadStarterManifests, modularStarterIds, validateManifestConsistency } from '../engine/starters.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../engine/dependencies.mjs';
+import { regenerateProject } from '../engine/regenerate.mjs';
 import { normalizeBlueprint } from '../blueprint/normalize.mjs';
 import { validateCanonicalSystem } from '../blueprint/validate.mjs';
 import { errors, formatDiagnostics, hasErrors } from '../model/diagnostics.mjs';
@@ -24,7 +25,7 @@ const FOUNDATION_ROOT = resolve(import.meta.dirname, '../..');
 
 function help() {
   console.log([
-    'Usage: enistere <doctor|architecture|profiles|profile|init|validate|plan|generate|install|verify> [arguments]',
+    'Usage: enistere <doctor|architecture|profiles|profile|init|validate|plan|generate|regenerate|install|verify> [arguments]',
     '',
     '  doctor                              environment and manifest matrix',
     '  profiles                            historical composition presets',
@@ -48,6 +49,12 @@ function help() {
     '                                      generate a project; --install also locks',
     '                                      dependencies (npm lock without lifecycle',
     '                                      scripts, then npm ci). Default: --no-install.',
+    '  regenerate <project> [--dry-run] [--keep-conflicts]',
+    '                                      replace what the Factory owns in an existing',
+    '                                      project. Never overwrites a file you changed:',
+    '                                      by default it writes nothing at all when any',
+    '                                      conflict exists; --keep-conflicts applies the',
+    '                                      safe changes and leaves the rest untouched.',
     '  install <project>                   finalize dependencies of a generated project',
     '  verify <blueprint|project>          a file verifies a blueprint; a directory',
     '                                      verifies a generated project (lock digest)',
@@ -342,6 +349,22 @@ async function main() {
     const blueprint = createArchitectureBlueprint(second ?? 'enistere-app', flags);
     await writeFile(target, `${JSON.stringify(blueprint, null, 2)}\n`, { flag: 'wx' });
     console.log(target);
+    return;
+  }
+
+  if (command === 'regenerate') {
+    if (!first) throw new Error('regenerate requires a generated project directory');
+    const projectDir = resolve(first);
+    if (!(await isDirectory(projectDir))) throw new Error(`Not a directory: ${projectDir}`);
+    const report = await regenerateProject(projectDir, {
+      dryRun: flags.has('--dry-run'),
+      onConflict: flags.has('--keep-conflicts') ? 'keep' : 'abort',
+    });
+    // The plan is large and already written to enistere.lock; what a caller
+    // needs here is what changed and what was refused.
+    const { plan, ...summary } = report;
+    console.log(JSON.stringify(summary, null, 2));
+    if (report.conflicts.length > 0 && !report.applied) process.exitCode = 1;
     return;
   }
 

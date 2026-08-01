@@ -42,11 +42,13 @@
  * sont explicitement déclarées comme telles.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateProject } from '../../engine/generator.mjs';
+import { regenerateProject } from '../../engine/regenerate.mjs';
+import { RUNTIME_ZONES } from './fitness-functions.mjs';
 import { createDefaultBlueprint } from '../../engine/blueprint.mjs';
 import { finalizeDependencies, verifyProjectDependencies } from '../../engine/dependencies.mjs';
 import { verifyMaterializedCapabilities } from '../../conformance/capability-product.mjs';
@@ -594,6 +596,30 @@ export async function verifyDistributedContracts(out, plan) {
   ];
 }
 
+/**
+ * Puts work of the owner's into the business zone of every application, and
+ * returns it so the regeneration can be held to it afterwards.
+ *
+ * A note rather than a source file, deliberately: the gates downstream compile,
+ * lint and test the result, and a planted source file would be judged by seven
+ * different linters for reasons that have nothing to do with regeneration.
+ * That a *source* file survives is proven by `factory/test/regenerate.test.mjs`;
+ * what this golden adds is that the regenerated project still builds and runs.
+ */
+async function plantOwnerWork(output, plan) {
+  const planted = new Map();
+  for (const application of plan.applications) {
+    const zone = RUNTIME_ZONES[application.runtime];
+    if (!zone) continue;
+    const relativePath = `${application.appDir}/${zone.business}OWNER_NOTES.md`;
+    const content = `# Owner notes\n\nWritten by whoever received this project. A regeneration must not touch it.\n`;
+    await mkdir(dirname(join(output, relativePath)), { recursive: true });
+    await writeFile(join(output, relativePath), content);
+    planted.set(relativePath, content);
+  }
+  return planted;
+}
+
 async function main() {
   const [composition, ...rest] = process.argv.slice(2);
   const keep = rest.includes('--keep');
@@ -607,8 +633,40 @@ async function main() {
   const out = join(root, 'project');
   const blueprint = compositionBlueprint(composition);
 
-  console.log(`Golden runtime: ${composition}\n  output: ${out}`);
-  const plan = await generateProject(blueprint, out);
+  // `--regenerate-from <composition>` proves the regeneration where it matters:
+  // the project is generated from another composition, worked on by its owner,
+  // then regenerated into this one — and has to pass the very same gates as a
+  // project generated directly. Anything less would prove file bookkeeping, not
+  // a working application.
+  const regenerateIndex = rest.indexOf('--regenerate-from');
+  const regenerateFrom = regenerateIndex === -1 ? null : rest[regenerateIndex + 1];
+  let plan;
+  if (regenerateFrom) {
+    if (!COMPOSITIONS[regenerateFrom]) {
+      console.error(`Unknown --regenerate-from composition "${regenerateFrom}"`);
+      process.exit(1);
+    }
+    console.log(`Golden runtime: ${regenerateFrom} → regenerate → ${composition}\n  output: ${out}`);
+    const initial = await generateProject(compositionBlueprint(regenerateFrom, `golden-${composition}`), out);
+    const ownerFiles = await plantOwnerWork(out, initial);
+    await writeFile(join(out, 'enistere.yaml'), `${JSON.stringify(blueprint, null, 2)}\n`);
+    const report = await regenerateProject(out);
+    console.log(`\n── regeneration\n   ${JSON.stringify(report.counts)}`);
+    if (!report.applied) {
+      console.log(`\n❌ FAILED: regeneration refused\n${JSON.stringify(report.conflicts, null, 2)}`);
+      process.exit(1);
+    }
+    for (const [path, content] of ownerFiles) {
+      if (await readFile(join(out, path), 'utf8') === content) continue;
+      console.log(`\n❌ FAILED: regeneration altered owner file ${path}`);
+      process.exit(1);
+    }
+    console.log(`✓ ${ownerFiles.size} owner file(s) untouched by the regeneration`);
+    plan = report.plan;
+  } else {
+    console.log(`Golden runtime: ${composition}\n  output: ${out}`);
+    plan = await generateProject(blueprint, out);
+  }
 
   // Live DB gates (migrate deploy, NestJS e2e) require a real, reachable
   // PostgreSQL — signalled explicitly by the CI. Schema-only gates always run.
