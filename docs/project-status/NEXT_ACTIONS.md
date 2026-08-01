@@ -975,8 +975,7 @@ Preuves : link checker sur 148 fichiers, fitness functions sans finding et diff 
 
 L'audit d'ADR-083 a démenti sa classification à quatre cas : elle ne classait
 que les fichiers, pas les répertoires ni les entrées non régulières. Un lien
-symbolique
-propriétaire placée sur le futur module Auth laissait `regenerate` écrire 45
+symbolique propriétaire placé sur le futur module Auth laissait `regenerate` écrire 45
 entrées hors du projet sans signaler de conflit.
 
 Le parcours distingue désormais fichiers réguliers et obstructions. Une
@@ -991,29 +990,58 @@ applicatifs, build, conformité, audit à zéro, lock reproductible). Non revend
 aucune transaction multi-fichiers contre une panne I/O ou un processus local
 échangeant les chemins entre deux appels système.
 
+## Mission achevée — RBAC sur Angular, absence RBAC explicite sur Mobile
+
+La prémisse de mission était fausse : `parity-gaps.json` ne déclarait qu'un
+écart RBAC sur Angular, et ADR-074 dit explicitement que `rbac/flutter` ne doit
+rien parce qu'aucun client Mobile ne possède de surface RBAC propre. Créer un
+overlay Flutter aurait contredit la décision et la target React Native.
+
+Angular tient désormais les deux responsabilités client de Next.js : résumé
+d'autorisation lié à la session courante, helpers de comparaison exacte et vue
+conditionnelle. L'API demeure l'unique autorité. Flutter passe de `planned` à
+`not-applicable` avec une justification machine, comme React Native ; aucun
+overlay mobile factice n'existe. Le dernier écart RBAC est retiré et le rapport
+produit RBAC devient `CONFORMANT` sur toutes ses targets applicables.
+
+L'exécution a aussi démenti une couture de transport : NestJS renvoie
+`{ success, data, timestamp }`, alors que le client Auth Angular préexistant et
+le premier client RBAC lisaient le corps comme la donnée nue. Les deux clients
+désenveloppent désormais explicitement la réponse canonique, avec tests.
+
+Preuves : 522/522 Factory ; rapport capability sans preuve manquante et seulement
+3 écarts Files déclarés ; fitness functions sans finding ; golden
+`nestjs-angular-auth-rbac` contre PostgreSQL jetable avec 3 migrations, seed,
+199/199 tests API, 55/55 E2E API, 134/134 tests Angular, builds, boot API et Web,
+contrats HTTP, conformité matérialisée et lock reproductible. L'audit npm trouve
+4 avis déjà couverts par des exceptions documentées et non expirées, aucune
+violation.
+
+Non revendiqué : aucune administration de rôles/permissions dans Angular ; le
+résumé client n'est jamais une preuve d'accès ; aucun runtime Mobile RBAC ni test
+sur appareil n'existe ou n'est nécessaire à cette décision.
+
 ## Prochaine mission unique
 
-> **RBAC sur Angular et Flutter**, les deux derniers écarts de parité déclarés
-> qui restent ouverts sur une capability déjà portée ailleurs.
+> **Files sur FastAPI**, le plus large des trois écarts de parité encore
+> déclarés.
 
 ### Justification de l'ordre
 
-Le socle n'a plus de défaut structurel nommé : les zones sont mesurées dans les
-deux sens, la régénération existe et est prouvée sur les trois familles, et la
-famille API n'a plus de couture manquante.
-
-Ce qui reste est du **portage**, et `parity-gaps.json` en tient le compte daté.
-RBAC est porté sur les trois runtimes API et sur Next.js ; Angular et Flutter
-sont les deux qui manquent, et la parité de famille exige qu'ils soient
-interchangeables avec leurs pairs.
+FastAPI est l'autorité API qui manque encore les sept responsabilités Files.
+Porter d'abord l'autorité garde l'ordre produit : stockage, métadonnées et
+permissions côté serveur avant les surfaces Angular et Flutter qui la
+consommeront. Auth et RBAC y sont déjà `ready` et prouvés.
 
 ### Critères de sortie
 
-- RBAC sur Angular et Flutter, avec descripteur de conformité et golden nommé
-  dans la matrice CI ;
-- les écarts correspondants retirés de `parity-gaps.json`.
+- Files FastAPI tient les sept responsabilités de ses pairs API avec migrations,
+  permissions, descripteur de conformité et golden runtime nommé ;
+- l'écart `files/fastapi` est retiré de `parity-gaps.json` ;
+- le comportement est exécuté contre PostgreSQL et un stockage objet local
+  contrôlé, pas seulement inspecté statiquement.
 
 ### Ce qui reste ouvert après cette mission
 
-- Files sur FastAPI, Angular et Flutter ;
+- Files sur Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

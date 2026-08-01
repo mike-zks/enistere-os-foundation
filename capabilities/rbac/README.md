@@ -13,12 +13,13 @@ autorité d'autorisation** : le Web ne fait que conditionner l'affichage (UX), i
 | NestJS | `ready` | overlay |
 | Spring | `ready` | overlay |
 | Next.js | `ready` | overlay |
+| Angular | `ready` | overlay |
 | React Native | `not-applicable` | — |
-| Angular / Flutter | `planned` | — |
+| Flutter | `not-applicable` | — |
 
-`not-applicable` (React Native) : l'autorisation fine est une préoccupation **serveur**. L'app mobile
-reçoit les décisions de l'API (401/403) et ne possède aucune surface RBAC. Ce statut **ne bloque pas**
-la génération d'une composition triple `auth + rbac` et **n'injecte rien** dans le mobile —
+`not-applicable` (React Native et Flutter) : l'autorisation fine est une préoccupation **serveur**.
+L'app mobile reçoit les décisions de l'API (401/403) et ne possède aucune surface RBAC. Ce statut
+**ne bloque pas** la génération d'une composition `auth + rbac` et **n'injecte rien** dans le mobile —
 aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §statuts.
 
 ## NestJS (`targets/nestjs`)
@@ -63,9 +64,21 @@ aucun overlay factice n'est créé. Voir `factory/engine/OVERLAY_CONTRACT.md` §
 - L'identifiant utilisateur provient exclusivement de `Authentication.details`, renseigné par
   Auth après validation du JWT ; une valeur absente ou malformée refuse l'accès.
 
+## Angular (`targets/angular`)
+
+- `GET /api/v1/auth/me/authorization` passe par le transport Auth existant ; aucune deuxième
+  gestion de jeton ni créance ambiante n'est introduite.
+- `AuthorizationService` expose rôles, permissions et helpers de comparaison exacte pour
+  l'affichage conditionnel uniquement ; l'API reste l'autorité sur chaque requête.
+- Le résumé est lié à l'identifiant de la session courante. Un logout, un changement de compte ou
+  une réponse tardive ne peut pas rendre le résumé d'une session visible dans une autre.
+- La vue `/authorization` ne montre que les comptes de rôles et permissions, jamais les créances ni
+  une structure interne du serveur.
+
 ## Preuves
 
-- Goldens runtime : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`, `spring-auth-rbac`
+- Goldens runtime : `nestjs-auth-rbac`, `nest-next-auth-rbac`, `triple-auth-rbac`, `spring-auth-rbac`,
+  `nestjs-angular-auth-rbac`
   (`factory/quality/scripts/golden-runtime.mjs`).
 - Non-régression V1 : historique Git et GitHub Releases (tag `foundation-v1.0.0`).
 - Tests de composition : `factory/test/rbac-composition.test.mjs` et

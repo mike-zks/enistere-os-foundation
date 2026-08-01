@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "angular",
+  "version": "0.2.0",
+  "description": "Surface RBAC Angular : résumé d’autorisation de la session courante, helpers d’affichage conditionnel et vue technique. L’API reste l’unique autorité ; aucun rôle ni permission côté navigateur ne constitue une preuve d’accès.",
+  "files": [
+    {
+      "source": "files/src/app/features/authorization",
+      "destination": "src/app/features/authorization"
+    },
+    {
+      "source": "files/test/authorization",
+      "destination": "src/app/features/authorization/__tests__"
+    }
+  ],
+  "dependencies": {},
+  "environment": [],
+  "integrations": [
+    {
+      "kind": "angular.route",
+      "path": "authorization",
+      "importPath": "../../features/authorization/authorization.component",
+      "symbol": "AuthorizationComponent",
+      "title": "Autorisations",
+      "order": 20
+    }
+  ],
+  "verification": [
+    [
+      "npm",
+      "run",
+      "test:ci"
+    ]
+  ]
+}

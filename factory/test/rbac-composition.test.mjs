@@ -80,9 +80,10 @@ describe('rbac dependency contract', () => {
     assert.deepEqual(value.requires, ['auth']);
     assert.equal(value.targets.nestjs.status, 'ready');
     assert.equal(value.targets.nextjs.status, 'ready');
+    assert.equal(value.targets.angular.status, 'ready');
     assert.equal(value.targets['react-native'].status, 'not-applicable');
+    assert.equal(value.targets.flutter.status, 'not-applicable');
     assert.equal(value.targets.spring.status, 'ready');
-    for (const planned of ['angular', 'flutter']) assert.equal(value.targets[planned].status, 'planned');
   });
 
   it('auto-includes and traces auth when rbac alone is requested', async () => {
@@ -303,6 +304,31 @@ describe('rbac golden compositions (structural)', () => {
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     const applied = lock.overlays.map((o) => `${o.capability}/${o.target}`).sort();
     assert.deepEqual(applied, ['auth/nestjs', 'auth/nextjs', 'auth/react-native', 'rbac/nestjs', 'rbac/nextjs']);
+  });
+
+  it('composes the Angular authorization client and no RBAC surface on Flutter', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-rbac-angular-flutter-'));
+    const angular = join(root, 'angular');
+    await generateProject(
+      blueprint('rbac-angular', { api: 'nestjs', web: 'angular', mobile: null }, ['base', 'auth', 'rbac']),
+      angular,
+    );
+    assert.ok(await exists(join(angular, 'apps/web/src/app/features/authorization/authorization.service.ts')));
+    assert.ok(await exists(join(angular, 'apps/web/src/app/features/authorization/authorization.component.ts')));
+    assert.match(
+      await readFile(join(angular, 'apps/web/src/app/core/composition/capability-routes.ts'), 'utf8'),
+      /AuthorizationComponent/,
+    );
+
+    const flutter = join(root, 'flutter');
+    await generateProject(
+      blueprint('rbac-flutter', { api: 'nestjs', web: null, mobile: 'flutter' }, ['base', 'auth', 'rbac']),
+      flutter,
+    );
+    assert.ok(await exists(join(flutter, 'apps/mobile/lib/src/features/auth/auth_controller.dart')));
+    assert.equal(await exists(join(flutter, 'apps/mobile/lib/src/features/authorization')), false);
+    const lock = JSON.parse(await readFile(join(flutter, 'enistere.lock'), 'utf8'));
+    assert.ok(lock.overlays.every((overlay) => !(overlay.capability === 'rbac' && overlay.target === 'flutter')));
   });
 
   it('keeps base and base+auth free of RBAC', async () => {

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1",
+  "capability": "rbac",
+  "target": "angular",
+  "contract": {
+    "id": "authorization-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client"
+  ],
+  "suite": "rbac-angular-integration",
+  "golden": "nestjs-angular-auth-rbac",
+  "invariants": {
+    "RBAC-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/authorization/authorization.service.spec.ts",
+        "materialized": "src/app/features/authorization/__tests__/authorization.service.spec.ts",
+        "contains": [
+          "expose le résumé pour l’UX conditionnelle avec des comparaisons exactes"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/authorization/authorization.component.spec.ts",
+        "materialized": "src/app/features/authorization/__tests__/authorization.component.spec.ts",
+        "contains": [
+          "affiche uniquement les comptes du résumé d’autorisation"
+        ]
+      }
+    ],
+    "RBAC-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/authorization/authorization.service.spec.ts",
+        "materialized": "src/app/features/authorization/__tests__/authorization.service.spec.ts",
+        "contains": [
+          "ne charge rien sans session authentifiée",
+          "ne réutilise jamais le résumé d’une autre session"
+        ]
+      }
+    ],
+    "RBAC-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/authorization/authorization-api.spec.ts",
+        "materialized": "src/app/features/authorization/__tests__/authorization-api.spec.ts",
+        "contains": [
+          "ne demande que le résumé public de l’autorité"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/authorization/authorization.service.spec.ts",
+        "materialized": "src/app/features/authorization/__tests__/authorization.service.spec.ts",
+        "contains": [
+          "réduit toute erreur à une forme publique sans secret"
+        ]
+      }
+    ]
+  }
+}

@@ -151,14 +151,35 @@
       ]
     },
     "angular": {
-      "status": "planned"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "angular",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary"
+      ],
+      "contracts": [
+        "authorization-context"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "rbac-angular-integration"
+      ]
     },
     "react-native": {
       "status": "not-applicable",
       "rationale": "L'autorisation fine est une préoccupation serveur : l'application mobile consomme les décisions de l'API (401/403) et ne possède aucune surface RBAC propre. Un overlay vide serait une surface factice."
     },
     "flutter": {
-      "status": "planned"
+      "status": "not-applicable",
+      "rationale": "L’autorisation fine est décidée par l’API ; comme React Native, le client Flutter consomme les réponses 401/403 mais ne possède aucune surface RBAC propre."
     }
   },
   "migrations": [
@@ -210,6 +231,12 @@
       "id": "rbac-nextjs-e2e",
       "target": "nextjs",
       "level": "e2e",
+      "evidence": "golden-runtime"
+    },
+    {
+      "id": "rbac-angular-integration",
+      "target": "angular",
+      "level": "integration",
       "evidence": "golden-runtime"
     }
   ]

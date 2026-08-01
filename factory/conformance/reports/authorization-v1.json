@@ -6,8 +6,9 @@
     "version": "1.0.0"
   },
   "evaluation": "foundation-registry",
-  "status": "NON_CONFORMANT",
+  "status": "CONFORMANT",
   "readyTargets": [
+    "angular",
     "fastapi",
     "nestjs",
     "nextjs",
@@ -134,25 +135,30 @@
       "issues": []
     },
     "angular": {
-      "status": "PLANNED",
-      "manifestStatus": "planned",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/4",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client"
+      ],
+      "responsibilities": [
+        "authorization-context",
+        "authorization-summary"
+      ],
+      "coverage": "2/4",
       "family": "web",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "authorization-context",
-          "authorization-summary"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "rbac-angular-integration",
+      "golden": "nestjs-angular-auth-rbac",
+      "invariants": [
+        "RBAC-CLIENT-001",
+        "RBAC-CLIENT-002",
+        "RBAC-CLIENT-003"
+      ],
+      "proofCount": 5,
       "materialized": false,
-      "issues": [
-        "family parity: web runtimes must hold the same responsibilities; missing authorization-context, authorization-summary"
-      ]
+      "issues": []
     },
     "react-native": {
       "status": "NOT_APPLICABLE",
@@ -170,8 +176,8 @@
       "issues": []
     },
     "flutter": {
-      "status": "PLANNED",
-      "manifestStatus": "planned",
+      "status": "NOT_APPLICABLE",
+      "manifestStatus": "not-applicable",
       "roles": [],
       "responsibilities": [],
       "coverage": "0/4",

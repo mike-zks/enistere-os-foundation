@@ -34,10 +34,10 @@
   "composition": {
     "model": "modular",
     "readyCapabilities": [
-      "auth"
+      "auth",
+      "rbac"
     ],
     "plannedCapabilities": [
-      "rbac",
       "files"
     ]
   },

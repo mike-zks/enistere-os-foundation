@@ -157,13 +157,16 @@ export const PROFILES = Object.freeze([
   profile('nestjs-angular-auth', 'ready', { api: 'nestjs', web: 'angular' }, ['auth'], {
     golden: 'nestjs-angular-auth',
   }),
+  profile('nestjs-angular-rbac', 'ready', { api: 'nestjs', web: 'angular' }, ['auth', 'rbac'], {
+    golden: 'nestjs-angular-auth-rbac',
+  }),
   profile('nestjs-flutter-auth', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['auth'], {
     golden: 'nestjs-flutter-auth',
   }),
   profile('fastapi-auth', 'ready', { api: 'fastapi' }, ['auth'], { golden: 'fastapi-auth' }),
   profile('fastapi-rbac', 'ready', { api: 'fastapi' }, ['auth', 'rbac'], { golden: 'fastapi-rbac' }),
   profile('spring-angular-auth', 'supported', { api: 'spring', web: 'angular' }, ['auth']),
-  profile('spring-angular-rbac', 'planned', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
+  profile('spring-angular-rbac', 'supported', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
   profile('spring-flutter-auth', 'supported', { api: 'spring', mobile: 'flutter' }, ['auth']),
   profile('spring-angular-flutter-files', 'planned', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['auth', 'rbac', 'files']),
 ]);

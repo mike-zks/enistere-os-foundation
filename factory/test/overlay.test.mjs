@@ -251,16 +251,15 @@ describe('capability closure and refusals', () => {
     await generateProject(blueprint, join(root, 'project'), { materialize: false });
   });
   it('refuses a capability on a target that is still planned', async () => {
-    // Angular was the example until ADR-075, Flutter's Authentication until
-    // ADR-076. The behaviour under test is the refusal, not the runtime that
-    // happens to be unfinished — so it now rides on RBAC.
+    // The behaviour under test is the refusal, not the capability that happens
+    // to be unfinished — it now rides on Files for the Flutter target.
     const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
     const blueprint = createDefaultBlueprint('blocked-app');
     blueprint.stack = { api: 'nestjs', web: null, mobile: 'flutter' };
-    blueprint.capabilities = ['base', 'auth', 'rbac'];
+    blueprint.capabilities = ['base', 'auth', 'rbac', 'files'];
     await assert.rejects(
       generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /rbac on flutter is planned/,
+      /files on flutter is planned/,
     );
   });
 

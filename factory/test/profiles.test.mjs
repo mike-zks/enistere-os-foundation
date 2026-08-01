@@ -130,6 +130,7 @@ describe('the API is mandatory', () => {
     'spring-angular-base', 'spring-flutter-base', 'nestjs-next-base', 'nestjs-react-native-base',
     'nestjs-angular-base', 'nestjs-flutter-base',
     'nestjs-next-files', 'nestjs-next-react-native-auth', 'nestjs-next-react-native-rbac',
+    'nestjs-angular-rbac',
   ];
 
   for (const name of refused) {

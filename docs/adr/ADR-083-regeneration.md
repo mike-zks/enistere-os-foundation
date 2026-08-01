@@ -155,7 +155,7 @@ pas : un répertoire contenant quoi que ce soit du propriétaire survit.
 ## Tests
 
 ```bash
-npm run factory:test                      # 520
+npm run factory:test                      # 522
 node factory/quality/scripts/golden-runtime.mjs nestjs-auth --regenerate-from nestjs-base
 ```
 

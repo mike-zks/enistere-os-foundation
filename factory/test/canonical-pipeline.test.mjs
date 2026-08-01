@@ -214,11 +214,10 @@ describe('canonical pipeline — target resolution', () => {
   });
 
   it('marks a blocked composition as not ready', async () => {
-    // rbac on flutter is planned → blocked. Angular served as the example until
-    // ADR-075, Flutter's Authentication until ADR-076; what is under test is the
-    // blocked level, not the runtime that happens to be unfinished.
-    const bp = blueprint({ stack: { api: 'nestjs', mobile: 'flutter' }, capabilities: ['base', 'auth', 'rbac'] });
-    const plan = buildGenerationPlan(bp, await registryFor(['base', 'auth', 'rbac']));
+    // Files on Flutter is planned → blocked. What is under test is the blocked
+    // level, not the capability that happens to be unfinished this week.
+    const bp = blueprint({ stack: { api: 'nestjs', mobile: 'flutter' }, capabilities: ['base', 'auth', 'rbac', 'files'] });
+    const plan = buildGenerationPlan(bp, await registryFor(['base', 'auth', 'rbac', 'files']));
     assert.equal(plan.support.level, 'blocked');
   });
 });
