@@ -35,6 +35,24 @@ describe('AuthApi', () => {
 
   afterEach(() => backend.verify());
 
+  // L’API NestJS enveloppe tout succès sous { success, data, timestamp }.
+  it('désenveloppe la session canonique renvoyée par l’autorité', async () => {
+    const session = {
+      user: { id: 'u-1', email: 'user@example.test', status: 'ACTIVE' },
+      accessToken: 'access-1',
+      refreshToken: 'refresh-1',
+      tokenType: 'Bearer',
+      accessTokenExpiresIn: 900,
+      refreshTokenExpiresIn: 2_592_000,
+    };
+    const result = api.login('user@example.test', 'password');
+    backend.expectOne('/api/v1/auth/login').flush({
+      success: true, data: session, timestamp: '2026-08-01T00:00:00.000Z',
+    });
+
+    await expectAsync(result).toBeResolvedTo(session);
+  });
+
   // AUTH-CLIENT-005
   it('mot de passe faux et compte inconnu donnent le MÊME message générique', async () => {
     const wrong = rejection(api.login('user@example.test', 'bad'));

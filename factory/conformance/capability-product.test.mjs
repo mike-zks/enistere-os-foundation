@@ -49,11 +49,11 @@ describe('capability product conformance', () => {
         );
       }
       // …and the capability is only conformant when no served runtime is left
-      // behind. Authentication is now held by all seven; RBAC and Files are not,
-      // and read NON_CONFORMANT — the honest verdict, not a regression.
+      // behind. Authentication and RBAC now cover every applicable target;
+      // Files still leaves declared family gaps.
       assert.equal(
         report.status,
-        report.capability === 'auth' ? 'CONFORMANT' : 'NON_CONFORMANT',
+        report.capability === 'files' ? 'NON_CONFORMANT' : 'CONFORMANT',
         report.capability,
       );
     }
@@ -186,14 +186,16 @@ describe('capability product conformance', () => {
 
   it('treats a not-applicable target as a legitimate absence, never as conformance', async () => {
     const report = await evaluateCapabilityProduct({ capability: 'rbac', repoRoot: REPO_ROOT });
-    const mobile = report.targets['react-native'];
-    assert.equal(mobile.manifestStatus, 'not-applicable');
-    assert.equal(mobile.status, 'NOT_APPLICABLE');
-    // No role, no invariant, no proof — and excluded from the conformance verdict.
-    assert.deepEqual(mobile.roles, []);
-    assert.deepEqual(mobile.invariants, []);
-    assert.ok(!report.readyTargets.includes('react-native'));
-    assert.deepEqual(report.readyTargets, ['fastapi', 'nestjs', 'nextjs', 'spring']);
+    for (const runtime of ['react-native', 'flutter']) {
+      const mobile = report.targets[runtime];
+      assert.equal(mobile.manifestStatus, 'not-applicable');
+      assert.equal(mobile.status, 'NOT_APPLICABLE');
+      // No role, no invariant, no proof — and excluded from the conformance verdict.
+      assert.deepEqual(mobile.roles, []);
+      assert.deepEqual(mobile.invariants, []);
+      assert.ok(!report.readyTargets.includes(runtime));
+    }
+    assert.deepEqual(report.readyTargets, ['angular', 'fastapi', 'nestjs', 'nextjs', 'spring']);
   });
 
   it('scopes invariants to the responsibilities a target actually holds', async () => {

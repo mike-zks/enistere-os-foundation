@@ -20,18 +20,6 @@
       "review": "Portage Files sur FastAPI."
     },
     {
-      "capability": "rbac",
-      "runtime": "angular",
-      "family": "web",
-      "missing": [
-        "authorization-context",
-        "authorization-summary"
-      ],
-      "justification": "Dépend d'Authentication sur Angular.",
-      "deadline": "2026-12-31",
-      "review": "Après Authentication sur Angular."
-    },
-    {
       "capability": "files",
       "runtime": "angular",
       "family": "web",

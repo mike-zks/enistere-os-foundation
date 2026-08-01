@@ -123,6 +123,7 @@ export const COMPOSITIONS = {
   // deux références historiques. Sans elles, `conformance.json` désignerait un
   // golden inexistant : une preuve matérialisée qui ne s'exécute jamais.
   'nestjs-angular-auth': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth'] },
+  'nestjs-angular-auth-rbac': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth', 'rbac'] },
   'nestjs-flutter-auth': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['auth'] },
   'fastapi-auth': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth'] },
   'fastapi-rbac': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },

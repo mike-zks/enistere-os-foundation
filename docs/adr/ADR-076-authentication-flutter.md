@@ -146,8 +146,13 @@ aussi les fonctions `provideX()`. Un test verrouille la contrainte.
 
 ### Non revendiqué
 
-* **RBAC et Files restent `planned` sur Flutter** ; l'écart Files de la famille
-  Mobile (`upload`) demeure déclaré.
+* **Au moment de cette ADR, RBAC et Files restent `planned` sur Flutter** ;
+  l'écart Files de la famille Mobile (`upload`) demeure déclaré.
+* **Correction après audit (2026-08-01).** La première affirmation recopiait une
+  prémisse déjà démentie par ADR-074 : `rbac/flutter` ne doit aucune
+  responsabilité puisque la famille Mobile n'a pas de surface RBAC propre. La
+  target devient `not-applicable`, comme React Native ; aucun overlay mobile
+  RBAC n'est créé.
 * Aucune garde n'est posée sur une route de la baseline : quels écrans sont
   publics est une décision produit, pas une décision d'authentification.
   `authRedirect` est fourni et documenté, comme `authGuard` l'est sur Angular.

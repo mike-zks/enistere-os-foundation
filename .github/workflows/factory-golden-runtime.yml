@@ -70,6 +70,7 @@ jobs:
           - nestjs-angular-base
           - nestjs-flutter-base
           - nestjs-angular-auth
+          - nestjs-angular-auth-rbac
           - nestjs-flutter-auth
           - fastapi-auth
           - fastapi-rbac

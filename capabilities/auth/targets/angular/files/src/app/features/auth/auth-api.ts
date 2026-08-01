@@ -5,6 +5,12 @@ import { APP_BASE_URL } from '../../core/config/api-config';
 import { AuthError, GENERIC_CREDENTIALS_MESSAGE, GENERIC_UNAVAILABLE_MESSAGE } from './auth-errors';
 import type { AuthSession } from './auth-session';
 
+interface ApiSuccessEnvelope<T> {
+  readonly success: true;
+  readonly data: T;
+  readonly timestamp: string;
+}
+
 /**
  * Marks a request as belonging to authentication itself.
  *
@@ -47,9 +53,10 @@ export class AuthApi {
 
   async #call(path: string, body: unknown, failureMessage: string): Promise<AuthSession> {
     try {
-      return await firstValueFrom(this.#http.post<AuthSession>(
+      const envelope = await firstValueFrom(this.#http.post<ApiSuccessEnvelope<AuthSession>>(
         `${this.#baseUrl}${path}`, body, { context: authContext() },
       ));
+      return envelope.data;
     } catch (error: unknown) {
       // The response body may carry the reason; it is not surfaced. Only the
       // correlation id crosses, so a support request stays traceable without

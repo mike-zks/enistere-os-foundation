@@ -131,35 +131,37 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
 ```text
 auth   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 4/4 · angular 4/4 ✓
        mobile rn 4/4 · flutter 4/4 ✓                     CONFORMANT
-rbac   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 2/4 · angular 0/4 ✗
-       mobile rn n/a · flutter 0/4 ✗                     NON_CONFORMANT
+rbac   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 2/4 · angular 2/4 ✓
+       mobile rn n/a · flutter n/a                       CONFORMANT
 files  api  nestjs 7/7 · spring 7/7 · fastapi 0/7 ✗   web nextjs 5/7 · angular 0/7 ✗
        mobile rn 1/7 · flutter 0/7 ✗                     NON_CONFORMANT
-       fastapi UNSUPPORTED · angular/flutter PLANNED sur rbac et files
+       fastapi UNSUPPORTED · angular/flutter PLANNED sur files
 
 **Authentication est tenue par les sept runtimes** (ADR-075, ADR-076, ADR-077) :
 c'est la première capability CONFORMANT comme produit, les trois familles étant à
-parité. **RBAC est à parité sur la famille API** (ADR-078) ; il reste à porter sur
-Angular et Flutter. Files reste la dette la plus large.
+parité. **RBAC est CONFORMANT sur toutes ses targets applicables** : Angular tient
+la même surface client que Next.js ; React Native et Flutter sont explicitement
+`not-applicable` conformément à ADR-074. Files reste la dette de parité ouverte.
 ```
 
-- `Parité par famille` : **MESURÉE ET SATISFAITE** (ADR-070) — les targets
-  `ready` d'une même famille déclarent les mêmes responsabilités. Le seul écart
-  du dépôt, `files/spring`, est refermé : les deux autorités API tiennent les
-  sept responsabilités.
-  `metadata`, `delete` et `quarantine` ont été portées ; manquent `quota` et
-  `reconciliation`. La surface Files de Spring est désormais gardée par les
-  permissions `files.*`, comme celle de NestJS.
+- `Parité par famille` : **MESURÉE SUR TOUS LES RUNTIMES** (ADR-070/074) —
+  Authentication et RBAC satisfont la règle sur toutes leurs targets
+  applicables. Files garde trois écarts exacts et datés : FastAPI (7
+  responsabilités), Angular (5) et Flutter (1). Spring tient bien les sept
+  responsabilités Files et protège sa surface par les permissions `files.*`,
+  comme NestJS.
 
 - `Conformité produit RBAC` : **CONFORMANT** (ADR-069) — évaluateur générique,
   contrats produit découverts par convention, `not-applicable` traité comme
   absence légitime de rôle. La mesure a corrigé un défaut latent : un refus
   d'autorisation Spring répondait `500` au lieu de `403`.
 
-  Reste, avant la parité **produit** globale : même traitement pour Files,
-  contrats polyglottes générés et lifecycle.
+  Reste, avant la parité **produit** globale : porter Files sur ses trois targets,
+  puis traiter les contrats polyglottes générés et le lifecycle.
 
-Ces éléments existent et fonctionnent, mais doivent être requalifiés contre le Platform Baseline v2.
+Ces éléments sont qualifiés contre le Platform Baseline v2 par les rapports de
+conformance et les goldens nommés ; aucune équivalence produit au-delà des
+responsabilités déclarées n'est sous-entendue.
 
 ## CI et dépendances
 
