@@ -74,6 +74,7 @@ jobs:
           - nestjs-flutter-auth
           - fastapi-auth
           - fastapi-rbac
+          - fastapi-files
           - distributed-spring-nestjs
 
     services:

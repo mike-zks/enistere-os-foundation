@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "fastapi",
+  "version": "0.2.0",
+  "description": "Autorité Files FastAPI : upload multipart validé par signatures, stockage privé MinIO/S3, métadonnées PostgreSQL, URLs signées courtes, ownership anti-énumération, suppression, quarantaine, quota concurrent et réconciliation sous verrous consultatifs.",
+  "files": [
+    {
+      "source": "files/app/modules/files",
+      "destination": "app/modules/files"
+    },
+    {
+      "source": "files/migrations/versions",
+      "destination": "migrations/versions"
+    },
+    {
+      "source": "files/tests/files",
+      "destination": "tests/files"
+    }
+  ],
+  "dependencies": {
+    "python": {
+      "direct": [
+        "minio==7.2.20",
+        "python-multipart==0.0.32"
+      ],
+      "runtime": [
+        "argon2-cffi-bindings==25.1.0",
+        "argon2-cffi==25.1.0",
+        "certifi==2026.7.22",
+        "cffi==2.1.0",
+        "minio==7.2.20",
+        "pycparser==3.0",
+        "pycryptodome==3.23.0",
+        "python-multipart==0.0.32",
+        "typing_extensions==4.16.0",
+        "urllib3==2.7.0"
+      ],
+      "all": [
+        "argon2-cffi-bindings==25.1.0",
+        "argon2-cffi==25.1.0",
+        "certifi==2026.7.22",
+        "cffi==2.1.0",
+        "minio==7.2.20",
+        "pycparser==3.0",
+        "pycryptodome==3.23.0",
+        "python-multipart==0.0.32",
+        "typing_extensions==4.16.0",
+        "urllib3==2.7.0"
+      ]
+    }
+  },
+  "environment": [
+    { "name": "S3_ENDPOINT", "example": "http://127.0.0.1:9000" },
+    { "name": "S3_REGION", "example": "us-east-1" },
+    { "name": "S3_ACCESS_KEY_ID", "example": "change_me" },
+    { "name": "S3_SECRET_ACCESS_KEY", "example": "change_me" },
+    { "name": "S3_BUCKET", "example": "enistere-files" },
+    { "name": "S3_FORCE_PATH_STYLE", "example": "true" },
+    { "name": "FILE_MAX_SIZE_BYTES", "example": "10485760" },
+    { "name": "FILE_OWNER_MAX_ACTIVE_FILES", "example": "0" },
+    { "name": "FILE_OWNER_MAX_TOTAL_BYTES", "example": "0" },
+    { "name": "FILE_SIGNED_URL_TTL_SECONDS", "example": "300" },
+    { "name": "FILE_PURGE_RETENTION_SECONDS", "example": "604800" },
+    { "name": "FILE_STORAGE_TIMEOUT_SECONDS", "example": "30" }
+  ],
+  "integrations": [
+    {
+      "kind": "fastapi.router",
+      "importPath": "app.modules.files",
+      "symbol": "router",
+      "order": 30
+    },
+    {
+      "kind": "fastapi.exception-handler",
+      "importPath": "app.modules.files",
+      "exception": "FilesError",
+      "handler": "files_error_handler",
+      "order": 30
+    },
+    {
+      "kind": "fastapi.model-module",
+      "importPath": "app.modules.files.models"
+    }
+  ],
+  "verification": [
+    ["python", "-m", "pytest", "-q"]
+  ]
+}

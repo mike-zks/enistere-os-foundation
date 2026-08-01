@@ -119,7 +119,38 @@
       ]
     },
     "fastapi": {
-      "status": "unsupported"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "fastapi",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "upload",
+        "metadata",
+        "download-url",
+        "delete",
+        "quarantine",
+        "reconciliation",
+        "quota"
+      ],
+      "contracts": [
+        "files-api",
+        "files-metadata"
+      ],
+      "primitives": [
+        "files-metadata-store",
+        "files-object-store"
+      ],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [
+        "files-fastapi-database"
+      ],
+      "conformance": [
+        "files-fastapi-integration"
+      ]
     },
     "nextjs": {
       "status": "ready",
@@ -194,6 +225,14 @@
       "strategy": "additive",
       "path": "targets/spring/files/src/main/resources/db/migration/V3__add_stored_files.sql",
       "order": 300
+    },
+    {
+      "id": "files-fastapi-database",
+      "target": "fastapi",
+      "kind": "database",
+      "strategy": "additive",
+      "path": "targets/fastapi/files/migrations/versions/0004_files.py",
+      "order": 400
     }
   ],
   "conformance": [
@@ -206,6 +245,12 @@
     {
       "id": "files-spring-integration",
       "target": "spring",
+      "level": "integration",
+      "evidence": "overlay-verification"
+    },
+    {
+      "id": "files-fastapi-integration",
+      "target": "fastapi",
       "level": "integration",
       "evidence": "overlay-verification"
     },

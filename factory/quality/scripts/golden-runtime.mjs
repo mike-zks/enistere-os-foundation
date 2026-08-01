@@ -22,6 +22,7 @@
  * R8A — compositions `base` seul, nommées d'après leur profil :
  *   spring-base                 spring
  *   fastapi-base                fastapi
+ *   fastapi-files               fastapi, base+auth+rbac+files
  *   spring-auth                 spring, base+auth
  *   spring-next-base            spring + nextjs
  *   spring-react-native-base    spring + react-native
@@ -127,6 +128,7 @@ export const COMPOSITIONS = {
   'nestjs-flutter-auth': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['auth'] },
   'fastapi-auth': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth'] },
   'fastapi-rbac': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },
+  'fastapi-files': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth', 'rbac', 'files'] },
   'distributed-spring-nestjs': {
     applications: [
       {
@@ -332,7 +334,15 @@ function gatesFor(kind, hasDb, capabilities = [], appDir = 'apps/api') {
       ['api: compile', '.venv/bin/python', ['-m', 'compileall', '-q', 'app'], appDir],
       ['api: dependency consistency', '.venv/bin/python', ['-m', 'pip', 'check'], appDir],
       ['api: dependency audit', '.venv/bin/python', ['-m', 'pip_audit', '--strict', '--progress-spinner', 'off'], appDir],
-      ['api: production dependency smoke', '.runtime-venv/bin/python', ['-c', 'import fastapi, pydantic_settings, uvicorn; print("production dependencies: ok")'], appDir],
+      [
+        'api: production dependency smoke',
+        '.runtime-venv/bin/python',
+        [
+          '-c',
+          `import fastapi, pydantic_settings, uvicorn${capabilities.includes('files') ? ', minio, multipart' : ''}; print("production dependencies: ok")`,
+        ],
+        appDir,
+      ],
       ['api: production dependency consistency', '.runtime-venv/bin/python', ['-m', 'pip', 'check'], appDir],
     ];
   }

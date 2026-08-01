@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "fastapi",
+  "contract": { "id": "files-product", "version": "1.0.0" },
+  "roles": ["authority"],
+  "suite": "files-fastapi-integration",
+  "golden": "fastapi-files",
+  "invariants": {
+    "FILES-AUTHORITY-001": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": [
+          "test_upload_is_authorized_detected_private_and_publicly_redacted",
+          "test_ownership_listing_signed_download_and_quarantine_lifecycle"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-002": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["storageKey", "checksum", "ownerId"]
+      }
+    ],
+    "FILES-AUTHORITY-003": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["unknown", "mismatch", "wrong_extension"]
+      },
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_units.py",
+        "materialized": "tests/files/test_files_units.py",
+        "contains": ["test_content_type_is_derived_from_magic_bytes"]
+      }
+    ],
+    "FILES-AUTHORITY-004": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["public_read.status_code in {401, 403}", "stat_object"]
+      }
+    ],
+    "FILES-AUTHORITY-005": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["expiresIn", "cache-control", "downloaded.content == PNG"]
+      }
+    ],
+    "FILES-AUTHORITY-006": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["nextOffset", "page[\"items\"][0][\"id\"] == second[\"id\"]"]
+      }
+    ],
+    "FILES-AUTHORITY-007": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": [
+          "test_delete_is_idempotent_removes_the_object_and_invalidates_issued_urls"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-008": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["QUARANTINED", "QUARANTINE_RELEASED", "blocked.status_code == 404"]
+      }
+    ],
+    "FILES-AUTHORITY-009": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": [
+          "test_reconciliation_refuses_a_second_run_and_purges_only_confirmed_absence",
+          "FILE_MAINTENANCE_BUSY"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-010": [
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": [
+          "test_owner_quota_cannot_be_exceeded_by_concurrent_uploads",
+          "FILE_STORAGE_QUOTA_EXCEEDED"
+        ]
+      }
+    ],
+    "FILES-AUTHORITY-011": [
+      {
+        "kind": "source",
+        "source": "files/app/modules/files/audit_events.py",
+        "materialized": "app/modules/files/audit_events.py",
+        "contains": [
+          "FILE_UPLOADED",
+          "FILE_DOWNLOAD_URL_ISSUED",
+          "FILE_METADATA_ACCESSED",
+          "FILE_DELETED"
+        ]
+      },
+      {
+        "kind": "test",
+        "source": "files/tests/files/test_files_authority.py",
+        "materialized": "tests/files/test_files_authority.py",
+        "contains": ["DELETION_REQUESTED", "OBJECT_DELETED", "DELETED"]
+      }
+    ]
+  }
+}
