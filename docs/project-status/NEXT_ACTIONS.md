@@ -957,6 +957,20 @@ Le danger est réel ; il arrive plus tard qu'annoncé et frappe plus large.
   échappe.
 - Les projets déjà générés gardent leur `env.py` énuméré jusqu'à régénération.
 
+## Mission achevée — autorisation des opérations de sécurité des agents IA
+
+Le contexte d'autorisation défensive est formalisé dans la politique opérationnelle
+[`AI_SECURITY_AUTHORIZATION.md`](../governance/AI_SECURITY_AUTHORIZATION.md), référencée par
+`MANDAT.md`, la source de vérité et l'instruction d'entrée `AGENTS.md`.
+
+Le périmètre couvre la Foundation et les systèmes ou environnements explicitement contrôlés par le
+mainteneur. Il exclut toute autorisation implicite sur Internet ou sur un tiers, privilégie les preuves
+non destructives et ne prétend contourner aucune politique ou protection d'un fournisseur d'IA.
+`SECURITY_ARCHITECTURE.md` reste l'unique source architecturale de sécurité ; aucun ADR ni changement
+d'architecture n'a été nécessaire.
+
+Preuves : link checker sur 148 fichiers, fitness functions sans finding et diff documentaire uniquement.
+
 ## Prochaine mission unique
 
 > **RBAC sur Angular et Flutter**, les deux derniers écarts de parité déclarés
