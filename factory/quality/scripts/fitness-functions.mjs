@@ -60,16 +60,19 @@ function overlayManifests(repoRoot) {
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 /**
- * The two zones of each runtime, read by FF5d (where a capability may write) and
- * FF5e (what the core may import). One map, so the frontier cannot be enforced
- * in one direction and forgotten in the other.
+ * The zones of each runtime, read by FF5d (where a capability may write) and
+ * FF5e (what the Factory's own code may import). One map, so the frontier
+ * cannot be enforced in one direction and forgotten in the other.
  *
  * A `core` entry ending in `/` is a directory; anything else is a file prefix,
  * for the root modules a framework insists on keeping beside its packages.
  *
- * The framework routing roots — `src/app/` on Next.js, `app/` on Expo — are
- * deliberately absent: capabilities write pages there, so they are a shared
- * surface rather than core. Their own frontier is a mission of its own.
+ * `routes` is the framework routing root of the file-based routers — `src/app/`
+ * on Next.js, `app/` on Expo. It is deliberately **not** core: capabilities
+ * write pages there, so FF5d must not forbid them. But every file a starter
+ * ships there is Factory-owned and replaced by a regeneration, so FF5e reads it
+ * exactly like the core. The other five runtimes route in code, not in a
+ * directory, and their router already sits in the core zone.
  */
 export const RUNTIME_ZONES = {
   angular: {
@@ -80,7 +83,11 @@ export const RUNTIME_ZONES = {
     core: ['lib/src/core/', 'lib/src/theme/', 'lib/main.dart', 'lib/app.dart'],
     business: 'lib/src/features/',
   },
-  nextjs: { core: ['src/core/', 'src/shared/', 'src/types/'], business: 'src/features/' },
+  nextjs: {
+    core: ['src/core/', 'src/shared/', 'src/types/'],
+    routes: ['src/app/'],
+    business: 'src/features/',
+  },
   // NestJS has no single `core/` directory: its core zone is every top-level
   // source directory the starter owns. Listing them is the honest encoding —
   // the alternative would be to invent a `core/` the framework never had.
@@ -108,6 +115,7 @@ export const RUNTIME_ZONES = {
       'src/logger/', 'src/offline/', 'src/permissions/', 'src/platform/', 'src/preferences/',
       'src/push/', 'src/query/', 'src/retry/', 'src/session/', 'src/states/', 'src/store/',
       'src/telemetry/', 'src/theme/', 'src/types/', 'src/ui/'],
+    routes: ['app/'],
     business: 'src/features/',
   },
   spring: {
@@ -178,8 +186,15 @@ export function resolveSpecifier(runtime, relativePath, specifier) {
   return null;
 }
 
-/** Reads every core-zone source file of a starter as `[runtime, path, source]`. */
-export function coreZoneSources(repoRoot = REPO_ROOT) {
+/**
+ * Reads every source file a starter owns and a regeneration replaces — the core
+ * zone plus the routing root — as `[runtime, path, source]`.
+ *
+ * Reading the routing root from the *starter* is what makes the distinction
+ * work without a rule of its own: a capability's own pages never appear here,
+ * because a starter ships none.
+ */
+export function factoryOwnedSources(repoRoot = REPO_ROOT) {
   const collected = [];
   const walk = (runtime, absolute, relative) => {
     if (!existsSync(absolute)) return;
@@ -195,7 +210,7 @@ export function coreZoneSources(repoRoot = REPO_ROOT) {
   for (const [runtime, zone] of Object.entries(RUNTIME_ZONES)) {
     const starter = join(repoRoot, 'starters', runtime);
     if (!existsSync(starter)) continue;
-    for (const prefix of zone.core) {
+    for (const prefix of [...zone.core, ...(zone.routes ?? [])]) {
       if (prefix.endsWith('/')) {
         walk(runtime, join(starter, prefix), prefix.replace(/\/$/, ''));
         continue;
@@ -239,7 +254,7 @@ export function runFitnessFunctions({
   // writing a broken overlay into the repository to test it.
   overlays = overlayManifests(repoRoot),
   layoutGaps = loadLayoutGaps(repoRoot),
-  coreSources = coreZoneSources(repoRoot),
+  coreSources = factoryOwnedSources(repoRoot),
 }) {
   const findings = [];
   const fail = (rule, detail) => findings.push({ rule, detail });
@@ -379,12 +394,12 @@ export function runFitnessFunctions({
 
   // FF5e — the complement FF5d cannot express. FF5d measures where a file
   // lands; it says nothing about what that file imports. A regeneration may
-  // replace the core because no capability writes into it — but it only really
-  // may if no core file depends on what a capability delivered.
+  // replace what the Factory owns because no capability writes into it — but it
+  // only really may if none of it depends on what a capability delivered.
   //
   // The business zone is the zone regeneration never touches: whatever lives
-  // there belongs to whoever received the project. A core file importing it
-  // depends on code the Factory neither ships nor maintains.
+  // there belongs to whoever received the project. A Factory-owned file
+  // importing it depends on code the Factory neither ships nor maintains.
   const seams = compositionSeams();
   for (const [runtime, relativePath, source] of coreSources) {
     const zone = RUNTIME_ZONES[runtime];
@@ -398,7 +413,7 @@ export function runFitnessFunctions({
       if (target === null || !target.startsWith(zone.business)) continue;
       fail(
         'core-business-independence',
-        `${runtime} core file ${relativePath} imports the business zone (${specifier})`,
+        `${runtime} starter file ${relativePath} imports the business zone (${specifier})`,
       );
     }
   }

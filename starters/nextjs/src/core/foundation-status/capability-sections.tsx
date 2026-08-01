@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 
-import { CAPABILITY_STATUS_SECTIONS } from "../../core/composition/status-sections.js";
+import { CAPABILITY_STATUS_SECTIONS } from "../composition/status-sections.js";
 
 /**
  * Rend les sections de statut apportées par les capabilities composées, dans

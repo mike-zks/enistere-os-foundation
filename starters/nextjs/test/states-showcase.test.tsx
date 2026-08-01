@@ -6,7 +6,7 @@ import { afterEach, test } from "node:test";
 import { cleanup, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import { StatesShowcase } from "../src/features/foundation-status/states-showcase.js";
+import { StatesShowcase } from "../src/core/foundation-status/states-showcase.js";
 
 afterEach(() => {
   cleanup();

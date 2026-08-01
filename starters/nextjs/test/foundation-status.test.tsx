@@ -5,7 +5,7 @@ import { afterEach, test } from "node:test";
 
 import { cleanup, render, screen } from "@testing-library/react";
 
-import { FoundationStatus } from "../src/features/foundation-status/foundation-status.js";
+import { FoundationStatus } from "../src/core/foundation-status/foundation-status.js";
 
 afterEach(() => {
   cleanup();

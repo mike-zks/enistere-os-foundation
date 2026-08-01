@@ -738,31 +738,86 @@ elle ne peut pas diverger de ce que la Factory génère.
 - **La régénération n'existe toujours pas.** Cette mission referme le dernier
   invariant qui lui manquait.
 
+## Mission achevée — les racines de routage sous la même frontière
+
+[ADR-082](../adr/ADR-082-routing-root-import-frontier.md) referme la dernière
+zone que FF5e ne mesurait pas — et **corrige le diagnostic qu'ADR-081 avait posé
+la veille**.
+
+### Le diagnostic était faux, la mesure l'a montré
+
+ADR-081 annonçait « une troisième catégorie à nommer ». Il n'y en avait pas.
+
+**Une seule racine de routage sur sept importait la zone métier** : Next.js,
+depuis une unique page, cinq imports. La racine Expo est propre. Et ce qu'elle
+importait n'était pas du métier :
+
+- `foundation-status` s'annonce lui-même « page technique de la baseline
+  Next.js » — le jumeau du `FOUNDATION_DIAGNOSTICS` de React Native ;
+- `capability-sections.tsx` est **le rendu d'une couture de composition** ;
+- `health` sondait `/health` alors que son transport et ses clés de requête
+  étaient **déjà dans le cœur** : le même sujet était coupé en deux par la
+  frontière.
+
+C'est le critère d'ADR-079 qui n'avait pas été appliqué à Next.js. Les deux
+paquets remontent dans `src/core/`.
+
+### Ce que ça change vraiment
+
+**`features/` est désormais vide dans les sept starters.** La zone métier cesse
+d'être *surtout* du territoire capability-et-utilisateur pour l'être
+**exclusivement** : ce qui s'y trouve vient d'une capability ou de l'utilisateur,
+sans exception à retenir.
+
+FF5e lit les racines de routage sous une clé distincte (`routes`), pas comme du
+cœur — FF5d doit continuer d'y autoriser les pages de capability. La distinction
+tient **sans règle particulière** parce que FF5e lit les *starters* : les pages
+d'une capability n'y apparaissent jamais.
+
+### Preuves
+
+- **épreuve sur le dépôt réel** : réintroduire les cinq imports produit cinq
+  violations ; le correctif les supprime ;
+- **non-vacuité étendue** : un test échoue si rien n'est lu sous une racine de
+  routage déclarée — la moitié la plus récente de la règle est celle qu'un
+  refactor distrait laisserait tomber en silence ;
+- la règle mord sur les deux racines, Next.js et Expo ;
+- 503/503 Foundation ; goldens Next.js verts, baseline et composé avec
+  Authentication — ce dernier exerce le test de frontière navigateur dont trois
+  chemins ont changé.
+
+### Non revendiqué
+
+- Une capability qui écrirait une page important la zone métier d'**une autre**
+  capability ne serait pas vue. Aucune ne le fait ; rien ne l'empêche.
+- **La régénération n'existe toujours pas.** Cette mission ne lève plus
+  d'obstacle : elle referme la dernière zone non mesurée.
+
 ## Prochaine mission unique
 
-> **Étendre la frontière aux racines de routage**, la seule zone que FF5e laisse
-> non mesurée.
+> **La régénération elle-même** — la capacité que tout ce chantier préparait.
 
 ### Justification de l'ordre
 
-C'est la mission elle-même qui a mis ce trou au jour, et il est du même genre que
-celui qu'on vient de refermer : `src/app/` sur Next.js et `app/` sur Expo sont
-remplacés par la régénération et importent la zone métier.
+Les trois missions précédentes ont refermé, dans l'ordre, le dernier angle mort
+de placement (ADR-080), l'invariant d'import du cœur (ADR-081) et celui des
+racines de routage (ADR-082). **Plus aucun obstacle structurel connu ne subsiste**,
+et chacune de ces ADR se termine par la même phrase : *la régénération n'existe
+pas*.
 
-Ils ne sont pas du cœur — les capabilities y écrivent des pages — donc la règle
-ne peut pas être la même. C'est une **troisième catégorie** à nommer, pas une
-extension de la carte.
+Continuer à durcir la frontière sans jamais s'en servir reviendrait à préparer
+indéfiniment.
 
 ### Critères de sortie
 
-- la nature des racines de routage est tranchée et écrite : surface partagée,
-  cœur, ou zone propre ;
-- la règle qui leur correspond est posée et éprouvée dans les deux sens ;
-- l'asymétrie Next.js / Angular sur les features de démonstration est tranchée.
+- une régénération remplace le cœur et la composition d'un projet existant sans
+  toucher à sa zone métier, et le prouve sur un projet **modifié** par son
+  propriétaire — pas sur une copie fraîche ;
+- ce qu'elle refuse de faire est aussi explicite que ce qu'elle fait ;
+- la preuve est un golden, pas une démonstration manuelle.
 
 ### Ce qui reste ouvert après cette mission
 
 - la couture de composition pour les modules de modèles Alembic ;
-- **la régénération elle-même** — plus aucun obstacle structurel connu ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

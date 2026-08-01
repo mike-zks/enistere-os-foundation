@@ -9,7 +9,7 @@ Gestion du **server state** via `@tanstack/react-query` v5.
 - `query-provider.tsx` — `QueryProvider` (Client Component, un `QueryClient` par instance navigateur).
 - `keys/health-keys.ts` — query keys standardisées (stables, sérialisables, sans secret).
 
-Hooks et `queryOptions` du domaine Health : voir `features/health/`. Préchargement/hydratation SSR :
+Hooks et `queryOptions` du domaine Health : voir `core/health/`. Préchargement/hydratation SSR :
 voir `app/page.tsx`. Détail : [`../../../docs/tanstack-query.md`](../../../docs/tanstack-query.md).
 
 ## Hors périmètre
