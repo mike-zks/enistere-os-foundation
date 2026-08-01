@@ -9,7 +9,7 @@ import { afterEach, beforeEach, test } from "node:test";
 import { resetPublicApiClientForTests } from "../src/core/api/public/public-api-client.js";
 import { createQueryClient } from "../src/core/query/query-client.js";
 import { healthKeys } from "../src/core/query/keys/health-keys.js";
-import { useHealth } from "../src/features/health/use-health.js";
+import { useHealth } from "../src/core/health/use-health.js";
 import { createMockFetch, createWrapper, envelope, useGlobalFetch } from "./helpers/api-test-kit.js";
 
 const ORIG_FETCH = globalThis.fetch;

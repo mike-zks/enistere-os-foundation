@@ -13,9 +13,9 @@ const CLIENT_REACHABLE = [
   "core/api/run-public-request.ts",
   "core/api/health/health-transport.ts",
   "core/api/errors/map-api-error.ts",
-  "features/health/use-health.ts",
-  "features/health/health-panel.tsx",
-  "features/health/health-probe-view.tsx",
+  "core/health/use-health.ts",
+  "core/health/health-panel.tsx",
+  "core/health/health-probe-view.tsx",
   "core/query/query-provider.tsx",
   "app/providers/app-providers.tsx",
   // Surface Auth navigateur (Web Auth 3/4) : hooks, panneau, vues présentationnelles, état, client BFF.

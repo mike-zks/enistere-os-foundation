@@ -5,8 +5,8 @@ import {
   getHealth,
   getLiveness,
   getReadiness,
-} from "../../core/api/health/health-transport.js";
-import { healthKeys } from "../../core/query/keys/health-keys.js";
+} from "../api/health/health-transport.js";
+import { healthKeys } from "../query/keys/health-keys.js";
 
 /**
  * Options de query réutilisables (ADR-012) : clé unique + query function unique. Le **client** est

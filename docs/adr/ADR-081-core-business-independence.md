@@ -103,8 +103,14 @@ contenant qu'un commentaire de déménagement. Supprimé.
   `src/app/(public)/status/page.tsx` importe `src/features/foundation-status` et
   `src/features/health` — des features de démonstration que le starter livre.
   Le danger est de même nature, la zone est partagée, et la question est ouverte.
+
+  *Corrigé par [ADR-082](ADR-082-routing-root-import-frontier.md). Le diagnostic
+  posé ici — « une troisième catégorie à nommer » — s'est révélé faux à la
+  mesure : ce n'étaient pas des features, et il n'y avait pas de catégorie à
+  inventer.*
 * **La parité web est inégale sur ce point** : Next.js livre des features de
-  démonstration, Angular n'en livre aucune. Non tranché ici.
+  démonstration, Angular n'en livre aucune. Non tranché ici. *(Tranché par
+  ADR-082 : Next.js n'en livre plus.)*
 * FF5e lit le cœur **des starters**. Que le cœur composé soit identique découle
   de FF5d et de l'exemption de couture ; ce raisonnement a été **vérifié plutôt
   qu'affirmé**, sur des applications réellement générées (voir Tests).

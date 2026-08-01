@@ -6,7 +6,7 @@ import { afterEach, beforeEach, test } from "node:test";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 
 import { resetPublicApiClientForTests } from "../src/core/api/public/public-api-client.js";
-import { useHealth } from "../src/features/health/use-health.js";
+import { useHealth } from "../src/core/health/use-health.js";
 import {
   createMockFetch,
   createTestQueryClient,

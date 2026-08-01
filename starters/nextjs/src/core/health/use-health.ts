@@ -9,10 +9,10 @@ import {
   type HealthStatus,
   type LivenessStatus,
   type ReadinessStatus,
-} from "../../core/api/health/health-transport.js";
-import { getPublicApiClient } from "../../core/api/public/public-api-client.js";
-import { isPublicApiConfigured } from "../../core/config/public-config.js";
-import { healthKeys } from "../../core/query/keys/health-keys.js";
+} from "../api/health/health-transport.js";
+import { getPublicApiClient } from "../api/public/public-api-client.js";
+import { isPublicApiConfigured } from "../config/public-config.js";
+import { healthKeys } from "../query/keys/health-keys.js";
 
 /**
  * Hooks Health (server state via TanStack Query). Utilisent le **client public** (navigateur), la

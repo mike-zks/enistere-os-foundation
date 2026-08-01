@@ -65,7 +65,7 @@ authorization supprimées**, **Health intact**. En cas d'**échec réseau** navi
 `invalidateQueries({ queryKey: authKeys.all })` lorsqu'on veut un **refetch** plutôt qu'une suppression
 (ex. après un changement de droits côté API, sans nouveau JWT).
 
-## Hooks (`features/health/use-health.ts`)
+## Hooks (`core/health/use-health.ts`)
 
 `useHealth / useLiveness / useReadiness` : client **public**, clés standardisées, **désactivés**
 (`enabled:false`) tant que `NEXT_PUBLIC_API_URL` est absente (aucune requête, `getPublicApiClient`

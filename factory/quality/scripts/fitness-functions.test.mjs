@@ -7,7 +7,7 @@ import {
   runPipelineFitnessFunctions,
   ingestionBoundaryFindings,
   staticImports,
-  coreZoneSources,
+  factoryOwnedSources,
   sourceSpecifiers,
   RUNTIME_ZONES,
   REPO_ROOT,
@@ -126,21 +126,55 @@ describe('architecture fitness functions', () => {
     );
   });
 
-  it('actually reads the core of all seven runtimes', () => {
+  it('actually reads everything the Factory owns, in all seven runtimes', () => {
     // Without this, the rule above could pass by reading nothing at all — the
     // failure mode that let a dangling golden ship once already.
-    const sources = coreZoneSources(REPO_ROOT);
+    const sources = factoryOwnedSources(REPO_ROOT);
     const perRuntime = new Map();
     for (const [runtime] of sources) perRuntime.set(runtime, (perRuntime.get(runtime) ?? 0) + 1);
     for (const runtime of Object.keys(RUNTIME_ZONES)) {
       assert.ok(
         (perRuntime.get(runtime) ?? 0) > 5,
-        `${runtime}: only ${perRuntime.get(runtime) ?? 0} core files read`,
+        `${runtime}: only ${perRuntime.get(runtime) ?? 0} starter files read`,
       );
+    }
+    // The routing roots are the newest half of the rule, and the half a
+    // careless refactor would silently drop: assert they are read by name.
+    for (const [runtime, zone] of Object.entries(RUNTIME_ZONES)) {
+      for (const root of zone.routes ?? []) {
+        assert.ok(
+          sources.some(([id, path]) => id === runtime && path.startsWith(root)),
+          `${runtime}: nothing read under the routing root ${root}`,
+        );
+      }
     }
     // And it must read something to import from, not just files.
     const specifiers = sources.flatMap(([, path, source]) => sourceSpecifiers(path, source));
     assert.ok(specifiers.length > 500, `only ${specifiers.length} specifiers parsed`);
+  });
+
+  it('holds the routing roots to the same import frontier as the core', async () => {
+    const starters = await loadStarterManifests(REPO_ROOT);
+    const capabilities = await loadCapabilityManifests(REPO_ROOT);
+
+    // A route file a starter ships is Factory-owned and replaced by a
+    // regeneration, so it must not depend on the zone regeneration preserves.
+    // A capability's own pages never reach this rule: it reads starters, and a
+    // starter ships none.
+    for (const breach of [
+      ['nextjs', 'src/app/(public)/status/page.tsx',
+        'import { HealthPanel } from "../../../features/health/health-panel.js";'],
+      ['react-native', 'app/index.tsx', "import { Session } from '@/features/auth/session';"],
+    ]) {
+      const report = runFitnessFunctions({ starters, capabilities, coreSources: [breach] });
+      assert.ok(
+        report.findings.some(
+          (finding) => finding.rule === 'core-business-independence'
+            && finding.detail.includes(breach[1]),
+        ),
+        `${breach[0]} routing-root breach went unnoticed`,
+      );
+    }
   });
 
   it('flags a capability that both requires and conflicts the same capability', async () => {

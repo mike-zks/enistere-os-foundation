@@ -6,7 +6,7 @@ import { afterEach, test } from "node:test";
 import { cleanup, render } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import { FoundationStatus } from "../src/features/foundation-status/foundation-status.js";
+import { FoundationStatus } from "../src/core/foundation-status/foundation-status.js";
 import { LoadingState } from "../src/shared/components/loading-state.js";
 import { ErrorState } from "../src/shared/components/error-state.js";
 import { NotFoundState } from "../src/shared/components/not-found-state.js";

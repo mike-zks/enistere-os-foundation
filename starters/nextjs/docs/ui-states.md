@@ -60,9 +60,9 @@ petit écran). Sans breadcrumbs, tabs ni navigation métier.
 
 ## Intégrations réelles (Web UI 1)
 
-- **Accueil** (`features/foundation-status`) : `PageHeader` (en-tête unique `h1`) + **galerie technique**
+- **Accueil** (`core/foundation-status`) : `PageHeader` (en-tête unique `h1`) + **galerie technique**
   `StatesShowcase` (Alert × variantes, Card, états en mode `inline`).
-- **Health** (`features/health/health-panel`) : `EmptyState` pour l'état « API non configurée ».
+- **Health** (`core/health/health-panel`) : `EmptyState` pour l'état « API non configurée ».
 - **Frontières d'erreur** : `app/error.tsx` / `(protected)/error.tsx` → `ErrorState` ; `not-found.tsx` →
   `NotFoundState` ; `loading.tsx` → `LoadingState`.
 - **Auth** : `features/auth/service-unavailable-view` **délègue** désormais à `ServiceUnavailableState`

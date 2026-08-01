@@ -4,8 +4,8 @@ import { Text } from "@enistere/ui-kit";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement } from "react";
 
-import { mapApiErrorToPublicMessage } from "../../core/api/errors/map-api-error.js";
-import { isPublicApiConfigured } from "../../core/config/public-config.js";
+import { mapApiErrorToPublicMessage } from "../api/errors/map-api-error.js";
+import { isPublicApiConfigured } from "../config/public-config.js";
 import { EmptyState } from "../../shared/components/empty-state.js";
 import { HealthProbeView, type HealthProbeViewProps } from "./health-probe-view.js";
 import { useHealth, useLiveness, useReadiness } from "./use-health.js";

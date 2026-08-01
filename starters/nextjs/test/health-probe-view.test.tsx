@@ -7,7 +7,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { axe } from "jest-axe";
 
-import { HealthProbeView } from "../src/features/health/health-probe-view.js";
+import { HealthProbeView } from "../src/core/health/health-probe-view.js";
 
 afterEach(() => {
   cleanup();
