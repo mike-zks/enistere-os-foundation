@@ -198,7 +198,9 @@ précisément ce qu'une zone nommée rend explicite.
 
 * **La règle mesure les destinations d'overlay, pas les imports.** Interdire à
   `core/**` d'importer `features/**` est l'invariant complémentaire, et il n'est
-  pas encore posé.
+  pas encore posé. *(Posé depuis par
+  [ADR-081](ADR-081-core-business-independence.md), qui a trouvé une seule
+  violation : le routeur Flutter.)*
 * **Elle ne sait pas exprimer une contribution de cœur par une capability**,
   et il reste un cas : `app/persistence` sur FastAPI, non mesuré parce que la
   zone cœur retenue pour ce runtime est celle que le starter possède. Voir
