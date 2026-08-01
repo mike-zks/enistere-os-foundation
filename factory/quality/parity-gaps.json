@@ -4,23 +4,6 @@
   "gaps": [
     {
       "capability": "files",
-      "runtime": "fastapi",
-      "family": "api",
-      "missing": [
-        "delete",
-        "download-url",
-        "metadata",
-        "quarantine",
-        "quota",
-        "reconciliation",
-        "upload"
-      ],
-      "justification": "Files dépend de auth + rbac, désormais tous deux portés sur FastAPI (ADR-077, ADR-078). L'écart restant est celui de Files.",
-      "deadline": "2026-12-31",
-      "review": "Portage Files sur FastAPI."
-    },
-    {
-      "capability": "files",
       "runtime": "angular",
       "family": "web",
       "missing": [

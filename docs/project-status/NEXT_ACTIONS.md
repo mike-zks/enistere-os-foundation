@@ -1021,27 +1021,61 @@ Non revendiqué : aucune administration de rôles/permissions dans Angular ; le
 résumé client n'est jamais une preuve d'accès ; aucun runtime Mobile RBAC ni test
 sur appareil n'existe ou n'est nécessaire à cette décision.
 
+## Mission achevée — Files sur FastAPI
+
+FastAPI tient désormais les sept responsabilités de l'autorité Files : upload
+multipart validé par signatures, métadonnées privées, URL de téléchargement
+signée courte, suppression, quarantaine administrative, quota concurrent et
+purge contrôlée. Les binaires restent dans un bucket privé MinIO/S3 ; PostgreSQL
+porte les métadonnées et les verrous consultatifs. Les appels objet ne sont pas
+effectués dans une transaction SQL.
+
+La migration `0004_files` suit Auth puis RBAC, et la couture de modèles d'ADR-085
+importe le modèle Files. Une mesure `alembic revision --autogenerate` contre un
+PostgreSQL réellement migré produit une révision vide : aucune table, colonne,
+contrainte ou index divergent.
+
+Preuves : rapport Files FastAPI **7/7 responsabilités, 11/11 invariants** ;
+**52/52 pytest** contre PostgreSQL 16 et MinIO réels ; bucket non lisible sans
+signature, URL signée réellement téléchargée puis invalidée par suppression ;
+course de quota et refus du second verrou de maintenance exercés ; golden
+`fastapi-files` complet avec `ruff`, compilation, locks Python reproductibles,
+`pip check`, `pip-audit` sans vulnérabilité connue, conformance matérialisée et
+audit npm à zéro. L'écart `files/fastapi` est retiré ; deux écarts Files restent.
+
+### Non revendiqué
+
+- La détection par signatures n'est pas un antivirus ni une validation complète
+  du format ; un contenu actif à l'intérieur d'un format autorisé n'est pas analysé.
+- Le bucket et ses credentials restent fournis par l'environnement ;
+  l'application ne provisionne ni ne rend public le stockage objet.
+- La purge est un service appelable, pas un ordonnanceur distribué livré par la
+  Factory ; son déclenchement opérationnel appartient au projet généré.
+- Aucune migration de retrait, fusion de fichiers propriétaire, verrouillage de
+  dépendances pendant `regenerate`, surface Files Angular/Flutter ou garantie de
+  production n'est revendiquée.
+
 ## Prochaine mission unique
 
-> **Files sur FastAPI**, le plus large des trois écarts de parité encore
-> déclarés.
+> **Files sur Angular**, le plus large des deux écarts de parité restants.
 
 ### Justification de l'ordre
 
-FastAPI est l'autorité API qui manque encore les sept responsabilités Files.
-Porter d'abord l'autorité garde l'ordre produit : stockage, métadonnées et
-permissions côté serveur avant les surfaces Angular et Flutter qui la
-consommeront. Auth et RBAC y sont déjà `ready` et prouvés.
+L'autorité FastAPI est maintenant portée et les trois APIs tiennent Files.
+Angular manque les cinq responsabilités client déjà tenues par Next.js, contre
+un seul upload manquant sur Flutter. Porter la surface Web la plus large réduit
+donc d'abord la dette mesurée sans inventer de nouvelle autorité côté client.
 
 ### Critères de sortie
 
-- Files FastAPI tient les sept responsabilités de ses pairs API avec migrations,
-  permissions, descripteur de conformité et golden runtime nommé ;
-- l'écart `files/fastapi` est retiré de `parity-gaps.json` ;
-- le comportement est exécuté contre PostgreSQL et un stockage objet local
-  contrôlé, pas seulement inspecté statiquement.
+- Angular tient upload, métadonnées paginées, téléchargement signé, suppression
+  et quarantaine/restore avec les mêmes invariants client que Next.js ;
+- la session Auth et les décisions RBAC existantes sont réutilisées sans faire
+  du client une autorité ;
+- un descripteur de conformité et un golden runtime nommé exécutent la surface ;
+- l'écart `files/angular` est retiré de `parity-gaps.json`.
 
 ### Ce qui reste ouvert après cette mission
 
-- Files sur Angular et Flutter ;
+- Files upload sur Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

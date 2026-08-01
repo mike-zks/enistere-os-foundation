@@ -8,6 +8,7 @@
   "evaluation": "foundation-registry",
   "status": "NON_CONFORMANT",
   "readyTargets": [
+    "fastapi",
     "nestjs",
     "nextjs",
     "react-native",
@@ -93,30 +94,43 @@
       "issues": []
     },
     "fastapi": {
-      "status": "UNSUPPORTED",
-      "manifestStatus": "unsupported",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/7",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "authority"
+      ],
+      "responsibilities": [
+        "delete",
+        "download-url",
+        "metadata",
+        "quarantine",
+        "quota",
+        "reconciliation",
+        "upload"
+      ],
+      "coverage": "7/7",
       "family": "api",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "delete",
-          "download-url",
-          "metadata",
-          "quarantine",
-          "quota",
-          "reconciliation",
-          "upload"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "files-fastapi-integration",
+      "golden": "fastapi-files",
+      "invariants": [
+        "FILES-AUTHORITY-001",
+        "FILES-AUTHORITY-002",
+        "FILES-AUTHORITY-003",
+        "FILES-AUTHORITY-004",
+        "FILES-AUTHORITY-005",
+        "FILES-AUTHORITY-006",
+        "FILES-AUTHORITY-007",
+        "FILES-AUTHORITY-008",
+        "FILES-AUTHORITY-009",
+        "FILES-AUTHORITY-010",
+        "FILES-AUTHORITY-011"
+      ],
+      "proofCount": 13,
       "materialized": false,
-      "issues": [
-        "family parity: api runtimes must hold the same responsibilities; missing delete, download-url, metadata, quarantine, quota, reconciliation, upload"
-      ]
+      "issues": []
     },
     "nextjs": {
       "status": "CONFORMANT",

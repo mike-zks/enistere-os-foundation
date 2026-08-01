@@ -165,6 +165,9 @@ export const PROFILES = Object.freeze([
   }),
   profile('fastapi-auth', 'ready', { api: 'fastapi' }, ['auth'], { golden: 'fastapi-auth' }),
   profile('fastapi-rbac', 'ready', { api: 'fastapi' }, ['auth', 'rbac'], { golden: 'fastapi-rbac' }),
+  profile('fastapi-files', 'ready', { api: 'fastapi' }, ['auth', 'rbac', 'files'], {
+    golden: 'fastapi-files',
+  }),
   profile('spring-angular-auth', 'supported', { api: 'spring', web: 'angular' }, ['auth']),
   profile('spring-angular-rbac', 'supported', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
   profile('spring-flutter-auth', 'supported', { api: 'spring', mobile: 'flutter' }, ['auth']),

@@ -157,6 +157,7 @@
 | compilation | `cd starters/fastapi && python -m compileall -q app` | Python 3.14 | **golden-runtime** | chaque PR |
 | audit Python | `cd starters/fastapi && python -m pip_audit --strict` | Python 3.14, PyPI advisories | **golden-runtime** | chaque PR |
 | boot + HTTP | `node factory/quality/scripts/golden-runtime.mjs fastapi-base` | Python 3.14, Uvicorn | **golden-runtime** | chaque PR |
+| Files composé | `node factory/quality/scripts/golden-runtime.mjs fastapi-files` | Python 3.14, PostgreSQL 16 + MinIO | **golden-runtime** | chaque PR |
 | audit packages partagés | même golden, scope `shared-packages` | Node 24 | **golden-runtime** | chaque PR |
 
 Le golden installe l'arbre transitif depuis `requirements.lock`, vérifie le lock
