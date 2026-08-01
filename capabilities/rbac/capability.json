@@ -183,7 +183,7 @@
       "target": "fastapi",
       "kind": "database",
       "strategy": "additive",
-      "path": "targets/fastapi/files/migrations/versions/0002_rbac.py",
+      "path": "targets/fastapi/files/migrations/versions/0003_rbac.py",
       "order": 200
     }
   ],

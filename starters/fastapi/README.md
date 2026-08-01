@@ -11,8 +11,11 @@ python -m pip_audit --strict
 python -m uvicorn app.main:app
 ```
 
-Les primitives de persistence spécialisent les ports neutres ; aucun ORM ni
-provider de base de données n’est imposé par le baseline.
+Le baseline porte l'adaptateur de persistance — SQLAlchemy, asyncpg, Alembic —
+comme les deux autres runtimes API portent Prisma et JPA (ADR-080). Le code est
+fourni, **jamais activé** : le hook `persistence_lifespan` n'est branché que par
+une capability composée, donc une application de base n'ouvre aucun pool et
+démarre sans base de données.
 Le rate limiter mémoire prouve le mécanisme de base sur une instance ; un
 déploiement multi-processus doit le remplacer par un adapter distribué avant
 toute revendication `PRODUCTION_READY`.

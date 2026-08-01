@@ -1,13 +1,11 @@
-"""Authentication schema and the generic business audit sink.
+"""Authentication schema: identities and refresh sessions.
 
-Two concerns in one revision because they arrive together: the FastAPI baseline
-picks no data provider, so the first capability that needs persistence is also
-the one that creates the audit table its two peer runtimes get from their
-baseline. The tables are otherwise unrelated and `audit_logs` carries no foreign
-key — it must survive the deletion of whatever it describes.
+The audit sink used to be created here, because the FastAPI baseline picked no
+data provider and the first capability needing persistence had to create it. It
+now belongs to the baseline, as it does on the two peer API runtimes (ADR-080).
 
-Revision ID: 0001_auth_and_audit
-Revises:
+Revision ID: 0002_auth
+Revises: 0001_baseline
 Create Date: 2026-07-29
 """
 
@@ -17,8 +15,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision = "0001_auth_and_audit"
-down_revision = None
+revision = "0002_auth"
+down_revision = "0001_baseline"
 branch_labels = None
 depends_on = None
 
@@ -70,29 +68,7 @@ def upgrade() -> None:
     op.create_index("idx_refresh_tokens_user_id", "refresh_tokens", ["user_id"])
     op.create_index("idx_refresh_tokens_expires_at", "refresh_tokens", ["expires_at"])
 
-    op.create_table(
-        "audit_logs",
-        sa.Column(
-            "id", postgresql.UUID(as_uuid=True), primary_key=True,
-            server_default=sa.text("gen_random_uuid()"),
-        ),
-        sa.Column("event_type", sa.String(100), nullable=False),
-        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("target_type", sa.String(100), nullable=True),
-        sa.Column("target_id", sa.String(255), nullable=True),
-        sa.Column("ip_address", sa.String(45), nullable=True),
-        sa.Column("user_agent", sa.String(512), nullable=True),
-        sa.Column(
-            "created_at", sa.DateTime(timezone=True), nullable=False,
-            server_default=sa.text("NOW()"),
-        ),
-    )
-    op.create_index("idx_audit_logs_event_type", "audit_logs", ["event_type"])
-    op.create_index("idx_audit_logs_user_id", "audit_logs", ["user_id"])
-    op.create_index("idx_audit_logs_created_at", "audit_logs", ["created_at"])
-
 
 def downgrade() -> None:
-    op.drop_table("audit_logs")
     op.drop_table("refresh_tokens")
     op.drop_table("users")
