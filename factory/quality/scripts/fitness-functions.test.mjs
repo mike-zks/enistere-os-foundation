@@ -7,6 +7,9 @@ import {
   runPipelineFitnessFunctions,
   ingestionBoundaryFindings,
   staticImports,
+  coreZoneSources,
+  sourceSpecifiers,
+  RUNTIME_ZONES,
   REPO_ROOT,
 } from './fitness-functions.mjs';
 
@@ -59,6 +62,85 @@ describe('architecture fitness functions', () => {
       overlays: [['auth', 'angular', { files: [{ destination: 'src/app/core/auth' }] }]],
     });
     assert.ok(expired.findings.some((finding) => finding.detail.includes('layout gap expired')));
+  });
+
+  it('keeps the core independent of the business zone, in every language', async () => {
+    const starters = await loadStarterManifests(REPO_ROOT);
+    const capabilities = await loadCapabilityManifests(REPO_ROOT);
+
+    // One breach per language the rule claims to read. A rule that only ever
+    // understood TypeScript would still report zero findings on the other six
+    // runtimes, and the silence would look exactly like conformity.
+    const breaches = [
+      ['nextjs', 'src/core/api/client.ts', "import { login } from '@/features/auth/login';"],
+      ['nestjs', 'src/health/health.service.ts', "import { AuthService } from '../modules/auth/auth.service';"],
+      ['flutter', 'lib/src/core/navigation/router.dart', "import '../../features/auth/login_screen.dart';"],
+      ['fastapi', 'app/platform.py', 'from app.modules.auth import router'],
+      ['fastapi', 'app/persistence/database.py', 'from ..modules.auth import model'],
+      ['spring', 'src/main/java/com/enistere/core/config/SecurityConfig.java',
+        'import com.enistere.core.modules.auth.AuthService;'],
+      ['react-native', 'src/api/client.ts', "import { session } from '../features/auth/session';"],
+      ['angular', 'src/app/core/api/client.ts', "import { Auth } from '../../features/auth/auth.service';"],
+    ];
+    for (const breach of breaches) {
+      const report = runFitnessFunctions({ starters, capabilities, coreSources: [breach] });
+      assert.ok(
+        report.findings.some(
+          (finding) => finding.rule === 'core-business-independence'
+            && finding.detail.includes(breach[1]),
+        ),
+        `${breach[0]} breach went unnoticed: ${breach[2]}`,
+      );
+    }
+
+    // The other direction must stay silent, or the rule would forbid the
+    // dependency that is actually correct: business code builds on the core.
+    const allowed = runFitnessFunctions({
+      starters,
+      capabilities,
+      coreSources: [
+        ['nextjs', 'src/core/api/client.ts', "import { env } from '@/core/config/env';"],
+        ['flutter', 'lib/src/core/navigation/router.dart', "import '../../theme/tokens.dart';"],
+        ['fastapi', 'app/main.py', 'from app.persistence import database'],
+        ['spring', 'src/main/java/com/enistere/core/config/SecurityConfig.java',
+          'import com.enistere.core.common.ApiError;'],
+      ],
+    });
+    assert.deepEqual(
+      allowed.findings.filter((finding) => finding.rule === 'core-business-independence'),
+      [],
+    );
+
+    // The composition seam is the one file whose job is to import business
+    // code, and it is exempt because the adapter registry generates it.
+    const seam = runFitnessFunctions({
+      starters,
+      capabilities,
+      coreSources: [
+        ['fastapi', 'app/composition/capability_routers.py', 'from app.modules.auth import router'],
+      ],
+    });
+    assert.deepEqual(
+      seam.findings.filter((finding) => finding.rule === 'core-business-independence'),
+      [],
+    );
+  });
+
+  it('actually reads the core of all seven runtimes', () => {
+    // Without this, the rule above could pass by reading nothing at all — the
+    // failure mode that let a dangling golden ship once already.
+    const sources = coreZoneSources(REPO_ROOT);
+    const perRuntime = new Map();
+    for (const [runtime] of sources) perRuntime.set(runtime, (perRuntime.get(runtime) ?? 0) + 1);
+    for (const runtime of Object.keys(RUNTIME_ZONES)) {
+      assert.ok(
+        (perRuntime.get(runtime) ?? 0) > 5,
+        `${runtime}: only ${perRuntime.get(runtime) ?? 0} core files read`,
+      );
+    }
+    // And it must read something to import from, not just files.
+    const specifiers = sources.flatMap(([, path, source]) => sourceSpecifiers(path, source));
+    assert.ok(specifiers.length > 500, `only ${specifiers.length} specifiers parsed`);
   });
 
   it('flags a capability that both requires and conflicts the same capability', async () => {

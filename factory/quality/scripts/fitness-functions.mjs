@@ -14,7 +14,7 @@
  * Aucune dépendance externe. Compatible Node 24.
  */
 
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname, join, posix } from 'node:path';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
@@ -60,6 +60,173 @@ function overlayManifests(repoRoot) {
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 /**
+ * The two zones of each runtime, read by FF5d (where a capability may write) and
+ * FF5e (what the core may import). One map, so the frontier cannot be enforced
+ * in one direction and forgotten in the other.
+ *
+ * A `core` entry ending in `/` is a directory; anything else is a file prefix,
+ * for the root modules a framework insists on keeping beside its packages.
+ *
+ * The framework routing roots — `src/app/` on Next.js, `app/` on Expo — are
+ * deliberately absent: capabilities write pages there, so they are a shared
+ * surface rather than core. Their own frontier is a mission of its own.
+ */
+export const RUNTIME_ZONES = {
+  angular: {
+    core: ['src/app/core/', 'src/app/pages/', 'src/app/shared/', 'src/app/app.'],
+    business: 'src/app/features/',
+  },
+  flutter: {
+    core: ['lib/src/core/', 'lib/src/theme/', 'lib/main.dart', 'lib/app.dart'],
+    business: 'lib/src/features/',
+  },
+  nextjs: { core: ['src/core/', 'src/shared/', 'src/types/'], business: 'src/features/' },
+  // NestJS has no single `core/` directory: its core zone is every top-level
+  // source directory the starter owns. Listing them is the honest encoding —
+  // the alternative would be to invent a `core/` the framework never had.
+  nestjs: {
+    core: ['src/audit/', 'src/bootstrap/', 'src/common/', 'src/composition/', 'src/config/',
+      'src/database/', 'src/health/', 'src/platform/', 'src/app.module.ts', 'src/main.ts'],
+    business: 'src/modules/',
+  },
+  // `app/persistence/` is measured like any other core directory since the
+  // baseline owns it (ADR-080). The blind spot the rule used to carry — a
+  // capability contributing core infrastructure — no longer exists on any
+  // runtime.
+  fastapi: {
+    core: ['app/composition/', 'app/persistence/', 'app/config.py', 'app/main.py',
+      'app/platform.py'],
+    business: 'app/modules/',
+  },
+  // React Native's core zone is the set of directories the starter owns. The
+  // secure-storage port, the form foundation and the query client stay there
+  // even though Authentication ships them: they name no domain.
+  'react-native': {
+    core: ['src/a11y/', 'src/analytics/', 'src/api/', 'src/app-environment/',
+      'src/app-lifecycle/', 'src/biometrics/', 'src/clipboard/', 'src/composition/',
+      'src/config/', 'src/consent/', 'src/crash-reporting/', 'src/i18n/', 'src/linking/',
+      'src/logger/', 'src/offline/', 'src/permissions/', 'src/platform/', 'src/preferences/',
+      'src/push/', 'src/query/', 'src/retry/', 'src/session/', 'src/states/', 'src/store/',
+      'src/telemetry/', 'src/theme/', 'src/types/', 'src/ui/'],
+    business: 'src/features/',
+  },
+  spring: {
+    core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
+      'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/',
+      'src/main/java/com/enistere/core/infrastructure/',
+      'src/test/java/com/enistere/core/infrastructure/',
+      'src/main/java/com/enistere/core/EnistereCoreApplication.java'],
+    business: 'src/main/java/com/enistere/core/modules/',
+  },
+};
+
+/** Path aliases a runtime resolves to its source root, longest prefix first. */
+const SOURCE_ALIASES = {
+  nextjs: [['@/', 'src/']],
+  'react-native': [['@/', 'src/']],
+  flutter: [['package:mobile_flutter/', 'lib/']],
+};
+
+/** Source extensions FF5e knows how to read imports from. */
+const READABLE_SOURCE = /\.(ts|tsx|js|jsx|mjs|dart|py|java)$/;
+
+/**
+ * Every module specifier a source file imports or re-exports. Regex-level on
+ * purpose: a parser per language would be five dependencies to state one fact.
+ */
+export function sourceSpecifiers(relativePath, source) {
+  const found = [];
+  const scan = (pattern) => {
+    let match;
+    while ((match = pattern.exec(source)) !== null) found.push(match[1]);
+  };
+  if (/\.(ts|tsx|js|jsx|mjs)$/.test(relativePath)) {
+    scan(/(?:from|import|require)\s*\(?\s*['"]([^'"]+)['"]/g);
+  } else if (relativePath.endsWith('.dart')) {
+    scan(/(?:import|export)\s+['"]([^'"]+)['"]/g);
+  } else if (relativePath.endsWith('.py')) {
+    scan(/^\s*from\s+([.\w]+)\s+import\s/gm);
+    scan(/^\s*import\s+([.\w]+)/gm);
+  } else if (relativePath.endsWith('.java')) {
+    scan(/^\s*import\s+(?:static\s+)?([\w.]+)\s*;/gm);
+  }
+  return found;
+}
+
+/**
+ * The starter-relative path a specifier points at, or `null` when it leaves the
+ * project — a package name resolves to `node_modules`, not to a zone.
+ */
+export function resolveSpecifier(runtime, relativePath, specifier) {
+  if (relativePath.endsWith('.java')) {
+    return `src/main/java/${specifier.split('.').join('/')}`;
+  }
+  if (relativePath.endsWith('.py')) {
+    if (!specifier.startsWith('.')) return specifier.split('.').join('/');
+    // `from ..x import y` climbs one package per dot beyond the first.
+    const climb = specifier.match(/^\.+/)[0].length;
+    const base = posix.dirname(relativePath).split('/');
+    const kept = climb > 1 ? base.slice(0, -(climb - 1)) : base;
+    return [...kept, ...specifier.slice(climb).split('.').filter(Boolean)].join('/');
+  }
+  if (specifier.startsWith('.')) {
+    return posix.normalize(posix.join(posix.dirname(relativePath), specifier));
+  }
+  for (const [alias, root] of SOURCE_ALIASES[runtime] ?? []) {
+    if (specifier.startsWith(alias)) return `${root}${specifier.slice(alias.length)}`;
+  }
+  return null;
+}
+
+/** Reads every core-zone source file of a starter as `[runtime, path, source]`. */
+export function coreZoneSources(repoRoot = REPO_ROOT) {
+  const collected = [];
+  const walk = (runtime, absolute, relative) => {
+    if (!existsSync(absolute)) return;
+    for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+      const child = join(absolute, entry.name);
+      const childRelative = `${relative}/${entry.name}`;
+      if (entry.isDirectory()) walk(runtime, child, childRelative);
+      else if (READABLE_SOURCE.test(entry.name)) {
+        collected.push([runtime, childRelative, readFileSync(child, 'utf8')]);
+      }
+    }
+  };
+  for (const [runtime, zone] of Object.entries(RUNTIME_ZONES)) {
+    const starter = join(repoRoot, 'starters', runtime);
+    if (!existsSync(starter)) continue;
+    for (const prefix of zone.core) {
+      if (prefix.endsWith('/')) {
+        walk(runtime, join(starter, prefix), prefix.replace(/\/$/, ''));
+        continue;
+      }
+      // A file prefix: the root modules that sit beside the packages.
+      const directory = posix.dirname(prefix);
+      const absolute = join(starter, directory);
+      if (!existsSync(absolute)) continue;
+      for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+        const relative = posix.join(directory, entry.name);
+        if (!entry.isFile() || !relative.startsWith(prefix)) continue;
+        if (!READABLE_SOURCE.test(entry.name)) continue;
+        collected.push([runtime, relative, readFileSync(join(absolute, entry.name), 'utf8')]);
+      }
+    }
+  }
+  return collected;
+}
+
+/** The generated composition files, which exist precisely to import business code. */
+function compositionSeams() {
+  const seams = new Set();
+  for (const runtime of Object.keys(RUNTIME_ZONES)) {
+    for (const seam of getTargetAdapter(runtime)?.composition ?? []) {
+      seams.add(`${runtime}/${seam.destination}`);
+    }
+  }
+  return seams;
+}
+
+/**
  * Runs the fitness functions against the given registries. Returns
  * `{ passed, findings }`; each finding is `{ rule, detail }`.
  */
@@ -72,6 +239,7 @@ export function runFitnessFunctions({
   // writing a broken overlay into the repository to test it.
   overlays = overlayManifests(repoRoot),
   layoutGaps = loadLayoutGaps(repoRoot),
+  coreSources = coreZoneSources(repoRoot),
 }) {
   const findings = [];
   const fail = (rule, detail) => findings.push({ rule, detail });
@@ -162,45 +330,7 @@ export function runFitnessFunctions({
 
   // FF5d — a capability is business code and belongs in the business zone of the
   // runtime it targets, never inside the zone the Factory owns and replaces.
-  // Enforced on the runtimes whose starter actually declares two zones; the
-  // others are measured by the layout mission that will give them one.
-  const businessZone = {
-    angular: { core: 'src/app/core/', business: 'src/app/features/' },
-    flutter: { core: 'lib/src/core/', business: 'lib/src/features/' },
-    nextjs: { core: 'src/core/', business: 'src/features/' },
-    // NestJS has no single `core/` directory: its core zone is every top-level
-    // source directory the starter owns. Listing them is the honest encoding —
-    // the alternative would be to invent a `core/` the framework never had.
-    nestjs: {
-      core: ['src/audit/', 'src/bootstrap/', 'src/common/', 'src/config/', 'src/database/',
-        'src/health/', 'src/platform/'],
-      business: 'src/modules/',
-    },
-    // `app/persistence/` is measured like any other core directory since the
-    // baseline owns it (ADR-080). The blind spot the rule used to carry — a
-    // capability contributing core infrastructure — no longer exists on any
-    // runtime.
-    fastapi: { core: ['app/composition/', 'app/persistence/'], business: 'app/modules/' },
-    // React Native's core zone is the set of directories the starter owns. The
-    // secure-storage port, the form foundation and the query client stay there
-    // even though Authentication ships them: they name no domain.
-    'react-native': {
-      core: ['src/a11y/', 'src/analytics/', 'src/api/', 'src/app-environment/',
-        'src/app-lifecycle/', 'src/biometrics/', 'src/clipboard/', 'src/composition/',
-        'src/config/', 'src/consent/', 'src/crash-reporting/', 'src/i18n/', 'src/linking/',
-        'src/logger/', 'src/offline/', 'src/permissions/', 'src/platform/', 'src/preferences/',
-        'src/push/', 'src/query/', 'src/retry/', 'src/session/', 'src/states/', 'src/store/',
-        'src/telemetry/', 'src/theme/', 'src/types/', 'src/ui/'],
-      business: 'src/features/',
-    },
-    spring: {
-      core: ['src/main/java/com/enistere/core/common/', 'src/main/java/com/enistere/core/config/',
-        'src/main/java/com/enistere/core/health/', 'src/main/java/com/enistere/core/platform/',
-        'src/main/java/com/enistere/core/infrastructure/',
-        'src/test/java/com/enistere/core/infrastructure/'],
-      business: 'src/main/java/com/enistere/core/modules/',
-    },
-  };
+  const businessZone = RUNTIME_ZONES;
   const declaredLayoutGaps = layoutGaps;
   const today = new Date().toISOString().slice(0, 10);
   for (const [capability, target, overlay] of overlays) {
@@ -244,6 +374,32 @@ export function runFitnessFunctions({
       if (!zone || !written.has(destination)) {
         fail('capability-business-zone', `${key} declares a layout gap that no longer exists: ${destination}`);
       }
+    }
+  }
+
+  // FF5e — the complement FF5d cannot express. FF5d measures where a file
+  // lands; it says nothing about what that file imports. A regeneration may
+  // replace the core because no capability writes into it — but it only really
+  // may if no core file depends on what a capability delivered.
+  //
+  // The business zone is the zone regeneration never touches: whatever lives
+  // there belongs to whoever received the project. A core file importing it
+  // depends on code the Factory neither ships nor maintains.
+  const seams = compositionSeams();
+  for (const [runtime, relativePath, source] of coreSources) {
+    const zone = RUNTIME_ZONES[runtime];
+    if (!zone) continue;
+    // The composition files are the sanctioned exception, and they are read
+    // from the adapter registry rather than listed here: the seam is exactly
+    // what the Factory generates, so the exemption cannot drift from it.
+    if (seams.has(`${runtime}/${relativePath}`)) continue;
+    for (const specifier of sourceSpecifiers(relativePath, source)) {
+      const target = resolveSpecifier(runtime, relativePath, specifier);
+      if (target === null || !target.startsWith(zone.business)) continue;
+      fail(
+        'core-business-independence',
+        `${runtime} core file ${relativePath} imports the business zone (${specifier})`,
+      );
     }
   }
 

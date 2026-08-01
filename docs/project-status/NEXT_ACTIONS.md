@@ -673,34 +673,96 @@ trahit.
 - **La régénération n'existe pas.** Cette mission lève le dernier obstacle
   structurel connu, elle ne la livre pas.
 
+## Mission achevée — le cœur ne dépend pas de la zone métier
+
+[ADR-081](../adr/ADR-081-core-business-independence.md) pose **FF5e**, l'invariant
+complémentaire qu'ADR-079 avait explicitement laissé de côté : la frontière était
+tenue en écriture, jamais en dépendance.
+
+### Ce que protège la règle
+
+La zone métier est celle que la régénération ne touche jamais : ce qui s'y trouve
+appartient à qui a reçu le projet. Un fichier du cœur qui l'importe dépend donc
+de code que la Factory ne livre pas et ne maintient pas.
+
+### Une seule violation, et c'était un rangement
+
+Sur **313 fichiers de cœur et 877 imports**, une seule : le routeur Flutter
+importait `lib/src/features/home/home_screen.dart`.
+
+**La parité de famille a tranché, pour la cinquième fois.** React Native place son
+écran d'accueil dans `app/index.tsx` — surface neutre du socle, sans contenu
+métier — et ne livre rien dans `src/features/`. L'écran Flutter était le même
+objet, simplement mal rangé : il passe dans `lib/src/core/navigation/`, et
+`lib/src/features/` du starter est désormais vide comme chez ses pairs.
+
+En chemin, `lib/src/app/router.dart` s'est révélé être un fichier mort ne
+contenant qu'un commentaire de déménagement.
+
+### Une seule carte des zones
+
+FF5d et FF5e lisent la même constante. L'écrire une fois a montré qu'elle était
+incomplète — `lib/src/theme/`, `src/shared/`, `src/types/`, `src/app/pages/` et
+les modules racines n'étaient mesurés par personne. FF5d ne gagne aucune
+violation, elle gagne de la portée.
+
+L'exemption de couture est **lue dans le registre d'adaptateurs**, pas recopiée :
+elle ne peut pas diverger de ce que la Factory génère.
+
+### Preuves
+
+- la règle mord **dans les deux sens et par langage** : violations forgées en
+  TypeScript, Dart, Python, Java et via alias `@/` détectées ; l'import inverse
+  reste muet ; la couture reste exemptée ;
+- **non-vacuité gardée par un test** : échec si la règle lit moins de six
+  fichiers de cœur par runtime ou moins de 500 imports — le mode de panne qui
+  avait laissé passer un golden fantôme ;
+- **épreuve sur le dépôt réel** : réintroduire l'import fait échouer la gate, le
+  correctif la fait passer ;
+- **sur applications composées** : cœur matérialisé de `nestjs-flutter-auth`,
+  `triple-files`, `spring-files`, `fastapi-rbac` et `nestjs-angular-auth` généré
+  puis relu — **427 fichiers de cœur composés, zéro violation**, sept runtimes ;
+- 502/502 tests Foundation ; goldens Flutter verts, `analyze`, `test` et
+  `build apk` compris.
+
+### Non revendiqué
+
+- **Les racines de routage ne sont pas mesurées** : `src/app/` sur Next.js,
+  `app/` sur Expo sont des surfaces partagées, les capabilities y écrivent. Or
+  `src/app/(public)/status/page.tsx` importe bien des features livrées par le
+  starter — même danger, zone différente.
+- **Parité web inégale** : Next.js livre des features de démonstration, Angular
+  n'en livre aucune.
+- Aucun mécanisme de dérogation datée pour FF5e : l'unique violation est
+  corrigée, et une machinerie que rien n'utilise est du code mort.
+- **La régénération n'existe toujours pas.** Cette mission referme le dernier
+  invariant qui lui manquait.
+
 ## Prochaine mission unique
 
-> **Interdire au cœur d'importer la zone métier**, l'invariant complémentaire que
-> la refonte a laissé de côté.
+> **Étendre la frontière aux racines de routage**, la seule zone que FF5e laisse
+> non mesurée.
 
 ### Justification de l'ordre
 
-FF5d mesure *où les fichiers atterrissent*, jamais *ce qu'ils importent*. Rien
-n'empêche aujourd'hui un fichier du cœur d'importer `modules/` ou `features/` :
-la frontière est vérifiée en écriture, pas en dépendance.
+C'est la mission elle-même qui a mis ce trou au jour, et il est du même genre que
+celui qu'on vient de refermer : `src/app/` sur Next.js et `app/` sur Expo sont
+remplacés par la régénération et importent la zone métier.
 
-C'est ce qui rendrait la garantie complète. Une régénération peut remplacer le
-cœur parce qu'aucune capability n'y écrit ; elle ne le peut vraiment que si aucun
-fichier du cœur ne dépend de ce qu'une capability a livré.
-
-Le chantier est aussi le bon moment pour cela : les sept runtimes viennent d'être
-rangés, donc toute violation trouvée sera récente et rare.
+Ils ne sont pas du cœur — les capabilities y écrivent des pages — donc la règle
+ne peut pas être la même. C'est une **troisième catégorie** à nommer, pas une
+extension de la carte.
 
 ### Critères de sortie
 
-- une fitness function lit les imports des fichiers de la zone cœur de chaque
-  runtime et refuse toute dépendance vers la zone métier ;
-- éprouvée dans les deux sens, comme FF5d ;
-- les violations trouvées sont corrigées, ou déclarées et datées.
+- la nature des racines de routage est tranchée et écrite : surface partagée,
+  cœur, ou zone propre ;
+- la règle qui leur correspond est posée et éprouvée dans les deux sens ;
+- l'asymétrie Next.js / Angular sur les features de démonstration est tranchée.
 
 ### Ce qui reste ouvert après cette mission
 
 - la couture de composition pour les modules de modèles Alembic ;
-- **la régénération elle-même** ;
+- **la régénération elle-même** — plus aucun obstacle structurel connu ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

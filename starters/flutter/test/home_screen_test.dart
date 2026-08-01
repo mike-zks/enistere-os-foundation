@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_flutter/src/features/home/home_screen.dart';
+import 'package:mobile_flutter/src/core/navigation/home_screen.dart';
 import 'package:mobile_flutter/src/theme/enistere_theme.dart';
 
 void main() {

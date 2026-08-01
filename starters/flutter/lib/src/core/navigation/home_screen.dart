@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../theme/enistere_theme_extension.dart';
 
+/// The baseline landing surface, and core code despite its former filename.
+///
+/// It used to live under `lib/src/features/home/`, which made the router — core
+/// — import the business zone. The zone follows the nature of the code
+/// (ADR-079): this screen names no domain, holds no session and calls nothing.
+/// Its React Native counterpart, `app/index.tsx`, is a starter surface for the
+/// same reason.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
