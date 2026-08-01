@@ -2,11 +2,13 @@ import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, readFile, writeFile, mkdir, cp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { generateProject } from '../engine/generator.mjs';
 import { regenerateProject } from '../engine/regenerate.mjs';
 import { createDefaultBlueprint } from '../engine/blueprint.mjs';
+import { REPO_ROOT } from '../quality/scripts/fitness-functions.mjs';
 
 /**
  * A regeneration is only worth proving on a project its owner has changed. On a
@@ -188,6 +190,30 @@ describe('regeneration of an existing project', () => {
     assert.equal(await readFile(target, 'utf8'), mine);
   });
 
+  it('never removes a migration when a capability is dropped', async () => {
+    const project = join(scratch, 'migrations');
+    await generateProject(blueprintFor('regen-migrations', ['auth']), project);
+    const migration = 'apps/api/prisma/migrations/20260718000100_auth_init/migration.sql';
+    assert.equal(existsSync(join(project, migration)), true);
+
+    const blueprintPath = join(project, 'enistere.yaml');
+    const blueprint = JSON.parse(await readFile(blueprintPath, 'utf8'));
+    blueprint.capabilities = [];
+    await writeFile(blueprintPath, `${JSON.stringify(blueprint, null, 2)}\n`);
+
+    const report = await regenerateProject(project);
+
+    // A migration says what has already been done to databases that are not in
+    // this repository. Deleting the file does not un-happen it — on FastAPI it
+    // left `alembic current` unable to locate the revision the schema is at.
+    assert.equal(report.applied, true, JSON.stringify(report.conflicts.slice(0, 5)));
+    assert.ok(report.retained.includes(migration), `not retained: ${JSON.stringify(report.retained)}`);
+    assert.ok(!report.remove.includes(migration));
+    assert.equal(existsSync(join(project, migration)), true);
+    // The capability's code is gone all the same.
+    assert.equal(existsSync(join(project, 'apps/api/src/modules/auth')), false);
+  });
+
   it('writes nothing at all in dry run', async () => {
     const project = await freshCopy();
     const blueprintPath = join(project, 'enistere.yaml');
@@ -200,6 +226,44 @@ describe('regeneration of an existing project', () => {
     assert.equal(report.applied, false);
     assert.ok(report.create.length > 0, 'a dry run still has to say what it would do');
     assert.equal(existsSync(join(project, 'apps/api/src/modules/auth')), false);
+  });
+
+  it('drives the real CLI surface, dry run then for real', async () => {
+    const project = await freshCopy();
+    const blueprintPath = join(project, 'enistere.yaml');
+    const blueprint = JSON.parse(await readFile(blueprintPath, 'utf8'));
+    blueprint.capabilities = ['auth'];
+    await writeFile(blueprintPath, `${JSON.stringify(blueprint, null, 2)}\n`);
+    const cli = (...args) => spawnSync(
+      'node', [join(REPO_ROOT, 'factory/cli/enistere.mjs'), 'regenerate', project, ...args],
+      { encoding: 'utf8', shell: false, cwd: REPO_ROOT },
+    );
+
+    const dry = cli('--dry-run');
+    assert.equal(dry.status, 0, dry.stderr);
+    assert.equal(JSON.parse(dry.stdout).applied, false);
+    assert.equal(existsSync(join(project, 'apps/api/src/modules/auth')), false);
+
+    const real = cli();
+    assert.equal(real.status, 0, real.stderr);
+    const report = JSON.parse(real.stdout);
+    assert.equal(report.applied, true);
+    assert.ok(report.counts.create > 0);
+    assert.equal(existsSync(join(project, 'apps/api/src/modules/auth')), true);
+  });
+
+  it('exits non-zero from the CLI when a conflict stops the run', async () => {
+    const project = await freshCopy();
+    const target = join(project, 'apps/api/src/main.ts');
+    await writeFile(target, `${await readFile(target, 'utf8')}\n// mine\n`);
+
+    const cli = spawnSync(
+      'node', [join(REPO_ROOT, 'factory/cli/enistere.mjs'), 'regenerate', project],
+      { encoding: 'utf8', shell: false, cwd: REPO_ROOT },
+    );
+    // A caller scripting this must be able to tell refusal from success.
+    assert.equal(cli.status, 1, cli.stderr);
+    assert.ok(JSON.parse(cli.stdout).conflicts.some((c) => c.reason === 'owner-modified'));
   });
 
   it('refuses a project generated before the inventory existed', async () => {

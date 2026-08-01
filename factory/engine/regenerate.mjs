@@ -26,6 +26,31 @@ import { createHash } from 'node:crypto';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { generateProject } from './generator.mjs';
+import { getTargetAdapter } from './target-adapters.mjs';
+
+/**
+ * The migration directories of each application, project-relative.
+ *
+ * A migration is not code, it is history: it says what has already been done to
+ * databases that are not in this repository. Deleting one because the code that
+ * needed it is gone does not un-happen it — measured, not supposed: removing
+ * Authentication and RBAC from a FastAPI project left a schema stamped
+ * `0003_rbac` and a project where `alembic current` itself fails with
+ * "Can't locate revision identified by '0003_rbac'". Not a residue: a project
+ * that can no longer run any migration at all.
+ *
+ * So a regeneration never removes one. The result is a chain that stays intact
+ * and, at worst, tables no capability uses any more — untidy instead of broken.
+ * Reverting a migration is a migration, and it is the owner's to write.
+ */
+function migrationRoots(plan) {
+  return (plan.applications ?? [])
+    .map((application) => {
+      const directory = getTargetAdapter(application.runtime)?.migrations;
+      return directory ? `${application.appDir}/${directory}` : null;
+    })
+    .filter(Boolean);
+}
 
 /** Directory names no inventory and no comparison ever descends into. */
 const IGNORED_DIRECTORIES = new Set([
@@ -67,7 +92,7 @@ async function filesUnder(root, prefix = '', accumulator = []) {
  * Compares the project on disk against the inventory the Factory left behind.
  * Returns the changes a regeneration would make and the conflicts that stop it.
  */
-export async function planRegeneration({ project, fresh, inventory }) {
+export async function planRegeneration({ project, fresh, inventory, keepUnder = [] }) {
   const onDisk = new Set(await filesUnder(project));
   const generated = new Set(await filesUnder(fresh));
   const recorded = inventory.files ?? {};
@@ -78,6 +103,7 @@ export async function planRegeneration({ project, fresh, inventory }) {
   const remove = [];
   const untouched = [];
   const preserved = [];
+  const retained = [];
 
   for (const path of new Set([...Object.keys(recorded), ...generated, ...onDisk])) {
     if (NOT_REGENERATED.has(path) || REWRITTEN_WHOLESALE.has(path)) continue;
@@ -105,7 +131,11 @@ export async function planRegeneration({ project, fresh, inventory }) {
       conflicts.push({ path, reason: 'owner-modified' });
       continue;
     }
-    if (!willGenerate) { remove.push(path); continue; }
+    if (!willGenerate) {
+      if (keepUnder.some((root) => path.startsWith(root))) retained.push(path);
+      else remove.push(path);
+      continue;
+    }
     const next = await digestOf(join(fresh, path));
     if (next === current) untouched.push(path);
     else replace.push(path);
@@ -121,6 +151,8 @@ export async function planRegeneration({ project, fresh, inventory }) {
     // The owner's own files: not counted as "unchanged", because the Factory
     // never had an opinion about them in the first place.
     preserved: sorted(preserved),
+    // Files the Factory no longer produces and deliberately leaves behind.
+    retained: sorted(retained),
   };
 }
 
@@ -183,7 +215,9 @@ export async function regenerateProject(project, options = {}) {
   const fresh = join(scratch, 'project');
   try {
     const plan = await generateProject(blueprint, fresh);
-    const changes = await planRegeneration({ project, fresh, inventory });
+    const changes = await planRegeneration({
+      project, fresh, inventory, keepUnder: migrationRoots(plan),
+    });
     const applied = !dryRun && (changes.conflicts.length === 0 || onConflict === 'keep');
 
     if (applied) {
@@ -209,6 +243,7 @@ export async function regenerateProject(project, options = {}) {
         remove: changes.remove.length,
         untouched: changes.untouched.length,
         preserved: changes.preserved.length,
+        retained: changes.retained.length,
         conflicts: changes.conflicts.length,
       },
     };

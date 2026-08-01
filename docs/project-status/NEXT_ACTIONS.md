@@ -846,29 +846,85 @@ et vide — le projet aurait continué d'en avoir l'air.
 - Un projet généré avant cette ADR ne peut pas être régénéré.
 - Le golden couvre une composition, pas les vingt-sept.
 
+## Mission achevée — une migration n'est pas du code
+
+[ADR-084](../adr/ADR-084-regeneration-across-families.md). La mission devait
+étendre la preuve de régénération au-delà d'une composition. Elle a surtout
+montré qu'ADR-083 décrivait le mauvais problème.
+
+### Ce que la mesure a montré, contre une vraie base
+
+ADR-083 déclarait : *« retirer une capability supprime son code, pas ses tables
+ni ses migrations déjà appliquées »*. Juste, et gravement incomplet.
+
+```
+alembic upgrade head    0001_baseline → 0002_auth → 0003_rbac
+alembic current         0003_rbac (head)
+# le propriétaire retire les capabilities, puis régénère
+alembic current         ERROR  Can't locate revision identified by '0003_rbac'
+alembic upgrade head    ERROR  Can't locate revision identified by '0003_rbac'
+```
+
+Le problème n'était pas les tables restantes : **la régénération supprimait les
+fichiers de migration**, et un projet dont le schéma est estampillé `0003_rbac`
+ne peut plus exécuter la moindre commande Alembic. Pas un résidu — un projet qui
+ne migre plus, dans aucune direction.
+
+### Décision
+
+**Une régénération ne retire jamais un fichier de migration.** Une migration
+n'est pas du code, c'est une histoire : elle dit ce qui a déjà été fait à des
+bases qui ne sont pas dans ce dépôt. Le répertoire est déclaré par l'adaptateur
+de cible — un fait de runtime, pas une règle de régénération.
+
+Résultat : chaîne intacte, et au pire des tables qu'aucune capability n'utilise
+plus. Désordonné plutôt que cassé. Revenir sur une migration est une migration,
+et elle appartient au propriétaire.
+
+### Preuves
+
+- **Contre la même base réelle qui échouait** : `alembic current` → `0003_rbac
+  (head)`, `upgrade head` sans erreur, `retained: 2` ;
+- un test unitaire couvre le même invariant sur NestJS/Prisma ;
+- **un golden de régénération par famille** : API non-JS (FastAPI), Web
+  (Next.js), Mobile (Flutter) — chacun soumis aux mêmes gates qu'un projet
+  généré directement, et ancré dans la CI.
+
+### Non revendiqué
+
+- **Tables orphelines assumées** : un projet qui retire une capability garde ses
+  tables, et un projet qui n'avait jamais migré gardera tout de même les
+  fichiers. La Factory ne sait pas quelles bases ont été migrées.
+- **Aucune migration de retrait générée** : la Factory sait ne pas détruire, pas
+  défaire.
+- `migrations/env.py` énumère toujours en dur les modules de modèles.
+- La régénération ne reverrouille toujours pas les dépendances.
+
 ## Prochaine mission unique
 
-> **Étendre la preuve de régénération au-delà d'une composition**, en commençant
-> par les runtimes non-JS.
+> **La couture de composition pour les modules de modèles Alembic**, le dernier
+> défaut nommé et jamais corrigé de la famille API.
 
 ### Justification de l'ordre
 
-La régénération est prouvée sur `nestjs-base → nestjs-auth`. Rien ne dit qu'elle
-se comporte de même sur FastAPI, où une capability apporte des **migrations
-Alembic chaînées** (`0002_auth`, `0003_rbac`) : les retirer laisse la base en
-avance sur le code, et l'ADR-083 déclare explicitement ne rien faire des données.
+Il est cité dans ADR-079, ADR-080 et ADR-084 sans jamais avoir été traité :
+`migrations/env.py` énumère en dur `app.modules.auth.models` et
+`app.modules.authorization.models`. Une capability ajoutée plus tard est
+invisible pour `--autogenerate`, qui proposerait donc de **supprimer ses
+tables**.
 
-C'est le premier endroit où « supprimer le code d'une capability » n'est pas
-suffisant, et il vaut mieux le mesurer que de le supposer.
+La régénération rend ce défaut plus dangereux qu'avant : ajouter une capability
+à un projet existant est désormais une opération courante, et c'est exactement le
+cas que l'énumération ne couvre pas.
 
 ### Critères de sortie
 
-- un golden de régénération par famille, API comprise sur un runtime non-JS ;
-- le comportement vis-à-vis des migrations déjà appliquées est tranché et écrit,
-  qu'il soit outillé ou explicitement refusé.
+- les modules de modèles sont composés par une couture, comme les routers et les
+  lifespans, et non énumérés ;
+- `--autogenerate` sur un projet composé ne propose la suppression d'aucune table
+  d'une capability présente — vérifié contre une vraie base, pas déduit.
 
 ### Ce qui reste ouvert après cette mission
 
-- la couture de composition pour les modules de modèles Alembic ;
 - RBAC sur Angular et Flutter ; Files sur FastAPI, Angular et Flutter ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12.

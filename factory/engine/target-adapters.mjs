@@ -49,7 +49,7 @@ function freezeComposition(composition) {
 
 const BUILT_IN = [
   {
-    id: 'nestjs', version: '1.0.0', integrationKinds: {
+    id: 'nestjs', version: '1.0.0', migrations: 'prisma/migrations/', integrationKinds: {
       'nestjs.module': { importPath: STRING, symbol: STRING },
       'nestjs.global-guard': { importPath: STRING, symbol: STRING, order: INTEGER },
       'nestjs.throttler': { name: STRING, limitEnv: STRING, defaultLimit: INTEGER, ttlSecondsEnv: STRING, defaultTtlSeconds: INTEGER },
@@ -91,13 +91,15 @@ const BUILT_IN = [
       { kinds: ['expo.query-retry-guard'], destination: 'src/composition/capability-query-retry.ts', render: renderExpoQueryRetryGuards },
     ],
   },
-  { id: 'spring', version: '1.0.0', dependencyManager: 'maven', integrationKinds: {
+  { id: 'spring', version: '1.0.0', dependencyManager: 'maven',
+    migrations: 'src/main/resources/db/migration/', integrationKinds: {
     'spring.module': { importPath: STRING, symbol: STRING },
   }, composition: [
     { kinds: ['spring.module'], destination: 'src/main/java/com/enistere/core/composition/CapabilityConfiguration.java', render: renderSpringComposition },
   ] },
   {
-    id: 'fastapi', version: '1.0.0', dependencyManager: 'python', integrationKinds: {
+    id: 'fastapi', version: '1.0.0', dependencyManager: 'python',
+    migrations: 'migrations/versions/', integrationKinds: {
       'fastapi.router': { importPath: STRING, symbol: STRING, order: INTEGER },
       'fastapi.lifespan': { importPath: STRING, symbol: STRING, order: INTEGER },
       'fastapi.exception-handler': { importPath: STRING, exception: STRING, handler: STRING, order: INTEGER },

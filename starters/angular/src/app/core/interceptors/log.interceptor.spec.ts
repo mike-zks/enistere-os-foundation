@@ -69,7 +69,8 @@ describe('logInterceptor', () => {
     http.get('/api/search?q=secret&token=abc123').subscribe({
       next: () => {
         const logged: string = logSpy.calls.mostRecent().args[0] as string;
-        expect(logged).toContain('/api/search');
+        const { path } = JSON.parse(logged) as { readonly path: string };
+        expect(path).toBe('/api/search');
         expect(logged).not.toContain('secret');
         expect(logged).not.toContain('token');
         expect(logged).not.toContain('abc123');
@@ -83,11 +84,17 @@ describe('logInterceptor', () => {
     http.get('/api/search?signed=secret&key=abc').subscribe({
       error: () => {
         const logged: string = logSpy.calls.mostRecent().args[0] as string;
-        expect(logged).toContain('/api/search');
+        // The stripping itself is asserted on the parsed field, not by
+        // substring: the line also carries a random `traceparent`, and a short
+        // hex-only needle like `abc` turns up in it by chance about once in
+        // seventy runs. It did, on CI, and failed a gate nothing had broken.
+        const { path } = JSON.parse(logged) as { readonly path: string };
+        expect(path).toBe('/api/search');
+        // Values that cannot occur in a hex trace id stay checked on the whole
+        // line, because leaking a secret anywhere in it is the real risk.
         expect(logged).not.toContain('signed');
         expect(logged).not.toContain('secret');
         expect(logged).not.toContain('key');
-        expect(logged).not.toContain('abc');
         done();
       },
     });

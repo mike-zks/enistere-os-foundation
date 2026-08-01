@@ -107,6 +107,12 @@ pas : un répertoire contenant quoi que ce soit du propriétaire survit.
   s'arrête.
 * **Aucune migration de données ni de schéma.** Retirer une capability supprime
   son code, pas ses tables ni ses migrations déjà appliquées.
+
+  *Cette phrase était juste et gravement incomplète. Mesuré depuis
+  ([ADR-084](ADR-084-regeneration-across-families.md)) : la régénération
+  supprimait aussi les **fichiers** de migration, ce qui laissait un projet
+  FastAPI incapable d'exécuter la moindre migration —* `alembic current` *lui-même
+  échouait. Une régénération ne retire plus jamais un fichier de migration.*
 * Le golden de régénération couvre **une composition** (`nestjs-base →
   nestjs-auth`), pas les vingt-sept.
 * La conservation d'un fichier *source* du propriétaire est prouvée par la suite
