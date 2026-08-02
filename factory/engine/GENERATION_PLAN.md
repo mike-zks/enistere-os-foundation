@@ -7,7 +7,8 @@
 > sélection de providers de primitives, contrats polyglottes, opérations
 > lifecycle, risques, approbations et statuts. ADR-066 ajoute communications et
 > déploiement distribués minimaux ; ADR-067 ajoute Capability Graph v2 et les
-> exigences de primitives par application.
+> exigences de primitives par application. ADR-086 fixe la frontière entre
+> sources de fabrication et artefacts réellement livrés.
 
 ## Rôle
 
@@ -59,6 +60,14 @@ Les overlays sont appliqués exclusivement dans `capabilityGraph.order`. Le
 générateur ne possède ni liste d’arêtes ni ordre de registre secondaire.
 `packages/contracts/capabilities.json` matérialise le graphe et les résolutions
 par application.
+
+Les racines `starters/` et `capabilities/` sont des sources de fabrication. La
+sortie reçoit les applications sélectionnées puis les seuls overlays résolus ;
+elle ne reçoit jamais une copie de `capabilities/`. Après composition, le
+générateur calcule depuis les manifests applicatifs la fermeture transitive des
+packages `@enistere/*` consommés. Seuls ces packages sont copiés, déclarés comme
+workspaces et inscrits dans `enistere.lock.sharedPackages`. Cette fermeture est
+un résultat de matérialisation déterministe, pas une seconde entrée du plan.
 
 ## Sérialisation
 

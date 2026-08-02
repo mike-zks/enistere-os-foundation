@@ -45,6 +45,8 @@ Parité de famille sur tous les runtimes :
 [`ADR-074`](../adr/ADR-074-family-parity-covers-every-runtime.md).
 Créance navigateur et Auth sur Angular :
 [`ADR-075`](../adr/ADR-075-browser-credential-storage.md).
+Frontière de matérialisation des projets dérivés :
+[`ADR-086`](../adr/ADR-086-derived-project-materialization-boundary.md).
 
 ## Actifs existants à migrer
 
@@ -120,6 +122,9 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
   audit et reproductibilité sans revendiquer de test device.
 - `Starter single source` : **COMPLETE** (ADR-063) — les sept starters sont
   matérialisés à leur racine ; aucun dossier `base/` ni `composition.baseSource`.
+- `Derived project materialization boundary` : **IMPLEMENTED_AND_TESTED**
+  (ADR-086) — aucun payload de capability, cache ou chemin machine n'est livré ;
+  les packages partagés suivent la fermeture transitive de leurs consommateurs.
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
 - `Capability Manifest v2` : **IMPLEMENTED** (ADR-067) — closure déterministe,
@@ -156,7 +161,7 @@ tient l'upload, seule responsabilité due dans la famille Mobile.
   d'autorisation Spring répondait `500` au lieu de `403`.
 
   Les trois capabilities livrées ont leur parité déclarée. Restent notamment les
-  contrats polyglottes générés, le lifecycle et l'audit de la forme des projets matérialisés.
+  identités applicatives dérivées du CSM, les contrats polyglottes générés et le lifecycle.
 
 Ces éléments sont qualifiés contre le Platform Baseline v2 par les rapports de
 conformance et les goldens nommés ; aucune équivalence produit au-delà des

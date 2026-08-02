@@ -121,14 +121,21 @@ fusionne les dépendances sans doublon, génère les fichiers d'intégration cen
 overlay appliqué. `generationMode` devient `modular-overlay` (et `bundledFeaturesMayExceedSelection`
 `false`) uniquement lorsque **toutes** les targets sélectionnées déclarent `composition.model: "modular"`.
 
+Les racines de capabilities restent dans la Foundation : elles servent à
+résoudre et appliquer les overlays, mais ne sont jamais copiées sous
+`capabilities/` dans le projet dérivé. Les caches, sorties de build,
+spécifications/manifests de starter et fichiers locaux machine sont également
+exclus de la copie. Voir [ADR-086](../../docs/adr/ADR-086-derived-project-materialization-boundary.md).
+
 Il n’existe aucun dossier `starters/*/base/`, aucune `composition.baseSource` et
 aucun ordre secondaire de capabilities dans le générateur.
 
 ## Reproductibilité et lockfiles (workspace unifié)
 
-Le projet généré est un **workspace npm unifié** (strategy/06). Le `package.json` racine déclare comme
-membres `packages/*` et chaque application npm (`apps/api`, `apps/web`, `apps/mobile`). Les packages
-`@enistere/*` sont donc des membres du workspace, résolus par leurs consommateurs via la portée `*`
+Lorsqu'il contient des applications npm ou des packages TypeScript partagés, le projet généré est un
+**workspace npm unifié** (strategy/06). Le `package.json` racine déclare explicitement chaque
+application npm et chaque package de la fermeture réellement consommée. Les packages `@enistere/*`
+sont résolus par leurs consommateurs via la portée `*`
 (**jamais** `file:`, `npm link` ni un chemin vers la Foundation). La fusion de dépendances d'un overlay
 **ne supprime aucun lockfile** ; le générateur retire les lockfiles par-application (hérités des starters
 autonomes) car un **unique `package-lock.json` racine** fait autorité.

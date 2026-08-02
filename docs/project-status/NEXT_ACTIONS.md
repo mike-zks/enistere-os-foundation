@@ -1116,49 +1116,72 @@ build APK, conformité matérialisée et locks reproductibles. Files est
   Dio en attendant la phase de contrats polyglottes ;
 - aucune liste, suppression, quarantaine ou administration Files sur Mobile.
 
+## Mission achevée — Frontière légère des projets dérivés
+
+L'audit a généré les sept runtimes, les 27 combinaisons de stack et les 35
+profils enregistrés. Il a confirmé que la sortie livrait les racines complètes
+des capabilities, les trois packages TypeScript sans égard aux consommateurs,
+des caches et, pour Flutter, des chemins SDK locaux dans
+`android/local.properties`.
+
+ADR-086 sépare désormais sources de fabrication et payload livré. La Factory
+copie les applications sélectionnées, applique uniquement leurs overlays, ne
+livre jamais `capabilities/`, puis calcule la fermeture transitive des packages
+`@enistere/*` réellement consommés après composition. Cette fermeture est
+explicite dans les workspaces et dans `enistere.lock.sharedPackages`.
+
+Mesure FastAPI + Angular + Flutter + Files : **1 080 → 286 fichiers**,
+**5 529 012 → 718 339 octets**, inventaire **149 828 → 32 799 octets**. Les
+budgets exécutables gardent respectivement 400 fichiers, 1 000 000 d'octets et
+50 000 octets d'inventaire. FastAPI seul ne reçoit plus aucun package
+TypeScript ; Next.js conserve contract, client et UI kit car il les consomme.
+
+Preuves : **525/525 tests Factory** ; fitness functions sans finding ; liens de
+149 documents ; Platform Baseline v2 conforme sur les sept runtimes ; Auth,
+RBAC et Files conformes sans écart déclaré ; typechecks, build et tests des
+packages contract/client ; goldens `fastapi-angular-files` et
+`fastapi-flutter-files` contre PostgreSQL 16 et MinIO jetables, schéma remis à
+zéro entre les runs. Les deux goldens ont verrouillé les dépendances, appliqué
+quatre migrations, exécuté 52 tests FastAPI chacun, 150 tests Angular ou 29
+tests Flutter, produit les builds, démarré l'API et vérifié conformité, audits
+et digest reproductible. Flutter a en plus produit un APK debug ; aucun
+démarrage Mobile sans émulateur n'est revendiqué.
+
+Non revendiqué : les identités internes restent celles des starters ; aucun
+binding Java/Python/Dart n'est généré ; les Runtime Contracts et goldens
+existants restent les preuves idiomatiques sans équivalence produit ; les
+projets historiques sans inventaire restent non régénérables.
+
 ## Prochaine mission unique
 
-> **Auditer et contractualiser la matérialisation légère des projets dérivés.**
+> **Dériver les identités des applications du Canonical System Model.**
 
 ### Pourquoi maintenant
 
-La parité déclarée des trois capabilities livrées est refermée. Une génération
-réelle demandée par le propriétaire a révélé que la forme livrée porte encore des
-éléments de fabrication et des identités de starter. Ce n'est pas une intuition :
+Le projet racine porte le slug du blueprint, mais ses applications continuent
+d'exposer des identités de socle : noms npm, package/artifact Maven, nom Python,
+nom et slug Expo, package/import Dart et identifiants Android. Les remplacer par
+une substitution globale serait incorrect : chaque écosystème impose sa propre
+grammaire et certains identifiants participent aux imports ou aux coordonnées de
+build.
 
-- FastAPI + Angular + Files embarque environ **3,0 MiB** de `capabilities/`, dont
-  les implémentations et tests des runtimes non sélectionnés ;
-- `.ruff_cache`, `.angular`, `starter.manifest.json` et
-  `STARTER_SPECIFICATION.md` peuvent atteindre le projet généré ;
-- un backend FastAPI seul embarque environ **924 KiB** de packages TypeScript,
-  dont `ui-kit`, sans consommateur applicatif ;
-- le nom racine dérive bien du blueprint, mais des sous-projets gardent des noms
-  de socle (`@enistere/web-angular`, `enistere-api-fastapi-core`) ;
-- les packages TypeScript sont fournis et bâtis globalement, sans fermeture
-  calculée par consommateurs ; aucun équivalent Java, Python ou Dart n'est généré.
+### Critères de sortie
 
-### Critères de sortie de l'audit
+- inventorier les champs d'identité réellement exécutés pour les sept runtimes ;
+- définir des dérivations déterministes depuis `project`, `displayName` et l'id
+  applicatif, avec normalisation propre à npm, Maven/Java, Python, Expo/Android
+  et Dart/Flutter ;
+- modifier manifests, coordonnées, imports et labels de manière structurelle,
+  sans réécriture textuelle aveugle ;
+- prouver génération, régénération, installation, build et démarrage sur une
+  sélection représentative de chaque famille ;
+- documenter collisions, limites de longueur et identifiants immuables après
+  livraison.
 
-- générer et inventorier les sept runtimes, les 27 combinaisons de stack et les
-  profils système générables, sans confondre code framework nécessaire et
-  artefact interne de la Foundation ;
-- définir une règle exécutable d'inclusion : aucun cache, manifeste/specification
-  de starter, payload d'overlay non sélectionné ou target étrangère dans la sortie ;
-- mesurer taille, nombre de fichiers et provenance avant/après sur des compositions
-  représentatives, avec un budget justifié plutôt qu'un seuil arbitraire ;
-- dériver noms, descriptions et identifiants d'applications du CSM tout en
-  respectant les contraintes propres à npm, Python, Maven et Dart ;
-- établir le graphe réel `package partagé → consommateurs`, ne fournir et bâtir
-  que sa fermeture, et distinguer package applicable, binding polyglotte manquant
-  et duplication locale de contrat ;
-- évaluer chaque runtime contre son contrat **et** ses idiomes majeurs sans
-  imposer une abstraction commune qui neutraliserait le framework ;
-- produire des tests de non-régression et séquencer les corrections si l'audit
-  montre que le périmètre ne tient pas dans une seule PR.
+### Ce qui reste ouvert après cette mission
 
-### Ce qui reste ouvert après cet audit
-
-- transport cookie HttpOnly, limitation de débit distribuée, reste de §12 ;
-- interopérabilité navigateur Angular↔NestJS ou Angular↔Spring sans adaptation
-  explicite du transport ;
-- génération polyglotte complète des contrats et lifecycle.
+- bindings polyglottes générés et classification fine des documents applicatifs ;
+- audit plus profond des avantages propres à chaque framework au-delà des
+  Runtime Contracts v2 déjà exécutés ;
+- transport cookie HttpOnly, limitation de débit distribuée, reste de §12,
+  interopérabilité Angular↔NestJS/Spring et lifecycle complet.

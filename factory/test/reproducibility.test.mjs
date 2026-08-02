@@ -10,10 +10,11 @@ import { generateProject } from '../engine/generator.mjs';
 /**
  * Reproducibility / lockfile strategy (strategy/06_DEPENDENCY_STRATEGY.md).
  *
- * The generated project is a single unified npm workspace: `@enistere/*` packages
- * are workspace members resolved through the `*` range (never `file:`/`link:`/a
- * Foundation path), so one root `package-lock.json` (produced by the first
- * `npm install`) locks the whole tree and `npm ci` reinstalls it reproducibly.
+ * The generated project is a single unified npm workspace: only `@enistere/*`
+ * packages consumed by the selected applications (plus their transitive local
+ * dependencies) are workspace members, resolved through the `*` range (never
+ * `file:`/`link:`/a Foundation path). One root `package-lock.json` locks the
+ * whole tree and `npm ci` reinstalls it reproducibly.
  * Actual `npm ci` execution is proven by the golden-runtime CI; here we assert the
  * deterministic, npm-ci-able shape the generator must always produce.
  */
@@ -65,7 +66,14 @@ describe('reproducibility and lockfile strategy', () => {
     const out = join(root, 'p');
     await generateProject(tripleAuth('ws-app'), out);
     const rootPkg = JSON.parse(await readFile(join(out, 'package.json'), 'utf8'));
-    assert.deepEqual(rootPkg.workspaces, ['packages/*', 'apps/api', 'apps/web', 'apps/mobile']);
+    assert.deepEqual(rootPkg.workspaces, [
+      'packages/api-contracts',
+      'packages/api-client-fetch',
+      'packages/ui-kit',
+      'apps/api',
+      'apps/web',
+      'apps/mobile',
+    ]);
   });
 
   it('leaves no per-app lockfile (the root lock is authoritative)', async () => {
@@ -108,5 +116,11 @@ describe('reproducibility and lockfile strategy', () => {
     }
     // api-contracts ships its own frozen canonical contract (self-contained generation).
     assert.ok(await exists(join(out, 'packages/api-contracts/contract/openapi.json')));
+    const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
+    assert.deepEqual(lock.sharedPackages, [
+      { name: '@enistere/api-contracts', directory: 'api-contracts' },
+      { name: '@enistere/api-client-fetch', directory: 'api-client-fetch' },
+      { name: '@enistere/ui-kit', directory: 'ui-kit' },
+    ]);
   });
 });

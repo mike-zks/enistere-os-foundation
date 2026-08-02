@@ -48,20 +48,21 @@ describe('blueprint v1', () => {
     assert.ok(contract.paths['/product']);
     assert.equal(contract.components.schemas.Product.properties.id.format, 'uuid');
   });
-  it('materializes a selected starter and shared public packages', async () => {
+  it('materializes a selected starter without unconsumed shared packages', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));
     const output = join(root, 'project');
     const blueprint = createDefaultBlueprint('materialized-app');
     blueprint.stack = { api: 'nestjs', web: null, mobile: null };
     await generateProject(blueprint, output);
     await access(join(output, 'apps/api/package.json'));
-    await access(join(output, 'packages/api-contracts/package.json'));
-    await access(join(output, 'packages/api-client-fetch/package.json'));
-    await access(join(output, 'packages/ui-kit/package.json'));
-    await assert.rejects(access(join(output, 'capabilities/base/capability.json')), /ENOENT/);
+    await access(join(output, 'packages/contracts/openapi.json'));
+    await assert.rejects(access(join(output, 'packages/api-contracts/package.json')), /ENOENT/);
+    await assert.rejects(access(join(output, 'packages/api-client-fetch/package.json')), /ENOENT/);
+    await assert.rejects(access(join(output, 'packages/ui-kit/package.json')), /ENOENT/);
+    await assert.rejects(access(join(output, 'capabilities')), /ENOENT/);
     const rootPackage = JSON.parse(await readFile(join(output, 'package.json'), 'utf8'));
-    assert.deepEqual(rootPackage.workspaces, ['packages/*', 'apps/api']);
-    assert.match(rootPackage.scripts['build:packages'], /api-contracts/);
+    assert.deepEqual(rootPackage.workspaces, ['apps/api']);
+    assert.equal(rootPackage.scripts['build:packages'], 'node -e ""');
     assert.equal(rootPackage.overrides.next.postcss, '8.5.23');
     // Unified workspace: the standalone starter's lockfile is removed (root lock is authoritative).
     await assert.rejects(access(join(output, 'apps/api/package-lock.json')), /ENOENT/);
