@@ -9,7 +9,7 @@
 
 | Capacité | État | Limite actuelle |
 |---|---|---|
-| `doctor/init/validate/plan/generate/verify` | Implémenté | lifecycle `inspect/diff/upgrade/migrate` non livré |
+| `doctor/init/validate/plan/generate/regenerate/verify` | Implémenté | aucun merge trois voies, reverrouillage automatique ou lifecycle `inspect/diff/upgrade/migrate` |
 | `architecture list/describe/recommend` | **Implémenté** (ADR-060/065) | quatre sorties canoniques, six dimensions et support séparé |
 | `capability list/describe` | **Implémenté** (ADR-067) | lecture du registre v2 ; add/remove/upgrade relèvent du lifecycle futur |
 | Initialisation system-first | **Implémentée** (ADR-065) | `init` exige `--architecture` avant les runtimes ; mode interactif riche non livré |
@@ -24,6 +24,7 @@
 | Platform Baseline v2 exécutable | **Implémenté** (ADR-058/061/062/063/064) | Common/API/Web/Mobile versionnés ; sept runtimes conformes ; rapport calculé dans `factory/conformance/reports/` |
 | Source unique des starters | **Implémentée et gardée** (ADR-063/064) | sept racines `starters/<runtime>` ; `base/`, `composition.baseSource` et capabilities Mobile embarquées interdits |
 | Frontière de matérialisation dérivée | **Implémentée et gardée** (ADR-086) | applications et overlays sélectionnés seulement ; caches, métadonnées de starter, chemins machine et racines de capabilities exclus |
+| Identités applicatives dérivées du CSM | **Implémentées et gardées** (ADR-087) | sept runtimes ; namespace neutre `app.*`, aucun cycle de renommage/retrait livré |
 | Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
 | `profiles` / `profile <name>` | Implémenté (R7/ADR-062) | presets de composition historiques : 35 déclarés, tous générables ; 31 prouvés par un golden exact |

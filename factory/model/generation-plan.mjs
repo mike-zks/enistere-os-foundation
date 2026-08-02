@@ -15,6 +15,7 @@
 import { stableDigest, stableStringify } from './canonical-system.mjs';
 import { deepFreeze } from './immutable.mjs';
 import { PLAN_DIAGNOSTIC_CODES as PC, diagnostic } from './diagnostics.mjs';
+import { withApplicationIdentities } from './application-identity.mjs';
 
 function deploymentPlan(applications) {
   const byId = new Map(applications.map((application) => [application.id, application]));
@@ -60,23 +61,27 @@ function copyTargetResolution(resolution) {
 /** Builds the deeply-immutable GenerationPlan from a ResolvedSystem. */
 export function buildPlan(resolved) {
   const { selection } = resolved;
-  const applications = resolved.applications.map((app) => ({
-    id: app.id,
-    kind: app.kind,
-    runtime: app.runtime,
-    baseline: { ...app.baseline },
-    source: app.source,
-    appDir: app.appDir,
-    consumes: [...app.consumes],
-    ownership: app.ownership
-      ? { team: app.ownership.team, domains: [...app.ownership.domains] }
-      : null,
-    resolvedCapabilities: app.resolvedCapabilities.map((capability) => ({
-      ...copyTargetResolution(capability),
-      id: capability.id,
-      inclusion: capability.inclusion,
+  const applications = withApplicationIdentities({
+    project: resolved.metadata.name,
+    displayName: resolved.metadata.displayName,
+    applications: resolved.applications.map((app) => ({
+      id: app.id,
+      kind: app.kind,
+      runtime: app.runtime,
+      baseline: { ...app.baseline },
+      source: app.source,
+      appDir: app.appDir,
+      consumes: [...app.consumes],
+      ownership: app.ownership
+        ? { team: app.ownership.team, domains: [...app.ownership.domains] }
+        : null,
+      resolvedCapabilities: app.resolvedCapabilities.map((capability) => ({
+        ...copyTargetResolution(capability),
+        id: capability.id,
+        inclusion: capability.inclusion,
+      })),
     })),
-  }));
+  });
 
   const apiDirs = applications.filter((app) => app.kind === 'api').map((app) => app.appDir);
   const otherDirs = applications.filter((app) => app.kind !== 'api').map((app) => app.appDir);

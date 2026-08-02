@@ -85,6 +85,22 @@ export function findFile(dir, name) {
   return null;
 }
 
+/** Finds a Spring Boot entrypoint without assuming the generated Java package or class name. */
+function findSpringBootApplication(dir) {
+  if (!existsSync(dir)) return null;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const found = findSpringBootApplication(full);
+      if (found) return found;
+    } else if (entry.name.endsWith('Application.java')
+      && readFileSync(full, 'utf8').includes('@SpringBootApplication')) {
+      return full;
+    }
+  }
+  return null;
+}
+
 /**
  * Classifies an error-envelope source. The canonical target is 'flat-envelope'
  * (ADR-048). Returns 'problem-details' | 'flat-envelope' | 'spring-apierror' | 'unknown'.
@@ -186,7 +202,7 @@ function evaluateSpring(appDir) {
   const transactionAdapter = findFile(java, 'SpringTransactionAdapter.java');
   const transactionProof = findFile(join(appDir, 'src', 'test'), 'SpringTransactionAdapterTest.java');
   return {
-    'http-server': result(findFile(java, 'EnistereCoreApplication.java') ? STATUS.COMPLIANT : STATUS.MISSING, 'Spring Boot application'),
+    'http-server': result(findSpringBootApplication(java) ? STATUS.COMPLIANT : STATUS.MISSING, 'Spring Boot application'),
     'input-validation': result(
       validationPort && validationAdapter && validationProof && findFile(java, 'GlobalExceptionHandler.java')
         ? STATUS.COMPLIANT : STATUS.MISSING,

@@ -1152,35 +1152,62 @@ binding Java/Python/Dart n'est généré ; les Runtime Contracts et goldens
 existants restent les preuves idiomatiques sans équivalence produit ; les
 projets historiques sans inventaire restent non régénérables.
 
+## Mission achevée — Identités applicatives dérivées du CSM
+
+ADR-087 ajoute à chaque application du `GenerationPlan` une identité dérivée
+uniquement du slug projet, du `displayName` et de l'id applicatif. Les sept
+runtimes matérialisent désormais leurs manifests, coordonnées, packages/imports,
+chemins natifs et labels sans hériter de l'identité de leur starter.
+
+`enistere.identity.json` inventorie le résultat livré. La régénération refuse un
+fichier d'identité modifié/supprimé, un changement de slug projet et le retrait
+ou renommage d'un id déjà livré ; elle permet ajout et réordonnancement. Sur
+Spring + Angular + Flutter, ce registre mesure 4 005 octets et l'inventaire
+complet 27 776 octets pour 211 fichiers.
+
+Preuves : **530/530 tests Factory** ; tests dédiés des sept runtimes et overlays Spring/Flutter ; vraie
+régénération NestJS→NestJS/Next.js Auth et Flutter base→Flutter Auth avec fichiers
+propriétaire préservés ; builds API/Web et packages partagés ; FastAPI démarré et
+sondé sur trois routes Health ; Next.js démarré et sondé en HTTP 200 ; Expo Doctor
+19/19, 321 tests et export iOS ; Spring/Maven et Angular construits avec leurs
+coordonnées dérivées ; Flutter analyze, 26 tests et APK debug.
+
+### Non revendiqué
+
+- aucun cycle de renommage/retrait, transfert de bundle ou publication de package ;
+- aucun démarrage mobile, build iOS natif ou test appareil/simulateur ;
+- aucun binding Java, Python ou Dart produit depuis le contrat partagé ;
+- aucun audit exhaustif des avantages propres à chaque framework ni équivalence
+  produit/production.
+
 ## Prochaine mission unique
 
-> **Dériver les identités des applications du Canonical System Model.**
+> **Neutraliser le contrat partagé historique et générer ses bindings polyglottes.**
 
 ### Pourquoi maintenant
 
-Le projet racine porte le slug du blueprint, mais ses applications continuent
-d'exposer des identités de socle : noms npm, package/artifact Maven, nom Python,
-nom et slug Expo, package/import Dart et identifiants Android. Les remplacer par
-une substitution globale serait incorrect : chaque écosystème impose sa propre
-grammaire et certains identifiants participent aux imports ou aux coordonnées de
-build.
+Les applications ne portent plus les identités des starters, mais
+`packages/api-contracts` contient encore un titre, une description et un exemple
+de service issus du contrat NestJS historique. Le package TypeScript est fourni
+et utilisé par ses consommateurs ; Java, Python et Dart restent sans binding
+généré. Corriger seulement les textes masquerait la frontière encore absente
+entre contrat neutre canonique et représentations propres aux langages.
 
 ### Critères de sortie
 
-- inventorier les champs d'identité réellement exécutés pour les sept runtimes ;
-- définir des dérivations déterministes depuis `project`, `displayName` et l'id
-  applicatif, avec normalisation propre à npm, Maven/Java, Python, Expo/Android
-  et Dart/Flutter ;
-- modifier manifests, coordonnées, imports et labels de manière structurelle,
-  sans réécriture textuelle aveugle ;
-- prouver génération, régénération, installation, build et démarrage sur une
-  sélection représentative de chaque famille ;
-- documenter collisions, limites de longueur et identifiants immuables après
-  livraison.
+- exécuter l'inventaire des sources OpenAPI/contrats et de leurs consommateurs,
+  sans créer une deuxième source de vérité ;
+- définir quelle donnée relève du contrat neutre, de l'identité applicative ou
+  d'un exemple, puis retirer les mentions runtime injustifiées ;
+- générer et consommer des bindings minimaux idiomatiques pour TypeScript, Java,
+  Python et Dart, ou caractériser par exécution tout blocage réel ;
+- prouver reproductibilité, absence de drift et utilisation dans des projets
+  dérivés représentatifs des trois familles ;
+- documenter versioning, compatibilité et ce qui reste non revendiqué.
 
 ### Ce qui reste ouvert après cette mission
 
-- bindings polyglottes générés et classification fine des documents applicatifs ;
+- classification fine des autres documents applicatifs livrés ;
 - audit plus profond des avantages propres à chaque framework au-delà des
   Runtime Contracts v2 déjà exécutés ;
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12,

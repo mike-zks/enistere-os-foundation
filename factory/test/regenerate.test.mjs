@@ -280,6 +280,46 @@ describe('regeneration of an existing project', () => {
     assert.equal(existsSync(join(project, 'apps/api/src/modules/auth')), false);
   });
 
+  it('refuses to rename immutable project identity during regeneration', async () => {
+    const project = await freshCopy();
+    const blueprintPath = join(project, 'enistere.yaml');
+    const blueprint = JSON.parse(await readFile(blueprintPath, 'utf8'));
+    blueprint.project.slug = 'renamed-project';
+    await writeFile(blueprintPath, `${JSON.stringify(blueprint, null, 2)}\n`);
+
+    await assert.rejects(
+      regenerateProject(project, { onConflict: 'keep' }),
+      /Project and application ids are immutable after delivery/u,
+    );
+    assert.equal(existsSync(join(project, 'apps/api/package.json')), true);
+    const identity = JSON.parse(await readFile(join(project, 'enistere.identity.json'), 'utf8'));
+    assert.equal(identity.project, 'regen-base');
+  });
+
+  it('refuses to remove a delivered application identity but permits adding one', async () => {
+    const project = await freshCopy();
+    const blueprintPath = join(project, 'enistere.yaml');
+    const blueprint = JSON.parse(await readFile(blueprintPath, 'utf8'));
+    delete blueprint.stack;
+    blueprint.applications = [
+      { id: 'api', kind: 'api', runtime: 'nestjs' },
+      { id: 'web', kind: 'web', runtime: 'angular', consumes: ['api'] },
+    ];
+    await writeFile(blueprintPath, `${JSON.stringify(blueprint, null, 2)}\n`);
+
+    const addition = await regenerateProject(project);
+    assert.equal(addition.applied, true, JSON.stringify(addition.conflicts.slice(0, 5)));
+
+    const withWeb = JSON.parse(await readFile(blueprintPath, 'utf8'));
+    withWeb.applications = withWeb.applications.filter((application) => application.id !== 'web');
+    await writeFile(blueprintPath, `${JSON.stringify(withWeb, null, 2)}\n`);
+
+    await assert.rejects(
+      regenerateProject(project, { onConflict: 'keep' }),
+      /Project and application ids are immutable after delivery/u,
+    );
+  });
+
   it('drives the real CLI surface, dry run then for real', async () => {
     const project = await freshCopy();
     const blueprintPath = join(project, 'enistere.yaml');

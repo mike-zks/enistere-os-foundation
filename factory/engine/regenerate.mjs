@@ -275,11 +275,35 @@ export async function regenerateProject(project, options = {}) {
       + 'regenerated safely — the Factory cannot tell its own output from your work.',
     );
   }
+  let previousIdentity = null;
+  if (inventory.files?.['enistere.identity.json']) {
+    const identityPath = join(project, 'enistere.identity.json');
+    let status;
+    try { status = await lstat(identityPath); } catch { status = null; }
+    if (!status?.isFile()
+      || await digestOf(identityPath) !== inventory.files['enistere.identity.json']) {
+      throw new Error(
+        'enistere.identity.json is missing or modified: immutable application identities '
+        + 'cannot be verified, so regeneration is refused.',
+      );
+    }
+    previousIdentity = JSON.parse(await readFile(identityPath, 'utf8'));
+  }
 
   const scratch = await mkdtemp(join(tmpdir(), 'enistere-regen-'));
   const fresh = join(scratch, 'project');
   try {
     const plan = await generateProject(blueprint, fresh);
+    const previousApplications = previousIdentity?.applications?.map((application) => application.id) ?? [];
+    const nextApplications = new Set(plan.applications.map((application) => application.id));
+    const removedApplication = previousApplications.find((id) => !nextApplications.has(id));
+    if (previousIdentity && (previousIdentity.project !== plan.project || removedApplication)) {
+      throw new Error(
+        'Project and application ids are immutable after delivery: changing them alters external '
+        + 'package, service and native application coordinates. Create a new project or use a future '
+        + 'explicit rename migration instead of regenerate.',
+      );
+    }
     const changes = await planRegeneration({
       project, fresh, inventory, keepUnder: migrationRoots(plan),
     });

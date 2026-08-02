@@ -47,6 +47,8 @@ Créance navigateur et Auth sur Angular :
 [`ADR-075`](../adr/ADR-075-browser-credential-storage.md).
 Frontière de matérialisation des projets dérivés :
 [`ADR-086`](../adr/ADR-086-derived-project-materialization-boundary.md).
+Identités applicatives dérivées du CSM :
+[`ADR-087`](../adr/ADR-087-csm-derived-application-identities.md).
 
 ## Actifs existants à migrer
 
@@ -125,6 +127,10 @@ exécution des suites normatives et des goldens. Aucun runtime n’est prouvé `
 - `Derived project materialization boundary` : **IMPLEMENTED_AND_TESTED**
   (ADR-086) — aucun payload de capability, cache ou chemin machine n'est livré ;
   les packages partagés suivent la fermeture transitive de leurs consommateurs.
+- `CSM-derived application identities` : **IMPLEMENTED_AND_TESTED** (ADR-087) —
+  les sept runtimes matérialisent manifests, coordonnées, packages/imports,
+  chemins natifs et labels depuis le projet et l'id applicatif ; la régénération
+  refuse le retrait ou renommage implicite d'une identité livrée.
 - `base` comme capability : **REMOVED** du registre, des manifests de capabilities, profils et plans ;
   compatibilité Blueprint v1 effacée à l'ingestion.
 - `Capability Manifest v2` : **IMPLEMENTED** (ADR-067) — closure déterministe,
@@ -161,7 +167,7 @@ tient l'upload, seule responsabilité due dans la famille Mobile.
   d'autorisation Spring répondait `500` au lieu de `403`.
 
   Les trois capabilities livrées ont leur parité déclarée. Restent notamment les
-  identités applicatives dérivées du CSM, les contrats polyglottes générés et le lifecycle.
+  contrats polyglottes générés, la classification fine des documents applicatifs et le lifecycle.
 
 Ces éléments sont qualifiés contre le Platform Baseline v2 par les rapports de
 conformance et les goldens nommés ; aucune équivalence produit au-delà des

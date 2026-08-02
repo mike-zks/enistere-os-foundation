@@ -9,6 +9,7 @@ import { loadCapabilityManifests } from './capabilities.mjs';
 import { loadStarterManifests, modularStarterIds } from './starters.mjs';
 import { applyCapabilityOverlays } from './overlay.mjs';
 import { errors, formatDiagnostics, hasErrors } from '../model/diagnostics.mjs';
+import { materializeApplicationIdentities } from './identity-materialization.mjs';
 
 async function exists(path) {
   try { await access(path, constants.F_OK); return true; } catch { return false; }
@@ -188,6 +189,18 @@ function ownershipContract(plan) {
         team: application.ownership.team,
         domains: [...application.ownership.domains],
       })),
+  };
+}
+
+function identityRecord(plan) {
+  return {
+    schemaVersion: '1',
+    project: plan.project,
+    applications: plan.applications.map((application) => ({
+      id: application.id,
+      kind: application.kind,
+      identity: application.identity,
+    })),
   };
 }
 
@@ -495,6 +508,7 @@ export async function materializeProject(plan, output, options = {}) {
     const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, plan.capabilities);
     await materializeApplications(plan, output);
     overlays = await applyCapabilityOverlays({ repoRoot: FOUNDATION_ROOT, plan, output, capabilityManifests });
+    await materializeApplicationIdentities(plan, output);
     sharedPackages = await resolveSharedPackages(plan, output);
     await materializeSharedPackages(sharedPackages, output);
     for (const app of plan.applications) {
@@ -515,6 +529,7 @@ export async function materializeProject(plan, output, options = {}) {
     lockfileVersion: null,
     runtimeLocks,
   }));
+  await writeFile(join(output, 'enistere.identity.json'), stable(identityRecord(plan)));
   await writeFile(join(output, 'README.md'), projectReadme(plan, overlays.applied, sharedPackages));
   await writeFile(join(output, 'package.json'), stable(rootPackage(plan, sharedPackages)));
   await writeFile(join(output, 'scripts/verify.mjs'), verifyScript(plan, overlays.verification));

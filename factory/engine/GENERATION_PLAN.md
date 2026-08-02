@@ -8,7 +8,8 @@
 > lifecycle, risques, approbations et statuts. ADR-066 ajoute communications et
 > déploiement distribués minimaux ; ADR-067 ajoute Capability Graph v2 et les
 > exigences de primitives par application. ADR-086 fixe la frontière entre
-> sources de fabrication et artefacts réellement livrés.
+> sources de fabrication et artefacts réellement livrés. ADR-087 dérive les
+> identités exécutables des applications depuis le CSM.
 
 ## Rôle
 
@@ -42,7 +43,7 @@ GenerationPlan
 ├── support { level, blockers[], notApplicable[] }
 ├── gates { <appId>: [{ gate, command }] }
 ├── directories[], applications[] { id, kind, runtime, baseline, source, appDir,
-│                                   consumes[], ownership?,
+│                                   consumes[], ownership?, identity,
 │                                   resolvedCapabilities[] }, starterSources
 ├── diagnostics[]                  (RESOLUTION_* + PLAN_*)
 ├── systemDigest, resolutionDigest
@@ -68,6 +69,12 @@ générateur calcule depuis les manifests applicatifs la fermeture transitive de
 packages `@enistere/*` consommés. Seuls ces packages sont copiés, déclarés comme
 workspaces et inscrits dans `enistere.lock.sharedPackages`. Cette fermeture est
 un résultat de matérialisation déterministe, pas une seconde entrée du plan.
+
+Après les overlays et avant cette fermeture, chaque runtime matérialise
+`application.identity` dans ses champs exécutables : manifests, coordonnées,
+packages/imports, chemins natifs et labels. La dérivation ne lit aucun nom de
+starter. `enistere.identity.json` enregistre le résultat livré et permet à la
+régénération de refuser tout renommage implicite d'un identifiant existant.
 
 ## Sérialisation
 
