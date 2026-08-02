@@ -10,6 +10,15 @@ interface ApiSuccessEnvelope<T> {
   readonly timestamp: string;
 }
 
+type AuthorityResponse<T> = T | ApiSuccessEnvelope<T>;
+
+function unwrap<T>(response: AuthorityResponse<T>): T {
+  if (typeof response === 'object' && response !== null && 'success' in response && 'data' in response) {
+    return response.data;
+  }
+  return response;
+}
+
 /** Client de lecture du résumé RBAC. L’intercepteur Auth porte la session. */
 @Injectable({ providedIn: 'root' })
 export class AuthorizationApi {
@@ -17,8 +26,8 @@ export class AuthorizationApi {
   readonly #baseUrl = inject(APP_BASE_URL);
 
   getSummary(): Promise<AuthorizationSummary> {
-    return firstValueFrom(this.#http.get<ApiSuccessEnvelope<AuthorizationSummary>>(
+    return firstValueFrom(this.#http.get<AuthorityResponse<AuthorizationSummary>>(
       `${this.#baseUrl}/api/v1/auth/me/authorization`,
-    )).then((envelope) => envelope.data);
+    )).then(unwrap);
   }
 }

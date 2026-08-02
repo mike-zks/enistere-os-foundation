@@ -39,4 +39,12 @@ describe('AuthorizationApi', () => {
       roles: ['operator'], permissions: ['files.read'],
     });
   });
+
+  it('accepte le résumé public brut renvoyé par Spring et FastAPI', async () => {
+    const result = api.getSummary();
+    backend.expectOne('https://api.example.test/api/v1/auth/me/authorization').flush({
+      roles: ['operator'], permissions: ['files.read'],
+    });
+    await expectAsync(result).toBeResolvedTo({ roles: ['operator'], permissions: ['files.read'] });
+  });
 });

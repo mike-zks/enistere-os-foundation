@@ -180,7 +180,31 @@
       ]
     },
     "angular": {
-      "status": "planned"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "angular",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "upload",
+        "metadata",
+        "download-url",
+        "delete",
+        "quarantine"
+      ],
+      "contracts": [
+        "files-api",
+        "files-metadata"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "files-angular-integration"
+      ]
     },
     "react-native": {
       "status": "ready",
@@ -258,6 +282,12 @@
       "id": "files-nextjs-e2e",
       "target": "nextjs",
       "level": "e2e",
+      "evidence": "overlay-verification"
+    },
+    {
+      "id": "files-angular-integration",
+      "target": "angular",
+      "level": "integration",
       "evidence": "overlay-verification"
     },
     {

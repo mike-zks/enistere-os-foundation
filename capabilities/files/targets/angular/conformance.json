@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "angular",
+  "contract": { "id": "files-product", "version": "1.0.0" },
+  "roles": ["client"],
+  "suite": "files-angular-integration",
+  "golden": "fastapi-angular-files",
+  "invariants": {
+    "FILES-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/files/files.service.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files.service.spec.ts",
+        "contains": ["réduit les erreurs à un état public distinct sans corps, nom local ni secret"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/download.spec.ts",
+        "materialized": "src/app/features/files/__tests__/download.spec.ts",
+        "contains": ["consomme l’URL avec une ancre temporaire puis ne laisse aucune référence dans le document"]
+      }
+    ],
+    "FILES-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/files/file-validation.spec.ts",
+        "materialized": "src/app/features/files/__tests__/file-validation.spec.ts",
+        "contains": ["valide forme, catégorie et type déclaré avant tout upload"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files-api.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files-api.spec.ts",
+        "contains": ["envoie le multipart par HttpClient authentifiable sans forcer Content-Type ni créance ambiante"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files-auth.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files-auth.spec.ts",
+        "contains": ["porte le Bearer mémoire sur chaque mutation sans cookie ni créance ambiante"]
+      }
+    ],
+    "FILES-CLIENT-003": [
+      {
+        "kind": "test",
+        "source": "files/test/files/files-api.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files-api.spec.ts",
+        "contains": ["demande une page explicite sans cookie ni cache client de session"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files.service.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files.service.spec.ts",
+        "contains": ["ne charge rien sans session et ne réutilise jamais une page entre deux sessions"]
+      }
+    ],
+    "FILES-CLIENT-004": [
+      {
+        "kind": "test",
+        "source": "files/test/files/download.spec.ts",
+        "materialized": "src/app/features/files/__tests__/download.spec.ts",
+        "contains": ["n’utilise que l’URL signée serveur et refuse les schémas dangereux"]
+      }
+    ],
+    "FILES-CLIENT-005": [
+      {
+        "kind": "test",
+        "source": "files/test/files/file-validation.spec.ts",
+        "materialized": "src/app/features/files/__tests__/file-validation.spec.ts",
+        "contains": ["refuse toute action portant un identifiant non UUID"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files-api.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files-api.spec.ts",
+        "contains": ["porte suppression, quarantaine et restore par le client Http authentifié sans cookie"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files-auth.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files-auth.spec.ts",
+        "contains": ["porte le Bearer mémoire sur chaque mutation sans cookie ni créance ambiante"]
+      }
+    ],
+    "FILES-CLIENT-006": [
+      {
+        "kind": "test",
+        "source": "files/test/files/files.service.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files.service.spec.ts",
+        "contains": ["refuse les mutations sans session ou identifiant validé avant tout appel réseau"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files.component.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files.component.spec.ts",
+        "contains": ["utilise RBAC seulement pour l’affichage ; les actions restent des appels à l’autorité"]
+      },
+      {
+        "kind": "test",
+        "source": "files/test/files/files-auth.spec.ts",
+        "materialized": "src/app/features/files/__tests__/files-auth.spec.ts",
+        "contains": ["porte le Bearer mémoire sur chaque mutation sans cookie ni créance ambiante"]
+      }
+    ]
+  }
+}

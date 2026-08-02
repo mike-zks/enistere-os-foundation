@@ -25,7 +25,7 @@
 | Source unique des starters | **Implémentée et gardée** (ADR-063/064) | sept racines `starters/<runtime>` ; `base/`, `composition.baseSource` et capabilities Mobile embarquées interdits |
 | Requalification de `base` | **Implémentée** (ADR-058) | baseline implicite ; `base` absent du graphe capability/CSM/plan, toléré uniquement en entrée Blueprint v1 puis effacé |
 | Fitness functions du pipeline (FF6–FF8) | **Implémenté** (ADR-047) | frontière d'ingestion, modèle interne unique, chaîne canonique — gardés contre régression |
-| `profiles` / `profile <name>` | Implémenté (R7/ADR-062) | presets de composition historiques : 33 déclarés, 32 générables |
+| `profiles` / `profile <name>` | Implémenté (R7/ADR-062) | presets de composition historiques : 34 déclarés, 33 générables |
 | Matrice de presets | Implémentée (R7) | validée contre la matrice réelle par test |
 | Invariant « API obligatoire » | Implémenté (R7) | demande web-only/mobile-only refusée et redirigée |
 | 27 combinaisons de stacks | Planifiées/testées | 3 API × 3 Web × 3 Mobile ; distinctes des profils |
@@ -36,7 +36,7 @@
 | Graphe de capabilities | **Implémenté** (ADR-067) | closure/ordre déterministes, auto-inclusions tracées, cycles et conflits refusés |
 | Conformité produit de capability | **Implémenté** — `auth`/`rbac` conformes, `files` non conforme (ADR-068 → ADR-070) | évaluateur générique, contrats découverts par convention, invariants par rôle et par responsabilité, `not-applicable` traité comme absence légitime |
 | Gates hermétiques | **Implémenté pour le mobile** (ADR-071) | le verdict d'un golden ne dépend plus d'une valeur distante mutable ; outil de vérification épinglé. Les autres gates ne sont pas audités |
-| Parité par famille de runtimes | **Mesurée sur tous les runtimes** (ADR-070, ADR-074) | un runtime ne s'exonère plus par `unsupported` ; 2 écarts Files déclarés et datés (Angular, Flutter) dans `factory/quality/parity-gaps.json` |
+| Parité par famille de runtimes | **Mesurée sur tous les runtimes** (ADR-070, ADR-074) | un runtime ne s'exonère plus par `unsupported` ; 1 écart Files déclaré et daté (Flutter upload) dans `factory/quality/parity-gaps.json` |
 | Composition modulaire (`modular-overlay`) | Implémentée (1A) | active si toutes les targets sont modulaires |
 | Workspace unifié + lock racine reproductible | Implémenté (1A-R) | `npm install` → `npm ci` ; prouvé par golden runtime |
 | CI `Factory Golden Runtime` | Implémentée (1A-R), étendue (1B/1C/R8A/ADR-066) | inclut le golden topologique `distributed-spring-nestjs` |
@@ -56,31 +56,31 @@
 |---|---|---|---|---|---|---|---|---|
 | auth | aucune | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** |
 | rbac | auth | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **non applicable** | **non applicable** |
-| files | auth + rbac | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié | **ready (overlay)** | planifié |
+| files | auth + rbac | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | **ready (overlay)** | planifié |
 | notifications | à décider | non défini | non défini | non défini | non défini | non défini | planifié | planifié |
 
 `auth` (1A), `rbac` (1B) et `files` (1C) satisfont le Manifest v2 et sont `ready` en mode overlay sur les
 targets indiquées : overlays déclaratifs, runtimes sans la
 surface correspondante, tests d'absence et goldens runtime vérifiés. `rbac` requiert explicitement
 `auth`. Sur React Native et Flutter, `rbac` est **`not-applicable`** (autorisation fine côté serveur) :
-ce statut ne bloque pas la composition et n'injecte aucune surface mobile. Le payload parqué
+ce statut ne bloque pas la composition et n'injecte aucune surface mobile. La capability
 `files` exige explicitement `auth + rbac` ; une demande `files` seule produit
 l’auto-closure tracée `auth → rbac → files`. Aucune surface n’est injectée sur
-les targets planifiées.
+la target Flutter encore planifiée.
 
 ## Presets de composition
 
 | Statut | Nombre | Génération | Détail |
 |---|---|---|---|
-| `ready` | 29 | autorisée | composables, exacts et prouvés par un golden runtime |
+| `ready` | 30 | autorisée | composables, exacts et prouvés par un golden runtime |
 | `supported` | 3 | autorisée | composables sans golden dédié |
-| `planned` | 1 | **refusée** | verticale Files Angular/Flutter |
+| `planned` | 1 | **refusée** | verticale incluant Files Flutter |
 
 Le détail profil par profil est dans `PROFILE_MATRIX.md`. Aucun profil `ready` n'existe sans overlay
 et golden ; aucun profil ne compose sans API.
 
 Les goldens runtime adossent les profils `ready`, chacun sur une composition distincte. Les sept
-baselines sont modulaires ; les targets Files encore `planned` restent refusées.
+baselines sont modulaires ; la target Files Flutter encore `planned` reste refusée.
 
 ## Qualité et exploitation
 

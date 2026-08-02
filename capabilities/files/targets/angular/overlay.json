@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "angular",
+  "version": "0.2.0",
+  "description": "Files Angular : client bearer sans créance ambiante, upload validé, métadonnées paginées, téléchargement signé, suppression et actions de quarantaine gouvernées par l’autorité.",
+  "files": [
+    {
+      "source": "files/src/app/features/files",
+      "destination": "src/app/features/files"
+    },
+    {
+      "source": "files/test/files",
+      "destination": "src/app/features/files/__tests__"
+    }
+  ],
+  "dependencies": {},
+  "environment": [],
+  "integrations": [
+    {
+      "kind": "angular.route",
+      "path": "files",
+      "importPath": "../../features/files/files.component",
+      "symbol": "FilesComponent",
+      "title": "Fichiers",
+      "order": 30
+    }
+  ],
+  "verification": [["npm", "run", "test:ci"]]
+}

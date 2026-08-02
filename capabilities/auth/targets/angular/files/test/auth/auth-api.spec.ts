@@ -53,6 +53,17 @@ describe('AuthApi', () => {
     await expectAsync(result).toBeResolvedTo(session);
   });
 
+  it('accepte aussi la session canonique brute renvoyée par Spring et FastAPI', async () => {
+    const session = {
+      user: { id: 'u-1', email: 'user@example.test', status: 'ACTIVE' },
+      accessToken: 'access-1', refreshToken: 'refresh-1', tokenType: 'Bearer',
+      accessTokenExpiresIn: 900, refreshTokenExpiresIn: 2_592_000,
+    };
+    const result = api.login('user@example.test', 'password');
+    backend.expectOne('/api/v1/auth/login').flush(session);
+    await expectAsync(result).toBeResolvedTo(session);
+  });
+
   // AUTH-CLIENT-005
   it('mot de passe faux et compte inconnu donnent le MÊME message générique', async () => {
     const wrong = rejection(api.login('user@example.test', 'bad'));

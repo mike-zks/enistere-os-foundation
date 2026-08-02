@@ -133,9 +133,9 @@ auth   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 4/4 · angu
        mobile rn 4/4 · flutter 4/4 ✓                     CONFORMANT
 rbac   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 2/4 · angular 2/4 ✓
        mobile rn n/a · flutter n/a                       CONFORMANT
-files  api  nestjs 7/7 · spring 7/7 · fastapi 7/7 ✓   web nextjs 5/7 · angular 0/7 ✗
+files  api  nestjs 7/7 · spring 7/7 · fastapi 7/7 ✓   web nextjs 5/7 · angular 5/7 ✓
        mobile rn 1/7 · flutter 0/7 ✗                     NON_CONFORMANT
-       angular/flutter PLANNED sur files
+       flutter PLANNED sur files
 
 **Authentication est tenue par les sept runtimes** (ADR-075, ADR-076, ADR-077) :
 c'est la première capability CONFORMANT comme produit, les trois familles étant à
@@ -146,8 +146,8 @@ la même surface client que Next.js ; React Native et Flutter sont explicitement
 
 - `Parité par famille` : **MESURÉE SUR TOUS LES RUNTIMES** (ADR-070/074) —
   Authentication et RBAC satisfont la règle sur toutes leurs targets
-  applicables. Files garde deux écarts exacts et datés : Angular (5
-  responsabilités) et Flutter (1). NestJS, Spring et FastAPI tiennent les sept
+  applicables. Files garde un écart exact et daté : l'upload Flutter. NestJS,
+  Spring et FastAPI tiennent les sept
   responsabilités Files et protègent leur surface par les permissions `files.*`.
 
 - `Conformité produit RBAC` : **CONFORMANT** (ADR-069) — évaluateur générique,
@@ -155,7 +155,7 @@ la même surface client que Next.js ; React Native et Flutter sont explicitement
   absence légitime de rôle. La mesure a corrigé un défaut latent : un refus
   d'autorisation Spring répondait `500` au lieu de `403`.
 
-  Reste, avant la parité **produit** globale : porter Files sur ses deux targets client,
+  Reste, avant la parité **produit** globale : porter l'upload Files sur Flutter,
   puis traiter les contrats polyglottes générés et le lifecycle.
 
 Ces éléments sont qualifiés contre le Platform Baseline v2 par les rapports de

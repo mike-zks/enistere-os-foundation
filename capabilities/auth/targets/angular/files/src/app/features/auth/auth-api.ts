@@ -11,6 +11,15 @@ interface ApiSuccessEnvelope<T> {
   readonly timestamp: string;
 }
 
+type AuthorityResponse<T> = T | ApiSuccessEnvelope<T>;
+
+function unwrap<T>(response: AuthorityResponse<T>): T {
+  if (typeof response === 'object' && response !== null && 'success' in response && 'data' in response) {
+    return response.data;
+  }
+  return response;
+}
+
 /**
  * Marks a request as belonging to authentication itself.
  *
@@ -53,10 +62,10 @@ export class AuthApi {
 
   async #call(path: string, body: unknown, failureMessage: string): Promise<AuthSession> {
     try {
-      const envelope = await firstValueFrom(this.#http.post<ApiSuccessEnvelope<AuthSession>>(
+      const response = await firstValueFrom(this.#http.post<AuthorityResponse<AuthSession>>(
         `${this.#baseUrl}${path}`, body, { context: authContext() },
       ));
-      return envelope.data;
+      return unwrap(response);
     } catch (error: unknown) {
       // The response body may carry the reason; it is not surfaced. Only the
       // correlation id crosses, so a support request stays traceable without

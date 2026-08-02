@@ -35,11 +35,10 @@
     "model": "modular",
     "readyCapabilities": [
       "auth",
-      "rbac"
-    ],
-    "plannedCapabilities": [
+      "rbac",
       "files"
-    ]
+    ],
+    "plannedCapabilities": []
   },
   "deployment": {
     "dockerfile": null,

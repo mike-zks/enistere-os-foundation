@@ -160,6 +160,9 @@ export const PROFILES = Object.freeze([
   profile('nestjs-angular-rbac', 'ready', { api: 'nestjs', web: 'angular' }, ['auth', 'rbac'], {
     golden: 'nestjs-angular-auth-rbac',
   }),
+  profile('fastapi-angular-files', 'ready', { api: 'fastapi', web: 'angular' }, ['auth', 'rbac', 'files'], {
+    golden: 'fastapi-angular-files',
+  }),
   profile('nestjs-flutter-auth', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['auth'], {
     golden: 'nestjs-flutter-auth',
   }),

@@ -130,7 +130,7 @@
       "appliesTo": [
         "client"
       ],
-      "requirement": "Deletion is a protected state-changing operation, refused without a valid origin and CSRF proof, and never issued from an unvalidated identifier."
+      "requirement": "Deletion is a protected state-changing operation, never issued from an unvalidated identifier, and refused without a valid origin and CSRF proof where the client uses ambient credentials exposed to cross-origin submission."
     },
     {
       "id": "FILES-CLIENT-006",
@@ -138,7 +138,7 @@
       "appliesTo": [
         "client"
       ],
-      "requirement": "Quarantine and restore are protected state-changing operations carrying the caller's authorization, refused without a valid origin and CSRF proof."
+      "requirement": "Quarantine and restore are protected state-changing operations carrying the caller's authorization, and are refused without a valid origin and CSRF proof where the client uses ambient credentials exposed to cross-origin submission."
     }
   ]
 }

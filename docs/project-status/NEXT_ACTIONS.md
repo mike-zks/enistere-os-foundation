@@ -1041,7 +1041,7 @@ signature, URL signée réellement téléchargée puis invalidée par suppressio
 course de quota et refus du second verrou de maintenance exercés ; golden
 `fastapi-files` complet avec `ruff`, compilation, locks Python reproductibles,
 `pip check`, `pip-audit` sans vulnérabilité connue, conformance matérialisée et
-audit npm à zéro. L'écart `files/fastapi` est retiré ; deux écarts Files restent.
+audit npm à zéro. L'écart `files/fastapi` est retiré ; deux écarts Files restaient alors.
 
 ### Non revendiqué
 
@@ -1052,30 +1052,68 @@ audit npm à zéro. L'écart `files/fastapi` est retiré ; deux écarts Files re
 - La purge est un service appelable, pas un ordonnanceur distribué livré par la
   Factory ; son déclenchement opérationnel appartient au projet généré.
 - Aucune migration de retrait, fusion de fichiers propriétaire, verrouillage de
-  dépendances pendant `regenerate`, surface Files Angular/Flutter ou garantie de
+  dépendances pendant `regenerate`, surface Files Flutter ou garantie de
   production n'est revendiquée.
+
+## Mission achevée — Files sur Angular
+
+Angular tient désormais les cinq responsabilités client Files : upload multipart
+validé avant envoi, métadonnées paginées liées à la session, téléchargement par
+URL signée au schéma contrôlé, suppression sur UUID validé et actions
+quarantaine/restore. Le `File` local et l'URL signée restent transitoires ; aucun
+des deux n'entre dans l'état partagé. Toutes les commandes passent par le client
+HTTP existant et son Bearer en mémoire, sans cookie ni `withCredentials`.
+
+RBAC ne décide que de l'affichage conditionnel. L'autorité revalide chaque
+permission `files.*`, l'ownership et les transitions. Le contrat client précise
+désormais que la preuve Origin/CSRF est exigée lorsque le modèle de créance est
+ambiant et exposé aux soumissions cross-origin : le BFF Next.js garde cette
+preuve, tandis que le SPA Angular bearer n'a aucune créance ambiante à rejouer.
+
+Preuves : 522/522 Factory ; **150/150 tests Angular** composés dans ChromeHeadless ;
+**52/52 tests FastAPI** contre PostgreSQL et MinIO réels ; quatre migrations
+Alembic ; builds API et Web ; conformité matérialisée Files Angular
+**6/6 invariants client** ; golden nommé `fastapi-angular-files` complet, lock
+reproductible et audit npm sans violation hors exceptions documentées. L'écart
+`files/angular` est retiré ; un seul écart Files reste.
+
+### Non revendiqué
+
+- Le golden exécute l'autorité FastAPI et la surface Angular dans la même
+  composition, mais pas un scénario navigateur connecté de bout en bout.
+  L'interopérabilité Angular↔NestJS ou Angular↔Spring n'est pas revendiquée :
+  NestJS expose ses contrôleurs sans le préfixe `/api/v1`, et Spring utilise
+  encore `GET` plutôt que `POST` pour émettre l'URL signée. Une adaptation de
+  transport explicite serait nécessaire.
+- La validation MIME du navigateur ne remplace jamais l'inspection du contenu
+  par l'autorité ; elle ne constitue pas une décision de sécurité.
+- Les métadonnées listées sont les champs publics et assainis renvoyés par
+  l'autorité ; aucun bucket, storage key, contenu ou chemin local n'est exposé.
+- Aucun transport cookie HttpOnly, test navigateur contre une autorité réelle,
+  scan antivirus ni garantie de production n'est revendiqué.
 
 ## Prochaine mission unique
 
-> **Files sur Angular**, le plus large des deux écarts de parité restants.
+> **Upload Files sur Flutter**, dernier écart de parité déclaré.
 
 ### Justification de l'ordre
 
-L'autorité FastAPI est maintenant portée et les trois APIs tiennent Files.
-Angular manque les cinq responsabilités client déjà tenues par Next.js, contre
-un seul upload manquant sur Flutter. Porter la surface Web la plus large réduit
-donc d'abord la dette mesurée sans inventer de nouvelle autorité côté client.
+Angular tient maintenant la surface Web Files complète. Dans la famille Mobile,
+React Native ne porte que l'upload ; ADR-074 impose donc exactement la même
+responsabilité à Flutter, sans inventer liste, suppression ou administration
+mobile qui ne sont pas dues par la règle de parité.
 
 ### Critères de sortie
 
-- Angular tient upload, métadonnées paginées, téléchargement signé, suppression
-  et quarantaine/restore avec les mêmes invariants client que Next.js ;
-- la session Auth et les décisions RBAC existantes sont réutilisées sans faire
-  du client une autorité ;
-- un descripteur de conformité et un golden runtime nommé exécutent la surface ;
-- l'écart `files/angular` est retiré de `parity-gaps.json`.
+- Flutter valide forme et type déclaré puis envoie le multipart uniquement via
+  le transport Auth bearer existant, sans journaliser contenu, chemin ou nom brut ;
+- aucun état RBAC mobile ni aucune décision d'autorisation locale n'est créé ;
+- un descripteur de conformité et un golden runtime nommé exécutent l'upload ;
+- l'écart `files/flutter` est retiré de `parity-gaps.json` et le rapport produit
+  Files devient conforme sur toutes ses targets applicables.
 
 ### Ce qui reste ouvert après cette mission
 
-- Files upload sur Flutter ;
-- transport cookie HttpOnly, limitation de débit distribuée, reste de §12.
+- transport cookie HttpOnly, limitation de débit distribuée, reste de §12 ;
+- interopérabilité navigateur Angular↔NestJS ou Angular↔Spring sans adaptation
+  explicite du transport.
