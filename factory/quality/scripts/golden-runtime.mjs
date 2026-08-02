@@ -125,6 +125,7 @@ export const COMPOSITIONS = {
   // golden inexistant : une preuve matérialisée qui ne s'exécute jamais.
   'nestjs-angular-auth': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth'] },
   'nestjs-angular-auth-rbac': { stack: { api: 'nestjs', web: 'angular', mobile: null }, capabilities: ['auth', 'rbac'] },
+  'fastapi-angular-files': { stack: { api: 'fastapi', web: 'angular', mobile: null }, capabilities: ['auth', 'rbac', 'files'] },
   'nestjs-flutter-auth': { stack: { api: 'nestjs', web: null, mobile: 'flutter' }, capabilities: ['auth'] },
   'fastapi-auth': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth'] },
   'fastapi-rbac': { stack: { api: 'fastapi', web: null, mobile: null }, capabilities: ['auth', 'rbac'] },

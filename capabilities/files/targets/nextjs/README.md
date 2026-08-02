@@ -1,7 +1,7 @@
-# Files — payload Next.js parqué (non câblé)
+# Files — overlay Next.js actif
 
 Surface Files web (BFF fichiers, routes `/api/files/*`, écrans protégés
-`/protected/files`, clients/hooks, tests, e2e de composition complète) extraite du
-starter Next.js lors de la mission Capability Packs 1A (extraction Auth). Ce payload
-n'est **pas** un overlay actif : pas d'`overlay.json`, la capability reste `planned`
-et `enistere generate` refuse toujours `files`.
+`/protected/files`, clients/hooks, tests et e2e de composition complète). Le
+descripteur `overlay.json` l'injecte lorsque Files est sélectionnée et le golden
+`nest-next-files` en exécute les gates. La surface réutilise Auth/RBAC ; le BFF
+reste un transport et l'API demeure l'unique autorité.

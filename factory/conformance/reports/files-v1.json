@@ -8,6 +8,7 @@
   "evaluation": "foundation-registry",
   "status": "NON_CONFORMANT",
   "readyTargets": [
+    "angular",
     "fastapi",
     "nestjs",
     "nextjs",
@@ -165,28 +166,36 @@
       "issues": []
     },
     "angular": {
-      "status": "PLANNED",
-      "manifestStatus": "planned",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/7",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client"
+      ],
+      "responsibilities": [
+        "delete",
+        "download-url",
+        "metadata",
+        "quarantine",
+        "upload"
+      ],
+      "coverage": "5/7",
       "family": "web",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "delete",
-          "download-url",
-          "metadata",
-          "quarantine",
-          "upload"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "files-angular-integration",
+      "golden": "fastapi-angular-files",
+      "invariants": [
+        "FILES-CLIENT-001",
+        "FILES-CLIENT-002",
+        "FILES-CLIENT-003",
+        "FILES-CLIENT-004",
+        "FILES-CLIENT-005",
+        "FILES-CLIENT-006"
+      ],
+      "proofCount": 14,
       "materialized": false,
-      "issues": [
-        "family parity: web runtimes must hold the same responsibilities; missing delete, download-url, metadata, quarantine, upload"
-      ]
+      "issues": []
     },
     "react-native": {
       "status": "CONFORMANT",

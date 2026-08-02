@@ -4,21 +4,6 @@
   "gaps": [
     {
       "capability": "files",
-      "runtime": "angular",
-      "family": "web",
-      "missing": [
-        "delete",
-        "download-url",
-        "metadata",
-        "quarantine",
-        "upload"
-      ],
-      "justification": "Dépend de auth + rbac sur Angular.",
-      "deadline": "2026-12-31",
-      "review": "Après RBAC sur Angular."
-    },
-    {
-      "capability": "files",
       "runtime": "flutter",
       "family": "mobile",
       "missing": [
