@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "flutter",
+  "version": "0.2.0",
+  "description": "Upload Files Flutter : descripteur local transitoire validé, multipart Dio et transport bearer fourni par Authentication.",
+  "files": [
+    {
+      "source": "files/lib/src/features/files",
+      "destination": "lib/src/features/files"
+    },
+    {
+      "source": "files/test/files",
+      "destination": "test/files"
+    }
+  ],
+  "dependencies": {},
+  "environment": [],
+  "integrations": [],
+  "verification": [
+    [
+      "flutter",
+      "test"
+    ]
+  ]
+}

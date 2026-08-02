@@ -73,6 +73,7 @@ jobs:
           - nestjs-angular-auth-rbac
           - fastapi-angular-files
           - nestjs-flutter-auth
+          - fastapi-flutter-files
           - fastapi-auth
           - fastapi-rbac
           - fastapi-files

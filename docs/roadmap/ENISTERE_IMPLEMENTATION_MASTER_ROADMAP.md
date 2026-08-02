@@ -86,9 +86,10 @@ Chaque mission livre code, tests, preuves, documentation et mise à jour de stat
   distribuées hors scope et `service-ecosystem` restent bloquées.
 - **Prochaine mission :** acquise par ADR-067, ADR-068 (Authentication),
   ADR-069 (RBAC, évaluateur générique) et ADR-070 (responsabilités par target,
-  parité par famille). Les trois capabilities sont mesurées ; `files` est non
-  conforme, et la parité API de `files` est refermée : les sept responsabilités
-  sont portées sur Spring. Poursuivre en faisant exécuter `factory:test` par la CI.
+  parité par famille). Les trois capabilities sont mesurées et conformes dans le
+  périmètre de responsabilités déclaré ; Files tient sept responsabilités sur
+  chaque API, cinq sur chaque Web et l'upload sur chaque Mobile. `factory:test`
+  est désormais bloquant en CI.
 
 ## 8. Capability Framework
 

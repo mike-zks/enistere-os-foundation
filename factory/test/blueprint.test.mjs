@@ -66,18 +66,13 @@ describe('blueprint v1', () => {
     // Unified workspace: the standalone starter's lockfile is removed (root lock is authoritative).
     await assert.rejects(access(join(output, 'apps/api/package-lock.json')), /ENOENT/);
   });
-  it('rejects generation when a selected capability is only planned', async () => {
+  it('generates the full Spring, Angular and Flutter Files selection', async () => {
     const root = await mkdtemp(join(tmpdir(), 'enistere-factory-'));
-    const blueprint = createDefaultBlueprint('blocked-app');
-    // Authentication and RBAC are generatable on every applicable target, so the
-    // refusal is exercised on Files. What is under test is the refusal itself,
-    // never the runtime that happens to be unfinished this week.
+    const blueprint = createDefaultBlueprint('full-files-app');
     blueprint.stack = { api: 'spring', web: 'angular', mobile: 'flutter' };
     blueprint.capabilities = ['base', 'auth', 'rbac', 'files'];
-    await assert.rejects(
-      generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /files on (angular|flutter) is planned/,
-    );
+    const plan = await generateProject(blueprint, join(root, 'project'), { materialize: false });
+    assert.equal(plan.support.level, 'ready');
   });
   it('plans every supported stack combination as a golden matrix', () => {
     const seen = new Set();

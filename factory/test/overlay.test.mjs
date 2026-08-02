@@ -250,17 +250,17 @@ describe('capability closure and refusals', () => {
     blueprint.capabilities = ['base', 'auth', 'rbac'];
     await generateProject(blueprint, join(root, 'project'), { materialize: false });
   });
-  it('refuses a capability on a target that is still planned', async () => {
-    // The behaviour under test is the refusal, not the capability that happens
-    // to be unfinished — it now rides on Files for the Flutter target.
-    const root = await mkdtemp(join(tmpdir(), 'enistere-refusal-'));
-    const blueprint = createDefaultBlueprint('blocked-app');
+  it('composes Files on Flutter now that the last parity target is ready', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'enistere-files-flutter-'));
+    const blueprint = createDefaultBlueprint('files-flutter-app');
     blueprint.stack = { api: 'nestjs', web: null, mobile: 'flutter' };
     blueprint.capabilities = ['base', 'auth', 'rbac', 'files'];
-    await assert.rejects(
-      generateProject(blueprint, join(root, 'project'), { materialize: false }),
-      /files on flutter is planned/,
-    );
+    const plan = await generateProject(blueprint, join(root, 'project'), { materialize: false });
+    assert.equal(plan.support.level, 'ready');
+    const mobileCapabilities = plan.applications.find((app) => app.runtime === 'flutter')
+      .resolvedCapabilities;
+    assert.deepEqual(mobileCapabilities.map((capability) => capability.id), ['auth', 'rbac', 'files']);
+    assert.equal(mobileCapabilities.find((capability) => capability.id === 'rbac').status, 'not-applicable');
   });
 
   it('composes auth on Angular now that the target is ready', async () => {

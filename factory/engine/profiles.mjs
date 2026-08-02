@@ -166,6 +166,10 @@ export const PROFILES = Object.freeze([
   profile('nestjs-flutter-auth', 'ready', { api: 'nestjs', mobile: 'flutter' }, ['auth'], {
     golden: 'nestjs-flutter-auth',
   }),
+  profile('fastapi-flutter-files', 'ready', { api: 'fastapi', mobile: 'flutter' }, ['auth', 'rbac', 'files'], {
+    golden: 'fastapi-flutter-files',
+    note: 'RBAC is not-applicable on Flutter: the mobile app receives decisions from the API.',
+  }),
   profile('fastapi-auth', 'ready', { api: 'fastapi' }, ['auth'], { golden: 'fastapi-auth' }),
   profile('fastapi-rbac', 'ready', { api: 'fastapi' }, ['auth', 'rbac'], { golden: 'fastapi-rbac' }),
   profile('fastapi-files', 'ready', { api: 'fastapi' }, ['auth', 'rbac', 'files'], {
@@ -174,7 +178,9 @@ export const PROFILES = Object.freeze([
   profile('spring-angular-auth', 'supported', { api: 'spring', web: 'angular' }, ['auth']),
   profile('spring-angular-rbac', 'supported', { api: 'spring', web: 'angular' }, ['auth', 'rbac']),
   profile('spring-flutter-auth', 'supported', { api: 'spring', mobile: 'flutter' }, ['auth']),
-  profile('spring-angular-flutter-files', 'planned', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['auth', 'rbac', 'files']),
+  profile('spring-angular-flutter-files', 'supported', { api: 'spring', web: 'angular', mobile: 'flutter' }, ['auth', 'rbac', 'files'], {
+    note: 'Generatable after Files Flutter, but no golden exercises this three-application selection.',
+  }),
 ]);
 
 const BY_ID = new Map(PROFILES.map((entry) => [entry.id, entry]));

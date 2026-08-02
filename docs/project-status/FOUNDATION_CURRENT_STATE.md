@@ -9,7 +9,8 @@
 Le corpus V2 est adopté comme architecture **cible**. Les développements d’expansion sont suspendus
 jusqu’à la convergence du code avec cette cible.
 
-L’adoption documentaire ne vaut pas implémentation : aucune parité produit complète n’est revendiquée.
+L’adoption documentaire ne vaut pas implémentation. Les trois capabilities livrées satisfont leur
+parité déclarée ; aucun statut `PRODUCT_EQUIVALENT` ou `PRODUCTION_READY` n’est revendiqué.
 Les sept runtimes sont désormais conformes à leur Runtime Contract v2 ; aucune nouvelle capability ne
 doit être ajoutée avant la fin du chantier Architecture Profiles.
 
@@ -134,20 +135,19 @@ auth   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 4/4 · angu
 rbac   api  nestjs 4/4 · spring 4/4 · fastapi 4/4 ✓   web nextjs 2/4 · angular 2/4 ✓
        mobile rn n/a · flutter n/a                       CONFORMANT
 files  api  nestjs 7/7 · spring 7/7 · fastapi 7/7 ✓   web nextjs 5/7 · angular 5/7 ✓
-       mobile rn 1/7 · flutter 0/7 ✗                     NON_CONFORMANT
-       flutter PLANNED sur files
+       mobile rn 1/7 · flutter 1/7 ✓                     CONFORMANT
 
 **Authentication est tenue par les sept runtimes** (ADR-075, ADR-076, ADR-077) :
 c'est la première capability CONFORMANT comme produit, les trois familles étant à
 parité. **RBAC est CONFORMANT sur toutes ses targets applicables** : Angular tient
 la même surface client que Next.js ; React Native et Flutter sont explicitement
-`not-applicable` conformément à ADR-074. Files reste la dette de parité ouverte.
+`not-applicable` conformément à ADR-074. Files est également conforme : Flutter
+tient l'upload, seule responsabilité due dans la famille Mobile.
 ```
 
 - `Parité par famille` : **MESURÉE SUR TOUS LES RUNTIMES** (ADR-070/074) —
-  Authentication et RBAC satisfont la règle sur toutes leurs targets
-  applicables. Files garde un écart exact et daté : l'upload Flutter. NestJS,
-  Spring et FastAPI tiennent les sept
+  Authentication, RBAC et Files satisfont la règle sur toutes leurs targets
+  applicables ; `parity-gaps.json` ne porte plus aucun écart. NestJS, Spring et FastAPI tiennent les sept
   responsabilités Files et protègent leur surface par les permissions `files.*`.
 
 - `Conformité produit RBAC` : **CONFORMANT** (ADR-069) — évaluateur générique,
@@ -155,8 +155,8 @@ la même surface client que Next.js ; React Native et Flutter sont explicitement
   absence légitime de rôle. La mesure a corrigé un défaut latent : un refus
   d'autorisation Spring répondait `500` au lieu de `403`.
 
-  Reste, avant la parité **produit** globale : porter l'upload Files sur Flutter,
-  puis traiter les contrats polyglottes générés et le lifecycle.
+  Les trois capabilities livrées ont leur parité déclarée. Restent notamment les
+  contrats polyglottes générés, le lifecycle et l'audit de la forme des projets matérialisés.
 
 Ces éléments sont qualifiés contre le Platform Baseline v2 par les rapports de
 conformance et les goldens nommés ; aucune équivalence produit au-delà des

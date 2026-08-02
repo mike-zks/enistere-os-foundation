@@ -1,17 +1,5 @@
 {
   "$comment": "Écarts de parité de famille CONNUS et actés (ADR-074). Le gate échoue sur tout écart non listé ici, sur un écart plus large que déclaré, et sur une échéance dépassée. Aucune désactivation globale : un écart absent de ce fichier fait échouer la mesure. Ce socle rend la dette visible et bornée dans le temps — il ne l'excuse pas.",
   "schemaVersion": "1",
-  "gaps": [
-    {
-      "capability": "files",
-      "runtime": "flutter",
-      "family": "mobile",
-      "missing": [
-        "upload"
-      ],
-      "justification": "React Native ne tient qu'`upload` dans la famille Mobile ; c'est donc la seule responsabilité due. Authentication est désormais portée sur Flutter (ADR-076), l'écart restant est celui de Files.",
-      "deadline": "2026-12-31",
-      "review": "Portage Files sur Flutter."
-    }
-  ]
+  "gaps": []
 }
