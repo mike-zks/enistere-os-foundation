@@ -81,7 +81,7 @@ export function buildPlan(resolved) {
   const apiDirs = applications.filter((app) => app.kind === 'api').map((app) => app.appDir);
   const otherDirs = applications.filter((app) => app.kind !== 'api').map((app) => app.appDir);
   const hasStaging = resolved.environments.some((environment) => environment.id === 'staging');
-  const directories = [...apiDirs, 'packages/contracts', 'capabilities', 'infrastructure/local', 'docs', ...otherDirs];
+  const directories = [...apiDirs, 'packages/contracts', 'infrastructure/local', 'docs', ...otherDirs];
   if (hasStaging) directories.push('infrastructure/staging');
 
   const planDiagnostics = [];

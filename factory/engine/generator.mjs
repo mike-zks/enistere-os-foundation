@@ -18,13 +18,20 @@ function stable(value) { return `${JSON.stringify(value, null, 2)}\n`; }
 
 const FOUNDATION_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const EXCLUDED_NAMES = new Set([
-  '.dart_tool', '.expo', '.gradle', '.next', '.pytest_cache', '.runtime-venv', '.venv', '__pycache__',
+  '.angular', '.dart_tool', '.expo', '.gradle', '.idea', '.next', '.pytest_cache', '.ruff_cache',
+  '.runtime-venv', '.venv', '__pycache__',
   'build', 'build-test', 'coverage', 'dist', 'node_modules', 'target',
+]);
+const EXCLUDED_FILES = new Set([
+  'STARTER_SPECIFICATION.md',
+  'local.properties',
+  'starter.manifest.json',
 ]);
 
 function copyFilter(source) {
   const name = source.split(/[\\/]/).at(-1);
   if (EXCLUDED_NAMES.has(name)) return false;
+  if (EXCLUDED_FILES.has(name)) return false;
   if (name?.endsWith('.tsbuildinfo')) return false;
   if (/\.py[co]$/.test(name ?? '')) return false;
   if (name === '.env' || name?.endsWith('.local')) return false;
@@ -97,15 +104,77 @@ async function runtimeDependencyLocks(plan, output) {
   return entries;
 }
 
-async function materializeFoundation(plan, output) {
+async function materializeApplications(plan, output) {
   for (const app of plan.applications) {
     await copyTree(join(FOUNDATION_ROOT, app.source), join(output, app.appDir));
   }
-  for (const packageName of ['api-contracts', 'api-client-fetch', ...(plan.designSystem ? ['ui-kit'] : [])]) {
-    await copyTree(join(FOUNDATION_ROOT, 'packages', packageName), join(output, 'packages', packageName));
+}
+
+async function sharedPackageRegistry() {
+  const registry = new Map();
+  for (const entry of await readdir(join(FOUNDATION_ROOT, 'packages'), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const manifestPath = join(FOUNDATION_ROOT, 'packages', entry.name, 'package.json');
+    if (!(await exists(manifestPath))) continue;
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+    if (typeof manifest.name !== 'string' || !manifest.name.startsWith('@enistere/')) continue;
+    if (registry.has(manifest.name)) throw new Error(`Duplicate shared package name: ${manifest.name}`);
+    registry.set(manifest.name, { directory: entry.name, manifest });
   }
-  for (const capability of plan.capabilities) {
-    await copyTree(join(FOUNDATION_ROOT, 'capabilities', capability), join(output, 'capabilities', capability));
+  return registry;
+}
+
+function declaredPackageNames(manifest) {
+  return new Set(['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']
+    .flatMap((section) => Object.keys(manifest[section] ?? {})));
+}
+
+/**
+ * Shared packages are delivery dependencies, not a fixed Foundation payload.
+ * Start from what the materialized applications really consume after overlays,
+ * then close transitively through the local package registry.
+ */
+async function resolveSharedPackages(plan, output) {
+  const registry = await sharedPackageRegistry();
+  const direct = new Set();
+  for (const app of plan.applications) {
+    const manifestPath = join(output, app.appDir, 'package.json');
+    if (!(await exists(manifestPath))) continue;
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+    for (const name of declaredPackageNames(manifest)) {
+      if (!name.startsWith('@enistere/')) continue;
+      if (!registry.has(name)) {
+        throw new Error(`${app.appDir} consumes unknown shared package ${name}`);
+      }
+      direct.add(name);
+    }
+  }
+
+  const visiting = new Set();
+  const visited = new Set();
+  const ordered = [];
+  const visit = (name) => {
+    if (visited.has(name)) return;
+    if (visiting.has(name)) throw new Error(`Shared package dependency cycle at ${name}`);
+    visiting.add(name);
+    const entry = registry.get(name);
+    for (const dependency of [...declaredPackageNames(entry.manifest)].sort()) {
+      if (registry.has(dependency)) visit(dependency);
+    }
+    visiting.delete(name);
+    visited.add(name);
+    ordered.push({ name, directory: entry.directory });
+  };
+  for (const name of [...direct].sort()) visit(name);
+  return ordered;
+}
+
+async function materializeSharedPackages(packages, output) {
+  for (const entry of packages) {
+    await copyTree(
+      join(FOUNDATION_ROOT, 'packages', entry.directory),
+      join(output, 'packages', entry.directory),
+    );
   }
 }
 
@@ -167,17 +236,17 @@ function npmAppWorkspaces(plan) {
  * Root package of the generated project: a single unified npm workspace. See the
  * generated README for the dependency strategy. Derived from the plan only.
  */
-function rootPackage(plan) {
-  const packageBuilds = [
-    'npm run build --workspace=@enistere/api-contracts',
-    'npm run build --workspace=@enistere/api-client-fetch',
-    ...(plan.designSystem ? ['npm run build --workspace=@enistere/ui-kit'] : []),
+function rootPackage(plan, sharedPackages) {
+  const packageBuilds = sharedPackages.map((entry) => `npm run build --workspace=${entry.name}`);
+  const workspaces = [
+    ...sharedPackages.map((entry) => `packages/${entry.directory}`),
+    ...npmAppWorkspaces(plan),
   ];
   return {
     name: plan.project,
     version: '0.1.0',
     private: true,
-    workspaces: ['packages/*', ...npmAppWorkspaces(plan)],
+    ...(workspaces.length > 0 ? { workspaces } : {}),
     overrides: {
       'form-data': '^4.0.6',
       'js-yaml': '^4.2.0',
@@ -186,7 +255,7 @@ function rootPackage(plan) {
       },
     },
     scripts: {
-      'build:packages': packageBuilds.join(' && '),
+      'build:packages': packageBuilds.join(' && ') || 'node -e ""',
       verify: 'node scripts/verify.mjs',
     },
   };
@@ -236,7 +305,7 @@ function runCommand(runtime, appDir) {
 }
 
 /** README derived from the plan — no hand-written divergence, no blueprint read. */
-function projectReadme(plan, overlays) {
+function projectReadme(plan, overlays, sharedPackages) {
   const apps = plan.applications;
   const hasApi = apps.some((app) => app.kind === 'api');
   const hasNestjs = apps.some((app) => app.runtime === 'nestjs');
@@ -247,6 +316,9 @@ function projectReadme(plan, overlays) {
   const overlayLines = overlays.length
     ? overlays.map((o) => `- \`${o.capability}\` sur \`${o.target}\` — v${o.version} (digest \`${o.digest.slice(0, 12)}…\`)`)
     : ['- aucune (baseline `base` seule)'];
+  const sharedPackageLines = sharedPackages.length
+    ? sharedPackages.map((entry) => `- \`${entry.name}\` — consommé par la sélection ou sa fermeture transitive.`)
+    : ['- aucun package TypeScript partagé : aucune application sélectionnée ne les consomme.'];
   const envLines = [];
   for (const app of apps) {
     if (app.runtime === 'nestjs') envLines.push(`- \`${app.appDir}/.env\` — copier depuis \`${app.appDir}/.env.example\` (config API, secrets Auth si composé).`);
@@ -265,7 +337,7 @@ function projectReadme(plan, overlays) {
     '## Stack sélectionnée',
     '',
     ...stackLines,
-    `- Design system (\`packages/ui-kit\`) : ${plan.designSystem ? 'activé' : 'désactivé'}`,
+    `- Politique design system demandée : ${plan.designSystem ? 'activée' : 'désactivée'} (la livraison réelle suit les consommateurs listés ci-dessous)`,
     '',
     '## Capabilities',
     '',
@@ -276,6 +348,10 @@ function projectReadme(plan, overlays) {
     'Overlays appliqués :',
     '',
     ...overlayLines,
+    '',
+    'Packages partagés matérialisés :',
+    '',
+    ...sharedPackageLines,
     '',
     'Une génération sans capability ne contient aucune surface au-delà du Platform Baseline. Les capabilities sont',
     'ajoutées uniquement via leurs overlays déclaratifs (voir `enistere.lock` → `overlays`).',
@@ -289,9 +365,9 @@ function projectReadme(plan, overlays) {
     '',
     '## Installation (reproductible)',
     '',
-    'Projet monorepo à **workspace npm unifié** : les packages `@enistere/*` sont des membres du',
-    'workspace (`packages/*`), résolus sans `file:` ni registre. Un seul `package-lock.json` racine',
-    'verrouille tout l\'arbre.',
+    'Lorsqu\'une application npm ou un package partagé est sélectionné, le projet utilise un',
+    '**workspace npm unifié**. Seule la fermeture réellement consommée des packages `@enistere/*`',
+    'est matérialisée, sans `file:` ni registre. Un seul `package-lock.json` racine verrouille l\'arbre.',
     '',
     'L\'état de verrouillage est déclaré dans `enistere.lock` (`dependenciesLocked`). S\'il vaut `false`,',
     'le projet a été généré **sans** finalisation des dépendances : lancez-la depuis la Foundation',
@@ -304,7 +380,7 @@ function projectReadme(plan, overlays) {
     '# 2) Installation reproductible strictement depuis le lock.',
     'npm ci',
     '',
-    '# 3) Build des packages partagés (contracts, client, UI Kit).',
+    '# 3) Build des seuls packages partagés consommés (no-op si aucun).',
     'npm run build:packages',
     ...(hasFastapi ? [
       '',
@@ -384,7 +460,8 @@ function projectReadme(plan, overlays) {
     ] : []),
     '## Limites connues',
     '',
-    '- Les capabilities non sélectionnées ne sont pas présentes ; régénérez le projet pour en ajouter.',
+    '- Les sources de fabrication des capabilities ne sont jamais livrées ; seuls leurs overlays sélectionnés sont appliqués.',
+    '- Les packages partagés sans consommateur ne sont pas livrés ; régénérez le projet si la sélection change.',
     '- La finalisation des dépendances requiert un accès réseau au registre npm ; ensuite `npm ci` suffit.',
     ...(plan.applications.some((app) => app.runtime === 'react-native') ? ['- Le build mobile natif (iOS) requiert macOS/Xcode ; `npm run doctor --workspace=apps/mobile` et `expo export` restent disponibles hors simulateur.'] : []),
     '',
@@ -413,10 +490,13 @@ export async function materializeProject(plan, output, options = {}) {
   }
   for (const directory of plan.directories) await mkdir(join(output, directory), { recursive: true });
   let overlays = { applied: [], verification: {} };
+  let sharedPackages = [];
   if (options.materialize !== false) {
     const capabilityManifests = await loadCapabilityManifests(FOUNDATION_ROOT, plan.capabilities);
-    await materializeFoundation(plan, output);
+    await materializeApplications(plan, output);
     overlays = await applyCapabilityOverlays({ repoRoot: FOUNDATION_ROOT, plan, output, capabilityManifests });
+    sharedPackages = await resolveSharedPackages(plan, output);
+    await materializeSharedPackages(sharedPackages, output);
     for (const app of plan.applications) {
       await rm(join(output, `${app.appDir}/package-lock.json`), { force: true });
     }
@@ -428,14 +508,15 @@ export async function materializeProject(plan, output, options = {}) {
     systemDigest: plan.systemDigest, resolutionDigest: plan.resolutionDigest, planDigest: plan.planDigest,
     plan,
     overlays: overlays.applied,
+    sharedPackages,
     dependenciesLocked: false,
     lockfile: 'package-lock.json',
     lockDigest: null,
     lockfileVersion: null,
     runtimeLocks,
   }));
-  await writeFile(join(output, 'README.md'), projectReadme(plan, overlays.applied));
-  await writeFile(join(output, 'package.json'), stable(rootPackage(plan)));
+  await writeFile(join(output, 'README.md'), projectReadme(plan, overlays.applied, sharedPackages));
+  await writeFile(join(output, 'package.json'), stable(rootPackage(plan, sharedPackages)));
   await writeFile(join(output, 'scripts/verify.mjs'), verifyScript(plan, overlays.verification));
   await writeFile(join(output, 'packages/contracts/README.md'), '# Contracts\n\nGenerated from the neutral blueprint.\n');
   await writeFile(join(output, 'packages/contracts/domain.json'), stable({ entities: plan.domain.entities }));

@@ -477,16 +477,27 @@ function evaluateReactNative(appDir) {
 }
 
 /** Evaluates the base Mobile invariants of a generated Flutter application (Dart, lib/, pubspec). */
-function evaluateFlutter(appDir) {
+function hasDeclaredGate(gates, command, appDir) {
+  if (gates.some((gate) => gate.command === command)) return true;
+  const manifest = readOptional(join(appDir, 'starter.manifest.json'));
+  if (!manifest) return false;
+  try {
+    return Object.values(JSON.parse(manifest).commands ?? {})
+      .some((argv) => Array.isArray(argv) && argv.join(' ') === command);
+  } catch {
+    return false;
+  }
+}
+
+function evaluateFlutter(appDir, gates = []) {
   const lib = join(appDir, 'lib');
   const proof = readOptional(findFile(join(appDir, 'test'), 'mobile_runtime_contract_test.dart'));
   const commonProof = proof.includes('mobile extension points are versioned and exclusive');
   const apiProof = proof.includes('typed API client propagates correlation and maps canonical errors');
   const hooksProof = proof.includes('neutral mobile hooks expose no capability behavior');
-  const manifest = readOptional(join(appDir, 'starter.manifest.json'));
   const buildable = existsSync(join(appDir, 'pubspec.yaml'))
     && existsSync(join(appDir, 'android'))
-    && manifest.includes('"flutter", "build", "apk"');
+    && hasDeclaredGate(gates, 'flutter build apk', appDir);
   return {
     navigation: result(
       findFile(lib, 'router.dart') && readOptional(join(appDir, 'pubspec.yaml')).includes('go_router')
@@ -539,9 +550,9 @@ function evaluateFlutter(appDir) {
 }
 
 /** Evaluates one generated Mobile application by runtime. */
-export function evaluateMobileApp({ appDir, runtime }) {
+export function evaluateMobileApp({ appDir, runtime, gates = [] }) {
   const invariants = runtime === 'react-native' ? evaluateReactNative(appDir)
-    : runtime === 'flutter' ? evaluateFlutter(appDir)
+    : runtime === 'flutter' ? evaluateFlutter(appDir, gates)
       : null;
   if (!invariants) throw new Error(`Platform Contract Mobile evaluation unsupported for runtime: ${runtime}`);
   return invariants;
@@ -557,7 +568,7 @@ function present(value, compliantEvidence, missingEvidence, partial = false) {
  * only PARTIAL observability because metrics, traces and propagation are also
  * required by Platform Baseline v2.
  */
-export function evaluateCommonBaseline({ appDir, runtime }) {
+export function evaluateCommonBaseline({ appDir, runtime, gates = [] }) {
   const src = join(appDir, 'src');
   const lib = join(appDir, 'lib');
   const java = join(src, 'main', 'java');
@@ -805,7 +816,6 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
   } else if (runtime === 'flutter') {
     const runtimeContract = readOptional(findFile(lib, 'runtime_contract.dart'));
     const runtimeProof = readOptional(findFile(join(appDir, 'test'), 'mobile_runtime_contract_test.dart'));
-    const manifest = readOptional(join(appDir, 'starter.manifest.json'));
     configuration = runtimeContract.includes('class RuntimeConfiguration');
     configurationProven = configuration
       && runtimeProof.includes('validates typed configuration and production transport');
@@ -836,9 +846,9 @@ export function evaluateCommonBaseline({ appDir, runtime }) {
     buildGates = existsSync(join(appDir, 'pubspec.yaml'))
       && existsSync(join(appDir, 'analysis_options.yaml'))
       && existsSync(join(appDir, 'android'))
-      && manifest.includes('"flutter", "analyze"')
-      && manifest.includes('"flutter", "test"')
-      && manifest.includes('"flutter", "build", "apk"');
+      && hasDeclaredGate(gates, 'flutter analyze', appDir)
+      && hasDeclaredGate(gates, 'flutter test', appDir)
+      && hasDeclaredGate(gates, 'flutter build apk', appDir);
     buildGatesProven = buildGates;
   } else {
     throw new Error(`Platform Baseline evaluation unsupported for runtime: ${runtime}`);
@@ -917,10 +927,10 @@ function readOptional(path) {
 function structuralLevel() { return 'GENERATABLE'; }
 
 /** Evaluates one generated application by family/runtime, or null if its family is not yet evaluated. */
-function evaluateByFamily(app, appDir) {
+function evaluateByFamily(app, appDir, gates) {
   if (app.kind === 'api') return { family: 'api', invariants: evaluateApiApp({ appDir, runtime: app.runtime }) };
   if (app.kind === 'web') return { family: 'web', invariants: evaluateWebApp({ appDir, runtime: app.runtime }) };
-  if (app.kind === 'mobile') return { family: 'mobile', invariants: evaluateMobileApp({ appDir, runtime: app.runtime }) };
+  if (app.kind === 'mobile') return { family: 'mobile', invariants: evaluateMobileApp({ appDir, runtime: app.runtime, gates }) };
   return null;
 }
 
@@ -934,9 +944,10 @@ export function buildConformance({ plan, projectDir }) {
   const apps = [];
   for (const app of plan.applications) {
     const appDir = join(projectDir, app.appDir);
-    const evaluated = evaluateByFamily(app, appDir);
+    const gates = plan.gates?.[app.id] ?? [];
+    const evaluated = evaluateByFamily(app, appDir, gates);
     if (!evaluated) continue;
-    const baselineInvariants = evaluateCommonBaseline({ appDir, runtime: app.runtime });
+    const baselineInvariants = evaluateCommonBaseline({ appDir, runtime: app.runtime, gates });
     const nonConformant = (scope, invariants) => Object.entries(invariants)
       .filter(([, r]) => r.status === STATUS.NON_CONFORMANT || r.status === STATUS.MISSING)
       .map(([id]) => `${scope}.${id}`);

@@ -135,7 +135,7 @@ describe('SystemBlueprint canonical model (Contrat 1)', () => {
     ] });
     await generateProject(bp, out, { materialize: false });
     const rootPkg = JSON.parse(await readFile(join(out, 'package.json'), 'utf8'));
-    assert.deepEqual(rootPkg.workspaces, ['packages/*', 'apps/api', 'apps/shop-web', 'apps/admin-web']);
+    assert.deepEqual(rootPkg.workspaces, ['apps/api', 'apps/shop-web', 'apps/admin-web']);
     const lock = JSON.parse(await readFile(join(out, 'enistere.lock'), 'utf8'));
     assert.deepEqual(lock.plan.applications.map((a) => a.appDir), ['apps/api', 'apps/shop-web', 'apps/admin-web']);
     const verify = await readFile(join(out, 'scripts/verify.mjs'), 'utf8');
