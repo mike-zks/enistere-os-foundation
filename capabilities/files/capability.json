@@ -230,7 +230,27 @@
       ]
     },
     "flutter": {
-      "status": "planned"
+      "status": "ready",
+      "mode": "overlay",
+      "adapter": {
+        "id": "flutter",
+        "version": "1.0.0"
+      },
+      "responsibilities": [
+        "upload"
+      ],
+      "contracts": [
+        "files-api",
+        "files-metadata"
+      ],
+      "primitives": [],
+      "deploymentModes": [
+        "embedded"
+      ],
+      "migrations": [],
+      "conformance": [
+        "files-flutter-integration"
+      ]
     }
   },
   "migrations": [
@@ -293,6 +313,12 @@
     {
       "id": "files-react-native-integration",
       "target": "react-native",
+      "level": "integration",
+      "evidence": "overlay-verification"
+    },
+    {
+      "id": "files-flutter-integration",
+      "target": "flutter",
       "level": "integration",
       "evidence": "overlay-verification"
     }

@@ -33,7 +33,7 @@ describe('capability product conformance', () => {
     assert.equal(byCapability.files, 'capabilities/files/contracts/files.product.v1.json');
   });
 
-  it('proves every ready target, and counts the runtimes left behind', async () => {
+  it('proves every ready target and every delivered capability', async () => {
     const reports = await evaluateAllCapabilityProducts({ repoRoot: REPO_ROOT });
     assert.ok(reports.length >= 3);
 
@@ -49,13 +49,9 @@ describe('capability product conformance', () => {
         );
       }
       // …and the capability is only conformant when no served runtime is left
-      // behind. Authentication and RBAC now cover every applicable target;
-      // Files still leaves declared family gaps.
-      assert.equal(
-        report.status,
-        report.capability === 'files' ? 'NON_CONFORMANT' : 'CONFORMANT',
-        report.capability,
-      );
+      // behind. All three delivered capabilities now cover every applicable
+      // target; the synthetic test below still proves a future gap is caught.
+      assert.equal(report.status, 'CONFORMANT', report.capability);
     }
   });
 
@@ -72,8 +68,10 @@ describe('capability product conformance', () => {
   it('holds a runtime to what its family peers actually implement', async () => {
     const files = await evaluateCapabilityProduct({ capability: 'files', repoRoot: REPO_ROOT });
     // React Native holds only `upload`, so Flutter owes only `upload` — the bar
-    // is peer coverage, not the capability's full scope.
-    assert.deepEqual(files.targets.flutter.familyParity.missing, ['upload']);
+    // is peer coverage, not the capability's full scope. Both now hold it.
+    assert.equal(files.targets['react-native'].coverage, '1/7');
+    assert.equal(files.targets.flutter.coverage, '1/7');
+    assert.equal(files.targets.flutter.familyParity.status, 'OK');
 
     const rbac = await evaluateCapabilityProduct({ capability: 'rbac', repoRoot: REPO_ROOT });
     // Nobody in the mobile family implements RBAC, so Flutter owes nothing.

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1",
+  "capability": "files",
+  "target": "flutter",
+  "contract": {
+    "id": "files-product",
+    "version": "1.0.0"
+  },
+  "roles": [
+    "client"
+  ],
+  "suite": "files-flutter-integration",
+  "golden": "fastapi-flutter-files",
+  "invariants": {
+    "FILES-CLIENT-001": [
+      {
+        "kind": "test",
+        "source": "files/test/files/files_upload_test.dart",
+        "materialized": "test/files/files_upload_test.dart",
+        "contains": [
+          "safeLogDescriptor omet le chemin local et le nom brut"
+        ]
+      }
+    ],
+    "FILES-CLIENT-002": [
+      {
+        "kind": "test",
+        "source": "files/test/files/files_upload_test.dart",
+        "materialized": "test/files/files_upload_test.dart",
+        "contains": [
+          "valide forme et type avant toute requête",
+          "envoie un multipart par le client authentifié"
+        ]
+      },
+      {
+        "kind": "source",
+        "source": "files/lib/src/features/files/files_api.dart",
+        "materialized": "lib/src/features/files/files_api.dart",
+        "contains": [
+          "ref.watch(dioClientProvider)",
+          "MultipartFile.fromFile",
+          "'/api/v1/files/upload'"
+        ]
+      }
+    ]
+  }
+}

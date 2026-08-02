@@ -1092,28 +1092,73 @@ reproductible et audit npm sans violation hors exceptions documentées. L'écart
 - Aucun transport cookie HttpOnly, test navigateur contre une autorité réelle,
   scan antivirus ni garantie de production n'est revendiqué.
 
+## Mission achevée — Upload Files sur Flutter
+
+Flutter tient désormais l'unique responsabilité Files due dans la famille Mobile :
+un descripteur local transitoire est validé avant lecture, transformé en multipart
+Dio à chaque appel et envoyé par le `dioClientProvider` où Authentication compose
+le Bearer. Files ne lit ni ne stocke de jeton, ne crée aucun état RBAC et ne place
+jamais chemin, nom brut ou contenu dans Riverpod, les logs ou la télémétrie.
+
+Preuves : projet réellement composé ; `flutter analyze` sans diagnostic ; 29/29
+tests Flutter ; golden `fastapi-flutter-files` contre PostgreSQL 16 et MinIO avec
+quatre migrations, 52/52 tests FastAPI, audit Python sans vulnérabilité connue,
+build APK, conformité matérialisée et locks reproductibles. Files est
+`CONFORMANT` sur ses sept targets et `parity-gaps.json` ne contient plus d'écart.
+
+### Non revendiqué
+
+- aucun picker de fichier n'est imposé : le produit choisit son intégration
+  plateforme et fournit le descripteur transitoire ;
+- aucun test sur appareil, iOS ou appel Flutter vers une API démarrée ; le golden
+  exerce l'autorité réelle et le transport Flutter séparément dans la même composition ;
+- aucun binding Dart généré depuis le contrat neutre ; le client reste idiomatique
+  Dio en attendant la phase de contrats polyglottes ;
+- aucune liste, suppression, quarantaine ou administration Files sur Mobile.
+
 ## Prochaine mission unique
 
-> **Upload Files sur Flutter**, dernier écart de parité déclaré.
+> **Auditer et contractualiser la matérialisation légère des projets dérivés.**
 
-### Justification de l'ordre
+### Pourquoi maintenant
 
-Angular tient maintenant la surface Web Files complète. Dans la famille Mobile,
-React Native ne porte que l'upload ; ADR-074 impose donc exactement la même
-responsabilité à Flutter, sans inventer liste, suppression ou administration
-mobile qui ne sont pas dues par la règle de parité.
+La parité déclarée des trois capabilities livrées est refermée. Une génération
+réelle demandée par le propriétaire a révélé que la forme livrée porte encore des
+éléments de fabrication et des identités de starter. Ce n'est pas une intuition :
 
-### Critères de sortie
+- FastAPI + Angular + Files embarque environ **3,0 MiB** de `capabilities/`, dont
+  les implémentations et tests des runtimes non sélectionnés ;
+- `.ruff_cache`, `.angular`, `starter.manifest.json` et
+  `STARTER_SPECIFICATION.md` peuvent atteindre le projet généré ;
+- un backend FastAPI seul embarque environ **924 KiB** de packages TypeScript,
+  dont `ui-kit`, sans consommateur applicatif ;
+- le nom racine dérive bien du blueprint, mais des sous-projets gardent des noms
+  de socle (`@enistere/web-angular`, `enistere-api-fastapi-core`) ;
+- les packages TypeScript sont fournis et bâtis globalement, sans fermeture
+  calculée par consommateurs ; aucun équivalent Java, Python ou Dart n'est généré.
 
-- Flutter valide forme et type déclaré puis envoie le multipart uniquement via
-  le transport Auth bearer existant, sans journaliser contenu, chemin ou nom brut ;
-- aucun état RBAC mobile ni aucune décision d'autorisation locale n'est créé ;
-- un descripteur de conformité et un golden runtime nommé exécutent l'upload ;
-- l'écart `files/flutter` est retiré de `parity-gaps.json` et le rapport produit
-  Files devient conforme sur toutes ses targets applicables.
+### Critères de sortie de l'audit
 
-### Ce qui reste ouvert après cette mission
+- générer et inventorier les sept runtimes, les 27 combinaisons de stack et les
+  profils système générables, sans confondre code framework nécessaire et
+  artefact interne de la Foundation ;
+- définir une règle exécutable d'inclusion : aucun cache, manifeste/specification
+  de starter, payload d'overlay non sélectionné ou target étrangère dans la sortie ;
+- mesurer taille, nombre de fichiers et provenance avant/après sur des compositions
+  représentatives, avec un budget justifié plutôt qu'un seuil arbitraire ;
+- dériver noms, descriptions et identifiants d'applications du CSM tout en
+  respectant les contraintes propres à npm, Python, Maven et Dart ;
+- établir le graphe réel `package partagé → consommateurs`, ne fournir et bâtir
+  que sa fermeture, et distinguer package applicable, binding polyglotte manquant
+  et duplication locale de contrat ;
+- évaluer chaque runtime contre son contrat **et** ses idiomes majeurs sans
+  imposer une abstraction commune qui neutraliserait le framework ;
+- produire des tests de non-régression et séquencer les corrections si l'audit
+  montre que le périmètre ne tient pas dans une seule PR.
+
+### Ce qui reste ouvert après cet audit
 
 - transport cookie HttpOnly, limitation de débit distribuée, reste de §12 ;
 - interopérabilité navigateur Angular↔NestJS ou Angular↔Spring sans adaptation
-  explicite du transport.
+  explicite du transport ;
+- génération polyglotte complète des contrats et lifecycle.

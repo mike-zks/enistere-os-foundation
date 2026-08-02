@@ -213,12 +213,11 @@ describe('canonical pipeline — target resolution', () => {
     assert.ok(!rbac.resolved.includes('mobile') || rbac.notApplicable.includes('mobile'));
   });
 
-  it('marks a blocked composition as not ready', async () => {
-    // Files on Flutter is planned → blocked. What is under test is the blocked
-    // level, not the capability that happens to be unfinished this week.
+  it('marks the completed Files Flutter composition ready', async () => {
     const bp = blueprint({ stack: { api: 'nestjs', mobile: 'flutter' }, capabilities: ['base', 'auth', 'rbac', 'files'] });
     const plan = buildGenerationPlan(bp, await registryFor(['base', 'auth', 'rbac', 'files']));
-    assert.equal(plan.support.level, 'blocked');
+    assert.equal(plan.support.level, 'ready');
+    assert.deepEqual(plan.support.blockers, []);
   });
 });
 

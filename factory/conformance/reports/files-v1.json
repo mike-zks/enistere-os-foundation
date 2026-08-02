@@ -6,10 +6,11 @@
     "version": "1.0.0"
   },
   "evaluation": "foundation-registry",
-  "status": "NON_CONFORMANT",
+  "status": "CONFORMANT",
   "readyTargets": [
     "angular",
     "fastapi",
+    "flutter",
     "nestjs",
     "nextjs",
     "react-native",
@@ -222,24 +223,28 @@
       "issues": []
     },
     "flutter": {
-      "status": "PLANNED",
-      "manifestStatus": "planned",
-      "roles": [],
-      "responsibilities": [],
-      "coverage": "0/7",
+      "status": "CONFORMANT",
+      "manifestStatus": "ready",
+      "roles": [
+        "client"
+      ],
+      "responsibilities": [
+        "upload"
+      ],
+      "coverage": "1/7",
       "family": "mobile",
       "familyParity": {
-        "status": "BREACH",
-        "missing": [
-          "upload"
-        ]
+        "status": "OK"
       },
-      "invariants": [],
-      "proofCount": 0,
+      "suite": "files-flutter-integration",
+      "golden": "fastapi-flutter-files",
+      "invariants": [
+        "FILES-CLIENT-001",
+        "FILES-CLIENT-002"
+      ],
+      "proofCount": 3,
       "materialized": false,
-      "issues": [
-        "family parity: mobile runtimes must hold the same responsibilities; missing upload"
-      ]
+      "issues": []
     }
   }
 }
